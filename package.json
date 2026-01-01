@@ -46,6 +46,7 @@
     "cheerio": "^1.1.2",
     "chrono-node": "^2.8.4",
     "crypto": "^1.0.1",
+    "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "dexie": "^4.0.11",
     "eventemitter3": "^5.0.1",
