@@ -1,0 +1,189 @@
+{
+  "schemaVersion": "1.0",
+  "cuisineKey": "aai",
+  "updatedAt": "2026-01-01T11:58:34Z",
+  "items": [
+    {
+      "key": "beef_bacon_cured",
+      "name": "Cured Beef Bacon",
+      "producedBy": [
+        "cure",
+        "smoke"
+      ],
+      "useIn": [
+        "aai_collards_smoked_beef",
+        "aai_beef_bacon_breakfast",
+        "aai_blackeyedpeas_pot"
+      ],
+      "prepOnceUse3": [
+        "Greens pot flavor",
+        "Breakfast plate",
+        "Beans pot base"
+      ]
+    },
+    {
+      "key": "lamb_bacon_cured",
+      "name": "Cured Lamb Bacon",
+      "producedBy": [
+        "cure",
+        "smoke"
+      ],
+      "useIn": [
+        "aai_collards_smoked_lamb",
+        "aai_bbq_lamb_ribs"
+      ],
+      "prepOnceUse3": [
+        "Greens pot flavor",
+        "Smoke plate"
+      ]
+    },
+    {
+      "key": "beef_breakfast_sausage",
+      "name": "Beef Breakfast Sausage",
+      "producedBy": [
+        "sausage"
+      ],
+      "useIn": [
+        "aai_beef_sausage_breakfast",
+        "aai_sausage_jambalaya_like"
+      ],
+      "prepOnceUse3": [
+        "Breakfast",
+        "Rice pot",
+        "Soup add-in"
+      ]
+    },
+    {
+      "key": "goat_suya_prep",
+      "name": "Suya Skewer Prep Packs",
+      "producedBy": [
+        "dry_rub",
+        "portion"
+      ],
+      "useIn": [
+        "aai_suya_goat_skewers",
+        "aai_grilled_goat_chops"
+      ],
+      "prepOnceUse3": [
+        "Skewers",
+        "Chops",
+        "Sheet-pan roast"
+      ]
+    },
+    {
+      "key": "okra_pickles",
+      "name": "Pickled/Fermented Okra",
+      "producedBy": [
+        "ferment",
+        "pickle"
+      ],
+      "useIn": [
+        "aai_grilled_goat_chops",
+        "aai_bbq_goat_plate",
+        "aai_steak_and_greens"
+      ],
+      "prepOnceUse3": [
+        "Side",
+        "Topping",
+        "Crunch element"
+      ]
+    },
+    {
+      "key": "stock_beef_roasted",
+      "name": "Roasted Beef Stock",
+      "producedBy": [
+        "stock"
+      ],
+      "useIn": [
+        "aai_black_bean_soup",
+        "aai_chicken_noodle_alt",
+        "aai_blackeyedpeas_pot"
+      ],
+      "prepOnceUse3": [
+        "Soup base",
+        "Bean pot base",
+        "Gravy base"
+      ]
+    },
+    {
+      "key": "cabbage_kraut",
+      "name": "Fermented Cabbage (Kraut)",
+      "producedBy": [
+        "ferment"
+      ],
+      "useIn": [
+        "aai_bbq_goat_plate",
+        "aai_suya_beef_skewers"
+      ],
+      "prepOnceUse3": [
+        "Side",
+        "Sandwich topping",
+        "Bowl crunch"
+      ]
+    },
+    {
+      "key": "jollof_base_jar",
+      "name": "Jollof Base (Jarred)",
+      "producedBy": [
+        "sauce",
+        "can"
+      ],
+      "useIn": [
+        "aai_jollof_beef",
+        "aai_gumbo_like_goat",
+        "aai_goat_curry_style"
+      ],
+      "prepOnceUse3": [
+        "Rice",
+        "Stew starter",
+        "Quick sauce"
+      ]
+    },
+    {
+      "key": "pepper_vinegar_bottle",
+      "name": "Pepper Vinegar Bottle",
+      "producedBy": [
+        "sauce"
+      ],
+      "useIn": [
+        "aai_collards_smoked_beef",
+        "aai_bean_rice_bowl"
+      ],
+      "prepOnceUse3": [
+        "Greens finish",
+        "Beans finish",
+        "Plate acid"
+      ]
+    }
+  ],
+  "workflowIdeas": [
+    {
+      "key": "prep_once_use_three_weeknight",
+      "name": "Prep once, use 3 ways (Weeknight)",
+      "steps": [
+        "Make stock",
+        "Cook beans pot",
+        "Ferment quick slaw"
+      ],
+      "weekUses": [
+        "Soup night",
+        "Beans+rice bowl",
+        "BBQ plate side kit"
+      ]
+    },
+    {
+      "key": "cure_and_rotate",
+      "name": "Cure & rotate",
+      "steps": [
+        "Cure beef/lamb bacon",
+        "Portion sausages",
+        "Jar jollof base"
+      ],
+      "weekUses": [
+        "Greens",
+        "Breakfast",
+        "Rice pot"
+      ]
+    }
+  ]
+}

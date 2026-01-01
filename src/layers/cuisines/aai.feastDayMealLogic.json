@@ -1,0 +1,163 @@
+{
+  "schemaVersion": "1.0",
+  "cuisineKey": "aai",
+  "updatedAt": "2026-01-01T11:58:34Z",
+  "notes": "Scripture-only: these are meal planning themes and prep suggestions. SSA should display scripture refs without adding extra tradition.",
+  "feasts": [
+    {
+      "key": "passover",
+      "name": "Passover",
+      "scriptureRefs": [
+        "Exodus 12",
+        "Leviticus 23:4-5",
+        "Numbers 28:16"
+      ],
+      "themes": [
+        "roasted meat",
+        "bitter herbs",
+        "simple sides"
+      ],
+      "suggestedDishes": [
+        "aai_shawarma_lamb_wrap",
+        "aai_steak_and_greens"
+      ],
+      "prepSuggestions": [
+        "Plan clean proteins",
+        "Prepare herb sauces and salads",
+        "Stock broths for the week"
+      ],
+      "avoidNotes": [
+        "Exclude prohibited meats and blood per Torah law metadata."
+      ]
+    },
+    {
+      "key": "unleavened_bread",
+      "name": "Feast of Unleavened Bread",
+      "scriptureRefs": [
+        "Exodus 12:15-20",
+        "Leviticus 23:6-8"
+      ],
+      "themes": [
+        "simple plates",
+        "greens",
+        "stews"
+      ],
+      "suggestedDishes": [
+        "aai_collards_smoked_beef",
+        "aai_blackeyedpeas_pot"
+      ],
+      "prepSuggestions": [
+        "Batch-cook beans/greens",
+        "Jar pepper vinegar",
+        "Portion suya rub packs"
+      ]
+    },
+    {
+      "key": "firstfruits",
+      "name": "Firstfruits",
+      "scriptureRefs": [
+        "Leviticus 23:9-14"
+      ],
+      "themes": [
+        "fresh harvest",
+        "thanks",
+        "light plates"
+      ],
+      "suggestedDishes": [
+        "aai_chermoula_fish",
+        "aai_roasted_eggplant_tomato"
+      ],
+      "prepSuggestions": [
+        "Use fresh herbs and greens",
+        "Make chermoula",
+        "Prepare fermented sides ahead"
+      ]
+    },
+    {
+      "key": "shavuot",
+      "name": "Shavuot (Weeks)",
+      "scriptureRefs": [
+        "Leviticus 23:15-21",
+        "Deuteronomy 16:9-12"
+      ],
+      "themes": [
+        "shared meal",
+        "breads/grains if household uses",
+        "stews"
+      ],
+      "suggestedDishes": [
+        "aai_sausage_jambalaya_like",
+        "aai_okra_tomato_beef_stew"
+      ],
+      "prepSuggestions": [
+        "Make stock",
+        "Plan large pot meal",
+        "Prep slaw/ferments for serving"
+      ]
+    },
+    {
+      "key": "trumpets",
+      "name": "Feast of Trumpets",
+      "scriptureRefs": [
+        "Leviticus 23:23-25",
+        "Numbers 29:1-6"
+      ],
+      "themes": [
+        "gathering meal",
+        "roasts",
+        "grill"
+      ],
+      "suggestedDishes": [
+        "aai_bbq_lamb_ribs",
+        "aai_suya_beef_skewers"
+      ],
+      "prepSuggestions": [
+        "Smoke/roast schedule",
+        "Batch sauces",
+        "Stock beverages (wine/beer methods per household)"
+      ]
+    },
+    {
+      "key": "atonement",
+      "name": "Day of Atonement",
+      "scriptureRefs": [
+        "Leviticus 23:26-32"
+      ],
+      "themes": [
+        "fast or solemn simplicity (household preference)"
+      ],
+      "suggestedDishes": [
+        "aai_bone_broth_night"
+      ],
+      "prepSuggestions": [
+        "Prep broth and simple foods for breaking fast"
+      ],
+      "avoidNotes": [
+        "Keep descriptions minimal; household decides practice."
+      ]
+    },
+    {
+      "key": "tabernacles",
+      "name": "Feast of Tabernacles",
+      "scriptureRefs": [
+        "Leviticus 23:33-43",
+        "Deuteronomy 16:13-15"
+      ],
+      "themes": [
+        "week of shared meals",
+        "grill+stew rotation",
+        "preservation-friendly"
+      ],
+      "suggestedDishes": [
+        "aai_bbq_goat_plate",
+        "aai_jollof_beef",
+        "aai_gumbo_like_goat"
+      ],
+      "prepSuggestions": [
+        "Prep once use 3 ways",
+        "Ferments/pickles for variety",
+        "Plan storehouse drawdown + replenishment list"
+      ]
+    }
+  ]
+}
