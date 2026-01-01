@@ -42,3 +42,6 @@ Thumbs.db
 # --- serverless/hosting ---
 .vercel/
 .netlify/
+
+__pycache__/
+*.pyc
