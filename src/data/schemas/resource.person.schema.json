@@ -1,0 +1,326 @@
+{
+  "$id": "https://schemas.suka.smart/resource.person.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SSA Resource — Person",
+  "description": "Canonical person resource for Suka Smart Assistant (SSA). People participate in planning, assignment, and execution across domains (cooking, cleaning, garden, animals, preservation). Focuses on availability windows, roles, and skills. Designed for imports → intelligence → automation, with optional hub export.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "createdAt", "availability"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable person id (UUID/ULID or household-scoped key).",
+      "pattern": "^[A-Za-z0-9_.:-]{4,}$"
+    },
+    "name": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "display": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "given": { "type": "string", "maxLength": 80 },
+        "family": { "type": "string", "maxLength": 80 },
+        "nickname": { "type": "string", "maxLength": 80 }
+      },
+      "required": ["display"]
+    },
+    "householdUnit": {
+      "type": "string",
+      "description": "Optional sub-household grouping (e.g., apartment A, unit-1).",
+      "maxLength": 64
+    },
+    "timezone": { "type": "string", "maxLength": 64 },
+    "languages": {
+      "type": "array",
+      "description": "BCP-47 language tags ranked by preference.",
+      "items": { "type": "string", "maxLength": 32 }
+    },
+
+    "contact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string", "maxLength": 32 },
+        "handle": { "type": "string", "maxLength": 64 }
+      }
+    },
+
+    "roles": {
+      "type": "array",
+      "description": "Assignable roles in the household engine (planner/routing uses these).",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 48,
+        "pattern": "^[a-z0-9._-]+$",
+        "description": "Examples: cook, cleaner, gardener, butcher, canner, picker, driver, shopper, steward"
+      },
+      "default": []
+    },
+
+    "skills": {
+      "type": "array",
+      "description": "Capabilities used for matching tasks and safety gating.",
+      "items": { "$ref": "#/definitions/skill" }
+    },
+
+    "certifications": {
+      "type": "array",
+      "description": "Optional certifications/licenses relevant to safety or tasks.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "maxLength": 120 },
+          "issuer": { "type": "string", "maxLength": 120 },
+          "issuedAt": { "type": "string", "format": "date-time" },
+          "expiresAt": { "type": "string", "format": "date-time" },
+          "id": { "type": "string", "maxLength": 120 }
+        },
+        "required": ["name"]
+      }
+    },
+
+    "constraints": {
+      "type": "object",
+      "description": "Hard/soft constraints that affect assignment and scheduling.",
+      "additionalProperties": false,
+      "properties": {
+        "ageYears": { "type": "integer", "minimum": 0 },
+        "allergies": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 64 }
+        },
+        "liftingLimitKg": { "type": "number", "minimum": 0 },
+        "avoidRoles": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z0-9._-]+$" }
+        },
+        "maxParallelSessions": { "type": "integer", "minimum": 1, "default": 1 },
+        "capacityHoursPerWeek": { "type": "number", "minimum": 0 }
+      }
+    },
+
+    "preferences": {
+      "type": "object",
+      "description": "Soft preferences to guide NBA (next-best action) and ergonomics.",
+      "additionalProperties": false,
+      "properties": {
+        "shift": { "type": "string", "enum": ["morning", "day", "evening", "night", "flex"] },
+        "domainsPreferred": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z0-9._-]+$" }
+        },
+        "domainsAvoid": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z0-9._-]+$" }
+        },
+        "muteMedia": { "type": "boolean" }
+      }
+    },
+
+    "availability": {
+      "type": "object",
+      "description": "Operational availability windows (quiet hours, blackout, exceptions).",
+      "additionalProperties": false,
+      "properties": {
+        "timezone": { "type": "string", "maxLength": 64 },
+        "quietHours": {
+          "type": "array",
+          "description": "Recurring quiet windows (de-prioritize noisy or demanding tasks).",
+          "items": { "$ref": "#/definitions/timeWindow" }
+        },
+        "blackout": {
+          "type": "array",
+          "description": "Hard disallow windows (work, school, sleep).",
+          "items": { "$ref": "#/definitions/timeWindow" }
+        },
+        "exceptions": {
+          "type": "array",
+          "description": "One-off overrides (vacation, event). If overlaps, exceptions win.",
+          "items": { "$ref": "#/definitions/timeWindow" }
+        }
+      },
+      "required": ["quietHours"],
+      "default": { "quietHours": [] }
+    },
+
+    "usageCalendar": {
+      "type": "array",
+      "description": "Busy/held intervals used by the planner (external calendars or manual blocks).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{4,}$" },
+          "title": { "type": "string", "maxLength": 160 },
+          "start": { "type": "string", "format": "date-time" },
+          "end": { "type": "string", "format": "date-time" },
+          "source": { "type": "string", "enum": ["session", "manual", "import", "work", "school", "external"] },
+          "sessionId": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{8,}$" },
+          "rrule": { "type": "string", "maxLength": 512 },
+          "tags": { "type": "array", "items": { "type": "string", "pattern": "^[a-z0-9._-]+$" } }
+        },
+        "required": ["start", "end", "source"]
+      }
+    },
+
+    "safety": {
+      "type": "object",
+      "description": "Safety profile used for task matching (PPE comfort, hazards to avoid).",
+      "additionalProperties": false,
+      "properties": {
+        "comfortableWith": { "type": "array", "items": { "type": "string", "maxLength": 64 } },
+        "avoid": { "type": "array", "items": { "type": "string", "maxLength": 64 } },
+        "ppe": { "type": "array", "items": { "type": "string", "maxLength": 64 } }
+      }
+    },
+
+    "tags": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "maxLength": 48, "pattern": "^[a-z0-9._-]+$" }
+    },
+
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+
+    "meta": {
+      "type": "object",
+      "description": "Forward-compatible extension bucket.",
+      "additionalProperties": true
+    }
+  },
+
+  "definitions": {
+    "skill": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable skill (e.g., knife_skills, oven_roast, safe_bleach_mix, pruning, canning_pressure).",
+          "minLength": 2,
+          "maxLength": 64,
+          "pattern": "^[a-z0-9._-]+$"
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "description": "Proficiency: 1=novice … 5=expert"
+        },
+        "domains": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z0-9._-]+$" }
+        },
+        "lastValidatedAt": { "type": "string", "format": "date-time" },
+        "evidence": {
+          "type": "array",
+          "description": "URLs, notes, or references that justify the level.",
+          "items": { "type": "string", "maxLength": 240 }
+        },
+        "tags": { "type": "array", "items": { "type": "string", "pattern": "^[a-z0-9._-]+$" } }
+      },
+      "required": ["name", "level"]
+    },
+
+    "timeWindow": {
+      "type": "object",
+      "description": "Recurring or one-off time window.",
+      "additionalProperties": false,
+      "properties": {
+        "label": { "type": "string", "maxLength": 120 },
+        "start": { "type": "string", "format": "date-time", "description": "Use for one-off windows." },
+        "end": { "type": "string", "format": "date-time" },
+        "rrule": { "type": "string", "maxLength": 512, "description": "RFC 5545 RRULE string for recurring windows." },
+        "byDay": {
+          "type": "array",
+          "description": "Simple weekly recurrence helper (0=Sun … 6=Sat). Use RRULE for complex cases.",
+          "items": { "type": "integer", "minimum": 0, "maximum": 6 }
+        },
+        "timeOfDay": {
+          "type": "object",
+          "description": "Daily local-time window, ignoring date.",
+          "additionalProperties": false,
+          "properties": {
+            "start": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" },
+            "end": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" }
+          }
+        },
+        "hard": {
+          "type": "boolean",
+          "description": "If true, planner must not schedule here (blackout). If false, it's a soft quiet window.",
+          "default": false
+        }
+      },
+      "anyOf": [
+        { "required": ["rrule"] },
+        { "required": ["start", "end"] },
+        { "required": ["byDay", "timeOfDay"] }
+      ]
+    }
+  },
+
+  "examples": [
+    {
+      "id": "person.rhonda",
+      "name": { "display": "Rhonda S.", "given": "Rhonda", "family": "Smith" },
+      "timezone": "America/Chicago",
+      "languages": ["en-US", "es-MX"],
+      "roles": ["cook", "steward", "planner"],
+      "skills": [
+        { "name": "knife_skills", "level": 4, "domains": ["cooking"], "lastValidatedAt": "2025-08-02T15:00:00.000Z" },
+        { "name": "canning_pressure", "level": 3, "domains": ["preservation"], "tags": ["safety"] }
+      ],
+      "constraints": {
+        "liftingLimitKg": 20,
+        "maxParallelSessions": 1,
+        "capacityHoursPerWeek": 8
+      },
+      "preferences": {
+        "shift": "evening",
+        "domainsPreferred": ["cooking", "preservation"]
+      },
+      "availability": {
+        "timezone": "America/Chicago",
+        "quietHours": [
+          { "label": "Evening Quiet", "byDay": [0,1,2,3,4,5,6], "timeOfDay": { "start": "21:30", "end": "06:30" } }
+        ],
+        "blackout": [
+          { "label": "Work", "rrule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=14;BYMINUTE=0;BYSECOND=0", "hard": true }
+        ],
+        "exceptions": [
+          { "label": "Vacation", "start": "2025-12-20T00:00:00.000Z", "end": "2025-12-28T23:59:59.000Z", "hard": true }
+        ]
+      },
+      "usageCalendar": [
+        {
+          "id": "busy-1",
+          "title": "PTA Meeting",
+          "start": "2025-11-09T01:00:00.000Z",
+          "end": "2025-11-09T02:30:00.000Z",
+          "source": "external",
+          "tags": ["community"]
+        }
+      ],
+      "tags": ["adult", "driver"],
+      "createdAt": "2025-09-01T12:00:00.000Z",
+      "updatedAt": "2025-11-08T13:10:00.000Z",
+      "meta": { "notes": "Prefers metric in recipes." }
+    },
+    {
+      "id": "person.sam",
+      "name": { "display": "Sam (Teen)" },
+      "roles": ["cleaner", "gardener"],
+      "skills": [{ "name": "dish_sanitization", "level": 2, "domains": ["cleaning"] }],
+      "constraints": { "ageYears": 15, "avoidRoles": ["butcher"], "capacityHoursPerWeek": 4 },
+      "availability": {
+        "timezone": "America/Chicago",
+        "quietHours": [{ "label": "School Night", "byDay": [0,1,2,3,4,5,6], "timeOfDay": { "start": "21:00", "end": "06:30" } }],
+        "blackout": [{ "label": "School", "rrule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=13;BYMINUTE=0;BYSECOND=0", "hard": true }]
+      },
+      "createdAt": "2025-10-01T12:00:00.000Z",
+      "updatedAt": "2025-11-08T13:10:00.000Z"
+    }
+  ]
+}

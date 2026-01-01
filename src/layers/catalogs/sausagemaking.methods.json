@@ -1,0 +1,1309 @@
+{
+  "$schema": "../schemas/methods.catalog.schema.json",
+  "catalog": {
+    "key": "sausagemaking.methods",
+    "version": 1,
+    "domain": "preservation",
+    "subdomain": "sausagemaking",
+    "title": "Sausage Making Methods Catalog",
+    "description": "Fixed method definitions for sausage making across fresh, smoked, cooked, cured/fermented, and dry-cured styles. Includes culture-specific and modern methods, and supports beef, pork, venison/deer, turkey, chicken, lamb, goat, and blends. Designed for SSA Layer Spine: method_maps → blueprints (with household/user overrides in layer_overrides).",
+    "createdAt": "2025-12-27T00:00:00Z",
+    "updatedAt": "2025-12-27T00:00:00Z",
+    "locale": "en-US",
+    "tags": [
+      "sausage",
+      "charcuterie",
+      "curing",
+      "smoking",
+      "processing",
+      "butchery"
+    ],
+    "methods": [
+      {
+        "id": "sm.base.fresh_coarse_sausage",
+        "methodKey": "sausage.fresh.coarse",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Fresh Coarse Sausage",
+        "summary": "Core method for fresh sausages (no cure/ferment): coarse grind, mix to tacky bind, stuff, rest, cook safely.",
+        "tags": ["fresh", "coarse", "basic", "all-meats"],
+        "cuisinesOrCultures": ["Global"],
+        "difficulty": "easy",
+        "estimatedActiveMinutes": 75,
+        "estimatedTotalMinutes": 240,
+        "parameters": [
+          {
+            "key": "meatType",
+            "label": "Meat type",
+            "type": "enum",
+            "options": [
+              "pork",
+              "beef",
+              "venison",
+              "lamb",
+              "goat",
+              "turkey",
+              "chicken",
+              "blend"
+            ],
+            "default": "pork"
+          },
+          {
+            "key": "fatPercent",
+            "label": "Target fat %",
+            "type": "number",
+            "unit": "%",
+            "min": 10,
+            "max": 40,
+            "default": 25,
+            "help": "Lean meats (venison/turkey) often need added fat for juiciness."
+          },
+          {
+            "key": "grind",
+            "label": "Grind size",
+            "type": "enum",
+            "options": ["coarse (10–12mm)", "medium (6–8mm)", "fine (3–4.5mm)"],
+            "default": "coarse (10–12mm)"
+          },
+          {
+            "key": "casing",
+            "label": "Casing type",
+            "type": "enum",
+            "options": [
+              "natural hog",
+              "natural sheep",
+              "collagen",
+              "skinless (patty/loose)"
+            ],
+            "default": "natural hog"
+          },
+          {
+            "key": "linkLengthIn",
+            "label": "Link length",
+            "type": "number",
+            "unit": "in",
+            "min": 3,
+            "max": 8,
+            "default": 6
+          }
+        ],
+        "safety": {
+          "hazards": [
+            "Cross-contamination",
+            "Time/temperature abuse",
+            "Undercooking"
+          ],
+          "guards": [
+            {
+              "type": "cold-chain",
+              "message": "Keep meat and equipment cold; return mixture to fridge if it warms up.",
+              "severity": "warn"
+            },
+            {
+              "type": "cook-temp",
+              "message": "Cook poultry sausages to a safe internal temperature; cook other meats to your household standard.",
+              "severity": "warn"
+            }
+          ]
+        },
+        "steps": [
+          {
+            "id": "s1_prep",
+            "title": "Prep + chill",
+            "instructions": "Chill grinder parts, bowl, and meat/fat. Cut meat/fat into cubes that feed the grinder easily. Keep everything cold to improve texture and safety.",
+            "checklist": [
+              "Sanitize surfaces",
+              "Set out ice tray for bowl",
+              "Weigh meat + fat + salt/spices"
+            ]
+          },
+          {
+            "id": "s2_grind",
+            "title": "Grind",
+            "instructions": "Grind meat and fat using your chosen plate. For best texture, grind meat/fat together or alternate handfuls.",
+            "checklist": [
+              "Keep meat below cool-room temperature",
+              "Collect grind into chilled bowl"
+            ]
+          },
+          {
+            "id": "s3_mix_bind",
+            "title": "Season + mix to bind",
+            "instructions": "Add salt and seasonings. Mix until the mixture turns tacky and holds together (protein extraction). Add a small splash of ice water if needed for mixing and juiciness.",
+            "cues": [
+              {
+                "type": "touch",
+                "text": "Mixture feels tacky/sticky and clings to your hand/glove."
+              },
+              {
+                "type": "visual",
+                "text": "Surface becomes slightly glossy; mixture holds a peak when pressed."
+              }
+            ]
+          },
+          {
+            "id": "s4_test_fry",
+            "title": "Test-fry for seasoning",
+            "instructions": "Cook a small patty. Taste and adjust salt/spices before stuffing.",
+            "timer": { "seconds": 360, "label": "Test patty cook" }
+          },
+          {
+            "id": "s5_stuff",
+            "title": "Stuff casings (or go loose)",
+            "instructions": "If using casings, flush and soak as needed. Stuff steadily, avoiding air pockets. Twist into links at your chosen length.",
+            "cues": [
+              {
+                "type": "visual",
+                "text": "Casing is filled firm but not stretched to bursting."
+              },
+              {
+                "type": "touch",
+                "text": "Links feel evenly packed; no large soft spots."
+              }
+            ]
+          },
+          {
+            "id": "s6_rest",
+            "title": "Rest to set",
+            "instructions": "Refrigerate links (uncovered or loosely covered) to dry the surface and let seasoning bloom.",
+            "timer": { "seconds": 7200, "label": "Rest (2 hours)" }
+          },
+          {
+            "id": "s7_cook_or_freeze",
+            "title": "Cook, smoke (if fresh-smoked), or freeze",
+            "instructions": "Cook fresh sausage soon, or freeze flat on trays then bag. If smoking fresh (uncured), keep it as hot smoke + cook through.",
+            "checklist": [
+              "Label bags with date + methodKey",
+              "Record batch notes (fat %, grind, spice blend)"
+            ]
+          }
+        ],
+        "cues": [
+          {
+            "type": "quality",
+            "text": "Juiciness improves with adequate fat and a well-developed bind (tacky mix)."
+          }
+        ],
+        "variants": [
+          {
+            "key": "loose_sausage",
+            "title": "Loose sausage (bulk)",
+            "notes": [
+              "Skip casings; portion into 1 lb (or household standard) packs."
+            ]
+          },
+          {
+            "key": "poultry_lean_support",
+            "title": "Lean poultry support",
+            "notes": [
+              "Add extra cold water/ice and consider adding fat (or skin) for better bite and moisture."
+            ]
+          }
+        ]
+      },
+
+      {
+        "id": "sm.base.fine_emulsified_sausage",
+        "methodKey": "sausage.emulsified.fine",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Fine Emulsified Sausage (Hot Dogs / Frankfurter / Bologna style)",
+        "summary": "Modern emulsified method: very cold meat, fine grind, emulsify with ice, stuff, cook gently for smooth bite.",
+        "tags": ["emulsified", "hotdog", "frankfurter", "bologna"],
+        "cuisinesOrCultures": ["European", "North American"],
+        "difficulty": "hard",
+        "parameters": [
+          {
+            "key": "meatType",
+            "label": "Meat type",
+            "type": "enum",
+            "options": ["beef", "pork", "turkey", "chicken", "blend"],
+            "default": "beef"
+          },
+          {
+            "key": "fatPercent",
+            "label": "Target fat %",
+            "type": "number",
+            "unit": "%",
+            "min": 15,
+            "max": 35,
+            "default": 25
+          },
+          {
+            "key": "binder",
+            "label": "Binder (optional)",
+            "type": "enum",
+            "options": [
+              "none",
+              "milk powder",
+              "potato starch",
+              "phosphate (commercial)"
+            ],
+            "default": "milk powder"
+          },
+          {
+            "key": "casing",
+            "label": "Casing type",
+            "type": "enum",
+            "options": [
+              "collagen",
+              "natural sheep",
+              "fibrous (bologna)",
+              "skinless"
+            ],
+            "default": "collagen"
+          }
+        ],
+        "safety": {
+          "hazards": ["Fat separation", "Warm emulsification", "Undercooking"],
+          "guards": [
+            {
+              "type": "emulsion-temp",
+              "message": "Keep the batter cold during emulsification; warm batter can break and weep fat.",
+              "severity": "warn"
+            }
+          ]
+        },
+        "steps": [
+          {
+            "id": "e1_chill",
+            "title": "Deep chill",
+            "instructions": "Chill meat/fat very cold (near-freezing). Chill processor bowl, blades, and mixing bowl."
+          },
+          {
+            "id": "e2_pregrind",
+            "title": "Pre-grind",
+            "instructions": "Grind meat/fat through a fine plate (or coarse then fine). Return to cold if it warms."
+          },
+          {
+            "id": "e3_emulsify",
+            "title": "Emulsify with ice",
+            "instructions": "In a food processor or bowl chopper, add ground meat, salt/spices, and crushed ice. Process until a smooth paste forms. Add binder if using.",
+            "cues": [
+              {
+                "type": "visual",
+                "text": "Batter turns smooth and glossy with no visible chunks."
+              },
+              {
+                "type": "touch",
+                "text": "Batter is sticky and cohesive, not greasy."
+              }
+            ]
+          },
+          {
+            "id": "e4_stuff",
+            "title": "Stuff",
+            "instructions": "Stuff into casings evenly. Prick out visible air pockets."
+          },
+          {
+            "id": "e5_cook_gently",
+            "title": "Cook gently",
+            "instructions": "Cook at gentle heat (poach or low oven/smoker) to set the emulsion, then cool quickly.",
+            "cues": [
+              {
+                "type": "quality",
+                "text": "Gentle cooking prevents fat-out and keeps texture smooth."
+              }
+            ]
+          },
+          {
+            "id": "e6_chill",
+            "title": "Chill + store",
+            "instructions": "Chill rapidly; store refrigerated or freeze. Record batch notes for repeatability."
+          }
+        ]
+      },
+
+      {
+        "id": "sm.base.smoked_hot_smoke_cured",
+        "methodKey": "sausage.smoked.hot.cured",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Cured Hot-Smoked Sausage",
+        "summary": "Cure + smoke workflow for fully cooked smoked sausages (kielbasa-style): cure, dry, smoke, finish, chill.",
+        "tags": ["smoked", "cured", "hot-smoke", "kielbasa-style"],
+        "cuisinesOrCultures": ["Eastern European", "Global"],
+        "difficulty": "medium",
+        "parameters": [
+          {
+            "key": "meatType",
+            "label": "Meat type",
+            "type": "enum",
+            "options": [
+              "pork",
+              "beef",
+              "venison",
+              "lamb",
+              "goat",
+              "turkey",
+              "chicken",
+              "blend"
+            ],
+            "default": "pork"
+          },
+          {
+            "key": "cure",
+            "label": "Cure",
+            "type": "enum",
+            "options": [
+              "none (fresh hot smoke)",
+              "cure #1 (nitrite)",
+              "celery cure (household choice)"
+            ],
+            "default": "cure #1 (nitrite)"
+          },
+          {
+            "key": "smokeWood",
+            "label": "Smoke wood",
+            "type": "enum",
+            "options": [
+              "hickory",
+              "oak",
+              "apple",
+              "cherry",
+              "pecan",
+              "mesquite",
+              "other"
+            ],
+            "default": "apple"
+          }
+        ],
+        "safety": {
+          "hazards": [
+            "Incorrect cure measurement",
+            "Time/temp abuse",
+            "Undercooking"
+          ],
+          "guards": [
+            {
+              "type": "measure",
+              "message": "If using curing agents, measure precisely and label clearly.",
+              "severity": "block"
+            },
+            {
+              "type": "cold-rest",
+              "message": "Cure/rest under refrigeration.",
+              "severity": "warn"
+            }
+          ]
+        },
+        "steps": [
+          {
+            "id": "h1_mix",
+            "title": "Mix + cure",
+            "instructions": "Mix meat/fat with salt, spices, and cure (if used) until tacky bind. Keep cold."
+          },
+          {
+            "id": "h2_stuff",
+            "title": "Stuff + link",
+            "instructions": "Stuff into casings; link; remove air pockets."
+          },
+          {
+            "id": "h3_dry",
+            "title": "Dry the surface",
+            "instructions": "Hang or rack in a cool airflow until the casing feels dry to the touch (forms a tacky pellicle)."
+          },
+          {
+            "id": "h4_smoke",
+            "title": "Smoke + cook through",
+            "instructions": "Smoke at hot-smoke temperatures until cooked through and properly set for your household standard. Avoid rushing; steady heat helps texture.",
+            "cues": [
+              {
+                "type": "visual",
+                "text": "Casing color deepens evenly; surface stays dry, not wet/greasy."
+              },
+              {
+                "type": "smell",
+                "text": "Clean smoke aroma; avoid harsh/sooty smoke."
+              }
+            ]
+          },
+          {
+            "id": "h5_chill",
+            "title": "Shower/cool + bloom",
+            "instructions": "Cool quickly, then rest/bloom refrigerated so smoke flavor rounds out."
+          }
+        ]
+      },
+
+      {
+        "id": "sm.base.fermented_dry_cured_salami",
+        "methodKey": "sausage.fermented.drycured.salami",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Fermented & Dry-Cured Salami-Style Sausage",
+        "summary": "Traditional dry-cured method with fermentation and controlled drying. Requires strict process control and safety-first workflow.",
+        "tags": ["fermented", "dry-cured", "salami", "charcuterie"],
+        "cuisinesOrCultures": ["Mediterranean", "Central European", "Global"],
+        "difficulty": "expert",
+        "safety": {
+          "hazards": [
+            "Pathogen growth if process is uncontrolled",
+            "Incorrect cure measurement",
+            "Inadequate drying conditions"
+          ],
+          "guards": [
+            {
+              "type": "controlled-process",
+              "message": "Dry-cured fermented sausages require controlled conditions and validated practices.",
+              "severity": "block"
+            },
+            {
+              "type": "measure",
+              "message": "Measure any curing agents precisely; document batch.",
+              "severity": "block"
+            }
+          ],
+          "legal": {
+            "note": "SSA catalogs provide templates; user must follow applicable local food safety rules.",
+            "requiresCompliance": true
+          }
+        },
+        "parameters": [
+          {
+            "key": "meatType",
+            "label": "Meat type",
+            "type": "enum",
+            "options": ["pork", "beef", "venison", "lamb", "goat", "blend"],
+            "default": "pork"
+          },
+          {
+            "key": "starterCulture",
+            "label": "Starter culture",
+            "type": "enum",
+            "options": [
+              "commercial starter",
+              "traditional backslop (advanced)",
+              "none (not recommended)"
+            ],
+            "default": "commercial starter"
+          },
+          {
+            "key": "casing",
+            "label": "Casing type",
+            "type": "enum",
+            "options": [
+              "natural beef middle",
+              "natural hog",
+              "collagen (dry-cure rated)"
+            ],
+            "default": "natural beef middle"
+          }
+        ],
+        "steps": [
+          {
+            "id": "f1_prep",
+            "title": "Prep + sanitize",
+            "instructions": "Sanitize workspace/equipment. Keep meat and tools very cold. Weigh everything precisely."
+          },
+          {
+            "id": "f2_grind",
+            "title": "Grind",
+            "instructions": "Grind to the style you want (often medium with distinct fat pieces). Keep cold to prevent smear."
+          },
+          {
+            "id": "f3_mix_cure_culture",
+            "title": "Mix + cure + culture",
+            "instructions": "Mix salt/spices, cure (if used), and starter culture thoroughly for even distribution. Mix to tacky bind while keeping mixture cold."
+          },
+          {
+            "id": "f4_stuff",
+            "title": "Stuff + prick",
+            "instructions": "Stuff firmly into dry-cure rated casings. Remove air pockets; prick as needed."
+          },
+          {
+            "id": "f5_ferment",
+            "title": "Ferment (controlled)",
+            "instructions": "Ferment under controlled conditions according to your chosen validated method/culture target."
+          },
+          {
+            "id": "f6_dry",
+            "title": "Dry/cure (controlled)",
+            "instructions": "Dry under controlled conditions until your target is achieved for your chosen style. Record time/conditions and results."
+          },
+          {
+            "id": "f7_store",
+            "title": "Store",
+            "instructions": "Store per your validated method. Label batch, date, and methodKey for repeatability."
+          }
+        ],
+        "cues": [
+          {
+            "type": "quality",
+            "text": "Good salami shows distinct fat definition, pleasant aroma, and stable slice texture."
+          },
+          {
+            "type": "safety",
+            "text": "If you cannot maintain controlled conditions, do not attempt dry-cured fermentation."
+          }
+        ]
+      },
+
+      {
+        "id": "sm.style.boerewors",
+        "methodKey": "sausage.style.boerewors",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Boerewors (South African spiral fresh sausage)",
+        "summary": "Coarse fresh sausage with warm spice profile; often formed into a spiral coil.",
+        "tags": ["fresh", "coarse", "spiral", "grilling"],
+        "cuisinesOrCultures": ["South African"],
+        "difficulty": "easy",
+        "steps": [
+          {
+            "id": "b1_grind",
+            "title": "Grind coarse",
+            "instructions": "Grind meat/fat coarse for traditional bite."
+          },
+          {
+            "id": "b2_season",
+            "title": "Season + bind",
+            "instructions": "Mix seasonings and salt until tacky bind forms. Keep mixture cold."
+          },
+          {
+            "id": "b3_stuff_coil",
+            "title": "Stuff + coil",
+            "instructions": "Stuff into casings, then form into a spiral coil. Avoid overstuffing to prevent bursting on grill."
+          },
+          {
+            "id": "b4_rest",
+            "title": "Rest",
+            "instructions": "Rest refrigerated so seasoning blooms and casing dries slightly."
+          }
+        ],
+        "cues": [
+          {
+            "type": "quality",
+            "text": "Coarse grind and firm bind keep the coil juicy and sliceable after grilling."
+          }
+        ]
+      },
+
+      {
+        "id": "sm.style.merguez",
+        "methodKey": "sausage.style.merguez",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Merguez-Style (spiced lamb/goat sausage)",
+        "summary": "North African/Maghrebi-inspired fresh sausage, often lamb/goat (or blends) with bold spices.",
+        "tags": ["fresh", "spiced", "lamb", "goat"],
+        "cuisinesOrCultures": ["North African", "Maghrebi"],
+        "difficulty": "medium",
+        "parameters": [
+          {
+            "key": "meatType",
+            "label": "Meat type",
+            "type": "enum",
+            "options": ["lamb", "goat", "blend"],
+            "default": "lamb"
+          },
+          {
+            "key": "heatLevel",
+            "label": "Heat level",
+            "type": "enum",
+            "options": ["mild", "medium", "hot"],
+            "default": "medium"
+          }
+        ],
+        "steps": [
+          {
+            "id": "m1_chill",
+            "title": "Chill + grind",
+            "instructions": "Chill meat/fat. Grind medium/coarse for traditional texture."
+          },
+          {
+            "id": "m2_spice",
+            "title": "Spice + bind",
+            "instructions": "Mix spices and salt until tacky bind forms. Keep cold. Test-fry to adjust heat/salt."
+          },
+          {
+            "id": "m3_stuff",
+            "title": "Stuff (often sheep casing)",
+            "instructions": "Stuff into smaller casings for slimmer links; remove air pockets."
+          },
+          {
+            "id": "m4_rest",
+            "title": "Rest",
+            "instructions": "Rest refrigerated before cooking."
+          }
+        ]
+      },
+
+      {
+        "id": "sm.style.sujuk",
+        "methodKey": "sausage.style.sujuk",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Sujuk / Sucuk-Style (spiced cured sausage template)",
+        "summary": "Garlic-forward, heavily spiced style often cured/dried. Requires controlled process if dry-cured.",
+        "tags": ["cured", "spiced", "garlic", "template"],
+        "cuisinesOrCultures": ["Turkish", "Middle Eastern", "Balkan"],
+        "difficulty": "expert",
+        "safety": {
+          "hazards": ["Drying without controls"],
+          "guards": [
+            {
+              "type": "controlled-process",
+              "message": "If you dry-cure this style, use controlled, validated conditions.",
+              "severity": "block"
+            }
+          ]
+        },
+        "steps": [
+          {
+            "id": "su1_mix",
+            "title": "Mix + bind",
+            "instructions": "Mix spices/salt thoroughly; develop tacky bind while keeping meat cold."
+          },
+          {
+            "id": "su2_stuff",
+            "title": "Stuff firm",
+            "instructions": "Stuff into casings firmly to reduce air pockets."
+          },
+          {
+            "id": "su3_press_optional",
+            "title": "Press (optional)",
+            "instructions": "Press to flatten slightly if your tradition/style uses it."
+          },
+          {
+            "id": "su4_cure_or_cook",
+            "title": "Cure/dry (controlled) or cook fresh",
+            "instructions": "Either follow controlled curing/drying or keep as fresh-cook variant per household preference."
+          }
+        ]
+      },
+
+      {
+        "id": "sm.style.kielbasa",
+        "methodKey": "sausage.style.kielbasa",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Kielbasa-Style Smoked Sausage",
+        "summary": "Garlic-forward smoked sausage template using cured hot-smoke workflow.",
+        "tags": ["smoked", "cured", "kielbasa"],
+        "cuisinesOrCultures": ["Polish", "Eastern European"],
+        "difficulty": "medium",
+        "steps": [
+          {
+            "id": "k1_mix",
+            "title": "Season + bind",
+            "instructions": "Mix seasonings (garlic/pepper/salt) and develop tacky bind."
+          },
+          {
+            "id": "k2_stuff",
+            "title": "Stuff + link",
+            "instructions": "Stuff into hog casings; link."
+          },
+          {
+            "id": "k3_dry",
+            "title": "Dry/pellicle",
+            "instructions": "Dry the surface before smoking."
+          },
+          {
+            "id": "k4_smoke",
+            "title": "Hot-smoke + finish",
+            "instructions": "Hot-smoke and finish cooking through; cool quickly."
+          }
+        ]
+      },
+
+      {
+        "id": "sm.style.andouille",
+        "methodKey": "sausage.style.andouille",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Andouille-Style (smoked, robust spice)",
+        "summary": "Smoked sausage template with bold seasoning. Often used in stews/gumbos; can be pork or mixed meats.",
+        "tags": ["smoked", "bold", "stew-ready"],
+        "cuisinesOrCultures": ["Cajun/Creole", "French"],
+        "difficulty": "medium",
+        "steps": [
+          {
+            "id": "a1_grind",
+            "title": "Grind (coarse to medium)",
+            "instructions": "Choose coarse/medium grind for rustic bite."
+          },
+          {
+            "id": "a2_mix",
+            "title": "Season + bind",
+            "instructions": "Mix spices/salt and develop tacky bind. Test-fry to adjust."
+          },
+          {
+            "id": "a3_stuff",
+            "title": "Stuff",
+            "instructions": "Stuff evenly; avoid air pockets."
+          },
+          {
+            "id": "a4_smoke_finish",
+            "title": "Smoke + finish",
+            "instructions": "Use cured hot-smoke workflow if curing; otherwise treat as hot-smoked fresh sausage and cook through."
+          }
+        ]
+      },
+
+      {
+        "id": "sm.style.chorizo_fresh",
+        "methodKey": "sausage.style.chorizo.fresh",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Chorizo-Style Fresh Sausage",
+        "summary": "Fresh sausage template built around paprika/chile and garlic. Great for pork, beef, turkey, chicken, venison blends.",
+        "tags": ["fresh", "paprika", "chile", "garlic"],
+        "cuisinesOrCultures": ["Mexican", "Iberian-inspired (fresh variants)"],
+        "difficulty": "easy",
+        "steps": [
+          {
+            "id": "c1_grind",
+            "title": "Grind",
+            "instructions": "Grind meat/fat to medium/coarse."
+          },
+          {
+            "id": "c2_season",
+            "title": "Season + bind",
+            "instructions": "Mix chile/paprika/garlic/salt until tacky. Test-fry."
+          },
+          {
+            "id": "c3_form",
+            "title": "Stuff or bulk",
+            "instructions": "Stuff into casings or keep bulk for crumbling."
+          },
+          {
+            "id": "c4_rest",
+            "title": "Rest",
+            "instructions": "Rest chilled so flavors bloom."
+          }
+        ]
+      },
+
+      {
+        "id": "sm.style.breakfast_sausage",
+        "methodKey": "sausage.style.breakfast",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Breakfast Sausage (bulk/patties/links)",
+        "summary": "Fresh breakfast sausage template (sage-forward optional). Works with pork, beef, turkey, chicken, goat/lamb blends.",
+        "tags": ["fresh", "breakfast", "bulk", "patties"],
+        "cuisinesOrCultures": ["North American"],
+        "difficulty": "easy",
+        "steps": [
+          {
+            "id": "br1_grind",
+            "title": "Grind",
+            "instructions": "Grind to medium for breakfast texture."
+          },
+          {
+            "id": "br2_mix",
+            "title": "Season + bind",
+            "instructions": "Mix salt/spices (sage optional) until tacky bind forms."
+          },
+          {
+            "id": "br3_portion",
+            "title": "Portion",
+            "instructions": "Form patties or pack bulk sausage; optionally stuff into small links."
+          },
+          {
+            "id": "br4_chill",
+            "title": "Chill",
+            "instructions": "Chill before cooking or freezing for best texture."
+          }
+        ]
+      },
+
+      {
+        "id": "sm.style.italian_sausage",
+        "methodKey": "sausage.style.italian",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Italian-Style Sausage (sweet/hot template)",
+        "summary": "Fresh Italian-style template; sweet (fennel) or hot (chile). Works across pork, beef, turkey/chicken, venison blends.",
+        "tags": ["fresh", "italian", "fennel", "links"],
+        "cuisinesOrCultures": ["Italian", "Italian-American"],
+        "difficulty": "easy",
+        "steps": [
+          {
+            "id": "it1_grind",
+            "title": "Grind",
+            "instructions": "Grind meat/fat to medium."
+          },
+          {
+            "id": "it2_mix",
+            "title": "Season + bind",
+            "instructions": "Mix seasonings (fennel optional) and develop tacky bind. Test-fry to adjust salt/heat."
+          },
+          {
+            "id": "it3_stuff",
+            "title": "Stuff + link",
+            "instructions": "Stuff into hog casings; twist into links."
+          },
+          {
+            "id": "it4_rest",
+            "title": "Rest",
+            "instructions": "Rest chilled before cooking."
+          }
+        ]
+      },
+
+      {
+        "id": "sm.style.brats",
+        "methodKey": "sausage.style.bratwurst",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Bratwurst-Style (fresh, often fine/medium)",
+        "summary": "Fresh bratwurst template with smooth, juicy bite; often includes a fine grind and strong bind.",
+        "tags": ["fresh", "bratwurst", "fine", "juicy"],
+        "cuisinesOrCultures": ["German"],
+        "difficulty": "medium",
+        "steps": [
+          {
+            "id": "bw1_chill",
+            "title": "Chill hard",
+            "instructions": "Chill meat/fat and gear very cold for clean texture."
+          },
+          {
+            "id": "bw2_grind",
+            "title": "Grind fine/medium",
+            "instructions": "Grind to medium then optionally pass once more for a smoother bite."
+          },
+          {
+            "id": "bw3_bind",
+            "title": "Mix to strong bind",
+            "instructions": "Mix longer than coarse sausages to develop a strong tacky bind. Add ice water as needed."
+          },
+          {
+            "id": "bw4_stuff",
+            "title": "Stuff",
+            "instructions": "Stuff into casings; link."
+          },
+          {
+            "id": "bw5_rest",
+            "title": "Rest",
+            "instructions": "Rest chilled before grilling/poaching."
+          }
+        ]
+      },
+
+      {
+        "id": "sm.style.kabanosy",
+        "methodKey": "sausage.style.kabanosy",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Kabanosy-Style (thin smoked sausage template)",
+        "summary": "Thin, often lightly smoked/dried style. If drying, requires controlled process; as a cooked smoked sausage it follows cured hot-smoke workflow.",
+        "tags": ["thin", "smoked", "template"],
+        "cuisinesOrCultures": ["Polish", "Eastern European"],
+        "difficulty": "expert",
+        "safety": {
+          "hazards": ["Uncontrolled drying"],
+          "guards": [
+            {
+              "type": "controlled-process",
+              "message": "If you dry/age this style, do so with controlled, validated conditions.",
+              "severity": "block"
+            }
+          ]
+        },
+        "steps": [
+          {
+            "id": "ka1_mix",
+            "title": "Mix + bind",
+            "instructions": "Mix seasonings and develop tacky bind."
+          },
+          {
+            "id": "ka2_stuff",
+            "title": "Stuff thin",
+            "instructions": "Stuff into small casings for thin links."
+          },
+          {
+            "id": "ka3_smoke",
+            "title": "Smoke + finish",
+            "instructions": "Use hot-smoke workflow if producing cooked smoked version; cool and bloom."
+          },
+          {
+            "id": "ka4_optional_dry",
+            "title": "Optional controlled drying",
+            "instructions": "Only if you have controlled/validated conditions; otherwise skip."
+          }
+        ]
+      },
+
+      {
+        "id": "sm.base.venison_deer_sausage_lean_blend",
+        "methodKey": "sausage.venison.lean_blend",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Venison/Deer Sausage (Lean-Meat Support Method)",
+        "summary": "Lean-meat optimization for venison/deer: add fat or moisture support, prevent dryness, maintain bite.",
+        "tags": ["venison", "deer", "lean", "support"],
+        "cuisinesOrCultures": ["Hunting traditions", "Global"],
+        "difficulty": "medium",
+        "parameters": [
+          {
+            "key": "fatAdd",
+            "label": "Fat addition source",
+            "type": "enum",
+            "options": [
+              "pork fatback",
+              "beef fat",
+              "lamb fat",
+              "goat fat",
+              "none"
+            ],
+            "default": "pork fatback"
+          },
+          {
+            "key": "fatPercent",
+            "label": "Target fat %",
+            "type": "number",
+            "unit": "%",
+            "min": 15,
+            "max": 35,
+            "default": 25
+          },
+          {
+            "key": "moisture",
+            "label": "Moisture support",
+            "type": "enum",
+            "options": ["ice water", "broth/stock", "none"],
+            "default": "ice water"
+          }
+        ],
+        "steps": [
+          {
+            "id": "v1_trim",
+            "title": "Trim silver skin",
+            "instructions": "Trim tough membranes/sinew for better texture and grind."
+          },
+          {
+            "id": "v2_chill",
+            "title": "Chill hard",
+            "instructions": "Chill venison and fat very cold to avoid smear."
+          },
+          {
+            "id": "v3_grind",
+            "title": "Grind",
+            "instructions": "Grind venison and added fat together for even distribution."
+          },
+          {
+            "id": "v4_mix",
+            "title": "Mix + bind + moisture",
+            "instructions": "Mix salt/spices to tacky bind. Add cold moisture support as needed to keep the bite juicy."
+          },
+          {
+            "id": "v5_rest",
+            "title": "Rest",
+            "instructions": "Rest chilled before cooking/freezing."
+          }
+        ],
+        "cues": [
+          {
+            "type": "quality",
+            "text": "Venison sausage should slice cleanly and stay moist; dryness usually means too little fat or weak bind."
+          }
+        ]
+      },
+
+      {
+        "id": "sm.base.poultry_sausage_bind_support",
+        "methodKey": "sausage.poultry.bind_support",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Poultry Sausage (Chicken/Turkey) Bind & Juiciness Support",
+        "summary": "Poultry sausage method optimized for chicken/turkey: keep cold, stronger bind, add moisture and/or skin/fat for better texture.",
+        "tags": ["poultry", "chicken", "turkey", "lean", "support"],
+        "cuisinesOrCultures": ["Global"],
+        "difficulty": "medium",
+        "parameters": [
+          {
+            "key": "meatType",
+            "label": "Poultry",
+            "type": "enum",
+            "options": ["chicken", "turkey"],
+            "default": "turkey"
+          },
+          {
+            "key": "fatSource",
+            "label": "Fat source",
+            "type": "enum",
+            "options": ["skin-on trim", "added animal fat", "none"],
+            "default": "skin-on trim"
+          },
+          {
+            "key": "moisture",
+            "label": "Moisture support",
+            "type": "enum",
+            "options": ["ice water", "broth/stock", "none"],
+            "default": "ice water"
+          }
+        ],
+        "steps": [
+          {
+            "id": "p1_chill",
+            "title": "Chill + prep",
+            "instructions": "Chill meat/skin/fat. Keep everything very cold for clean grind."
+          },
+          {
+            "id": "p2_grind",
+            "title": "Grind",
+            "instructions": "Grind to medium; consider a second pass for smoother texture."
+          },
+          {
+            "id": "p3_bind",
+            "title": "Mix to stronger bind",
+            "instructions": "Mix longer to develop a tacky bind. Add cold moisture as needed. Test-fry for seasoning."
+          },
+          {
+            "id": "p4_form",
+            "title": "Stuff or patty",
+            "instructions": "Stuff into casings or form patties. Chill before cooking."
+          }
+        ],
+        "cues": [
+          {
+            "type": "quality",
+            "text": "A strong bind is the difference between juicy poultry sausage and crumbly dry links."
+          }
+        ]
+      },
+
+      {
+        "id": "sm.base.lamb_goat_sausage_fat_management",
+        "methodKey": "sausage.lambgoat.fat_management",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Lamb/Goat Sausage (Fat Management & Aroma Balance)",
+        "summary": "Method focused on balancing lamb/goat flavor and managing fat texture for clean bite and pleasant aroma.",
+        "tags": ["lamb", "goat", "aroma", "balance"],
+        "cuisinesOrCultures": [
+          "Middle Eastern",
+          "Mediterranean",
+          "African",
+          "Global"
+        ],
+        "difficulty": "medium",
+        "steps": [
+          {
+            "id": "lg1_trim",
+            "title": "Trim + select fat",
+            "instructions": "Trim heavy membranes. Choose clean, firm fat; avoid warm smearing."
+          },
+          {
+            "id": "lg2_chill",
+            "title": "Chill hard",
+            "instructions": "Chill meat/fat and gear very cold."
+          },
+          {
+            "id": "lg3_grind",
+            "title": "Grind",
+            "instructions": "Grind medium/coarse depending on desired bite."
+          },
+          {
+            "id": "lg4_mix",
+            "title": "Season + bind",
+            "instructions": "Mix seasonings and salt until tacky. Test-fry to confirm aroma balance."
+          },
+          {
+            "id": "lg5_rest",
+            "title": "Rest",
+            "instructions": "Rest chilled to let spices round out."
+          }
+        ]
+      },
+
+      {
+        "id": "sm.technique.casing_prep_natural",
+        "methodKey": "sausage.technique.casing_prep.natural",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Natural Casing Prep (Soak, Flush, and Handle)",
+        "summary": "Reusable technique method to prep natural casings (hog/sheep/beef) for stuffing.",
+        "tags": ["technique", "casings", "prep"],
+        "cuisinesOrCultures": ["Global"],
+        "difficulty": "easy",
+        "steps": [
+          {
+            "id": "cp1_rinse",
+            "title": "Rinse exterior",
+            "instructions": "Rinse casings under cool water to remove salt and surface residue."
+          },
+          {
+            "id": "cp2_soak",
+            "title": "Soak",
+            "instructions": "Soak casings in cool water until pliable. Change water if heavily salted."
+          },
+          {
+            "id": "cp3_flush",
+            "title": "Flush interior",
+            "instructions": "Run cool water through the casing to flush the inside."
+          },
+          {
+            "id": "cp4_store",
+            "title": "Hold cold until use",
+            "instructions": "Keep casings submerged in cool water in the fridge until ready to stuff."
+          }
+        ],
+        "cues": [
+          {
+            "type": "touch",
+            "text": "Casing feels supple, not brittle; slides easily onto the stuffing tube."
+          }
+        ]
+      },
+
+      {
+        "id": "sm.technique.stuffing_linking_no_air",
+        "methodKey": "sausage.technique.stuff_link.no_air",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Stuffing & Linking (Even Fill, Low Air Pockets)",
+        "summary": "Technique template for even stuffing, air management, and consistent linking.",
+        "tags": ["technique", "stuffing", "linking"],
+        "cuisinesOrCultures": ["Global"],
+        "difficulty": "medium",
+        "steps": [
+          {
+            "id": "sl1_prime",
+            "title": "Prime stuffer",
+            "instructions": "Load meat mixture; push through until mixture reaches the tube tip to avoid air."
+          },
+          {
+            "id": "sl2_load_casing",
+            "title": "Load casing",
+            "instructions": "Slide casing onto tube with slack; tie a knot or use a clip."
+          },
+          {
+            "id": "sl3_stuff_even",
+            "title": "Stuff evenly",
+            "instructions": "Stuff steadily, keeping gentle backpressure with your hand to avoid blowouts and soft spots."
+          },
+          {
+            "id": "sl4_remove_air",
+            "title": "Remove air pockets",
+            "instructions": "Massage small air bubbles to the end; prick only when needed and only small pinholes."
+          },
+          {
+            "id": "sl5_link",
+            "title": "Link consistently",
+            "instructions": "Measure desired length; twist alternating directions or use the loop method to prevent untwisting."
+          }
+        ],
+        "cues": [
+          {
+            "type": "visual",
+            "text": "Links are uniform thickness; no big voids."
+          },
+          { "type": "touch", "text": "Firm but not overstretched casing." }
+        ]
+      },
+
+      {
+        "id": "sm.technique.smoke_pellicle_dry",
+        "methodKey": "sausage.technique.pellicle_dry",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Pellicle & Drying Before Smoking",
+        "summary": "Technique to dry sausage casings before smoking for better color and smoke adhesion.",
+        "tags": ["technique", "smoking", "pellicle"],
+        "cuisinesOrCultures": ["Global"],
+        "difficulty": "easy",
+        "steps": [
+          {
+            "id": "pd1_rack",
+            "title": "Rack or hang",
+            "instructions": "Place sausages on racks or hang with space for airflow."
+          },
+          {
+            "id": "pd2_airflow",
+            "title": "Airflow",
+            "instructions": "Use cool airflow until the casing feels dry and slightly tacky (pellicle formed)."
+          },
+          {
+            "id": "pd3_ready",
+            "title": "Ready to smoke",
+            "instructions": "Proceed to smoking when surface is dry/tacky, not wet."
+          }
+        ],
+        "cues": [
+          { "type": "touch", "text": "Surface is tacky, not slimy or wet." },
+          {
+            "type": "visual",
+            "text": "Casing looks matte rather than glossy-wet."
+          }
+        ]
+      },
+
+      {
+        "id": "sm.technique.hot_smoke_finish_chill",
+        "methodKey": "sausage.technique.hot_smoke.finish_chill",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Hot-Smoke Finish & Rapid Chill",
+        "summary": "Technique for finishing cooked smoked sausages with texture preservation: steady heat, then quick chill and bloom.",
+        "tags": ["technique", "hot-smoke", "cooling"],
+        "cuisinesOrCultures": ["Global"],
+        "difficulty": "medium",
+        "steps": [
+          {
+            "id": "hs1_steady",
+            "title": "Maintain steady heat",
+            "instructions": "Smoke/cook with steady heat to avoid wrinkled casings or fat-out."
+          },
+          {
+            "id": "hs2_finish",
+            "title": "Finish cooking",
+            "instructions": "Finish cooking fully per your household safety standards and style."
+          },
+          {
+            "id": "hs3_cool",
+            "title": "Cool quickly",
+            "instructions": "Cool sausages quickly after cooking (cold air/cold shower as appropriate), then refrigerate."
+          },
+          {
+            "id": "hs4_bloom",
+            "title": "Bloom/rest",
+            "instructions": "Rest chilled so smoke flavor and color stabilize."
+          }
+        ],
+        "cues": [
+          {
+            "type": "quality",
+            "text": "Wrinkling often means casing dried too hard or heat swings; steady heat improves appearance."
+          }
+        ]
+      },
+
+      {
+        "id": "sm.product.bulk_breakdown_freeze",
+        "methodKey": "sausage.product.bulk.pack_freeze",
+        "domain": "preservation",
+        "subdomain": "sausagemaking",
+        "title": "Bulk Sausage Packaging & Freezing (Production Pack-Out)",
+        "summary": "Pack-out method for bulk sausage: portion, flatten for quick freeze/thaw, label for SSA inventory/storehouse sync.",
+        "tags": ["packaging", "freezing", "inventory"],
+        "cuisinesOrCultures": ["Global"],
+        "difficulty": "easy",
+        "steps": [
+          {
+            "id": "pk1_portion",
+            "title": "Portion",
+            "instructions": "Portion into household standard sizes (e.g., 1 lb). Keep cold."
+          },
+          {
+            "id": "pk2_flatten",
+            "title": "Flatten",
+            "instructions": "Flatten in freezer bags to speed freezing and thawing; remove air."
+          },
+          {
+            "id": "pk3_label",
+            "title": "Label",
+            "instructions": "Label: meat type, methodKey, date, batch notes (fat %, spice). Optionally add SSA barcode/QR."
+          },
+          {
+            "id": "pk4_freeze",
+            "title": "Freeze",
+            "instructions": "Freeze flat on trays, then stack once solid."
+          }
+        ]
+      }
+    ]
+  }
+}

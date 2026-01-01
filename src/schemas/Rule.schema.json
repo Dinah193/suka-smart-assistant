@@ -1,0 +1,472 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka-smart-assistant/schemas/Rule.schema.json",
+  "title": "SSA Universal Domain Rule",
+  "description": "A forward-compatible, event-driven rule format used across SSA domains (recipe/cooking, cleaning, garden, animal, preservation, storehouse, maintenance). Rules listen for events and/or state, evaluate conditions, and perform actions (emit events, create tasks, update inventory/storehouse, notify, schedule).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ruleId", "title", "domain", "enabled", "logic", "actions"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "default": "1.0.0",
+      "description": "Schema payload version for forward-compat migrations."
+    },
+    "ruleId": {
+      "type": "string",
+      "description": "Stable unique identifier (UUID or deterministic hash)."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-friendly name (e.g., 'Auto-thaw before roast night')."
+    },
+    "description": { "type": "string" },
+    "domain": {
+      "type": "string",
+      "enum": ["recipe", "cooking", "cleaning", "garden", "animal", "preservation", "storehouse", "maintenance", "other"],
+      "description": "Primary domain used by routing & analytics."
+    },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "enabled": { "type": "boolean", "default": true },
+    "priority": {
+      "type": "integer",
+      "default": 0,
+      "description": "Higher runs first when multiple rules match."
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["info", "warning", "critical"],
+      "default": "info",
+      "description": "Operational severity for analytics/alerts."
+    },
+
+    "scope": {
+      "type": "object",
+      "description": "Optional narrowing scope for rule applicability.",
+      "additionalProperties": false,
+      "properties": {
+        "householdId": { "type": "string" },
+        "zones": { "type": "array", "items": { "type": "string" } },
+        "assignees": { "type": "array", "items": { "type": "string" } },
+        "regions": { "type": "array", "items": { "type": "string" } } 
+      }
+    },
+
+    "schedule": {
+      "type": "object",
+      "description": "Time gating; rule only evaluates within allowed windows.",
+      "additionalProperties": false,
+      "properties": {
+        "activeFrom": { "type": "string", "format": "date-time" },
+        "activeUntil": { "type": "string", "format": "date-time" },
+        "rrule": { "type": "string", "description": "RFC 5545 RRULE (e.g., FREQ=WEEKLY;BYDAY=MO,WE;BYHOUR=18)" },
+        "timezone": { "type": "string" }
+      }
+    },
+
+    "triggers": {
+      "type": "object",
+      "description": "Event and/or interval triggers. If omitted, engine may evaluate on state changes.",
+      "additionalProperties": false,
+      "properties": {
+        "onEvents": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/eventPattern" },
+          "description": "SSA events that should trigger evaluation (e.g., import.parsed, inventory.updated)."
+        },
+        "onInterval": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "every": { "$ref": "#/definitions/isoDuration", "description": "ISO-8601 duration (e.g., PT15M)" },
+            "jitterPct": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.1 }
+          }
+        }
+      }
+    },
+
+    "logic": {
+      "type": "object",
+      "description": "Boolean expressions that must pass before actions run.",
+      "additionalProperties": false,
+      "required": ["mode", "expressions"],
+      "properties": {
+        "mode": { "type": "string", "enum": ["all", "any"], "default": "all", "description": "all = AND; any = OR." },
+        "expressions": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/expression" }
+        }
+      }
+    },
+
+    "actions": {
+      "type": "array",
+      "minItems": 1,
+      "description": "One or more actions to execute on success.",
+      "items": { "$ref": "#/definitions/action" }
+    },
+
+    "provenance": {
+      "type": "object",
+      "description": "Authoring and source metadata.",
+      "additionalProperties": false,
+      "properties": {
+        "authoredBy": { "type": "string" },
+        "sourceUrl": { "type": "string", "format": "uri" },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+
+  "definitions": {
+    "isoDuration": {
+      "type": "string",
+      "pattern": "^P(?!$)(\\d+Y)?(\\d+M)?(\\d+D)?(T(\\d+H)?(\\d+M)?(\\d+S)?)?$"
+    },
+
+    "eventPattern": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string", "description": "SSA event type (e.g., 'import.parsed')." },
+        "source": { "type": "string", "description": "Optional event source filter (e.g., 'ScraperEngine')." },
+        "match": {
+          "type": "array",
+          "description": "Optional predicates against event.data",
+          "items": { "$ref": "#/definitions/predicate" }
+        }
+      }
+    },
+
+    "expression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subject", "predicates"],
+      "properties": {
+        "subject": {
+          "type": "string",
+          "enum": ["event", "inventory", "storehouse", "environment", "task", "resource", "time"],
+          "description": "What the predicates read from."
+        },
+        "mode": { "type": "string", "enum": ["all", "any"], "default": "all" },
+        "predicates": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/predicate" }
+        }
+      }
+    },
+
+    "predicate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "op"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "JSONPath-like pointer relative to subject (e.g., $.data.tables[?@.name=='recipe.ingredients'].rows)"
+        },
+        "op": {
+          "type": "string",
+          "enum": ["=", "!=", ">", ">=", "<", "<=", "includes", "excludes", "between", "in", "not_in", "exists", "not_exists", "regex", "starts_with", "ends_with"]
+        },
+        "value": {
+          "description": "Right-hand value. Arrays for between/in/not_in.",
+          "oneOf": [
+            { "type": ["string", "number", "boolean", "null"] },
+            { "type": "array", "items": { "type": ["string", "number"] } }
+          ]
+        },
+        "unit": { "type": "string" }
+      }
+    },
+
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["emitEvent", "createTask", "scheduleSession", "updateInventory", "updateStorehouse", "notify", "noop"]
+        },
+
+        "emitEvent": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "eventType": { "type": "string", "description": "SSA event type to emit." },
+            "data": { "type": "object" }
+          }
+        },
+
+        "createTask": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "task": { "$ref": "https://suka-smart-assistant/schemas/Task.schema.json" },
+            "emitOnCreate": { "type": "boolean", "default": true }
+          }
+        },
+
+        "scheduleSession": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "taskId": { "type": "string" },
+            "start": { "type": "string", "format": "date-time" },
+            "duration": { "$ref": "#/definitions/isoDuration" }
+          }
+        },
+
+        "updateInventory": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/inventoryPatch" }
+            },
+            "emitEvents": { "type": "boolean", "default": true }
+          }
+        },
+
+        "updateStorehouse": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/storehousePatch" }
+            },
+            "emitEvents": { "type": "boolean", "default": true }
+          }
+        },
+
+        "notify": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "channel": { "type": "string", "enum": ["inbox", "push", "sms", "email", "log"], "default": "inbox" },
+            "title": { "type": "string" },
+            "message": { "type": "string" },
+            "severity": { "type": "string", "enum": ["info", "warning", "critical"], "default": "info" },
+            "link": { "type": "string", "format": "uri" }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "emitEvent" } } },
+          "then": { "required": ["type", "emitEvent"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "createTask" } } },
+          "then": { "required": ["type", "createTask"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "scheduleSession" } } },
+          "then": { "required": ["type", "scheduleSession"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "updateInventory" } } },
+          "then": { "required": ["type", "updateInventory"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "updateStorehouse" } } },
+          "then": { "required": ["type", "updateStorehouse"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "notify" } } },
+          "then": { "required": ["type", "notify"] }
+        }
+      ]
+    },
+
+    "inventoryPatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["op", "name"],
+      "properties": {
+        "op": { "type": "string", "enum": ["add", "remove", "adjust", "set"] },
+        "id": { "type": "string" },
+        "sku": { "type": "string" },
+        "name": { "type": "string" },
+        "quantity": { "$ref": "#/definitions/quantity" },
+        "location": { "type": "string" },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "storehousePatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["op", "name"],
+      "properties": {
+        "op": { "type": "string", "enum": ["add", "remove", "adjust", "set"] },
+        "id": { "type": "string" },
+        "sku": { "type": "string" },
+        "name": { "type": "string" },
+        "quantity": { "$ref": "#/definitions/quantity" },
+        "location": { "type": "string" },
+        "expiry": { "type": "string", "format": "date" },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "quantity": {
+      "type": "object",
+      "required": ["amount"],
+      "additionalProperties": false,
+      "properties": {
+        "amount": { "type": "number" },
+        "unit": { "type": "string" }
+      }
+    }
+  },
+
+  "examples": [
+    {
+      "version": "1.0.0",
+      "ruleId": "rule_auto_thaw_before_roast",
+      "title": "Auto-thaw whole chicken night before roasting",
+      "description": "When a roast chicken recipe is parsed/scheduled for tomorrow, suggest a thaw task 24h in advance.",
+      "domain": "cooking",
+      "enabled": true,
+      "priority": 10,
+      "severity": "info",
+      "triggers": {
+        "onEvents": [
+          { "type": "import.parsed", "match": [ { "path": "$.data.kind", "op": "=", "value": "recipe" } ] }
+        ]
+      },
+      "logic": {
+        "mode": "all",
+        "expressions": [
+          {
+            "subject": "event",
+            "predicates": [
+              { "path": "$.data.tables[?@.name=='recipe.ingredients'].rows", "op": "exists" },
+              { "path": "$.data.mainText", "op": "regex", "value": "(whole\\s+chicken|roaster)" }
+            ]
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "createTask",
+          "createTask": {
+            "task": {
+              "taskId": "task_thaw_chicken_example",
+              "title": "Thaw whole chicken in fridge",
+              "domain": "cooking",
+              "prepOptions": { "thaw": true, "leadTime": "P1D" },
+              "metrics": { "prepMinutes": 2, "activeMinutes": 2, "totalMinutes": 1440 },
+              "steps": [
+                { "stepId": "t1", "order": 1, "text": "Move chicken from freezer to fridge on tray." }
+              ]
+            }
+          }
+        },
+        {
+          "type": "notify",
+          "notify": {
+            "channel": "inbox",
+            "title": "Reminder: Start thawing for tomorrow's roast",
+            "message": "Move whole chicken from freezer to refrigerator ~24h before cooking."
+          }
+        }
+      ],
+      "createdAt": "2025-11-11T19:30:00.000Z",
+      "updatedAt": "2025-11-11T19:30:00.000Z"
+    },
+    {
+      "version": "1.0.0",
+      "ruleId": "rule_garden_soil_temp_gate",
+      "title": "Gate carrot planting by soil temperature",
+      "domain": "garden",
+      "enabled": true,
+      "priority": 20,
+      "triggers": {
+        "onEvents": [
+          { "type": "sensor.reading", "match": [ { "path": "$.data.kind", "op": "=", "value": "soil" } ] }
+        ],
+        "onInterval": { "every": "PT30M" }
+      },
+      "logic": {
+        "mode": "all",
+        "expressions": [
+          {
+            "subject": "event",
+            "predicates": [
+              { "path": "$.data.tempC", "op": ">=", "value": 7 }
+            ]
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "emitEvent",
+          "emitEvent": {
+            "eventType": "garden.window.open",
+            "data": { "crop": "carrot", "soilTempCMin": 7 }
+          }
+        }
+      ],
+      "createdAt": "2025-11-11T19:31:00.000Z",
+      "updatedAt": "2025-11-11T19:31:00.000Z"
+    },
+    {
+      "version": "1.0.0",
+      "ruleId": "rule_inventory_shortage_auto_list",
+      "title": "Auto-add to shopping list on inventory shortage",
+      "domain": "storehouse",
+      "enabled": true,
+      "priority": 5,
+      "triggers": {
+        "onEvents": [
+          { "type": "inventory.shortage.detected" }
+        ]
+      },
+      "logic": {
+        "mode": "any",
+        "expressions": [
+          {
+            "subject": "event",
+            "predicates": [
+              { "path": "$.data.item.tags", "op": "includes", "value": "staple" },
+              { "path": "$.data.item.name", "op": "regex", "value": "flour|rice|oil|salt|eggs" }
+            ]
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "updateStorehouse",
+          "updateStorehouse": {
+            "items": [
+              { "op": "add", "name": "All-purpose flour", "quantity": { "amount": 1, "unit": "bag" }, "location": "Shopping List" }
+            ],
+            "emitEvents": true
+          }
+        },
+        {
+          "type": "notify",
+          "notify": {
+            "channel": "inbox",
+            "title": "Added to shopping list",
+            "message": "All-purpose flour added due to shortage."
+          }
+        }
+      ],
+      "createdAt": "2025-11-11T19:32:00.000Z",
+      "updatedAt": "2025-11-11T19:32:00.000Z"
+    }
+  ]
+}

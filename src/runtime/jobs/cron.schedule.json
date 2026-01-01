@@ -1,0 +1,206 @@
+{
+  "$schema": "../../schemas/cron.schedule.schema.json",
+  "version": "1.0.0",
+  "_comment": "SSA runtime job schedule. All times are in the specified timezone. Use featureFlag gates to enable/disable families of jobs without editing this file.",
+  "timezone": "America/Chicago",
+  "defaults": {
+    "maxConcurrency": 3,
+    "retryPolicy": {
+      "maxAttempts": 3,
+      "backoff": {
+        "type": "exponential",
+        "initialSeconds": 15,
+        "maxSeconds": 300
+      },
+      "retryOn": ["timeout", "network", "5xx"]
+    },
+    "timeoutSeconds": 600,
+    "jitterSeconds": 30
+  },
+  "jobs": [
+    {
+      "id": "scheduler.tick",
+      "description": "Lightweight tick to evaluate priorities and admit ready work (does NOT commit schedules).",
+      "enabled": true,
+      "cron": "5,20,35,50 * * * *",
+      "payload": {
+        "module": "@/runtime/jobs/handlers/schedulerTick.js",
+        "fn": "run",
+        "args": {
+          "emitPreviewOnly": true
+        }
+      }
+    },
+    {
+      "id": "scheduler.autoplan",
+      "description": "Attempt to place sessions with near-term deadlines using feasibility/options/policies.",
+      "enabled": true,
+      "cron": "10 * * * *",
+      "timeoutSeconds": 900,
+      "payload": {
+        "module": "@/runtime/jobs/handlers/autoPlanner.js",
+        "fn": "run",
+        "args": {
+          "deadlineHorizonMinutes": 240,
+          "maxPlacements": 5
+        }
+      }
+    },
+    {
+      "id": "learningLoop.updateModels",
+      "description": "Nightly learning model refresh (correction factors & recommended buffers).",
+      "enabled": true,
+      "cron": "15 3 * * *",
+      "jitterSeconds": 90,
+      "payload": {
+        "module": "@/engines/scheduling/learningLoop/updateModels.js",
+        "fn": "nightlyUpdate",
+        "args": {
+          "lookbackDays": 30
+        }
+      }
+    },
+    {
+      "id": "learningLoop.compactActuals",
+      "description": "Storage maintenance: compact/trim actuals (IQR outliers cached, orphan rows removed).",
+      "enabled": true,
+      "cron": "10 2 * * *",
+      "payload": {
+        "module": "@/runtime/jobs/handlers/compactActuals.js",
+        "fn": "run",
+        "args": {
+          "maxAgeDays": 365,
+          "vacuum": true
+        }
+      }
+    },
+    {
+      "id": "inventory.shortage.scan",
+      "description": "Scan inventory and emit shortage/low-stock events.",
+      "enabled": true,
+      "cron": "20 * * * *",
+      "payload": {
+        "module": "@/domain/inventory/InventoryScanner.js",
+        "fn": "scanAndEmit",
+        "args": {
+          "emitPerItem": false
+        }
+      }
+    },
+    {
+      "id": "storehouse.reconcile",
+      "description": "Reconcile storehouse counts from recent sessions and imports.",
+      "enabled": true,
+      "cron": "40 1 * * *",
+      "payload": {
+        "module": "@/domain/storehouse/Reconciler.js",
+        "fn": "run",
+        "args": {
+          "windowDays": 7
+        }
+      }
+    },
+    {
+      "id": "analytics.snapshot.household",
+      "description": "Daily analytics snapshot for dashboards.",
+      "enabled": true,
+      "cron": "0 4 * * *",
+      "payload": {
+        "module": "@/analytics/snapshots/HouseholdSnapshot.js",
+        "fn": "run",
+        "args": {}
+      }
+    },
+    {
+      "id": "garden.reminders.seasonality",
+      "description": "Seasonal garden tasks & seed-start reminders.",
+      "enabled": true,
+      "cron": "30 7 * * *",
+      "payload": {
+        "module": "@/domain/garden/SeasonalReminders.js",
+        "fn": "run",
+        "args": {
+          "emitSoftSuggestions": true
+        }
+      }
+    },
+    {
+      "id": "preservation.weekly.rollup",
+      "description": "Weekly preservation summary and backlog health.",
+      "enabled": true,
+      "cron": "0 18 * * SUN",
+      "payload": {
+        "module": "@/domain/preservation/WeeklyRollup.js",
+        "fn": "run",
+        "args": {}
+      }
+    },
+    {
+      "id": "backups.local",
+      "description": "Encrypted local backup of SSA data stores.",
+      "enabled": true,
+      "cron": "45 2 * * *",
+      "timeoutSeconds": 1800,
+      "payload": {
+        "module": "@/runtime/jobs/handlers/backupLocal.js",
+        "fn": "run",
+        "args": {
+          "includeBlobs": true,
+          "rotate": 7
+        }
+      }
+    },
+    {
+      "id": "hub.export.mirror",
+      "description": "If familyFundMode is enabled, mirror safe rollups to the Hub.",
+      "enabled": true,
+      "featureFlag": "familyFundMode",
+      "cron": "0 */6 * * *",
+      "payload": {
+        "module": "@/runtime/jobs/handlers/hubMirror.js",
+        "fn": "run",
+        "args": {
+          "kinds": ["learning.models.updated", "inventory.summary", "analytics.snapshot"]
+        }
+      }
+    },
+    {
+      "id": "policies.refreshCaches",
+      "description": "Refresh caches for buffers/priorities/constraints (pull latest overrides).",
+      "enabled": true,
+      "cron": "*/30 * * * *",
+      "timeoutSeconds": 120,
+      "payload": {
+        "module": "@/runtime/jobs/handlers/policyRefresh.js",
+        "fn": "run",
+        "args": {}
+      }
+    },
+    {
+      "id": "videos.howto.sync",
+      "description": "Sync/refresh video/how-to imports and index metadata.",
+      "enabled": true,
+      "cron": "0 */12 * * *",
+      "payload": {
+        "module": "@/import/providers/video/VideoIndexer.js",
+        "fn": "sync",
+        "args": {
+          "maxPerRun": 100
+        }
+      }
+    },
+    {
+      "id": "imports.ingest.queue",
+      "description": "Process queued imports from all domains (recipe, cleaning, garden/seed, animal, storehouse, video).",
+      "enabled": true,
+      "cron": "*/10 * * * *",
+      "payload": {
+        "module": "@/import/ImportRouter.js",
+        "fn": "processQueue",
+        "args": {
+          "maxBatch": 25
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,567 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:suka:vocab:animal.tasks",
+  "title": "Suka Animal Tasks Vocabulary",
+  "description": "Canonical animal task templates for barn plans: defaults, resources (feed, water, meds), tools/PPE, withhold guidance, sequencing, species/zone hints, and NBA labels.",
+  "type": "object",
+  "x-version": "1.0.0",
+  "x-domain": "animals",
+  "meta": {
+    "generatedAt": "2025-10-24T00:00:00.000Z",
+    "notes": [
+      "Maps to barnplan.validate.js resources schema: water, feed.items[{sku,name,amount}], meds[{name,dose}], equipment[], ppe[].",
+      "defaultWithhold provides safe heuristics; validator still enforces concrete withhold.until dates.",
+      "Dayparts help scheduleHelpers propose AM/PM chore clusters."
+    ]
+  },
+  "globals": {
+    "dayparts": ["pre_dawn", "morning", "midday", "afternoon", "evening"],
+    "equipmentNoise": {
+      "bucket_milker": 2,
+      "generator": 3,
+      "pressure_washer": 3,
+      "clippers": 2,
+      "tractor": 3,
+      "hand_tools": 1
+    },
+    "withholdHeuristics": [
+      { "med": "penicillin", "product": "meat", "days": 10 },
+      { "med": "penicillin", "product": "milk", "days": 5 },
+      { "med": "ivermectin", "product": "meat", "days": 14 },
+      { "med": "ivermectin", "product": "milk", "days": 0 },
+      { "med": "tetracycline", "product": "meat", "days": 28 },
+      { "med": "tetracycline", "product": "milk", "days": 4 }
+    ],
+    "incompatiblePairs": [
+      { "a": "live_vaccine", "b": "antibiotic", "reason": "Antibiotics may inactivate live vaccines—separate by days per label." }
+    ],
+    "units": {
+      "time": "minutes",
+      "amountExamples": ["2 kg", "1 scoop", "500 ml", "1 dose", "1 bale"]
+    }
+  },
+  "tasks": [
+    {
+      "id": "task:feed",
+      "name": "Feed",
+      "icon": "drumstick",
+      "kind": "care",
+      "category": "husbandry",
+      "defaultDurationMin": 10,
+      "resources": {
+        "water": false,
+        "feed": { "items": [{ "name": "ration", "amount": "1 scoop" }] },
+        "meds": [],
+        "equipment": [],
+        "ppe": []
+      },
+      "defaultWithhold": null,
+      "sequenceBefore": [],
+      "sequenceAfter": ["water_check", "health_check"],
+      "speciesHints": ["chicken", "duck", "goat", "sheep", "cow", "pig", "rabbit"],
+      "zoneHints": ["barn", "coop", "pen", "pasture"],
+      "daypartHints": ["morning", "evening"],
+      "nbaHints": [{ "code": "batch_feeds", "label": "Batch feed runs by zone" }]
+    },
+    {
+      "id": "task:water_check",
+      "name": "Water Check & Top-Up",
+      "icon": "droplets",
+      "kind": "care",
+      "category": "husbandry",
+      "defaultDurationMin": 8,
+      "resources": {
+        "water": true,
+        "feed": { "items": [] },
+        "meds": [],
+        "equipment": ["hand_tools"],
+        "ppe": []
+      },
+      "defaultWithhold": null,
+      "sequenceBefore": ["feed"],
+      "sequenceAfter": [],
+      "speciesHints": ["all"],
+      "zoneHints": ["barn", "coop", "pen", "pasture"],
+      "daypartHints": ["morning", "afternoon"],
+      "nbaHints": [{ "code": "freeze_guard", "label": "Check heaters in freezing weather" }]
+    },
+    {
+      "id": "task:nest_collect",
+      "name": "Collect Eggs",
+      "icon": "egg",
+      "kind": "care",
+      "category": "production",
+      "defaultDurationMin": 6,
+      "resources": {
+        "water": false,
+        "feed": { "items": [] },
+        "meds": [],
+        "equipment": [],
+        "ppe": []
+      },
+      "defaultWithhold": null,
+      "sequenceBefore": ["nest_refresh"],
+      "sequenceAfter": [],
+      "speciesHints": ["chicken", "duck"],
+      "zoneHints": ["coop"],
+      "daypartHints": ["morning"],
+      "nbaHints": [{ "code": "daily_egg", "label": "Daily collection prevents breakage & broodiness" }]
+    },
+    {
+      "id": "task:nest_refresh",
+      "name": "Refresh Nesting Material",
+      "icon": "feather",
+      "kind": "care",
+      "category": "environment",
+      "defaultDurationMin": 10,
+      "resources": {
+        "water": false,
+        "feed": { "items": [] },
+        "meds": [],
+        "equipment": ["hand_tools"],
+        "ppe": ["gloves"]
+      },
+      "defaultWithhold": null,
+      "sequenceBefore": [],
+      "sequenceAfter": ["nest_collect"],
+      "speciesHints": ["chicken", "duck"],
+      "zoneHints": ["coop"],
+      "daypartHints": ["morning"],
+      "nbaHints": [{ "code": "coop_hygiene", "label": "Top up bedding where soiled" }]
+    },
+    {
+      "id": "task:muck_out",
+      "name": "Muck Out / Bedding Replace",
+      "icon": "trash-2",
+      "kind": "cleaning",
+      "category": "environment",
+      "defaultDurationMin": 30,
+      "resources": {
+        "water": false,
+        "feed": { "items": [] },
+        "meds": [],
+        "equipment": ["hand_tools", "tractor"],
+        "ppe": ["gloves", "mask"]
+      },
+      "defaultWithhold": null,
+      "sequenceBefore": [],
+      "sequenceAfter": ["sanitize_area", "fresh_bedding"],
+      "speciesHints": ["goat", "sheep", "cow", "pig", "rabbit", "chicken", "duck"],
+      "zoneHints": ["barn", "coop", "pen"],
+      "daypartHints": ["morning", "afternoon"],
+      "nbaHints": [{ "code": "ammonia_watch", "label": "If ammonia odor, prioritize muck out" }]
+    },
+    {
+      "id": "task:fresh_bedding",
+      "name": "Lay Fresh Bedding",
+      "icon": "layers",
+      "kind": "care",
+      "category": "environment",
+      "defaultDurationMin": 12,
+      "resources": {
+        "water": false,
+        "feed": { "items": [] },
+        "meds": [],
+        "equipment": ["hand_tools"],
+        "ppe": ["gloves"]
+      },
+      "defaultWithhold": null,
+      "sequenceBefore": ["muck_out"],
+      "sequenceAfter": [],
+      "speciesHints": ["all"],
+      "zoneHints": ["barn", "coop", "pen"],
+      "daypartHints": ["afternoon"],
+      "nbaHints": [{ "code": "deep_litter", "label": "Consider deep-litter in winter" }]
+    },
+    {
+      "id": "task:sanitize_area",
+      "name": "Sanitize Housing/Equipment",
+      "icon": "spray-bottle",
+      "kind": "cleaning",
+      "category": "biosecurity",
+      "defaultDurationMin": 20,
+      "resources": {
+        "water": true,
+        "feed": { "items": [] },
+        "meds": [{ "name": "disinfectant", "dose": "as_directed" }],
+        "equipment": ["pressure_washer"],
+        "ppe": ["gloves", "mask", "eye_protection"]
+      },
+      "defaultWithhold": { "product": "eggs", "days": 0 },
+      "sequenceBefore": ["fresh_bedding"],
+      "sequenceAfter": ["fresh_bedding"],
+      "speciesHints": ["all"],
+      "zoneHints": ["coop", "barn", "processing"],
+      "daypartHints": ["afternoon"],
+      "nbaHints": [{ "code": "dry_time", "label": "Allow dry time before re-entry" }]
+    },
+    {
+      "id": "task:milking",
+      "name": "Milking",
+      "icon": "milk",
+      "kind": "care",
+      "category": "production",
+      "defaultDurationMin": 25,
+      "resources": {
+        "water": false,
+        "feed": { "items": [{ "name": "dairy_ration", "amount": "0.5 kg" }] },
+        "meds": [],
+        "equipment": ["bucket_milker"],
+        "ppe": []
+      },
+      "defaultWithhold": null,
+      "sequenceBefore": ["udder_prep"],
+      "sequenceAfter": ["teat_dip"],
+      "speciesHints": ["goat", "cow", "sheep"],
+      "zoneHints": ["barn"],
+      "daypartHints": ["morning", "evening"],
+      "nbaHints": [{ "code": "consistent_times", "label": "Keep milking times consistent" }]
+    },
+    {
+      "id": "task:udder_prep",
+      "name": "Udder Prep (Pre-dip/Wipe)",
+      "icon": "droplet",
+      "kind": "care",
+      "category": "production",
+      "defaultDurationMin": 5,
+      "resources": {
+        "water": true,
+        "feed": { "items": [] },
+        "meds": [{ "name": "pre_dip", "dose": "as_label" }],
+        "equipment": [],
+        "ppe": ["gloves"]
+      },
+      "defaultWithhold": null,
+      "sequenceBefore": [],
+      "sequenceAfter": ["milking"],
+      "speciesHints": ["goat", "cow", "sheep"],
+      "zoneHints": ["barn"],
+      "daypartHints": ["morning", "evening"],
+      "nbaHints": [{ "code": "dwell_time", "label": "Respect pre-dip dwell before wipe" }]
+    },
+    {
+      "id": "task:teat_dip",
+      "name": "Teat Dip (Post)",
+      "icon": "test-tube",
+      "kind": "care",
+      "category": "production",
+      "defaultDurationMin": 3,
+      "resources": {
+        "water": false,
+        "feed": { "items": [] },
+        "meds": [{ "name": "post_dip", "dose": "as_label" }],
+        "equipment": [],
+        "ppe": ["gloves"]
+      },
+      "defaultWithhold": null,
+      "sequenceBefore": ["milking"],
+      "sequenceAfter": [],
+      "speciesHints": ["goat", "cow", "sheep"],
+      "zoneHints": ["barn"],
+      "daypartHints": ["morning", "evening"],
+      "nbaHints": [{ "code": "mastitis_watch", "label": "Check milk for clots/heat/swelling" }]
+    },
+    {
+      "id": "task:hoof_trim",
+      "name": "Hoof Trim / Foot Bath",
+      "icon": "scissors",
+      "kind": "maintenance",
+      "category": "health",
+      "defaultDurationMin": 20,
+      "resources": {
+        "water": true,
+        "feed": { "items": [] },
+        "meds": [{ "name": "footbath_solution", "dose": "as_label" }],
+        "equipment": ["clippers"],
+        "ppe": ["gloves", "eye_protection"]
+      },
+      "defaultWithhold": null,
+      "sequenceBefore": [],
+      "sequenceAfter": ["health_check"],
+      "speciesHints": ["goat", "sheep", "cow"],
+      "zoneHints": ["pen", "barn"],
+      "daypartHints": ["afternoon"],
+      "nbaHints": [{ "code": "lameness_monitor", "label": "Flag animals with gait issues" }]
+    },
+    {
+      "id": "task:shearing",
+      "name": "Shearing",
+      "icon": "cut",
+      "kind": "maintenance",
+      "category": "production",
+      "defaultDurationMin": 30,
+      "resources": {
+        "water": false,
+        "feed": { "items": [] },
+        "meds": [],
+        "equipment": ["clippers"],
+        "ppe": ["gloves", "eye_protection"]
+      },
+      "defaultWithhold": null,
+      "sequenceBefore": [],
+      "sequenceAfter": ["health_check"],
+      "speciesHints": ["sheep", "alpaca"],
+      "zoneHints": ["barn"],
+      "daypartHints": ["morning"],
+      "nbaHints": [{ "code": "bag_and_label_fleece", "label": "Bag & label fleece per animal" }]
+    },
+    {
+      "id": "task:deworm",
+      "name": "Deworm",
+      "icon": "pill",
+      "kind": "care",
+      "category": "health",
+      "defaultDurationMin": 8,
+      "resources": {
+        "water": false,
+        "feed": { "items": [] },
+        "meds": [{ "name": "ivermectin", "dose": "per_weight" }],
+        "equipment": [],
+        "ppe": ["gloves"]
+      },
+      "defaultWithhold": { "product": "meat", "days": 14 },
+      "sequenceBefore": ["weigh"],
+      "sequenceAfter": ["move_pasture"],
+      "speciesHints": ["goat", "sheep", "cow"],
+      "zoneHints": ["pen", "chute"],
+      "daypartHints": ["morning"],
+      "nbaHints": [{ "code": "fecal_schedule", "label": "Pair with fecal checks seasonally" }]
+    },
+    {
+      "id": "task:vaccination",
+      "name": "Vaccination",
+      "icon": "syringe",
+      "kind": "care",
+      "category": "health",
+      "defaultDurationMin": 10,
+      "resources": {
+        "water": false,
+        "feed": { "items": [] },
+        "meds": [{ "name": "CDT_vaccine", "dose": "per_label" }],
+        "equipment": [],
+        "ppe": ["gloves"]
+      },
+      "defaultWithhold": { "product": "meat", "days": 0 },
+      "sequenceBefore": ["weigh"],
+      "sequenceAfter": ["health_check"],
+      "speciesHints": ["goat", "sheep", "cow", "pig"],
+      "zoneHints": ["chute", "pen"],
+      "daypartHints": ["morning"],
+      "nbaHints": [{ "code": "avoid_antibiotic_overlap", "label": "Don’t co-administer with antibiotics (live vaccines)" }]
+    },
+    {
+      "id": "task:weigh",
+      "name": "Weigh",
+      "icon": "scale",
+      "kind": "care",
+      "category": "health",
+      "defaultDurationMin": 6,
+      "resources": {
+        "water": false,
+        "feed": { "items": [] },
+        "meds": [],
+        "equipment": [],
+        "ppe": []
+      },
+      "defaultWithhold": null,
+      "sequenceBefore": [],
+      "sequenceAfter": ["deworm", "vaccination"],
+      "speciesHints": ["all"],
+      "zoneHints": ["chute", "pen"],
+      "daypartHints": ["morning"],
+      "nbaHints": [{ "code": "dose_accuracy", "label": "Use current weight for dosing" }]
+    },
+    {
+      "id": "task:health_check",
+      "name": "Health Check",
+      "icon": "stethoscope",
+      "kind": "care",
+      "category": "health",
+      "defaultDurationMin": 10,
+      "resources": {
+        "water": false,
+        "feed": { "items": [] },
+        "meds": [],
+        "equipment": [],
+        "ppe": []
+      },
+      "defaultWithhold": null,
+      "sequenceBefore": [],
+      "sequenceAfter": [],
+      "speciesHints": ["all"],
+      "zoneHints": ["pen", "pasture", "barn"],
+      "daypartHints": ["morning"],
+      "nbaHints": [{ "code": "record_famacha", "label": "Record FAMACHA/respiration/temp as needed" }]
+    },
+    {
+      "id": "task:move_pasture",
+      "name": "Rotate/Move Pasture",
+      "icon": "shuffle",
+      "kind": "care",
+      "category": "grazing",
+      "defaultDurationMin": 15,
+      "resources": {
+        "water": false,
+        "feed": { "items": [] },
+        "meds": [],
+        "equipment": [],
+        "ppe": []
+      },
+      "defaultWithhold": null,
+      "sequenceBefore": ["deworm"],
+      "sequenceAfter": [],
+      "speciesHints": ["goat", "sheep", "cow"],
+      "zoneHints": ["pasture", "pen"],
+      "daypartHints": ["morning", "afternoon"],
+      "nbaHints": [{ "code": "pasture_rest", "label": "Respect pasture rest periods" }]
+    },
+    {
+      "id": "task:fence_repair",
+      "name": "Fence Check/Repair",
+      "icon": "wrench",
+      "kind": "maintenance",
+      "category": "infrastructure",
+      "defaultDurationMin": 25,
+      "resources": {
+        "water": false,
+        "feed": { "items": [] },
+        "meds": [],
+        "equipment": ["hand_tools"],
+        "ppe": ["gloves"]
+      },
+      "defaultWithhold": null,
+      "sequenceBefore": [],
+      "sequenceAfter": [],
+      "speciesHints": ["all"],
+      "zoneHints": ["pasture", "pen"],
+      "daypartHints": ["afternoon"],
+      "nbaHints": [{ "code": "hotwire_test", "label": "Test fence voltage at corners" }]
+    },
+    {
+      "id": "task:breeding",
+      "name": "Breeding/AI",
+      "icon": "heart",
+      "kind": "care",
+      "category": "reproduction",
+      "defaultDurationMin": 20,
+      "resources": {
+        "water": false,
+        "feed": { "items": [] },
+        "meds": [],
+        "equipment": [],
+        "ppe": []
+      },
+      "defaultWithhold": null,
+      "sequenceBefore": ["heat_check"],
+      "sequenceAfter": ["preg_check"],
+      "speciesHints": ["goat", "sheep", "cow", "pig", "rabbit"],
+      "zoneHints": ["pen", "barn"],
+      "daypartHints": ["morning"],
+      "nbaHints": [{ "code": "record_service", "label": "Record dates for due-date forecast" }]
+    },
+    {
+      "id": "task:heat_check",
+      "name": "Heat/Estrus Check",
+      "icon": "thermometer",
+      "kind": "care",
+      "category": "reproduction",
+      "defaultDurationMin": 5,
+      "resources": { "water": false, "feed": { "items": [] }, "meds": [], "equipment": [], "ppe": [] },
+      "defaultWithhold": null,
+      "sequenceBefore": [],
+      "sequenceAfter": ["breeding"],
+      "speciesHints": ["goat", "cow", "pig"],
+      "zoneHints": ["pen", "barn"],
+      "daypartHints": ["morning", "evening"],
+      "nbaHints": [{ "code": "standing_heat", "label": "Note standing heat & mucus signs" }]
+    },
+    {
+      "id": "task:assist_birth",
+      "name": "Kidding/Lambing/Farrowing Assist",
+      "icon": "baby",
+      "kind": "care",
+      "category": "reproduction",
+      "defaultDurationMin": 45,
+      "resources": {
+        "water": true,
+        "feed": { "items": [] },
+        "meds": [{ "name": "lubricant", "dose": "as_needed" }, { "name": "iodine_navel", "dose": "as_needed" }],
+        "equipment": ["hand_tools"],
+        "ppe": ["gloves"]
+      },
+      "defaultWithhold": null,
+      "sequenceBefore": [],
+      "sequenceAfter": ["postnatal_check"],
+      "speciesHints": ["goat", "sheep", "pig", "cow", "rabbit"],
+      "zoneHints": ["barn"],
+      "daypartHints": ["any"],
+      "nbaHints": [{ "code": "kit_ready", "label": "Have birthing kit prepped" }]
+    },
+    {
+      "id": "task:postnatal_check",
+      "name": "Postnatal Check",
+      "icon": "first-aid-kit",
+      "kind": "care",
+      "category": "reproduction",
+      "defaultDurationMin": 12,
+      "resources": {
+        "water": true,
+        "feed": { "items": [] },
+        "meds": [{ "name": "vitamin_boost", "dose": "per_label" }],
+        "equipment": [],
+        "ppe": ["gloves"]
+      },
+      "defaultWithhold": null,
+      "sequenceBefore": ["assist_birth"],
+      "sequenceAfter": [],
+      "speciesHints": ["goat", "sheep", "pig", "cow", "rabbit"],
+      "zoneHints": ["barn"],
+      "daypartHints": ["any"],
+      "nbaHints": [{ "code": "colostrum_clock", "label": "Confirm colostrum within first hours" }]
+    },
+    {
+      "id": "task:tagging",
+      "name": "Tagging/ID",
+      "icon": "tag",
+      "kind": "maintenance",
+      "category": "recordkeeping",
+      "defaultDurationMin": 6,
+      "resources": {
+        "water": false,
+        "feed": { "items": [] },
+        "meds": [{ "name": "iodine_swab", "dose": "as_needed" }],
+        "equipment": ["hand_tools"],
+        "ppe": ["gloves"]
+      },
+      "defaultWithhold": null,
+      "sequenceBefore": [],
+      "sequenceAfter": ["weigh"],
+      "speciesHints": ["goat", "sheep", "cow", "pig", "rabbit"],
+      "zoneHints": ["pen", "barn"],
+      "daypartHints": ["morning"],
+      "nbaHints": [{ "code": "link_records", "label": "Link tag to medical & lineage records" }]
+    },
+    {
+      "id": "task:butchery",
+      "name": "Butchery/Processing",
+      "icon": "knife",
+      "kind": "butchery",
+      "category": "processing",
+      "defaultDurationMin": 120,
+      "resources": {
+        "water": true,
+        "feed": { "items": [] },
+        "meds": [],
+        "equipment": ["hand_tools"],
+        "ppe": ["gloves", "apron", "eye_protection"]
+      },
+      "defaultWithhold": { "product": "meat", "days": 0 },
+      "sequenceBefore": [],
+      "sequenceAfter": ["sanitize_area"],
+      "speciesHints": ["chicken", "duck", "rabbit", "pig", "goat", "sheep", "cow"],
+      "zoneHints": ["processing"],
+      "daypartHints": ["morning"],
+      "nbaHints": [{ "code": "check_withholds", "label": "Verify no active med withhold before slaughter" }]
+    }
+  ]
+}

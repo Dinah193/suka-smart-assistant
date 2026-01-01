@@ -1,0 +1,388 @@
+{
+  "$schema": "file:///c:/Users/larho/suka-smart-assistant/src/data/schemas/gardenHarvest.schema.json",
+  "version": "2025-10-31T17:20:00-05:00",
+  "meta": {
+    "id": "herbs_perennial_corner",
+    "title": "Perennial Herbs – Corner / Edge Bed (perennial-corner)",
+    "description": "Harvest/yield profile for a perennial herb corner/edge bed (rosemary, oregano, thyme, mint in containers, chives, sage, lemon balm). Pairs with your `perennial-corner` location preset. Built to: (1) suggest light, frequent harvest sessions (NOT force them), (2) feed storehouse stock planning for dried blends, compound butters, vinegars, and feast-day menu herbs, (3) support meal planning via ‘fresh window’ flags, (4) trigger cleaning/sanitizing for herb-drying racks, (5) route excess/minty/spent material to animals/compost, and (6) support reverse-generation from storehouse/spice goals, co-op herb shares, or feast plans.",
+    "source": "suka-smart-assistant",
+    "tags": [
+      "garden",
+      "harvest",
+      "herbs",
+      "perennial",
+      "storehouse",
+      "meal-planning",
+      "cleaning",
+      "animals",
+      "reverse-gen"
+    ],
+    "calendar": {
+      "hebrewMonthStart": "full-moon",
+      "supportsAltStart": true,
+      "notes": "Use herb flushes to pre-load feast/holy day menus in your full-moon month layout."
+    },
+    "locationPreset": "garden_beds/perennial-corner"
+  },
+  "ui": {
+    "layout": "cards/timeline",
+    "hints": {
+      "primaryCTA": "Offer Herb Harvest Session",
+      "secondaryCTA": "Save as Favorite",
+      "tertiaryCTA": "Reverse-generate From Herb / Spice Targets",
+      "showSeasonalityBadge": true,
+      "groupBy": [
+        "weekOfSeason",
+        "bedId",
+        "herbType"
+      ],
+      "suggestOnly": true,
+      "notes": "Show herb readiness like modern garden apps: small chips for oregano/thyme ‘ready’, bigger chips for rosemary ‘prune now’. Do NOT auto-schedule unless user turns it on."
+    },
+    "badges": [
+      { "text": "Garden", "color": "green" },
+      { "text": "Perennial Herbs", "color": "teal" },
+      { "text": "Perennial Corner", "color": "violet" }
+    ]
+  },
+  "orchestration": {
+    "bus": "window.__suka?.eventBus",
+    "emitOnLoad": [
+      "garden.harvest.curve.loaded",
+      "garden.herbs.perennial-corner.loaded"
+    ],
+    "listen": [
+      "garden.session.request",
+      "garden.plan.changed",
+      "storehouse.goal.request",
+      "meal.session.request",
+      "cleaning.session.request",
+      "inventory.restock.request",
+      "automation.schedule.request"
+    ],
+    "sharedScopes": [
+      "garden",
+      "storehouse",
+      "meals",
+      "cleaning",
+      "animals"
+    ]
+  },
+  "engines": {
+    "primary": "gardenQueueEngine",
+    "supports": [
+      "storehouseGoalEngine",
+      "mealPlanEngine",
+      "cleaningSessionEngine",
+      "animalSessionEngine"
+    ],
+    "notes": "Perennial herbs grow slower than hot-strip tomatoes but more continuously than shade lettuce. Engine should suggest small, frequent cuts, and when a feast/holy-day or storehouse target appears, suggest a bigger ‘herb processing’ run."
+  },
+  "reverse": {
+    "generateFrom": [
+      "storehouse.targets.dried-herbs",
+      "storehouse.targets.herb-blends",
+      "storehouse.targets.herb-vinegars",
+      "mealplan.requirements.fresh-herbs",
+      "community.feast-days.herb-platters",
+      "coop-pool.herb-share",
+      "garden.bed.perennial-corner.target"
+    ],
+    "strategies": [
+      {
+        "id": "from-storehouse-dried-herbs",
+        "title": "Back into herb harvests from dried herb storehouse target",
+        "input": {
+          "driedHerbJarsQuart": 6,
+          "freshToDryKgRatio": 4
+        },
+        "output": {
+          "requiredFreshHerbKg": 24,
+          "suggestedHarvestSessions": 4,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Do 4× herb cuts from perennial corner for drying",
+              "emitOnUserAccept": [
+                "garden.session.request",
+                "cleaning.session.request"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "from-mealplan-fresh-herbs",
+        "title": "Back into harvest from meal-plan fresh herb usage",
+        "input": {
+          "freshHerbMealsPerWeek": 5,
+          "kgPerMeal": 0.05
+        },
+        "output": {
+          "requiredWeeklyFreshHerbKg": 0.25,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Cut 250 g mixed herbs for meals this week",
+              "emitOnUserAccept": [
+                "garden.session.request",
+                "meal.session.request"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "from-coop-herb-share",
+        "title": "Back into harvest from co-op/shared herb program",
+        "input": {
+          "coopHerbKgGoal": 8,
+          "householdSharePct": 0.25
+        },
+        "output": {
+          "householdHerbKgGoal": 2,
+          "suggestedHarvestSessions": 3,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Contribute 2 kg mixed herbs from perennial corner",
+              "emitOnUserAccept": [
+                "garden.session.request",
+                "storehouse.plan.generated"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "curve": {
+    "units": "kg-per-harvest",
+    "seasonLengthDays": 180,
+    "base": [
+      { "day": 1, "value": 0.1, "stage": "spring-flush" },
+      { "day": 7, "value": 0.2, "stage": "spring-flush" },
+      { "day": 14, "value": 0.25, "stage": "spring-flush" },
+      { "day": 21, "value": 0.3, "stage": "early-summer" },
+      { "day": 28, "value": 0.35, "stage": "early-summer" },
+      { "day": 35, "value": 0.4, "stage": "peak" },
+      { "day": 42, "value": 0.45, "stage": "peak" },
+      { "day": 56, "value": 0.45, "stage": "peak" },
+      { "day": 70, "value": 0.4, "stage": "mid" },
+      { "day": 84, "value": 0.35, "stage": "mid" },
+      { "day": 98, "value": 0.3, "stage": "mid" },
+      { "day": 120, "value": 0.25, "stage": "late" },
+      { "day": 140, "value": 0.2, "stage": "late" },
+      { "day": 160, "value": 0.15, "stage": "late" },
+      { "day": 180, "value": 0.12, "stage": "late" }
+    ],
+    "weeklyView": [
+      { "week": 1, "avg": 0.18 },
+      { "week": 2, "avg": 0.25 },
+      { "week": 3, "avg": 0.32 },
+      { "week": 4, "avg": 0.37 },
+      { "week": 5, "avg": 0.42 },
+      { "week": 6, "avg": 0.44 },
+      { "week": 7, "avg": 0.43 },
+      { "week": 8, "avg": 0.4 },
+      { "week": 10, "avg": 0.35 },
+      { "week": 12, "avg": 0.3 },
+      { "week": 16, "avg": 0.2 },
+      { "week": 20, "avg": 0.15 },
+      { "week": 24, "avg": 0.12 }
+    ],
+    "bed": {
+      "id": "perennial-corner",
+      "areaSqft": 18,
+      "plantSpacingIn": 16,
+      "rowCount": 1,
+      "trellised": false,
+      "notes": "Corner/edge bed, perennial, mixed herbs. Yield is intentionally conservative to avoid overharvesting; reverse-gen can suggest more cuts if user wants to dry more."
+    }
+  },
+  "adjustments": {
+    "byClimateZone": [
+      {
+        "zone": "hot-humid",
+        "multiplier": 0.9,
+        "notes": "More fungal pressure on rosemary/sage → surface ‘sanitize shears’ and ‘prune for airflow’ cleaning sessions."
+      },
+      {
+        "zone": "hot-dry",
+        "multiplier": 1.05,
+        "notes": "Dry conditions favor many Mediterranean herbs; also surface irrigation-check session for mints/chives."
+      },
+      {
+        "zone": "cooler-shoulder",
+        "multiplier": 0.95,
+        "notes": "Slower regrowth → lengthen interval between offered sessions."
+      }
+    ],
+    "byCareLevel": [
+      { "level": "intensive", "multiplier": 1.1 },
+      { "level": "standard", "multiplier": 1.0 },
+      { "level": "minimal", "multiplier": 0.8 }
+    ]
+  },
+  "storehouse": {
+    "targets": {
+      "dried_mixed_herbs_jars": 6,
+      "herb_butters_freezer_packs": 10,
+      "herb_vinegar_quarts": 3,
+      "feast_day_fresh_bundles": 4
+    },
+    "grocerySectionsInspiration": [
+      "Herbs & Spices",
+      "Condiments / Vinegars",
+      "Freezer – Savory Bases",
+      "Feast / Entertaining",
+      "Medicinals / Wellness (non-Talmudic)"
+    ],
+    "autoPlan": {
+      "enabled": false
+    }
+  },
+  "meals": {
+    "recipes": [
+      {
+        "id": "fresh-herb-roast",
+        "title": "Fresh Herb Roast (Meat or Veg)",
+        "useWithinHours": 48,
+        "linksTo": [
+          "/meals/dinner",
+          "/inventory/fresh-produce",
+          "/storehouse/herbs"
+        ]
+      },
+      {
+        "id": "compound-herb-butter",
+        "title": "Compound Herb Butter (Storehouse)",
+        "linksTo": [
+          "/storehouse/butters",
+          "/cleaning/kitchen"
+        ],
+        "emit": "cooking.session.request"
+      }
+    ],
+    "autoSession": {
+      "everyDays": 0,
+      "emit": []
+    }
+  },
+  "cleaning": {
+    "routines": [
+      {
+        "id": "herb-shears-sanitize",
+        "title": "Sanitize Herb Shears & Baskets",
+        "frequency": "PER_HARVEST",
+        "emit": "cleaning.session.request",
+        "tools": [
+          "sanitizer",
+          "cloth",
+          "drying-rack"
+        ]
+      },
+      {
+        "id": "drying-rack-weekly",
+        "title": "Herb Drying Rack / Dehydrator Weekly Clean",
+        "frequency": "WEEKLY",
+        "emit": "cleaning.session.request"
+      }
+    ],
+    "sabbathGuard": true
+  },
+  "garden": {
+    "care": [
+      {
+        "id": "prune-woody-herbs",
+        "title": "Prune Woody Herbs (rosemary/sage)",
+        "emit": "garden.session.request"
+      },
+      {
+        "id": "check-irrigation-mints",
+        "title": "Check Irrigation / Containment for Mints",
+        "emit": "garden.session.request"
+      }
+    ],
+    "harvest": {
+      "autoSuggest": true,
+      "userMustConfirm": true,
+      "emitOnConfirm": [
+        "garden.session.request"
+      ]
+    },
+    "notes": "This bed is perennial so do NOT clear it on season rollover. If user changes layout, engine should copy this curve to the new perennial corner ID."
+  },
+  "animals": {
+    "routing": {
+      "excessHerbs": [
+        "compost",
+        "poultry"
+      ],
+      "notes": "Do not send strongly flavored or oiled herb residues to all animals; poultry and compost are safest general routes."
+    },
+    "emit": [
+      "animal.care.session.request"
+    ]
+  },
+  "inventory": {
+    "productId": "garden-herbs-perennial-corner",
+    "unit": "kg",
+    "trackLots": true,
+    "harvestTag": "perennial-corner",
+    "shelfLifeDays": 4
+  },
+  "favoriteSessions": [
+    {
+      "id": "fav-perennial-herb-sat",
+      "title": "Perennial Corner Herb Cut – Sat Evening (User Confirm)",
+      "domain": "garden/harvest",
+      "schedule": "RRULE:FREQ=WEEKLY;BYDAY=SA;BYHOUR=18;BYMINUTE=0;BYSECOND=0",
+      "sabbathGuard": true
+    },
+    {
+      "id": "fav-herb-drying-run",
+      "title": "Herb Drying / Dehydrator Run",
+      "domain": "storehouse/herbs",
+      "schedule": ""
+    }
+  ],
+  "scheduleTemplates": [
+    {
+      "id": "herbs-weekly-light-cut",
+      "title": "Weekly Light Herb Cut (User Confirm)",
+      "rrules": [
+        "RRULE:FREQ=WEEKLY;BYDAY=WE;BYHOUR=7;BYMINUTE=30;BYSECOND=0"
+      ],
+      "options": {
+        "userMustConfirm": true,
+        "sabbathGuard": true,
+        "quietHoursGuard": true
+      }
+    }
+  ],
+  "userProfiles": {
+    "allowUserOwnedSchedules": true,
+    "allowUserOwnedFavorites": true,
+    "allowExportShare": true,
+    "shareFormats": [
+      "json",
+      "suka-plan",
+      "calendar-rrule"
+    ]
+  },
+  "events": {
+    "emits": [
+      "garden.session.request",
+      "cleaning.session.request",
+      "meal.session.request",
+      "storehouse.plan.generated",
+      "inventory.restock.request"
+    ],
+    "consumes": [
+      "garden.plan.changed",
+      "storehouse.targets.changed",
+      "meal.session.completed"
+    ]
+  }
+}

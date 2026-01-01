@@ -1,0 +1,149 @@
+{
+  "$id": "https://suka-smart-assistant.local/schemas/planningGraph/node.config.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Planning Graph Node Config",
+  "description": "Shared schema for Planning Graph node config files (calculator, planner, shim) used across SSA.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "nodeKey",
+    "kind",
+    "version",
+    "name",
+    "description",
+    "inputKeys",
+    "outputKeys"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional JSON Schema reference used by tooling. Not interpreted by SSA runtime."
+    },
+    "nodeKey": {
+      "type": "string",
+      "description": "Stable key for the node, used as a graph identifier (e.g. 'calendar.BiblicalOfferingCalculator').",
+      "pattern": "^[a-zA-Z0-9_.-]+$",
+      "minLength": 3
+    },
+    "kind": {
+      "type": "string",
+      "description": "The type of node within the planning graph.",
+      "enum": [
+        "calculator-node",
+        "planner-node",
+        "shim-node"
+      ]
+    },
+    "version": {
+      "type": "integer",
+      "description": "Monotonic version for this node config. Bump on breaking changes.",
+      "minimum": 1
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-friendly display name for the node."
+    },
+    "description": {
+      "type": "string",
+      "description": "Longer description of what this node calculates or plans."
+    },
+    "tags": {
+      "type": "array",
+      "description": "Freeform tags used for discovery, filtering, and docs.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "inputKeys": {
+      "type": "array",
+      "description": "Fully-qualified keys this node consumes from other nodes or calculators.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "outputKeys": {
+      "type": "array",
+      "description": "Fully-qualified keys this node produces for downstream consumers.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "feedsInto": {
+      "type": "array",
+      "description": "Optional list of node keys that this node commonly connects to in the Planning Graph.",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "ui": {
+      "type": "object",
+      "description": "UI/UX hints for rendering this node inside SSA tooling.",
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Short label used in menus and node diagrams."
+        },
+        "category": {
+          "type": "string",
+          "description": "High-level group (e.g. 'Calendar & Feasts', 'Nutrition', 'Animals')."
+        },
+        "icon": {
+          "type": "string",
+          "description": "Icon name or key for the node."
+        },
+        "priority": {
+          "type": "integer",
+          "description": "Sort priority for UI lists (higher = more prominent).",
+          "minimum": 0
+        },
+        "docsPath": {
+          "type": "string",
+          "description": "Relative path to README or docs for this node."
+        }
+      }
+    },
+    "behavior": {
+      "type": "object",
+      "description": "Non-functional behavior hints for orchestration and caching.",
+      "additionalProperties": false,
+      "properties": {
+        "isDeterministic": {
+          "type": "boolean",
+          "description": "Whether the node produces the same output for the same input."
+        },
+        "canCache": {
+          "type": "boolean",
+          "description": "Whether SSA is allowed to cache outputs keyed by inputs."
+        },
+        "sensitivity": {
+          "type": "string",
+          "description": "Data sensitivity classification for Hub export and sharing.",
+          "enum": [
+            "public",
+            "household",
+            "private"
+          ],
+          "default": "household"
+        },
+        "conflictsWith": {
+          "type": "array",
+          "description": "Optional list of node keys this node conflicts with (mutually exclusive scenarios).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dependsOnFreshness": {
+          "type": "array",
+          "description": "Optional list of input keys that should be treated as freshness-sensitive (e.g. inventory, herd snapshot).",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

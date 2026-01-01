@@ -1,0 +1,375 @@
+{
+  "nodeId": "health.micronutrientCalculator",
+  "version": 1,
+  "label": "Micronutrient Daily Targets",
+  "description": "Maps Micronutrient Calculator outputs into SSA Next Steps for meals, garden planning, animal products, and storehouse inventory.",
+  "sourceModule": "features/calculators/health/MicronutrientCalculator",
+  "triggers": [
+    "calculator.micronutrient.calculated",
+    "planningGraph.nextSteps.requested"
+  ],
+
+  "routingDefaults": {
+    "priorityScale": {
+      "high": 100,
+      "medium": 70,
+      "low": 40
+    },
+    "targetModules": {
+      "mealPlanner": {
+        "id": "meals.mealPlanner",
+        "label": "Meal Planner",
+        "kind": "planner"
+      },
+      "gardenPlanner": {
+        "id": "garden.planner",
+        "label": "Garden Planner",
+        "kind": "planner"
+      },
+      "animalPlanner": {
+        "id": "animals.planner",
+        "label": "Animal Planner",
+        "kind": "planner"
+      },
+      "storehouseInventory": {
+        "id": "storehouse.inventory",
+        "label": "Storehouse Inventory",
+        "kind": "inventory"
+      }
+    },
+    "payloadShape": {
+      "from": "calculatorResult",
+      "fields": ["profile", "unitSystem", "targets", "summary", "focusFlags", "constraintFlags"],
+      "includeRawInput": true
+    }
+  },
+
+  "nextSteps": {
+    "default": [
+      {
+        "id": "micro.default.meals",
+        "label": "Plan meals to hit micronutrient targets",
+        "description": "Send daily micronutrient targets into the Meal Planner so SSA can suggest recipes and batch cooking sessions.",
+        "targetModuleId": "meals.mealPlanner",
+        "priority": 100,
+        "conditions": {
+          "requiresResult": true
+        },
+        "payloadTransform": {
+          "type": "micronutrientTargetsToMealPlanner",
+          "map": {
+            "profile": "profile",
+            "targets": "targets",
+            "focusFlags": "focusFlags"
+          }
+        }
+      },
+      {
+        "id": "micro.default.garden",
+        "label": "Plan garden crops for missing nutrients",
+        "description": "Use nutrient gaps to suggest crops and planting plans that supply key vitamins and minerals.",
+        "targetModuleId": "garden.planner",
+        "priority": 80,
+        "conditions": {
+          "requiresResult": true
+        },
+        "payloadTransform": {
+          "type": "micronutrientTargetsToGardenPlanner",
+          "map": {
+            "targets": "targets",
+            "focusFlags": "focusFlags",
+            "summary": "summary"
+          }
+        }
+      },
+      {
+        "id": "micro.default.animals",
+        "label": "Plan animal products for nutrient coverage",
+        "description": "Map nutrient needs to animal products (meat, organs, eggs, dairy alternatives) that can cover remaining gaps.",
+        "targetModuleId": "animals.planner",
+        "priority": 75,
+        "conditions": {
+          "requiresResult": true
+        },
+        "payloadTransform": {
+          "type": "micronutrientTargetsToAnimalPlanner",
+          "map": {
+            "targets": "targets",
+            "focusFlags": "focusFlags",
+            "constraintFlags": "constraintFlags"
+          }
+        }
+      },
+      {
+        "id": "micro.default.storehouse",
+        "label": "Check storehouse for micronutrient coverage",
+        "description": "Compare micronutrient targets against storehouse inventory and flag missing nutrient sources.",
+        "targetModuleId": "storehouse.inventory",
+        "priority": 70,
+        "conditions": {
+          "requiresResult": true
+        },
+        "payloadTransform": {
+          "type": "micronutrientTargetsToInventoryCheck",
+          "map": {
+            "targets": "targets",
+            "focusFlags": "focusFlags"
+          }
+        }
+      }
+    ],
+
+    "byFocus": {
+      "boneHealth": [
+        {
+          "id": "micro.focus.bone.meals",
+          "label": "Bone-health focused meal ideas",
+          "description": "Prioritize meals rich in calcium, magnesium, vitamin D, and vitamin K from Torah-aligned foods.",
+          "targetModuleId": "meals.mealPlanner",
+          "priority": 100,
+          "conditions": {
+            "requiresResult": true,
+            "focusFlag": "boneHealth"
+          },
+          "payloadTransform": {
+            "type": "micronutrientBoneFocusToMeals",
+            "map": {
+              "targets": "targets",
+              "profile": "profile"
+            }
+          }
+        },
+        {
+          "id": "micro.focus.bone.garden",
+          "label": "Grow bone-supporting crops",
+          "description": "Suggest leafy greens, herbs, and other crops that support bone health and can be grown in the garden.",
+          "targetModuleId": "garden.planner",
+          "priority": 85,
+          "conditions": {
+            "requiresResult": true,
+            "focusFlag": "boneHealth"
+          },
+          "payloadTransform": {
+            "type": "micronutrientBoneFocusToGarden",
+            "map": {
+              "targets": "targets",
+              "summary": "summary"
+            }
+          }
+        }
+      ],
+      "bloodHealth": [
+        {
+          "id": "micro.focus.blood.meals",
+          "label": "Iron and blood-health meal plan",
+          "description": "Emphasize iron, B vitamins, and supportive foods from clean meat, legumes, and leafy greens.",
+          "targetModuleId": "meals.mealPlanner",
+          "priority": 95,
+          "conditions": {
+            "requiresResult": true,
+            "focusFlag": "bloodHealth"
+          },
+          "payloadTransform": {
+            "type": "micronutrientBloodFocusToMeals",
+            "map": {
+              "targets": "targets"
+            }
+          }
+        },
+        {
+          "id": "micro.focus.blood.animals",
+          "label": "Organ meats and animal products for blood health",
+          "description": "Use animal planner to prioritize liver and other organ meats where culturally appropriate.",
+          "targetModuleId": "animals.planner",
+          "priority": 90,
+          "conditions": {
+            "requiresResult": true,
+            "focusFlag": "bloodHealth"
+          },
+          "payloadTransform": {
+            "type": "micronutrientBloodFocusToAnimals",
+            "map": {
+              "targets": "targets",
+              "constraintFlags": "constraintFlags"
+            }
+          }
+        }
+      ],
+      "immuneSupport": [
+        {
+          "id": "micro.focus.immune.meals",
+          "label": "Immune-supportive meals",
+          "description": "Prioritize vitamin C, zinc, and antioxidant-rich recipes.",
+          "targetModuleId": "meals.mealPlanner",
+          "priority": 90,
+          "conditions": {
+            "requiresResult": true,
+            "focusFlag": "immuneSupport"
+          },
+          "payloadTransform": {
+            "type": "micronutrientImmuneFocusToMeals",
+            "map": {
+              "targets": "targets"
+            }
+          }
+        },
+        {
+          "id": "micro.focus.immune.garden",
+          "label": "Immune-support herb garden",
+          "description": "Suggest herbs and crops that support immune health for planting and preservation.",
+          "targetModuleId": "garden.planner",
+          "priority": 80,
+          "conditions": {
+            "requiresResult": true,
+            "focusFlag": "immuneSupport"
+          },
+          "payloadTransform": {
+            "type": "micronutrientImmuneFocusToGarden",
+            "map": {
+              "targets": "targets"
+            }
+          }
+        }
+      ],
+      "heartHealth": [
+        {
+          "id": "micro.focus.heart.meals",
+          "label": "Heart-health focused meals",
+          "description": "Optimize nutrient targets around potassium, magnesium, fiber, and healthy fats within user constraints.",
+          "targetModuleId": "meals.mealPlanner",
+          "priority": 90,
+          "conditions": {
+            "requiresResult": true,
+            "focusFlag": "heartHealth"
+          },
+          "payloadTransform": {
+            "type": "micronutrientHeartFocusToMeals",
+            "map": {
+              "targets": "targets",
+              "constraintFlags": "constraintFlags"
+            }
+          }
+        }
+      ],
+      "brainHealth": [
+        {
+          "id": "micro.focus.brain.meals",
+          "label": "Brain and mood-supporting meals",
+          "description": "Favor omega-3s, B vitamins, and mineral-rich foods aligned with brain health.",
+          "targetModuleId": "meals.mealPlanner",
+          "priority": 85,
+          "conditions": {
+            "requiresResult": true,
+            "focusFlag": "brainHealth"
+          },
+          "payloadTransform": {
+            "type": "micronutrientBrainFocusToMeals",
+            "map": {
+              "targets": "targets"
+            }
+          }
+        },
+        {
+          "id": "micro.focus.brain.garden",
+          "label": "Grow brain-supportive crops",
+          "description": "Suggest crops and herbs that supply B vitamins and supportive phytonutrients.",
+          "targetModuleId": "garden.planner",
+          "priority": 75,
+          "conditions": {
+            "requiresResult": true,
+            "focusFlag": "brainHealth"
+          },
+          "payloadTransform": {
+            "type": "micronutrientBrainFocusToGarden",
+            "map": {
+              "targets": "targets"
+            }
+          }
+        }
+      ],
+      "metabolicHealth": [
+        {
+          "id": "micro.focus.metabolic.meals",
+          "label": "Metabolic support meal plan",
+          "description": "Align meals with chromium, magnesium, and other metabolic support nutrients while respecting sugar limits.",
+          "targetModuleId": "meals.mealPlanner",
+          "priority": 95,
+          "conditions": {
+            "requiresResult": true,
+            "focusFlag": "metabolicHealth"
+          },
+          "payloadTransform": {
+            "type": "micronutrientMetabolicFocusToMeals",
+            "map": {
+              "targets": "targets",
+              "constraintFlags": "constraintFlags"
+            }
+          }
+        }
+      ]
+    },
+
+    "byConstraint": {
+      "kidneyIssues": [
+        {
+          "id": "micro.constraint.kidney.inventory",
+          "label": "Review storehouse for kidney-safe options",
+          "description": "Filter inventory and future plans based on kidney-supportive nutrient ranges.",
+          "targetModuleId": "storehouse.inventory",
+          "priority": 90,
+          "conditions": {
+            "requiresResult": true,
+            "constraintFlag": "kidneyIssues"
+          },
+          "payloadTransform": {
+            "type": "micronutrientKidneyConstraintToInventory",
+            "map": {
+              "targets": "targets",
+              "constraintFlags": "constraintFlags"
+            }
+          }
+        }
+      ],
+      "limitSodium": [
+        {
+          "id": "micro.constraint.lowSodium.meals",
+          "label": "Plan low-sodium meals",
+          "description": "Apply low-sodium constraints when building meal plans from micronutrient targets.",
+          "targetModuleId": "meals.mealPlanner",
+          "priority": 85,
+          "conditions": {
+            "requiresResult": true,
+            "constraintFlag": "limitSodium"
+          },
+          "payloadTransform": {
+            "type": "micronutrientLowSodiumToMeals",
+            "map": {
+              "targets": "targets",
+              "constraintFlags": "constraintFlags"
+            }
+          }
+        }
+      ],
+      "limitAddedSugar": [
+        {
+          "id": "micro.constraint.lowSugar.meals",
+          "label": "Plan low-sugar meals",
+          "description": "Favor micronutrient-dense whole foods and avoid high added sugar recipes.",
+          "targetModuleId": "meals.mealPlanner",
+          "priority": 80,
+          "conditions": {
+            "requiresResult": true,
+            "constraintFlag": "limitAddedSugar"
+          },
+          "payloadTransform": {
+            "type": "micronutrientLowSugarToMeals",
+            "map": {
+              "targets": "targets",
+              "constraintFlags": "constraintFlags"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "meta": {
+    "id": "catalog.workflows.expanded.index",
+    "domain": "workflows",
+    "kind": "index",
+    "title": "Workflow Overlays (Opt-in)",
+    "version": "1.0.0",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Added US + West/Central Africa workflow overlays for preservation, animals, textiles; all opt-in and editable."
+      }
+    ]
+  },
+  "overlays": [
+    {
+      "id": "workflow.us.midwest_homestead",
+      "path": "./united_states/midwest_homestead.json",
+      "tags": [
+        "region:usa",
+        "mode:homestead",
+        "values:thrift"
+      ]
+    },
+    {
+      "id": "workflow.us.gulf_coastal_resilience",
+      "path": "./united_states/gulf_coastal_resilience.json",
+      "tags": [
+        "region:usa",
+        "mode:resilience",
+        "values:preparedness"
+      ]
+    },
+    {
+      "id": "workflow.us.urban_apartment_efficiency",
+      "path": "./united_states/urban_apartment_efficiency.json",
+      "tags": [
+        "region:usa",
+        "mode:urban",
+        "values:efficiency"
+      ]
+    },
+    {
+      "id": "workflow.wca.sahel_dryland_household",
+      "path": "./west_central_africa/sahel_dryland_household.json",
+      "tags": [
+        "region:wca",
+        "mode:dryland",
+        "values:water_stewardship"
+      ]
+    },
+    {
+      "id": "workflow.wca.forest_zone_household",
+      "path": "./west_central_africa/forest_zone_household.json",
+      "tags": [
+        "region:wca",
+        "mode:forest",
+        "values:staples"
+      ]
+    },
+    {
+      "id": "workflow.wca.riverine_market_garden",
+      "path": "./west_central_africa/riverine_market_garden.json",
+      "tags": [
+        "region:wca",
+        "mode:garden",
+        "values:market"
+      ]
+    },
+    {
+      "id": "workflow.wca.pastoral_mobility_light",
+      "path": "./west_central_africa/pastoral_mobility_light.json",
+      "tags": [
+        "region:wca",
+        "mode:pastoral",
+        "values:mobility"
+      ]
+    },
+    {
+      "id": "workflow.wca.coastal_trade_kitchen",
+      "path": "./west_central_africa/coastal_trade_kitchen.json",
+      "tags": [
+        "region:wca",
+        "mode:kitchen",
+        "values:communal"
+      ]
+    }
+  ],
+  "ui": {
+    "defaultFilters": [
+      "region",
+      "mode",
+      "values"
+    ]
+  }
+}

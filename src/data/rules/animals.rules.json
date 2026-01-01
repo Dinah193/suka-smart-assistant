@@ -1,0 +1,353 @@
+{
+  "version": "1.0.0",
+  "domain": "animals",
+  "generatedAt": "2025-11-11T00:00:00.000Z",
+  "source": "SSA builtin",
+  "rules": [
+    {
+      "id": "acquire-quarantine-new-animals",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 100,
+      "tags": ["acquisition", "biosecurity", "quarantine"],
+      "match": { "byMethod": { "methodsAny": ["acquire", "intake", "new-arrival"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "set-up-quarantine-pen",
+            "title": "Set up quarantine pen",
+            "description": "House new animals separately with dedicated tools, boots, and water/feed buckets. Place the pen downwind of the main herd/flock.",
+            "duration": "PT10M",
+            "equipment": ["quarantine-pen", "dedicated-buckets", "foot-bath(optional)"]
+          }
+        },
+        {
+          "action": "setTimer",
+          "duration": "PT336H",
+          "label": "Quarantine period (14 days)"
+        }
+      ]
+    },
+    {
+      "id": "acquire-records-and-observe",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 110,
+      "tags": ["acquisition", "recordkeeping", "biosecurity"],
+      "match": { "byMethod": { "methodsAny": ["acquire", "intake", "new-arrival"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "collect-records-and-log",
+            "title": "Collect records & start observation log",
+            "description": "Record ID, source, age, vaccinations, deworming, and date of arrival. Log daily appetite, feces, temperature if concerned.",
+            "duration": "PT3M",
+            "equipment": ["journal", "thermometer(optional)"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "milking-sanitation-sequence",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 200,
+      "tags": ["milking", "sanitation"],
+      "match": { "byMethod": { "methodsAny": ["milk", "milking"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "wash-hands-and-equipment",
+            "title": "Wash hands & sanitize equipment",
+            "description": "Wash and dry hands. Sanitize pail/cluster/strainer. Avoid scented soaps. Prepare clean teat dip.",
+            "duration": "PT2M",
+            "equipment": ["wash-station", "sanitizer", "paper-towels"]
+          }
+        },
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "pre-dip-and-wipe",
+            "title": "Pre-dip teats and wipe dry",
+            "description": "Apply pre-dip and allow 30 seconds contact time. Wipe teats with single-use towels until visibly clean and dry.",
+            "duration": "PT30S",
+            "setTimer": true,
+            "equipment": ["pre-dip", "single-use-towels"]
+          }
+        },
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "strip-filter-chill",
+            "title": "Strip, filter, and rapid chill milk",
+            "description": "Strip first squirts to check for clots. Filter milk into sanitized container and chill to ≤ 4°C (≤ 40°F) within 30 minutes (ice bath if needed). Post-dip teats.",
+            "duration": "PT5M",
+            "equipment": ["filter", "milk-pail", "ice-bath", "post-dip"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "milking-udder-health-check",
+      "ruleType": "timing",
+      "enabled": true,
+      "priority": 210,
+      "tags": ["milking", "health-check"],
+      "applyTo": { "byMethod": { "methodsAny": ["milk", "milking"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "mastitis-check",
+            "title": "Quick mastitis check",
+            "description": "Observe udder symmetry/heat and fore-strip into a strip cup. Consider a CMT test weekly or if clots/watery milk appear.",
+            "duration": "PT45S",
+            "equipment": ["strip-cup", "CMT-paddle(optional)"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "brooding-setup-chicks-ducklings",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 300,
+      "tags": ["brooding", "chicks", "ducklings", "heat"],
+      "match": { "byMethod": { "methodsAny": ["brood", "start-brooder", "receive-hatchlings"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "brooder-prepare",
+            "title": "Prepare brooder with heat & bedding",
+            "description": "Set up draft-free brooder with dry bedding, guard, and heat source (≈32–35°C / 90–95°F at chick height Week 1). Provide starter feed and water with marbles for ducklings.",
+            "duration": "PT10M",
+            "equipment": ["heat-lamp-or-plate", "thermometer", "bedding", "feeder", "waterer"]
+          }
+        },
+        {
+          "action": "setTimer",
+          "duration": "PT168H",
+          "label": "Brooder weekly temp adjustment"
+        },
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "brooder-temp-plan",
+            "title": "Plan heat step-down",
+            "description": "Reduce target temp by ~3°C (5°F) each week until fully feathered. Watch behavior: huddling = too cold, edge-avoiding = too hot.",
+            "duration": "PT0S"
+          }
+        }
+      ]
+    },
+    {
+      "id": "brooding-litter-hygiene",
+      "ruleType": "timing",
+      "enabled": true,
+      "priority": 310,
+      "tags": ["brooding", "hygiene"],
+      "applyTo": { "byMethod": { "methodsAny": ["brood", "start-brooder"] } },
+      "actions": [
+        {
+          "action": "setTimer",
+          "duration": "PT24H",
+          "label": "Spot-clean litter (daily)"
+        }
+      ]
+    },
+    {
+      "id": "bottle-feed-lamb-kid-calf-schedule",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 400,
+      "tags": ["bottle-feed", "neonate", "orphan"],
+      "match": { "byMethod": { "methodsAny": ["bottle-feed", "orphan-care", "hand-rear"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "prepare-milk-replacer",
+            "title": "Prepare milk/milk replacer at body-temp",
+            "description": "Warm to ~38–40°C (100–104°F). Use species-appropriate replacer, mix per label, and sanitize bottles/teats.",
+            "duration": "PT5M",
+            "equipment": ["kettle", "thermometer", "bottle", "teat"]
+          }
+        },
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "feeding-schedule-guideline",
+            "title": "Feeding schedule guideline",
+            "description": "Rule of thumb: split total daily volume into 4–6 feeds initially; reduce to 3–4 as growth stabilizes. Keep neonates upright; burp if bloaty.",
+            "duration": "PT0S"
+          }
+        },
+        {
+          "action": "setTimer",
+          "duration": "PT3H",
+          "label": "Next bottle feeding (early stage)"
+        }
+      ]
+    },
+    {
+      "id": "bottle-feed-hygiene",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 410,
+      "tags": ["bottle-feed", "sanitation"],
+      "match": { "byMethod": { "methodsAny": ["bottle-feed", "hand-rear"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "sanitize-bottles",
+            "title": "Sanitize bottles and teats after use",
+            "description": "Rinse immediately, then wash with hot soapy water. Optionally sterilize by boiling 5 minutes; air-dry upside down.",
+            "duration": "PT6M",
+            "equipment": ["brush", "dish-soap", "pot(optional)"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "butchery-ppe-and-zone",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 500,
+      "tags": ["butchery", "safety", "sanitation"],
+      "match": { "byMethod": { "methodsAny": ["butcher", "process", "harvest"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "don-ppe-setup-zone",
+            "title": "Don PPE & set up clean/dirty zones",
+            "description": "Wear cut-resistant gloves and apron. Establish separate dirty (hide/feathers) and clean (meat) zones; sanitize tables and knives.",
+            "duration": "PT3M",
+            "equipment": ["cut-gloves", "apron", "sanitizer", "two-table-setup"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "poultry-scald-and-pluck-guideline",
+      "ruleType": "timing",
+      "enabled": true,
+      "priority": 510,
+      "tags": ["butchery", "poultry", "scald"],
+      "applyTo": { "byIngredient": { "names": ["chicken", "duck", "turkey"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "scald-setup",
+            "title": "Scald water temp range",
+            "description": "Heat scald tank to ~60–65°C (140–149°F). Agitate bird in scald 45–90s until wing feathers pull easily (ducks often need the high end).",
+            "duration": "PT0S",
+            "equipment": ["scald-tank", "thermometer"]
+          }
+        },
+        {
+          "action": "setTimer",
+          "duration": "PT60S",
+          "label": "Initial scald interval"
+        }
+      ]
+    },
+    {
+      "id": "red-meat-carcass-chill",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 520,
+      "tags": ["butchery", "cooling", "food-safety"],
+      "match": { "byIngredient": { "names": ["lamb", "goat", "beef", "veal"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "rapid-chill-carcass",
+            "title": "Rapid chill carcass",
+            "description": "Move carcass to chill room/ice chest promptly. Aim for internal temperature ≤ 7°C (45°F) within 24 hours; avoid surface drying by maintaining airflow and humidity.",
+            "duration": "PT0S",
+            "equipment": ["cooler", "ice", "chill-room"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "poultry-feed-withhold",
+      "ruleType": "timing",
+      "enabled": true,
+      "priority": 515,
+      "tags": ["butchery", "prep"],
+      "applyTo": { "byIngredient": { "names": ["chicken", "duck", "turkey"] } },
+      "actions": [
+        {
+          "action": "setTimer",
+          "duration": "PT10H",
+          "label": "Withhold feed pre-slaughter (water available)"
+        }
+      ]
+    },
+    {
+      "id": "milk-parlor-cleandown",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 220,
+      "tags": ["milking", "sanitation"],
+      "match": { "byMethod": { "methodsAny": ["milk", "milking"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "cleandown-cycle",
+            "title": "Cleandown cycle",
+            "description": "Rinse equipment with lukewarm water, wash with alkaline dairy detergent per label, rinse, then acid rinse weekly to remove milkstone. Air-dry.",
+            "duration": "PT8M",
+            "equipment": ["dairy-detergent", "acid-rinse(optional)"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "kid-lamb-coccidia-hygiene",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 430,
+      "tags": ["youngstock", "hygiene"],
+      "match": { "byIngredient": { "names": ["kid", "lamb"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "dry-bedding-and-raise-buckets",
+            "title": "Keep bedding dry; raise buckets",
+            "description": "Top up dry bedding, keep water/feed buckets off the floor, and separate loafing from feeding areas to reduce coccidia exposure.",
+            "duration": "PT0S",
+            "equipment": ["bedding", "bucket-hooks"]
+          }
+        }
+      ]
+    }
+  ]
+}

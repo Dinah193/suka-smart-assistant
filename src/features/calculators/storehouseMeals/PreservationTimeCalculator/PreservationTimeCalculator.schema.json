@@ -1,0 +1,285 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "PreservationTimeCalculator.schema.json",
+  "title": "Preservation Time Calculator Schema",
+  "description": "Schema describing inputs (method, volume, conditions) and time outputs for the Preservation Time Calculator in SSA.",
+
+  "type": "object",
+  "properties": {
+    "calculatorId": {
+      "type": "string",
+      "description": "Identifier for this calculator instance or node.",
+      "default": "preservationTimeCalculator"
+    },
+
+    "input": {
+      "type": "object",
+      "description": "All inputs required to estimate safe processing and storage times.",
+      "properties": {
+        "foodType": {
+          "type": "string",
+          "description": "High-level category of food (e.g., 'greenBeans', 'boneBroth', 'tomatoSauce')."
+        },
+        "preservationMethod": {
+          "type": "string",
+          "description": "Preservation method used.",
+          "enum": [
+            "pressureCanning",
+            "waterBathCanning",
+            "refrigeration",
+            "freezing",
+            "dehydration",
+            "fermentation",
+            "curing",
+            "pickling",
+            "other"
+          ]
+        },
+        "containerType": {
+          "type": "string",
+          "description": "Container used for preservation (jar, mylar, vacuumBag, etc.).",
+          "enum": [
+            "glassJar",
+            "mylarBag",
+            "vacuumBag",
+            "plasticContainer",
+            "metalCan",
+            "ceramicCrock",
+            "other"
+          ]
+        },
+        "containerVolume": {
+          "type": "number",
+          "description": "Volume of the container used for preservation.",
+          "minimum": 0
+        },
+        "containerVolumeUnit": {
+          "type": "string",
+          "description": "Unit for container volume.",
+          "enum": [
+            "ml",
+            "liter",
+            "cup",
+            "pint",
+            "quart",
+            "gallon",
+            "ounceFluid"
+          ]
+        },
+        "headspace": {
+          "type": "number",
+          "description": "Headspace left at the top of the container.",
+          "minimum": 0
+        },
+        "headspaceUnit": {
+          "type": "string",
+          "description": "Unit for headspace.",
+          "enum": [
+            "mm",
+            "cm",
+            "inch"
+          ]
+        },
+        "altitudeMeters": {
+          "type": "number",
+          "description": "Altitude of the household in meters above sea level.",
+          "minimum": 0
+        },
+        "ambientTemperatureC": {
+          "type": "number",
+          "description": "Typical ambient storage temperature in degrees Celsius."
+        },
+        "ambientHumidityPercent": {
+          "type": "number",
+          "description": "Typical ambient relative humidity as a percentage.",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "acidityPH": {
+          "type": "number",
+          "description": "Approximate pH of the food (if known).",
+          "minimum": 0,
+          "maximum": 14
+        },
+        "brineStrengthPercent": {
+          "type": "number",
+          "description": "Salt concentration by percent, if applicable (ferments, pickles, etc.).",
+          "minimum": 0,
+          "maximum": 30
+        },
+        "sugarContentBrix": {
+          "type": "number",
+          "description": "Approximate sugar content (degrees Brix) for high-sugar preserves.",
+          "minimum": 0,
+          "maximum": 80
+        },
+        "householdRiskTolerance": {
+          "type": "string",
+          "description": "How conservative the household prefers recommendations to be.",
+          "enum": [
+            "veryLow",
+            "low",
+            "moderate",
+            "high"
+          ],
+          "default": "low"
+        }
+      },
+      "required": [
+        "foodType",
+        "preservationMethod",
+        "containerVolume",
+        "containerVolumeUnit"
+      ],
+      "additionalProperties": false
+    },
+
+    "output": {
+      "type": "object",
+      "description": "Calculated processing and storage time recommendations plus safety metadata.",
+      "properties": {
+        "recommendedProcessingTimeMinutes": {
+          "type": "number",
+          "description": "Recommended processing time (e.g., canning, dehydrating) in minutes.",
+          "minimum": 0
+        },
+        "recommendedStorageTimeDays": {
+          "type": "number",
+          "description": "Recommended safe storage time in days under the provided conditions.",
+          "minimum": 0
+        },
+        "recommendedStorageTimeLabel": {
+          "type": "string",
+          "description": "Human-friendly label for storage time (e.g., 'up to 1 year', '3–6 months')."
+        },
+        "riskBand": {
+          "type": "string",
+          "description": "Risk band summarizing safety (e.g., 'low', 'moderate', 'high').",
+          "enum": [
+            "veryLow",
+            "low",
+            "moderate",
+            "high"
+          ]
+        },
+        "warnings": {
+          "type": "array",
+          "description": "List of textual warnings or cautions based on method + inputs.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional notes from the shim (e.g., 'method not recommended for low-acid foods at this altitude')."
+        },
+        "sessionTemplateOverride": {
+          "type": "object",
+          "description": "Optional override or enrichment for the default session template used by the SessionRunner.",
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "Optional custom title for the generated preservation session."
+            },
+            "steps": {
+              "type": "array",
+              "description": "Optional list of steps to override or extend the default session steps.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "desc": {
+                    "type": "string"
+                  },
+                  "durationSec": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "blockers": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "inventory",
+                        "weather",
+                        "quietHours",
+                        "sabbath",
+                        "equipment"
+                      ]
+                    }
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "properties": {
+                      "tempTargetF": {
+                        "type": "number"
+                      },
+                      "donenessCue": {
+                        "type": "string",
+                        "enum": [
+                          "color",
+                          "texture",
+                          "probeTemp",
+                          "timer",
+                          "smell"
+                        ]
+                      },
+                      "cueNotes": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "title"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "recommendedProcessingTimeMinutes",
+        "recommendedStorageTimeDays",
+        "riskBand"
+      ],
+      "additionalProperties": false
+    },
+
+    "meta": {
+      "type": "object",
+      "description": "Optional metadata for analytics and debugging.",
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "Semantic version for this calculator's logic.",
+          "default": "1.0.0"
+        },
+        "computedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp indicating when the calculation was performed."
+        },
+        "source": {
+          "type": "string",
+          "description": "Origin of the calculation (e.g., 'userInput', 'importedSession', 'batchRun')."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+
+  "required": [
+    "input",
+    "output"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,223 @@
+{
+  "metadata": {
+    "id": "macroCalculator",
+    "nodeId": "pg.health.macroCalculator",
+    "label": "Macro Calculator",
+    "shortLabel": "Macros",
+    "description": "Calculates daily protein, fat, and carbohydrate targets based on calorie needs, body data, and goals. Feeds into meal planning, grocery planning, and animal/product planning inside SSA.",
+    "domain": "health",
+    "category": "nutrition",
+    "version": "1.0.0",
+    "status": "stable",
+    "tags": [
+      "health",
+      "nutrition",
+      "macros",
+      "planner",
+      "ssa-core"
+    ],
+    "ui": {
+      "icon": "macro-calculator",
+      "accent": "health",
+      "route": "/calculators/health/macros",
+      "layout": "calculator",
+      "showInQuickLaunch": true,
+      "nowCtaLabel": "Use Macros Now"
+    }
+  },
+
+  "defaults": {
+    "sex": "female",
+    "ageYears": 35,
+    "height": {
+      "value": 66,
+      "unit": "in"
+    },
+    "weight": {
+      "value": 180,
+      "unit": "lb"
+    },
+    "bodyFatPercent": null,
+    "activityLevel": "moderatelyActive",
+    "activityOptions": [
+      "sedentary",
+      "lightlyActive",
+      "moderatelyActive",
+      "veryActive",
+      "athlete"
+    ],
+    "goal": "recomposition",
+    "goalOptions": [
+      "fatLoss",
+      "maintenance",
+      "recomposition",
+      "muscleGain"
+    ],
+    "calorieSource": "autoFromTDEE",
+    "manualCalories": null,
+    "macroStrategy": "percentOfCalories",
+    "protein": {
+      "mode": "gPerKg",
+      "gPerKg": 1.8,
+      "minGPerDay": 80
+    },
+    "fat": {
+      "mode": "percentOfCalories",
+      "percent": 30,
+      "minGPerDay": 40
+    },
+    "carbs": {
+      "mode": "remainder",
+      "percent": null,
+      "minGPerDay": 75
+    },
+    "rounding": {
+      "macroGrams": 5,
+      "calories": 10
+    },
+    "mealsPerDay": 3,
+    "snacksPerDay": 1,
+    "outputGranularity": [
+      "perDay",
+      "perMeal"
+    ],
+    "healthFlags": {
+      "diabetesOrPreDiabetes": false,
+      "kidneyIssues": false,
+      "pregnantOrBreastfeeding": false
+    },
+    "ssaIntegration": {
+      "allowAutoLinkToMealPlanner": true,
+      "allowAutoLinkToGroceryPlanner": true,
+      "allowAutoLinkToAnimalPlanner": true,
+      "preferredUnitSystem": "imperial",
+      "autosaveProfile": true
+    }
+  },
+
+  "planningGraph": {
+    "nodeId": "pg.health.macroCalculator",
+    "label": "Daily Macro Requirements",
+    "kind": "calculator",
+    "domain": "health",
+    "priority": 30,
+    "description": "Computes daily macro targets that downstream planners use to shape meals, grocery lists, and animal/production plans.",
+    "inputs": [
+      {
+        "key": "bmr",
+        "label": "Basal Metabolic Rate",
+        "type": "number",
+        "unit": "kcal/day",
+        "source": "pg.health.bmrCalculator",
+        "required": false
+      },
+      {
+        "key": "tdee",
+        "label": "Total Daily Energy Expenditure",
+        "type": "number",
+        "unit": "kcal/day",
+        "source": "pg.health.tdeeCalculator",
+        "required": false
+      },
+      {
+        "key": "calorieBudget",
+        "label": "Calorie Budget",
+        "type": "number",
+        "unit": "kcal/day",
+        "source": "auto|manual",
+        "required": true
+      },
+      {
+        "key": "profile",
+        "label": "Person Profile",
+        "type": "object",
+        "schemaRef": "health.profile.schema.json",
+        "required": true
+      },
+      {
+        "key": "goal",
+        "label": "Goal",
+        "type": "enum",
+        "options": [
+          "fatLoss",
+          "maintenance",
+          "recomposition",
+          "muscleGain"
+        ],
+        "required": true
+      }
+    ],
+    "outputs": [
+      {
+        "key": "caloriesPerDay",
+        "label": "Calories per Day",
+        "type": "number",
+        "unit": "kcal"
+      },
+      {
+        "key": "proteinGramsPerDay",
+        "label": "Protein (g/day)",
+        "type": "number",
+        "unit": "g"
+      },
+      {
+        "key": "fatGramsPerDay",
+        "label": "Fat (g/day)",
+        "type": "number",
+        "unit": "g"
+      },
+      {
+        "key": "carbGramsPerDay",
+        "label": "Carbs (g/day)",
+        "type": "number",
+        "unit": "g"
+      },
+      {
+        "key": "perMealBreakdown",
+        "label": "Per-Meal Macro Targets",
+        "type": "object",
+        "schemaRef": "health.macroPerMeal.schema.json"
+      },
+      {
+        "key": "profileMacroPresetId",
+        "label": "Saved Macro Profile ID",
+        "type": "string",
+        "description": "Key used by other modules to load this macro pattern as a preset."
+      }
+    ],
+    "feedsInto": [
+      "pg.meals.mealPlanner",
+      "pg.meals.batchCookingPlanner",
+      "pg.storehouse.groceryPlanner",
+      "pg.storehouse.inventoryShortageDetector",
+      "pg.animals.animalPlanner",
+      "pg.health.micronutrientCalculator"
+    ],
+    "graphHints": {
+      "recommendedOrder": [
+        "pg.health.bmiCalculator",
+        "pg.health.bmrCalculator",
+        "pg.health.tdeeCalculator",
+        "pg.health.macroCalculator",
+        "pg.health.micronutrientCalculator",
+        "pg.meals.mealPlanner"
+      ],
+      "nowCtaText": "Use these macro targets to build meals and grocery lists.",
+      "summaryFields": [
+        "caloriesPerDay",
+        "proteinGramsPerDay",
+        "fatGramsPerDay",
+        "carbGramsPerDay"
+      ]
+    },
+    "sessionDefaults": {
+      "domain": "storehouse",
+      "titleTemplate": "Apply Macro Targets to Meals & Grocery Plan",
+      "prefs": {
+        "voiceGuidance": true,
+        "haptic": true,
+        "autoAdvance": false
+      }
+    }
+  }
+}

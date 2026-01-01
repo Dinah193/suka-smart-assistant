@@ -1,0 +1,322 @@
+{
+  "id": "wf.indigenous.west_african",
+  "domain": "workflow",
+  "kind": "workflow_overlay",
+  "title": "West African-Inspired Household Rhythm (Opt-in Overlay)",
+  "intentTags": [
+    "overlay:workflow",
+    "culture:west_african",
+    "group:indigenous"
+  ],
+  "inputs": [
+    {
+      "key": "enabled",
+      "label": "Enabled (opt-in)",
+      "type": "boolean",
+      "required": true,
+      "default": false,
+      "notes": "Overlays must be explicitly enabled by user/household."
+    },
+    {
+      "key": "householdMode",
+      "label": "Household mode",
+      "type": "string",
+      "default": "default",
+      "notes": "Examples: default, communal, travel, recovery."
+    },
+    {
+      "key": "dietaryLaws",
+      "label": "Dietary laws / household rules",
+      "type": "object",
+      "default": {},
+      "notes": "Merged with household prefs; overlay never overrides hard constraints."
+    },
+    {
+      "key": "quietHours",
+      "label": "Quiet hours / Sabbath guard",
+      "type": "object",
+      "default": {
+        "enabled": false
+      }
+    },
+    {
+      "key": "season",
+      "label": "Season",
+      "type": "string"
+    }
+  ],
+  "outputs": [
+    {
+      "key": "tagOverlays",
+      "label": "Canonical tags to apply",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "patternBiases",
+      "label": "Pattern bias suggestions",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "constraintOverlays",
+      "label": "Constraint overlays (soft)",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "uiOverlays",
+      "label": "UI label/order defaults",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "roleDefaults",
+      "label": "Role-based defaults (optional)",
+      "type": "object",
+      "default": {}
+    }
+  ],
+  "constraints": [
+    "optInOnly",
+    "neverStereotype",
+    "userEditable",
+    "respectDietaryLaws",
+    "respectQuietHours"
+  ],
+  "steps": [
+    {
+      "id": "overlay.apply",
+      "title": "Apply workflow overlay",
+      "template": "tpl.workflow.overlay.apply",
+      "domain": "workflow",
+      "params": {
+        "cultureTag": "culture:west_african",
+        "mergeMode": "soft"
+      },
+      "hints": [
+        "emitHintTag:applyWorkflowOverlay"
+      ]
+    }
+  ],
+  "kpis": [
+    {
+      "key": "adoptionRate",
+      "label": "Overlay adoption rate",
+      "direction": "up",
+      "unit": "%",
+      "notes": "How often households keep overlay enabled."
+    },
+    {
+      "key": "overrideEdits",
+      "label": "User edits vs defaults",
+      "direction": "down",
+      "unit": "count",
+      "notes": "High edits may indicate defaults need tuning."
+    }
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial workflow overlay catalog (opt-in, non-stereotyped)."
+      }
+    ],
+    "tags": [
+      "culture:west_african",
+      "group:indigenous"
+    ],
+    "family": "workflows"
+  },
+  "workflow": {
+    "preferredStaples": {
+      "canonicalTags": [
+        "grain",
+        "legume",
+        "leafy_greens",
+        "root_crop",
+        "spice_blend"
+      ],
+      "examples": [
+        {
+          "tag": "staple:grain",
+          "examples": [
+            "millet",
+            "sorghum",
+            "rice",
+            "cornmeal"
+          ]
+        },
+        {
+          "tag": "staple:legume",
+          "examples": [
+            "cowpeas/black-eyed peas",
+            "lentils",
+            "groundnuts/peanuts"
+          ]
+        },
+        {
+          "tag": "staple:root_crop",
+          "examples": [
+            "yam",
+            "cassava",
+            "sweet potato"
+          ]
+        }
+      ],
+      "notes": "Examples are ingredient variations, not requirements. Swap with locally available equivalents."
+    },
+    "mealRhythms": {
+      "canonicalTags": [
+        "communal_optional",
+        "one_pot_bias",
+        "stew_sauce_and_staple",
+        "market_day_optional"
+      ],
+      "defaults": {
+        "weeklyCadence": {
+          "batchCookDay": "optional",
+          "marketDay": "optional"
+        },
+        "structure": [
+          "staple_base",
+          "sauce_or_stew",
+          "veg_side_optional"
+        ]
+      },
+      "notes": "Overlay favors flexible, scalable meals that feed households and guests without excessive complexity."
+    },
+    "preservationEmphasis": {
+      "canonicalTags": [
+        "drying",
+        "fermentation",
+        "smoking_optional"
+      ],
+      "defaults": {
+        "prioritize": [
+          "drying",
+          "fermentation"
+        ],
+        "secondary": [
+          "smoking_optional"
+        ]
+      },
+      "notes": "SSA uses this to suggest preservation patterns when surplus risk is detected."
+    },
+    "valuePriorities": {
+      "canonicalTags": [
+        "sharing",
+        "thrift",
+        "stewardship",
+        "skill_transfer_optional"
+      ],
+      "defaults": {
+        "sharingMode": "optional",
+        "thriftMode": "on",
+        "feastFocus": "optional"
+      },
+      "notes": "Values inform pattern bias (e.g., bulk staples, fewer trips, batch cooking)."
+    },
+    "notes": "All fields are suggestions. Users can disable any default and replace with their own."
+  },
+  "outputs_default": {
+    "tagOverlays": [
+      "staple:grain",
+      "value:thrift",
+      "preservation:drying",
+      "rhythm:stew_sauce_and_staple",
+      "value:skill_transfer_optional",
+      "preservation:fermentation",
+      "rhythm:market_day_optional",
+      "value:sharing",
+      "staple:legume",
+      "staple:root_crop",
+      "preservation:smoking_optional",
+      "staple:leafy_greens",
+      "rhythm:communal_optional",
+      "value:stewardship",
+      "rhythm:one_pot_bias",
+      "staple:spice_blend"
+    ],
+    "patternBiases": {
+      "favor": {
+        "pat.meals.weekly_batch": 1.15,
+        "pat.storehouse.weekly_restock": 1.1,
+        "pat.storehouse.monthly_cycle_count": 1.05
+      },
+      "avoid": {
+        "pat.meals.daily_fresh": 0.95
+      },
+      "notes": "Biases are advisory; resolvers may downrank/boost patterns, not block unless user also sets a hard constraint.",
+      "emitHintTags": [
+        "workflow:communal_optional",
+        "kitchen:one_pot_bias"
+      ]
+    },
+    "constraintOverlays": {
+      "soft": {
+        "maxNewRecipesPerWeek": 2,
+        "preferBatchSessions": true,
+        "preferLowEquipment": true
+      },
+      "hard": {}
+    },
+    "uiOverlays": {
+      "labels": {
+        "meals": "Meals",
+        "storehouse": "Storehouse",
+        "homestead": "Homestead"
+      },
+      "ordering": {
+        "plannerSections": [
+          "inventory",
+          "staples",
+          "menu",
+          "sessions",
+          "sharing"
+        ]
+      },
+      "defaults": {
+        "shoppingGroupBy": "staples_first"
+      }
+    },
+    "roleDefaults": {
+      "notes": "Roles are suggestions only. Users can rename, remove, or reassign.",
+      "roles": [
+        {
+          "roleId": "role.coordinator",
+          "label": "Coordinator",
+          "defaults": {
+            "owns": [
+              "planning",
+              "shoppingMerge"
+            ]
+          }
+        },
+        {
+          "roleId": "role.kitchen_lead",
+          "label": "Kitchen Lead",
+          "defaults": {
+            "owns": [
+              "prepSession",
+              "batchSession"
+            ]
+          }
+        },
+        {
+          "roleId": "role.storehouse_steward",
+          "label": "Storehouse Steward",
+          "defaults": {
+            "owns": [
+              "rotation",
+              "labels",
+              "cycleCount"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

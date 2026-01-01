@@ -1,0 +1,123 @@
+{
+  "description": "Sample SSA event envelope for `inventory.shortage.detected`. This is emitted when the inventory rule/insight engine sees that an item is below its target level. Downstream logic should decide which route to take: 1) garden.plan, 2) animal.acquire/breed/butcher, 3) storehouse.restock/production, 4) grocery/shopping list. This is the bridge from INTELLIGENCE → AUTOMATION.",
+  "envelopeShape": {
+    "type": "inventory.shortage.detected",
+    "ts": "2025-11-02T13:15:00.000Z",
+    "source": "domain/inventory/InventorySessionEngine",
+    "data": {
+      "itemId": "inv_xxxxxxxx",
+      "itemName": "string — human readable name",
+      "currentQty": 0,
+      "requiredQty": 0,
+      "suggestedRoutes": [
+        "garden.plan",
+        "animal.acquire",
+        "storehouse.restock",
+        "shopping.add"
+      ]
+    }
+  },
+  "samples": [
+    {
+      "label": "Low flour → suggest storehouse + shopping",
+      "event": {
+        "type": "inventory.shortage.detected",
+        "ts": "2025-11-02T13:15:00.000Z",
+        "source": "domain/inventory/InventorySessionEngine",
+        "data": {
+          "itemId": "inv_flour_allpurpose",
+          "itemName": "Flour, All-Purpose",
+          "currentQty": 3,
+          "requiredQty": 10,
+          "suggestedRoutes": [
+            "storehouse.restock",
+            "shopping.add"
+          ]
+        }
+      }
+    },
+    {
+      "label": "Low lamb fat / tallow base (for soapmaking + meat blends) → suggest animal/butchery + storehouse",
+      "event": {
+        "type": "inventory.shortage.detected",
+        "ts": "2025-11-02T13:16:45.000Z",
+        "source": "domain/inventory/InventorySessionEngine",
+        "data": {
+          "itemId": "inv_lamb_fat",
+          "itemName": "Lamb Fat / Tallow Base",
+          "currentQty": 1.5,
+          "requiredQty": 6,
+          "suggestedRoutes": [
+            "animal.butchery.plan",     
+            "storehouse.restock",       
+            "shopping.add"              
+          ]
+        }
+      }
+    },
+    {
+      "label": "Low rosemary (fresh) → suggest garden.plan and optional shopping",
+      "event": {
+        "type": "inventory.shortage.detected",
+        "ts": "2025-11-02T13:18:10.000Z",
+        "source": "domain/inventory/InventorySessionEngine",
+        "data": {
+          "itemId": "inv_rosemary_fresh",
+          "itemName": "Rosemary (Fresh)",
+          "currentQty": 0,
+          "requiredQty": 4,
+          "suggestedRoutes": [
+            "garden.plan",
+            "shopping.add"
+          ]
+        }
+      }
+    },
+    {
+      "label": "Low cornmeal (your storehouse → garden reverse-gen example)",
+      "event": {
+        "type": "inventory.shortage.detected",
+        "ts": "2025-11-02T13:19:30.000Z",
+        "source": "domain/inventory/InventorySessionEngine",
+        "data": {
+          "itemId": "inv_cornmeal",
+          "itemName": "Cornmeal",
+          "currentQty": 2,
+          "requiredQty": 12,
+          "suggestedRoutes": [
+            "storehouse.restock",
+            "garden.plan",              
+            "shopping.add"
+          ]
+        }
+      }
+    },
+    {
+      "label": "Low freezer goat cuts (animal → butchery → preservation pipeline)",
+      "event": {
+        "type": "inventory.shortage.detected",
+        "ts": "2025-11-02T13:21:05.000Z",
+        "source": "domain/inventory/InventorySessionEngine",
+        "data": {
+          "itemId": "inv_goat_cuts_freezer",
+          "itemName": "Goat Cuts (Freezer)",
+          "currentQty": 0,
+          "requiredQty": 5,
+          "suggestedRoutes": [
+            "animal.acquire",
+            "animal.butchery.plan",
+            "preservation.session",
+            "shopping.add"
+          ]
+        }
+      }
+    }
+  ],
+  "notes": [
+    "1. This event should immediately be visible to the automation runtime. The runtime can create an automation.task for the best route OR show a user-facing recommendation (Next Best Action).",
+    "2. In files like src/events/eventMappers.js, this event is hubEligible=true, so if featureFlags.familyFundMode=true you should map + export it to the Hub for community production planning.",
+    "3. This event is the *output* of INTELLIGENCE. The *input* was one or more inventory updates, storehouse goals, or imports that declared a required quantity.",
+    "4. `suggestedRoutes` should be flexible/ordered. First entry is usually what the SSA thinks is most aligned with your household setup (e.g. garden-first households).",
+    "5. Keep this file JSON-only (no $schema) so VS Code doesn’t try to fetch remote schemas."
+  ]
+}

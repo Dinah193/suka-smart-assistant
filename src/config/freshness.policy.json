@@ -1,0 +1,183 @@
+{
+  "meta": {
+    "version": 1,
+    "generatedAt": "2025-11-19T00:00:00.000Z",
+    "description": "SSA dataset freshness / TTL policy used by scrapers, Dexie hydration, guards, and background shims."
+  },
+  "defaults": {
+    "ttlMinutes": 1440,
+    "staleAfterMinutes": 720,
+    "expireAfterMinutes": 4320,
+    "refreshStrategy": "on-access",
+    "priority": "normal"
+  },
+  "datasets": {
+    "weather.current": {
+      "ttlMinutes": 15,
+      "staleAfterMinutes": 10,
+      "expireAfterMinutes": 60,
+      "refreshStrategy": "background",
+      "priority": "high",
+      "notes": "Used by weatherGuard and planning UI. Keep tight TTL for current conditions."
+    },
+    "weather.forecast.hourly": {
+      "ttlMinutes": 60,
+      "staleAfterMinutes": 120,
+      "expireAfterMinutes": 720,
+      "refreshStrategy": "background",
+      "priority": "normal",
+      "notes": "Short-range hourly forecast for next 24–48h. Good enough within 1 hour."
+    },
+    "weather.forecast.daily": {
+      "ttlMinutes": 180,
+      "staleAfterMinutes": 720,
+      "expireAfterMinutes": 2880,
+      "refreshStrategy": "background",
+      "priority": "normal",
+      "notes": "Multi-day forecast used by garden/animals/preservation planners."
+    },
+
+    "pricing.storeItem": {
+      "ttlMinutes": 4320,
+      "staleAfterMinutes": 10080,
+      "expireAfterMinutes": 43200,
+      "refreshStrategy": "on-access",
+      "priority": "high",
+      "notes": "Normalized pricebook entries (by store + item). Consider refresh if older than 3 days; hard-expire after 30 days."
+    },
+    "pricing.promotions.circular.weekly": {
+      "ttlMinutes": 10080,
+      "staleAfterMinutes": 10080,
+      "expireAfterMinutes": 20160,
+      "refreshStrategy": "background",
+      "priority": "high",
+      "notes": "Weekly store circulars. Fresh for one ad cycle; keep one extra week for cycle-learning."
+    },
+    "pricing.promotions.dailyDeals": {
+      "ttlMinutes": 1440,
+      "staleAfterMinutes": 1440,
+      "expireAfterMinutes": 4320,
+      "refreshStrategy": "on-access",
+      "priority": "normal",
+      "notes": "Short-lived daily deals / manager specials."
+    },
+    "pricing.coupons": {
+      "ttlMinutes": 4320,
+      "staleAfterMinutes": 10080,
+      "expireAfterMinutes": 43200,
+      "refreshStrategy": "background",
+      "priority": "normal",
+      "notes": "Coupon metadata (issue/expiry/terms). Frequently re-used; refresh weekly."
+    },
+    "pricing.couponCycles": {
+      "ttlMinutes": 43200,
+      "staleAfterMinutes": 86400,
+      "expireAfterMinutes": 172800,
+      "refreshStrategy": "background",
+      "priority": "low",
+      "notes": "Learned coupon/price cycles. Very long-lived model data."
+    },
+
+    "nutrition.foodProfile": {
+      "ttlMinutes": 43200,
+      "staleAfterMinutes": 129600,
+      "expireAfterMinutes": 259200,
+      "refreshStrategy": "on-access",
+      "priority": "normal",
+      "notes": "Core nutrient profiles (USDA-style). Rarely change; effectively cached for months."
+    },
+    "nutrition.brandLabel": {
+      "ttlMinutes": 20160,
+      "staleAfterMinutes": 43200,
+      "expireAfterMinutes": 129600,
+      "refreshStrategy": "on-access",
+      "priority": "normal",
+      "notes": "Brand-specific labels scraped/parsed from packages or websites."
+    },
+
+    "inventory.householdSnapshot": {
+      "ttlMinutes": 60,
+      "staleAfterMinutes": 180,
+      "expireAfterMinutes": 1440,
+      "refreshStrategy": "on-access",
+      "priority": "high",
+      "notes": "Derived snapshot used by planners / guards. Encourage fresh sync every 1–3 hours during use."
+    },
+    "inventory.externalStoreStock": {
+      "ttlMinutes": 180,
+      "staleAfterMinutes": 720,
+      "expireAfterMinutes": 2880,
+      "refreshStrategy": "background",
+      "priority": "normal",
+      "notes": "Stock estimates scraped from external stores (when enabled)."
+    },
+
+    "garden.plantingGuides": {
+      "ttlMinutes": 43200,
+      "staleAfterMinutes": 129600,
+      "expireAfterMinutes": 259200,
+      "refreshStrategy": "manual",
+      "priority": "low",
+      "notes": "Static-ish guides by zone / crop. Updated only when sources change."
+    },
+    "garden.harvestHistory": {
+      "ttlMinutes": 525600,
+      "staleAfterMinutes": 525600,
+      "expireAfterMinutes": 0,
+      "refreshStrategy": "never",
+      "priority": "archive",
+      "notes": "User harvest logs. Never auto-expire; 0 means keep until explicit cleanup."
+    },
+
+    "sessions.checkpoint": {
+      "ttlMinutes": 1440,
+      "staleAfterMinutes": 4320,
+      "expireAfterMinutes": 10080,
+      "refreshStrategy": "on-access",
+      "priority": "high",
+      "notes": "SessionRunner checkpoints (running/paused sessions). Needed for auto-resume after reload; safe to prune after ~7 days."
+    },
+    "sessions.analytics": {
+      "ttlMinutes": 525600,
+      "staleAfterMinutes": 525600,
+      "expireAfterMinutes": 0,
+      "refreshStrategy": "never",
+      "priority": "archive",
+      "notes": "Completed session analytics. Long-lived for trend analysis; do not auto-expire."
+    },
+
+    "hub.exportEnvelope": {
+      "ttlMinutes": 10080,
+      "staleAfterMinutes": 20160,
+      "expireAfterMinutes": 43200,
+      "refreshStrategy": "background",
+      "priority": "normal",
+      "notes": "Outbound envelopes for Family Fund Hub exports, including retry queues."
+    },
+
+    "guards.quietHoursConfig": {
+      "ttlMinutes": 525600,
+      "staleAfterMinutes": 525600,
+      "expireAfterMinutes": 0,
+      "refreshStrategy": "manual",
+      "priority": "config",
+      "notes": "User-configured Quiet Hours. Treated as config; never auto-expire."
+    },
+    "guards.sabbathConfig": {
+      "ttlMinutes": 525600,
+      "staleAfterMinutes": 525600,
+      "expireAfterMinutes": 0,
+      "refreshStrategy": "manual",
+      "priority": "config",
+      "notes": "User-configured Sabbath rules/offsets. Treated as config; never auto-expire."
+    },
+    "guards.deviceBatteryProfile": {
+      "ttlMinutes": 1440,
+      "staleAfterMinutes": 4320,
+      "expireAfterMinutes": 10080,
+      "refreshStrategy": "background",
+      "priority": "low",
+      "notes": "Optional learned battery behavior profile for device-level guard decisions."
+    }
+  }
+}

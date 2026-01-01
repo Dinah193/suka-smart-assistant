@@ -1,0 +1,235 @@
+{
+  "id": "health.bmiCalculator",
+  "nodeId": "pg.health.bmiCalculator",
+  "type": "calculator",
+  "version": "1.0.0",
+  "status": "active",
+
+  "labels": {
+    "short": "BMI Calculator",
+    "long": "Body Mass Index (BMI) Calculator",
+    "description": "Estimate Body Mass Index (BMI) and weight category from height and weight. Used as a simple screening tool and as a starting point for other health planning nodes."
+  },
+
+  "ui": {
+    "route": "/calculators/health/bmi",
+    "routeName": "BMICalculator",
+    "icon": "HealthIcon.BMI", 
+    "category": "health",
+    "displayOrder": 10,
+    "ctaLabelPrimary": "Calculate BMI",
+    "ctaLabelSecondary": "Use BMI in Other Plans",
+    "badges": [
+      "quick",
+      "screening",
+      "notDiagnostic"
+    ],
+    "notes": [
+      "BMI is a rough screening tool and not a diagnosis.",
+      "Body composition, muscle mass, and distribution of weight are not reflected in BMI alone."
+    ]
+  },
+
+  "tags": [
+    "health",
+    "screening",
+    "bmi",
+    "weight",
+    "height",
+    "calculator",
+    "planning-graph-node"
+  ],
+
+  "defaults": {
+    "unitSystem": "imperial",
+    "sex": "unspecified",
+    "ageYears": 35,
+    "height": {
+      "value": 66,
+      "unit": "in"
+    },
+    "weight": {
+      "value": 180,
+      "unit": "lb"
+    },
+    "rounding": {
+      "bmiDecimals": 1,
+      "weightDecimals": 1
+    }
+  },
+
+  "inputShape": {
+    "height": {
+      "type": "object",
+      "fields": {
+        "value": {
+          "type": "number",
+          "min": 36,
+          "max": 96
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["in", "cm"]
+        }
+      }
+    },
+    "weight": {
+      "type": "object",
+      "fields": {
+        "value": {
+          "type": "number",
+          "min": 40,
+          "max": 700
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["lb", "kg"]
+        }
+      }
+    },
+    "sex": {
+      "type": "string",
+      "enum": ["female", "male", "other", "unspecified"]
+    },
+    "ageYears": {
+      "type": "number",
+      "min": 5,
+      "max": 120
+    },
+    "unitSystem": {
+      "type": "string",
+      "enum": ["imperial", "metric", "mixed"],
+      "default": "imperial"
+    }
+  },
+
+  "outputShape": {
+    "bmi": {
+      "type": "number",
+      "description": "Computed Body Mass Index (BMI)."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "underweight",
+        "normal",
+        "overweight",
+        "obeseClass1",
+        "obeseClass2",
+        "obeseClass3"
+      ],
+      "description": "WHO-style BMI category based on numeric BMI."
+    },
+    "categoryLabel": {
+      "type": "string",
+      "description": "Human-friendly label for BMI category (e.g., 'Normal weight')."
+    },
+    "recommendedWeightRange": {
+      "type": "object",
+      "fields": {
+        "min": {
+          "type": "number",
+          "description": "Lower bound of weight for BMI 18.5 at given height (in user's preferred weight unit)."
+        },
+        "max": {
+          "type": "number",
+          "description": "Upper bound of weight for BMI 24.9 at given height (in user's preferred weight unit)."
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["lb", "kg"]
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Non-blocking warnings (e.g., 'BMI may not be appropriate for athletes or pregnancy.')."
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Informational notes that UI can display under the results."
+    }
+  },
+
+  "planningGraph": {
+    "kind": "calculator",
+    "nodeId": "pg.health.bmiCalculator",
+    "domain": "health",
+
+    "inputs": [
+      {
+        "key": "height",
+        "label": "Height",
+        "source": "user",
+        "required": true
+      },
+      {
+        "key": "weight",
+        "label": "Weight",
+        "source": "user",
+        "required": true
+      },
+      {
+        "key": "sex",
+        "label": "Sex",
+        "source": "user",
+        "required": false
+      },
+      {
+        "key": "ageYears",
+        "label": "Age (years)",
+        "source": "user",
+        "required": false
+      }
+    ],
+
+    "outputs": [
+      {
+        "key": "bmi",
+        "label": "BMI",
+        "type": "number"
+      },
+      {
+        "key": "category",
+        "label": "BMI Category",
+        "type": "string"
+      },
+      {
+        "key": "recommendedWeightRange",
+        "label": "Recommended Weight Range",
+        "type": "object"
+      }
+    ],
+
+    "feedsInto": [
+      {
+        "nodeId": "pg.health.macroCalculator",
+        "reason": "BMI can help the user choose a goal (fat loss / recomposition / maintenance) in the Macro Calculator.",
+        "mode": "insight"
+      },
+      {
+        "nodeId": "pg.health.micronutrientCalculator",
+        "reason": "BMI and weight give context when evaluating micronutrient targets.",
+        "mode": "context"
+      },
+      {
+        "nodeId": "pg.health.dashboard",
+        "reason": "BMI is a quick screening metric for the health overview.",
+        "mode": "summary"
+      }
+    ],
+
+    "graphHints": {
+      "recommendedOrder": 1,
+      "summaryFields": ["bmi", "category"],
+      "nowButtonLabel": "Use BMI in Plans",
+      "showOnHealthOverview": true
+    }
+  }
+}

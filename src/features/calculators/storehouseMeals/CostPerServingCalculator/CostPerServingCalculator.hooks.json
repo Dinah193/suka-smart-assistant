@@ -1,0 +1,183 @@
+{
+  "$id": "https://suka.local/schemas/planningGraph/hooks.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SSA Planning Graph Calculator Hooks",
+  "description": "Schema for *.hooks.json files that describe how a calculator integrates with the Planning Graph, inventory, batch sessions, and preservation flows.",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Semantic version of this hooks config, e.g. v1.0.0."
+    },
+    "calculator": {
+      "type": "string",
+      "description": "Identifier of the calculator this hooks config belongs to, e.g. CostPerServingCalculator."
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-friendly description of what these hooks do."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Optional planning-graph or analytics metadata.",
+      "additionalProperties": true
+    },
+
+    "hooks": {
+      "type": "object",
+      "description": "Named hook groups that connect this calculator to other SSA systems (planning graph, sessions, inventory, etc).",
+      "properties": {
+        "batchCooking": {
+          "type": "object",
+          "description": "How this calculator should inform batch cooking/session planning.",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "eventTypes": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Event types to emit or listen for, e.g. session.request.fromCostPerServing."
+            },
+            "templates": {
+              "type": "array",
+              "description": "Optional list of session or action templates this calculator can suggest.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "label": { "type": "string" },
+                  "description": { "type": "string" },
+                  "domain": {
+                    "type": "string",
+                    "enum": [
+                      "cooking",
+                      "cleaning",
+                      "garden",
+                      "animals",
+                      "preservation",
+                      "storehouse"
+                    ]
+                  },
+                  "trigger": {
+                    "type": "object",
+                    "description": "Arbitrary trigger conditions (min servings, high cost per serving, etc).",
+                    "additionalProperties": true
+                  },
+                  "sessionPrefs": {
+                    "type": "object",
+                    "description": "Default prefs to hand to the SessionRunner when this template is used.",
+                    "properties": {
+                      "voiceGuidance": { "type": "boolean" },
+                      "haptic": { "type": "boolean" },
+                      "autoAdvance": { "type": "boolean" }
+                    },
+                    "additionalProperties": true
+                  }
+                },
+                "required": ["id", "label"],
+                "additionalProperties": true
+              }
+            }
+          },
+          "additionalProperties": true
+        },
+
+        "inventory": {
+          "type": "object",
+          "description": "How this calculator’s results should interact with storehouse/inventory (e.g., adjusting quantities based on cost per serving).",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "routingRules": {
+              "type": "array",
+              "description": "Optional rules for mapping results into inventory rows or tags.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "label": { "type": "string" },
+                  "match": {
+                    "type": "object",
+                    "description": "Flexible matching conditions (e.g., costPerServing > X).",
+                    "additionalProperties": true
+                  },
+                  "setFields": {
+                    "type": "object",
+                    "description": "Fields to set on inventory rows when the rule matches.",
+                    "additionalProperties": true
+                  }
+                },
+                "required": ["id", "label"],
+                "additionalProperties": true
+              }
+            }
+          },
+          "additionalProperties": true
+        },
+
+        "preservation": {
+          "type": "object",
+          "description": "Optional preservation-related hooks (e.g., when high cost per serving should trigger different storage or prep decisions).",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "strategies": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "label": { "type": "string" },
+                  "description": { "type": "string" },
+                  "preservationMethod": { "type": "string" },
+                  "tags": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "conditions": {
+                    "type": "object",
+                    "description": "Conditions keyed off calculator outputs.",
+                    "additionalProperties": true
+                  }
+                },
+                "required": ["id", "label"],
+                "additionalProperties": true
+              }
+            }
+          },
+          "additionalProperties": true
+        },
+
+        "analytics": {
+          "type": "object",
+          "description": "Optional analytics hooks (e.g., cost bands, alerts when cost per serving exceeds a threshold).",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "alerts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "label": { "type": "string" },
+                  "description": { "type": "string" },
+                  "severity": {
+                    "type": "string",
+                    "enum": ["info", "warning", "critical"]
+                  },
+                  "conditions": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": ["id", "label"],
+                "additionalProperties": true
+              }
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "required": ["version", "calculator"],
+  "additionalProperties": true
+}

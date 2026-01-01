@@ -1,0 +1,490 @@
+===============================================================================
+SEASON RULES CONFIG – DESIGN SPEC
+File: src/intelligence/seasonality/seasonRules.config.txt
+Role: Config contract for season + cycle rules across the whole household
+===============================================================================
+
+0. CONCEPTUAL PURPOSE
+---------------------
+The seasonRules config describes how SSA recognizes and interprets **seasons**
+for the household, so that:
+
+- Cycles (garden, animals, preservation, cooking, cleaning, feasts, enterprise)
+  are anchored in season-aware rhythms.
+- The storehouse and provisions are understood relative to seasonal expectations
+  (lean vs flush, planting vs harvest vs rest).
+- Feast windows, planting windows, preservation windows, and rest windows are
+  derived from **season rules**, not arbitrary dates.
+- Insights and SessionRunner sessions can say:
+  - “You are in early planting season; consider starting cool-weather crops.”
+  - “Harvest-and-preservation season is approaching; stock jars and salt.”
+  - “Post-feast recovery overlaps with rest season; lighten the house rhythm.”
+
+This config is **seasonal intelligence scaffolding**, not the engine itself.
+
+It must support:
+
+- TOOL MODE:
+  - A single tool (e.g. “Season Viewer” or “Planting & Preservation Season
+    Planner”) can load these rules, use basic date inputs, and compute season
+    labels and windows without Dexie or global state.
+- STEWARDSHIP MODE:
+  - SSA’s seasonalIntelligence engine uses seasonRules with the Hebrew calendar,
+    astronomy data, climate observations, and household data to keep the entire
+    system season-aware and cycle-aware.
+
+Language: cycle, season, storehouse, provision, yield, rhythm, feast, householder.
+Avoid: “task”, “todo”, generic checklist language.
+
+
+1. STRUCTURE – CONFIG SHAPE & DOMAINS
+-------------------------------------
+Season rules sit in a **meta-domain**:
+
+- Primary meta-domain:
+  - seasonal intelligence / cycles engine
+- Connected domains:
+  - garden, animals, preservation, cooking/meals, storehouse/provisioning,
+    cleaning/hygiene, textiles, home maintenance, feasts/events, enterprise.
+
+Conceptual config shape (JSON-like):
+
+seasonRulesConfig = {
+  version: "1.0.0",
+  lastUpdatedAt: string,
+  modeHint?: "TOOL" | "STEWARDSHIP",
+
+  // Canonical seasons and sub-seasons for the household
+  seasons: SeasonDefinition[],
+
+  // Rules that map raw signals (calendar, sky, climate, household state)
+  // to specific seasons and seasonal windows
+  rules: {
+    calendarRules: SeasonCalendarRule[],
+    climateRules: SeasonClimateRule[],
+    householdRules: SeasonHouseholdRule[],
+  },
+
+  // Domain adjustments: how seasons bend domain rhythms
+  domainAdjustments: SeasonDomainAdjustment[],
+
+  // Preferences / tuning knobs for sensitivity and horizons
+  signals: {
+    seasonSmoothingDays: number,          // avoid hyper-rapid season flipping
+    horizonDaysForWindows: number,        // how far ahead to compute windows
+    sendSeasonShiftAlerts: boolean,
+    sendWindowOpenAlerts: boolean,
+  },
+
+  metadata?: {
+    timezone?: string,
+    regionProfile?: string,               // e.g. "temperate", "semi-arid"
+  },
+};
+
+
+2. PROPS – DETAILED CONFIG COMPONENTS
+-------------------------------------
+
+2.1 SeasonDefinition
+Defines high-level seasons and sub-seasons used across SSA.
+
+SeasonDefinition = {
+  id: string,                        // e.g. "early-planting", "harvest-flush",
+                                     // "lean-winter", "feast-season-1",
+                                     // "rest-season", "mud-season"
+  label: string,
+  category: "agricultural" | "climate" | "festal" | "rest" | "custom",
+  priority: "core" | "supporting",
+
+  // Rough expectations for yields and storehouse posture
+  expectations?: {
+    gardenYieldProfile?: "none" | "emerging" | "steady" | "peak" | "rest",
+    animalYieldProfile?: "steady" | "peak" | "reduced",
+    storehouseTolerance?: {
+      allowsDrawdown: boolean,       // OK to draw down deeply?
+      encouragesStocking: boolean,   // Should be stocking up?
+    },
+  },
+
+  // Which domain rhythms are most sensitive to this season
+  domainWeights?: {
+    garden?: number,                 // 0..1
+    animals?: number,
+    preservation?: number,
+    cooking?: number,
+    storehouse?: number,
+    cleaning?: number,
+    textiles?: number,
+    feasts?: number,
+    enterprise?: number,
+  },
+
+  notes?: string,
+};
+
+
+2.2 SeasonCalendarRule
+Rules that connect calendar/astronomy to SeasonDefinition.
+
+SeasonCalendarRule = {
+  id: string,
+  label: string,
+
+  seasonId: string,                  // the SeasonDefinition this rule activates
+  // Calendar/astronomy bindings:
+  calendarKey?: string,              // e.g. "month-1", "month-7", "feast:passover"
+  anchorType: "season-start" | "full-moon" | "new-moon" |
+              "first-visible-crescent" | "equinox" | "solstice" |
+              "calendar-ordinal",
+
+  window: {
+    startOffsetDays: number,         // from anchor
+    endOffsetDays: number,
+  },
+
+  // Weight vs other rules (in case of overlaps)
+  weight: number,                    // 0..1
+
+  // TODO[seasonal-logic]:
+  // - Bind this to the Hebrew calendar engine and astronomy source so that
+  //   season windows are computed from scriptural month/feast anchors.
+
+  notes?: string,
+};
+
+
+2.3 SeasonClimateRule
+Rules that refine seasons based on observed climate signals.
+
+SeasonClimateRule = {
+  id: string,
+  label: string,
+
+  seasonId: string,
+
+  // Example metrics (actual source handled by seasonalIntelligence engine)
+  conditions: {
+    avgHighTempRangeC?: [number, number],
+    avgLowTempRangeC?: [number, number],
+    rainfallProfile?: "dry" | "normal" | "wet",
+    frostRisk?: "none" | "possible" | "likely",
+  },
+
+  // Rule effect:
+  effect: "confirm" | "shift-earlier" | "shift-later" | "intensify" | "soften",
+
+  // Weight relative to calendar rules
+  weight: number,                    // 0..1
+
+  // TODO[seasonal-logic]:
+  // - Use real climate observations or user-configured climate profiles to
+  //   adjust agricultural seasons (planting vs harvest vs rest).
+
+  notes?: string,
+};
+
+
+2.4 SeasonHouseholdRule
+Rules that refine seasons based on **household** state (storehouse, yields).
+
+SeasonHouseholdRule = {
+  id: string,
+  label: string,
+
+  seasonId: string,
+  signals: {
+    storehouseGrainLevel?: "flush" | "moderate" | "lean",
+    storehousePreservedLevel?: "flush" | "moderate" | "lean",
+    gardenBedState?: "planted" | "bare" | "overgrown",
+    animalFeedPressure?: "low" | "medium" | "high",
+  },
+
+  // How these signals shape the effective season feeling
+  effect: "highlight-lean" | "highlight-flush" | "call-preservation" |
+          "call-planting" | "call-rest",
+
+  // TODO[dependencies]:
+  // - Connect this with storehouse + garden + animals snapshots so that
+  //   season labeling reflects actual provisions and yields, not only dates.
+
+  notes?: string,
+};
+
+
+2.5 SeasonDomainAdjustment
+Defines how each season should tilt domain rhythms.
+
+SeasonDomainAdjustment = {
+  id: string,
+  seasonId: string,                  // SeasonDefinition target
+  label: string,
+
+  // Per-domain adjustments; these are **relative** hints, not direct schedules.
+  adjustments: {
+    garden?: {
+      emphasis: "none" | "emerging" | "steady" | "peak" | "rest",
+      plantingWindow?: {
+        openOffsetDays?: number,     // from season start
+        closeOffsetDays?: number,
+      },
+    },
+    animals?: {
+      emphasis: "steady" | "peak" | "reduced",
+      breedingWindow?: { openOffsetDays?: number, closeOffsetDays?: number },
+    },
+    preservation?: {
+      emphasis: "none" | "emerging" | "steady" | "peak",
+      conversionWindow?: { openOffsetDays?: number, closeOffsetDays?: number },
+    },
+    cooking?: {
+      // e.g. heavier stews in cold season, lighter meals in heat
+      emphasis: "light" | "moderate" | "hearty",
+    },
+    storehouse?: {
+      allowDrawdown?: boolean,
+      recommendedStocking?: "none" | "moderate" | "strong",
+    },
+    cleaning?: {
+      emphasis: "light" | "moderate" | "intensive",
+    },
+    textiles?: {
+      emphasis: "light" | "moderate" | "intensive", // linens, blankets, clothing
+    },
+    feasts?: {
+      feastIntensityHint?: "none" | "scattered" | "clustered",
+    },
+    enterprise?: {
+      demandProfile?: "low" | "normal" | "high",
+    },
+  },
+
+  // TODO[cycles-engine]:
+  // - Use these adjustments as inputs when building domain-specific cycle
+  //   inputs in householdCycles.engine (e.g., “garden in peak season”).
+
+  notes?: string,
+};
+
+
+3. DATA FLOW – HOW SEASON RULES ARE USED
+----------------------------------------
+
+3.1 TOOL MODE
+In TOOL MODE, a standalone view (e.g. “Season Viewer” or “Planting Seasons
+Planner”) can:
+
+1) Load a seasonRulesConfig in memory (static JS/JSON).
+2) Ask the user for:
+   - Reference date or range,
+   - Optional basic climate profile (temperate vs hot, etc.).
+3) Use seasonRules to:
+   - Compute the **active seasonId** for a date (based on calendarRules).
+   - Optionally refine it using simple climate/hardcoded assumptions.
+   - Display:
+     - season label and expectations,
+     - approximate planting/preservation/feast windows.
+
+No Dexie needed. The tool can still emit season-related eventBus events so
+other parts of SSA (if loaded) can respond.
+
+Typical TOOL MODE flow:
+
+- User opens Season Viewer.
+- Tool loads seasonRulesConfig.
+- Tool calculates season for today or a chosen date.
+- Tool emits "season.rules.season.derived" for telemetry or other tools.
+
+3.2 STEWARDSHIP MODE
+In STEWARDSHIP MODE, the seasonRulesConfig becomes the backbone of
+seasonalIntelligence and household cycles.
+
+Flow:
+
+1) App boot:
+   - Dexie loads seasonRulesConfig from e.g. "seasonRulesConfig".
+   - seasonalIntelligence uses:
+     - calendar/astronomy engine (including Hebrew calendar),
+     - climate data (snapshot, manual input, simple profile),
+     - storehouse/garden/animals snapshots,
+     to evaluate SeasonCalendarRule, SeasonClimateRule, SeasonHouseholdRule.
+
+2) The seasonalIntelligence engine:
+   - Determines the **active seasonId** (and possibly a secondary/transition).
+   - Computes season windows (plantingWindow, harvestWindow, preservationWindow,
+     feastWindow, restWindow) based on SeasonDomainAdjustment and rules.
+
+3) seasonalIntelligence emits events:
+   - season shift when seasonId changes.
+   - window open/close events for key domain windows.
+
+4) householdCycles.engine:
+   - Consumes active seasonId and windows to adjust domain cycle interpretation.
+   - For example:
+     - Garden cycles weigh more heavily in "peak-planting" and "peak-harvest".
+     - Preservation cycles intensify during "harvest-flush".
+
+5) Domain pages (garden, animals, storehouse, cooking, feasts, cleaning):
+   - Use season info to adjust UI and suggested rhythms:
+     - Garden dashboard: highlight next planting window.
+     - Storehouse: show recommended stocking focus.
+     - Feasts: highlight upcoming feast season windows.
+
+6) Householder updates:
+   - If the householder adjusts rules (e.g., custom region, different
+     harvest window), the updated seasonRulesConfig is persisted in Dexie and
+     used immediately by seasonalIntelligence and householdCycles.engine.
+
+
+4. EVENT TRIGGERS – EVENTBUS CONTRACT
+-------------------------------------
+The config is data, but **seasonalIntelligence code using these rules** must
+emit consistent events.
+
+All events follow SSA’s eventBus shape:
+
+  { type, ts, source, data }
+
+Recommended event types:
+
+1) Config lifecycle
+   - "season.rules.config.loaded"
+     data: {
+       version,
+       seasonCount,
+       calendarRuleCount,
+       climateRuleCount,
+       householdRuleCount,
+     }
+
+   - "season.rules.config.updated"
+     data: {
+       version,
+       changedBy,              // "householder" | "system" | "migration"
+       changesSummary,         // e.g. { seasonsAdded, rulesModified }
+     }
+
+2) Season derivation
+   - "season.rules.season.derived"
+     // When seasonalIntelligence computes the current season
+     data: {
+       at: string,             // ISO date/time
+       seasonId,
+       secondarySeasonId?: string,
+       confidence: number,     // 0..1 indicating how strong the match is
+       contributingRules: {
+         calendarRuleIds: string[],
+         climateRuleIds: string[],
+         householdRuleIds: string[],
+       },
+     }
+
+   - "season.rules.season.shifted"
+     // When the active seasonId changes
+     data: {
+       fromSeasonId,
+       toSeasonId,
+       at: string,
+     }
+
+3) Seasonal windows
+   - "season.rules.window.calculated"
+     // For planting, harvest, preservation, feast, rest windows
+     data: {
+       seasonId,
+       windowType: "planting" | "harvest" | "preservation" | "feast" | "rest",
+       from: string,
+       to: string,
+       domainAdjustmentsSummary?: object,
+     }
+
+   - "season.rules.window.open"
+     data: {
+       windowType,
+       seasonId,
+       from: string,
+       to: string,
+     }
+
+   - "season.rules.window.closing"
+     data: {
+       windowType,
+       seasonId,
+       daysRemaining: number,
+     }
+
+4) Insights for householder
+   - "season.rules.insight"
+     data: {
+       insightId,
+       seasonId,
+       kind: "planting" | "harvest" | "preservation" | "feast" | "storehouse" |
+             "rest" | "enterprise",
+       severity: "info" | "gentle" | "important",
+       message,
+     }
+
+These events allow:
+- dashboards to display current season, windows, and important shifts,
+- householdCycles.engine to update cycle posture,
+- domain pages and SessionRunner to adjust suggested rhythms and sessions.
+
+
+5. CONCEPTUAL PURPOSE – HOW SEASON RULES FIT THE WEB OF MEANING
+----------------------------------------------------------------
+The seasonRules config anchors **seasonal intelligence** so every domain
+breathes with the same rhythm.
+
+- Seasons are not just weather:
+  - They reflect planting, harvest, preservation, feast, and rest cycles.
+  - They determine when the storehouse should be filling vs being drawn down.
+
+- Seasons define **yields and provisions**:
+  - In harvest-flush, yields are high and preservation windows open.
+  - In lean winter, the storehouse is the visible yield of prior faithfulness.
+  - In feast seasons, provisions flow outward to hospitality and mutual aid.
+
+- Seasons connect **domains**:
+  - Garden and animals define raw yield cycles.
+  - Preservation captures harvest into the storehouse.
+  - Cooking and feasts convert provisions into shared experiences.
+  - Cleaning and textiles ensure spaces and garments honor the feast and rest.
+  - Enterprise and mutual aid overlay additional rhythms on top of these.
+
+- Seasons inform **cycles engine and insights**:
+  - householdCycles.engine uses seasonId and windows to interpret domain
+    signals as “on-rhythm” or “drifting”.
+  - Insights can say:
+    - “Planting window is open, but garden rhythm is quiet.”
+    - “Preservation window is closing; storehouse may remain lean next season.”
+
+- Seasons support **TOOL MODE and STEWARDSHIP MODE**:
+  - TOOL MODE:
+    - A single planner can reason about seasons for a specific year and region
+      without needing full SSA infrastructure.
+  - STEWARDSHIP MODE:
+    - Seasonal rules become shared wisdom shaping all household rhythms.
+
+Explicit TODO HOOKS:
+- TODO[seasonal-logic]:
+  - Bind SeasonCalendarRule to the Hebrew calendar and astronomy data.
+  - Implement climate profile selection (region, altitude, microclimate) and
+    simple climate integration for SeasonClimateRule.
+
+- TODO[cycles-engine]:
+  - Define how active seasonId and windows become part of the context passed
+    into householdCycles.engine and domain-specific cycle inputs.
+
+- TODO[dependencies]:
+  - Connect storehouse, garden, animals, preservation, feasts, and cleaning
+    snapshots so SeasonHouseholdRule can reflect real provisions and yields.
+
+- TODO[insights]:
+  - Standardize insight patterns such as:
+    - “Early planting window has opened.”
+    - “Harvest flush: prepare preservation yields.”
+    - “Lean season incoming: strengthen provisioning rhythm now.”
+    - “Rest season: lighten non-essential rhythms where possible.”
+
+END OF SPEC
+===============================================================================

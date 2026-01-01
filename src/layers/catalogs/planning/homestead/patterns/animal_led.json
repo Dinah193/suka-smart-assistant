@@ -1,0 +1,273 @@
+{
+  "id": "pat.homestead.animal_led",
+  "domain": "homestead",
+  "kind": "planning_pattern",
+  "title": "Animal-Led Homestead Planning",
+  "description": "Plan around animal care, breeding, and processing windows; align storehouse provisioning.",
+  "intentTags": [
+    "plan:homestead",
+    "focus:animals"
+  ],
+  "inputs": [
+    {
+      "key": "landOrSpace",
+      "label": "Land/space available",
+      "type": "object",
+      "required": true,
+      "default": {
+        "type": "yard",
+        "size": 0.25,
+        "unit": "acre"
+      }
+    },
+    {
+      "key": "laborCapacity",
+      "label": "Labor capacity",
+      "type": "object",
+      "required": true,
+      "default": {
+        "adults": 1,
+        "kids": 0,
+        "hoursPerWeek": 10
+      }
+    },
+    {
+      "key": "season",
+      "label": "Season",
+      "type": "string",
+      "required": true,
+      "default": "spring"
+    },
+    {
+      "key": "climateZone",
+      "label": "Climate zone",
+      "type": "string"
+    },
+    {
+      "key": "equipment",
+      "label": "Equipment",
+      "type": "array",
+      "default": [
+        "hand_tools"
+      ]
+    },
+    {
+      "key": "schoolWorkSchedule",
+      "label": "School/work schedules",
+      "type": "object"
+    },
+    {
+      "key": "weatherWindows",
+      "label": "Weather windows",
+      "type": "object"
+    },
+    {
+      "key": "humaneWindows",
+      "label": "Humane windows / animal constraints",
+      "type": "object"
+    }
+  ],
+  "outputs": [
+    {
+      "key": "weeklySchedule",
+      "label": "Weekly task schedule",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "yieldForecasts",
+      "label": "Yield forecasts",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "sessions",
+      "label": "Session blueprints requested",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "storehouseProvisioning",
+      "label": "Storehouse provisioning links",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "preservationSessions",
+      "label": "Preservation sessions",
+      "type": "array",
+      "required": true
+    }
+  ],
+  "constraints": [
+    "humaneWindows",
+    "weatherWindows",
+    "schoolWorkSchedules",
+    "quietHours/sabbathGuard"
+  ],
+  "requires": [
+    "catalog:gardenTasks",
+    "catalog:animalTasks"
+  ],
+  "produces": [
+    "artifact:weeklySchedule",
+    "artifact:yieldForecasts",
+    "blueprint:homesteadSessions",
+    "trigger:storehouseProvisioning",
+    "trigger:preservation"
+  ],
+  "lean": {
+    "wasteTargets": [
+      "waiting",
+      "motion",
+      "transport",
+      "overprocessing"
+    ],
+    "standardWorkRefs": [
+      "stdwork.garden.batch",
+      "stdwork.animals.rounds",
+      "stdwork.harvest.sort"
+    ],
+    "taktModelRef": "takt.homestead.weekly",
+    "kpiTargets": {
+      "tasksCompleted": "increase",
+      "missedWindows": "reduce",
+      "tripsPerWeek": "reduce"
+    }
+  },
+  "ui": {
+    "icon": "leaf",
+    "chips": [
+      "time:medium",
+      "difficulty:high",
+      "focus:animals"
+    ],
+    "defaultFilters": {
+      "domain": "homestead"
+    },
+    "form": [
+      {
+        "key": "animalFocus",
+        "type": "select",
+        "label": "Primary animal focus",
+        "options": [
+          "goats",
+          "sheep",
+          "poultry",
+          "mixed"
+        ],
+        "default": "mixed"
+      },
+      {
+        "key": "processingWindow",
+        "type": "select",
+        "label": "Processing window",
+        "options": [
+          "none",
+          "next_30_days",
+          "this_season"
+        ],
+        "default": "none"
+      }
+    ]
+  },
+  "steps": [
+    {
+      "id": "season.window",
+      "title": "Resolve season + humane windows",
+      "template": "tpl.homestead.season.resolve",
+      "domain": "homestead",
+      "params": {
+        "seasonKey": "season",
+        "humaneWindowsKey": "humaneWindows"
+      }
+    },
+    {
+      "id": "animals.rounds",
+      "title": "Build animal care schedule",
+      "template": "tpl.animals.plan.week",
+      "domain": "homestead",
+      "params": {
+        "focusKey": "animalFocus"
+      }
+    },
+    {
+      "id": "processing.plan",
+      "title": "Plan processing/butchering window",
+      "template": "tpl.animals.processing.plan",
+      "domain": "homestead",
+      "params": {
+        "processingWindowKey": "processingWindow"
+      },
+      "optional": true
+    },
+    {
+      "id": "storehouse.provision",
+      "title": "Align feed + storage provisioning",
+      "template": "tpl.storehouse.provision.from.animals",
+      "domain": "storehouse",
+      "params": {
+        "zones": [
+          "pantry",
+          "cold",
+          "frozen"
+        ]
+      }
+    },
+    {
+      "id": "preserve.sessions",
+      "title": "Trigger preservation sessions for surplus",
+      "template": "tpl.preservation.trigger.sessions",
+      "domain": "homestead",
+      "params": {
+        "methods": [
+          "freeze",
+          "cure",
+          "ferment"
+        ],
+        "emitEvent": "session.blueprints.created"
+      },
+      "optional": true
+    },
+    {
+      "id": "sessions.build",
+      "title": "Generate homestead session blueprints",
+      "template": "tpl.blueprint.build.sessions",
+      "domain": "homestead",
+      "params": {
+        "sessionStyles": [
+          "animals",
+          "butchery",
+          "storehouse_pull"
+        ],
+        "emitEvent": "session.blueprints.created"
+      }
+    }
+  ],
+  "kpis": [
+    {
+      "key": "missedHumaneWindows",
+      "label": "Missed humane windows",
+      "direction": "down",
+      "unit": "count"
+    },
+    {
+      "key": "feedTrips",
+      "label": "Feed/store trips",
+      "direction": "down",
+      "unit": "trips"
+    }
+  ],
+  "variants": [],
+  "links": {
+    "storehouseSuggested": [
+      "pat.storehouse.weekly_restock",
+      "pat.storehouse.winter_reserve"
+    ]
+  },
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "tags": []
+  }
+}

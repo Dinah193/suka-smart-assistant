@@ -1,0 +1,298 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:suka:vocab:cleaning.zones",
+  "title": "Suka Cleaning Zones Vocabulary",
+  "description": "Canonical presets for common home zones/rooms used by clean plan builders, placement rules, and NBA hints.",
+  "x-version": "1.0.0",
+  "x-domain": "cleaning",
+  "type": "object",
+  "meta": {
+    "generatedAt": "2025-10-24T00:00:00.000Z",
+    "notes": [
+      "This vocabulary is consumed by placementRules, cleanplan.validate, and UI wizards.",
+      "Quiet hours and ventilation flags help scheduleHelpers compute prestep advisories.",
+      "Forbidden pairs mirror validator-level chemical safety checks."
+    ]
+  },
+  "globals": {
+    "quietHours": { "startHour": 21, "endHour": 7 },
+    "toolNoiseRatings": {
+      "vacuum": 3,
+      "carpet_extractor": 3,
+      "steam_cleaner": 2,
+      "mop": 1,
+      "broom": 1,
+      "microfiber": 0,
+      "squeegee": 0,
+      "blower": 3
+    },
+    "forbiddenPairs": [
+      { "a": "bleach", "b": "ammonia", "reason": "chloramine gas risk" },
+      { "a": "bleach", "b": "acid", "reason": "chlorine gas risk (vinegar, muriatic, etc.)" }
+    ],
+    "defaultSequence": [
+      "declutter",
+      "dust_high",
+      "dust_mid",
+      "dust_low",
+      "vacuum",
+      "spot_treat",
+      "mop",
+      "sanitize_touchpoints",
+      "trash_out"
+    ],
+    "surfaceMaterialHints": {
+      "hardwood": { "avoid": ["standing_water", "bleach"], "preferred": ["neutral_cleaner", "microfiber"] },
+      "tile": { "preferred": ["neutral_cleaner", "steam_cleaner"] },
+      "stone": { "avoid": ["acid"], "preferred": ["ph_neutral_stone_cleaner"] },
+      "stainless": { "avoid": ["chloride_bleach"], "preferred": ["stainless_cleaner", "microfiber"] },
+      "glass": { "preferred": ["glass_cleaner", "squeegee", "microfiber"] },
+      "fabric": { "preferred": ["vacuum", "spot_treat"], "avoid": ["bleach_unless_colorfast"] }
+    }
+  },
+  "zones": [
+    {
+      "id": "zone:kitchen",
+      "name": "Kitchen",
+      "floor": "main",
+      "tags": ["food_prep", "high_touch", "grease"],
+      "constraints": { "requiresVentilation": true, "noNoise": false, "occupancySensitive": true },
+      "preferredSequence": ["declutter", "dishes", "degrease", "sanitize_touchpoints", "vacuum", "mop", "trash_out"],
+      "recommendedTasks": ["dishes", "degrease", "sanitize", "vacuum", "mop", "trash"],
+      "surfaces": [
+        { "id": "surface:kitchen_counters", "material": "stone", "notes": "Granite/quartz. Use pH-neutral." },
+        { "id": "surface:kitchen_sink", "material": "stainless" },
+        { "id": "surface:kitchen_stove", "material": "steel_enamel" },
+        { "id": "surface:kitchen_floor", "material": "tile" },
+        { "id": "surface:kitchen_handles", "material": "mixed" }
+      ],
+      "tools": ["microfiber", "vacuum", "mop", "scraper", "sponge"],
+      "ppe": ["gloves"],
+      "supplies": [
+        { "name": "degreaser" },
+        { "name": "neutral_cleaner" },
+        { "name": "disinfectant", "note": "respect dwell time" },
+        { "name": "glass_cleaner" }
+      ],
+      "incompatibilities": [
+        { "surface": "stone", "avoid": ["acid", "bleach"] },
+        { "surface": "stainless", "avoid": ["chloride_bleach"] }
+      ],
+      "quietHoursSensitive": false
+    },
+    {
+      "id": "zone:bathroom",
+      "name": "Bathroom",
+      "floor": "main",
+      "tags": ["sanitary", "moisture", "high_touch"],
+      "constraints": { "requiresVentilation": true, "noNoise": false, "occupancySensitive": true },
+      "preferredSequence": ["declutter", "dust_mid", "toilet", "shower_tub", "sink", "sanitize_touchpoints", "vacuum", "mop", "trash_out"],
+      "recommendedTasks": ["sanitize", "descale", "vacuum", "mop", "trash"],
+      "surfaces": [
+        { "id": "surface:bathroom_sink", "material": "ceramic" },
+        { "id": "surface:bathroom_counter", "material": "stone" },
+        { "id": "surface:bathroom_tub", "material": "fiberglass" },
+        { "id": "surface:bathroom_shower_glass", "material": "glass" },
+        { "id": "surface:bathroom_floor", "material": "tile" },
+        { "id": "surface:bathroom_toilet", "material": "porcelain" }
+      ],
+      "tools": ["microfiber", "vacuum", "mop", "squeegee", "scrub_brush"],
+      "ppe": ["gloves"],
+      "supplies": [
+        { "name": "bathroom_cleaner" },
+        { "name": "descaler" },
+        { "name": "disinfectant", "note": "set dwellTimeMin >= 5" },
+        { "name": "glass_cleaner" }
+      ],
+      "incompatibilities": [{ "pair": ["bleach", "ammonia"] }, { "pair": ["bleach", "acid"] }],
+      "quietHoursSensitive": false
+    },
+    {
+      "id": "zone:laundry",
+      "name": "Laundry",
+      "floor": "main",
+      "tags": ["detergents", "machines"],
+      "constraints": { "requiresVentilation": false, "noNoise": true, "occupancySensitive": false },
+      "preferredSequence": ["declutter", "laundry_sort", "wipe_appliances", "vacuum", "mop", "trash_out"],
+      "recommendedTasks": ["laundry", "wipe_appliances", "vacuum", "mop"],
+      "surfaces": [
+        { "id": "surface:laundry_appliances", "material": "steel_enamel" },
+        { "id": "surface:laundry_floor", "material": "tile" },
+        { "id": "surface:laundry_counter", "material": "laminate" }
+      ],
+      "tools": ["vacuum", "mop", "microfiber"],
+      "ppe": [],
+      "supplies": [{ "name": "neutral_cleaner" }, { "name": "stain_treater" }],
+      "incompatibilities": [],
+      "quietHoursSensitive": true
+    },
+    {
+      "id": "zone:bedroom",
+      "name": "Bedroom",
+      "floor": "upper",
+      "tags": ["quiet", "fabric", "dust"],
+      "constraints": { "requiresVentilation": false, "noNoise": true, "occupancySensitive": true },
+      "preferredSequence": ["declutter", "dust_high", "dust_mid", "vacuum", "organize", "trash_out"],
+      "recommendedTasks": ["dust", "vacuum", "organize", "trash"],
+      "surfaces": [
+        { "id": "surface:bedroom_floor", "material": "hardwood" },
+        { "id": "surface:bedroom_windows", "material": "glass" },
+        { "id": "surface:bedroom_fabric", "material": "fabric" }
+      ],
+      "tools": ["microfiber", "vacuum"],
+      "ppe": [],
+      "supplies": [{ "name": "neutral_cleaner" }, { "name": "glass_cleaner" }],
+      "incompatibilities": [{ "surface": "hardwood", "avoid": ["standing_water", "bleach"] }],
+      "quietHoursSensitive": true
+    },
+    {
+      "id": "zone:living_room",
+      "name": "Living Room",
+      "floor": "main",
+      "tags": ["quiet", "dust", "electronics"],
+      "constraints": { "requiresVentilation": false, "noNoise": true, "occupancySensitive": true },
+      "preferredSequence": ["declutter", "dust_high", "electronics_dust", "vacuum", "mop", "trash_out"],
+      "recommendedTasks": ["dust", "vacuum", "mop", "organize", "trash"],
+      "surfaces": [
+        { "id": "surface:living_floor", "material": "hardwood" },
+        { "id": "surface:living_glass", "material": "glass" },
+        { "id": "surface:living_fabric", "material": "fabric" }
+      ],
+      "tools": ["microfiber", "vacuum", "mop"],
+      "ppe": [],
+      "supplies": [{ "name": "neutral_cleaner" }, { "name": "glass_cleaner" }],
+      "incompatibilities": [{ "surface": "hardwood", "avoid": ["standing_water"] }],
+      "quietHoursSensitive": true
+    },
+    {
+      "id": "zone:entry_mudroom",
+      "name": "Entry / Mudroom",
+      "floor": "main",
+      "tags": ["grit", "high_traffic"],
+      "constraints": { "requiresVentilation": false, "noNoise": false, "occupancySensitive": false },
+      "preferredSequence": ["declutter", "sweep", "vacuum", "mop", "sanitize_touchpoints", "trash_out"],
+      "recommendedTasks": ["sweep", "vacuum", "mop", "sanitize", "trash"],
+      "surfaces": [
+        { "id": "surface:entry_floor", "material": "tile" },
+        { "id": "surface:entry_handles", "material": "mixed" }
+      ],
+      "tools": ["broom", "vacuum", "mop", "microfiber"],
+      "ppe": [],
+      "supplies": [{ "name": "neutral_cleaner" }, { "name": "disinfectant" }],
+      "incompatibilities": [],
+      "quietHoursSensitive": false
+    },
+    {
+      "id": "zone:office",
+      "name": "Office",
+      "floor": "main",
+      "tags": ["electronics", "paper"],
+      "constraints": { "requiresVentilation": false, "noNoise": true, "occupancySensitive": true },
+      "preferredSequence": ["declutter", "dust_high", "electronics_dust", "vacuum", "trash_out"],
+      "recommendedTasks": ["dust", "vacuum", "organize", "trash"],
+      "surfaces": [
+        { "id": "surface:office_desk", "material": "laminate" },
+        { "id": "surface:office_glass", "material": "glass" },
+        { "id": "surface:office_floor", "material": "hardwood" }
+      ],
+      "tools": ["microfiber", "vacuum"],
+      "ppe": [],
+      "supplies": [{ "name": "neutral_cleaner" }, { "name": "glass_cleaner" }],
+      "incompatibilities": [],
+      "quietHoursSensitive": true
+    },
+    {
+      "id": "zone:garage",
+      "name": "Garage",
+      "floor": "ground",
+      "tags": ["dust", "oil", "outdoor_interface"],
+      "constraints": { "requiresVentilation": true, "noNoise": false, "occupancySensitive": false },
+      "preferredSequence": ["declutter", "sweep", "spot_treat_oil", "vacuum", "mop"],
+      "recommendedTasks": ["sweep", "vacuum", "mop", "organize"],
+      "surfaces": [
+        { "id": "surface:garage_floor", "material": "concrete" },
+        { "id": "surface:garage_windows", "material": "glass" }
+      ],
+      "tools": ["broom", "vacuum", "mop", "blower"],
+      "ppe": ["gloves"],
+      "supplies": [{ "name": "degreaser" }, { "name": "neutral_cleaner" }],
+      "incompatibilities": [],
+      "quietHoursSensitive": false
+    },
+    {
+      "id": "zone:pantry",
+      "name": "Pantry",
+      "floor": "main",
+      "tags": ["food_storage", "shelves"],
+      "constraints": { "requiresVentilation": false, "noNoise": true, "occupancySensitive": false },
+      "preferredSequence": ["declutter", "organize", "dust_mid", "vacuum", "mop"],
+      "recommendedTasks": ["organize", "dust", "vacuum", "mop"],
+      "surfaces": [
+        { "id": "surface:pantry_shelves", "material": "laminate" },
+        { "id": "surface:pantry_floor", "material": "tile" }
+      ],
+      "tools": ["microfiber", "vacuum", "mop"],
+      "ppe": [],
+      "supplies": [{ "name": "neutral_cleaner" }],
+      "incompatibilities": [],
+      "quietHoursSensitive": true
+    },
+    {
+      "id": "zone:nursery",
+      "name": "Nursery",
+      "floor": "upper",
+      "tags": ["sensitive", "fabric", "quiet"],
+      "constraints": { "requiresVentilation": false, "noNoise": true, "occupancySensitive": true },
+      "preferredSequence": ["declutter", "dust_mid", "vacuum", "sanitize_touchpoints", "trash_out"],
+      "recommendedTasks": ["dust", "vacuum", "sanitize", "trash"],
+      "surfaces": [
+        { "id": "surface:nursery_floor", "material": "hardwood" },
+        { "id": "surface:nursery_fabric", "material": "fabric" }
+      ],
+      "tools": ["microfiber", "vacuum"],
+      "ppe": [],
+      "supplies": [{ "name": "mild_cleaner" }, { "name": "hypoallergenic_disinfectant" }],
+      "incompatibilities": [{ "surface": "hardwood", "avoid": ["standing_water"] }],
+      "quietHoursSensitive": true
+    },
+    {
+      "id": "zone:sickroom",
+      "name": "Sick Room",
+      "floor": "main",
+      "tags": ["sanitary", "isolation", "high_touch"],
+      "constraints": { "requiresVentilation": true, "noNoise": true, "occupancySensitive": true },
+      "preferredSequence": ["declutter", "laundry_bag_out", "sanitize_touchpoints", "vacuum", "mop", "trash_out_bio"],
+      "recommendedTasks": ["sanitize", "laundry", "vacuum", "mop", "trash"],
+      "surfaces": [
+        { "id": "surface:sickroom_floor", "material": "hardwood" },
+        { "id": "surface:sickroom_touchpoints", "material": "mixed" }
+      ],
+      "tools": ["microfiber", "vacuum", "mop"],
+      "ppe": ["gloves", "mask"],
+      "supplies": [
+        { "name": "hospital_grade_disinfectant", "note": "follow label dwell time" },
+        { "name": "neutral_cleaner" }
+      ],
+      "incompatibilities": [],
+      "quietHoursSensitive": true
+    },
+    {
+      "id": "zone:porch_patio",
+      "name": "Porch / Patio",
+      "floor": "outdoor",
+      "tags": ["outdoor", "dust", "pollen"],
+      "constraints": { "requiresVentilation": false, "noNoise": false, "occupancySensitive": false },
+      "preferredSequence": ["declutter", "sweep", "hose_down", "glass_clean", "organize"],
+      "recommendedTasks": ["sweep", "wash", "glass", "organize"],
+      "surfaces": [
+        { "id": "surface:porch_floor", "material": "concrete" },
+        { "id": "surface:porch_rail_glass", "material": "glass" }
+      ],
+      "tools": ["broom", "hose", "squeegee", "microfiber"],
+      "ppe": [],
+      "supplies": [{ "name": "outdoor_cleaner" }, { "name": "glass_cleaner" }],
+      "incompatibilities": [],
+      "quietHoursSensitive": false
+    }
+  ]
+}

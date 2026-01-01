@@ -1,0 +1,251 @@
+{
+  "version": "1.0.0",
+  "updatedAt": "2025-10-20T23:25:00Z",
+  "template": {
+    "id": "tpl_cook_once_eat_twice_v1",
+    "title": "Cook Once, Eat Twice",
+    "subtitle": "One big cook → two fast follow-ups",
+    "timezone": "America/Chicago",
+    "status": "planned",
+    "description": "Plan a primary batch cook, then two reuse nights. Prioritizes easy follow-ups (≤20m active), budget-aware sides, and a Friday tilt to no-cook/reheat if Sabbath guard is active.",
+    "dateRange": {
+      "lengthDays": 4,
+      "startPolicy": "next-weekday",
+      "allowWeekend": true
+    },
+    "constraints": {
+      "peopleCount": 6,
+      "budget": { "currency": "USD", "maxPerDay": 24, "maxTotal": 96 },
+      "dietaryFlags": [],
+      "excludeAllergens": [],
+      "applianceAvailability": ["stovetop", "oven", "instant-pot", "air-fryer"],
+      "timeWindows": [
+        { "daysOfWeek": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], "from": "17:00", "to": "19:30" }
+      ],
+      "fastingRules": { "mode": "none" },
+      "nutritionTargets": { "kcalPerDay": 2200, "protein_g": 110, "carbs_g": 220, "fat_g": 80 },
+      "sabbathGuard": { "enabled": true, "windows": [], "policy": "defer" }
+    },
+    "groceryOptions": {
+      "storeSelector": "default",
+      "includeHave": false,
+      "collapseDuplicates": true,
+      "allowSubstitutions": true,
+      "householdItems": true
+    },
+    "selection": {
+      "globalFilters": {
+        "courseAnyOf": ["dinner", "main", "soup", "freezer-meal"],
+        "effortAnyOf": ["easy", "moderate"],
+        "maxActiveMinutes": 45,
+        "maxTotalMinutes": 120,
+        "disallowAppliancesAnyOf": ["pressure_canner", "smoker"],
+        "preferSabbathFriendly": true
+      },
+      "diversity": {
+        "minUniqueCuisines": 2,
+        "avoidSameCuisineOnConsecutiveDays": false,
+        "proteinRotation": {
+          "maxRepeatPer4": 2,
+          "buckets": {
+            "poultry": ["chicken", "turkey"],
+            "red-meat": ["beef", "lamb", "goat"],
+            "seafood": ["fish", "shrimp", "tuna"],
+            "veg": ["tofu", "tempeh", "beans", "lentils", "egg"]
+          }
+        }
+      },
+      "themes": {
+        "d0": "Batch Anchor",
+        "d1": "Remix #1 (Fast)",
+        "d2": "Buffer / Free night",
+        "d3": "Remix #2 (No-Cook/Reheat tilt)"
+      }
+    },
+    "slots": [
+      {
+        "id": "slot_d0_dinner",
+        "relativeDate": { "offsetDays": 0 },
+        "mealType": "dinner",
+        "status": "planned",
+        "servings": 10,
+        "labels": ["Batch Anchor"],
+        "strategy": {
+          "preferCourse": ["dinner", "main", "soup", "freezer-meal"],
+          "preferCuisines": ["italian", "american-classic", "north-african", "levantine", "greek"],
+          "rules": [
+            { "id": "batchable", "where": "classifiers.tags contains 'freezer-meal' OR servings >= 10 OR totalMinutes >= 60" },
+            { "id": "saucy-or-shreddable", "where": "tags intersects ['sauce-base','shreddable','braise','stew']" },
+            { "id": "gear-limit", "where": "count(resources where kind in ['appliance','tool']) <= 6" }
+          ]
+        },
+        "notes": "Cook big; earmark at least 4 servings for leftovers."
+      },
+      {
+        "id": "slot_d1_dinner",
+        "relativeDate": { "offsetDays": 1 },
+        "mealType": "dinner",
+        "status": "planned",
+        "servings": 6,
+        "labels": ["Remix #1 (Fast)"],
+        "strategy": {
+          "preferCourse": ["dinner", "main", "salad"],
+          "preferCuisines": ["mediterranean", "mexican", "greek", "american-classic", "japanese"],
+          "rules": [
+            { "id": "use-leftovers", "where": "exists(prev.slot_d0_dinner.leftovers)" },
+            { "id": "≤20m-active", "where": "recipe.classifiers.effort in ['very-easy','easy'] AND (recipe.time.prepMinutes || 0) + (recipe.time.cookMinutes || 0) <= 30" },
+            { "id": "handheld-or-bowl", "where": "tags intersects ['handheld','grain-bowl','pita','wrap'] OR title ~ /bowl|wrap|pita|taco/i" }
+          ]
+        },
+        "notes": "Turn day-0 base into bowls, wraps, or quick skillet."
+      },
+      {
+        "id": "slot_d2_buffer",
+        "relativeDate": { "offsetDays": 2 },
+        "mealType": "dinner",
+        "status": "planned",
+        "servings": 6,
+        "labels": ["Free / Light / Leftovers"],
+        "strategy": {
+          "preferCourse": ["salad", "soup", "dinner"],
+          "rules": [
+            { "id": "optional", "where": "true" }
+          ]
+        },
+        "notes": "Flexible: use ad-hoc, pantry, or remaining leftovers."
+      },
+      {
+        "id": "slot_d3_dinner",
+        "relativeDate": { "offsetDays": 3 },
+        "mealType": "dinner",
+        "status": "planned",
+        "servings": 6,
+        "labels": ["Remix #2 (No-Cook/Reheat tilt)"],
+        "strategy": {
+          "preferCourse": ["freezer-meal", "salad", "dinner"],
+          "preferCuisines": ["mediterranean", "israeli", "greek", "mexican"],
+          "rules": [
+            { "id": "sabbath-tilt", "where": "sabbathGuardActive(date) ? (course in ['freezer-meal','salad'] OR tags contains 'no-cook') : true" },
+            { "id": "use-leftovers-again", "where": "exists(template.leftovers.map where fromSlotId == 'slot_d0_dinner')" }
+          ]
+        },
+        "notes": "Lean no-cook/reheat if guarded window is near."
+      }
+    ],
+    "leftovers": {
+      "policy": "strict-reserve",
+      "map": [
+        { "fromSlotId": "slot_d0_dinner", "toSlotId": "slot_d1_dinner", "portionServings": 4, "label": "Remix #1" },
+        { "fromSlotId": "slot_d0_dinner", "toSlotId": "slot_d3_dinner", "portionServings": 2, "label": "Remix #2" }
+      ]
+    },
+    "batchSessions": {
+      "generate": true,
+      "rules": [
+        {
+          "id": "anchor-session",
+          "where": "slot.id == 'slot_d0_dinner'",
+          "prepSteps": ["defrost", "marinate", "pre-chop", "brown", "simmer-base"],
+          "timers": [
+            { "label": "Simmer 60m", "durationMinutes": 60 },
+            { "label": "Chill safely 30m", "durationMinutes": 30 }
+          ],
+          "inventoryPlan": [
+            { "intent": "produce", "item": { "name": "Batch base", "quantity": 6, "unit": "servings" }, "destination": "fridge", "preservation": { "method": "chill", "shelfLifeDays": 3 } },
+            { "intent": "produce", "item": { "name": "Batch base (freezer)", "quantity": 4, "unit": "servings" }, "destination": "freezer", "preservation": { "method": "freeze", "shelfLifeDays": 90 } }
+          ]
+        }
+      ]
+    },
+    "automation": {
+      "emit": [
+        { "on": "plan-created", "topic": "planner.template.created", "payload": { "templateId": "tpl_cook_once_eat_twice_v1" } },
+        { "on": "slot-prep-due", "topic": "meal.prep.reminder" },
+        { "on": "shopping-generated", "topic": "grocery.list.ready" }
+      ]
+    },
+    "x-uxHints": {
+      "pinPanels": ["Collect", "Decide", "Plan", "GroceryList", "BatchSessionPlanner"],
+      "primaryPanel": "Plan",
+      "badges": ["Batch Anchor", "≤30m Remix", "No-Cook Tilt"]
+    }
+  },
+  "render": {
+    "planFromTemplate": {
+      "mapToMealPlan": true,
+      "resolveDatesFromStart": true,
+      "hebrewCalendar": { "enable": true }
+    },
+    "groceryList": {
+      "generateOnCreate": true,
+      "mergeUnitsStrategy": "smart"
+    }
+  },
+  "examples": [
+    {
+      "preview": {
+        "plan": {
+          "id": "mealplan_cook_once_twice_example",
+          "createdAt": "2025-10-20T23:25:00Z",
+          "updatedAt": "2025-10-20T23:25:00Z",
+          "ownerTier": "tier2",
+          "title": "Cook Once, Eat Twice",
+          "subtitle": "Auto-generated from template",
+          "timezone": "America/Chicago",
+          "status": "planned",
+          "dateRange": { "start": "2025-10-27", "end": "2025-10-30" },
+          "groceryOptions": {
+            "storeSelector": "default",
+            "includeHave": false,
+            "collapseDuplicates": true,
+            "allowSubstitutions": true,
+            "householdItems": true
+          },
+          "slots": [
+            {
+              "id": "slot_2025-10-27_dinner",
+              "date": "2025-10-27",
+              "mealType": "dinner",
+              "status": "planned",
+              "labels": ["Batch Anchor"],
+              "recipeRef": { "recipeId": "rec_braised_beef_bulk", "versionId": "v2", "servings": 10 },
+              "notes": "Reserve 6 servings for remixes."
+            },
+            {
+              "id": "slot_2025-10-28_dinner",
+              "date": "2025-10-28",
+              "mealType": "dinner",
+              "status": "planned",
+              "labels": ["Remix #1 (Fast)"],
+              "recipeRef": { "recipeId": "rec_beef_grain_bowls_15m", "versionId": "v1", "servings": 6 }
+            },
+            {
+              "id": "slot_2025-10-29_dinner",
+              "date": "2025-10-29",
+              "mealType": "dinner",
+              "status": "planned",
+              "labels": ["Free / Light / Leftovers"],
+              "adHoc": {
+                "title": "Green salad + pantry soup",
+                "ingredients": [
+                  { "name": "mixed greens", "quantity": 10, "unit": "oz" },
+                  { "name": "pantry soup", "quantity": 2, "unit": "cans" }
+                ],
+                "notes": "Optional night."
+              }
+            },
+            {
+              "id": "slot_2025-10-30_dinner",
+              "date": "2025-10-30",
+              "mealType": "dinner",
+              "status": "planned",
+              "labels": ["Remix #2 (No-Cook/Reheat tilt)"],
+              "recipeRef": { "recipeId": "rec_beef_pita_salad_10m", "versionId": "v1", "servings": 6 },
+              "sabbathSensitive": false
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

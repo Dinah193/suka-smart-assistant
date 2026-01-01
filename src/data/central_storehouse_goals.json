@@ -1,0 +1,476 @@
+{
+  "version": "2025-10-31T11:40:00-05:00",
+  "description": "CENTRAL: storehouse goals for Suka Smart Assistant: 3-month pantry, feast-day pantry, preservation pantry. Auto-fed by scrapers/ingestors (weekly ads, recipe/meal imports, garden harvest logs), with hub override for Torah/culture-specific observances and local co-op targets. Feeds Storehouse Planner, Inventory Monitor, MealPlanEngine, GardenQueueManager, Cleaning (storehouse visibility + intake sanitation), and Animal Planner (when meat/eggs are below target).",
+  "meta": {
+    "sourceOfTruth": "scraper",
+    "lastIngestedAt": "2025-10-31T11:40:00-05:00",
+    "ingestionPipelines": [
+      "scraperService",
+      "importService",
+      "bookmarklet",
+      "linked-accounts",
+      "scan-compare-trust"
+    ],
+    "mergeStrategy": "scraper-wins",
+    "allowHubOverrides": true,
+    "overrideFields": [
+      "torahFeastTargets",
+      "coOpTargets",
+      "sabbathGuard",
+      "preservationMethods"
+    ],
+    "sharedOrchestration": {
+      "emitOnUpdate": true,
+      "reason": "scraper-update",
+      "channels": [
+        "storehouse",
+        "inventory",
+        "meals",
+        "garden",
+        "cleaning",
+        "animals"
+      ]
+    },
+    "notes": [
+      "Scraper/ingestor can bump goal quantities when new meal plans, garden harvests, or sale/coupon events arrive.",
+      "Hub can lock specific feast-day and Torah-required stock even if the scraper wants to reduce it.",
+      "This file tries to keep ‘grocery section’ style groupings so it’s familiar like well-executed pantry/meal sites.",
+      "Integrates with your rule: users can save THEIR goals/schedules, not just the system goals."
+    ]
+  },
+  "defaults": {
+    "timezone": "America/Chicago",
+    "goalWindowDays": 90,
+    "autoGenerateCleaning": true,
+    "autoGenerateGarden": true,
+    "autoGenerateMealPlans": true,
+    "autoGenerateAnimalProvisioning": true,
+    "grocerySections": [
+      "produce",
+      "dry-goods",
+      "baking",
+      "ferments",
+      "freezer",
+      "meat",
+      "eggs-dairy",
+      "oils-condiments",
+      "hygiene"
+    ]
+  },
+  "goals": [
+    {
+      "id": "storehouse-3mo-pantry",
+      "label": "3-Month Pantry (Household Core)",
+      "type": "duration",
+      "durationDays": 90,
+      "grocerySections": [
+        "produce",
+        "dry-goods",
+        "baking",
+        "freezer",
+        "eggs-dairy",
+        "oils-condiments",
+        "hygiene"
+      ],
+      "items": [
+        {
+          "sku": "flour-wheat-hard",
+          "label": "Hard Wheat / Flour",
+          "section": "baking",
+          "targetQty": 50,
+          "unit": "lb",
+          "preservationMethods": ["dry-store", "vac-seal"],
+          "reverseGeneration": {
+            "enabled": true,
+            "rules": [
+              {
+                "id": "low-flour-meal-gen",
+                "ifBelowPct": 0.3,
+                "generate": "meal-plan-low-flour",
+                "emit": [
+                  "meals.plan.fromStorehouse.requested"
+                ]
+              },
+              {
+                "id": "low-flour-garden-gen",
+                "ifBelowPct": 0.3,
+                "generate": "garden-grains-or-feed-plan",
+                "emit": [
+                  "garden.plan.fromStorehouse.requested"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "sku": "beans-black",
+          "label": "Black Beans (Dry or Canned)",
+          "section": "dry-goods",
+          "targetQty": 24,
+          "unit": "lb",
+          "preservationMethods": ["dry-store", "pressure-can"],
+          "reverseGeneration": {
+            "enabled": true,
+            "rules": [
+              {
+                "id": "beans-low-trigger-cleaning",
+                "ifBelowPct": 0.2,
+                "generate": "cleaning.storehouse-bin-sanitize",
+                "emit": [
+                  "cleaning.session.created"
+                ]
+              },
+              {
+                "id": "beans-low-trigger-meal",
+                "ifBelowPct": 0.2,
+                "generate": "meal-plan-from-beans",
+                "emit": [
+                  "meals.plan.fromStorehouse.requested"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "sku": "rice-long-grain",
+          "label": "Rice (Long Grain)",
+          "section": "dry-goods",
+          "targetQty": 40,
+          "unit": "lb",
+          "reverseGeneration": {
+            "enabled": true,
+            "rules": [
+              {
+                "id": "rice-low",
+                "ifBelowPct": 0.25,
+                "generate": "import.pricebook-best-rice",
+                "emit": [
+                  "scan.compare-trust.requested"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "sku": "meat-lamb",
+          "label": "Lamb / Mutton (from own animals)",
+          "section": "meat",
+          "targetQty": 30,
+          "unit": "lb",
+          "source": "animals",
+          "reverseGeneration": {
+            "enabled": true,
+            "rules": [
+              {
+                "id": "meat-lamb-low",
+                "ifBelowPct": 0.35,
+                "generate": "animals.plan.fromStorehouse.low-lamb",
+                "emit": [
+                  "animals.plan.fromStorehouse.generated",
+                  "cleaning.processing-area.requested",
+                  "storehouse.intake.expected"
+                ],
+                "copyContext": [
+                  "householdId",
+                  "timezone"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "sku": "eggs-dozen",
+          "label": "Eggs (dozens)",
+          "section": "eggs-dairy",
+          "targetQty": 12,
+          "unit": "dozen",
+          "source": "animals/poultry",
+          "reverseGeneration": {
+            "enabled": true,
+            "rules": [
+              {
+                "id": "eggs-low",
+                "ifBelowPct": 0.3,
+                "generate": "animals.poultry-production-boost",
+                "emit": [
+                  "animals.poultry-production.generated"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "inventory.item.below-threshold",
+          "storehouse.visibility.logged",
+          "meals.plan.created",
+          "garden.harvest.logged",
+          "animals.butchery.completed"
+        ],
+        "rules": [
+          {
+            "id": "visibility-to-cleaning",
+            "ifEvent": "storehouse.visibility.logged",
+            "generate": "cleaning.storehouse-visibility-pass",
+            "emit": [
+              "cleaning.session.created"
+            ]
+          },
+          {
+            "id": "meals-to-storehouse",
+            "ifEvent": "meals.plan.created",
+            "generate": "storehouse.provision-from-meal",
+            "emit": [
+              "storehouse.provision.requested"
+            ]
+          },
+          {
+            "id": "harvest-to-storehouse",
+            "ifEvent": "garden.harvest.logged",
+            "generate": "storehouse.intake.from-garden",
+            "emit": [
+              "storehouse.intake.expected",
+              "cleaning.storehouse-harvest-sanitize"
+            ]
+          }
+        ]
+      },
+      "collaboration": {
+        "enabled": true,
+        "mode": "plan-with-others",
+        "capacityHouseholds": 10,
+        "shareable": true,
+        "tradeable": true,
+        "notes": "Allows multiple allied households to maintain a 90-day buffer together while each has their own pantry view."
+      },
+      "uiHints": {
+        "icon": "pantry",
+        "group": "core",
+        "color": "amber"
+      }
+    },
+    {
+      "id": "storehouse-feast-day-pantry",
+      "label": "Feast-Day / Appointed Times Pantry",
+      "type": "event-driven",
+      "events": [
+        "passover",
+        "unleavened-bread",
+        "firstfruits",
+        "shavuot",
+        "yom-teruah",
+        "yom-kippur",
+        "sukkot",
+        "hanukkah"
+      ],
+      "grocerySections": [
+        "produce",
+        "baking",
+        "oils-condiments",
+        "meat"
+      ],
+      "torahFeastTargets": [
+        {
+          "feast": "passover",
+          "required": [
+            {
+              "sku": "meat-lamb",
+              "label": "Lamb (Torah-clean, no pork)",
+              "section": "meat",
+              "targetQty": 1,
+              "unit": "whole-or-equivalent",
+              "reverseGeneration": {
+                "enabled": true,
+                "rules": [
+                  {
+                    "id": "passover-lamb-short",
+                    "ifBelowCount": 1,
+                    "generate": "animals.plan.passover-lamb",
+                    "emit": [
+                      "animals.passover-lamb.requested",
+                      "cleaning.processing-area.requested",
+                      "storehouse.intake.expected"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "sku": "unleavened-grain",
+              "label": "Unleavened Grain / Flour",
+              "section": "baking",
+              "targetQty": 10,
+              "unit": "lb",
+              "reverseGeneration": {
+                "enabled": true,
+                "rules": [
+                  {
+                    "id": "unleavened-low",
+                    "ifBelowPct": 0.25,
+                    "generate": "meals.unleavened-menu-plan",
+                    "emit": [
+                      "meals.plan.fromFeast.requested"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "feast": "sukkot",
+          "required": [
+            {
+              "sku": "preserved-fruits",
+              "label": "Preserved Fruits",
+              "section": "ferments",
+              "targetQty": 12,
+              "unit": "qt",
+              "preservationMethods": [
+                "dehydrate",
+                "ferment",
+                "can"
+              ],
+              "reverseGeneration": {
+                "enabled": true,
+                "rules": [
+                  {
+                    "id": "sukkot-fruit-short",
+                    "ifBelowPct": 0.4,
+                    "generate": "garden.plan.fall-fruit-or-harvest",
+                    "emit": [
+                      "garden.plan.fromStorehouse.requested"
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "calendar.feast.upcoming",
+          "meals.sabbath-cooking.planned"
+        ],
+        "rules": [
+          {
+            "id": "feast-upcoming-to-meals",
+            "ifEvent": "calendar.feast.upcoming",
+            "generate": "meals.plan.fromFeast",
+            "emit": [
+              "meals.plan.fromFeast.requested"
+            ]
+          },
+          {
+            "id": "feast-upcoming-to-cleaning",
+            "ifEvent": "calendar.feast.upcoming",
+            "generate": "cleaning.sabbath-prep",
+            "emit": [
+              "cleaning.sabbath-prep.requested"
+            ]
+          }
+        ]
+      },
+      "collaboration": {
+        "enabled": true,
+        "mode": "co-op",
+        "capacityHouseholds": 20,
+        "shareable": true,
+        "notes": "Co-op can pre-position feast-day foods together; households pull what they need on their calendar schedule."
+      },
+      "uiHints": {
+        "icon": "calendar-star",
+        "group": "feast",
+        "color": "emerald"
+      }
+    },
+    {
+      "id": "storehouse-preservation-pantry",
+      "label": "Preservation Pantry (Canned, Fermented, Dehydrated)",
+      "type": "capacity",
+      "capacityBuckets": [
+        {
+          "bucket": "canned",
+          "target": 120,
+          "unit": "qt"
+        },
+        {
+          "bucket": "fermented",
+          "target": 60,
+          "unit": "qt"
+        },
+        {
+          "bucket": "dehydrated",
+          "target": 80,
+          "unit": "pt"
+        }
+      ],
+      "grocerySections": [
+        "produce",
+        "ferments",
+        "freezer",
+        "dry-goods"
+      ],
+      "preservationMethods": [
+        "water-bath",
+        "pressure-can",
+        "brine-ferment",
+        "lacto-ferment",
+        "dehydrate",
+        "freeze"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.harvest.logged",
+          "animals.butchery.completed",
+          "storehouse.overstock.detected"
+        ],
+        "rules": [
+          {
+            "id": "harvest-to-canning",
+            "ifEvent": "garden.harvest.logged",
+            "generate": "cooking.preserve.batch",
+            "emit": [
+              "meals.batch-cooking.fromHarvest.requested",
+              "cleaning.after-cooking.requested"
+            ]
+          },
+          {
+            "id": "butchery-to-freezer-and-cleaning",
+            "ifEvent": "animals.butchery.completed",
+            "generate": "storehouse.meat-intake-and-freeze",
+            "emit": [
+              "storehouse.intake.expected",
+              "cleaning.processing-area.requested"
+            ]
+          }
+        ]
+      },
+      "collaboration": {
+        "enabled": true,
+        "mode": "plan-with-others",
+        "capacityHouseholds": 8,
+        "shareable": true,
+        "tradeable": true,
+        "notes": "Use when one household has garden surplus and another has meat surplus; plan preservation sessions together."
+      },
+      "uiHints": {
+        "icon": "jar",
+        "group": "preservation",
+        "color": "cyan"
+      }
+    }
+  ],
+  "userCanSaveFavorites": true,
+  "userFavoritePolicy": {
+    "maxPerHousehold": 25,
+    "allowCustomSchedule": true,
+    "allowCustomGrocerySections": true,
+    "allowCustomReverseGeneration": true
+  }
+}

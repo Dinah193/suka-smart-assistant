@@ -1,0 +1,265 @@
+{
+  "$schema": "../../../../schemas/planningGraph/nodes.schema.json",
+
+  "nodeKey": "fermentationDuration",
+  "kind": "calculator-node",
+
+  "version": "v1.0.0",
+  "type": "calculator-node",
+  "id": "PG_NODE_FERMENTATION_DURATION_CALCULATOR",
+  "label": "Fermentation Duration Calculator",
+  "shortLabel": "Fermentation Duration",
+  "calculatorId": "FermentationDurationCalculator",
+  "domain": "preservation",
+  "description": "Determines ideal fermentation durations, phases, and check-in schedules for brined, dry-salted, and starter-based ferments. Feeds timers and sessions into the SessionRunner and updates storehouse inventory and meal planning windows.",
+  "tags": [
+    "preservation",
+    "fermentation",
+    "storehouseMeals",
+    "timing",
+    "planningGraph"
+  ],
+
+  "extensions": {
+    "ssa": {
+      "inputs": {
+        "expectedPayloadShape": "FermentationDurationCalculator.schema.json",
+        "requiredFields": [
+          "inputs.product.type",
+          "inputs.product.batchSize",
+          "inputs.product.unit",
+          "inputs.fermentation.method",
+          "inputs.fermentation.temperatureRange",
+          "inputs.fermentation.targetStyle"
+        ],
+        "optionalFields": [
+          "inputs.product.householdId",
+          "inputs.product.projectId",
+          "inputs.fermentation.saltPct",
+          "inputs.fermentation.starterType",
+          "inputs.fermentation.targetAcidity",
+          "inputs.fermentation.desiredShelfLifeDays"
+        ],
+        "sources": [
+          "PG_NODE_BATCH_COOKING_PLANNER",
+          "PG_NODE_STOREHOUSE_STOCK_PLANNER",
+          "PG_NODE_MEAL_YIELD_PLANNER",
+          "PG_NODE_PRESERVATION_SUITE",
+          "PG_NODE_MEAT_BREAKDOWN_CALCULATOR"
+        ]
+      },
+      "outputs": {
+        "primary": [
+          {
+            "key": "schedule",
+            "description": "Full fermentation schedule with phases, expected sensory markers, and target dates.",
+            "shape": "array<Phase>",
+            "example": [
+              {
+                "phaseId": "active_ferment",
+                "label": "Active Fermentation",
+                "durationDays": 5,
+                "startAt": "ISO",
+                "endAt": "ISO",
+                "checkpoints": [
+                  {
+                    "id": "day2_burp_jars",
+                    "label": "Burp jars / check activity",
+                    "offsetDays": 2
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "key": "targetReadyWindow",
+            "description": "Date range when the ferment is expected to be at peak flavor/texture.",
+            "shape": "{ start: ISO, end: ISO }"
+          },
+          {
+            "key": "storageShift",
+            "description": "Planned move from room-temp fermentation to cold storage or root cellar.",
+            "shape": "{ moveAt: ISO, targetStorage: string }"
+          }
+        ],
+        "secondary": [
+          {
+            "key": "sessionSuggestions",
+            "description": "Suggested SessionRunner sessions (check, burp, move-to-cold, tasting, re-pack).",
+            "shape": "array<SessionHint>"
+          },
+          {
+            "key": "inventoryHints",
+            "description": "Hints for quantity-on-hand timing and when ferments are available for meal planning.",
+            "shape": "array<InventoryHint>"
+          }
+        ]
+      }
+    }
+  },
+
+  "events": {
+    "consumes": [
+      "calculator.fermentationDuration.requested",
+      "calendar.event.fermentation.created",
+      "inventory.ferment.batch.created",
+      "session.completed",
+      "session.aborted"
+    ],
+    "emits": [
+      "calculator.fermentationDuration.completed",
+      "calculator.fermentationDuration.error",
+      "calendar.fermentation.schedule.upserted",
+      "storehouse.inventory.ferment.readyWindow.updated",
+      "session.request.fromFermentationDuration",
+      "session.request.fromFermentationDuration.batch",
+      "planningGraph.node.FERMENTATION_DURATION_CALCULATOR.completed"
+    ]
+  },
+
+  "edges": {
+    "feedsInto": [
+      "PG_NODE_PRESERVATION_SUITE",
+      "PG_NODE_STOREHOUSE_STOCK_PLANNER",
+      "PG_NODE_MEAL_YIELD_PLANNER",
+      "PG_NODE_BATCH_COOKING_PLANNER",
+      "PG_NODE_ANIMAL_PLANNER"
+    ],
+    "acceptsFrom": [
+      "PG_NODE_MEAL_YIELD_PLANNER",
+      "PG_NODE_STOREHOUSE_STOCK_PLANNER",
+      "PG_NODE_MEAT_BREAKDOWN_CALCULATOR",
+      "PG_NODE_PRESERVATION_SUITE"
+    ],
+    "priority": 60
+  },
+
+  "sessionHints": {
+    "domain": "preservation",
+    "nowCtaLabel": "Start Fermentation Session",
+    "nowCtaDescription": "Use the calculated schedule to guide today’s fermentation tasks (mix brine, pack jars, set timers).",
+    "templates": [
+      {
+        "id": "ferment_start_session_template",
+        "title": "Start Fermentation Batch",
+        "description": "Initial session to prepare brine, pack jars/crocks, and set the first timers.",
+        "sessionIdPrefix": "ferment_start_",
+        "trigger": {
+          "when": "onCalculatorComplete",
+          "conditions": {
+            "phaseIncludes": ["active_ferment"],
+            "minBatchSize": {
+              "value": 1,
+              "unit": "jar"
+            }
+          }
+        },
+        "sessionPrefs": {
+          "domain": "preservation",
+          "sourceType": "manual",
+          "voiceGuidance": true,
+          "haptic": true,
+          "autoAdvance": false
+        }
+      },
+      {
+        "id": "ferment_check_session_template",
+        "title": "Check / Burp Ferments",
+        "description": "Short recurring session to check jars, burp lids if needed, skim foam, and confirm aroma.",
+        "sessionIdPrefix": "ferment_check_",
+        "trigger": {
+          "when": "phaseScheduled",
+          "conditions": {
+            "phaseId": "active_ferment",
+            "hasCheckpoints": true
+          }
+        },
+        "sessionPrefs": {
+          "domain": "preservation",
+          "sourceType": "manual",
+          "voiceGuidance": true,
+          "haptic": true,
+          "autoAdvance": false
+        }
+      },
+      {
+        "id": "ferment_move_to_cold_template",
+        "title": "Move Ferments to Cold Storage",
+        "description": "Guide to move jars/crocks into cold or root-cellar storage at the end of the active fermentation window.",
+        "sessionIdPrefix": "ferment_cold_storage_",
+        "trigger": {
+          "when": "phaseTransition",
+          "conditions": {
+            "fromPhaseId": "active_ferment",
+            "toPhaseId": "cold_storage"
+          }
+        },
+        "sessionPrefs": {
+          "domain": "preservation",
+          "sourceType": "manual",
+          "voiceGuidance": true,
+          "haptic": true,
+          "autoAdvance": false
+        }
+      }
+    ]
+  },
+
+  "inventoryIntegration": {
+    "enabled": true,
+    "defaultCategory": "ferment",
+    "defaultLocation": "Fermentation Shelf",
+    "fields": {
+      "readyWindow": {
+        "from": "outputs.targetReadyWindow"
+      },
+      "storageShift": {
+        "from": "outputs.storageShift"
+      },
+      "quantity": {
+        "from": "inputs.product.batchSize"
+      },
+      "unit": {
+        "from": "inputs.product.unit",
+        "fallback": "jar"
+      }
+    },
+    "routingRules": [
+      {
+        "id": "ferment_to_meal_planner_window",
+        "label": "Expose ferments to meal planner in ready window",
+        "match": {
+          "outputKey": "targetReadyWindow"
+        },
+        "setFields": {
+          "eligibleForMealPlanning": true
+        }
+      }
+    ]
+  },
+
+  "ui": {
+    "group": "Storehouse & Preservation",
+    "icon": "GiSauerkraut",
+    "color": "emerald",
+    "primaryRoute": "/tier2/household/preservation/fermentation-duration",
+    "nowButton": {
+      "label": "Use Fermentation Duration",
+      "tooltip": "Open the fermentation duration results and start a guidance session.",
+      "opensSessionRunner": true,
+      "sessionSourceEvent": "session.request.fromFermentationDuration"
+    },
+    "badges": [
+      {
+        "type": "info",
+        "label": "Uses SessionRunner",
+        "description": "Outputs can become guided sessions with timers and notifications."
+      },
+      {
+        "type": "context",
+        "label": "Tied to Storehouse",
+        "description": "Ready windows update storehouse and meal planning."
+      }
+    ]
+  }
+}

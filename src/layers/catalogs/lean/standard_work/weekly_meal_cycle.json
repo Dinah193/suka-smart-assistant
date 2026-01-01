@@ -1,0 +1,141 @@
+{
+  "id": "lean.sw.weekly_meal_cycle",
+  "domain": "lean",
+  "kind": "standard_work",
+  "title": "Standard Work: Weekly Meal Cycle",
+  "intentTags": [
+    "lean:standard_work"
+  ],
+  "inputs": [
+    {
+      "key": "timeBudgetMinutes",
+      "label": "Time budget (minutes)",
+      "type": "number"
+    },
+    {
+      "key": "householdSize",
+      "label": "Household size",
+      "type": "number",
+      "default": 4
+    },
+    {
+      "key": "inventorySnapshot",
+      "label": "Inventory snapshot",
+      "type": "object"
+    },
+    {
+      "key": "quietHours",
+      "label": "Quiet hours / Sabbath guard",
+      "type": "object",
+      "default": {
+        "enabled": false
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "key": "sessionBlueprintSteps",
+      "label": "Convertible session steps",
+      "type": "array",
+      "required": true
+    }
+  ],
+  "constraints": [
+    "definitionOfDoneRequired",
+    "timeboxesRequired",
+    "convertibleToSessionSteps"
+  ],
+  "steps": [
+    {
+      "id": "convert",
+      "title": "Convert to session blueprint steps",
+      "template": "tpl.lean.standardWork.toSession",
+      "domain": "lean",
+      "hints": [
+        "emitHintTag:convertToSession"
+      ]
+    }
+  ],
+  "kpis": [
+    {
+      "key": "completionRate",
+      "label": "Completion rate",
+      "direction": "up",
+      "unit": "%"
+    },
+    {
+      "key": "timeVariance",
+      "label": "Time variance",
+      "direction": "down",
+      "unit": "%"
+    }
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial Lean Six Sigma catalog."
+      }
+    ]
+  },
+  "standardWork": {
+    "steps": [
+      {
+        "id": "sw.step.inventory",
+        "title": "Inventory truth check",
+        "timeboxMin": 20,
+        "definitionOfDone": "Snapshot updated for pantry+cold; gaps list generated.",
+        "sessionTemplate": "tpl.inventory.snapshot.confirm",
+        "domain": "storehouse"
+      },
+      {
+        "id": "sw.step.menu",
+        "title": "Menu structure + batch anchor",
+        "timeboxMin": 25,
+        "definitionOfDone": "Meal structure set for 7 days; batch anchor day chosen.",
+        "sessionTemplate": "tpl.meals.plan.structure",
+        "domain": "meals"
+      },
+      {
+        "id": "sw.step.sessions",
+        "title": "Session blueprints",
+        "timeboxMin": 10,
+        "definitionOfDone": "Cooking session blueprint(s) generated and saved.",
+        "sessionTemplate": "tpl.blueprint.build.sessions",
+        "domain": "meals"
+      },
+      {
+        "id": "sw.step.shopping",
+        "title": "Shopping draft + dedupe",
+        "timeboxMin": 15,
+        "definitionOfDone": "Shopping list draft produced; duplicates removed; budget check done.",
+        "sessionTemplate": "tpl.shopping.from.gaps",
+        "domain": "storehouse"
+      },
+      {
+        "id": "sw.step.storehouse",
+        "title": "Quick restock + FIFO",
+        "timeboxMin": 20,
+        "definitionOfDone": "Restock actions produced; FIFO labels refreshed in high-turn zones.",
+        "sessionTemplate": "tpl.storehouse.rotation.quick",
+        "domain": "storehouse"
+      },
+      {
+        "id": "sw.step.review",
+        "title": "Review + adjust",
+        "timeboxMin": 10,
+        "definitionOfDone": "Any risks flagged (spoilage/stockouts) and next actions queued.",
+        "sessionTemplate": "tpl.lean.review.queueNext",
+        "domain": "lean"
+      }
+    ]
+  },
+  "links": {
+    "affectsPatterns": [
+      "pat.meals.weekly_batch",
+      "pat.storehouse.weekly_restock"
+    ]
+  }
+}

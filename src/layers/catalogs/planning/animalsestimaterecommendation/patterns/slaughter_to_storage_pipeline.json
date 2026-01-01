@@ -1,0 +1,390 @@
+{
+  "id": "pat.animals.slaughter_to_storage_pipeline",
+  "domain": "animals_estimate_recommendation",
+  "kind": "planning_pattern",
+  "title": "Slaughter → Storage Pipeline",
+  "intentTags": [
+    "intent:processing",
+    "goal:processing",
+    "mode:pipeline"
+  ],
+  "description": "Plan processing day(s) and immediate storage/preservation actions to minimize waste and bottlenecks.",
+  "inputs": [
+    {
+      "key": "householdSize",
+      "type": "number",
+      "label": "Household size",
+      "required": true,
+      "default": 4,
+      "min": 1,
+      "max": 30
+    },
+    {
+      "key": "spaceType",
+      "type": "select",
+      "label": "Space type",
+      "required": false,
+      "default": "mixed",
+      "options": [
+        "urban_backyard",
+        "suburban",
+        "rural",
+        "mixed"
+      ]
+    },
+    {
+      "key": "landAcres",
+      "type": "number",
+      "label": "Land (acres)",
+      "required": false,
+      "default": 1,
+      "min": 0,
+      "max": 500
+    },
+    {
+      "key": "laborHoursPerWeek",
+      "type": "number",
+      "label": "Labor hours/week",
+      "required": false,
+      "default": 10,
+      "min": 1,
+      "max": 200
+    },
+    {
+      "key": "climateZone",
+      "type": "select",
+      "label": "Climate zone",
+      "required": false,
+      "default": "unknown",
+      "options": [
+        "unknown",
+        "usda:6",
+        "usda:7",
+        "usda:8",
+        "usda:9",
+        "usda:10",
+        "usda:11"
+      ]
+    },
+    {
+      "key": "dietaryLaws",
+      "type": "multiselect",
+      "label": "Dietary laws",
+      "required": false,
+      "options": [
+        "no_pork",
+        "no_shellfish",
+        "no_blood",
+        "none"
+      ],
+      "default": [
+        "no_pork"
+      ]
+    },
+    {
+      "key": "equipmentLevel",
+      "type": "select",
+      "label": "Equipment level",
+      "required": false,
+      "default": "standard",
+      "options": [
+        "limited",
+        "standard",
+        "advanced"
+      ]
+    },
+    {
+      "key": "proteinGoalPerWeek",
+      "type": "number",
+      "label": "Protein goal (meals/week)",
+      "required": false,
+      "default": 7,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "preferredSpecies",
+      "type": "multiselect",
+      "label": "Preferred species",
+      "required": false,
+      "options": [
+        "chicken",
+        "turkey",
+        "duck",
+        "goat",
+        "sheep",
+        "cattle",
+        "rabbit",
+        "fish",
+        "quail"
+      ]
+    },
+    {
+      "key": "processingPreference",
+      "type": "select",
+      "label": "Processing preference",
+      "required": false,
+      "default": "outsourced",
+      "options": [
+        "outsourced",
+        "on_farm",
+        "mixed"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "type": "sessions",
+      "notes": "Multi-session blueprint bundle (animals + storehouse + preservation)."
+    },
+    {
+      "type": "inventoryMove",
+      "notes": "Immediate storage moves with FIFO and labeling."
+    },
+    {
+      "type": "shoppingDelta",
+      "notes": "Packaging, ice, sanitizer, bags, labels."
+    }
+  ],
+  "constraints": [
+    {
+      "type": "humane",
+      "tag": "constraint:humane_windows",
+      "notes": "Respect humane windows for breeding, transport, and slaughter; recommend rather than force."
+    },
+    {
+      "type": "time",
+      "tag": "constraint:time_budget",
+      "notes": "Plans must respect labor capacity."
+    },
+    {
+      "type": "neighbors",
+      "tag": "constraint:local_rules",
+      "notes": "Local ordinances vary; surface as a check, not a blocker."
+    }
+  ],
+  "requires": [
+    {
+      "type": "seasonal",
+      "tag": "seasonTags",
+      "optional": true
+    }
+  ],
+  "produces": [
+    {
+      "type": "session",
+      "domain": "animals",
+      "title": "Slaughter → Storage Pipeline Session"
+    },
+    {
+      "type": "session",
+      "domain": "storehouse",
+      "title": "Storehouse Provisioning Follow-on",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "scope",
+      "title": "Scope animals + cut-sheet targets",
+      "kind": "template",
+      "timeboxMin": 25
+    },
+    {
+      "id": "humane",
+      "title": "Humane window + logistics plan",
+      "kind": "template",
+      "timeboxMin": 20
+    },
+    {
+      "id": "stations",
+      "title": "Stations (slaughter, chill, cut, pack, label, store)",
+      "kind": "template",
+      "timeboxMin": 35
+    },
+    {
+      "id": "cold_chain",
+      "title": "Cold chain + freezer space check",
+      "kind": "template",
+      "timeboxMin": 20,
+      "ui": {
+        "chips": [
+          "cold_chain",
+          "space_cap"
+        ],
+        "help": "Emit needsInventorySnapshot if freezer space unknown."
+      }
+    },
+    {
+      "id": "session_build",
+      "title": "Build sessions: processing + storehouse reset + preservation follow-ons",
+      "kind": "template",
+      "timeboxMin": 20
+    }
+  ],
+  "kpis": [
+    {
+      "key": "cold_chain_breaks",
+      "label": "Cold chain breaks",
+      "unit": "count",
+      "target": "0"
+    },
+    {
+      "key": "pack_label_accuracy",
+      "label": "Pack/label accuracy",
+      "unit": "%",
+      "target": "≥98%"
+    },
+    {
+      "key": "time_to_freeze",
+      "label": "Time to freeze/chill",
+      "unit": "min",
+      "target": "As low as practical"
+    }
+  ],
+  "lean": {
+    "wasteTargets": [
+      "waiting",
+      "defects",
+      "transport",
+      "motion"
+    ],
+    "countermeasures": [
+      {
+        "waste": "waiting",
+        "do": "Pre-chill coolers; stage labels; parallelize stations."
+      },
+      {
+        "waste": "defects",
+        "do": "Definition-of-done at pack station; verify labels."
+      }
+    ],
+    "standardWorkRefs": [
+      "std.storehouse.monthly_storehouse_check"
+    ]
+  },
+  "ui": {
+    "form": {
+      "fields": [
+        {
+          "key": "householdSize",
+          "type": "number",
+          "label": "Household size",
+          "required": true,
+          "default": 4,
+          "min": 1,
+          "max": 30
+        },
+        {
+          "key": "spaceType",
+          "type": "select",
+          "label": "Space type",
+          "required": false,
+          "default": "mixed",
+          "options": [
+            "urban_backyard",
+            "suburban",
+            "rural",
+            "mixed"
+          ]
+        },
+        {
+          "key": "landAcres",
+          "type": "number",
+          "label": "Land (acres)",
+          "required": false,
+          "default": 1,
+          "min": 0,
+          "max": 500
+        },
+        {
+          "key": "laborHoursPerWeek",
+          "type": "number",
+          "label": "Labor hours/week",
+          "required": false,
+          "default": 10,
+          "min": 1,
+          "max": 200
+        },
+        {
+          "key": "climateZone",
+          "type": "select",
+          "label": "Climate zone",
+          "required": false,
+          "default": "unknown",
+          "options": [
+            "unknown",
+            "usda:6",
+            "usda:7",
+            "usda:8",
+            "usda:9",
+            "usda:10",
+            "usda:11"
+          ]
+        },
+        {
+          "key": "dietaryLaws",
+          "type": "multiselect",
+          "label": "Dietary laws",
+          "required": false,
+          "options": [
+            "no_pork",
+            "no_shellfish",
+            "no_blood",
+            "none"
+          ],
+          "default": [
+            "no_pork"
+          ]
+        },
+        {
+          "key": "equipmentLevel",
+          "type": "select",
+          "label": "Equipment level",
+          "required": false,
+          "default": "standard",
+          "options": [
+            "limited",
+            "standard",
+            "advanced"
+          ]
+        },
+        {
+          "key": "freezerSpaceKnown",
+          "type": "toggle",
+          "label": "Freezer space is known",
+          "default": false
+        }
+      ]
+    },
+    "chips": [
+      {
+        "key": "mode",
+        "label": "Pipeline",
+        "tag": "mode:pipeline"
+      }
+    ],
+    "help": {
+      "title": "Slaughter → Storage Pipeline",
+      "intro": "Minimize bottlenecks and protect quality.",
+      "tips": [
+        "Confirm freezer/root cellar capacity first.",
+        "Build follow-on sessions (inventory + preservation)."
+      ]
+    }
+  },
+  "links": {
+    "valueStreams": [
+      "vs.slaughter_to_storage"
+    ],
+    "storehousePatterns": [
+      "pat.storehouse.winter_reserve",
+      "pat.storehouse.weekly_restock"
+    ],
+    "homesteadPatterns": [
+      "pat.homestead.animal_led",
+      "pat.homestead.mixed_subsistence"
+    ]
+  },
+  "variants": []
+}

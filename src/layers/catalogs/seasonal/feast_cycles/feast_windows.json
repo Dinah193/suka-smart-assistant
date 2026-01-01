@@ -1,0 +1,205 @@
+{
+  "id": "seasonal.feast_cycles.feast_windows",
+  "domain": "seasonal",
+  "kind": "feast_windows",
+  "title": "Scripture-Aligned Feast Windows (Hebrew Day Anchors)",
+  "intentTags": [
+    "seasonal:feasts",
+    "rhythm:appointed_times"
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "notes": [
+      "Windows are defined as Hebrew month/day anchors for SSA's fixed Hebrew calendar engine.",
+      "This file contains no extra-tradition commentary; it is a normalized planning window map."
+    ]
+  },
+  "requirements": {
+    "inputsNeeded": [
+      "hebrewMonthKey",
+      "hebrewDayNumber"
+    ],
+    "supportsShavuotCounting": true
+  },
+  "windows": [
+    {
+      "id": "passover_window",
+      "tag": "feast:passover_window",
+      "monthKey": "abib",
+      "startDay": 10,
+      "endDay": 21,
+      "anchors": [
+        {
+          "day": 14,
+          "tag": "feast:passover"
+        },
+        {
+          "day": 15,
+          "tag": "feast:unleavened_bread_day1"
+        },
+        {
+          "day": 21,
+          "tag": "feast:unleavened_bread_day7"
+        }
+      ],
+      "planningTriggers": [
+        {
+          "tag": "trigger:feast_prep",
+          "horizonDays": 14,
+          "hints": [
+            "pattern:pat.meals.feast_anchored",
+            "pattern:pat.storehouse.feast_buffer_build"
+          ]
+        },
+        {
+          "tag": "trigger:clean_out_leaven",
+          "horizonDays": 7,
+          "hints": [
+            "storehouse:pantry_reset_optional"
+          ]
+        },
+        {
+          "tag": "trigger:make_ahead_bias",
+          "horizonDays": 5,
+          "hints": [
+            "mode:make_ahead",
+            "workflow:sabbath_guard_optional"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "firstfruits_window",
+      "tag": "feast:firstfruits_window",
+      "monthKey": "abib",
+      "startDay": 16,
+      "endDay": 21,
+      "anchors": [
+        {
+          "day": 16,
+          "tag": "feast:firstfruits_candidate"
+        }
+      ],
+      "planningTriggers": [
+        {
+          "tag": "trigger:firstfruits_count_start",
+          "horizonDays": 0,
+          "hints": [
+            "count:shavuot_user_rule"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shavuot_window",
+      "tag": "feast:shavuot_window",
+      "relativeTo": "firstfruits",
+      "relativeRule": {
+        "userSelectable": true,
+        "options": [
+          {
+            "id": "count_50_days",
+            "label": "Count 50 days from Firstfruits",
+            "offsetDays": 50,
+            "tag": "count:50_days"
+          },
+          {
+            "id": "count_49_sabbaths_then_50_days",
+            "label": "Count 49 Sabbaths, then 50th day",
+            "offsetDays": 50,
+            "tag": "count:49_sabbaths_then_50_days"
+          }
+        ]
+      },
+      "planningTriggers": [
+        {
+          "tag": "trigger:feast_prep",
+          "horizonDays": 10,
+          "hints": [
+            "pattern:pat.meals.feast_anchored",
+            "pattern:pat.storehouse.feast_buffer_build"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "trumpets_window",
+      "tag": "feast:trumpets_window",
+      "monthKey": "ethanim",
+      "startDay": 1,
+      "endDay": 2,
+      "anchors": [
+        {
+          "day": 1,
+          "tag": "feast:trumpets"
+        }
+      ],
+      "planningTriggers": [
+        {
+          "tag": "trigger:feast_prep",
+          "horizonDays": 7,
+          "hints": [
+            "pattern:pat.meals.feast_anchored"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "atonement_window",
+      "tag": "feast:atonement_window",
+      "monthKey": "ethanim",
+      "startDay": 9,
+      "endDay": 10,
+      "anchors": [
+        {
+          "day": 10,
+          "tag": "feast:atonement"
+        }
+      ],
+      "planningTriggers": [
+        {
+          "tag": "trigger:fast_day",
+          "horizonDays": 3,
+          "hints": [
+            "pattern:pat.meals.fast_day_light"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tabernacles_window",
+      "tag": "feast:tabernacles_window",
+      "monthKey": "ethanim",
+      "startDay": 15,
+      "endDay": 22,
+      "anchors": [
+        {
+          "day": 15,
+          "tag": "feast:tabernacles_day1"
+        },
+        {
+          "day": 22,
+          "tag": "feast:eighth_day"
+        }
+      ],
+      "planningTriggers": [
+        {
+          "tag": "trigger:feast_prep",
+          "horizonDays": 21,
+          "hints": [
+            "pattern:pat.meals.feast_anchored",
+            "pattern:pat.storehouse.feast_buffer_build"
+          ]
+        },
+        {
+          "tag": "trigger:buffer_build",
+          "horizonDays": 14,
+          "hints": [
+            "pattern:pat.storehouse.winter_reserve"
+          ]
+        }
+      ]
+    }
+  ]
+}

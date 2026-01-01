@@ -1,0 +1,284 @@
+{
+  "version": "1.0.0",
+  "generatedAtISO": "2025-10-27T18:20:00Z",
+  "schedules": [
+    { "id": "sched-grocery-wed", "name": "Wednesday Grocery Run", "type": "schedule" },
+    { "id": "sess-batch-freezer-1", "name": "Batch • Freezer Fill #1", "type": "session" }
+  ],
+  "stores": [
+    { "storeId": "aldi-0123", "name": "ALDI #123" },
+    { "storeId": "sams-0456", "name": "Sam's Club #456" },
+    { "storeId": "costco-0791", "name": "Costco #791" }
+  ],
+  "coupons": [
+    {
+      "contractVersion": "1.0.0",
+      "id": "cpn-abc123",
+      "externalId": "MFG-7654321",
+      "title": "$1.00 OFF 2 Friendly Farms Milk (1 Gallon)",
+      "subtitle": "Mix & Match gallons",
+      "description": "Manufacturer coupon on Friendly Farms gallon milk. Excludes lactose-free.",
+      "scope": "manufacturer",
+      "provider": "coupons_com",
+      "channels": ["in_store","pickup","delivery"],
+      "stores": [{ "storeId": "aldi-0123", "name": "ALDI #123" }],
+      "tags": ["mfg","dairy","buy_more_save_more"],
+      "images": [],
+      "validity": {
+        "fromISO": "2025-10-27T05:00:00Z",
+        "toISO": "2025-11-10T04:59:59Z"
+      },
+      "redemption": {
+        "method": "clip",
+        "loyaltyProgram": "ALDI",
+        "clipUrl": "https://example.com/clip/abc123"
+      },
+      "limits": { "perTransaction": 2, "perCustomer": 4 },
+      "applicability": {
+        "include": [
+          { "brand": "Friendly Farms", "categoryPath": ["Grocery","Dairy","Milk"] }
+        ],
+        "exclude": [
+          { "titleContains": ["lactose free"] }
+        ],
+        "mixAndMatch": true
+      },
+      "triggers": { "minQuantity": 2 },
+      "benefit": {
+        "type": "amount_off",
+        "value": 1.0,
+        "currency": "USD",
+        "maxRedemptionValue": 1.0,
+        "rounding": "nearest_cent"
+      },
+      "stacking": {
+        "group": "mfg",
+        "behavior": "exclusive",
+        "priority": 50,
+        "cannotCombineWith": ["group:other_mfg"]
+      },
+      "feesAndTaxes": { "affectsTaxableBase": "pre_tax", "excludesDeposits": true },
+      "cycleHints": {
+        "pattern": "monthly",
+        "lastObservedISO": "2025-09-29T05:00:00Z",
+        "nextExpectedISO": "2025-11-24T05:00:00Z",
+        "confidence": 0.65
+      },
+      "matching": { "strategy": "taxonomy", "confidence": 0.9 },
+      "sourceAttribution": [
+        { "provider": "coupons_com", "fields": ["title","validity","benefit"], "confidence": 0.95 }
+      ],
+      "provenance": {
+        "createdBy": "CouponService:ingest",
+        "createdAtISO": "2025-10-27T18:18:10Z",
+        "updatedAtISO": "2025-10-27T18:18:10Z"
+      },
+      "trust": { "score": 0.92, "reasons": ["official source"] },
+      "userContext": {
+        "isFavorite": true,
+        "notes": "Use when gallon <= $3.50",
+        "pinnedSchedules": [{ "type": "schedule", "id": "sched-grocery-wed", "name": "Wednesday Grocery Run" }]
+      }
+    },
+
+    {
+      "contractVersion": "1.0.0",
+      "id": "cpn-store-bogo-001",
+      "title": "BOGO 50% OFF Cereal (Mix & Match)",
+      "description": "Buy one, get one 50% off on qualifying cereals. Discount applies to the cheaper item.",
+      "scope": "store",
+      "provider": "sams",
+      "channels": ["in_store","pickup"],
+      "stores": [{ "storeId": "sams-0456", "name": "Sam's Club #456" }],
+      "tags": ["bogo","breakfast","cereal"],
+      "validity": {
+        "fromISO": "2025-10-25T05:00:00Z",
+        "toISO": "2025-10-31T23:59:59Z",
+        "daysOfWeek": [5,6,0]
+      },
+      "applicability": {
+        "include": [
+          { "categoryPath": ["Grocery","Breakfast & Cereal","Cereal"] }
+        ],
+        "mixAndMatch": true
+      },
+      "triggers": {
+        "buyXGetY": { "buyQty": 1, "getQty": 1, "getPrice": "discounted", "appliesTo": "cheapest" }
+      },
+      "benefit": { "type": "percent_off", "value": 50 },
+      "stacking": { "group": "store", "behavior": "stackable_if_different_group", "priority": 30 },
+      "matching": { "strategy": "taxonomy", "confidence": 0.85 },
+      "provenance": {
+        "createdBy": "CouponService:ad_ingest",
+        "createdAtISO": "2025-10-24T18:00:00Z",
+        "updatedAtISO": "2025-10-24T18:00:00Z"
+      },
+      "userContext": {
+        "pinnedSchedules": [{ "type": "schedule", "id": "sched-grocery-wed", "name": "Wednesday Grocery Run" }]
+      }
+    },
+
+    {
+      "contractVersion": "1.0.0",
+      "id": "cpn-waff-20pct",
+      "title": "20% OFF Frozen Breakfast (App Exclusive)",
+      "scope": "store",
+      "provider": "sams",
+      "channels": ["pickup","delivery","in_store"],
+      "stores": [{ "storeId": "sams-0456", "name": "Sam's Club #456" }],
+      "tags": ["frozen","breakfast","app_only"],
+      "validity": {
+        "fromISO": "2025-10-20T05:00:00Z",
+        "toISO": "2025-11-03T03:59:59Z",
+        "timeOfDay": { "start": "06:00", "end": "21:00" }
+      },
+      "redemption": { "method": "loyalty" },
+      "applicability": {
+        "include": [
+          { "categoryPath": ["Grocery","Frozen","Breakfast"] }
+        ],
+        "mixAndMatch": true
+      },
+      "benefit": { "type": "percent_off", "value": 20 },
+      "stacking": { "group": "store", "behavior": "stackable_if_different_group", "priority": 25 },
+      "matching": { "strategy": "taxonomy", "confidence": 0.9 },
+      "userContext": {}
+    },
+
+    {
+      "contractVersion": "1.0.0",
+      "id": "cpn-house-1off5",
+      "title": "$1 OFF $5 Household Cleaners",
+      "description": "Basket threshold: $1 off when you spend $5 or more on qualifying household cleaners.",
+      "scope": "basket",
+      "provider": "aldi",
+      "channels": ["in_store"],
+      "stores": [{ "storeId": "aldi-0123", "name": "ALDI #123" }],
+      "tags": ["basket","household"],
+      "validity": { "fromISO": "2025-10-18T05:00:00Z", "toISO": "2025-11-01T23:59:59Z" },
+      "triggers": { "minSpend": { "amount": 5, "currency": "USD" } },
+      "applicability": {
+        "include": [
+          { "categoryPath": ["Household","Cleaning"] }
+        ]
+      },
+      "benefit": { "type": "basket_amount_off", "value": 1, "currency": "USD" },
+      "stacking": { "group": "basket", "behavior": "stackable_if_different_group", "priority": 10 },
+      "feesAndTaxes": { "affectsTaxableBase": "pre_tax", "excludesDeposits": true },
+      "matching": { "strategy": "taxonomy", "confidence": 0.8 },
+      "userContext": {
+        "pinnedSchedules": [{ "type": "session", "id": "sess-batch-freezer-1", "name": "Batch • Freezer Fill #1" }]
+      }
+    },
+
+    {
+      "contractVersion": "1.0.0",
+      "id": "cpn-lamb-2off",
+      "title": "$2 OFF Meat — rotating",
+      "subtitle": "Applies to lamb/pork/beef select items",
+      "scope": "store",
+      "provider": "costco",
+      "channels": ["in_store"],
+      "stores": [{ "storeId": "costco-0791", "name": "Costco #791" }],
+      "tags": ["meat","rotating"],
+      "validity": { "fromISO": "2025-10-15T05:00:00Z", "toISO": "2025-10-31T23:59:59Z" },
+      "applicability": {
+        "include": [
+          { "categoryPath": ["Grocery","Meat","Lamb"] },
+          { "categoryPath": ["Grocery","Meat","Beef"] },
+          { "categoryPath": ["Grocery","Meat","Pork"] }
+        ]
+      },
+      "benefit": { "type": "amount_off", "value": 2, "currency": "USD" },
+      "stacking": { "group": "store", "behavior": "stackable_if_different_group", "priority": 20 },
+      "matching": { "strategy": "taxonomy", "confidence": 0.7 },
+      "userContext": { "isFavorite": true }
+    },
+
+    {
+      "contractVersion": "1.0.0",
+      "id": "cpn-milk-unitcap-025perL",
+      "title": "Pay no more than $0.80/L on Milk",
+      "description": "Unit price guarantee coupon (rare; used to test unit price logic).",
+      "scope": "store",
+      "provider": "aldi",
+      "channels": ["in_store","pickup"],
+      "stores": [{ "storeId": "aldi-0123", "name": "ALDI #123" }],
+      "validity": { "fromISO": "2025-10-27T05:00:00Z", "toISO": "2025-11-05T23:59:59Z" },
+      "applicability": {
+        "include": [
+          { "categoryPath": ["Grocery","Dairy","Milk"] }
+        ]
+      },
+      "benefit": {
+        "type": "unit_price",
+        "currency": "USD",
+        "unitPriceCap": 0.80
+      },
+      "stacking": { "group": "store", "behavior": "exclusive", "priority": 60 },
+      "matching": { "strategy": "taxonomy", "confidence": 0.6 },
+      "userContext": {}
+    },
+
+    {
+      "contractVersion": "1.0.0",
+      "id": "cpn-seeds-fall-BOGOF",
+      "title": "Seed Packets — Buy 2 Get 1 FREE",
+      "scope": "store",
+      "provider": "aldi",
+      "channels": ["in_store"],
+      "stores": [{ "storeId": "aldi-0123", "name": "ALDI #123" }],
+      "tags": ["garden","seeds","seasonal"],
+      "validity": { "fromISO": "2025-03-01T05:00:00Z", "toISO": "2025-04-15T23:59:59Z" },
+      "applicability": {
+        "include": [
+          { "categoryPath": ["Garden","Seeds"] }
+        ],
+        "mixAndMatch": true
+      },
+      "triggers": { "buyXGetY": { "buyQty": 2, "getQty": 1, "getPrice": "free", "appliesTo": "specific" } },
+      "benefit": { "type": "bogo" },
+      "stacking": { "group": "store", "behavior": "stackable_if_different_group", "priority": 15 },
+      "matching": { "strategy": "taxonomy", "confidence": 0.88 },
+      "userContext": {
+        "notes": "On scan, suggest Garden Planner",
+        "pinnedSchedules": [{ "type": "schedule", "id": "sched-grocery-wed", "name": "Wednesday Grocery Run" }]
+      }
+    },
+
+    {
+      "contractVersion": "1.0.0",
+      "id": "cpn-egg-clip-50c",
+      "title": "$0.50 OFF Large Eggs (18 ct)",
+      "scope": "manufacturer",
+      "provider": "catalina",
+      "channels": ["in_store"],
+      "stores": [{ "storeId": "sams-0456", "name": "Sam's Club #456" }],
+      "validity": {
+        "fromISO": "2025-10-22T05:00:00Z",
+        "toISO": "2025-11-05T23:59:59Z",
+        "daysOfWeek": [1,2,3,4]
+      },
+      "redemption": {
+        "method": "barcode",
+        "barcode": { "format": "Code128", "payload": "PLU-7755018" }
+      },
+      "limits": { "perTransaction": 1 },
+      "applicability": {
+        "include": [
+          {
+            "brand": "Member's Mark",
+            "categoryPath": ["Grocery","Dairy","Eggs"],
+            "package": { "minQty": 18, "unit": "ct" }
+          }
+        ]
+      },
+      "benefit": { "type": "amount_off", "value": 0.5, "currency": "USD" },
+      "stacking": { "group": "mfg", "behavior": "exclusive", "priority": 40 },
+      "matching": { "strategy": "taxonomy", "confidence": 0.86 },
+      "userContext": {
+        "pinnedSchedules": [{ "type": "session", "id": "sess-batch-freezer-1", "name": "Batch • Freezer Fill #1" }]
+      }
+    }
+  ]
+}

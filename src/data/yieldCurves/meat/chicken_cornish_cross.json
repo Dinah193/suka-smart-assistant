@@ -1,0 +1,495 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "2025-10-31T14:58:00-05:00",
+  "description": "Meat yield curve for Cornish Cross / Cornish-X broilers – tuned for your Suka Smart Assistant multi-domain pipeline. This one assumes: (1) fast grow-out, (2) limited or no garden passes (bio-safety), (3) high storehouse demand for whole + parted + stock packs, (4) meal planner pushes a lot of chicken meals, (5) cleaning/sanitation is STRONGER than the garden-pass birds, (6) reverse generation from storehouse & meal & feast days, and (7) users can save their own butchery-day templates/schedules in Dexie.",
+  "__notes": [
+    "This is your ‘industrial’ / high-yield bird, so we do NOT default to garden passes like we did for chicken_garden_pass.json. We CAN support a very controlled pass (short, supervised), but defaults should be OFF.",
+    "It stays schema-compatible with your existing chicken_ranger.json and garden-pass poultry JSONs so your ImportService.js can treat them all the same.",
+    "We also added storehouse grocery inspiration based on big-box stores (Costco, Walmart, Sam’s) because Cornish Cross aligns best with those cuts.",
+    "Reverse generation: storehouse shortage for ‘Poultry → Whole → Cornish’ → back into ‘grow 25 Cornish X’ and schedule butchery ~8 weeks out."
+  ],
+  "animal": {
+    "species": "chicken",
+    "breed": "Cornish Cross",
+    "class": "poultry",
+    "high_yield": true,
+    "garden_pass_capable": false,
+    "typical_live_weight_lbs": [5.5, 6, 6.5, 7],
+    "default_live_weight_lbs": 6.25,
+    "live_to_dressed_yield_pct": 0.74,
+    "dressed_to_cut_yield_pct": 0.9,
+    "default_chill_hours": 0.5,
+    "butchery_style_default": "whole-bird",
+    "butchery_supported_styles": [
+      "whole-bird",
+      "parted-8pc",
+      "bone-in-breast + thighs + drumsticks",
+      "stock-pack / broth-pack",
+      "poultry-torah-compliant-no-unclean-cross-contamination"
+    ],
+    "torah_compliant_profile": {
+      "allow_unclean_animals": false,
+      "separate_tools_required": true,
+      "separate_surfaces_required": true,
+      "blood_draining_required": true,
+      "notes": "This profile is meant for clean, controlled grow-out → slaughter → process. Do NOT mix with unclean animals."
+    }
+  },
+  "yield_model": {
+    "formula_hint": "dressed = live_weight * live_to_dressed_yield_pct; cut_weight = dressed * dressed_to_cut_yield_pct",
+    "example": {
+      "live_weight_lbs": 6.25,
+      "live_to_dressed_yield_pct": 0.74,
+      "dressed_to_cut_yield_pct": 0.9,
+      "calculated_dressed_weight_lbs": 4.625,
+      "calculated_cut_weight_lbs": 4.1625
+    },
+    "cut_profile_defaults": [
+      {
+        "cut_id": "cornish_whole",
+        "label": "Cornish Cross – Whole Bird",
+        "default_pct_of_dressed": 0.62,
+        "storehouse_section_hint": "Meat → Poultry → Whole Birds",
+        "mealplanner_tags": [
+          "roast-chicken",
+          "batch-cook",
+          "sabbath"
+        ],
+        "inventory_unit": "bird",
+        "preservation": ["freeze", "brine-freeze"],
+        "cleaning_profile_ref": "poultry_sanitation_heavy"
+      },
+      {
+        "cut_id": "cornish_parts",
+        "label": "Cornish – Parts (thigh/drum/breast/wing)",
+        "default_pct_of_dressed": 0.3,
+        "storehouse_section_hint": "Meat → Poultry → Parts",
+        "mealplanner_tags": [
+          "fry",
+          "grill",
+          "sheet-pan",
+          "kid-friendly"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "vac-seal"],
+        "cleaning_profile_ref": "poultry_sanitation_heavy"
+      },
+      {
+        "cut_id": "cornish_stock",
+        "label": "Cornish – Stock / Broth Pack",
+        "default_pct_of_dressed": 0.05,
+        "storehouse_section_hint": "Meat → Poultry → Stock Pack",
+        "mealplanner_tags": [
+          "broth",
+          "soup",
+          "pressure-can"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "poultry_sanitation_heavy"
+      },
+      {
+        "cut_id": "cornish_organs",
+        "label": "Cornish – Giblets (liver, heart, gizzard)",
+        "default_pct_of_dressed": 0.01,
+        "storehouse_section_hint": "Meat → Poultry → Organs",
+        "mealplanner_tags": [
+          "gravy",
+          "dog-food",
+          "nutrient-dense"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "poultry_sanitation_heavy"
+      }
+    ]
+  },
+  "storehouse_mapping": {
+    "purpose": "Map Cornish X butchery output → storehouse goals → inventory execution, with grocery-section inspiration from big-box & warehouse clubs.",
+    "sections": [
+      {
+        "id": "STH-POULTRY-WHOLE-CORNISH",
+        "label": "Meat → Poultry → Whole (Cornish Cross)",
+        "target_inventory_unit": "bird",
+        "auto_replenish_from": [
+          "cornish_whole"
+        ],
+        "grocery_inspo": [
+          "Costco – rotisserie/whole",
+          "Sam’s Club – family pack",
+          "Walmart – whole chicken"
+        ]
+      },
+      {
+        "id": "STH-POULTRY-PARTS-CORNISH",
+        "label": "Meat → Poultry → Parts (Cornish)",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "cornish_parts"
+        ],
+        "grocery_inspo": [
+          "Walmart – value pack thighs/drums",
+          "Kroger – family pack"
+        ]
+      },
+      {
+        "id": "STH-POULTRY-STOCK-CORNISH",
+        "label": "Meat → Poultry → Stock / Broth (Cornish)",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "cornish_stock"
+        ],
+        "grocery_inspo": [
+          "Warehouse – bone broth starter",
+          "Asian market – backs/necks"
+        ]
+      }
+    ],
+    "reverse_generation_rules": [
+      {
+        "id": "RG-CORNISH-WHOLE",
+        "when_event": "storehouse.goal.short.cornish-whole",
+        "action": "calc required whole birds → map to live Cornish X → emit automation.schedule.request (poultry-butchery + cleaning + mealplan.refresh)",
+        "notes": "If storehouse wants 30 whole birds, schedule 30 live birds for butchery."
+      },
+      {
+        "id": "RG-CORNISH-PARTS",
+        "when_event": "storehouse.goal.short.cornish-parts",
+        "action": "calc required lb → back-calc to birds → emit automation.schedule.request"
+      }
+    ]
+  },
+  "meal_planner_hooks": {
+    "default_meal_templates": [
+      {
+        "id": "mt-cornish-roast",
+        "label": "Roast Cornish Bird + Garden Root Veg",
+        "uses_cuts": [
+          {
+            "cut_id": "cornish_whole",
+            "qty_birds": 1
+          }
+        ],
+        "suggested_sides": [
+          "roasted carrots",
+          "potatoes/sweet potatoes",
+          "greens"
+        ],
+        "garden_suggestions": [
+          "carrot",
+          "onion",
+          "garlic",
+          "greens"
+        ],
+        "cleaning_profiles": [
+          "poultry_sanitation_heavy",
+          "oven_tray_deep_clean"
+        ]
+      },
+      {
+        "id": "mt-cornish-soup",
+        "label": "Cornish Chicken Soup / Broth Batch",
+        "uses_cuts": [
+          {
+            "cut_id": "cornish_stock",
+            "qty_lb": 2.5
+          }
+        ],
+        "suggested_sides": [
+          "bread",
+          "rice",
+          "noodles"
+        ],
+        "garden_suggestions": [
+          "celery",
+          "carrot",
+          "onion",
+          "parsley"
+        ],
+        "cleaning_profiles": [
+          "poultry_sanitation_heavy"
+        ]
+      },
+      {
+        "id": "mt-cornish-parts",
+        "label": "Cornish Parts → Fry/Grill",
+        "uses_cuts": [
+          {
+            "cut_id": "cornish_parts",
+            "qty_lb": 3.5
+          }
+        ],
+        "suggested_sides": [
+          "salad",
+          "fermented veg",
+          "fries"
+        ],
+        "garden_suggestions": [
+          "lettuce",
+          "tomato",
+          "cucumber"
+        ],
+        "cleaning_profiles": [
+          "poultry_sanitation_heavy",
+          "sheetpan_clean"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "can_generate_animal_plan": true,
+      "handler_event": "animal.plan.requested",
+      "notes": "If a month has 6 roasts + 3 soups + 2 parts meals, propose ‘raise 20 Cornish X’ and schedule butchery 6–8 weeks ahead."
+    }
+  },
+  "garden_integration": {
+    "purpose": "Even though Cornish is not a pass bird, the meals it produces need the same pantry garden (carrot, onion, celery, greens) so we still tell the garden planner what to grow.",
+    "crops_to_recommend": [
+      {
+        "crop": "carrot",
+        "use_case": "roast sides, soup base",
+        "harvest_window": "spring-fall",
+        "preservation": ["pressure can", "dehydrate"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "onion",
+        "use_case": "soup/roast base",
+        "harvest_window": "late summer",
+        "preservation": ["cure", "store dry"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "celery",
+        "use_case": "soup/broth base",
+        "harvest_window": "cool season",
+        "preservation": ["freeze", "dehydrate"],
+        "cleaning_profile_ref": "garden_light"
+      },
+      {
+        "crop": "greens",
+        "use_case": "sides",
+        "harvest_window": "cool seasons",
+        "preservation": ["blanch-freeze"],
+        "cleaning_profile_ref": "garden_light"
+      }
+    ],
+    "reverse_generation": {
+      "when_meat_menu_fixed_event": "garden.plan.adjust.requested",
+      "notes": "If the meal planner commits to weekly Cornish roast + weekly soup, garden should schedule onion/celery/carrot and add harvest reminders."
+    }
+  },
+  "animal_care_and_butchery": {
+    "pre_slaughter_care_checklist": [
+      "12hr feed withdrawal",
+      "clean water until 2hr before",
+      "shade/low-stress holding",
+      "inspect for disease",
+      "torah_compliant_tools_ready"
+    ],
+    "butchery_session_template": {
+      "id": "butchery-session-chicken-cornish",
+      "label": "Cornish Cross – Poultry Processing Day",
+      "estimated_duration_hours": 3,
+      "scales_with_bird_count": true,
+      "roles_needed": [
+        "scalder/plucker",
+        "eviscerator",
+        "chill-station",
+        "sanitation-runner"
+      ],
+      "outputs": [
+        "whole_birds",
+        "parted_birds",
+        "stock_packs",
+        "organs"
+      ],
+      "emits_events": [
+        "inventory.add.requested",
+        "storehouse.update.requested",
+        "cleaning.plan.requested",
+        "mealplan.refresh.requested",
+        "garden.plan.adjust.requested"
+      ],
+      "scheduling": {
+        "supports_user_favorites": true,
+        "supports_recurring": true,
+        "supports_coop_mode": true,
+        "coop_mode_notes": "Co-op / family fund members can bring their Cornish X to the same day; cleaning must scale."
+      }
+    },
+    "cleaning_after_butchery": {
+      "cleaning_profile_id": "poultry_sanitation_heavy",
+      "label": "Post-Cornish Poultry Sanitation",
+      "tasks": [
+        "collect offal for compost/render/blood-meal line",
+        "wash scalders, pluckers, evisceration tables",
+        "sanitize with poultry-safe, torah-safe cleaner",
+        "mop floor / drains",
+        "launder aprons/towels"
+      ],
+      "emits_events": [
+        "cleaning.log.added",
+        "inventory.cleaning-supplies.decrement"
+      ]
+    }
+  },
+  "cleaning_integration": {
+    "profiles": [
+      {
+        "id": "poultry_sanitation_heavy",
+        "label": "Poultry – Heavy Sanitation (Cornish)",
+        "zone": "Processing / Kitchen",
+        "supplies": [
+          "hot_water",
+          "poultry-safe_disinfectant",
+          "scrub_brush",
+          "mop_bucket",
+          "laundry_detergent"
+        ]
+      },
+      {
+        "id": "garden_root",
+        "label": "Garden Root Veg Cleanup",
+        "zone": "Utility / Outdoor Sink",
+        "supplies": [
+          "hose",
+          "brush",
+          "drain_screens"
+        ]
+      },
+      {
+        "id": "garden_light",
+        "label": "Garden Light Wash",
+        "zone": "Kitchen",
+        "supplies": [
+          "sink_sanitizer",
+          "drying_rack"
+        ]
+      },
+      {
+        "id": "sheetpan_clean",
+        "label": "Sheet Pan / Roast Tray Clean",
+        "zone": "Kitchen",
+        "supplies": [
+          "degreaser",
+          "scrub_pad"
+        ]
+      },
+      {
+        "id": "oven_tray_deep_clean",
+        "label": "Oven/Tray Deep Clean (post-roast chicken)",
+        "zone": "Kitchen",
+        "supplies": [
+          "oven_cleaner",
+          "scrub_pad"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "when_butchery_scheduled_event": "cleaning.session.auto-created",
+      "when_roast_chicken_event": "cleaning.session.suggested"
+    }
+  },
+  "scheduling_and_favorites": {
+    "can_be_favorited": true,
+    "favorite_key": "yieldcurve:meat:chicken_cornish_cross",
+    "suggested_schedules": [
+      {
+        "id": "sched-cornish-6wk-butchery",
+        "label": "Cornish Cross → Butchery Every 6 Weeks",
+        "rule": "FREQ=MONTHLY;INTERVAL=1;BYDAY=SA;BYSETPOS=1",
+        "creates": [
+          "butchery-session-chicken-cornish",
+          "cleaning:poultry_sanitation_heavy",
+          "storehouse:update",
+          "mealplan:refresh",
+          "garden.plan.adjust.requested"
+        ]
+      },
+      {
+        "id": "sched-cornish-quarter",
+        "label": "Cornish Poultry Day – Quarterly",
+        "rule": "FREQ=MONTHLY;INTERVAL=3;BYDAY=SA;BYSETPOS=1",
+        "creates": [
+          "butchery-session-chicken-cornish"
+        ]
+      }
+    ],
+    "shared_orchestration": {
+      "event_bus_path": "window.__suka.eventBus",
+      "events_emitted": [
+        "yieldcurve.loaded",
+        "yieldcurve.butchery.session.generated",
+        "storehouse.goal.derived",
+        "cleaning.session.derived",
+        "mealplan.refresh.requested",
+        "garden.plan.adjust.requested"
+      ],
+      "events_listened_for": [
+        "automation.schedule.request",
+        "mealplanner.menu.locked",
+        "storehouse.goal.short",
+        "garden.plan.adjust.requested"
+      ]
+    }
+  },
+  "reverse_generation": {
+    "enabled": true,
+    "scenarios": [
+      {
+        "id": "RG-CORNISH-01",
+        "source": "meal-planner",
+        "input_example": {
+          "roast_chicken_meals": 6,
+          "chicken_soup_batches": 2,
+          "parts_meals": 3
+        },
+        "output_example": {
+          "required_dressed_birds": 20,
+          "required_live_birds": 20,
+          "suggested_date": "next-available-poultry-day",
+          "auto_cleaning_sessions": [
+            "poultry_sanitation_heavy"
+          ]
+        }
+      },
+      {
+        "id": "RG-CORNISH-02",
+        "source": "storehouse",
+        "input_example": {
+          "target_section": "STH-POULTRY-WHOLE-CORNISH",
+          "target_birds": 30
+        },
+        "output_example": {
+          "required_dressed_birds": 30,
+          "required_live_birds": 30,
+          "notes": "UI can offer: ‘Raise 30 Cornish X’ → ‘Schedule Poultry Day’ → ‘Create Cleaning Session’ → ‘Notify Garden (broth veg)’"
+        }
+      }
+    ],
+    "notes": "This one should NOT auto-schedule garden passes; if you really need it, add a flag in Dexie to allow ‘controlled pass’ and then use the lighter sanitation."
+  },
+  "user_overrides_placeholder": {
+    "explanation": "User-specific edits (bigger batch, different interval, allow controlled passes) should be stored in Dexie/local DB.",
+    "keys": [
+      "yield_model.cut_profile_defaults",
+      "scheduling_and_favorites.suggested_schedules"
+    ]
+  },
+  "interop": {
+    "import_sources_supported": [
+      "csv-poultry-yields",
+      "google-sheets-yields",
+      "extension.capture.poultry",
+      "pinterest-board-to-planner",
+      "recipe-site-chicken-detector"
+    ],
+    "export_targets_supported": [
+      "household.storehouse",
+      "household.inventory",
+      "community.coop-planner",
+      "family-fund.hub",
+      "pdf-labels"
+    ]
+  }
+}

@@ -1,0 +1,295 @@
+{
+  "version": "2025-10-31T13:35:00-05:00",
+  "description": "Preservation zones for Suka Smart Assistant. Defines where canning, fermenting, dehydrating, curing/smoking, and long-rise bread/prep happen so meal → preserve → cleaning can be a single chain. Tied to storehouse sections (ferments, freezer, baking), to garden (harvest overflow), and to animals/butchery (meat curing, broth, tallow). Supports user-owned favorites/schedules and reverse generation from harvest, overstock, batch cooking, and butchery events.",
+  "meta": {
+    "sourceOfTruth": "scraper",
+    "allowHubOverrides": true,
+    "mergeStrategy": "scraper-wins",
+    "ingestionPipelines": [
+      "scraperService",
+      "importService",
+      "bookmarklet",
+      "linked-accounts"
+    ],
+    "sharedOrchestration": {
+      "emitOnUpdate": true,
+      "reason": "preservation-zones-update",
+      "channels": [
+        "meals",
+        "storehouse",
+        "garden",
+        "animals",
+        "cleaning"
+      ]
+    },
+    "notes": [
+      "Meal planner can send surplus (or planned batch) to a preservation zone.",
+      "Storehouse can request preservation when a section is overstocked.",
+      "Cleaning can follow preservation with a specific routine (sanitize jars/surfaces)."
+    ]
+  },
+  "defaults": {
+    "timezone": "America/Chicago",
+    "sabbathGuard": true,
+    "quietHoursGuard": true,
+    "onMismatch": "allow-with-mitigation",
+    "supportsReverseGeneration": true
+  },
+  "zones": [
+    {
+      "id": "preserve-canning-kitchen",
+      "label": "Canning Kitchen (Hot Work)",
+      "kind": "canning",
+      "priority": 1,
+      "sabbathAllowed": false,
+      "quietHoursAllowed": false,
+      "supports": [
+        "meals.batch-cooking",
+        "storehouse.preservation.canning",
+        "garden.harvest.overflow",
+        "animals.broth-or-tallow"
+      ],
+      "targetStorehouseSections": [
+        "ferments",
+        "freezer",
+        "baking"
+      ],
+      "environment": {
+        "ventilation": "good",
+        "heatTolerance": "high"
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.harvest.logged",
+          "storehouse.overstock.detected",
+          "meals.batch-cooking.completed",
+          "animals.butchery.completed"
+        ],
+        "emit": [
+          "cleaning.after-cooking-session"
+        ],
+        "rules": [
+          {
+            "id": "harvest-to-canning",
+            "ifEvent": "garden.harvest.logged",
+            "generate": "storehouse.preservation.canning"
+          },
+          {
+            "id": "overstock-to-canning",
+            "ifEvent": "storehouse.overstock.detected",
+            "generate": "storehouse.preservation.canning"
+          },
+          {
+            "id": "butchery-to-broth",
+            "ifEvent": "animals.butchery.completed",
+            "generate": "meals.batch-cooking.broth-or-stock",
+            "emit": [
+              "storehouse.intake.expected"
+            ]
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "jar",
+        "group": "indoor"
+      }
+    },
+    {
+      "id": "preserve-ferment-room",
+      "label": "Ferment Room / Cool Pantry",
+      "kind": "ferment",
+      "priority": 2,
+      "sabbathAllowed": true,
+      "quietHoursAllowed": true,
+      "supports": [
+        "storehouse.preservation.ferment",
+        "garden.harvest.overflow",
+        "meals.sourdough-or-starter"
+      ],
+      "environment": {
+        "ventilation": "low",
+        "temp": "cool",
+        "light": "low"
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "storehouse.overstock.detected",
+          "meals.sourdough-or-starter.requested"
+        ],
+        "emit": [
+          "cleaning.after-cooking-session"
+        ],
+        "rules": [
+          {
+            "id": "overstock-to-ferment",
+            "ifEvent": "storehouse.overstock.detected",
+            "generate": "storehouse.preservation.ferment"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "beaker",
+        "group": "indoor"
+      }
+    },
+    {
+      "id": "preserve-dehydrate-porch",
+      "label": "Dehydrate Station – Porch",
+      "kind": "dehydrate",
+      "priority": 2,
+      "sabbathAllowed": false,
+      "quietHoursAllowed": true,
+      "supports": [
+        "storehouse.preservation.dehydrate",
+        "garden.herbs.dry",
+        "meals.snacks.from-overstock"
+      ],
+      "environment": {
+        "ventilation": "high",
+        "heatTolerance": "high"
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.harvest.logged",
+          "storehouse.overstock.detected"
+        ],
+        "emit": [
+          "cleaning.outdoor-zone.expected"
+        ],
+        "rules": [
+          {
+            "id": "herbs-to-dehydrate",
+            "ifEvent": "garden.harvest.logged",
+            "ifCropCategoryIn": [
+              "herbs",
+              "leafy-greens"
+            ],
+            "generate": "storehouse.preservation.dehydrate"
+          }
+        ]
+      },
+      "mitigation": {
+        "extraCleaningEmit": [
+          "cleaning.outdoor-zone.expected"
+        ],
+        "risks": [
+          "humidity may lengthen dry time",
+          "insects if screens not used"
+        ]
+      },
+      "uiHints": {
+        "icon": "sun",
+        "group": "outdoor"
+      }
+    },
+    {
+      "id": "preserve-smoke-cure",
+      "label": "Smoke / Cure Corner",
+      "kind": "cure-or-smoke",
+      "priority": 3,
+      "sabbathAllowed": false,
+      "quietHoursAllowed": false,
+      "supports": [
+        "animals.butchery.cure",
+        "storehouse.preservation.cure",
+        "meals.feast-meats"
+      ],
+      "environment": {
+        "ventilation": "outdoor",
+        "heatTolerance": "medium"
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "animals.butchery.completed",
+          "calendar.feast.upcoming"
+        ],
+        "emit": [
+          "cleaning.processing-area.requested"
+        ],
+        "rules": [
+          {
+            "id": "feast-to-cure",
+            "ifEvent": "calendar.feast.upcoming",
+            "generate": "storehouse.preservation.cure"
+          }
+        ]
+      },
+      "mitigation": {
+        "extraCleaningEmit": [
+          "cleaning.processing-area.requested"
+        ]
+      },
+      "uiHints": {
+        "icon": "flame",
+        "group": "outdoor"
+      }
+    },
+    {
+      "id": "preserve-bread-prep",
+      "label": "Bread / Leaven Prep Station",
+      "kind": "bread-prep",
+      "priority": 3,
+      "sabbathAllowed": true,
+      "quietHoursAllowed": true,
+      "supports": [
+        "meals.sabbath-bread",
+        "meals.batch-bread",
+        "storehouse.baking-cycle"
+      ],
+      "environment": {
+        "ventilation": "low",
+        "temp": "room"
+      },
+      "targetStorehouseSections": [
+        "baking"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "meals.sabbath-cooking.planned",
+          "calendar.feast.upcoming"
+        ],
+        "emit": [
+          "cleaning.after-cooking-session"
+        ],
+        "rules": [
+          {
+            "id": "feast-to-bread",
+            "ifEvent": "calendar.feast.upcoming",
+            "generate": "meals.sabbath-bread"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "loaf",
+        "group": "indoor"
+      }
+    }
+  ],
+  "userCanSaveFavorites": true,
+  "favoritesTemplate": [
+    {
+      "id": "fav-canning-harvest-overflow",
+      "source": "system",
+      "cloneOf": "preserve-canning-kitchen",
+      "label": "My Harvest → Canning",
+      "allowUserScheduleOverride": true
+    },
+    {
+      "id": "fav-ferment-overstock",
+      "source": "system",
+      "cloneOf": "preserve-ferment-room",
+      "label": "My Ferment Overstock",
+      "allowUserScheduleOverride": true
+    }
+  ],
+  "userFavoritePolicy": {
+    "maxPerHousehold": 30,
+    "allowCustomSchedule": true,
+    "allowCustomReverseGeneration": true
+  }
+}

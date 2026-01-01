@@ -1,0 +1,59 @@
+{
+  "inputs": {
+    "plantingWindows": "gardenPlantingCalendar.outputs.plantingWindows",
+    "harvestWindows": "gardenPlantingCalendar.outputs.harvestWindows",
+    "storehouseTargets": "storehouseStockPlanner.outputs.targetsByCrop",
+    "householdProfile": "householdProfileCalculator.outputs.profile"
+  },
+
+  "outputs": {
+    "yieldEstimates": "gardenYieldCalculator.outputs.yieldEstimates",
+    "harvestLoadByWeek": "gardenYieldCalculator.outputs.harvestLoadByWeek",
+    "preservationLoad": "gardenYieldCalculator.outputs.preservationLoad",
+    "storehouseCoverage": "gardenYieldCalculator.outputs.storehouseCoverage",
+    "nextActions": "gardenYieldCalculator.outputs.nextActions"
+  },
+
+  "edges": [
+    {
+      "from": "gardenPlantingCalendar.outputs.plantingWindows",
+      "to": "gardenYieldCalculator.inputs.plantingWindows",
+      "description": "Feed computed planting windows into yield engine so it can infer expected harvest timing and volume."
+    },
+    {
+      "from": "gardenPlantingCalendar.outputs.harvestWindows",
+      "to": "gardenYieldCalculator.inputs.harvestWindows",
+      "description": "Use harvest windows (including feast-day highlights) as the primary time buckets for yield and preservation planning."
+    },
+    {
+      "from": "storehouseStockPlanner.outputs.targetsByCrop",
+      "to": "gardenYieldCalculator.inputs.storehouseTargets",
+      "description": "Align yield predictions with storehouse targets so coverage % can be computed for each crop."
+    },
+    {
+      "from": "householdProfileCalculator.outputs.profile",
+      "to": "gardenYieldCalculator.inputs.householdProfile",
+      "description": "Use household size and months-of-coverage targets to compute per-person, per-month coverage from expected yields."
+    },
+    {
+      "from": "gardenYieldCalculator.outputs.preservationLoad",
+      "to": "preservationSessionPlanner.inputs.harvestLoad",
+      "description": "Convert grouped preservation load (by crop and method) into preservation batch session suggestions."
+    },
+    {
+      "from": "gardenYieldCalculator.outputs.harvestLoadByWeek",
+      "to": "gardenHarvestSessionPlanner.inputs.harvestLoadByWeek",
+      "description": "Summarized weekly harvest load becomes the basis for garden harvest sessions and labor planning."
+    },
+    {
+      "from": "gardenYieldCalculator.outputs.storehouseCoverage",
+      "to": "storehouseStockPlanner.inputs.coverageFromGarden",
+      "description": "Storehouse planner updates coverage KPIs using yield-driven coverage %, highlighting gaps and surplus."
+    },
+    {
+      "from": "gardenYieldCalculator.outputs.nextActions",
+      "to": "automationEngine.inputs.gardenNextActions",
+      "description": "Next-best-actions from yield (e.g., thin, side-dress, schedule preservation) become triggers for SSA automation and SessionRunner."
+    }
+  ]
+}

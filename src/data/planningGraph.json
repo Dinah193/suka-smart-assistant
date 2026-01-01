@@ -1,0 +1,341 @@
+{
+  "nodes": [
+    {
+      "id": "C1",
+      "label": "Macro Calculator",
+      "type": "calculator",
+      "section": "health",
+      "feedsInto": ["M1", "M2", "M7", "M9", "M17", "C41"],
+      "crossLinks": ["C2", "C3", "C5"]
+    },
+    {
+      "id": "C2",
+      "label": "BMI Calculator",
+      "type": "calculator",
+      "section": "health",
+      "feedsInto": ["M1", "M9", "M10", "M17", "C41"],
+      "crossLinks": ["C1"]
+    },
+    {
+      "id": "C3",
+      "label": "Daily Micronutrient Requirement Calculator",
+      "type": "calculator",
+      "section": "health",
+      "feedsInto": ["M1", "M3", "M4", "M5", "M6", "M17", "C41"],
+      "crossLinks": ["C1", "C4", "C14", "C15", "C11", "C20"]
+    },
+    {
+      "id": "C4",
+      "label": "Hair Growth Protein Calculator",
+      "type": "calculator",
+      "section": "health",
+      "feedsInto": ["M1", "M2", "M4", "M17", "C41"],
+      "crossLinks": ["C3", "C11"]
+    },
+    {
+      "id": "C5",
+      "label": "Movement Intensity Calculator",
+      "type": "calculator",
+      "section": "health",
+      "feedsInto": ["M10", "M11", "M17", "C41"],
+      "crossLinks": ["C1"]
+    },
+
+    {
+      "id": "C6",
+      "label": "Batch Cooking Yield Calculator",
+      "type": "calculator",
+      "section": "storehouseMeals",
+      "feedsInto": ["M7", "M4", "M1", "M17", "C41"],
+      "crossLinks": ["C13", "C10", "C9"]
+    },
+    {
+      "id": "C7",
+      "label": "Recipe Scaling Calculator",
+      "type": "calculator",
+      "section": "storehouseMeals",
+      "feedsInto": ["C6", "M4", "M17", "C41"],
+      "crossLinks": ["C13", "C9"]
+    },
+    {
+      "id": "C8",
+      "label": "Storehouse Refill Calculator",
+      "type": "calculator",
+      "section": "storehouseMeals",
+      "feedsInto": ["M3", "M4", "M17", "C41"],
+      "crossLinks": ["C15", "C13", "C18"]
+    },
+    {
+      "id": "C9",
+      "label": "Food Cost-per-Serving Calculator",
+      "type": "calculator",
+      "section": "storehouseMeals",
+      "feedsInto": ["M3", "M4", "M17", "C41"],
+      "crossLinks": ["C6", "C7"]
+    },
+    {
+      "id": "C10",
+      "label": "Preservation Time Calculator",
+      "type": "calculator",
+      "section": "storehouseMeals",
+      "feedsInto": ["M12", "M4", "M17", "C41"],
+      "crossLinks": ["C15", "C13", "C28"]
+    },
+    {
+      "id": "C11",
+      "label": "Meat Breakdown Yield Calculator",
+      "type": "calculator",
+      "section": "storehouseMeals",
+      "feedsInto": ["M4", "M7", "M1", "M17", "C41"],
+      "crossLinks": ["C13", "C10", "C3", "C4", "C19", "C20"]
+    },
+    {
+      "id": "C12",
+      "label": "Fermentation Duration Calculator",
+      "type": "calculator",
+      "section": "storehouseMeals",
+      "feedsInto": ["M13", "M14", "M4", "M17", "C41"],
+      "crossLinks": ["C28"]
+    },
+    {
+      "id": "C13",
+      "label": "Freezer Space Calculator",
+      "type": "calculator",
+      "section": "storehouseMeals",
+      "feedsInto": ["M4", "M7", "M12", "M17", "C41"],
+      "crossLinks": ["C6", "C7", "C8", "C10", "C11", "C15", "C20"]
+    },
+
+    {
+      "id": "C14",
+      "label": "Garden Planting Calendar Calculator",
+      "type": "calculator",
+      "section": "gardenAnimal",
+      "feedsInto": ["M5", "C15", "M17", "C41"],
+      "crossLinks": ["C27", "C3", "C29"]
+    },
+    {
+      "id": "C15",
+      "label": "Garden Yield Calculator",
+      "type": "calculator",
+      "section": "gardenAnimal",
+      "feedsInto": ["M1", "M7", "M12", "M4", "M17", "C41"],
+      "crossLinks": ["C6", "C10", "C13", "C8", "C3"]
+    },
+    {
+      "id": "C16",
+      "label": "Soil Amendment Calculator",
+      "type": "calculator",
+      "section": "gardenAnimal",
+      "feedsInto": ["C15", "M17", "C41"],
+      "crossLinks": []
+    },
+    {
+      "id": "C17",
+      "label": "Irrigation Calculator",
+      "type": "calculator",
+      "section": "gardenAnimal",
+      "feedsInto": ["C15", "M17", "C41"],
+      "crossLinks": []
+    },
+    {
+      "id": "C18",
+      "label": "Seed Viability Calculator",
+      "type": "calculator",
+      "section": "gardenAnimal",
+      "feedsInto": ["C14", "C8", "M17", "C41"],
+      "crossLinks": []
+    },
+    {
+      "id": "C19",
+      "label": "Animal Feed Calculator",
+      "type": "calculator",
+      "section": "gardenAnimal",
+      "feedsInto": ["M4", "C11", "C20", "M17", "C41"],
+      "crossLinks": []
+    },
+    {
+      "id": "C20",
+      "label": "Butchery Weight Calculator",
+      "type": "calculator",
+      "section": "gardenAnimal",
+      "feedsInto": ["C11", "C13", "M7", "M1", "M17", "C41"],
+      "crossLinks": ["C3", "C19"]
+    },
+
+    {
+      "id": "C27",
+      "label": "Hebrew Month Start Calculator",
+      "type": "calculator",
+      "section": "calendar",
+      "feedsInto": ["C14", "C28", "C29", "M14", "M17", "C41"],
+      "crossLinks": []
+    },
+    {
+      "id": "C28",
+      "label": "Feast Day Alignment Calculator",
+      "type": "calculator",
+      "section": "calendar",
+      "feedsInto": ["M16", "M7", "M11", "C10", "C12", "M17", "C41"],
+      "crossLinks": ["C27"]
+    },
+    {
+      "id": "C29",
+      "label": "Scriptural Year Length Calculator",
+      "type": "calculator",
+      "section": "calendar",
+      "feedsInto": ["C14", "M15", "M17", "C41"],
+      "crossLinks": ["C27"]
+    },
+    {
+      "id": "C30",
+      "label": "Biblical Offering Calculator",
+      "type": "calculator",
+      "section": "calendar",
+      "feedsInto": ["M15", "M17"],
+      "crossLinks": []
+    },
+
+    {
+      "id": "C41",
+      "label": "Household Stability Calculator",
+      "type": "calculator-orchestrator",
+      "section": "stability",
+      "feedsInto": ["M17"],
+      "crossLinks": [
+        "C1","C2","C3","C4","C5",
+        "C6","C7","C8","C9","C10","C11","C12","C13",
+        "C14","C15","C16","C17","C18","C19","C20",
+        "C27","C28","C29"
+      ]
+    },
+
+    {
+      "id": "M1",
+      "label": "Meal Planner",
+      "type": "planner"
+    },
+    {
+      "id": "M2",
+      "label": "Recipe Library",
+      "type": "planner"
+    },
+    {
+      "id": "M3",
+      "label": "Shopping List Generator",
+      "type": "planner"
+    },
+    {
+      "id": "M4",
+      "label": "Storehouse / Inventory",
+      "type": "planner"
+    },
+    {
+      "id": "M5",
+      "label": "Garden Planner",
+      "type": "planner"
+    },
+    {
+      "id": "M6",
+      "label": "Animal Planner",
+      "type": "planner"
+    },
+    {
+      "id": "M7",
+      "label": "Batch Session Planner",
+      "type": "planner"
+    },
+    {
+      "id": "M8",
+      "label": "SessionRunner",
+      "type": "module"
+    },
+    {
+      "id": "M9",
+      "label": "Health Goals Panel",
+      "type": "planner"
+    },
+    {
+      "id": "M10",
+      "label": "Movement / Workout Sessions",
+      "type": "planner"
+    },
+    {
+      "id": "M11",
+      "label": "Cleaning Session Templates",
+      "type": "planner"
+    },
+    {
+      "id": "M12",
+      "label": "Preservation Session Planner",
+      "type": "planner"
+    },
+    {
+      "id": "M13",
+      "label": "Winemaking / Brewing Tracker",
+      "type": "planner"
+    },
+    {
+      "id": "M14",
+      "label": "Calendar Module",
+      "type": "planner"
+    },
+    {
+      "id": "M15",
+      "label": "Curriculum / Study Planner",
+      "type": "planner"
+    },
+    {
+      "id": "M16",
+      "label": "Feast Meal Planner",
+      "type": "planner"
+    },
+    {
+      "id": "M17",
+      "label": "Next Steps Panel / Automation Runtime",
+      "type": "module"
+    }
+  ],
+  "edges": [
+    { "from": "C1", "to": "M1", "relation": "feeds_into" },
+    { "from": "C1", "to": "M2", "relation": "feeds_into" },
+    { "from": "C1", "to": "M7", "relation": "feeds_into" },
+    { "from": "C1", "to": "M9", "relation": "feeds_into" },
+    { "from": "C1", "to": "M17", "relation": "feeds_into" },
+    { "from": "C1", "to": "C2", "relation": "cross_link" },
+    { "from": "C1", "to": "C3", "relation": "cross_link" },
+    { "from": "C1", "to": "C5", "relation": "cross_link" },
+
+    { "from": "C2", "to": "M1", "relation": "feeds_into" },
+    { "from": "C2", "to": "M9", "relation": "feeds_into" },
+    { "from": "C2", "to": "M10", "relation": "feeds_into" },
+    { "from": "C2", "to": "M17", "relation": "feeds_into" },
+    { "from": "C2", "to": "C1", "relation": "cross_link" },
+
+    { "from": "C3", "to": "M1", "relation": "feeds_into" },
+    { "from": "C3", "to": "M3", "relation": "feeds_into" },
+    { "from": "C3", "to": "M4", "relation": "feeds_into" },
+    { "from": "C3", "to": "M5", "relation": "feeds_into" },
+    { "from": "C3", "to": "M6", "relation": "feeds_into" },
+    { "from": "C3", "to": "M17", "relation": "feeds_into" },
+    { "from": "C3", "to": "C1", "relation": "cross_link" },
+    { "from": "C3", "to": "C4", "relation": "cross_link" },
+    { "from": "C3", "to": "C14", "relation": "cross_link" },
+    { "from": "C3", "to": "C15", "relation": "cross_link" },
+    { "from": "C3", "to": "C11", "relation": "cross_link" },
+    { "from": "C3", "to": "C20", "relation": "cross_link" },
+
+    { "from": "C4", "to": "M1", "relation": "feeds_into" },
+    { "from": "C4", "to": "M2", "relation": "feeds_into" },
+    { "from": "C4", "to": "M4", "relation": "feeds_into" },
+    { "from": "C4", "to": "M17", "relation": "feeds_into" },
+    { "from": "C4", "to": "C3", "relation": "cross_link" },
+    { "from": "C4", "to": "C11", "relation": "cross_link" },
+
+    { "from": "C5", "to": "M10", "relation": "feeds_into" },
+    { "from": "C5", "to": "M11", "relation": "feeds_into" },
+    { "from": "C5", "to": "M17", "relation": "feeds_into" },
+    { "from": "C5", "to": "C1", "relation": "cross_link" }
+
+  ]
+}

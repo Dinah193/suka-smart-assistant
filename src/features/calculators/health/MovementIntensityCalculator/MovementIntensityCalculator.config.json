@@ -1,0 +1,77 @@
+{
+  "nodeId": "health.movementIntensityCalculator",
+  "label": "Movement Intensity & Load Calculator",
+  "description": "Translates steps, heart rate, and activity patterns into clear intensity zones, weekly movement targets, and recovery flags. Feeds directly into movement-focused sessions and planning flows.",
+  "category": "health",
+  "featureKind": "calculator",
+  "route": "/health/movement-intensity",
+  "icon": "ri-run-line",
+  "tags": [
+    "movement",
+    "exercise",
+    "intensity",
+    "steps",
+    "heart-rate",
+    "recovery",
+    "planning-graph-node"
+  ],
+
+  "graph": {
+    "role": "source",
+    "provides": [
+      "movementIntensityScore",
+      "movementIntensityCategory",
+      "movementMinutesTargets",
+      "movementZoneBreakdown",
+      "recoveryLoadFlags",
+      "movementSessionTemplates"
+    ],
+    "consumes": [
+      "bodyWeight",
+      "age",
+      "sex",
+      "restingHeartRate",
+      "maxHeartRateEstimate",
+      "stepHistory",
+      "sessionHistory",
+      "healthRiskFlags",
+      "sleepQualityFlags"
+    ],
+    "nextStepsNodeId": "health.movementIntensityCalculator.nextSteps"
+  },
+
+  "events": {
+    "onCalculate": [
+      "calculator.movementIntensity.calculated"
+    ],
+    "onError": [
+      "calculator.movementIntensity.error"
+    ]
+  },
+
+  "defaults": {
+    "unitSystem": "imperial",
+    "baselineStepGoalPerDay": 8000,
+    "targetModerateMinutesPerWeek": 150,
+    "targetVigorousMinutesPerWeek": 75,
+    "restDayEvery": 7,
+    "lowIntensityFloorMinutes": 10,
+    "sessionBlockMinutesDefault": 20
+  },
+
+  "ux": {
+    "group": "Health & Body",
+    "order": 45,
+    "showInQuickLaunch": true,
+    "quickLaunchLabel": "Movement Intensity",
+    "helpText": "Use this calculator to turn your steps and heart-rate data into clear intensity zones and weekly movement targets. Results plug into SessionRunner-powered movement sessions (walks, strength blocks, stretching) and recovery planning."
+  },
+
+  "integration": {
+    "hairNutritionCalculatorNodeId": "health.hairNutritionCalculator",
+    "macroCalculatorNodeId": "health.macroCalculator",
+    "sleepCalculatorNodeId": "health.sleepNeedCalculator",
+    "sessionPlannerNodeId": "sessions.movementPlanner",
+    "storehousePlannerNodeId": "storehouse.inventoryPlanner"
+  }
+}

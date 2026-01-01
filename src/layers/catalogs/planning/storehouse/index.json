@@ -1,0 +1,126 @@
+{
+  "id": "catalog.storehouse.planning",
+  "domain": "storehouse",
+  "kind": "catalog_index",
+  "title": "Storehouse Planning Catalog",
+  "intentTags": [
+    "catalog:index"
+  ],
+  "inputs": [],
+  "outputs": [],
+  "constraints": [],
+  "steps": [],
+  "kpis": [
+    {
+      "key": "spoilageRate",
+      "label": "Spoilage rate",
+      "direction": "down",
+      "unit": "%"
+    },
+    {
+      "key": "trips",
+      "label": "Trips",
+      "direction": "down",
+      "unit": "trips"
+    },
+    {
+      "key": "stockouts",
+      "label": "Stockouts",
+      "direction": "down",
+      "unit": "count"
+    },
+    {
+      "key": "overstocks",
+      "label": "Overstocks",
+      "direction": "down",
+      "unit": "count"
+    }
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial fixed-layer planning catalog release (MVP)."
+      }
+    ]
+  },
+  "patterns": [
+    {
+      "id": "pat.storehouse.weekly_restock",
+      "path": "src/layers/catalogs/planning/storehouse/patterns/weekly_restock.json",
+      "title": "Weekly Restock",
+      "tags": [
+        "time:low",
+        "difficulty:low",
+        "zones:pantry+cold",
+        "equipment:labels"
+      ]
+    },
+    {
+      "id": "pat.storehouse.monthly_cycle_count",
+      "path": "src/layers/catalogs/planning/storehouse/patterns/monthly_cycle_count.json",
+      "title": "Monthly Cycle Count + FIFO Rotation",
+      "tags": [
+        "time:medium",
+        "difficulty:medium",
+        "zones:all",
+        "equipment:labels"
+      ]
+    },
+    {
+      "id": "pat.storehouse.feast_buffer_build",
+      "path": "src/layers/catalogs/planning/storehouse/patterns/feast_buffer_build.json",
+      "title": "Feast Buffer Build",
+      "tags": [
+        "time:medium",
+        "difficulty:medium",
+        "Sabbath-safe",
+        "zones:pantry+cold+frozen"
+      ]
+    },
+    {
+      "id": "pat.storehouse.winter_reserve",
+      "path": "src/layers/catalogs/planning/storehouse/patterns/winter_reserve.json",
+      "title": "Winter Reserve Build",
+      "tags": [
+        "time:high",
+        "difficulty:high",
+        "zones:pantry+rootCellar+frozen"
+      ]
+    },
+    {
+      "id": "pat.storehouse.root_cellar_optimizer",
+      "path": "src/layers/catalogs/planning/storehouse/patterns/root_cellar_optimizer.json",
+      "title": "Root Cellar Optimizer",
+      "tags": [
+        "time:medium",
+        "difficulty:medium",
+        "zones:rootCellar"
+      ]
+    }
+  ],
+  "filters": {
+    "zones": [
+      "zones:pantry+cold",
+      "zones:all",
+      "zones:pantry+cold+frozen",
+      "zones:pantry+rootCellar+frozen",
+      "zones:rootCellar"
+    ],
+    "time": [
+      "time:low",
+      "time:medium",
+      "time:high"
+    ],
+    "difficulty": [
+      "difficulty:low",
+      "difficulty:medium",
+      "difficulty:high"
+    ],
+    "modes": [
+      "Sabbath-safe"
+    ]
+  }
+}

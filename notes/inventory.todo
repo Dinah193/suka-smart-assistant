@@ -1,0 +1,417 @@
+# C:\Users\larho\suka-smart-assistant\notes\inventory.todo
+# Suka Smart Assistant — Inventory System Scratch Plan
+# (Storehouse + Kitchen + Root Cellar + Animals/Butchery + Animal Shares/Orders LINKED TO CUT SHEETS)
+# Style: BLUF + actionable checklists + event hooks
+
+0) BLUF
+- Build an intuitive Inventory core that:
+  • Tracks food, supplies, tools, animals, processed packages, and **reserved buyer shares** across locations:
+    Pantry, Freezer, Fridge, Root Cellar, Garden Shed, Storehouse A/B, “In-Transit”, “Chill Room”, **“Reserved/<BuyerId>”**.
+  • Syncs with: Meals (Recipe Vault, Batch Cooking), Garden (Harvest → produce[]), Preservation trackers, **Animals & Butchery** (intake → slaughter → cut sheet → packaging → labels), and **Animal Share Sales**.
+  • **Sales are tightly bound to specific animals & cut sheets**: allocation must use packages created from the linked animal(s) and cut sheet(s) unless an admin enables pooling.
+  • Supports barcode/QR, unit conversions, FEFO/FIFO, low-stock alerts with “make at home” or buy recommendations.
+  • UI: horizontal “raised card” layout: Overview | Receive/Scan | Use/Decrement | Locations Map | Preservation | **Animals/Butchery** | **Animal Shares/Orders (Cut-Sheet Linked)** | Lists & Purchasing | Analytics/Savings.
+  • Emits automation events for calendar, shopping, garden, meals, animals, **sales**, supply lines/logistics.
+
+1) One-liners (Job → Output → Next Best Action → Events)
+• Receive: “Scan/enter items → receipt batch + labels → ‘Commit’ → inventory.received”
+• Use: “Recipe/Batch consumes → delta preview → ‘Apply/Undo’ → inventory.updated”
+• Garden: “Log harvest → produce[] + location → ‘Move to root cellar’ → harvest.logged”
+• Preservation: “Select method → derived SKUs + labels → ‘Log preservation’ → preservation.logged”
+• **Animals Intake**: “Register animal(s) → intake record + feeding plan → ‘Schedule processing’ → animals.registered”
+• **Butchery**: “Upload/Fill cut sheet → package SKUs + yield calc + labels → ‘Commit to inventory’ → butchery.completed”
+• **Animal Shares (Linked)**: “Offer quarter/half/whole/bulk with AN-IDs/CS-IDs → reservations + invoices → ‘Finalize allocation (enforce linkage)’ → sales.order.finalized”
+• Pickup/Delivery: “Schedule buyer pickup (Hebrew guard) → packing slips + signatures → ‘Complete handoff’ → sales.order.fulfilled”
+• Lists: “Low stock & plan delta → unified Shopping/Grocery list → ‘Send to mobile/print’ → lists.generated”
+• Audit: “Cycle count by zone → discrepancies report → ‘Reconcile’ → inventory.reconciled”
+• Alerts: “Expiry/low stock → notifications + make/buy suggestions → ‘Acknowledge’ → inventory.alert.acknowledged”
+
+2) Git Setup (branch per feature)
+git checkout -b feat/inventory-core
+git add .
+git commit -m "chore(inventory): notes scratch + animals/butchery + linked animal share sales"
+
+3) Front-end (create/update)
+- src/pages/inventory/index.jsx
+  ☐ Horizontal cards: <InventoryOverview /> | <ReceiveScan /> | <UseDecrement /> | <LocationMap /> | <PreservationPanel /> | **<AnimalsButcheryPanel />** | **<AnimalShareMarketPanel />** | <ListsPurchasing /> | <InventoryAnalytics />
+  ☐ “Inventory Vault” collapsible (SKUs, bundles/kits, suppliers, **cut-sheet presets**).
+
+- src/components/inventory/AnimalsButcheryPanel.jsx (NEW)
+  ☐ Tabs: Intake | Schedule | Cut Sheet | Cooling/Compliance | Packaging/Labels | By-products | Yields
+  ☐ Quick actions: “Download blank cut sheet (PDF)”, “Import cut sheet (CSV/XLSX)”, “Start packaging run”
+
+- src/components/inventory/ButcheryCutSheetMapper.jsx (NEW)
+  ☐ Map cut sheet rows → SKU catalog (e.g., BEEF_STEAK_RIBEYE_1LB, LAMB_SHOULDER_ROAST_3LB, ORGANS_LIVER)
+  ☐ Auto-suggest sizes (1 lb, 2 lb), grind %, trim %, bone-in/out
+  ☐ Output InventoryDelta.produce[] + labels payload (each package tagged with {sourceAnimalId, cutSheetId, lotId})
+
+- src/components/inventory/CoolingTracker.jsx (NEW)
+  ☐ Track carcass & packaged temps/time (chill room/freezer); warnings if above thresholds
+  ☐ Location moves: “Chill Room → Freezer 1” emits inventory.moved
+
+- src/components/inventory/ByproductManager.jsx (NEW)
+  ☐ Tallow/lard rendering batches, bones (stock), hides, offal, casings; create derived SKUs and labels
+
+- src/components/inventory/AnimalsIntakeForm.jsx (NEW)
+  ☐ Tag/ID, species/breed, live weight, source, condition, withhold feed/water timers, expected dress yield
+  ☐ Schedule processing → calendar.synced (+ Hebrew guard)
+
+- src/components/inventory/AnimalShareMarketPanel.jsx (NEW/UPDATE)
+  ☐ Tabs: Market | Reservations | Allocation | Billing | Pickup/Delivery | Docs
+  ☐ Market: **select Animal IDs (AN-xxxx) & Cut Sheet IDs (CS-xxxx)** for each offer; toggle “Allow pooling” (admin only)
+  ☐ Reservations: buyer list, waitlist, deposit status
+  ☐ Allocation: **ShareAllocator** lists only eligible packages (linked animals/cut sheets); drag-to-allocate; auto-balance by category targets
+  ☐ Billing: invoices, partial payments, refunds; QuickBooks stub call
+  ☐ Pickup/Delivery: schedule windows (Hebrew guard), packing slips, signatures
+  ☐ Docs: contracts/waivers, cut sheet summary per buyer, safe-handling, state regs links
+
+- src/components/inventory/ShareAllocator.jsx (NEW)
+  ☐ Source filters (Animal, Cut Sheet) default “Only linked” ON; blocks cross-animal drops unless pooling enabled
+  ☐ Outputs: InventoryDelta move[] to “Reserved/<BuyerId>”; buyer label payloads; packing slip data
+
+- src/components/inventory/BuyerCheckout.jsx (NEW)
+  ☐ Buyer info, contract e-sign, deposit/payment, policy acknowledgments; generates invoice/reservation code
+
+- src/components/inventory/PickupScheduler.jsx (NEW)
+  ☐ Pickups by buyer; feast/Sabbath guard; reminders; signature capture
+
+- src/components/inventory/OrderDocs.jsx (NEW/UPDATE)
+  ☐ Contract + **Cut Sheet Summary** (animal tag(s), cut sheet IDs, lot IDs), safe-handling, invoice, pickup instructions
+
+- src/components/inventory/InventoryOverview.jsx (UPDATE)
+  ☐ Tiles: “Animals in queue”, “Carcasses in chill”, “Packaging runs”, **“Reserved orders (by Animal)”**, “Next pickups”
+
+4) Agents & Services
+- src/agents/inventoryAgent.js (NEW)
+  ☐ applyDelta(delta, options) → {patchId}
+  ☐ computeDeltaFromRecipes(recipes, pantry) → InventoryDelta
+  ☐ buildUnifiedList({lowStock, planDelta, prefs}) → {list, grouped}
+  ☐ suggestLocation(sku) → recommended zone/bin (include “Reserved/<BuyerId>”)
+
+- src/agents/labelAgent.js (extend)
+  ☐ buildFoodLabels(items) → PDF (name/date/method/lot/expiry/reheat/handling)
+  ☐ buildButcheryLabels(packages) → safe-handling + cut + weight + lot + pack date + “Keep Refrigerated/Frozen”
+  ☐ **buildBuyerLabels(packages, buyer)** → buyer name/code + cut + weight + lot + **animal/cut-sheet identifiers**
+
+- src/agents/animalAgent.js (NEW)
+  ☐ registerAnimals(intake) → {animalIds}
+  ☐ planProcessing(animals, calendar, hebrewCal) → events (slaughter, chill, break, package)
+  ☐ computeLiveToCarcassToRetailYields(records) → {yields, savings}
+
+- src/agents/butcheryAgent.js (NEW/UPDATE)
+  ☐ parseCutSheet(fileOrRows, presets) → rows **with {cutSheetId, animalId} per row**
+  ☐ mapCutsToSkus(rows, skuCatalog, options) → { delta.produce[], packages[], yields } (each package has {sourceAnimalId, cutSheetId, lotId})
+  ☐ estimateYields(liveWeight, carcassWeight, trimPct, bonePct) → breakdown
+  ☐ buildPackagingRun(packages) → labels payloads + location plan
+  ☐ Emits: **butchery.completed({animalId, cutSheetId, packages, yields})**
+
+- **src/agents/animalShareAgent.js (NEW/UPDATE)**
+  ☐ priceQuote({model:'live'|'hanging'|'retail', liveLb, hangLb, retailTotalLb, rates}) → {estimate, breakdown}
+  ☐ openOffer({species, shareType, qty, model, rate, deposit, eta, **animalIds**, **cutSheetIds**, allowPooling=false}) → {offerId}
+  ☐ reserveShare({offerId, buyer, shareQty, depositPaid}) → {orderId, status}
+  ☐ **eligiblePackages({offerId})** → only packages with `sourceAnimalId ∈ offer.animalIds` AND `cutSheetId ∈ offer.cutSheetIds` (unless pooling)
+  ☐ finalizeAllocation({orderId, packageMap}) → validates sources; returns {deltaMove, labels, invoiceUpdate}
+  ☐ generateInvoice({orderId, terms}) / settlePayment({orderId, amount, method})
+  ☐ schedulePickup({orderId, window}) → {event}
+
+- src/services/scanning/barcode.js (NEW)
+  ☐ QuaggaJS/HID; map to SKUs
+
+- src/services/accounting/quickbooks.js (STUB)
+  ☐ createInvoice({customer, items, amount}) / recordPayment({invoiceId, amount, method})
+
+- src/services/automation/runtime.js
+  ☐ Ensure emit() supports events in §7
+
+- src/stores/*
+  ☐ InventoryStore, SuppliersStore, SavingsStore, MealsLinkStore, GardenStore bridge
+  ☐ **AnimalsStore (profiles, queues, processing runs)**
+  ☐ **ButcheryStore (cut sheets, packages, temp logs, compliance docs)** (index by {sourceAnimalId, cutSheetId})
+  ☐ **SalesStore** (offers contain animalIds[], cutSheetIds[]; orders copy linkage & status)
+
+5) UI Acceptance Criteria
+☐ “Receive” fast; suggested locations; labels print.
+☐ “Use” shows FEFO picks; Apply/Undo cleanly.
+☐ LocationMap drag-drop works; emits move events.
+☐ Preservation creates derived SKUs & labels; logs method/dates.
+☐ **Animals & Butchery** produces correct packages, yields, labels, location moves; cooling compliance tracked.
+☐ **Animal Shares (Linked)**: offers can’t be created without Animal IDs; allocation shows only eligible packages; cross-animal blocked unless pooling.
+☐ Unified List grouped by store aisle; export PDF/SMS/email.
+☐ Analytics shows savings, velocity, turnover, **live→carcass→retail yields**, spoilage, **revenue by animal**.
+☐ Hebrew/Sabbath guard for slaughter/packaging/pickups.
+
+6) Domain Preferences & Constraints
+- Hebrew calendar & Sabbath: shift processing & pickups off feast days; propose prep-day alternatives.
+- Torah constraints: species handling; avoid mixing with non-kosher; separate tooling if required.
+- Preservation compliance: low-acid warnings; label method/date; safe-handling for raw meats.
+- Butchery safety: chill windows (e.g., ≤4°C/40°F quickly); logs for audit.
+- Units: base units per SKU; package weights (lb/kg) & counts (ct); grind % and trim captured.
+- Rotation: FEFO default; FIFO fallback.
+- Sales policy: deposits, substitution tolerances (±%), refunds on shortfall, buyer consent required to enable pooling.
+
+7) Event Contract (emit/subscribe)
+Emit:
+  • inventory.received ({batchId, items})
+  • inventory.updated ({patchId, delta})
+  • inventory.moved ({sku, from, to, qty})
+  • inventory.alert.lowstock ({sku, qty, par})
+  • inventory.alert.expiring ({sku, lot, expiresOn})
+  • lists.generated ({listId, channel})
+  • preservation.logged ({method, items, ts})
+  • savings.updated ({amount, period})
+
+  • animals.registered ({animalIds, intake})
+  • animals.processing.scheduled ({events})
+  • animals.processing.started|completed ({runId})
+
+  • butchery.cut_sheet.created ({sheetId})
+  • butchery.carcass.chilled ({animalId, tempLog})
+  • butchery.packaging.run.started|completed ({runId})
+  • **butchery.completed ({animalId, cutSheetId, packages, yields})**
+
+  • **sales.offer.opened ({offerId, animalIds, cutSheetIds})**
+  • **sales.order.reserved ({orderId, buyer})**
+  • **sales.order.invoiced ({orderId, invoiceId, amount})**
+  • **sales.payment.recorded ({orderId, amount, method})**
+  • **sales.order.allocated ({orderId, packages, animalIds, cutSheetIds})**
+  • **sales.order.finalized ({orderId, deltaMove, animalIds, cutSheetIds})**
+  • **sales.pickup.scheduled ({orderId, event})**
+  • **sales.order.fulfilled ({orderId, ts})**
+
+Subscribe:
+  • recipes.consolidated → computeDeltaFromRecipes
+  • batch.started|completed → proposeMakeOrBuy; update use forecast
+  • harvest.logged → add produce[] & location prompt
+  • **animals.registered|processing.scheduled → block conflicting calendar windows**
+  • **butchery.cut_sheet.created → open mapper & packaging run**
+  • **butchery.completed → refresh eligible packages for linked offers**
+  • calendar.updated/hebrewCalendar.updated → shift shopping/processing/pickup events
+  • user.prefs.updated → recalc make/buy, pricing defaults, label format
+
+8) Minimal Data Shapes (typedef sketches)
+/** SKU */
+{ "sku":"BEEF_STEAK_RIBEYE_1LB","name":"Beef Ribeye Steak (1 lb)","category":"Meat","baseUnit":"lb","par":8 }
+
+/** Lot */
+{ "lotId":"LOT-2025-10-12-BEEF-01","sku":"BEEF_STEAK_RIBEYE_1LB","qty":6,"unit":"lb","exp":"2026-04-01","location":{"zone":"Freezer1","bin":"A3"} }
+
+/** AnimalProfile */
+{
+  "animalId":"AN-0001","species":"beef","breed":"Angus","sex":"steer","liveWeightLb":1150,
+  "source":"Local Farm","intakeDate":"2025-10-10","notes":"Grass-fed, 18 months"
+}
+
+/** ProcessingPlan */
+{
+  "animalId":"AN-0001",
+  "events":[
+    {"type":"slaughter","start":"2025-10-12T08:00:00"},
+    {"type":"chill","start":"2025-10-12T12:00:00","end":"2025-10-13T12:00:00"},
+    {"type":"breakdown","start":"2025-10-13T13:00:00"},
+    {"type":"package","start":"2025-10-13T16:00:00"}
+  ]
+}
+
+/** ButcheryCutSheet (normalized row) */
+{
+  "sheetId":"CS-0007","animalId":"AN-0001","cut":"ribeye","bone":"out","targetWeightLb":1.0,"count":6,
+  "grindPercent":0,"package":"vac-seal","labelNotes":"steak"
+}
+
+/** Package (produced from a cut sheet row) */
+{
+  "sku":"BEEF_STEAK_RIBEYE_1LB","qty":6,"unit":"lb","lotId":"LOT-2025-10-12-BEEF-01",
+  "sourceAnimalId":"AN-0001","cutSheetId":"CS-0007","packDate":"2025-10-13"
+}
+
+/** PackagingRun → InventoryDelta */
+{
+  "produce":[{"sku":"BEEF_STEAK_RIBEYE_1LB","qty":6,"unit":"lb","lotId":"LOT-2025-10-12-BEEF-01"}],
+  "missing":[],
+  "move":[{"sku":"BEEF_STEAK_RIBEYE_1LB","qty":6,"unit":"lb","from":"Chill Room","to":"Freezer1"}]
+}
+
+/** CoolingLog */
+{
+  "animalId":"AN-0001",
+  "readings":[
+    {"t":"2025-10-12T12:00:00","tempF":90},
+    {"t":"2025-10-12T14:00:00","tempF":60},
+    {"t":"2025-10-12T20:00:00","tempF":40}
+  ],
+  "ok": true
+}
+
+/** Offer (linked) */
+{
+  "offerId":"OFF-2025-10-12-01","species":"beef","shareType":"quarter","qtyAvailable":2,
+  "pricingModel":"hanging","rate":5.25,"deposit":150,"eta":"2025-10-20",
+  "animalIds":["AN-0001"], "cutSheetIds":["CS-0007"], "allowPooling":false
+}
+
+/** Order (inherits linkage) */
+{
+  "orderId":"ORD-2001","offerId":"OFF-2025-10-12-01","buyerId":"B-1001","status":"reserved","shareQty":1,
+  "animalIds":["AN-0001"], "cutSheetIds":["CS-0007"],
+  "targets":{"steakLb":20,"roastLb":20,"groundLb":60,"offalLb":5,"boneLb":5,"tolerancePct":10},
+  "pricingModel":"hanging","liveLb":1150,"hangLb":690,"targetRetailLb":110
+}
+
+/** SalesDeltaMove → InventoryDelta.move[] (traceable) */
+{ "sku":"BEEF_STEAK_RIBEYE_1LB","qty":6,"unit":"lb","from":"Freezer1","to":"Reserved/B-1001","meta":{"animal":"AN-0001","cutSheet":"CS-0007"} }
+
+/** Invoice */
+{ "invoiceId":"INV-3001","orderId":"ORD-2001","amount":795,"paid":150,"balance":645,"due":"2025-10-21" }
+
+/** PickupEvent */
+{ "orderId":"ORD-2001","start":"2025-10-22T14:00:00","end":"2025-10-22T14:30:00","location":"Dock A","guarded":true }
+
+9) Core Flows
+
+A) Receive/Scan
+- Input: {barcode|manual}, name/sku, qty/unit, lot/expiry, location, cost (optional)
+- Output: labels (PDF), batchId
+- Events: inventory.received → optional savings calc
+
+B) Use/Decrement (from Meals/Batch)
+- Input: selected recipes/batch → computeDeltaFromRecipes
+- Preview: human table; FEFO picks; conflicts (insufficient qty)
+- Apply: applyDelta → patchId; Undo supported
+- Events: inventory.updated
+
+C) Garden Harvest
+- Input: harvest entry → produce[]
+- Location assign (Root Cellar/Fridge); “Confirm moved” logs timestamp
+- Events: harvest.logged, savings.updated
+
+D) Preservation
+- Method + items → derived SKUs (e.g., TOMATO_FRESH → TOMATO_SAUCE_QT)
+- Labels (date/method/lot/reheat if cooked)
+- Events: preservation.logged, inventory.updated
+
+E) **Animals Intake → Processing → Butchery**
+1) Intake: AnimalsIntakeForm → AnimalsStore
+   - Emit animals.registered; planProcessing → events guarded by Hebrew calendar; emit animals.processing.scheduled
+2) Cut Sheet: Upload/Fill → ButcheryCutSheetMapper
+   - Emit butchery.cut_sheet.created; map rows → SKUs; compute yields (live→carcass→retail)
+3) Cooling/Compliance: CoolingTracker logs temps; alert if slow-chill; location “Chill Room”
+   - Emit butchery.carcass.chilled; propose move to Freezer when ok
+4) Packaging & Labels: buildPackagingRun → labelAgent.buildButcheryLabels → print; Location moves
+   - applyDelta(produce+move+consume materials) → patchId; emit butchery.packaging.run.completed + butchery.completed
+5) Analytics: Savings ledger uses local price benchmarks; add yield cards to Overview
+
+F) **Animal Shares/Orders (Cut-Sheet Linked)**
+- Open Offer: select **animalIds** (required) and **cutSheetIds** (if available); pooling OFF by default.
+- Reserve: create order; copy linkage; capture deposit & contract.
+- Allocate: ShareAllocator shows **eligiblePackages(offerId)**; enforces linkage; outputs move[] to “Reserved/<BuyerId>”; prints buyer labels & packing slips.
+- Bill: priceQuote (live/hanging/retail); invoice; record payments (QuickBooks stub).
+- Pickup: schedule (Hebrew guard); reminders; scan-out from Reserved; mark fulfilled.
+- Shortfall/Surplus: show delta by animal; substitutions within same animal first; pooling requires buyer consent & admin toggle.
+
+G) Lists & Purchasing (Unified)
+- Inputs: lowStock (below par), planDelta (meals/batches), butchery materials (bags/casings)
+- Output: grouped list by store/aisle; export PDF/SMS/email; calendar sync with Hebrew guard
+- Events: lists.generated
+
+10) Scanning & Labeling
+- Barcode: QuaggaJS/HID; manual SKU picker fallback
+- SKU mapping: JSON/db; alias search
+- Labels: buildFoodLabels, buildButcheryLabels, **buildBuyerLabels (shows buyer/animal/cut-sheet)**
+
+11) Alerts & Rotation
+- Low Stock (par), Expiring (FEFO), Spoilage logs
+- **Chill/Temp** alerts; block freezer move until safe
+
+12) Integration Points
+- InventorySyncModal (multi-item checkboxes; RecipeForm/BatchQueue/CookingHistory) — (#95)
+- BatchInventoryMap (drag ingredient→location) — (#86)
+- Unified Shopping/Grocery List — (#113)
+- Root Cellar Toggle & Preservation Column in savings.jsx — (#111)
+- **ButcheryCutSheet export to inventory PDF** — (#83)
+- QuickBooks auto-contribution reminder — stub — (#60)
+- Animals section (AnimalProfiles, TaskScheduler, BreedingTracker, ButcheringLog) — wire to AnimalsButcheryPanel — (#107)
+
+13) Calendar & Hebrew Guard
+- Shift shopping, intake, slaughter, packaging, pickups off feast/Sabbath; propose prep day
+- Emit calendar.synced after planProcessing, packaging finalize, and pickup scheduling
+
+14) Component Snippets (wire-in ready)
+/* AnimalsIntakeForm.jsx — submit */
+async function onRegister(intake){
+  const { animalIds } = await animalAgent.registerAnimals(intake);
+  const events = await animalAgent.planProcessing(animalIds, calendar, hebrewCal);
+  emit('animals.registered',{animalIds,intake});
+  emit('animals.processing.scheduled',{events});
+  emit('calendar.synced',{events});
+}
+
+/* ButcheryCutSheetMapper.jsx — commit packages */
+async function onCommitPackages(rows){
+  const { delta, packages, yields } = await butcheryAgent.mapCutsToSkus(rows, skuCatalog, {grindPct, trimPct});
+  const patchId = await inventory.applyDelta(delta);
+  const pdf = await labelAgent.buildButcheryLabels(packages);
+  saveBlob(pdf, `butchery-${packages?.[0]?.lotId || Date.now()}.pdf`);
+  emit('butchery.completed',{animalId:packages?.[0]?.sourceAnimalId, cutSheetId:packages?.[0]?.cutSheetId, packages, yields, patchId});
+}
+
+/* AnimalShareMarketPanel.jsx — open linked offer */
+async function openOfferLinked(form){
+  // species, shareType, model, rate, deposit, eta, animalIds[], cutSheetIds[], allowPooling
+  const { offerId } = await animalShareAgent.openOffer(form);
+  emit('sales.offer.opened',{offerId, animalIds:form.animalIds, cutSheetIds:form.cutSheetIds});
+}
+
+/* ShareAllocator.jsx — eligible only */
+async function loadEligible(offerId){
+  const pkgs = await animalShareAgent.eligiblePackages({offerId});
+  setEligible(pkgs); // each pkg has sourceAnimalId & cutSheetId
+}
+
+/* ShareAllocator.jsx — finalize */
+async function finalize(order, packageMap){
+  const { deltaMove, labels } = await animalShareAgent.finalizeAllocation({orderId:order.orderId, packageMap});
+  const patchId = await inventory.applyDelta({move:deltaMove});
+  await labelAgent.buildBuyerLabels(labels, order.buyer);
+  emit('sales.order.finalized',{orderId:order.orderId, deltaMove, animalIds:order.animalIds, cutSheetIds:order.cutSheetIds, patchId});
+}
+
+/* CoolingTracker.jsx — move when chilled */
+function moveWhenChilled(item){
+  if(item.ok){ emit('inventory.moved',{sku:item.sku,from:'Chill Room',to:'Freezer1',qty:item.qty}); }
+}
+
+/* InventoryOverview.jsx — yield tile */
+<StatCard title="Yield (live→retail)" value={`${yieldPct}%`} hint="Target 60–70% beef / 45–55% lamb (example)"/>
+
+15) VS Code Steps (you now)
+☐ Add AnimalsButcheryPanel + subcomponents and route under /inventory
+☐ Scaffold animalAgent.js, butcheryAgent.js, animalShareAgent.js with methods above
+☐ Extend labelAgent with buildButcheryLabels & buildBuyerLabels (adds animal/cut-sheet IDs)
+☐ Wire CoolingTracker to temp logs; block moves until chilled
+☐ Ensure applyDelta handles produce/consume/move (with meta) for packaging runs & reservations
+☐ Update Analytics with yield & revenue by animal + order accuracy
+
+16) Commit Cadence
+- feat: AnimalsIntake + processing schedule + Hebrew guard
+- feat: CutSheetMapper + SKU mapping + yields
+- feat: CoolingTracker + temp logs + move gating
+- feat: AnimalShareMarket (linked offers) + reservations + invoices
+- feat: ShareAllocator (eligible packages only) + buyer labels + reserved bins
+- feat: PickupScheduler (guarded) + fulfillment scan-out
+- chore: inventory.css (raised cards), scanner service, docs
+- fix: unit conversions (lb↔kg), reservation exclusion from meal planner
+
+17) Done = Definition
+☐ Receive/Use flows fast; FEFO honored; labels print.
+☐ Animals intake & processing scheduled with Hebrew guard; conflicts avoided.
+☐ Cut sheet → packages → inventory works; yields computed; by-products captured.
+☐ **Animal Shares**: offers linked to animals/cut sheets; allocation enforces linkage; buyer labels & docs correct.
+☐ Cooling compliance logged; freezer moves gated; locations updated.
+☐ Unified list exports; analytics show savings, yield, and revenue by animal; no console errors; responsive.
+
+18) Parking Lot
+- E-commerce invite-only page for offers (per-animal story & weights)
+- Scale integration (serial/USB) to capture package weights
+- SMS “on my way” + curbside handoff QR & signature
+- NFC/QR per buyer box → real-time handoff + temp log sticker
+- Supplier price tracker & auto-reorder pars for packaging materials

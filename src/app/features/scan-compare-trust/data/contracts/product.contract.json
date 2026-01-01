@@ -1,0 +1,634 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka.local/contracts/product.contract.json",
+  "title": "Suka • Normalized Product",
+  "type": "object",
+  "additionalProperties": false,
+  "description": "Canonical product record for Scan • Compare • Trust. Provider-agnostic. One logical product; many sources, packages, stores.",
+  "required": ["id", "identifiers", "title", "brand", "categoryPath", "lifecycle", "sourceAttribution", "hashes"],
+  "properties": {
+    "contractVersion": {
+      "type": "string",
+      "const": "1.3.0",
+      "description": "Schema/contract semver; bump on breaking field changes."
+    },
+
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9\\-]{8,}$",
+      "description": "Stable, deterministic product ID (e.g., sha256-12 of main identifiers)."
+    },
+
+    "identifiers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonicalKey"],
+      "properties": {
+        "canonicalKey": {
+          "type": "string",
+          "description": "Primary matching key: prefer GTIN-14/UPC/EAN; otherwise provider+sku."
+        },
+        "gtin14": { "type": "string", "pattern": "^[0-9]{14}$" },
+        "upc": { "type": "string", "pattern": "^[0-9]{12}$" },
+        "ean": { "type": "string", "pattern": "^[0-9]{13}$" },
+        "plu": { "type": "string" },
+        "manufacturerPartNumber": { "type": "string" },
+        "skuByProvider": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/ProviderSku" }
+        },
+        "lotCodes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "When known from OCR/receipt/box."
+        },
+        "batch": { "type": "string" }
+      }
+    },
+
+    "title": { "type": "string", "minLength": 1 },
+    "subtitle": { "type": "string" },
+    "description": { "type": "string" },
+
+    "brand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "owner": { "type": "string" },
+        "manufacturer": { "type": "string" },
+        "countryOfOrigin": { "type": "string" }
+      }
+    },
+
+    "categoryPath": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Normalized taxonomy path, e.g. ['Grocery','Dairy','Milk']."
+    },
+
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+
+    "images": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Image" }
+    },
+
+    "package": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "size": { "$ref": "#/definitions/Size" },
+        "count": { "type": "number", "minimum": 0 },
+        "variant": { "type": "string", "description": "Flavor/scents/roast etc." },
+        "dimensions": { "$ref": "#/definitions/Dimensions" }
+      }
+    },
+
+    "ingredients": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "raw": { "type": "string", "description": "As printed." },
+        "parsed": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Ingredient" }
+        },
+        "flags": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "containsArtificialSweetener": { "type": "boolean" },
+            "containsPalmOil": { "type": "boolean" },
+            "containsRedDye40": { "type": "boolean" },
+            "kosher": { "type": "boolean" },
+            "halal": { "type": "boolean" },
+            "organic": { "type": "boolean" },
+            "nonGMO": { "type": "boolean" },
+            "vegan": { "type": "boolean" },
+            "vegetarian": { "type": "boolean" },
+            "glutenFree": { "type": "boolean" }
+          }
+        },
+        "allergens": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["milk","eggs","fish","shellfish","tree_nuts","peanuts","wheat","soy","sesame","sulfites","mustard","celery","lupin","other"] }
+        }
+      }
+    },
+
+    "nutrition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "serving": { "$ref": "#/definitions/Size" },
+        "perServing": { "$ref": "#/definitions/NutritionPanel" },
+        "per100g": { "$ref": "#/definitions/NutritionPanel" }
+      }
+    },
+
+    "certifications": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Certification" }
+    },
+
+    "sustainability": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ecoLabels": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "packaging": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Packaging" }
+        }
+      }
+    },
+
+    "compliance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ageRestricted": { "type": "boolean" },
+        "hazmat": { "type": "boolean" },
+        "taxCategory": { "type": "string" }
+      }
+    },
+
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "recalls": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Recall" }
+        },
+        "riskFlags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Derived from ingredient flags, advisories, etc."
+        }
+      }
+    },
+
+    "pricing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "prices": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Price" }
+        },
+        "unitComparisons": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/UnitPrice" }
+        },
+        "cycles": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/PricingCycle" },
+          "description": "Learned discount cadence (CycleAnalyzer)."
+        }
+      }
+    },
+
+    "availability": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/StoreAvailability" },
+      "description": "Per-store shelf presence, stock, aisle hints."
+    },
+
+    "offers": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "coupons": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/CouponRef" },
+          "description": "Link to CouponService IDs; stacking rules evaluated elsewhere."
+        },
+        "loyalty": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/LoyaltyOffer" }
+        }
+      }
+    },
+
+    "matching": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "strategy": { "type": "string", "enum": ["barcode","title_fuzzy","ocr_semantic","provider_hint","hybrid"] },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/MatchEvidence" }
+        }
+      }
+    },
+
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "createdBy": { "type": "string" },
+        "createdAtISO": { "type": "string", "format": "date-time" },
+        "updatedAtISO": { "type": "string", "format": "date-time" },
+        "providers": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/ProviderAttribution" }
+        }
+      }
+    },
+
+    "sourceAttribution": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Attribution" },
+      "description": "Feeds SourceAttribution.jsx UI."
+    },
+
+    "hashes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "idSha": { "type": "string" },
+        "contentSha": { "type": "string" },
+        "imagesSha": { "type": "string" }
+      }
+    },
+
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "type": "string", "enum": ["active","discontinued","seasonal","unknown"] },
+        "firstSeenISO": { "type": "string", "format": "date-time" },
+        "lastSeenISO": { "type": "string", "format": "date-time" },
+        "bestByISO": { "type": "string", "format": "date" },
+        "expiresISO": { "type": "string", "format": "date" }
+      }
+    },
+
+    "ocr": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rawText": { "type": "string" },
+        "language": { "type": "string" },
+        "engine": { "type": "string", "description": "e.g., tesseract" },
+        "boxes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/OcrBox" }
+        }
+      }
+    },
+
+    "trust": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "reasons": { "type": "array", "items": { "type": "string" } },
+        "lastEvaluatedISO": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "userContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Non-canonical overlay persisted per user/household. Safe to strip in exports.",
+      "properties": {
+        "isFavorite": { "type": "boolean" },
+        "notes": { "type": "string" },
+        "preferredStores": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "pinnedSchedules": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/ScheduleRef" },
+          "description": "User-saved sessions/schedules that reference this product."
+        }
+      }
+    }
+  },
+
+  "definitions": {
+    "ProviderSku": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "sku"],
+      "properties": {
+        "provider": { "type": "string", "description": "e.g., costco, aldi, sams, walmart" },
+        "sku": { "type": "string" }
+      }
+    },
+
+    "Image": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url"],
+      "properties": {
+        "url": { "type": "string", "format": "uri" },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "type": { "type": "string", "enum": ["front","back","nutrition","ingredients","shelf","brand","other"] },
+        "source": { "type": "string" },
+        "lastSeenISO": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "Size": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["quantity", "unit"],
+      "properties": {
+        "quantity": { "type": "number", "minimum": 0 },
+        "unit": { "type": "string", "description": "Original unit as provided (e.g., 'oz', 'fl oz', 'ct')." },
+        "normalized": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "quantity": { "type": "number", "minimum": 0 },
+            "unit": { "type": "string", "enum": ["g","kg","ml","l","ct"] }
+          }
+        }
+      }
+    },
+
+    "Dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "length_cm": { "type": "number", "minimum": 0 },
+        "width_cm": { "type": "number", "minimum": 0 },
+        "height_cm": { "type": "number", "minimum": 0 }
+      }
+    },
+
+    "Ingredient": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "percent": { "type": "number", "minimum": 0, "maximum": 100 },
+        "additives": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "NutritionPanel": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "calories": { "type": "number", "minimum": 0 },
+        "fat_g": { "type": "number", "minimum": 0 },
+        "saturated_fat_g": { "type": "number", "minimum": 0 },
+        "trans_fat_g": { "type": "number", "minimum": 0 },
+        "carbs_g": { "type": "number", "minimum": 0 },
+        "sugars_g": { "type": "number", "minimum": 0 },
+        "added_sugars_g": { "type": "number", "minimum": 0 },
+        "fiber_g": { "type": "number", "minimum": 0 },
+        "protein_g": { "type": "number", "minimum": 0 },
+        "sodium_mg": { "type": "number", "minimum": 0 },
+        "cholesterol_mg": { "type": "number", "minimum": 0 },
+        "vitamins": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "percentDV": { "type": "number", "minimum": 0, "maximum": 100 }
+            }
+          }
+        }
+      }
+    },
+
+    "Certification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label"],
+      "properties": {
+        "label": { "type": "string", "description": "USDA Organic, Fair Trade, etc." },
+        "certifier": { "type": "string" },
+        "certificateId": { "type": "string" },
+        "validFromISO": { "type": "string", "format": "date" },
+        "validToISO": { "type": "string", "format": "date" }
+      }
+    },
+
+    "Packaging": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "material": { "type": "string", "description": "PET, HDPE, paper, glass, etc." },
+        "recyclable": { "type": "boolean" },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "Recall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "status", "reason", "announcedISO"],
+      "properties": {
+        "source": { "type": "string", "description": "FDA, USDA, CPSC, provider link" },
+        "status": { "type": "string", "enum": ["active","resolved","investigating"] },
+        "severity": { "type": "string", "enum": ["info","low","moderate","high","critical"] },
+        "reason": { "type": "string" },
+        "announcedISO": { "type": "string", "format": "date-time" },
+        "link": { "type": "string", "format": "uri" }
+      }
+    },
+
+    "Price": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "channel", "amount", "currency"],
+      "properties": {
+        "provider": { "type": "string", "description": "e.g., costco, aldi, sams" },
+        "channel": { "type": "string", "enum": ["in_store","pickup","delivery","online"] },
+        "amount": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "minLength": 3, "maxLength": 3 },
+        "listPrice": { "type": "number", "minimum": 0 },
+        "promoPrice": { "type": "number", "minimum": 0 },
+        "effectiveFromISO": { "type": "string", "format": "date-time" },
+        "effectiveToISO": { "type": "string", "format": "date-time" },
+        "loyaltyRequired": { "type": "boolean" },
+        "loyaltyTier": { "type": "string" },
+        "pricePerUnit": { "$ref": "#/definitions/UnitPrice" },
+        "sourceRef": { "type": "string", "description": "ID in StoreCatalogAdapters or provider doc." }
+      }
+    },
+
+    "UnitPrice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit", "amount"],
+      "properties": {
+        "unit": { "type": "string", "enum": ["per_g","per_kg","per_ml","per_l","per_ct"] },
+        "amount": { "type": "number", "minimum": 0 }
+      }
+    },
+
+    "PricingCycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "store": { "type": "string" },
+        "brand": { "type": "string" },
+        "pattern": { "type": "string", "enum": ["weekly","biweekly","monthly","seasonal","irregular"] },
+        "lastObservedISO": { "type": "string", "format": "date-time" },
+        "nextExpectedISO": { "type": "string", "format": "date-time" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "StoreAvailability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["storeId"],
+      "properties": {
+        "storeId": { "type": "string" },
+        "storeName": { "type": "string" },
+        "aisleHint": { "type": "string" },
+        "inStock": { "type": "boolean" },
+        "stockLevel": { "type": "string", "enum": ["low","medium","high","unknown"] },
+        "lastSeenISO": { "type": "string", "format": "date-time" },
+        "distanceKm": { "type": "number", "minimum": 0 }
+      }
+    },
+
+    "CouponRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string", "description": "CouponService coupon ID" },
+        "stackingGroup": { "type": "string", "description": "For stacking/anti-stacking rules" },
+        "appliesToVariants": { "type": "boolean" }
+      }
+    },
+
+    "LoyaltyOffer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "program": { "type": "string" },
+        "tier": { "type": "string" },
+        "benefit": { "type": "string" },
+        "validFromISO": { "type": "string", "format": "date-time" },
+        "validToISO": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "MatchEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "enum": ["barcode","title","image","ocr","provider_field","nutrition","ingredient"] },
+        "value": { "type": "string" },
+        "score": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "ProviderAttribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider": { "type": "string" },
+        "fetchedISO": { "type": "string", "format": "date-time" },
+        "docId": { "type": "string" },
+        "link": { "type": "string", "format": "uri" }
+      }
+    },
+
+    "Attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider": { "type": "string" },
+        "fields": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "OcrBox": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "text": { "type": "string" },
+        "bbox": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "x1,y1,x2,y2"
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "ScheduleRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "type": "string", "enum": ["session","schedule"] },
+        "id": { "type": "string" },
+        "name": { "type": "string" }
+      }
+    }
+  },
+
+  "examples": [
+    {
+      "contractVersion": "1.3.0",
+      "id": "p-9f52a1b0",
+      "identifiers": {
+        "canonicalKey": "00012345678905",
+        "gtin14": "00012345678905",
+        "upc": "012345678905",
+        "skuByProvider": [{ "provider": "aldi", "sku": "A-12345" }]
+      },
+      "title": "Whole Milk 1 Gallon",
+      "brand": { "name": "Friendly Farms", "manufacturer": "DairyCo" },
+      "categoryPath": ["Grocery","Dairy","Milk"],
+      "package": { "size": { "quantity": 1, "unit": "gal", "normalized": { "quantity": 3785.41, "unit": "ml" } } },
+      "ingredients": { "raw": "Milk, Vitamin D3", "allergens": ["milk"] },
+      "nutrition": {
+        "serving": { "quantity": 240, "unit": "ml", "normalized": { "quantity": 240, "unit": "ml" } },
+        "perServing": { "calories": 150, "fat_g": 8, "protein_g": 8, "carbs_g": 12, "sodium_mg": 120 }
+      },
+      "pricing": {
+        "prices": [
+          { "provider": "aldi", "channel": "in_store", "amount": 3.29, "currency": "USD", "pricePerUnit": { "unit": "per_l", "amount": 0.87 } }
+        ]
+      },
+      "availability": [
+        { "storeId": "aldi-0123", "storeName": "ALDI #123", "inStock": true, "stockLevel": "high", "lastSeenISO": "2025-10-27T13:00:00Z" }
+      ],
+      "offers": { "coupons": [{ "id": "cpn-abc123", "stackingGroup": "mfg" }] },
+      "matching": { "confidence": 0.98, "strategy": "barcode" },
+      "sourceAttribution": [{ "provider": "aldi", "fields": ["title","price","images"], "confidence": 0.9 }],
+      "hashes": { "idSha": "sha256:...", "contentSha": "sha256:..." },
+      "lifecycle": { "status": "active", "firstSeenISO": "2025-09-15T00:00:00Z" },
+      "userContext": { "isFavorite": true, "preferredStores": ["aldi-0123"] }
+    }
+  ]
+}

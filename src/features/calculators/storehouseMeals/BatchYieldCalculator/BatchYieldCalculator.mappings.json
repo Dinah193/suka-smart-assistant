@@ -1,0 +1,106 @@
+{
+  "nodeId": "storehouseMeals.batchYieldCalculator",
+  "label": "Batch Yield → Sessions, Preservation, Shopping",
+  "description": "Maps a computed batch yield into the next best household actions: start a batch cooking session, schedule preservation work, and fill inventory gaps with a shopping run.",
+  "graph": {
+    "role": "source",
+    "provides": [
+      "batchPortionYield",
+      "batchContainerPlan",
+      "batchInventoryDelta",
+      "batchLabelingHints",
+      "batchTimeEstimate"
+    ],
+    "consumes": [
+      "recipeDefinition",
+      "batchScalingTarget",
+      "portioningPreferences",
+      "containerCatalog"
+    ]
+  },
+  "nextSteps": {
+    "primary": [
+      {
+        "id": "storehouseMeals.batchYieldCalculator.toSessionRunner",
+        "label": "Start Batch Session Now",
+        "type": "session",
+        "sessionDomain": "cooking",
+        "sessionBuilderKey": "sessions.createFromBatchYield",
+        "dependsOn": [
+          "batchPortionYield",
+          "batchTimeEstimate"
+        ],
+        "ui": {
+          "icon": "ri-play-circle-line",
+          "route": "/sessions/now",
+          "ctaLabel": "Cook This Batch Now"
+        }
+      }
+    ],
+    "preservation": [
+      {
+        "id": "storehouseMeals.batchYieldCalculator.toCanning",
+        "label": "Plan Canning / Jar Preservation",
+        "type": "planner",
+        "plannerNodeId": "preservation.canningPlanner",
+        "uses": [
+          "batchPortionYield",
+          "batchContainerPlan",
+          "batchLabelingHints"
+        ],
+        "ui": {
+          "icon": "ri-archive-2-line",
+          "route": "/preservation/canning",
+          "ctaLabel": "Map Jars and Shelf Space"
+        }
+      },
+      {
+        "id": "storehouseMeals.batchYieldCalculator.toFreezer",
+        "label": "Plan Freezer Allocation",
+        "type": "planner",
+        "plannerNodeId": "storehouse.freezerPlanner",
+        "uses": [
+          "batchContainerPlan",
+          "batchInventoryDelta"
+        ],
+        "ui": {
+          "icon": "ri-fridge-line",
+          "route": "/storehouse/freezer",
+          "ctaLabel": "Assign Containers to Freezer Zones"
+        }
+      }
+    ],
+    "shopping": [
+      {
+        "id": "storehouseMeals.batchYieldCalculator.toShoppingList",
+        "label": "Fill Gaps With a Shopping List",
+        "type": "planner",
+        "plannerNodeId": "storehouse.shoppingListGenerator",
+        "uses": [
+          "batchInventoryDelta"
+        ],
+        "ui": {
+          "icon": "ri-shopping-basket-2-line",
+          "route": "/storehouse/shopping-list",
+          "ctaLabel": "Generate Shopping List From Shortages"
+        }
+      }
+    ],
+    "export": [
+      {
+        "id": "storehouseMeals.batchYieldCalculator.toFamilyFundHub",
+        "label": "Export Batch Plan to Hub",
+        "type": "hub-export",
+        "hubPacketKind": "batchYieldPlan",
+        "uses": [
+          "batchPortionYield",
+          "batchContainerPlan",
+          "batchTimeEstimate"
+        ],
+        "conditions": {
+          "requireFamilyFundMode": true
+        }
+      }
+    ]
+  }
+}

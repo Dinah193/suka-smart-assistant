@@ -1,0 +1,232 @@
+{
+  "version": 1,
+  "generatedAt": "2025-11-08T00:00:00.000Z",
+  "evaluation": {
+    "mode": "first-match",
+    "order": [
+      "safety",
+      "hard-constraints",
+      "time-pressure",
+      "inventory",
+      "device",
+      "network",
+      "environment",
+      "ergonomics",
+      "fallback"
+    ]
+  },
+  "defaults": [
+    {
+      "id": "dq-safety-critical",
+      "bucket": "safety",
+      "when": "behind_schedule",
+      "condition": { "minutesBehindGte": 30, "quietHoursWithinMinLte": 20 },
+      "actions": [
+        { "action": "skip_noncritical_steps" },
+        { "action": "shorten_timers_pct", "params": { "pct": 0.15, "floorMs": 30000 } }
+      ]
+    },
+    {
+      "id": "dq-hard-quiet-hours",
+      "bucket": "hard-constraints",
+      "when": "quiet_hours",
+      "condition": { "withinMinutesLte": 10 },
+      "actions": [
+        { "action": "defer_to_next_window" }
+      ]
+    },
+    {
+      "id": "dq-time-pressure",
+      "bucket": "time-pressure",
+      "when": "behind_schedule",
+      "condition": { "minutesBehindGte": 10 },
+      "actions": [
+        { "action": "reduce_concurrency_to", "params": { "maxParallel": 1 } },
+        { "action": "shorten_timers_pct", "params": { "pct": 0.1, "floorMs": 45000 } }
+      ]
+    },
+    {
+      "id": "dq-inventory-low",
+      "bucket": "inventory",
+      "when": "inventory_short",
+      "condition": { "severity": "low" },
+      "actions": [
+        { "action": "substitute_ingredient_tag", "params": { "tag": "aromatics" } }
+      ]
+    },
+    {
+      "id": "dq-inventory-medium",
+      "bucket": "inventory",
+      "when": "inventory_short",
+      "condition": { "severity": "medium" },
+      "actions": [
+        { "action": "skip_noncritical_steps" },
+        { "action": "substitute_ingredient_tag", "params": { "tag": "pantry_equivalent" } }
+      ]
+    },
+    {
+      "id": "dq-device-unavailable",
+      "bucket": "device",
+      "when": "device_unavailable",
+      "condition": { "retryMs": 60000 },
+      "actions": [
+        { "action": "defer_to_next_window" }
+      ]
+    },
+    {
+      "id": "dq-rtc-unavailable",
+      "bucket": "network",
+      "when": "rtc_unavailable",
+      "condition": { "graceMs": 15000 },
+      "actions": [
+        { "action": "fallback_transport_ws" },
+        { "action": "suppress_media" }
+      ]
+    },
+    {
+      "id": "dq-network-poor",
+      "bucket": "network",
+      "when": "network_poor",
+      "condition": { "packetLossPctGte": 3, "rttMsGte": 250 },
+      "actions": [
+        { "action": "suppress_media" }
+      ]
+    },
+    {
+      "id": "dq-environment-energy",
+      "bucket": "environment",
+      "when": "energy_saving",
+      "condition": { "active": true },
+      "actions": [
+        { "action": "reduce_concurrency_to", "params": { "maxParallel": 1 } },
+        { "action": "shorten_timers_pct", "params": { "pct": 0.08, "floorMs": 60000 } }
+      ]
+    },
+    {
+      "id": "dq-fallback-window",
+      "bucket": "fallback",
+      "when": "behind_schedule",
+      "condition": { "minutesBehindGte": 45 },
+      "actions": [
+        { "action": "defer_to_next_window" }
+      ]
+    }
+  ],
+  "byDomain": {
+    "cooking": [
+      {
+        "id": "cook-time-pressure",
+        "bucket": "time-pressure",
+        "when": "behind_schedule",
+        "condition": { "minutesBehindGte": 8 },
+        "actions": [
+          { "action": "shorten_timers_pct", "params": { "pct": 0.12, "floorMs": 60000 } },
+          { "action": "skip_noncritical_steps" }
+        ]
+      },
+      {
+        "id": "cook-quiet-hours",
+        "bucket": "hard-constraints",
+        "when": "quiet_hours",
+        "condition": { "withinMinutesLte": 20, "containsNoisySteps": true },
+        "actions": [
+          { "action": "defer_to_next_window" }
+        ]
+      }
+    ],
+    "cleaning": [
+      {
+        "id": "clean-night-mode",
+        "bucket": "environment",
+        "when": "quiet_hours",
+        "condition": { "active": true },
+        "actions": [
+          { "action": "skip_noncritical_steps" }
+        ]
+      }
+    ],
+    "garden": [
+      {
+        "id": "garden-time-pressure",
+        "bucket": "time-pressure",
+        "when": "behind_schedule",
+        "condition": { "minutesBehindGte": 5 },
+        "actions": [
+          { "action": "reduce_concurrency_to", "params": { "maxParallel": 1 } }
+        ]
+      }
+    ],
+    "animals": [
+      {
+        "id": "animals-hard-window",
+        "bucket": "hard-constraints",
+        "when": "behind_schedule",
+        "condition": { "minutesBehindGte": 3, "taskType": "feeding" },
+        "actions": [
+          { "action": "skip_noncritical_steps" }
+        ]
+      }
+    ],
+    "preservation": [
+      {
+        "id": "preserve-long-run",
+        "bucket": "time-pressure",
+        "when": "behind_schedule",
+        "condition": { "minutesBehindGte": 15 },
+        "actions": [
+          { "action": "shorten_timers_pct", "params": { "pct": 0.08, "floorMs": 120000 } }
+        ]
+      }
+    ]
+  },
+  "bySessionType": {
+    "project": [
+      {
+        "id": "project-cascade",
+        "bucket": "time-pressure",
+        "when": "behind_schedule",
+        "condition": { "minutesBehindGte": 12 },
+        "actions": [
+          { "action": "reduce_concurrency_to", "params": { "maxParallel": 1 } },
+          { "action": "skip_noncritical_steps" },
+          { "action": "shorten_timers_pct", "params": { "pct": 0.1, "floorMs": 90000 } }
+        ]
+      }
+    ],
+    "feeding": [
+      {
+        "id": "feeding-hard-deadline",
+        "bucket": "hard-constraints",
+        "when": "behind_schedule",
+        "condition": { "minutesBehindGte": 2 },
+        "actions": [
+          { "action": "skip_noncritical_steps" }
+        ]
+      },
+      {
+        "id": "feeding-network",
+        "bucket": "network",
+        "when": "rtc_unavailable",
+        "condition": { "graceMs": 5000 },
+        "actions": [
+          { "action": "fallback_transport_ws" }
+        ]
+      }
+    ]
+  },
+  "situationalMultipliers": {
+    "quietHours": 1.1,
+    "rtcUnavailable": 1.05,
+    "firstRunOnDevice": 1.08,
+    "lowInventoryConfidence": 1.06
+  },
+  "actionCatalog": [
+    "skip_noncritical_steps",
+    "shorten_timers_pct",
+    "reduce_concurrency_to",
+    "substitute_ingredient_tag",
+    "fallback_transport_ws",
+    "suppress_media",
+    "defer_to_next_window"
+    ]
+}

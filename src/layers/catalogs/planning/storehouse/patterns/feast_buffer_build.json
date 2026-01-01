@@ -1,0 +1,236 @@
+{
+  "id": "pat.storehouse.feast_buffer_build",
+  "domain": "storehouse",
+  "kind": "planning_pattern",
+  "title": "Feast Buffer Build",
+  "description": "Build buffer stock for feast windows, with perishables risk controls.",
+  "intentTags": [
+    "plan:storehouse",
+    "mode:bufferStock",
+    "moed:feast"
+  ],
+  "inputs": [
+    {
+      "key": "storageZones",
+      "label": "Storage zones",
+      "type": "array",
+      "required": true,
+      "default": [
+        "pantry",
+        "cold",
+        "frozen",
+        "rootCellar",
+        "fermentationRoom"
+      ],
+      "notes": "Zones: pantry/cold/frozen/root cellar/fermentation room."
+    },
+    {
+      "key": "inventorySnapshot",
+      "label": "Inventory snapshot",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "budgetCap",
+      "label": "Budget cap (optional)",
+      "type": "number"
+    },
+    {
+      "key": "spaceCap",
+      "label": "Space cap (optional)",
+      "type": "object"
+    },
+    {
+      "key": "timeCapMinutes",
+      "label": "Time cap (minutes)",
+      "type": "number"
+    },
+    {
+      "key": "householdSize",
+      "label": "Household size",
+      "type": "number",
+      "default": 4
+    },
+    {
+      "key": "season",
+      "label": "Season / mode",
+      "type": "string"
+    }
+  ],
+  "outputs": [
+    {
+      "key": "reorderActions",
+      "label": "Reorder actions",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "rotationActions",
+      "label": "Rotation actions (FIFO)",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "preservationTriggers",
+      "label": "Preservation triggers (surplus risk)",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "sessions",
+      "label": "Session blueprints requested",
+      "type": "array",
+      "required": true
+    }
+  ],
+  "constraints": [
+    "budgetCap",
+    "spaceCap",
+    "timeCap",
+    "allergiesAvoidList"
+  ],
+  "requires": [
+    "artifact:inventorySnapshot"
+  ],
+  "produces": [
+    "artifact:reorderList",
+    "artifact:rotationPlan",
+    "blueprint:storehouseSessions",
+    "trigger:preservation"
+  ],
+  "lean": {
+    "wasteTargets": [
+      "motion",
+      "transport",
+      "inventory",
+      "defects",
+      "waiting"
+    ],
+    "standardWorkRefs": [
+      "stdwork.fifo.labels",
+      "stdwork.cycle.count",
+      "stdwork.zone.layout"
+    ],
+    "taktModelRef": "takt.household.storehouse",
+    "kpiTargets": {
+      "spoilageRate": "reduce",
+      "tripsPerWeek": "reduce",
+      "stockouts": "reduce",
+      "overstocks": "reduce"
+    }
+  },
+  "ui": {
+    "icon": "warehouse",
+    "chips": [
+      "time:medium",
+      "difficulty:medium",
+      "Sabbath-safe",
+      "zones:pantry+cold+frozen"
+    ],
+    "defaultFilters": {
+      "domain": "storehouse"
+    },
+    "form": [
+      {
+        "key": "feastWindowDays",
+        "type": "slider",
+        "label": "Feast window (days)",
+        "min": 1,
+        "max": 14,
+        "default": 7
+      },
+      {
+        "key": "bufferFactor",
+        "type": "slider",
+        "label": "Buffer factor",
+        "min": 1.0,
+        "max": 2.0,
+        "step": 0.1,
+        "default": 1.3
+      }
+    ]
+  },
+  "steps": [
+    {
+      "id": "inv.snapshot",
+      "title": "Confirm inventory snapshot",
+      "template": "tpl.inventory.snapshot.confirm",
+      "domain": "storehouse",
+      "params": {
+        "zonesKey": "storageZones"
+      }
+    },
+    {
+      "id": "buffer.compute",
+      "title": "Compute feast buffer quantities",
+      "template": "tpl.storehouse.buffer.compute",
+      "domain": "storehouse",
+      "params": {
+        "windowDaysKey": "feastWindowDays",
+        "bufferFactorKey": "bufferFactor"
+      }
+    },
+    {
+      "id": "reorder.build",
+      "title": "Build reorder actions",
+      "template": "tpl.storehouse.reorder.build",
+      "domain": "storehouse",
+      "params": {
+        "respectBudgetKey": "budgetCap",
+        "dedupe": true
+      }
+    },
+    {
+      "id": "risk.detect",
+      "title": "Detect perishables risk",
+      "template": "tpl.inventory.risk.scan",
+      "domain": "storehouse",
+      "params": {
+        "riskHorizonDays": 5
+      },
+      "hints": [
+        "leanSignal:spoilage"
+      ]
+    },
+    {
+      "id": "preserve.trigger",
+      "title": "Trigger preservation sessions if needed",
+      "template": "tpl.preservation.trigger.sessions",
+      "domain": "homestead",
+      "params": {
+        "methods": [
+          "freeze",
+          "ferment",
+          "can"
+        ],
+        "emitEvent": "session.blueprints.created"
+      },
+      "optional": true
+    }
+  ],
+  "kpis": [
+    {
+      "key": "stockouts",
+      "label": "Stockouts during window",
+      "direction": "down",
+      "unit": "count"
+    },
+    {
+      "key": "spoilageRate",
+      "label": "Spoilage rate",
+      "direction": "down",
+      "unit": "%"
+    }
+  ],
+  "variants": [],
+  "links": {
+    "preservationSuggested": [
+      "pat.meals.preservation_first"
+    ]
+  },
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "tags": []
+  }
+}

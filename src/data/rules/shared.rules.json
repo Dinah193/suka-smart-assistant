@@ -1,0 +1,168 @@
+{
+  "version": "1.0.0",
+  "domain": "shared",
+  "generatedAt": "2025-11-11T00:00:00.000Z",
+  "source": "SSA builtin",
+  "rules": [
+    {
+      "id": "preheat-water-for-thermal-tasks",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 220,
+      "tags": ["water", "heat", "staging"],
+      "match": {
+        "byMethod": { "methodsAny": ["boil", "sanitize", "sterilize", "blanch", "dissolve-solids"] }
+      },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "start-kettle-or-pot",
+            "title": "Start heating water",
+            "description": "Begin heating water now so it’s ready when needed. Use kettle for speed; cover pot to reduce time to boil.",
+            "duration": "PT5M",
+            "setTimer": true,
+            "equipment": ["kettle(optional)", "lidded-pot", "stovetop"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "sanitize-tools-between-materials",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 210,
+      "tags": ["sanitation", "cross-contamination", "tools"],
+      "match": {
+        "byStepText": { "regex": "(?i)(switch|then use).*?(knife|shears|scissors|saw|spatula|tongs|pruners)", "flags": "i" }
+      },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "sanitize-shared-tools",
+            "title": "Sanitize shared tools before switching tasks",
+            "description": "Clean visible debris, then sanitize contact surfaces (70% alcohol, bleach 1:9, or dishwasher sanitize cycle where appropriate). Dry before reuse.",
+            "duration": "PT1M",
+            "equipment": ["isopropyl-70", "bleach-solution", "paper-towels"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "wash-hands-after-raw-or-soil",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 200,
+      "tags": ["hygiene", "handwash"],
+      "match": {
+        "byStepText": { "regex": "(?i)(raw (chicken|meat|eggs|milk)|soil|manure|compost|litter)", "flags": "i" }
+      },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "wash-hands",
+            "title": "Wash hands",
+            "description": "Wash with soap and warm water for ≥20 seconds after handling raw foods or soil/manure before touching other surfaces.",
+            "duration": "PT20S",
+            "setTimer": true,
+            "equipment": ["sink", "soap", "paper-towels"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "label-and-log-common",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 230,
+      "tags": ["logging", "traceability"],
+      "match": {
+        "byMethod": { "methodsAny": ["batch", "preserve", "sow-direct", "seed-start", "transplant", "butcher", "clean-session"] }
+      },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "apply-label-and-log",
+            "title": "Label & log the session",
+            "description": "Record date/time, material, quantity, and location (jar/bag/batch/bed). Add notes for later scheduling and audits.",
+            "duration": "PT1M",
+            "equipment": ["label", "marker", "journal-or-app"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "check-spacing-or-load-planning",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 240,
+      "tags": ["planning", "spacing", "capacity"],
+      "match": {
+        "byMethod": { "methodsAny": ["sow-direct", "transplant", "rack-load", "tray-load"] }
+      },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "verify-spacing-or-capacity",
+            "title": "Verify spacing/capacity plan",
+            "description": "Check recommended spacing (beds/trays) or capacity limits (racks/shelves). Avoid crowding to improve airflow and outcomes.",
+            "duration": "PT0S",
+            "equipment": ["measuring-tape(optional)"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "rinse-between-chemistries-shared",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 250,
+      "tags": ["compatibility", "chemistry", "safety"],
+      "match": {
+        "byStepText": { "regex": "(?i)(switch .*cleaner|then apply .*solution|change .*chemical)", "flags": "i" }
+      },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "rinse-between-chemistries",
+            "title": "Rinse between different chemistries",
+            "description": "Rinse tools/surfaces with water and dry before applying a different product to prevent dangerous reactions or residues.",
+            "duration": "PT45S"
+          }
+        }
+      ]
+    },
+    {
+      "id": "cool-hot-liquids-safely",
+      "ruleType": "timing",
+      "enabled": true,
+      "priority": 260,
+      "tags": ["thermal", "safety"],
+      "applyTo": { "byStepText": { "regex": "(?i)(boiling|near-boiling|sterilize|blanch)", "flags": "i" } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "cooldown-guidance",
+            "title": "Cool hot liquids safely",
+            "description": "Move hot vessels away from edges, use heat-safe surfaces, and allow brief cooldown before pouring to avoid splashes and burns.",
+            "duration": "PT0S",
+            "equipment": ["trivet", "oven-mitts"]
+          }
+        }
+      ]
+    }
+  ]
+}

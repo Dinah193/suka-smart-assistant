@@ -1,0 +1,184 @@
+{
+  "id": "lean.wm.cooking",
+  "domain": "lean",
+  "kind": "waste_map",
+  "title": "Waste Map: Cooking",
+  "intentTags": [
+    "lean:waste_map",
+    "domain:meals"
+  ],
+  "inputs": [
+    {
+      "key": "signals",
+      "label": "Detected signals",
+      "type": "array",
+      "default": []
+    },
+    {
+      "key": "context",
+      "label": "Context",
+      "type": "object",
+      "default": {}
+    }
+  ],
+  "outputs": [
+    {
+      "key": "countermeasures",
+      "label": "Recommended countermeasures",
+      "type": "array",
+      "required": true
+    }
+  ],
+  "constraints": [
+    "advisoryOnly",
+    "linkToPatternsAndSessions"
+  ],
+  "steps": [],
+  "kpis": [
+    {
+      "key": "wasteIncidents",
+      "label": "Waste incidents",
+      "direction": "down",
+      "unit": "count"
+    },
+    {
+      "key": "timeLost",
+      "label": "Time lost",
+      "direction": "down",
+      "unit": "min"
+    }
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial Lean Six Sigma catalog."
+      }
+    ]
+  },
+  "wasteMap": {
+    "categories": [
+      {
+        "waste": "waiting",
+        "commonCauses": [
+          "missing_thawed_items",
+          "preheat_not_started",
+          "tools_not_ready"
+        ],
+        "countermeasures": [
+          {
+            "type": "standard_work_ref",
+            "ref": "lean.sw.weekly_meal_cycle"
+          },
+          {
+            "type": "hintTag",
+            "value": "prestageTools"
+          },
+          {
+            "type": "pattern_bias",
+            "patternId": "pat.meals.weekly_batch",
+            "boost": 0.08
+          }
+        ],
+        "affects": [
+          "pat.meals.weekly_batch",
+          "pat.meals.daily_fresh"
+        ],
+        "sessions": [
+          "batch",
+          "single",
+          "prep_only"
+        ]
+      },
+      {
+        "waste": "motion",
+        "commonCauses": [
+          "kitchen_layout_scatter",
+          "too_many_trips_to_pantry",
+          "no_staging_area"
+        ],
+        "countermeasures": [
+          {
+            "type": "hintTag",
+            "value": "stagingStation"
+          },
+          {
+            "type": "standard_work_ref",
+            "ref": "stdwork.kitchen.staging"
+          }
+        ],
+        "affects": [
+          "pat.meals.weekly_batch",
+          "pat.meals.feast_anchored"
+        ],
+        "sessions": [
+          "batch",
+          "prep_only"
+        ]
+      },
+      {
+        "waste": "defects",
+        "commonCauses": [
+          "overcooking",
+          "undercooking",
+          "missed_safety_steps"
+        ],
+        "countermeasures": [
+          {
+            "type": "hintTag",
+            "value": "donenessChecks"
+          },
+          {
+            "type": "session_guard",
+            "value": "safetyChecklist"
+          }
+        ],
+        "affects": [
+          "pat.meals.daily_fresh",
+          "pat.meals.weekly_batch"
+        ],
+        "sessions": [
+          "single",
+          "batch"
+        ]
+      },
+      {
+        "waste": "overprocessing",
+        "commonCauses": [
+          "too_many_new_recipes",
+          "overly_complex_sides"
+        ],
+        "countermeasures": [
+          {
+            "type": "soft_constraint",
+            "value": {
+              "maxNewRecipesPerWeek": 2
+            }
+          },
+          {
+            "type": "pattern_bias",
+            "patternId": "pat.meals.daily_fresh",
+            "boost": -0.04
+          }
+        ],
+        "affects": [
+          "pat.meals.weekly_batch",
+          "pat.meals.feast_anchored"
+        ],
+        "sessions": [
+          "prep_only",
+          "batch"
+        ]
+      }
+    ]
+  },
+  "links": {
+    "affectsPatterns": [
+      "pat.meals.weekly_batch",
+      "pat.meals.daily_fresh",
+      "pat.meals.feast_anchored"
+    ]
+  }
+}

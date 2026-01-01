@@ -1,0 +1,419 @@
+{
+  "version": "1.0.0",
+  "updatedAt": "2025-10-20T22:18:00Z",
+  "locale": "en-US",
+  "groups": [
+    { "id": "africa", "label": "Africa", "uiOrder": 10, "icon": "globe-africa" },
+    { "id": "americas", "label": "Americas", "uiOrder": 20, "icon": "globe-americas" },
+    { "id": "asia", "label": "Asia", "uiOrder": 30, "icon": "globe-asia" },
+    { "id": "europe", "label": "Europe", "uiOrder": 40, "icon": "globe-europe" },
+    { "id": "middle-east", "label": "Middle East", "uiOrder": 50, "icon": "moon-star" },
+    { "id": "global-fusion", "label": "Global & Fusion", "uiOrder": 60, "icon": "sparkles" }
+  ],
+  "cuisines": [
+    {
+      "id": "west-african",
+      "label": "West African",
+      "groupId": "africa",
+      "synonyms": ["Ghanaian", "Nigerian", "Senegalese", "Jollof region", "West African inspired"],
+      "regions": ["Ghana", "Nigeria", "Senegal", "Ivory Coast"],
+      "tags": ["stew-forward", "rice", "spice", "clean-friendly"],
+      "staples": ["rice", "yam", "cassava", "tomato", "chili"]
+    },
+    {
+      "id": "east-african",
+      "label": "East African",
+      "groupId": "africa",
+      "synonyms": ["Ethiopian", "Eritrean", "Somali", "Kenyan"],
+      "regions": ["Ethiopia", "Eritrea", "Somalia", "Kenya"],
+      "tags": ["injera", "legume", "spiced", "stew"],
+      "staples": ["teff", "lentils", "berbere", "ghee"]
+    },
+    {
+      "id": "north-african",
+      "label": "North African",
+      "groupId": "africa",
+      "synonyms": ["Moroccan", "Tunisian", "Algerian"],
+      "regions": ["Morocco", "Tunisia", "Algeria"],
+      "tags": ["tagine", "preserved-lemon", "couscous"],
+      "staples": ["couscous", "olive", "harissa", "lamb"]
+    },
+    {
+      "id": "south-african",
+      "label": "Southern African",
+      "groupId": "africa",
+      "synonyms": ["South African"],
+      "regions": ["South Africa", "Botswana"],
+      "tags": ["braai", "stew", "cornmeal"],
+      "staples": ["maize", "beef", "boerewors"]
+    },
+
+    {
+      "id": "american-classic",
+      "label": "American (Classic)",
+      "groupId": "americas",
+      "synonyms": ["US", "comfort food"],
+      "regions": ["United States"],
+      "tags": ["comfort", "grill", "bake"],
+      "staples": ["beef", "potato", "corn"]
+    },
+    {
+      "id": "southern-us",
+      "label": "Southern US",
+      "groupId": "americas",
+      "synonyms": ["soul food", "Cajun", "Creole"],
+      "regions": ["United States–South"],
+      "tags": ["stew", "smoked", "spice"],
+      "staples": ["rice", "beans", "okra", "pork"]
+    },
+    {
+      "id": "tex-mex",
+      "label": "Tex–Mex",
+      "groupId": "americas",
+      "synonyms": ["southwest"],
+      "regions": ["Texas", "US Southwest"],
+      "tags": ["cheesy", "spicy", "grill"],
+      "staples": ["tortilla", "beans", "beef", "chile"]
+    },
+    {
+      "id": "mexican",
+      "label": "Mexican",
+      "groupId": "americas",
+      "synonyms": ["MX"],
+      "regions": ["Mexico"],
+      "tags": ["spicy", "corn", "stew", "fresh"],
+      "staples": ["corn", "beans", "chile", "tomato"]
+    },
+    {
+      "id": "caribbean",
+      "label": "Caribbean",
+      "groupId": "americas",
+      "synonyms": ["Jamaican", "Trinidadian", "Cuban"],
+      "regions": ["Jamaica", "Trinidad & Tobago", "Cuba"],
+      "tags": ["jerk", "spice", "grill"],
+      "staples": ["rice", "plantain", "goat", "allspice"]
+    },
+    {
+      "id": "peruvian",
+      "label": "Peruvian",
+      "groupId": "americas",
+      "synonyms": ["Perú"],
+      "regions": ["Peru"],
+      "tags": ["ceviche", "aji", "potato"],
+      "staples": ["potato", "corn", "aji amarillo", "fish"]
+    },
+    {
+      "id": "brazilian",
+      "label": "Brazilian",
+      "groupId": "americas",
+      "synonyms": ["Brasil"],
+      "regions": ["Brazil"],
+      "tags": ["stew", "grill"],
+      "staples": ["beans", "cassava", "beef"]
+    },
+
+    {
+      "id": "chinese",
+      "label": "Chinese",
+      "groupId": "asia",
+      "synonyms": ["CN"],
+      "regions": ["China"],
+      "tags": ["stir-fry", "noodle", "rice"],
+      "staples": ["rice", "noodles", "soy", "ginger"]
+    },
+    {
+      "id": "sichuan",
+      "label": "Sichuan",
+      "groupId": "asia",
+      "synonyms": ["Szechuan"],
+      "regions": ["China–Sichuan"],
+      "tags": ["spicy", "numbing", "stir-fry"],
+      "staples": ["chili", "Sichuan peppercorn", "doubanjiang"]
+    },
+    {
+      "id": "cantonese",
+      "label": "Cantonese",
+      "groupId": "asia",
+      "synonyms": ["Guangdong", "HK"],
+      "regions": ["China–Guangdong", "Hong Kong"],
+      "tags": ["dim-sum", "steam", "mild"],
+      "staples": ["rice", "soy", "ginger", "scallion"]
+    },
+    {
+      "id": "japanese",
+      "label": "Japanese",
+      "groupId": "asia",
+      "synonyms": ["JP"],
+      "regions": ["Japan"],
+      "tags": ["umami", "rice", "noodle"],
+      "staples": ["rice", "soy", "miso", "dashi"]
+    },
+    {
+      "id": "korean",
+      "label": "Korean",
+      "groupId": "asia",
+      "synonyms": ["KR"],
+      "regions": ["Korea"],
+      "tags": ["spicy", "fermented", "bbq"],
+      "staples": ["rice", "gochujang", "kimchi", "beef"]
+    },
+    {
+      "id": "thai",
+      "label": "Thai",
+      "groupId": "asia",
+      "synonyms": ["TH"],
+      "regions": ["Thailand"],
+      "tags": ["spicy", "herbal", "curry"],
+      "staples": ["rice", "coconut", "lemongrass", "chili"]
+    },
+    {
+      "id": "vietnamese",
+      "label": "Vietnamese",
+      "groupId": "asia",
+      "synonyms": ["VN"],
+      "regions": ["Vietnam"],
+      "tags": ["fresh", "herbs", "noodle"],
+      "staples": ["rice", "fish sauce", "herbs"]
+    },
+    {
+      "id": "indian-north",
+      "label": "Indian (North)",
+      "groupId": "asia",
+      "synonyms": ["Punjabi", "Mughlai"],
+      "regions": ["India–North"],
+      "tags": ["rich", "spice", "tandoor"],
+      "staples": ["wheat", "ghee", "garam masala", "lamb"]
+    },
+    {
+      "id": "indian-south",
+      "label": "Indian (South)",
+      "groupId": "asia",
+      "synonyms": ["Tamil", "Andhra", "Kerala"],
+      "regions": ["India–South"],
+      "tags": ["rice", "curry", "fermented"],
+      "staples": ["rice", "lentils", "coconut", "tamarind"]
+    },
+    {
+      "id": "indonesian",
+      "label": "Indonesian",
+      "groupId": "asia",
+      "synonyms": ["ID"],
+      "regions": ["Indonesia"],
+      "tags": ["satay", "spice", "fried"],
+      "staples": ["rice", "peanut", "chili", "sweet soy"]
+    },
+    {
+      "id": "malay",
+      "label": "Malaysian",
+      "groupId": "asia",
+      "synonyms": ["Malay"],
+      "regions": ["Malaysia"],
+      "tags": ["spice", "noodle", "rice"],
+      "staples": ["rice", "coconut", "chili", "shrimp paste"]
+    },
+    {
+      "id": "filipino",
+      "label": "Filipino",
+      "groupId": "asia",
+      "synonyms": ["PH"],
+      "regions": ["Philippines"],
+      "tags": ["stew", "sour-savory"],
+      "staples": ["rice", "vinegar", "pork", "garlic"]
+    },
+
+    {
+      "id": "italian",
+      "label": "Italian",
+      "groupId": "europe",
+      "synonyms": ["IT"],
+      "regions": ["Italy"],
+      "tags": ["pasta", "olive-oil", "simmer"],
+      "staples": ["wheat", "tomato", "olive oil", "cheese"]
+    },
+    {
+      "id": "french",
+      "label": "French",
+      "groupId": "europe",
+      "synonyms": ["FR"],
+      "regions": ["France"],
+      "tags": ["braise", "sauce", "butter"],
+      "staples": ["butter", "wine", "herbs", "stock"]
+    },
+    {
+      "id": "spanish",
+      "label": "Spanish",
+      "groupId": "europe",
+      "synonyms": ["ES"],
+      "regions": ["Spain"],
+      "tags": ["olive-oil", "rice", "tapas"],
+      "staples": ["olive oil", "paprika", "rice", "seafood"]
+    },
+    {
+      "id": "greek",
+      "label": "Greek",
+      "groupId": "europe",
+      "synonyms": ["GR"],
+      "regions": ["Greece"],
+      "tags": ["olive-oil", "herbal", "grill"],
+      "staples": ["olive oil", "lamb", "yogurt", "herbs"]
+    },
+    {
+      "id": "german",
+      "label": "German",
+      "groupId": "europe",
+      "synonyms": ["DE"],
+      "regions": ["Germany"],
+      "tags": ["roast", "stew"],
+      "staples": ["pork", "potato", "cabbage"]
+    },
+    {
+      "id": "british",
+      "label": "British",
+      "groupId": "europe",
+      "synonyms": ["UK", "English", "Scottish"],
+      "regions": ["United Kingdom"],
+      "tags": ["bake", "roast", "stew"],
+      "staples": ["potato", "beef", "flour"]
+    },
+    {
+      "id": "eastern-european",
+      "label": "Eastern European",
+      "groupId": "europe",
+      "synonyms": ["Polish", "Ukrainian", "Russian", "Baltic"],
+      "regions": ["Poland", "Ukraine", "Russia", "Baltics"],
+      "tags": ["pickled", "stew", "root-veg"],
+      "staples": ["potato", "cabbage", "beet", "dill"]
+    },
+    {
+      "id": "balkan",
+      "label": "Balkan",
+      "groupId": "europe",
+      "synonyms": ["Serbian", "Croatian", "Bosnian"],
+      "regions": ["Balkans"],
+      "tags": ["grill", "stew"],
+      "staples": ["paprika", "beef", "bread"]
+    },
+    {
+      "id": "nordic",
+      "label": "Nordic",
+      "groupId": "europe",
+      "synonyms": ["Scandinavian"],
+      "regions": ["Norway", "Sweden", "Denmark", "Finland", "Iceland"],
+      "tags": ["preserved", "foraged", "seafood"],
+      "staples": ["rye", "fish", "potato", "berries"]
+    },
+
+    {
+      "id": "levantine",
+      "label": "Levantine",
+      "groupId": "middle-east",
+      "synonyms": ["Levant", "Syrian", "Lebanese", "Palestinian"],
+      "regions": ["Syria", "Lebanon", "Palestine", "Jordan"],
+      "tags": ["mezze", "grill", "fresh-herbs"],
+      "staples": ["chickpea", "tahini", "lamb", "olive oil"]
+    },
+    {
+      "id": "turkish",
+      "label": "Turkish",
+      "groupId": "middle-east",
+      "synonyms": ["Türkiye"],
+      "regions": ["Turkey"],
+      "tags": ["grill", "bake", "stew"],
+      "staples": ["eggplant", "lamb", "yogurt", "bulgur"]
+    },
+    {
+      "id": "persian",
+      "label": "Persian / Iranian",
+      "groupId": "middle-east",
+      "synonyms": ["Iranian"],
+      "regions": ["Iran"],
+      "tags": ["herbal", "rice", "stew"],
+      "staples": ["rice", "saffron", "herbs", "lamb"]
+    },
+    {
+      "id": "maghrebi",
+      "label": "Maghrebi",
+      "groupId": "middle-east",
+      "synonyms": ["North African (Arab)"],
+      "regions": ["Maghreb"],
+      "tags": ["tagine", "spice", "couscous"],
+      "staples": ["couscous", "chickpea", "harissa"]
+    },
+    {
+      "id": "israeli",
+      "label": "Israeli",
+      "groupId": "middle-east",
+      "synonyms": ["Modern Israeli"],
+      "regions": ["Israel"],
+      "tags": ["mezze", "fresh", "grill"],
+      "staples": ["tahini", "chickpea", "cucumber", "tomato"]
+    },
+
+    {
+      "id": "mediterranean",
+      "label": "Mediterranean",
+      "groupId": "global-fusion",
+      "synonyms": ["Mediterranean diet", "Med"],
+      "regions": ["Southern Europe & Levant"],
+      "tags": ["olive-oil", "fresh", "grill"],
+      "staples": ["olive oil", "tomato", "fish", "herbs"]
+    },
+    {
+      "id": "middle-eastern-fusion",
+      "label": "Middle Eastern Fusion",
+      "groupId": "global-fusion",
+      "synonyms": ["Arab–Med fusion"],
+      "regions": ["Global"],
+      "tags": ["fusion", "mezze"],
+      "staples": ["tahini", "sumac", "herbs"]
+    },
+    {
+      "id": "pan-asian",
+      "label": "Pan-Asian",
+      "groupId": "global-fusion",
+      "synonyms": ["Asian fusion"],
+      "regions": ["Asia (mixed)"],
+      "tags": ["fusion"],
+      "staples": ["soy", "ginger", "rice", "noodle"]
+    },
+    {
+      "id": "vegetarian-global",
+      "label": "Vegetarian (Global)",
+      "groupId": "global-fusion",
+      "synonyms": ["veg-forward"],
+      "regions": ["Global"],
+      "tags": ["veg", "clean-friendly"],
+      "staples": ["legumes", "grains", "vegetables"]
+    },
+    {
+      "id": "street-food",
+      "label": "Street Food",
+      "groupId": "global-fusion",
+      "synonyms": ["hawker", "food truck"],
+      "regions": ["Global"],
+      "tags": ["quick", "portable", "grill-fry"],
+      "staples": ["flatbread", "noodles", "skewers"]
+    }
+  ],
+  "search": {
+    "boost": {
+      "synonyms": 0.6,
+      "label": 1.0,
+      "tags": 0.8,
+      "regions": 0.4
+    },
+    "stopwords": ["the", "a", "an", "and"]
+  },
+  "x-uxHints": {
+    "featured": ["mediterranean", "west-african", "mexican", "thai", "italian", "japanese", "levantine", "american-classic"],
+    "pickerSections": [
+      { "label": "Popular", "items": ["mediterranean", "mexican", "italian", "thai", "japanese"] },
+      { "label": "Africa", "items": ["west-african", "east-african", "north-african", "south-african"] },
+      { "label": "Americas", "items": ["american-classic", "southern-us", "mexican", "tex-mex", "caribbean", "peruvian", "brazilian"] },
+      { "label": "Asia", "items": ["chinese", "sichuan", "cantonese", "japanese", "korean", "thai", "vietnamese", "indian-north", "indian-south", "indonesian", "malay", "filipino"] },
+      { "label": "Europe", "items": ["italian", "french", "spanish", "greek", "german", "british", "eastern-european", "balkan", "nordic"] },
+      { "label": "Middle East", "items": ["levantine", "turkish", "persian", "maghrebi", "israeli"] },
+      { "label": "Fusion & Global", "items": ["mediterranean", "pan-asian", "middle-eastern-fusion", "street-food", "vegetarian-global"] }
+    ]
+  }
+}

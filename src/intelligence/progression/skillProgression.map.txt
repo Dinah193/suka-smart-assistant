@@ -1,0 +1,502 @@
+===============================================================================
+SKILL PROGRESSION MAP – DESIGN SPEC
+File: src/intelligence/progression/skillProgression.map.txt
+Role: Contract for household skill progression across SSA domains
+===============================================================================
+
+0. CONCEPTUAL PURPOSE
+---------------------
+The skillProgression.map spec defines how SSA understands **householder skills**
+across domains (cooking, garden, animals, preservation, cleaning, textiles,
+home maintenance, feasts, enterprise) as part of the web of meaning.
+
+It answers:
+
+- Where is the householder in each domain’s skill cycle?
+- Which rhythms and yields are appropriate at which skill levels?
+- How can SSA suggest **next meaningful moves** that honor season, storehouse,
+  and dependency chains, instead of random “practice”?
+
+This is NOT a badge system and NOT gamification.
+It is a **household stewardship progression map**, shaping:
+
+- Difficulty and complexity of suggested rhythms,
+- Which sessions / flows SessionRunner offers,
+- How insights are phrased (gentle start vs advanced planning),
+- How domains cooperate (e.g. beginner garden + beginner preservation vs
+  advanced garden feeding advanced preservation).
+
+It must:
+
+- Work in TOOL MODE as a standalone “Skill Explorer / Planner”.
+- Plug into STEWARDSHIP MODE where SSA reads actual usage (sessions completed,
+  rhythms sustained, yields achieved) and gently infers or updates skill posture.
+- Emit eventBus events when skill posture or progression paths change.
+- Provide TODO hooks for seasonal logic, cycles engine, dependencies, insights.
+
+
+1. STRUCTURE – CONFIG SHAPE & DOMAINS
+-------------------------------------
+Meta-domain:
+- skill progression / user progression
+
+Connected domains:
+- cooking, storehouse, garden, animals, preservation, cleaning, textiles,
+  home maintenance, feasts, enterprise, plus cycles engine and dependency map.
+
+Conceptual config shape (JSON-like):
+
+skillProgressionMapConfig = {
+  version: "1.0.0",
+  lastUpdatedAt: string,
+  modeHint?: "TOOL" | "STEWARDSHIP",
+
+  // Core progression tiers and language
+  tiers: SkillTierDefinition[],
+
+  // Domain-specific skill paths
+  domainPaths: DomainSkillPath[],
+
+  // Cross-domain “weaving” patterns
+  progressionPatterns: ProgressionPattern[],
+
+  // Signaling preferences
+  signals: {
+    sendProgressionUpdates: boolean,
+    sendMilestoneInsights: boolean,
+    sendReadinessSuggestions: boolean,
+  },
+
+  metadata?: {
+    householdName?: string,
+    regionProfile?: string,
+  },
+};
+
+
+2. PROPS – DETAILED COMPONENTS
+------------------------------
+
+2.1 SkillTierDefinition
+Defines common progression tiers (shared vocabulary across domains).
+
+SkillTierDefinition = {
+  id: string,                        // e.g. "seedling", "steady-hand",
+                                     //      "household-steward", "mentor"
+
+  label: string,                     // human-facing name
+  order: number,                     // 0..N, ascending skill
+
+  description?: string,              // what this tier “feels like” in practice
+
+  // Typical rhythm posture at this tier
+  rhythmProfile?: {
+    complexity: "simple" | "moderate" | "complex",
+    independence: "guided" | "semi-guided" | "self-directed",
+    recommendedSessionLengthMinutes?: number,
+  },
+
+  // Optional expectations for yields at this tier
+  yieldHints?: {
+    // Not strict requirements; more like typical patterns
+    expectedGardenContributionPerSeason?: "none" | "small" | "steady" | "abundant",
+    expectedStorehouseContribution?: "none" | "small" | "steady" | "deep",
+  },
+
+  // TODO[cycles-engine]:
+  // - Allow cycles engine to interpret these tiers as “posture inputs”
+  //   when deciding which rhythms to suggest or hide.
+
+  notes?: string,
+};
+
+
+2.2 DomainSkillPath
+Defines skill progression for a single domain.
+
+DomainSkillPath = {
+  id: string,                        // e.g. "cooking.core", "garden.core",
+                                     //      "preservation.canning",
+                                     //      "animals.egg-flock",
+                                     //      "cleaning.kitchen-rhythm"
+
+  domain:
+    "cooking" | "storehouse" | "garden" | "animals" |
+    "preservation" | "cleaning" | "textiles" |
+    "homeMaintenance" | "feasts" | "enterprise",
+
+  label: string,
+
+  // Link to shared tiers in order
+  tierIds: string[],                 // array of SkillTierDefinition.id
+
+  // Optional domain-specific descriptions per tier
+  tierOverlays?: {
+    [tierId: string]: {
+      description?: string,          // domain-specific nuance
+      exampleRhythms?: string[],     // e.g. "steady weeknight stew rhythm"
+      exampleYields?: string[],      // e.g. "winter storehouse jars from fall harvest"
+    },
+  },
+
+  // Inputs used to infer progression in STEWARDSHIP MODE
+  signalsUsed?: {
+    sessionTypes?: string[],         // e.g. ["cooking.session", "garden.session"]
+    eventTypes?: string[],           // e.g. ["session.cooking.completed"]
+    yieldEvents?: string[],          // e.g. ["garden.harvest.logged"]
+  },
+
+  // Optional recommended **pre-requisites** from other domains
+  // (this forms a skill dependency graph, not just within-domain sequence)
+  prerequisites?: {
+    tierRequirements?: {
+      [otherDomainPathId: string]: string;  // required tierId in other path
+    },
+  },
+
+  // TODO[dependencies]:
+  // - Integrate with dependencyMap to highlight when a higher domain tier
+  //   relies on lower tiers in other domains (e.g., advanced preservation
+  //   expects at least a steady garden rhythm).
+
+  notes?: string,
+};
+
+
+2.3 ProgressionPattern
+Cross-domain patterns describing how skills weave together.
+
+ProgressionPattern = {
+  id: string,                        // e.g. "harvest-householder-pattern",
+                                     //      "winter-storehouse-builder",
+                                     //      "feast-hosting-steward"
+
+  label: string,
+  description?: string,
+
+  // Ordered skill path checkpoints (can be across domains)
+  steps: {
+    domainPathId: string,            // from DomainSkillPath.id
+    tierId: string,                  // from SkillTierDefinition.id
+  }[],
+
+  // Optional recommended sequence or grouping
+  sequenceHint?: "strict" | "flexible" | "parallel",
+
+  // Expected yields from this pattern
+  expectedYields?: {
+    storehouseSecurityScore?: number,   // 0..1
+    hospitalityCapacityScore?: number,  // 0..1
+    seasonalAlignmentScore?: number,    // 0..1
+  },
+
+  // TODO[insights]:
+  // - Use these patterns to generate “next-skill” insights:
+  //   “You are steady in cooking.core at tier X and garden.core at tier Y,
+  //    you may be ready for preservation.canning tier Z this season.”
+
+  notes?: string,
+};
+
+
+2.4 SkillProgressionState (runtime shape)
+Not part of the config itself, but shape of state the engine will work with.
+
+SkillProgressionState = {
+  // Per domain path inferred tier
+  domainPostures: {
+    [domainPathId: string]: {
+      currentTierId: string,
+      confidence: number,            // 0..1, based on evidence
+      lastUpdatedAt: string,
+      // Optional manual overrides by householder
+      overrideTierId?: string,
+      overrideReason?: string,
+    },
+  },
+
+  // History of progression events (for analytics / storytelling)
+  history?: SkillProgressionEvent[],
+};
+
+SkillProgressionEvent = {
+  id: string,
+  at: string,
+  domainPathId: string,
+  fromTierId?: string,
+  toTierId: string,
+  reason: "inferred" | "manual" | "system-migration",
+  evidence?: {
+    eventIds?: string[],             // underlying SSA event IDs
+    summary?: string,
+  },
+};
+
+
+3. DATA FLOW – TOOL MODE VS STEWARDSHIP MODE
+--------------------------------------------
+
+3.1 TOOL MODE – “Skill Explorer / Planner”
+In TOOL MODE, a standalone experience can:
+
+1) Load:
+   - skillProgressionMapConfig (static),
+   - optional user-specified progression state (e.g., manual self-leveling).
+
+2) Display:
+   - All SkillTierDefinition tiers as a timeline or ladder.
+   - DomainSkillPath entries as lines or branches across tiers.
+   - ProgressionPattern entries as combined cross-domain paths.
+
+3) Let the householder:
+   - Manually indicate where they feel they are (per domain/tier).
+   - Preview what rhythms and yields are natural at a given tier.
+   - Explore recommended “next small progression” aligned with season
+     (e.g., focus on garden.core tier uplift in spring).
+
+4) Emit events:
+   - When the householder adjusts self-assessed tiers,
+     or when the tool computes recommended next steps.
+
+Typical TOOL MODE event flow:
+
+- "progression.map.config.loaded"
+- "progression.skill.selfAssessment.updated"
+- "progression.skill.recommendations.generated"
+
+
+3.2 STEWARDSHIP MODE – “Live Skill Posture Engine”
+In STEWARDSHIP MODE, SSA quietly infers and adjusts skill posture using
+real household rhythms.
+
+Flow:
+
+1) App boot:
+   - Dexie loads:
+     - skillProgressionMapConfig,
+     - householdCycles.engine config,
+     - dependencyMapConfig.
+   - Progression engine initializes SkillProgressionState (from Dexie or default).
+
+2) Listen to domain events:
+   - session.*.completed (cooking, garden, animals, preservation, cleaning, etc.)
+   - harvest, preservation, storehouse, feast, cleaning rhythm events.
+   - insights events that signal consistency or mastery (e.g. multiple
+     “strong rhythm” indicators over a season).
+
+3) Accumulate evidence:
+   - For each domainPathId:
+     - count and classify sessions by complexity,
+     - measure rhythm consistency (e.g. repeated weekly patterns),
+     - identify yields (e.g. storehouse jars, garden pounds, preserved batches),
+     - track feast hosting events.
+
+4) Periodic progression evaluation:
+   - At season boundaries and defined intervals, progression engine:
+     - runs domain-specific heuristics guided by DomainSkillPath.tierOverlays
+       and SkillTierDefinition.rhythmProfile,
+     - infers whether evidence supports a shift to a higher or lower tier.
+
+5) Update SkillProgressionState:
+   - If confidence crosses thresholds, propose tier changes.
+   - Allow for householder confirmation (via UI) before applying significant shifts.
+   - Persist updates in Dexie.
+
+6) Emit progression events:
+   - Expose tier changes and readiness messages via eventBus.
+
+7) Downstream effects:
+   - householdCycles.engine:
+     - can recommend more complex or simpler rhythms based on tier.
+   - SessionRunner:
+     - can adjust session templates and overlays to match skill tier.
+   - Insights engines (storehouseInsights, gardenInsights, cookingInsights, etc.):
+     - can tune language and suggestions to skill posture
+       (e.g. “simple next step” vs “advanced optimization”).
+
+
+4. EVENT TRIGGERS – EVENTBUS CONTRACT
+-------------------------------------
+All events follow SSA’s eventBus structure:
+
+  { type, ts, source, data }
+
+Where:
+- type: string
+- ts: ISO 8601 timestamp
+- source: e.g. "progression.engine" or "progression.map"
+- data: structured payload
+
+Recommended event types:
+
+1) Config lifecycle
+   - "progression.map.config.loaded"
+     data: {
+       version,
+       tierCount,
+       domainPathCount,
+       patternCount,
+     }
+
+   - "progression.map.config.updated"
+     data: {
+       version,
+       changedBy,                    // "householder" | "system" | "migration"
+       changesSummary,               // e.g. { tiersAdded, pathsModified }
+     }
+
+
+2) Self-assessment (TOOL MODE and optional in STEWARDSHIP)
+   - "progression.skill.selfAssessment.updated"
+     data: {
+       domainPathId,
+       tierId,
+       source: "manual",
+     }
+
+
+3) Inferred progression
+   - "progression.skill.inferred"
+     // When engine infers possible tier movements, before confirmation
+     data: {
+       domainPathId,
+       fromTierId?: string,
+       toTierId: string,
+       confidence: number,
+       evidenceSummary?: string,
+     }
+
+   - "progression.skill.updated"
+     // When progression state is committed (confirmed or auto-applied)
+     data: {
+       domainPathId,
+       fromTierId?: string,
+       toTierId: string,
+       reason: "inferred" | "manual" | "system",
+       runId?: string,
+     }
+
+
+4) Readiness & recommendations
+   - "progression.skill.readiness"
+     // Domain is ready for a new rhythm or yield step
+     data: {
+       domainPathId,
+       currentTierId: string,
+       recommendedNextTierId?: string,
+       recommendedSeasonId?: string,
+       recommendationKind:
+         "new-rhythm" |
+         "deeper-yield" |
+         "cross-domain-weave",
+       notes?: string,
+     }
+
+   - "progression.skill.recommendations.generated"
+     // A set of recommendations based on ProgressionPattern
+     data: {
+       runId,
+       recommendations: {
+         patternId: string,
+         nextSteps: {
+           domainPathId: string,
+           currentTierId: string,
+           suggestedTierId: string,
+         }[],
+       }[],
+     }
+
+
+5) Integration hooks for cycles / dependencies / insights
+   - "progression.skill.cycleAlignment"
+     // How skill posture aligns with cycles engine expectations
+     data: {
+       runId,
+       seasonId,
+       domainPathId,
+       alignmentScore: number,
+       notes?: string,
+     }
+
+   - "progression.skill.dependencyImpact"
+     // When progression changes significantly in a node that's central in
+     // the dependency graph
+     data: {
+       runId,
+       domainPathId,
+       newTierId: string,
+       impactedPatterns?: string[],  // from dependencyMapConfig.patterns
+     }
+
+   - "progression.skill.insight"
+     // A high-level progression insight, for display in dashboards
+     data: {
+       insightId,
+       domainPathId,
+       tierId: string,
+       kind: "milestone" | "drift" | "opportunity",
+       message,
+       seasonId?: string,
+     }
+
+
+5. CONCEPTUAL PURPOSE – HOW SKILL PROGRESSION FITS THE WEB OF MEANING
+----------------------------------------------------------------------
+The skillProgression map is the **memory of how the householder grows** with
+SSA, not just how many times a screen is tapped.
+
+It lets SSA:
+
+- Treat skills as **rhythms and yields**, not checklists:
+  - Higher skill tiers correspond to steadier, more complex rhythms and
+    deeper, more reliable yields in each domain.
+
+- Tie skill progression to **seasons and cycles**:
+  - Certain progression steps are best taken in particular seasons:
+    - garden.core uplift in spring,
+    - preservation.canning uplift in harvest,
+    - storehouse planning uplift in lean seasons.
+  - SSA can suggest **season-appropriate growth**.
+
+- Respect **dependencies**:
+  - Advanced preservation skills expect at least modest garden or animal yields.
+  - Feast-hosting skills depend on baseline cooking, storehouse, and cleaning
+    skills.
+  - The dependencyMap and ProgressionPattern entries reveal these ties.
+
+- Support both **TOOL MODE** and **STEWARDSHIP MODE**:
+  - TOOL MODE:
+    - A Skill Explorer shows the householder the map and lets them choose
+      where they want to grow next.
+  - STEWARDSHIP MODE:
+    - The progression engine quietly watches cycles and yields, proposing
+      small, meaningful next steps.
+
+- Shape **SessionRunner and insights**:
+  - Beginning tiers → simpler flows, more guidance and explanations.
+  - Steady tiers → more autonomy, more cross-domain weaving suggestions.
+  - Steward/mentor tiers → focus on mutual-aid, teaching others, and
+    enterprise opportunities.
+
+Explicit TODO HOOKS:
+- TODO[seasonal-logic]:
+  - Bind progression recommendations to seasonRulesConfig so the engine
+    suggests next steps that harmonize with the current and upcoming seasons.
+
+- TODO[cycles-engine]:
+  - Allow householdCycles.engine to consume SkillProgressionState to adjust
+    the complexity and number of suggested rhythms per season.
+
+- TODO[dependencies]:
+  - Integrate with dependencyMapConfig so progression suggestions consider
+    where the householder’s skills sit in major patterns
+    (e.g., garden → preservation → storehouse → meals → feasts).
+
+- TODO[insights]:
+  - Cross-link skill progression with storehouseInsights, gardenInsights,
+    cookingInsights, feastInsights to produce combined messages like:
+    “Your garden rhythm is strong and storehouse is ready; this season is
+     a gentle time to step into preservation.canning tier ‘steady-hand’.”
+
+END OF SPEC
+===============================================================================

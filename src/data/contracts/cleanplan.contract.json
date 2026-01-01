@@ -1,0 +1,545 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:suka:contracts:cleanplan",
+  "title": "Clean Plan Contract",
+  "description": "Canonical data contract for household cleaning plans used across Suka Smart Assistant. Designed to interoperate with useWorkPlanDraft, useWorkDecider, useNBANudges, and useMappingLinks.",
+  "x-version": "1.0.0",
+  "x-domain": "cleaning",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^(workplan|cleanplan):[A-Za-z0-9_-]+(:\\d+)?$" },
+    "kind": { "type": "string", "const": "cleanplan" },
+    "title": { "type": "string", "minLength": 1, "default": "Clean Plan" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "sessionId": { "type": ["string","null"] },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "author": { "type": ["string","null"] },
+        "notes": { "type": "string", "default": "" },
+        "tags": { "type": "array", "items": { "type": "string" }, "default": [] },
+        "flags": { "type": "array", "items": { "type": "string" }, "default": [] }
+      },
+      "default": {}
+    },
+    "timeline": { "$ref": "#/definitions/Timeline" },
+    "home": {
+      "description": "Optional context about the space and rotation rules.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "residents": { "type": "integer", "minimum": 0, "default": 0 },
+        "pets": { "type": "integer", "minimum": 0, "default": 0 },
+        "quietHours": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "startLocal": { "type": ["string","null"], "pattern": "^[0-2][0-9]:[0-5][0-9]$" },
+            "endLocal": { "type": ["string","null"], "pattern": "^[0-2][0-9]:[0-5][0-9]$" }
+          },
+          "default": {}
+        },
+        "zones": {
+          "type": "array",
+          "description": "Rooms/areas with optional rotation frequency (days).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "floorType": { "type": ["string","null"], "enum": ["tile","wood","vinyl","laminate","carpet","concrete","mixed",null] },
+              "rotationDays": { "type": ["integer","null"], "minimum": 1 },
+              "lastDoneISO": { "type": ["string","null"], "format": "date-time" }
+            },
+            "required": ["id","name"]
+          },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+    "sanitation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ppeRequired": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["gloves","mask","goggles","apron","boots","ear-protection"] },
+          "default": ["gloves","mask"]
+        },
+        "chemicalPolicy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "allowBleach": { "type": "boolean", "default": true },
+            "allowAmmonia": { "type": "boolean", "default": false },
+            "fragranceFree": { "type": "boolean", "default": false }
+          },
+          "default": {}
+        },
+        "ventilationRequired": { "type": "boolean", "default": false }
+      },
+      "default": {}
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sabbathGuard": { "type": "boolean", "default": false },
+        "maxBudget": { "type": ["number","null"], "minimum": 0 },
+        "timeWindowMinutes": { "type": ["integer","null"], "minimum": 5 },
+        "respectQuietHours": { "type": "boolean", "default": true },
+        "petSafe": { "type": "boolean", "default": true },
+        "childNapWindows": {
+          "type": "array",
+          "description": "Windows to avoid loud tasks.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "startLocal": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" },
+              "endLocal": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" }
+            },
+            "required": ["startLocal","endLocal"]
+          },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+    "tasks": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Task" },
+      "default": []
+    },
+    "conflicts": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Conflict" },
+      "default": []
+    },
+    "cost": { "$ref": "#/definitions/Cost" },
+    "score": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stability": { "type": "number", "minimum": 0, "maximum": 1, "default": 0 },
+        "signals": { "type": "array", "items": { "type": "string" }, "default": [] }
+      },
+      "default": {}
+    },
+    "nba": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": ["string","null"] },
+        "label": { "type": ["string","null"] },
+        "reason": { "type": ["string","null"] },
+        "taskId": { "type": ["string","null"] }
+      },
+      "default": { "id": null, "label": null, "reason": null, "taskId": null }
+    },
+    "history": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "past": { "type": "array", "items": { "type": "object" }, "default": [] },
+        "future": { "type": "array", "items": { "type": "object" }, "default": [] }
+      },
+      "default": {}
+    }
+  },
+  "required": ["id","kind","title","createdAt","updatedAt","timeline","tasks","cost"],
+  "definitions": {
+    "Timeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "startAt": { "type": ["string","null"], "format": "date-time" },
+        "endAt": { "type": ["string","null"], "format": "date-time" },
+        "timezone": { "type": "string", "default": "UTC" },
+        "holds": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Hold" },
+          "default": []
+        },
+        "reminders": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Reminder" },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+    "Reminder": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string" },
+        "atISO": { "type": "string", "format": "date-time" },
+        "channel": { "type": "string", "enum": ["push","toast","email","sms"], "default": "push" }
+      },
+      "required": ["title","atISO"]
+    },
+    "Hold": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["chemical-dwell","cure","dry-time","ventilation","sabbath","quiet-hours"]
+        },
+        "startISO": { "type": "string", "format": "date-time" },
+        "endISO": { "type": "string", "format": "date-time" },
+        "reason": { "type": ["string","null"] }
+      },
+      "required": ["type","startISO","endISO"]
+    },
+    "Cost": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "currency": { "type": "string", "default": "USD" },
+        "subtotal": { "type": "number", "minimum": 0, "default": 0 },
+        "lines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "label": { "type": "string" },
+              "amount": { "type": "number", "minimum": 0 },
+              "category": { "type": ["string","null"], "enum": ["consumable","detergent","energy","disposal","repair","other",null] }
+            },
+            "required": ["label","amount"]
+          },
+          "default": []
+        }
+      },
+      "required": ["currency","subtotal","lines"],
+      "default": { "currency": "USD", "subtotal": 0, "lines": [] }
+    },
+    "ChemicalUse": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "sku": { "type": ["string","null"] },
+        "dwellMinutes": { "type": ["integer","null"], "minimum": 0 },
+        "hazard": { "type": "string", "enum": ["bleach","ammonia","acid","solvent","quats","detergent","other"] },
+        "incompatibleWith": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["bleach","ammonia","acid","solvent","quats","detergent","other"] },
+          "default": []
+        },
+        "ventilation": { "type": "boolean", "default": false },
+        "petSafe": { "type": ["boolean","null"] }
+      },
+      "required": ["name","hazard"]
+    },
+    "Task": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^task:[A-Za-z0-9_-]+$" },
+        "title": { "type": "string", "minLength": 1 },
+        "domain": { "type": "string", "enum": ["cleaning"] },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "laundry-wash","laundry-dry","laundry-fold",
+            "vacuum","mop","dust","bathroom-sanitize","kitchen-degrease",
+            "appliance-clean","disinfect-high-touch","windows",
+            "outdoor-sweep","trash","organize","restock","filter-change","custom"
+          ],
+          "default": "custom"
+        },
+        "status": { "type": "string", "enum": ["pending","ready","active","paused","done","blocked"], "default": "pending" },
+        "zoneId": { "type": ["string","null"] },
+        "rotationHintDays": { "type": ["integer","null"], "minimum": 1 },
+        "estMinutes": { "type": "integer", "minimum": 1, "default": 15 },
+        "actualMinutes": { "type": "integer", "minimum": 0, "default": 0 },
+        "ppe": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["gloves","mask","goggles","apron","boots","ear-protection"] },
+          "default": ["gloves"]
+        },
+        "appliances": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["washer","dryer","vacuum","robot-vac","steam-mop","mop-bucket","dishwasher","oven","fridge","freezer","air-purifier","pressure-washer","other"]
+          },
+          "default": []
+        },
+        "resources": { "type": "array", "items": { "type": "string" }, "default": [] },
+        "deps": { "type": "array", "items": { "type": "string", "pattern": "^task:[A-Za-z0-9_-]+$" }, "default": [] },
+        "window": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "earliest": { "type": ["string","null"], "format": "date-time" },
+            "latest": { "type": ["string","null"], "format": "date-time" }
+          },
+          "default": {}
+        },
+        "scheduledAt": { "type": ["string","null"], "format": "date-time" },
+        "timers": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "startAt": { "type": ["string","null"], "format": "date-time" },
+            "endAt": { "type": ["string","null"], "format": "date-time" },
+            "alarms": { "type": "array", "items": { "type": "string", "format": "date-time" }, "default": [] }
+          },
+          "default": {}
+        },
+        "inventory": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/InventoryItem" },
+              "default": []
+            },
+            "reserveOnStart": { "type": "boolean", "default": true }
+          },
+          "default": {}
+        },
+        "chemicals": { "type": "array", "items": { "$ref": "#/definitions/ChemicalUse" }, "default": [] },
+        "costHints": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "category": { "type": ["string","null"], "enum": ["consumable","detergent","energy","disposal","repair","other",null] },
+            "supplierProfileId": { "type": ["string","null"] },
+            "overrides": { "type": "object", "additionalProperties": true, "default": {} }
+          },
+          "default": {}
+        },
+        "notes": { "type": "string", "default": "" },
+        "flags": { "type": "array", "items": { "type": "string" }, "default": [] }
+      },
+      "required": ["id","title","domain","kind","status"]
+    },
+    "InventoryItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sku": { "type": ["string","null"] },
+        "name": { "type": "string" },
+        "qty": { "type": "number", "minimum": 0 },
+        "unit": { "type": ["string","null"] },
+        "aliases": { "type": "array", "items": { "type": "string" }, "default": [] }
+      },
+      "required": ["name","qty"]
+    },
+    "Conflict": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "resource-overlap","appliance-locked","ppe-missing",
+            "chemical-incompatibility","ventilation-required","quiet-hours",
+            "pet-unsafe","rotation-overdue"
+          ]
+        },
+        "resource": { "type": ["string","null"] },
+        "tasks": { "type": "array", "items": { "type": "string", "pattern": "^task:[A-Za-z0-9_-]+$" }, "default": [] },
+        "taskId": { "type": ["string","null"], "pattern": "^task:[A-Za-z0-9_-]+$" },
+        "message": { "type": "string" }
+      },
+      "required": ["type","message"]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "constraints": {
+            "properties": { "sabbathGuard": { "const": true } },
+            "required": ["sabbathGuard"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "timeline": {
+            "properties": {
+              "holds": {
+                "items": {
+                  "anyOf": [
+                    {},
+                    { "properties": { "type": { "const": "sabbath" } } }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "x-orchestration": {
+    "events": {
+      "emit": [
+        "workplan.draft.created",
+        "workplan.draft.updated",
+        "workplan.draft.published",
+        "workplan.draft.discarded",
+        "ui.sessionHUD.focusTask",
+        "ui.conflictResolver.open",
+        "mapping.link.added",
+        "mapping.link.updated",
+        "mapping.link.removed"
+      ],
+      "listen": [
+        "decider:top-candidate",
+        "inventory.updated",
+        "session.paused",
+        "session.resumable",
+        "mealplan:finalize"
+      ]
+    },
+    "cta": {
+      "routes": [
+        "SCHEDULE_TASKS",
+        "SCHEDULE_BLOCK",
+        "OPEN_CLEANING",
+        "OPEN_GROCERY",
+        "OPEN_MEAL_PICKER_WITH_FILTER",
+        "SESSION_RESUME"
+      ]
+    }
+  },
+  "x-ui": {
+    "icons": {
+      "plan": "🧼",
+      "laundry": "🧺",
+      "vacuum": "🧹",
+      "mop": "🪣",
+      "bathroom": "🚿",
+      "kitchen": "🍳",
+      "windows": "🪟",
+      "filter": "🧯"
+    },
+    "lists": {
+      "taskChips": {
+        "primary": "title",
+        "secondary": "kind",
+        "meta": ["zoneId","estMinutes","status","appliances"]
+      }
+    },
+    "defaults": {
+      "ppe": ["gloves","mask"]
+    }
+  },
+  "examples": [
+    {
+      "id": "cleanplan:nyc-loft-001:1730060000000",
+      "kind": "cleanplan",
+      "title": "Weekly Loop — High-Impact",
+      "createdAt": "2025-10-19T14:00:00.000Z",
+      "updatedAt": "2025-10-19T14:10:00.000Z",
+      "sessionId": null,
+      "meta": { "author": "larho", "notes": "Prioritize guest bath and kitchen.", "tags": ["weekly","quick-wins"] },
+      "timeline": {
+        "startAt": "2025-10-24T15:00:00.000Z",
+        "endAt": null,
+        "timezone": "America/New_York",
+        "holds": [],
+        "reminders": [{ "title": "Start laundry first", "atISO": "2025-10-24T14:55:00.000Z", "channel": "push" }]
+      },
+      "home": {
+        "residents": 2,
+        "pets": 1,
+        "quietHours": { "startLocal": "21:00", "endLocal": "08:00" },
+        "zones": [
+          { "id": "kitchen", "name": "Kitchen", "floorType": "tile", "rotationDays": 2, "lastDoneISO": "2025-10-22T12:00:00.000Z" },
+          { "id": "bath-guest", "name": "Guest Bath", "floorType": "tile", "rotationDays": 3 },
+          { "id": "living", "name": "Living Room", "floorType": "wood", "rotationDays": 3 }
+        ]
+      },
+      "sanitation": {
+        "ppeRequired": ["gloves","mask"],
+        "chemicalPolicy": { "allowBleach": true, "allowAmmonia": false, "fragranceFree": true },
+        "ventilationRequired": false
+      },
+      "constraints": { "sabbathGuard": false, "timeWindowMinutes": 120, "respectQuietHours": true, "petSafe": true },
+      "tasks": [
+        {
+          "id": "task:laundry-wash",
+          "title": "Laundry — Wash darks",
+          "domain": "cleaning",
+          "kind": "laundry-wash",
+          "status": "ready",
+          "zoneId": null,
+          "estMinutes": 10,
+          "appliances": ["washer"],
+          "inventory": { "items": [{ "sku": "DET-001", "name": "Detergent", "qty": 50, "unit": "ml" }], "reserveOnStart": true },
+          "chemicals": [{ "name": "Detergent (fragrance-free)", "hazard": "detergent" }],
+          "notes": "Start first to parallelize."
+        },
+        {
+          "id": "task:kitchen-degrease",
+          "title": "Degrease stove & backsplash",
+          "domain": "cleaning",
+          "kind": "kitchen-degrease",
+          "status": "pending",
+          "zoneId": "kitchen",
+          "estMinutes": 20,
+          "deps": [],
+          "appliances": [],
+          "inventory": { "items": [{ "sku": "DEG-002", "name": "Citrus degreaser", "qty": 40, "unit": "ml" }], "reserveOnStart": true },
+          "chemicals": [{ "name": "Citrus degreaser", "hazard": "solvent", "dwellMinutes": 5, "ventilation": true, "incompatibleWith": ["bleach"] }],
+          "notes": "Let dwell 5 min, wipe, rinse."
+        },
+        {
+          "id": "task:bathroom-sanitize",
+          "title": "Sanitize guest bath surfaces",
+          "domain": "cleaning",
+          "kind": "bathroom-sanitize",
+          "status": "pending",
+          "zoneId": "bath-guest",
+          "estMinutes": 25,
+          "deps": [],
+          "chemicals": [
+            { "name": "Bleach solution 1000 ppm", "hazard": "bleach", "dwellMinutes": 1, "incompatibleWith": ["ammonia"] }
+          ],
+          "notes": "Open fan; keep pet out."
+        },
+        {
+          "id": "task:vacuum",
+          "title": "Vacuum living room",
+          "domain": "cleaning",
+          "kind": "vacuum",
+          "status": "pending",
+          "zoneId": "living",
+          "estMinutes": 15,
+          "appliances": ["vacuum"],
+          "deps": [],
+          "notes": ""
+        }
+      ],
+      "conflicts": [],
+      "cost": {
+        "currency": "USD",
+        "subtotal": 1.8,
+        "lines": [
+          { "label": "Detergent", "amount": 0.5, "category": "detergent" },
+          { "label": "Degreaser", "amount": 0.9, "category": "consumable" },
+          { "label": "Bleach", "amount": 0.4, "category": "consumable" }
+        ]
+      },
+      "score": { "stability": 0.69, "signals": ["inventory-ok","quiet-hours-safe"] },
+      "nba": { "id": "start-ready-task", "label": "Start laundry first", "reason": "Parallelize with cycle time", "taskId": "task:laundry-wash" },
+      "history": { "past": [], "future": [] }
+    }
+  ]
+}

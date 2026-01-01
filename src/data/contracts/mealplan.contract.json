@@ -1,0 +1,533 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka.smart/contract/mealplan.contract.json",
+  "title": "Suka Meal Plan Contract",
+  "type": "object",
+  "required": ["version", "plan"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "plan": {
+      "type": "object",
+      "required": [
+        "id",
+        "createdAt",
+        "updatedAt",
+        "ownerTier",
+        "title",
+        "timezone",
+        "dateRange",
+        "status",
+        "slots",
+        "constraints",
+        "groceryOptions"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "ownerTier": { "type": "string", "enum": ["tier1", "tier2", "tier3", "tier4"], "default": "tier2" },
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "timezone": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "planned", "scheduled", "active", "paused", "completed", "cancelled"],
+          "default": "planned"
+        },
+        "x-uxHints": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "showPanels": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["Collect", "Decide", "Plan", "GroceryList", "BatchSessionPlanner", "NutritionPeek", "RecipeVault"] }
+            },
+            "primaryPanel": { "type": "string" }
+          }
+        },
+        "dateRange": {
+          "type": "object",
+          "required": ["start", "end"],
+          "additionalProperties": false,
+          "properties": {
+            "start": { "type": "string", "format": "date" },
+            "end": { "type": "string", "format": "date" }
+          }
+        },
+        "recurrence": {
+          "type": "object",
+          "description": "Optional recurrence template (e.g., weekly rhythm).",
+          "additionalProperties": false,
+          "properties": {
+            "rule": { "type": "string", "description": "iCal RRULE string" },
+            "until": { "type": "string", "format": "date" },
+            "instances": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "calendar": {
+          "type": "object",
+          "description": "Parallel Hebrew calendar mapping for feast days, Sabbaths, etc.",
+          "additionalProperties": false,
+          "properties": {
+            "hebrewMonthStartRule": {
+              "type": "string",
+              "enum": ["full-moon", "new-moon", "first-crescent", "moon-not-passing-meridian"],
+              "default": "full-moon"
+            },
+            "feastDays": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["gregorianDate", "name"],
+                "additionalProperties": false,
+                "properties": {
+                  "gregorianDate": { "type": "string", "format": "date" },
+                  "hebrew": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "year": { "type": "integer" },
+                      "monthName": { "type": "string" },
+                      "day": { "type": "integer" }
+                    }
+                  },
+                  "name": { "type": "string" },
+                  "workProhibited": { "type": "boolean", "default": true }
+                }
+              }
+            }
+          }
+        },
+        "constraints": {
+          "type": "object",
+          "description": "Global constraints; per-slot overrides allowed.",
+          "additionalProperties": false,
+          "properties": {
+            "peopleCount": { "type": "integer", "minimum": 1, "default": 4 },
+            "budget": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "currency": { "type": "string", "default": "USD" },
+                "maxPerDay": { "type": "number", "minimum": 0 },
+                "maxTotal": { "type": "number", "minimum": 0 }
+              }
+            },
+            "dietaryFlags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["clean", "dairy-free", "gluten-free", "grain-free", "nut-free", "soy-free", "egg-free", "low-carb", "keto", "paleo", "vegan", "vegetarian", "pescatarian", "passover-unleavened", "sabbath-friendly"]
+              }
+            },
+            "excludeAllergens": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["milk", "egg", "fish", "shellfish", "tree-nuts", "peanuts", "wheat", "soy", "sesame"] }
+            },
+            "applianceAvailability": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "timeWindows": {
+              "type": "array",
+              "description": "Preferred cook/serve windows (local times).",
+              "items": {
+                "type": "object",
+                "required": ["daysOfWeek", "from", "to"],
+                "additionalProperties": false,
+                "properties": {
+                  "daysOfWeek": {
+                    "type": "array",
+                    "items": { "type": "string", "enum": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] }
+                  },
+                  "from": { "type": "string", "pattern": "^\\d{2}:\\d{2}$" },
+                  "to": { "type": "string", "pattern": "^\\d{2}:\\d{2}$" }
+                }
+              }
+            },
+            "fastingRules": {
+              "type": "object",
+              "description": "OMAD, 16:8, etc.",
+              "additionalProperties": false,
+              "properties": {
+              "mode": { "type": "string", "enum": ["none", "OMAD", "16:8", "18:6", "24hr", "custom"], "default": "none" },
+              "windowStart": { "type": "string", "pattern": "^\\d{2}:\\d{2}$" },
+              "windowEnd": { "type": "string", "pattern": "^\\d{2}:\\d{2}$" }
+              }
+            },
+            "nutritionTargets": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kcalPerDay": { "type": "number", "minimum": 0 },
+                "protein_g": { "type": "number", "minimum": 0 },
+                "carbs_g": { "type": "number", "minimum": 0 },
+                "fat_g": { "type": "number", "minimum": 0 }
+              }
+            },
+            "sabbathGuard": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": { "type": "boolean", "default": true },
+                "windows": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["from", "to"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "from": { "type": "string", "format": "date-time" },
+                      "to": { "type": "string", "format": "date-time" }
+                    }
+                  }
+                },
+                "policy": { "type": "string", "enum": ["block", "warn", "defer"], "default": "block" }
+              }
+            }
+          }
+        },
+        "groceryOptions": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "storeSelector": { "type": "string" },
+            "includeHave": { "type": "boolean", "default": false },
+            "collapseDuplicates": { "type": "boolean", "default": true },
+            "allowSubstitutions": { "type": "boolean", "default": true },
+            "householdItems": { "type": "boolean", "default": true }
+          }
+        },
+        "slots": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "date", "mealType", "status"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "date": { "type": "string", "format": "date" },
+              "hebrew": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "year": { "type": "integer" },
+                  "monthName": { "type": "string" },
+                  "day": { "type": "integer" }
+                }
+              },
+              "mealType": { "type": "string", "enum": ["breakfast", "lunch", "dinner", "snack", "beverage", "OMAD", "other"] },
+              "status": { "type": "string", "enum": ["planned", "prepped", "served", "skipped", "swapped", "cancelled"], "default": "planned" },
+              "labels": { "type": "array", "items": { "type": "string" } },
+              "recipeRef": {
+                "type": "object",
+                "description": "Use for cataloged recipes.",
+                "required": ["recipeId"],
+                "additionalProperties": false,
+                "properties": {
+                  "recipeId": { "type": "string" },
+                  "versionId": { "type": "string" },
+                  "servings": { "type": "number", "minimum": 0 },
+                  "overrideUnits": { "type": "string", "enum": ["metric", "us-customary", "hybrid"] }
+                }
+              },
+              "adHoc": {
+                "type": "object",
+                "description": "Fallback freeform meal when not using a recipe.",
+                "additionalProperties": false,
+                "properties": {
+                  "title": { "type": "string" },
+                  "ingredients": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["name", "quantity", "unit"],
+                      "additionalProperties": false,
+                      "properties": {
+                        "name": { "type": "string" },
+                        "quantity": { "type": "number" },
+                        "unit": { "type": "string" },
+                        "inventoryLink": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "itemId": { "type": "string" },
+                            "sourceType": { "type": "string", "enum": ["pantry", "freezer", "fridge", "root-cellar", "garden", "animal", "bulk", "retailer", "unknown"] }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "notes": { "type": "string" }
+                }
+              },
+              "constraintsOverride": {
+                "type": "object",
+                "description": "Per-slot constraint overrides.",
+                "additionalProperties": false,
+                "properties": {
+                  "peopleCount": { "type": "integer", "minimum": 1 },
+                  "dietaryFlags": { "type": "array", "items": { "type": "string" } },
+                  "excludeAllergens": { "type": "array", "items": { "type": "string" } },
+                  "applianceAvailability": { "type": "array", "items": { "type": "string" } },
+                  "nutritionTargets": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "kcal": { "type": "number", "minimum": 0 },
+                      "protein_g": { "type": "number", "minimum": 0 },
+                      "carbs_g": { "type": "number", "minimum": 0 },
+                      "fat_g": { "type": "number", "minimum": 0 }
+                    }
+                  }
+                }
+              },
+              "prepWindow": {
+                "type": "object",
+                "description": "Window to prep ahead or at-serve.",
+                "additionalProperties": false,
+                "properties": {
+                  "serveAt": { "type": "string", "pattern": "^\\d{2}:\\d{2}$" },
+                  "prepAt": { "type": "string", "pattern": "^\\d{2}:\\d{2}$" },
+                  "preSteps": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["kind", "offset"],
+                      "additionalProperties": false,
+                      "properties": {
+                        "kind": { "type": "string", "enum": ["defrost", "marinate", "preheat", "soak", "brine", "activate-yeast", "sanitize"] },
+                        "offset": {
+                          "type": "object",
+                          "required": ["unit", "value", "relation"],
+                          "additionalProperties": false,
+                          "properties": {
+                            "unit": { "type": "string", "enum": ["minutes", "hours", "days"] },
+                            "value": { "type": "integer", "minimum": 0 },
+                            "relation": { "type": "string", "enum": ["before-serve", "before-prep", "absolute"] },
+                            "absoluteAt": { "type": "string", "format": "date-time" }
+                          }
+                        },
+                        "sabbathSensitive": { "type": "boolean", "default": true }
+                      }
+                    }
+                  }
+                }
+              },
+              "batchSessionRef": {
+                "type": "object",
+                "description": "Optional linkage to a Batch Session that preps this meal.",
+                "additionalProperties": false,
+                "properties": {
+                  "sessionId": { "type": "string" },
+                  "stepIds": { "type": "array", "items": { "type": "string" } }
+                }
+              },
+              "inventoryPolicy": {
+                "type": "string",
+                "enum": ["reserve-on-plan", "consume-on-prep", "consume-on-serve", "purchase-required"],
+                "default": "reserve-on-plan"
+              },
+              "sabbathSensitive": { "type": "boolean", "default": true },
+              "storeSelector": { "type": "string" },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "shoppingPlan": {
+          "type": "object",
+          "description": "Optional derived plan snapshot post-generation.",
+          "additionalProperties": false,
+          "properties": {
+            "generatedAt": { "type": "string", "format": "date-time" },
+            "range": {
+              "type": "object",
+              "properties": { "start": { "type": "string", "format": "date" }, "end": { "type": "string", "format": "date" } },
+              "additionalProperties": false
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["name", "quantity", "unit"],
+                "additionalProperties": false,
+                "properties": {
+                  "name": { "type": "string" },
+                  "quantity": { "type": "number" },
+                  "unit": { "type": "string" },
+                  "aisle": { "type": "string" },
+                  "have": { "type": "boolean", "default": false },
+                  "substitutions": { "type": "array", "items": { "type": "string" } },
+                  "storeSkuMap": {
+                    "type": "array",
+                    "items": { "type": "object", "required": ["storeProfileId"], "additionalProperties": false, "properties": { "storeProfileId": { "type": "string" }, "sku": { "type": "string" }, "aisle": { "type": "string" } } }
+                  },
+                  "notes": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "automation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "emit": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["on", "topic"],
+                "additionalProperties": true,
+                "properties": {
+                  "on": {
+                    "type": "string",
+                    "enum": ["plan-created", "plan-updated", "slot-prep-due", "slot-serve-due", "slot-served", "shopping-generated", "plan-completed"]
+                  },
+                  "topic": { "type": "string" },
+                  "payload": { "type": "object" }
+                }
+              }
+            },
+            "milestones": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["id", "when"],
+                "additionalProperties": true,
+                "properties": {
+                  "id": { "type": "string" },
+                  "when": { "type": "string" },
+                  "award": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "analytics": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "channels": { "type": "array", "items": { "type": "string", "enum": ["stabilityScore", "costPerServing", "nutritionAdherence", "prepThroughput"] } },
+            "sampling": { "type": "string", "enum": ["all", "milestones", "none"], "default": "milestones" }
+          }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "version": "1.0.0",
+      "plan": {
+        "id": "mealplan_2025w43",
+        "createdAt": "2025-10-20T20:50:00Z",
+        "updatedAt": "2025-10-20T20:50:00Z",
+        "ownerTier": "tier2",
+        "title": "Week 43 – Family Menu",
+        "subtitle": "Collect • Decide • Plan",
+        "timezone": "America/New_York",
+        "status": "planned",
+        "dateRange": { "start": "2025-10-20", "end": "2025-10-26" },
+        "calendar": {
+          "hebrewMonthStartRule": "full-moon",
+          "feastDays": [
+            {
+              "gregorianDate": "2025-10-25",
+              "hebrew": { "year": 5786, "monthName": "Cheshvan", "day": 3 },
+              "name": "Sabbath",
+              "workProhibited": true
+            }
+          ]
+        },
+        "constraints": {
+          "peopleCount": 6,
+          "budget": { "currency": "USD", "maxPerDay": 35, "maxTotal": 220 },
+          "dietaryFlags": ["clean", "sabbath-friendly"],
+          "excludeAllergens": ["peanuts"],
+          "applianceAvailability": ["stovetop", "oven", "instant-pot", "air-fryer"],
+          "timeWindows": [
+            { "daysOfWeek": ["Mon", "Tue", "Wed", "Thu", "Fri"], "from": "17:30", "to": "19:30" },
+            { "daysOfWeek": ["Sat", "Sun"], "from": "12:00", "to": "19:00" }
+          ],
+          "fastingRules": { "mode": "16:8", "windowStart": "12:00", "windowEnd": "20:00" },
+          "nutritionTargets": { "kcalPerDay": 2200, "protein_g": 110, "carbs_g": 220, "fat_g": 80 },
+          "sabbathGuard": {
+            "enabled": true,
+            "windows": [
+              { "from": "2025-10-24T22:45:00Z", "to": "2025-10-25T22:45:00Z" }
+            ],
+            "policy": "defer"
+          }
+        },
+        "groceryOptions": {
+          "storeSelector": "costco_01",
+          "includeHave": false,
+          "collapseDuplicates": true,
+          "allowSubstitutions": true,
+          "householdItems": true
+        },
+        "slots": [
+          {
+            "id": "slot_2025-10-20_dinner",
+            "date": "2025-10-20",
+            "mealType": "dinner",
+            "status": "planned",
+            "recipeRef": { "recipeId": "rec_lamb_stew", "versionId": "rec_lamb_stew_v2", "servings": 6 },
+            "prepWindow": {
+              "serveAt": "18:30",
+              "preSteps": [
+                { "kind": "defrost", "offset": { "unit": "hours", "value": 24, "relation": "before-serve" }, "sabbathSensitive": true }
+              ]
+            },
+            "inventoryPolicy": "reserve-on-plan",
+            "notes": "Double for leftovers if stew freezes well."
+          },
+          {
+            "id": "slot_2025-10-21_dinner",
+            "date": "2025-10-21",
+            "mealType": "dinner",
+            "status": "planned",
+            "recipeRef": { "recipeId": "rec_chicken_curry", "versionId": "v1", "servings": 6 },
+            "constraintsOverride": { "excludeAllergens": ["milk"], "dietaryFlags": ["dairy-free"] },
+            "storeSelector": "sams_01",
+            "notes": "Sam's Club curry run; bulk spices."
+          },
+          {
+            "id": "slot_2025-10-25_lunch",
+            "date": "2025-10-25",
+            "mealType": "lunch",
+            "status": "planned",
+            "recipeRef": { "recipeId": "rec_cold_platter", "versionId": "v3", "servings": 6 },
+            "sabbathSensitive": false,
+            "notes": "Cold platter (no-cook) to honor Sabbath guard."
+          },
+          {
+            "id": "slot_2025-10-26_dinner",
+            "date": "2025-10-26",
+            "mealType": "dinner",
+            "status": "planned",
+            "recipeRef": { "recipeId": "rec_roast_goat", "versionId": "v1", "servings": 6 },
+            "batchSessionRef": { "sessionId": "sess_2025_10_26_batch_001", "stepIds": ["step_brown_lamb"] },
+            "inventoryPolicy": "consume-on-prep"
+          }
+        ],
+        "automation": {
+          "emit": [
+            { "on": "plan-created", "topic": "meal.plan.created", "payload": { "planId": "mealplan_2025w43" } },
+            { "on": "shopping-generated", "topic": "grocery.list.ready" },
+            { "on": "slot-prep-due", "topic": "meal.prep.reminder" }
+          ],
+          "milestones": [
+            { "id": "ms_5_home_cooked", "when": "count(slots where status=='served')>=5", "award": "Home Cook Hero I" }
+          ]
+        },
+        "analytics": { "channels": ["stabilityScore", "costPerServing", "nutritionAdherence"], "sampling": "milestones" }
+      }
+    }
+  ]
+}

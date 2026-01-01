@@ -1,0 +1,363 @@
+{
+  "$schema": "../../schemas/yieldCurve.dairy.schema.json",
+  "version": "2025-10-31T14:00:00-05:00",
+  "meta": {
+    "id": "goat-dairy-standard",
+    "species": "caprine",
+    "breed": "standard-dairy-mix",
+    "title": "Standard Dairy Goat – Temperate Zone (Full Moon Month Start)",
+    "description": "Baseline daily/weekly milk production curve for a standard dairy goat in a temperate zone, aligned to your Hebrew month layout (full-moon start). Intended to feed storehouse stock planning, meal planning (fresh milk → cheeses/yogurts), and animal-care task generation.",
+    "source": "suka-smart-assistant",
+    "tags": [
+      "dairy",
+      "goat",
+      "storehouse",
+      "meal-planning",
+      "animal-care",
+      "butchery-prep",
+      "garden-integration"
+    ],
+    "calendar": {
+      "hebrewMonthStart": "full-moon",
+      "supportsAltStart": true,
+      "notes": "Sync with your calendar mapping engine so day 1 = full moon, not rabbinic crescent."
+    }
+  },
+  "ui": {
+    "layout": "cards/timeline",
+    "hints": {
+      "primaryCTA": "Generate Dairy Session",
+      "secondaryCTA": "Save as Favorite",
+      "tertiaryCTA": "Reverse-generate Storehouse Plan",
+      "showSeasonalityBadge": true,
+      "groupBy": [
+        "lactationStage",
+        "weekOfLactation"
+      ]
+    },
+    "badges": [
+      {
+        "text": "Torah-compliant",
+        "color": "emerald"
+      },
+      {
+        "text": "Dairy",
+        "color": "blue"
+      }
+    ]
+  },
+  "engines": {
+    "primary": "animalSessionEngine",
+    "supports": [
+      "storehouseGoalEngine",
+      "mealPlanEngine",
+      "gardenQueueEngine",
+      "cleaningSessionEngine"
+    ],
+    "notes": "Dairy output can trigger storehouse goals (cultured products), meal plans (fresh milk windows), cleaning routines (parlor/milking stand), and garden/plants (whey to soil/compost)."
+  },
+  "orchestration": {
+    "bus": "window.__suka?.eventBus",
+    "emitOnLoad": [
+      "yieldcurve.loaded",
+      "animal.dairy.curve.loaded"
+    ],
+    "listen": [
+      "automation.schedule.request",
+      "inventory.restock.request",
+      "storehouse.goal.request",
+      "meal.session.request",
+      "garden.session.request",
+      "cleaning.session.request"
+    ],
+    "sharedScopes": [
+      "meals",
+      "cleaning",
+      "garden",
+      "animals",
+      "storehouse"
+    ]
+  },
+  "reverse": {
+    "generateFrom": [
+      "storehouse.targets.dairy",
+      "mealplan.requirements.dairy",
+      "coop-pool.dairy",
+      "community.shared-lactation-target"
+    ],
+    "strategies": [
+      {
+        "id": "from-storehouse-dairy-target",
+        "title": "Back into how many goats / milkings from a storehouse dairy target",
+        "input": {
+          "storehouseTargetLitersPerMonth": 120
+        },
+        "output": {
+          "requiredDoes": 3,
+          "milkingSessionsPerDay": 2,
+          "milkingDaysPerMonth": 28
+        }
+      },
+      {
+        "id": "from-mealplan",
+        "title": "Back into dairy schedule from meal plan usage (cheese/yogurt)",
+        "input": {
+          "recipesPerWeekNeedingFreshMilk": 5,
+          "litersPerRecipe": 1.5
+        },
+        "output": {
+          "requiredDailyProductionLiters": 1.5,
+          "suggestedGoatCount": 1
+        }
+      }
+    ]
+  },
+  "curve": {
+    "units": "liters-per-day",
+    "lactationWindowDays": 305,
+    "base": [
+      { "day": 1, "value": 1.3, "stage": "freshening" },
+      { "day": 2, "value": 1.5, "stage": "freshening" },
+      { "day": 3, "value": 1.8, "stage": "freshening" },
+      { "day": 7, "value": 2.0, "stage": "ramp-up" },
+      { "day": 14, "value": 2.2, "stage": "ramp-up" },
+      { "day": 21, "value": 2.4, "stage": "peak-approach" },
+      { "day": 30, "value": 2.6, "stage": "peak" },
+      { "day": 45, "value": 2.7, "stage": "peak" },
+      { "day": 60, "value": 2.7, "stage": "peak" },
+      { "day": 90, "value": 2.5, "stage": "mid" },
+      { "day": 120, "value": 2.3, "stage": "mid" },
+      { "day": 150, "value": 2.1, "stage": "mid" },
+      { "day": 180, "value": 2.0, "stage": "late" },
+      { "day": 210, "value": 1.8, "stage": "late" },
+      { "day": 240, "value": 1.6, "stage": "late" },
+      { "day": 270, "value": 1.4, "stage": "dry-off-approach" },
+      { "day": 305, "value": 1.0, "stage": "dry-off-approach" }
+    ],
+    "weeklyView": [
+      { "week": 1, "avg": 1.7 },
+      { "week": 2, "avg": 2.0 },
+      { "week": 3, "avg": 2.3 },
+      { "week": 4, "avg": 2.5 },
+      { "week": 5, "avg": 2.6 },
+      { "week": 6, "avg": 2.7 },
+      { "week": 8, "avg": 2.7 },
+      { "week": 12, "avg": 2.5 },
+      { "week": 16, "avg": 2.3 },
+      { "week": 20, "avg": 2.1 },
+      { "week": 24, "avg": 2.0 },
+      { "week": 28, "avg": 1.8 },
+      { "week": 32, "avg": 1.6 },
+      { "week": 36, "avg": 1.4 },
+      { "week": 40, "avg": 1.0 }
+    ]
+  },
+  "adjustments": {
+    "byClimateZone": [
+      {
+        "zone": "hot-humid",
+        "multiplier": 0.92,
+        "notes": "High heat stress → slightly lower output. Trigger cleaning session for fans/shade/waterers."
+      },
+      {
+        "zone": "hot-dry",
+        "multiplier": 0.9,
+        "notes": "Dry heat → add water checks; send to cleaningSessionEngine for trough/supply sanitizing."
+      },
+      {
+        "zone": "cold-temperate",
+        "multiplier": 1.02,
+        "notes": "Slight boost; also increase bedding cleaning frequency."
+      }
+    ],
+    "byFeedQuality": [
+      {
+        "level": "high",
+        "multiplier": 1.05
+      },
+      {
+        "level": "medium",
+        "multiplier": 1.0
+      },
+      {
+        "level": "low",
+        "multiplier": 0.9
+      }
+    ],
+    "byLitterSize": [
+      {
+        "kidding": "single",
+        "multiplier": 0.98
+      },
+      {
+        "kidding": "twins",
+        "multiplier": 1.0
+      },
+      {
+        "kidding": "triplets",
+        "multiplier": 1.03
+      }
+    ]
+  },
+  "storehouse": {
+    "targets": {
+      "chevre_monthly_liters": 20,
+      "yogurt_weekly_liters": 6,
+      "butter_equivalent": 0.5,
+      "whey_to_garden_ratio": 0.3
+    },
+    "grocerySectionsInspiration": [
+      "Dairy & Eggs",
+      "Cultured & Fermented",
+      "Prepared Breakfasts",
+      "Baking & Sweets (milk-based)",
+      "Animal Feed / Kitchen Scraps → Livestock"
+    ],
+    "autoPlan": {
+      "enabled": true,
+      "emit": [
+        "storehouse.plan.generated",
+        "inventory.restock.request"
+      ]
+    }
+  },
+  "meals": {
+    "recipes": [
+      {
+        "id": "fresh-milk-breakfast",
+        "title": "Fresh Milk Breakfast Window",
+        "useWithinHours": 12,
+        "linksTo": [
+          "/meals/breakfast",
+          "/inventory/dairy",
+          "/garden/companion"
+        ]
+      },
+      {
+        "id": "cheese-making-session",
+        "title": "Cheese Making (Soft / Chevre)",
+        "minBatchLiters": 4,
+        "emit": "cooking.session.request"
+      }
+    ],
+    "autoSession": {
+      "everyDays": 3,
+      "emit": [
+        "meal.session.request",
+        "automation.schedule.request"
+      ]
+    }
+  },
+  "garden": {
+    "wheyUse": "foliar-or-compost",
+    "emit": [
+      "garden.session.request"
+    ],
+    "notes": "Whey or milk waste can be routed to compost or soil feed. This connects dairy to garden planning."
+  },
+  "cleaning": {
+    "routines": [
+      {
+        "id": "milking-stand-daily",
+        "title": "Milking Stand Daily Clean",
+        "frequency": "DAILY",
+        "emit": "cleaning.session.request",
+        "tools": [
+          "sanitizer",
+          "bucket",
+          "towels"
+        ]
+      },
+      {
+        "id": "parlor-weekly-deep",
+        "title": "Milking/Parlor Weekly Deep Clean",
+        "frequency": "WEEKLY",
+        "emit": "cleaning.session.request"
+      }
+    ],
+    "sabbathGuard": true
+  },
+  "animals": {
+    "acquisition": {
+      "allowedSpecies": [
+        "goat"
+      ],
+      "disallowedSpecies": [
+        "pig",
+        "swine"
+      ],
+      "notes": "Torah-compliant: no pork/unclean processing alongside dairy line."
+    },
+    "care": {
+      "milkingPerDay": 2,
+      "hoovesPerYear": 4,
+      "dewormSchedule": "SEASONAL",
+      "emit": [
+        "animal.care.session.request"
+      ]
+    },
+    "butchery": {
+      "notes": "Dairy does age out → cull/butchery needs to be scheduled but must stay Torah-compliant.",
+      "emit": [
+        "butchery.session.request"
+      ]
+    }
+  },
+  "favoriteSessions": [
+    {
+      "id": "fav-dairy-morning-milking",
+      "title": "Morning Milking + Stand Clean",
+      "domain": "animals/dairy",
+      "schedule": "RRULE:FREQ=DAILY;BYHOUR=6;BYMINUTE=0;BYSECOND=0",
+      "sabbathGuard": true
+    },
+    {
+      "id": "fav-cheese-batch-weekly",
+      "title": "Weekly Cheese Batch",
+      "domain": "meals/cooking",
+      "schedule": "RRULE:FREQ=WEEKLY;BYDAY=MO;BYHOUR=10;BYMINUTE=0;BYSECOND=0"
+    }
+  ],
+  "scheduleTemplates": [
+    {
+      "id": "standard-dairy-twice-daily",
+      "title": "Twice Daily Milking (Hebrew Calendar Aware)",
+      "rrules": [
+        "RRULE:FREQ=DAILY;BYHOUR=6;BYMINUTE=0;BYSECOND=0",
+        "RRULE:FREQ=DAILY;BYHOUR=18;BYMINUTE=0;BYSECOND=0"
+      ],
+      "options": {
+        "sabbathGuard": true,
+        "quietHoursGuard": true
+      }
+    }
+  ],
+  "userProfiles": {
+    "allowUserOwnedSchedules": true,
+    "allowUserOwnedFavorites": true,
+    "allowExportShare": true,
+    "shareFormats": [
+      "json",
+      "suka-plan",
+      "calendar-rrule"
+    ]
+  },
+  "events": {
+    "emits": [
+      "yieldcurve.loaded",
+      "automation.schedule.request",
+      "storehouse.plan.generated",
+      "meal.session.request",
+      "garden.session.request",
+      "cleaning.session.request",
+      "animal.care.session.request",
+      "butchery.session.request"
+    ],
+    "consumes": [
+      "import.payload.ready",
+      "calendar.config.changed",
+      "inventory.updated",
+      "storehouse.targets.changed"
+    ]
+  }
+}

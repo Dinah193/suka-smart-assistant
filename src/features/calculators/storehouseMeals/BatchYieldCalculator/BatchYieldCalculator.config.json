@@ -1,0 +1,73 @@
+{
+  "nodeId": "storehouseMeals.batchYieldCalculator",
+  "label": "Batch Yield Calculator",
+  "description": "Calculates how many portions, containers, and preserved units a batch will produce based on recipe definition, batch size, container choices, and household needs. Feeds results into meal planning, storehouse inventory updates, and batch cooking SessionRunner sessions.",
+  "category": "storehouseMeals",
+  "featureKind": "calculator",
+  "route": "/storehouse-meals/batch-yield",
+  "icon": "ri-layout-masonry-line",
+  "tags": [
+    "batch-cooking",
+    "yield",
+    "storehouse",
+    "meal-planning",
+    "containers",
+    "planning-graph-node"
+  ],
+  "graph": {
+    "role": "source",
+    "provides": [
+      "batchPortionYield",
+      "batchContainerPlan",
+      "batchInventoryDelta",
+      "batchLabelingHints",
+      "batchNutritionPerPortion"
+    ],
+    "consumes": [
+      "recipeDefinition",
+      "batchScalingTarget",
+      "portioningPreferences",
+      "containerCatalog",
+      "storehouse.inventorySnapshot",
+      "nutrition.macroTargets",
+      "nutrition.hairSupportTargets"
+    ],
+    "nextStepsNodeId": "storehouseMeals.batchYieldCalculator.nextSteps"
+  },
+  "events": {
+    "onCalculate": [
+      "calculator.batchYield.calculated"
+    ],
+    "onError": [
+      "calculator.batchYield.error"
+    ]
+  },
+  "defaults": {
+    "unitSystem": "imperial",
+    "assumedPortionSizeGrams": 275,
+    "minPortionsPerBatch": 4,
+    "maxPortionsPerBatch": 64,
+    "roundingMode": "floor",
+    "defaultContainerPreference": "storehouse.jars.quart",
+    "autoLinkToInventory": true,
+    "autoSuggestLabelTemplates": true
+  },
+  "ux": {
+    "group": "Storehouse & Meals",
+    "order": 30,
+    "showInQuickLaunch": true,
+    "quickLaunchLabel": "Batch Yield Planner",
+    "helpText": "Use this calculator to estimate how many portions, containers, and preserved units your batch will produce. Results can be pushed into Meal Planner, Storehouse Inventory, and Batch Cooking sessions so SessionRunner knows exactly what you’re making and how much goes into the storehouse versus ready-to-eat meals."
+  },
+  "integration": {
+    "recipeNodeId": "meals.recipeDefinition",
+    "macroCalculatorNodeId": "health.macroCalculator",
+    "hairNutritionCalculatorNodeId": "health.hairNutritionCalculator",
+    "movementIntensityNodeId": "health.movementIntensityCalculator",
+    "mealPlannerNodeId": "meals.mealPlanner",
+    "storehousePlannerNodeId": "storehouse.inventoryPlanner",
+    "batchCookingSessionNodeId": "sessions.batchCookingSessionPlanner",
+    "labelPrinterNodeId": "storehouse.labelPrinter",
+    "preservationPlannerNodeId": "storehouse.preservationPlanner"
+  }
+}

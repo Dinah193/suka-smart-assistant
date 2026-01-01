@@ -1,0 +1,128 @@
+{
+  "$id": "https://schemas.suka.smart/plan.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SSA Computed Plan",
+  "description": "Computed plan fields produced by the SSA automation runtime after imports → intelligence → automation. This object can be embedded under session.plan or stored separately for scheduling analytics.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["plannedStartTs", "p50Ms", "p80Ms", "p95Ms", "criticalPath", "riskBadge"],
+  "properties": {
+    "plannedStartTs": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Planned start timestamp (ISO 8601, UTC recommended)."
+    },
+    "plannedEndTs": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Planned end timestamp derived from the selected percentile (typically p80)."
+    },
+    "p50Ms": {
+      "$ref": "#/definitions/durationMs",
+      "description": "Median expected total runtime from start to finish (ms)."
+    },
+    "p80Ms": {
+      "$ref": "#/definitions/durationMs",
+      "description": "Conservative expected runtime (80th percentile, ms)."
+    },
+    "p95Ms": {
+      "$ref": "#/definitions/durationMs",
+      "description": "Worst typical runtime (95th percentile, ms)."
+    },
+    "criticalPath": {
+      "type": "array",
+      "description": "Ordered step ids that define the schedule’s critical path. The first item should be the first critical step to begin; the last, the final to complete.",
+      "items": { "$ref": "#/definitions/stepId" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "riskBadge": {
+      "type": "string",
+      "description": "Aggregated plan risk computed from constraints (inventory, time pressure, device availability, RTC/network). Drives Next-Best-Action and degrade policy selection.",
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "selectedPercentile": {
+      "type": "string",
+      "enum": ["p50", "p80", "p95"],
+      "description": "Which percentile the scheduler targeted when computing plannedEndTs and holds."
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Confidence score (0–1) for the current plan given historical telemetry and variance."
+    },
+    "explanations": {
+      "type": "array",
+      "description": "Human-readable reasons behind the risk badge and selected percentile.",
+      "items": { "type": "string", "maxLength": 300 }
+    },
+    "holds": {
+      "type": "array",
+      "description": "Planned resource holds this plan requires (rooms/devices/people). Useful for pre-allocations.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "resourceType": { "type": "string", "enum": ["device", "room", "person"] },
+          "resourceId": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{3,}$" },
+          "start": { "type": "string", "format": "date-time" },
+          "end": { "type": "string", "format": "date-time" },
+          "hard": { "type": "boolean", "description": "If true, this is a hard hold; planner must not oversubscribe." },
+          "tags": { "type": "array", "items": { "type": "string", "pattern": "^[a-z0-9._-]+$" } }
+        },
+        "required": ["resourceType", "resourceId", "start", "end"]
+      }
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the plan was computed."
+    },
+    "meta": {
+      "type": "object",
+      "description": "Forward-compatible bucket (algorithm versions, feature flags, debug).",
+      "additionalProperties": true
+    }
+  },
+  "definitions": {
+    "durationMs": { "type": "integer", "minimum": 0 },
+    "stepId": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{2,}$" }
+  },
+  "examples": [
+    {
+      "plannedStartTs": "2025-11-08T22:00:00.000Z",
+      "plannedEndTs": "2025-11-08T23:45:00.000Z",
+      "p50Ms": 5400000,
+      "p80Ms": 6300000,
+      "p95Ms": 7800000,
+      "criticalPath": ["s1_prep", "s3_sear", "s4_braise", "s5_rest"],
+      "riskBadge": "medium",
+      "selectedPercentile": "p80",
+      "confidence": 0.78,
+      "explanations": [
+        "Inventory variance on onions ±2 min",
+        "Oven warmup adds 15 min on average",
+        "Quiet hours start at 06:00 local — prefer p80 to avoid spillover"
+      ],
+      "holds": [
+        {
+          "resourceType": "device",
+          "resourceId": "oven.main",
+          "start": "2025-11-08T22:05:00.000Z",
+          "end": "2025-11-08T23:40:00.000Z",
+          "hard": true,
+          "tags": ["bake", "heat"]
+        },
+        {
+          "resourceType": "room",
+          "resourceId": "room.kitchen",
+          "start": "2025-11-08T22:00:00.000Z",
+          "end": "2025-11-08T23:45:00.000Z"
+        }
+      ],
+      "generatedAt": "2025-11-08T20:10:00.000Z",
+      "meta": { "algo": "v2.3.1", "features": ["variance-aware-buffers", "quiet-hour-guard"] }
+    }
+  ]
+}

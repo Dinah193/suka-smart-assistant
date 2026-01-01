@@ -1,0 +1,474 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "HairNutritionCalculator Schema",
+  "description": "Schema for Black Hair Nutrition Calculator inputs and outputs, including protein, healthy fats, and key micronutrients for hair support.",
+  "type": "object",
+  "properties": {
+    "meta": {
+      "type": "object",
+      "description": "Metadata about the calculation run.",
+      "properties": {
+        "nodeId": {
+          "type": "string",
+          "const": "health.hairNutritionCalculator",
+          "description": "Planning Graph node ID for this calculator."
+        },
+        "calculationVersion": {
+          "type": "string",
+          "description": "Semantic version of the calculator logic (e.g. 1.0.0)."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When this calculation was performed (ISO 8601)."
+        }
+      },
+      "required": ["nodeId", "timestamp"],
+      "additionalProperties": false
+    },
+
+    "input": {
+      "type": "object",
+      "description": "All inputs needed to compute Black hair nutrition targets.",
+      "properties": {
+        "unitSystem": {
+          "type": "string",
+          "enum": ["imperial", "metric"],
+          "default": "imperial",
+          "description": "Measurement system for body weight and other quantities."
+        },
+        "bodyWeight": {
+          "type": "number",
+          "minimum": 20,
+          "maximum": 400,
+          "description": "Current body weight (lbs if imperial, kg if metric)."
+        },
+        "activityLevel": {
+          "type": "string",
+          "enum": ["sedentary", "light", "moderate", "active", "athlete"],
+          "description": "General activity level, used to fine-tune protein and fat needs."
+        },
+        "hairTypeProfile": {
+          "type": "object",
+          "description": "Profile describing hair characteristics that affect nutrition focus.",
+          "properties": {
+            "curlPattern": {
+              "type": "string",
+              "enum": [
+                "wavy-2",
+                "curly-3a",
+                "curly-3b",
+                "curly-3c",
+                "coily-4a",
+                "coily-4b",
+                "coily-4c",
+                "locs",
+                "other"
+              ],
+              "description": "Dominant curl pattern / hair category."
+            },
+            "porosity": {
+              "type": "string",
+              "enum": ["low", "medium", "high", "unknown"],
+              "description": "Perceived porosity, used as a hint for moisture and protein balance."
+            },
+            "density": {
+              "type": "string",
+              "enum": ["low", "medium", "high", "unknown"],
+              "description": "Overall hair density."
+            },
+            "scalpCondition": {
+              "type": "string",
+              "enum": [
+                "normal",
+                "dry",
+                "oily",
+                "itchy",
+                "flaky",
+                "inflamed",
+                "protective-style-tension",
+                "other"
+              ],
+              "description": "Primary current scalp condition."
+            },
+            "chemicalHistory": {
+              "type": "array",
+              "description": "Relevant chemical history affecting strength and breakage risk.",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "relaxer",
+                  "texturizer",
+                  "permanent-color",
+                  "bleach",
+                  "henna",
+                  "keratin-treatment",
+                  "none",
+                  "other"
+                ]
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "growthGoalFlags": {
+          "type": "object",
+          "description": "User’s primary hair goals; multiple may be true.",
+          "properties": {
+            "lengthRetention": { "type": "boolean", "default": true },
+            "thickness": { "type": "boolean", "default": false },
+            "sheddingReduction": { "type": "boolean", "default": false },
+            "scalpHealing": { "type": "boolean", "default": false },
+            "postpartumSupport": { "type": "boolean", "default": false }
+          },
+          "additionalProperties": false
+        },
+        "protectiveStylePattern": {
+          "type": "object",
+          "description": "How often and how long protective styles are worn.",
+          "properties": {
+            "protectiveStyleType": {
+              "type": "string",
+              "enum": [
+                "none",
+                "twists",
+                "braids",
+                "cornrows",
+                "wigs",
+                "weaves",
+                "locs",
+                "other"
+              ],
+              "default": "none"
+            },
+            "weeksPerStyle": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 12,
+              "description": "Typical number of weeks a style is kept installed."
+            },
+            "installTensionLevel": {
+              "type": "string",
+              "enum": ["low", "medium", "high", "unknown"],
+              "description": "Perceived tension level during install, used as a risk hint."
+            }
+          },
+          "additionalProperties": false
+        },
+        "macroTargets": {
+          "type": "object",
+          "description": "Optional macro targets from the Macro Calculator node; used as an upper or lower bound.",
+          "properties": {
+            "calories": {
+              "type": "number",
+              "minimum": 800,
+              "maximum": 5000
+            },
+            "proteinGrams": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 400
+            },
+            "fatGrams": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 300
+            },
+            "carbGrams": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 600
+            }
+          },
+          "additionalProperties": false
+        },
+        "micronutrientFocusFlags": {
+          "type": "object",
+          "description": "Flags from the Micronutrient Calculator or user intake survey indicating areas of concern.",
+          "properties": {
+            "ironLowRisk": { "type": "boolean", "default": false },
+            "vitaminDLowRisk": { "type": "boolean", "default": false },
+            "zincLowRisk": { "type": "boolean", "default": false },
+            "omega3LowRisk": { "type": "boolean", "default": false },
+            "biotinLowRisk": { "type": "boolean", "default": false },
+            "generalMicronutrientConcern": { "type": "boolean", "default": false }
+          },
+          "additionalProperties": false
+        },
+        "dietaryPattern": {
+          "type": "string",
+          "enum": [
+            "omnivore",
+            "pescatarian",
+            "lacto-ovo-vegetarian",
+            "vegetarian",
+            "vegan",
+            "other"
+          ],
+          "default": "omnivore",
+          "description": "High-level dietary pattern to guide food suggestions."
+        },
+        "dietaryConstraints": {
+          "type": "object",
+          "description": "Common constraints that may affect recommended foods.",
+          "properties": {
+            "allergies": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "fish",
+                  "shellfish",
+                  "egg",
+                  "milk",
+                  "wheat",
+                  "soy",
+                  "peanut",
+                  "tree-nut",
+                  "sesame",
+                  "other"
+                ]
+              }
+            },
+            "avoids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "pork",
+                  "beef",
+                  "lamb",
+                  "goat",
+                  "organ-meats",
+                  "gelatin",
+                  "refined-sugar",
+                  "gluten",
+                  "other"
+                ]
+              }
+            },
+            "budgetLevel": {
+              "type": "string",
+              "enum": ["very-tight", "budget-conscious", "flexible"],
+              "default": "budget-conscious",
+              "description": "Used downstream for meal and storehouse suggestions."
+            }
+          },
+          "additionalProperties": false
+        },
+        "hydrationCupsCurrent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 32,
+          "description": "User's typical daily water intake in cups."
+        }
+      },
+      "required": ["unitSystem", "bodyWeight"],
+      "additionalProperties": false
+    },
+
+    "output": {
+      "type": "object",
+      "description": "Calculator outputs that feed into the Planning Graph and downstream planners.",
+      "properties": {
+        "dailyHairProteinTarget": {
+          "type": "object",
+          "description": "Daily protein target tuned for hair growth and retention.",
+          "properties": {
+            "grams": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 400,
+              "description": "Recommended grams of protein per day."
+            },
+            "gramsPerKg": {
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 3.0,
+              "description": "Effective protein intake per kg of body weight."
+            },
+            "rationale": {
+              "type": "string",
+              "description": "Short explanation of how this protein target was chosen."
+            }
+          },
+          "required": ["grams", "gramsPerKg"],
+          "additionalProperties": false
+        },
+
+        "hairAminoProfile": {
+          "type": "object",
+          "description": "Target intake ranges for key amino acids relevant to hair structure and growth.",
+          "properties": {
+            "unit": {
+              "type": "string",
+              "enum": ["grams-per-day"],
+              "default": "grams-per-day"
+            },
+            "lysine": { "type": "number", "minimum": 0, "maximum": 20 },
+            "methionine": { "type": "number", "minimum": 0, "maximum": 10 },
+            "cysteine": { "type": "number", "minimum": 0, "maximum": 10 },
+            "arginine": { "type": "number", "minimum": 0, "maximum": 20 },
+            "histidine": { "type": "number", "minimum": 0, "maximum": 10 },
+            "tryptophan": { "type": "number", "minimum": 0, "maximum": 5 }
+          },
+          "required": ["unit"],
+          "additionalProperties": false
+        },
+
+        "hairHealthyFatTargets": {
+          "type": "object",
+          "description": "Healthy fat targets to support scalp health and moisture retention.",
+          "properties": {
+            "totalFatGrams": {
+              "type": "number",
+              "minimum": 10,
+              "maximum": 200
+            },
+            "omega3Grams": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "omega6Grams": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 30
+            },
+            "efaRatioHint": {
+              "type": "string",
+              "description": "Human-readable hint about omega-3 to omega-6 balance."
+            }
+          },
+          "required": ["totalFatGrams"],
+          "additionalProperties": false
+        },
+
+        "hairMicronutrientTargets": {
+          "type": "object",
+          "description": "Key micronutrient targets with ranges tuned for hair health focus.",
+          "properties": {
+            "ironMg": {
+              "type": "object",
+              "properties": {
+                "min": { "type": "number", "minimum": 0 },
+                "max": { "type": "number", "minimum": 0 }
+              },
+              "required": ["min", "max"],
+              "additionalProperties": false
+            },
+            "zincMg": {
+              "type": "object",
+              "properties": {
+                "min": { "type": "number", "minimum": 0 },
+                "max": { "type": "number", "minimum": 0 }
+              },
+              "required": ["min", "max"],
+              "additionalProperties": false
+            },
+            "vitaminDMcg": {
+              "type": "object",
+              "properties": {
+                "min": { "type": "number", "minimum": 0 },
+                "max": { "type": "number", "minimum": 0 }
+              },
+              "required": ["min", "max"],
+              "additionalProperties": false
+            },
+            "vitaminAmcgRAE": {
+              "type": "object",
+              "properties": {
+                "min": { "type": "number", "minimum": 0 },
+                "max": { "type": "number", "minimum": 0 }
+              },
+              "required": ["min", "max"],
+              "additionalProperties": false
+            },
+            "vitaminCmg": {
+              "type": "object",
+              "properties": {
+                "min": { "type": "number", "minimum": 0 },
+                "max": { "type": "number", "minimum": 0 }
+              },
+              "required": ["min", "max"],
+              "additionalProperties": false
+            },
+            "biotinMcg": {
+              "type": "object",
+              "properties": {
+                "min": { "type": "number", "minimum": 0 },
+                "max": { "type": "number", "minimum": 0 }
+              },
+              "required": ["min", "max"],
+              "additionalProperties": false
+            },
+            "folateMcgDFE": {
+              "type": "object",
+              "properties": {
+                "min": { "type": "number", "minimum": 0 },
+                "max": { "type": "number", "minimum": 0 }
+              },
+              "required": ["min", "max"],
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+
+        "hairSupportFlags": {
+          "type": "object",
+          "description": "High-level support flags used by the Planning Graph and UX to show simple messages (e.g., 'protein on track').",
+          "properties": {
+            "proteinOnTrack": { "type": "boolean", "default": false },
+            "proteinLowRisk": { "type": "boolean", "default": false },
+            "ironSupportNeeded": { "type": "boolean", "default": false },
+            "vitaminDSupportNeeded": { "type": "boolean", "default": false },
+            "omega3SupportNeeded": { "type": "boolean", "default": false },
+            "hydrationSupportNeeded": { "type": "boolean", "default": false },
+            "summaryNote": {
+              "type": "string",
+              "description": "Short summary of top 1–3 focus areas."
+            }
+          },
+          "additionalProperties": false
+        },
+
+        "blackHairRiskFlags": {
+          "type": "object",
+          "description": "Risk flags specifically tuned for Black hair patterns and common challenges.",
+          "properties": {
+            "breakageRisk": { "type": "boolean", "default": false },
+            "sheddingRisk": { "type": "boolean", "default": false },
+            "drynessRisk": { "type": "boolean", "default": false },
+            "scalpInflammationRisk": { "type": "boolean", "default": false },
+            "protectiveStyleDamageRisk": { "type": "boolean", "default": false },
+            "postpartumRisk": { "type": "boolean", "default": false },
+            "notes": {
+              "type": "string",
+              "description": "Optional explanatory notes for why certain risks are flagged."
+            }
+          },
+          "additionalProperties": false
+        },
+
+        "waterIntakeTargetCups": {
+          "type": "number",
+          "minimum": 4,
+          "maximum": 32,
+          "description": "Suggested daily water intake in cups, tuned slightly upward if dryness or scalp concerns are present."
+        }
+      },
+      "required": [
+        "dailyHairProteinTarget",
+        "hairAminoProfile",
+        "hairHealthyFatTargets",
+        "hairMicronutrientTargets",
+        "hairSupportFlags",
+        "blackHairRiskFlags"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": ["input", "output"],
+  "additionalProperties": false
+}

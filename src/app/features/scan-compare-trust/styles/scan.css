@@ -1,0 +1,340 @@
+/* scan.css — Minor sheet / fab styles (Tailwind-friendly)
+   - Works alongside Tailwind utilities; uses CSS vars so tokens can be themed.
+   - State via data-* attributes to avoid specificity wars with Tailwind.
+   - Dark mode + reduced motion + safe-area aware.
+*/
+
+/* ------------------- Design tokens (inherits from app where present) ------------------- */
+:root {
+  --scan-bg:      hsl(0 0% 100%);
+  --scan-elev:    hsl(0 0% 100% / 0.85);
+  --scan-text:    hsl(222 47% 11%);
+  --scan-muted:   hsl(220 9% 46%);
+  --scan-ring:    hsl(221 83% 53%);
+  --scan-border:  hsl(220 13% 91%);
+  --scan-shadow:  0 10px 20px hsl(222 30% 5% / 0.15);
+
+  --scan-chip-bg: hsl(216 33% 97%);
+  --scan-chip-tx: hsl(222 47% 11%);
+  --scan-badge-bg:hsl(221 83% 53%);
+  --scan-badge-tx:hsl(0 0% 100%);
+
+  --scan-danger:  hsl(0 72% 51%);
+  --scan-warn:    hsl(45 93% 47%);
+  --scan-ok:      hsl(142 71% 45%);
+
+  --scan-radius:  16px;
+  --scan-radius-sm: 10px;
+  --scan-gap:     12px;
+
+  --sheet-max-h:  82vh;
+  --sheet-min-h:  92px;
+  --sheet-scrim:  hsl(222 22% 5% / 0.42);
+  --sheet-blur:   12px;
+
+  --fab-size:     56px;
+  --fab-shadow:   0 12px 24px hsl(222 30% 5% / 0.24);
+
+  --focus-ring:   0 0 0 3px var(--scan-ring);
+}
+
+.dark :root,
+:root.dark {
+  --scan-bg:      hsl(224 14% 12%);
+  --scan-elev:    hsl(224 14% 12% / 0.85);
+  --scan-text:    hsl(0 0% 98%);
+  --scan-muted:   hsl(215 14% 65%);
+  --scan-ring:    hsl(217 91% 60%);
+  --scan-border:  hsl(220 13% 18%);
+
+  --scan-chip-bg: hsl(224 14% 16%);
+  --scan-chip-tx: hsl(0 0% 98%);
+  --scan-badge-bg:hsl(217 91% 60%);
+  --scan-badge-tx:hsl(224 14% 12%);
+
+  --sheet-scrim:  hsl(222 22% 5% / 0.62);
+}
+
+/* ------------------- Floating Action Button (Scan) ------------------- */
+.scan-fab {
+  position: fixed;
+  right: clamp(12px, 2vw, 20px);
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  inline-size: var(--fab-size);
+  block-size: var(--fab-size);
+  border-radius: 9999px;
+  background: var(--scan-badge-bg);
+  color: var(--scan-badge-tx);
+  box-shadow: var(--fab-shadow);
+  display: grid;
+  place-items: center;
+  z-index: 60; /* above scrim, below toasts if any */
+  border: 1px solid color-mix(in hsl, var(--scan-badge-bg), var(--scan-border) 35%);
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.scan-fab:hover { transform: translateY(-2px); }
+.scan-fab:active { transform: translateY(0); }
+.scan-fab:focus-visible { outline: none; box-shadow: var(--fab-shadow), var(--focus-ring); }
+
+.scan-fab[data-state="active"] {
+  background: color-mix(in hsl, var(--scan-badge-bg), white 8%);
+}
+
+/* Mini badge for queued items / errors */
+.scan-fab .badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-inline-size: 18px;
+  inline-size: auto;
+  block-size: 18px;
+  padding: 0 5px;
+  border-radius: 9999px;
+  background: var(--scan-danger);
+  color: #fff;
+  font: 700 11px/18px system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  box-shadow: 0 4px 10px hsl(0 0% 0% / 0.2);
+}
+
+/* ------------------- Bottom Sheet (Results + Actions) ------------------- */
+.scan-sheet-scrim {
+  position: fixed;
+  inset: 0;
+  background: var(--sheet-scrim);
+  backdrop-filter: blur(var(--sheet-blur));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease;
+  z-index: 40;
+}
+.scan-sheet-scrim[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.scan-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-block-size: var(--sheet-max-h);
+  min-block-size: var(--sheet-min-h);
+  background: var(--scan-elev);
+  color: var(--scan-text);
+  border-top-left-radius: calc(var(--scan-radius) + 4px);
+  border-top-right-radius: calc(var(--scan-radius) + 4px);
+  box-shadow: var(--scan-shadow);
+  border-top: 1px solid var(--scan-border);
+  transform: translateY(100%);
+  transition: transform .22s cubic-bezier(.2,.8,.2,1);
+  z-index: 50;
+  -webkit-backdrop-filter: blur(var(--sheet-blur));
+  backdrop-filter: blur(var(--sheet-blur));
+  will-change: transform;
+}
+.scan-sheet[data-open="true"] { transform: translateY(0); }
+
+.scan-handle {
+  display: grid;
+  place-items: center;
+  padding: 10px 0 8px;
+  cursor: grab;
+  user-select: none;
+}
+.scan-handle::before {
+  content: "";
+  inline-size: 42px;
+  block-size: 5px;
+  border-radius: 9999px;
+  background: var(--scan-border);
+}
+
+.scan-sheet .scan-content {
+  padding: 8px max(12px, env(safe-area-inset-left)) calc(12px + env(safe-area-inset-bottom))
+           max(12px, env(safe-area-inset-right));
+  overflow: auto;
+  max-block-size: calc(var(--sheet-max-h) - 40px);
+}
+
+/* Sticky header row inside sheet (e.g., filters, attribution) */
+.scan-sticky {
+  position: sticky;
+  top: 0;
+  background: color-mix(in hsl, var(--scan-elev), transparent 0%);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--scan-border);
+  padding: 8px 4px;
+  z-index: 2;
+}
+
+/* ------------------- Chips / Badges / Pills ------------------- */
+.scan-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 9999px;
+  background: var(--scan-chip-bg);
+  color: var(--scan-chip-tx);
+  border: 1px solid var(--scan-border);
+  font: 500 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  white-space: nowrap;
+}
+.scan-chip[data-variant="success"] { background: color-mix(in hsl, var(--scan-ok), white 86%); color: hsl(142 71% 20%); }
+.scan-chip[data-variant="warn"]    { background: color-mix(in hsl, var(--scan-warn), white 86%); color: hsl(39 80% 20%); }
+.scan-chip[data-variant="danger"]  { background: color-mix(in hsl, var(--scan-danger), white 90%); color: hsl(0 70% 24%); }
+
+/* Small close button inside chip */
+.scan-chip .x {
+  inline-size: 18px; block-size: 18px;
+  display: grid; place-items: center;
+  border-radius: 9999px; opacity: .8;
+}
+.scan-chip .x:hover { opacity: 1; }
+
+/* Source Attribution cluster */
+.scan-attrib {
+  display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px;
+}
+.scan-badge {
+  padding: 4px 8px;
+  border-radius: 9999px;
+  background: var(--scan-badge-bg);
+  color: var(--scan-badge-tx);
+  font: 600 11px/1 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+/* ------------------- Compare rows / price & score ------------------- */
+.scan-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--scan-gap);
+  padding: 10px 8px;
+  border-bottom: 1px dashed var(--scan-border);
+}
+.scan-row:last-child { border-bottom: 0; }
+
+.scan-price {
+  font: 700 18px/1.2 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--scan-text);
+}
+.scan-per-unit {
+  font: 500 12px/1.2 ui-sans-serif, system-ui; color: var(--scan-muted);
+}
+
+.scan-score {
+  inline-size: 120px;
+  display: grid; align-content: center; justify-items: end;
+  gap: 6px;
+}
+.scan-score-bar {
+  inline-size: 120px; block-size: 8px; border-radius: 6px;
+  background: var(--scan-border);
+  overflow: hidden; position: relative;
+}
+.scan-score-bar::after {
+  content: "";
+  position: absolute; inset: 0;
+  inline-size: var(--score, 50%);
+  background: linear-gradient(90deg, hsl(142 71% 45%), hsl(221 83% 53%));
+}
+
+/* Reason tags */
+.scan-reasons { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ------------------- Empty states / skeletons ------------------- */
+.scan-empty {
+  padding: 24px 12px; text-align: center;
+  color: var(--scan-muted);
+  border: 1px dashed var(--scan-border);
+  border-radius: var(--scan-radius);
+  background: color-mix(in hsl, var(--scan-chip-bg), transparent 30%);
+}
+
+/* Skeleton shimmer (optional) */
+@keyframes scan-shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+.scan-skel {
+  border-radius: 10px;
+  background: linear-gradient(90deg,
+    hsl(0 0% 50% / .08) 0%,
+    hsl(0 0% 50% / .18) 50%,
+    hsl(0 0% 50% / .08) 100%);
+  background-size: 200% 100%;
+  animation: scan-shimmer 1.2s linear infinite;
+}
+
+/* ------------------- Favorite toggle (sessions & schedules) ------------------- */
+.fav-toggle {
+  display: inline-grid; place-items: center;
+  inline-size: 32px; block-size: 32px;
+  border-radius: 9999px;
+  color: var(--scan-muted);
+  transition: transform .18s ease, color .18s ease, background .18s ease;
+}
+.fav-toggle:hover { background: var(--scan-chip-bg); }
+.fav-toggle:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.fav-toggle[data-active="true"] { color: var(--scan-badge-bg); transform: scale(1.05); }
+
+/* ------------------- Tiny toast (inline, non-intrusive) ------------------- */
+.scan-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  transform: translateX(-50%) translateY(20px);
+  background: var(--scan-elev);
+  border: 1px solid var(--scan-border);
+  border-radius: var(--scan-radius);
+  padding: 10px 14px;
+  color: var(--scan-text);
+  box-shadow: var(--scan-shadow);
+  opacity: 0; pointer-events: none; z-index: 70;
+  transition: opacity .18s ease, transform .18s ease;
+}
+.scan-toast[data-open="true"] {
+  opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0);
+}
+
+/* ------------------- Small utilities ------------------- */
+.scan-divider { border-top: 1px solid var(--scan-border); margin: 8px 0; }
+.scan-row:hover { background: color-mix(in hsl, var(--scan-chip-bg), transparent 60%); }
+.scan-muted  { color: var(--scan-muted); }
+.scan-grid   { display: grid; gap: var(--scan-gap); }
+.scan-card   {
+  border: 1px solid var(--scan-border);
+  border-radius: var(--scan-radius);
+  background: var(--scan-bg);
+  box-shadow: var(--scan-shadow);
+}
+
+/* ------------------- Media tweaks ------------------- */
+@media (min-width: 640px) {
+  .scan-sheet { max-inline-size: 640px; margin-inline: auto; }
+}
+@media (min-width: 1024px) {
+  .scan-sheet { max-inline-size: 840px; }
+}
+
+/* ------------------- Reduced motion / blur fallbacks ------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .scan-fab,
+  .scan-sheet,
+  .scan-toast { transition: none !important; }
+  .scan-skel { animation: none; }
+}
+@supports not (backdrop-filter: blur(6px)) {
+  .scan-sheet,
+  .scan-sheet-scrim { backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+
+/* ------------------- Accessibility helpers ------------------- */
+[data-kbd="true"] .scan-fab:focus-visible,
+[data-kbd="true"] .fav-toggle:focus-visible,
+[data-kbd="true"] .scan-chip:focus-visible { box-shadow: var(--focus-ring); }
+
+/* ------------------- Inline status accents ------------------- */
+.scan-flag { border-left: 4px solid var(--scan-border); padding-left: 10px; }
+.scan-flag[data-kind="ok"]     { border-color: var(--scan-ok); }
+.scan-flag[data-kind="warn"]   { border-color: var(--scan-warn); }
+.scan-flag[data-kind="danger"] { border-color: var(--scan-danger); }

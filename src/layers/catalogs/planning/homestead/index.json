@@ -1,0 +1,83 @@
+{
+  "id": "catalog.homestead.planning",
+  "domain": "homestead",
+  "kind": "catalog_index",
+  "title": "Homestead Planning Catalog",
+  "intentTags": [
+    "catalog:index"
+  ],
+  "inputs": [],
+  "outputs": [],
+  "constraints": [],
+  "steps": [],
+  "kpis": [],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial fixed-layer planning catalog release (MVP)."
+      }
+    ]
+  },
+  "patterns": [
+    {
+      "id": "pat.homestead.garden_led",
+      "path": "src/layers/catalogs/planning/homestead/patterns/garden_led.json",
+      "title": "Garden-Led Homestead Planning",
+      "tags": [
+        "time:medium",
+        "difficulty:medium",
+        "focus:garden"
+      ]
+    },
+    {
+      "id": "pat.homestead.animal_led",
+      "path": "src/layers/catalogs/planning/homestead/patterns/animal_led.json",
+      "title": "Animal-Led Homestead Planning",
+      "tags": [
+        "time:medium",
+        "difficulty:high",
+        "focus:animals"
+      ]
+    },
+    {
+      "id": "pat.homestead.mixed_subsistence",
+      "path": "src/layers/catalogs/planning/homestead/patterns/mixed_subsistence.json",
+      "title": "Mixed Subsistence Planning",
+      "tags": [
+        "time:high",
+        "difficulty:medium",
+        "focus:mixed"
+      ]
+    },
+    {
+      "id": "pat.homestead.urban_homestead",
+      "path": "src/layers/catalogs/planning/homestead/patterns/urban_homestead.json",
+      "title": "Urban Homestead Planning",
+      "tags": [
+        "time:medium",
+        "difficulty:low",
+        "mode:urban"
+      ]
+    }
+  ],
+  "filters": {
+    "focus": [
+      "focus:garden",
+      "focus:animals",
+      "focus:mixed",
+      "mode:urban"
+    ],
+    "time": [
+      "time:medium",
+      "time:high"
+    ],
+    "difficulty": [
+      "difficulty:low",
+      "difficulty:medium",
+      "difficulty:high"
+    ]
+  }
+}

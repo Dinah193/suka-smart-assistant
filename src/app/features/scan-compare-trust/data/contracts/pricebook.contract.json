@@ -1,0 +1,464 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka.local/contracts/pricebook.contract.json",
+  "title": "Suka • Store Price Observation",
+  "description": "Normalized per-store price observation for Scan • Compare • Trust. One document = one price read (scrape/API/OCR) for a product at a store, time-bound and channel-specific.",
+  "type": "object",
+  "additionalProperties": false,
+
+  "required": [
+    "contractVersion",
+    "id",
+    "productRef",
+    "provider",
+    "store",
+    "channel",
+    "observedAtISO",
+    "price"
+  ],
+
+  "properties": {
+    "contractVersion": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Semver for this contract."
+    },
+
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9\\-]{10,}$",
+      "description": "Deterministic ID (e.g., sha256-12 of productRef+store+channel+observedAtISO)."
+    },
+
+    "productRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Minimal pointer back to the normalized product record.",
+      "required": ["productId", "canonicalKey"],
+      "properties": {
+        "productId": { "type": "string", "description": "product.contract.id" },
+        "canonicalKey": { "type": "string", "description": "GTIN/UPC/EAN or provider+sku fallback" },
+        "providerSku": { "$ref": "#/definitions/ProviderSku" },
+        "packageSize": { "$ref": "#/definitions/Size" }
+      }
+    },
+
+    "provider": {
+      "type": "string",
+      "description": "Adapter that produced this observation (e.g., aldi, sams, costco, walmart)."
+    },
+
+    "store": {
+      "$ref": "#/definitions/StoreRef"
+    },
+
+    "channel": {
+      "type": "string",
+      "enum": ["in_store", "pickup", "delivery", "online"]
+    },
+
+    "observedAtISO": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp you captured this price."
+    },
+
+    "effectiveWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "If known from ad/API: the promo window or price validity.",
+      "properties": {
+        "fromISO": { "type": "string", "format": "date-time" },
+        "toISO": { "type": "string", "format": "date-time" },
+        "sourceHint": { "type": "string", "enum": ["weekly_ad","manager_special","everyday_price","api_contract","unknown"] }
+      }
+    },
+
+    "price": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amount", "currency"],
+      "properties": {
+        "amount": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "minLength": 3, "maxLength": 3, "description": "ISO 4217 (e.g., USD)" },
+        "listPrice": { "type": "number", "minimum": 0, "description": "MSRP or shelf crossed-out price, if visible." },
+        "promoPrice": { "type": "number", "minimum": 0, "description": "If signage/API exposes a promo field." },
+        "loyaltyRequired": { "type": "boolean" },
+        "loyaltyTier": { "type": "string" },
+        "unitPrice": { "$ref": "#/definitions/UnitPrice" },
+        "multipackRule": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Pricing that requires buying multiples (e.g., 3 for $5).",
+          "properties": {
+            "requiredQty": { "type": "number", "minimum": 1 },
+            "bundlePrice": { "type": "number", "minimum": 0 }
+          }
+        },
+        "depositsAndFees": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "bottleDeposit": { "$ref": "#/definitions/Money" },
+            "bagFee": { "$ref": "#/definitions/Money" },
+            "serviceFee": { "$ref": "#/definitions/Money" },
+            "deliveryFee": { "$ref": "#/definitions/Money" }
+          }
+        },
+        "tax": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "rate": { "type": "number", "minimum": 0, "maximum": 1 },
+            "category": { "type": "string", "description": "Food, prepared, household, etc." },
+            "estimatedTaxOnOne": { "$ref": "#/definitions/Money" }
+          }
+        },
+        "sourceRef": { "type": "string", "description": "Adapter- or provider-specific document/item ID." }
+      }
+    },
+
+    "promotion": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Visible promo info tied to the price observation.",
+      "properties": {
+        "tags": { "type": "array", "items": { "type": "string" }, "description": "e.g., BOGO, Mix & Match, Manager's Special" },
+        "buyXGetY": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "buyQty": { "type": "number", "minimum": 1 },
+            "getQty": { "type": "number", "minimum": 1 },
+            "getPrice": { "type": "string", "enum": ["free","discounted"], "description": "Common BOGO rule" }
+          }
+        },
+        "limitPerCustomer": { "type": "number", "minimum": 1 },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "coupons": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "What coupon context was discoverable at observation time.",
+      "properties": {
+        "applied": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/CouponApplication" },
+          "description": "If the adapter can simulate or confirm coupon application."
+        },
+        "available": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/CouponRef" },
+          "description": "Coupons found but not yet applied."
+        },
+        "stackingEvaluation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "result": { "type": "string", "enum": ["stackable","not_stackable","unknown"] },
+            "reason": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "cycleHints": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Fields written by CycleAnalyzer to learn cadence.",
+      "properties": {
+        "cycleId": { "type": "string" },
+        "pattern": { "type": "string", "enum": ["weekly","biweekly","monthly","seasonal","irregular"] },
+        "lastObservedISO": { "type": "string", "format": "date-time" },
+        "nextExpectedISO": { "type": "string", "format": "date-time" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "method": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "How this observation was captured.",
+      "properties": {
+        "type": { "type": "string", "enum": ["api","scrape","ocr","manual"] },
+        "agent": { "type": "string", "description": "Which worker/agent made the capture (e.g., store-adapter:aldi)." },
+        "screenshotRef": { "$ref": "#/definitions/ImageRef" },
+        "documentRef": { "type": "string", "description": "Ad PDF page or receipt ID, if any." },
+        "ocr": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "rawText": { "type": "string" },
+            "boxes": { "type": "array", "items": { "$ref": "#/definitions/OcrBox" } },
+            "engine": { "type": "string", "description": "tesseract, vision-api, etc." }
+          }
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "matching": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Linkage evidence to product.",
+      "properties": {
+        "strategy": { "type": "string", "enum": ["barcode","title_fuzzy","ocr_semantic","provider_hint","hybrid"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/MatchEvidence" }
+        }
+      }
+    },
+
+    "sourceAttribution": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Attribution" },
+      "description": "Powers SourceAttribution.jsx"
+    },
+
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "createdBy": { "type": "string" },
+        "createdAtISO": { "type": "string", "format": "date-time" },
+        "updatedAtISO": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "userContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Per-user/household overlay. Stripped in exports.",
+      "properties": {
+        "isPinnedToList": { "type": "boolean" },
+        "plannedPurchaseISO": { "type": "string", "format": "date-time" },
+        "pinnedSchedules": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/ScheduleRef" }
+        },
+        "notes": { "type": "string" }
+      }
+    }
+  },
+
+  "definitions": {
+    "Money": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amount", "currency"],
+      "properties": {
+        "amount": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "minLength": 3, "maxLength": 3 }
+      }
+    },
+
+    "UnitPrice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit", "amount"],
+      "properties": {
+        "unit": { "type": "string", "enum": ["per_g","per_kg","per_ml","per_l","per_ct"] },
+        "amount": { "type": "number", "minimum": 0 }
+      }
+    },
+
+    "Size": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["quantity", "unit"],
+      "properties": {
+        "quantity": { "type": "number", "minimum": 0 },
+        "unit": { "type": "string" },
+        "normalized": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "quantity": { "type": "number", "minimum": 0 },
+            "unit": { "type": "string", "enum": ["g","kg","ml","l","ct"] }
+          }
+        }
+      }
+    },
+
+    "ProviderSku": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "sku"],
+      "properties": {
+        "provider": { "type": "string" },
+        "sku": { "type": "string" }
+      }
+    },
+
+    "StoreRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["storeId"],
+      "properties": {
+        "storeId": { "type": "string", "description": "Your internal store key (e.g., sams-0123, aldi-0091)" },
+        "name": { "type": "string" },
+        "address": { "type": "string" },
+        "geo": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "lat": { "type": "number" },
+            "lng": { "type": "number" }
+          }
+        },
+        "distanceKm": { "type": "number", "minimum": 0 }
+      }
+    },
+
+    "CouponRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string", "description": "CouponService ID" },
+        "stackingGroup": { "type": "string" }
+      }
+    },
+
+    "CouponApplication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["couponId"],
+      "properties": {
+        "couponId": { "type": "string" },
+        "applies": { "type": "boolean" },
+        "appliedValue": { "$ref": "#/definitions/Money" },
+        "reason": { "type": "string" }
+      }
+    },
+
+    "ImageRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url"],
+      "properties": {
+        "url": { "type": "string", "format": "uri" },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "type": { "type": "string", "enum": ["shelf","ad","product","receipt","other"] }
+      }
+    },
+
+    "OcrBox": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "text": { "type": "string" },
+        "bbox": {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "x1,y1,x2,y2"
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "MatchEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "enum": ["barcode","title","image","ocr","provider_field"] },
+        "value": { "type": "string" },
+        "score": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "Attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider": { "type": "string" },
+        "fields": { "type": "array", "items": { "type": "string" } },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "ScheduleRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "type": "string", "enum": ["session","schedule"] },
+        "id": { "type": "string" },
+        "name": { "type": "string" }
+      }
+    }
+  },
+
+  "examples": [
+    {
+      "contractVersion": "1.0.0",
+      "id": "pb-6e21f41a31",
+      "productRef": {
+        "productId": "p-9f52a1b0",
+        "canonicalKey": "00012345678905",
+        "providerSku": { "provider": "aldi", "sku": "A-12345" },
+        "packageSize": { "quantity": 1, "unit": "gal", "normalized": { "quantity": 3785.41, "unit": "ml" } }
+      },
+      "provider": "aldi",
+      "store": { "storeId": "aldi-0123", "name": "ALDI #123" },
+      "channel": "in_store",
+      "observedAtISO": "2025-10-27T16:31:00Z",
+      "effectiveWindow": {
+        "fromISO": "2025-10-27T05:00:00Z",
+        "toISO": "2025-11-02T23:59:59Z",
+        "sourceHint": "weekly_ad"
+      },
+      "price": {
+        "amount": 3.29,
+        "currency": "USD",
+        "unitPrice": { "unit": "per_l", "amount": 0.87 },
+        "loyaltyRequired": false,
+        "tax": { "rate": 0, "category": "food" }
+      },
+      "promotion": {
+        "tags": ["Weekly Ad"],
+        "limitPerCustomer": 4
+      },
+      "coupons": {
+        "available": [{ "id": "cpn-abc123", "stackingGroup": "mfg" }],
+        "stackingEvaluation": { "result": "stackable", "reason": "mfg + store allowed" }
+      },
+      "cycleHints": {
+        "cycleId": "milk-weekly-aldi",
+        "pattern": "weekly",
+        "lastObservedISO": "2025-10-20T16:00:00Z",
+        "nextExpectedISO": "2025-11-03T05:00:00Z",
+        "confidence": 0.78
+      },
+      "method": {
+        "type": "api",
+        "agent": "store-adapter:aldi",
+        "confidence": 0.98
+      },
+      "matching": {
+        "strategy": "barcode",
+        "confidence": 0.99
+      },
+      "sourceAttribution": [
+        { "provider": "aldi", "fields": ["price","unitPrice","effectiveWindow"], "confidence": 0.9 }
+      ],
+      "provenance": {
+        "createdBy": "pricing:StoreCatalogAdapters",
+        "createdAtISO": "2025-10-27T16:31:05Z",
+        "updatedAtISO": "2025-10-27T16:31:05Z"
+      },
+      "userContext": {
+        "isPinnedToList": true,
+        "plannedPurchaseISO": "2025-10-29T20:00:00Z",
+        "pinnedSchedules": [{ "type": "schedule", "id": "sched-grocery-wed", "name": "Wednesday Grocery Run" }]
+      }
+    }
+  ]
+}

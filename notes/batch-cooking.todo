@@ -1,0 +1,268 @@
+# C:\Users\larho\suka-smart-assistant\batch-cooking.todo
+# Suka Smart Assistant — Batch Cooking Scratch Plan
+# Style: BLUF + actionable checklists + event hooks
+# Use: keep this file open while you implement; check items off; commit early/often
+
+0) BLUF
+- We are building an intuitive Batch Cooking flow that:
+  • Lets users drag recipes from the Recipe Vault into a Batch Session.
+  • Merges steps into an integrated timeline with parallel-safe tasks and MultiTimerPanel.
+  • Honors household taste prefs (doneness, softness/tenderness, spice tolerance, fat preference).
+  • Syncs ingredients ⇄ Inventory, auto-generates Prep Checklists & Labels, and logs preservation (pressure canning, freezing, dehydrating, curing, beer/wine).
+  • Emits events for the automation runtime so other modules react (calendar, inventory, garden, storehouse).
+
+1) One-liners (Job → Output → Next Best Action → Events)
+• Batch Cooking: “Build a session → integrated timeline + timers + labels → ‘Start Session’ → batch.started”
+• Prep: “Consolidate ingredients → prep checklist + station map → ‘Send to Print’ → prep.checklist.created”
+• Cook: “Run timers → live step tracker + voice prompts → ‘Mark steps done’ → batch.step.completed”
+• Labeling: “Autofill labels (name/date/preservation) → printable PDF → ‘Print labels’ → labels.printed”
+• Inventory Sync: “Delta items used → inventory update patch → ‘Apply’ → inventory.updated”
+• Preservation: “Select preservation per dish → tracker entries → ‘Log preservation’ → preservation.logged”
+• Garden Tie-ins: “Harvest pulled for recipes → decrement harvest bins → ‘Move to root cellar’ → harvest.logged”
+• Calendar: “Session blocks + cooling/cure times → calendar events → ‘Share schedule’ → calendar.synced”
+• Recovery: “If session stalls → suggest swap/shortcuts → ‘Apply recovery’ → batch.recovery.applied”
+
+2) Git Setup (1 branch per feature you touch)
+- Terminal:
+  git checkout -b feat/batch-session-core
+  git add .
+  git commit -m "chore(batch): scratch .todo + plan scaffolding"
+
+3) Files/Areas to touch (front-end)
+- src/pages/cooking/index.jsx
+  ☐ Ensure BatchSessionPlanner + MultiTimerPanel render in horizontal “raised card” layout (per design refs).
+- src/pages/cooking/CookingSessionPlanner.jsx
+  ☐ Add drag target (accept: "RECIPE_CARD") [already configured—extend].
+  ☐ Add “Session Goals” banner (yield, duration, storage targets).
+  ☐ Show taste prefs (doneness, softness/tenderness, spice level) at top-right as quick toggles.
+- src/pages/cooking/MultiTimerPanel.jsx
+  ☐ Register timers from integrated timeline (generated below).
+  ☐ Add voice cues + toast notifications on step change.
+- src/components/cooking/BatchPrepChecklist.jsx (NEW)
+  ☐ Generate station-based checklist: Wash → Chop → Marinate → Preheat → Tools.
+- src/components/cooking/LabelPrinter.jsx
+  ☐ Generate print-ready labels (PDF): dish name, batch date, net weight/servings, preservation method, reheat cues, allergen flags.
+- src/components/cooking/IntegratedTaskParser.jsx
+  ☐ Merge steps across recipes; parallelize safe tasks; embed rest/cool windows.
+- src/components/cooking/BatchInventoryMap.jsx
+  ☐ Show storage locations; drag ingredient→location; sync to inventory.
+- src/components/cooking/PreservationTrackers/*
+  ☐ PressureCanningTracker.jsx, FreezingTracker.jsx, DehydratingTracker.jsx, CuringManager.jsx, BeerBrewingForm.jsx, WineMakingTracker.jsx
+
+4) Files/Areas to touch (agents + services)
+- src/agents/batchCookingAgent.js (NEW if missing)
+  ☐ buildIntegratedTimeline(recipes, prefs, equipment)
+  ☐ proposePreservation(dish, householdConstraints)
+  ☐ computeInventoryDelta(recipes, pantry)
+- src/services/automation/runtime.js
+  ☐ Ensure events below are registered and broadcast
+- src/stores/*
+  ☐ RecipeStore, MealPrefsStore (doneness/softness/spice), SupplyInventoryStore, ToolInventoryStore
+
+5) UI Acceptance Criteria (quick)
+☐ Horizontal, raised cards layout for Session Planner & MultiTimerPanel.
+☐ Drag from Recipe Vault → Batch Session queue works (multi-select + drag).
+☐ Taste toggles (doneness/softness/spice/fat) visibly affect steps & timers.
+☐ One-click: “Generate Prep Checklist”, “Generate Labels”, “Start Session”.
+☐ Live step tracker + voice + toasts; timers persist on route change.
+☐ Inventory delta preview with “Apply” (safe patch + undo).
+☐ Preservation trackers write entries + produce labels where relevant.
+☐ Calendar sync creates events for session window + critical timings.
+
+6) Domain Preferences to honor (HouseholdProfile / MealPrefs)
+- Doneness: rare/med-rare/medium/med-well/well for meats
+- Softness/Tenderness: softer | normal | firmer
+- Spice Tolerance: mild | medium | hot
+- Fat Preference: leaner | balanced | rich
+- Texture Goals: crispy | tender | chewy | flaky (per dish)
+- Kosher/Torah constraints: no pork/shellfish; separation logic when needed
+- Appliances: pressure cooker, dehydrator, smoker, water bath, pressure canner
+- Batch Goal: target servings, storage method split (e.g., 50% freeze, 30% can, 20% fresh)
+
+7) Event Contract (emit/subscribe)
+- Emit:
+  • batch.started, batch.paused, batch.resumed, batch.completed
+  • batch.step.completed (payload: {stepId, recipeId, ts})
+  • prep.checklist.created (payload: {pdfUrl, items})
+  • labels.printed (payload: {pdfUrl, count})
+  • inventory.updated (payload: {delta, patchId})
+  • preservation.logged (payload: {method, items, ts})
+  • calendar.synced (payload: {events})
+  • batch.recovery.applied (payload: {suggestions})
+- Subscribe:
+  • recipes.consolidated → prefill selectable recipes
+  • garden.harvest.available → suggest substitutions
+  • inventory.low → warn & auto-adjust shopping checklist
+  • user.prefs.updated → recompute timeline/temps
+
+8) Minimal Data Shapes (copy into agents as JSDoc or typedefs)
+/**
+ * @typedef {Object} BatchSession
+ * @prop {string} id
+ * @prop {string} name
+ * @prop {Date} createdAt
+ * @prop {string[]} recipeIds
+ * @prop {SessionPrefs} prefs
+ * @prop {IntegratedStep[]} timeline
+ * @prop {InventoryDelta} inventoryDelta
+ */
+
+/** SessionPrefs includes doneness/softness/spice/fat */
+{
+  "doneness": {"beef":"medium","lamb":"medium","chicken":"well"},
+  "softness": "tender",
+  "spice": "medium",
+  "fat": "balanced",
+  "textureGoals": {"fried-chicken":"crispy","stew":"tender"},
+  "appliances": ["pressure_cooker","pressure_canner","dehydrator","smoker"],
+  "targets": {"servingsTotal": 32, "preservationSplit": {"freeze":0.5,"can":0.3,"fresh":0.2}}
+}
+
+/** IntegratedStep (flattened, parallel-safe) */
+{
+  "id":"step-uuid",
+  "recipeId":"r1",
+  "startsAfter":"preheat-oven",
+  "durationSec": 420,
+  "blocking": false,
+  "appliance":"oven",
+  "action":"Bake thighs @400°F until 165°F (approx 18 min). Crisp goal.",
+  "thermoTargetF": 165,
+  "donenessTuning": {"beef":"medium","lamb":"medium"},
+  "softnessTuning": "tender",
+  "spiceTuning": "medium",
+  "labels": ["hot-surface","timer","crispy-target"]
+}
+
+/** InventoryDelta */
+{
+  "consume":[ {"sku":"CHICKEN_THIGH","qty":12,"unit":"pcs"}, {"sku":"OIL_AVO","qty":180,"unit":"ml"} ],
+  "produce":[ {"sku":"FRIED_CHICKEN_MEAL","qty":12,"unit":"serving","preservation":"freeze"} ],
+  "missing":[ {"sku":"PAPRIKA_SMOKED","qty":10,"unit":"g"} ]
+}
+
+9) Pseudocode — Agent timeline (src/agents/batchCookingAgent.js)
+/*
+export async function buildIntegratedTimeline(selectedRecipes, prefs, equipment){
+  const steps = flattenRecipeSteps(selectedRecipes);
+  const tuned = applyTasteTuning(steps, prefs); // doneness/softness/spice/fat/texture
+  const sequenced = topologicalSchedule(tuned); // resolve deps
+  const parallelized = packParallel(sequenced, equipment); // avoid appliance conflicts
+  const withThermo = injectThermoTargets(parallelized, prefs);
+  return withThermo;
+}
+*/
+
+10) UI Wiring Notes
+- Taste toggles should immediately regenerate the timeline and timers.
+- “Generate Prep Checklist” pulls from tuned steps: ingredients→actions→tools.
+- “Label Printer” consumes produce[] from InventoryDelta plus preservation method & reheat.
+- MultiTimerPanel registers 1 timer per IntegratedStep that has durationSec (no subplots).
+- Voice/Toasts: “Preheat complete”, “Start sear”, “Flip now”, “Pull at 135°F”, “Rest 10 min”…
+
+11) Minimal Component Snippets
+// In CookingSessionPlanner.jsx — taste toggles bar
+/*
+<div className="flex items-center gap-2">
+  <DonenessSelect meats={['beef','lamb','chicken']} default={{beef:'medium', lamb:'medium', chicken:'well'}} />
+  <SoftnessToggle options={['softer','tender','firmer']} default="tender" />
+  <SpiceToggle options={['mild','medium','hot']} default="medium" />
+  <FatToggle options={['leaner','balanced','rich']} default="balanced" />
+</div>
+*/
+
+// In MultiTimerPanel.jsx — register timers after timeline generation
+/*
+useEffect(() => {
+  if (!timeline?.length) return;
+  timeline.forEach(step => step.durationSec && registerTimer(step.id, step.durationSec, {label: step.action}));
+}, [timeline]);
+*/
+
+12) Label Template (JSON → PDF)
+{
+  "template":"food_label_v1",
+  "items":[
+    {
+      "name":"Fried Chicken (crispy)",
+      "date":"{{today}}",
+      "servings":4,
+      "preservation":"freeze",
+      "reheat":"Oven 375°F 18–22 min; Air fryer 360°F 10–12 min",
+      "allergens":["gluten","egg"],
+      "notes":"Season: medium spice; Oil: balanced fat"
+    }
+  ]
+}
+
+13) Calendar Sync (event skeleton)
+/*
+events = [
+ {title:"Batch Session: Sunday Meal Prep", start: "2025-10-05T13:00:00", end:"2025-10-05T16:30:00"},
+ {title:"Cooling Window (soups)", start:"...", end:"..."},
+ {title:"Curing Check", start:"...", end:"..."}
+]
+emit('calendar.synced',{events})
+*/
+
+14) Inventory Patch (safe apply + undo)
+/*
+const delta = await agent.computeInventoryDelta(recipes, pantry);
+showDelta(delta); // human review
+if (userConfirms) {
+  const patchId = await inventory.applyDelta(delta);
+  emit('inventory.updated',{delta, patchId});
+} else { cancel(); }
+*/
+
+15) Recovery Logic (if session runs behind)
+/*
+detectLate = compareNowToTimeline(timeline);
+if (detectLate > 12 * 60) {
+  suggestions = [
+    "Swap to pressure-cook route for beans (35 min → 18 min).",
+    "Air fry batch #2 while oven handles casseroles.",
+    "Skip marinade rest: use vacuum tumbler / fork-perf + 10 min."
+  ];
+  emit('batch.recovery.applied',{suggestions});
+}
+*/
+
+16) VS Code Working Steps (for you)
+☐ Create feature branch (above).
+☐ Open index.jsx → ensure layout: horizontal raised cards (Tailwind + DaisyUI).
+☐ Add taste toggles (as simple local state first).
+☐ Wire buildIntegratedTimeline → setTimeline.
+☐ Connect MultiTimerPanel timers to timeline.
+☐ Build Prep Checklist component → print (use window.print() as stopgap or jsPDF).
+☐ Build LabelPrinter → generate PDF via jsPDF or pdf-lib.
+☐ Hook Inventory delta modal (confirm/undo).
+☐ Add Preservation trackers (start with PressureCanningTracker).
+☐ Emit all events (see §7) from handlers.
+☐ Manual test run; then commit.
+
+17) Commit Cadence
+- feat: Session planner taste toggles + timeline regenerate
+- feat: MultiTimer timers register + voice cues
+- feat: Prep checklist + label PDF
+- feat: Inventory delta modal + apply/undo
+- feat: Preservation trackers + events
+- chore: styles — horizontal raised cards
+- fix: parallel scheduler avoids appliance conflicts
+
+18) Done = Definition
+☐ Users can drag 3+ recipes in; timeline generated in ≤2s.
+☐ Doneness/softness/spice toggles change steps & timers immediately.
+☐ Timers run independently; voice + toasts fire on each step change.
+☐ Labels print with correct metadata; PDFs saved.
+☐ Inventory updates produce correct consume/produce/missing.
+☐ Preservation logs created and viewable.
+☐ Calendar entries created for session + critical follow-ups.
+☐ All events emitted; no console errors; refresh-safe.
+
+19) Parking Lot (later)
+- AI voice pack selection (kitchen vibe).
+- Equipment load estimator (max BTU / rack space).
+- “What can I make right now?” from pantry snapshot.
+- Batch cost & nutrition roll-up.
+- Team mode (assign stations to helpers, QR step pickup).

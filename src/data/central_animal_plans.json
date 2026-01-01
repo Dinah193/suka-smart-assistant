@@ -1,0 +1,467 @@
+{
+  "version": "2025-10-31T12:05:00-05:00",
+  "description": "CENTRAL: animal acquisition / care / butchery archetypes for Suka Smart Assistant. Auto-fed by scrapers/ingestors and breed table (breeds.json), with hub override for Torah-clean rules and local processing safety. Feeds Animal Planner, Storehouse intake, Cleaning (post-process), Garden (grazing/brush-control), and MealPlanEngine (reverse → animal when meals call for certain proteins).",
+  "meta": {
+    "sourceOfTruth": "scraper",
+    "lastIngestedAt": "2025-10-31T12:05:00-05:00",
+    "ingestionPipelines": [
+      "scraperService",
+      "importService",
+      "bookmarklet",
+      "linked-accounts"
+    ],
+    "mergeStrategy": "scraper-wins",
+    "allowHubOverrides": true,
+    "overrideFields": [
+      "torahClean",
+      "processing",
+      "storehouseIntake",
+      "cleaningProfiles"
+    ],
+    "sharedOrchestration": {
+      "emitOnUpdate": true,
+      "reason": "scraper-update",
+      "channels": [
+        "animals",
+        "storehouse",
+        "meals",
+        "cleaning",
+        "garden"
+      ]
+    },
+    "notes": [
+      "This file is the canonical list of 'patterns' for animals: acquire → care → harvest/butchery → storehouse → cleaning.",
+      "Households can clone any archetype into their prefs and schedule it or favorite it.",
+      "Reverse generation is enabled so low storehouse levels, meal plans, or garden brush-control needs can create animal sessions automatically.",
+      "Integrates with central breeds.json for yields and Torah-clean."
+    ]
+  },
+  "defaults": {
+    "timezone": "America/Chicago",
+    "supportsCleaning": true,
+    "emitCleaningOnComplete": true,
+    "defaultButcheryComplexity": "medium"
+  },
+  "archetypes": [
+    {
+      "id": "animal-plan-sheep-meat-cycle",
+      "label": "Sheep – Meat Cycle (Torah-Clean)",
+      "species": "sheep",
+      "torahClean": true,
+      "purpose": [
+        "meat",
+        "byproduct"
+      ],
+      "phases": [
+        {
+          "id": "acquisition",
+          "label": "Acquire Feeder/Katahdin/Dorper",
+          "trigger": "storehouse.meat-lamb.low",
+          "actions": [
+            "check local inventory for feeder lambs",
+            "schedule acquisition day",
+            "update storehouse.intake.expected"
+          ],
+          "reverseGeneration": {
+            "enabled": true,
+            "listensFor": [
+              "meals.plan.fromStorehouse.requested",
+              "storehouse.meat-lamb.low"
+            ],
+            "emit": [
+              "animals.plan.fromStorehouse.generated"
+            ]
+          }
+        },
+        {
+          "id": "care",
+          "label": "Pasture + Supplement",
+          "actions": [
+            "daily water check",
+            "rotational graze if garden/yard needs",
+            "weekly health check (hooves, eyes, parasites)"
+          ],
+          "gardenIntegration": {
+            "canAssist": true,
+            "emitOnBrushUse": [
+              "garden.care-session.generated",
+              "cleaning.outdoor-zone.expected"
+            ]
+          },
+          "schedule": {
+            "type": "recurring",
+            "rule": "RRULE:FREQ=DAILY;BYHOUR=7;BYMINUTE=0;BYSECOND=0"
+          }
+        },
+        {
+          "id": "butchery",
+          "label": "On-Farm Butchery (Sheep)",
+          "actions": [
+            "prep butchery area",
+            "perform Torah-compliant slaughter",
+            "process carcass per central breeds yield",
+            "emit storehouse.intake.expected"
+          ],
+          "processing": {
+            "complexity": "low",
+            "byproducts": [
+              "blood-meal",
+              "tallow",
+              "bones"
+            ]
+          },
+          "cleaningProfiles": [
+            "cleaning.processing-area.requested",
+            "cleaning.storehouse-meat-intake"
+          ],
+          "reverseGeneration": {
+            "enabled": true,
+            "listensFor": [
+              "animals.butchery.completed"
+            ],
+            "emit": [
+              "cleaning.processing-area.requested",
+              "storehouse.intake.expected"
+            ]
+          }
+        }
+      ],
+      "storehouseIntake": {
+        "items": [
+          {
+            "sku": "meat-lamb",
+            "qty": 50,
+            "unit": "lb",
+            "source": "butchery"
+          },
+          {
+            "sku": "byproduct-blood-meal",
+            "qty": 1,
+            "unit": "bucket",
+            "source": "processing"
+          }
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "meals.plan.created",
+          "storehouse.meat-lamb.low"
+        ],
+        "rules": [
+          {
+            "id": "meal-lamb-demand",
+            "ifEvent": "meals.plan.created",
+            "ifProteinIn": [
+              "lamb",
+              "mutton"
+            ],
+            "generate": "animal-plan-sheep-meat-cycle"
+          }
+        ]
+      },
+      "userCanSaveAsFavorite": true,
+      "uiHints": {
+        "icon": "sheep",
+        "group": "torah-clean",
+        "color": "slate"
+      }
+    },
+    {
+      "id": "animal-plan-goat-meat-brush",
+      "label": "Goat – Meat + Brush-Control Dual",
+      "species": "goat",
+      "torahClean": true,
+      "purpose": [
+        "meat",
+        "brush-control"
+      ],
+      "phases": [
+        {
+          "id": "acquisition",
+          "label": "Acquire Boer/Kiko",
+          "trigger": "garden.brush-control.requested",
+          "actions": [
+            "find suitable goat breed from breeds.json",
+            "assign to brush-control zone",
+            "emit cleaning.outdoor-zone.expected"
+          ]
+        },
+        {
+          "id": "care",
+          "label": "Brush Rotation",
+          "actions": [
+            "move goats along fenceline",
+            "check water and shelter",
+            "monitor for parasite load"
+          ],
+          "schedule": {
+            "type": "recurring",
+            "rule": "RRULE:FREQ=DAILY;BYHOUR=8;BYMINUTE=30;BYSECOND=0"
+          },
+          "reverseGeneration": {
+            "enabled": true,
+            "listensFor": [
+              "garden.plan.created",
+              "garden.pest-pressure.detected"
+            ],
+            "emit": [
+              "garden.care-session.generated"
+            ]
+          }
+        },
+        {
+          "id": "butchery",
+          "label": "Goat Butchery (Medium Complexity)",
+          "processing": {
+            "complexity": "medium",
+            "byproducts": [
+              "blood-meal",
+              "bone-broth-stock"
+            ]
+          },
+          "actions": [
+            "prep butchery station",
+            "process goat into storehouse cuts",
+            "emit storehouse.intake.expected"
+          ],
+          "cleaningProfiles": [
+            "cleaning.processing-area.requested",
+            "cleaning.storehouse-meat-intake"
+          ]
+        }
+      ],
+      "storehouseIntake": {
+        "items": [
+          {
+            "sku": "meat-goat",
+            "qty": 55,
+            "unit": "lb"
+          }
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "storehouse.meat-goat.low",
+          "meals.plan.created",
+          "garden.brush-control.requested"
+        ],
+        "rules": [
+          {
+            "id": "goat-meat-low",
+            "ifEvent": "storehouse.meat-goat.low",
+            "generate": "animal-plan-goat-meat-brush",
+            "emit": [
+              "animals.plan.generated",
+              "cleaning.processing-area.requested"
+            ]
+          },
+          {
+            "id": "meal-goat-demand",
+            "ifEvent": "meals.plan.created",
+            "ifProteinIn": [
+              "goat"
+            ],
+            "generate": "animal-plan-goat-meat-brush"
+          }
+        ]
+      },
+      "userCanSaveAsFavorite": true,
+      "uiHints": {
+        "icon": "goat",
+        "group": "torah-clean",
+        "color": "green"
+      }
+    },
+    {
+      "id": "animal-plan-cattle-family",
+      "label": "Cattle – Family Beef Intake Plan",
+      "species": "cattle",
+      "torahClean": true,
+      "purpose": [
+        "meat",
+        "milk"
+      ],
+      "phases": [
+        {
+          "id": "acquisition",
+          "label": "Acquire Dexter/Senepol",
+          "actions": [
+            "select heat-tolerant breed for zone 8b",
+            "verify Torah-clean from breeds.json",
+            "schedule intake and initial health check"
+          ]
+        },
+        {
+          "id": "care",
+          "label": "Daily Care + Milking (if dairy line)",
+          "actions": [
+            "feed/hay as needed",
+            "water check",
+            "milking (if applicable)",
+            "emit cleaning.milking-station.expected"
+          ],
+          "schedule": {
+            "type": "recurring",
+            "rule": "RRULE:FREQ=DAILY;BYHOUR=6;BYMINUTE=0;BYSECOND=0"
+          }
+        },
+        {
+          "id": "butchery",
+          "label": "Large Animal Butchery",
+          "processing": {
+            "complexity": "high",
+            "byproducts": [
+              "blood-meal",
+              "tallow",
+              "bone-broth-stock"
+            ]
+          },
+          "actions": [
+            "prep large-animal bay",
+            "quarter and chill",
+            "emit storehouse.beef-intake.expected"
+          ],
+          "cleaningProfiles": [
+            "cleaning.processing-area.requested",
+            "cleaning.heavy-duty-requested"
+          ]
+        }
+      ],
+      "storehouseIntake": {
+        "items": [
+          {
+            "sku": "meat-beef",
+            "qty": 300,
+            "unit": "lb"
+          },
+          {
+            "sku": "milk-raw",
+            "qty": 5,
+            "unit": "gal",
+            "note": "per week, if dairy"
+          }
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "storehouse.beef-intake.low",
+          "meals.plan.created"
+        ],
+        "rules": [
+          {
+            "id": "beef-low",
+            "ifEvent": "storehouse.beef-intake.low",
+            "generate": "animal-plan-cattle-family"
+          }
+        ]
+      },
+      "userCanSaveAsFavorite": true,
+      "uiHints": {
+        "icon": "cow",
+        "group": "large",
+        "color": "red"
+      }
+    },
+    {
+      "id": "animal-plan-poultry-batch",
+      "label": "Poultry – Batch Raise & Process",
+      "species": "poultry",
+      "torahClean": true,
+      "purpose": [
+        "meat",
+        "eggs"
+      ],
+      "phases": [
+        {
+          "id": "acquisition",
+          "label": "Acquire Chicks / Meat Birds",
+          "trigger": "meals.plan.batch-cooking.requested",
+          "actions": [
+            "order meat chicks",
+            "schedule brooder setup",
+            "emit cleaning.brooder-prep.requested"
+          ]
+        },
+        {
+          "id": "care",
+          "label": "Brooder → Tractor → Pasture",
+          "actions": [
+            "daily feed and water",
+            "move tractor",
+            "check for pest load in garden"
+          ],
+          "gardenIntegration": {
+            "canAssist": true,
+            "emitOnPestPass": [
+              "garden.pest-pressure.reduced"
+            ]
+          },
+          "schedule": {
+            "type": "recurring",
+            "rule": "RRULE:FREQ=DAILY;BYHOUR=7;BYMINUTE=30;BYSECOND=0"
+          }
+        },
+        {
+          "id": "butchery",
+          "label": "Poultry Processing Day",
+          "processing": {
+            "complexity": "low",
+            "byproducts": [
+              "feathers-compost",
+              "offal-compost"
+            ]
+          },
+          "actions": [
+            "setup scald + pluck",
+            "process batch",
+            "package to storehouse",
+            "emit cleaning.processing-area.requested"
+          ],
+          "cleaningProfiles": [
+            "cleaning.processing-area.requested",
+            "cleaning.storehouse-meat-intake"
+          ]
+        }
+      ],
+      "storehouseIntake": {
+        "items": [
+          {
+            "sku": "meat-poultry",
+            "qty": 10,
+            "unit": "bird"
+          }
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "meals.batch-cooking.completed",
+          "storehouse.meat-poultry.low"
+        ],
+        "rules": [
+          {
+            "id": "batch-cooking-to-poultry",
+            "ifEvent": "meals.batch-cooking.completed",
+            "generate": "animal-plan-poultry-batch"
+          }
+        ]
+      },
+      "userCanSaveAsFavorite": true,
+      "uiHints": {
+        "icon": "chicken",
+        "group": "small",
+        "color": "yellow"
+      }
+    }
+  ],
+  "userCanSaveFavorites": true,
+  "userFavoritePolicy": {
+    "maxPerHousehold": 30,
+    "allowCustomSchedule": true,
+    "allowCustomCleaningProfiles": true,
+    "allowCustomStorehouseIntake": true
+  }
+}

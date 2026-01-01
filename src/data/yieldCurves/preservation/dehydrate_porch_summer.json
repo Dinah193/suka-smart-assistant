@@ -1,0 +1,369 @@
+{
+  "$schema": "../../schemas/preservation.schema.json",
+  "version": "2025-10-31T18:40:00-05:00",
+  "meta": {
+    "id": "dehydrate_porch_summer",
+    "title": "Preservation – Porch / Solar Dehydration (Summer Line)",
+    "description": "Preservation profile for warm-season, outdoor/porch/solar dehydration sessions. Designed to catch peak garden and orchard overflow (tomato hot strip seconds, leafy bed surplus, herb corner cuttings, orchard-row-1 small fruit), turn them into shelf-stable storehouse items, and then surface cleaning/sanitizing runs for trays, racks, porch screens, and insect guards. This should OFFER dehydration sessions — not auto-trigger — and it must support reverse-generation from storehouse dried targets and co-op/shared planning. Includes optional Torah-compliant animal jerky line (clean species only) tied to butchery sessions.",
+    "source": "suka-smart-assistant",
+    "tags": [
+      "preservation",
+      "dehydrate",
+      "porch",
+      "solar",
+      "summer",
+      "storehouse",
+      "garden",
+      "orchard",
+      "cleaning",
+      "meal-planning",
+      "animals",
+      "butchery",
+      "reverse-gen"
+    ],
+    "zone": "preserve-dehydrate-porch",
+    "calendar": {
+      "hebrewMonthStart": "full-moon",
+      "supportsAltStart": true,
+      "notes": "Use full-moon starts so summer feast prep and ‘sunny-day-only’ tasks line up with your calendar engine."
+    },
+    "torahCompliance": {
+      "uncleanSpeciesExcluded": true,
+      "notes": "If dehydrating meat/jerky, use only clean species (beef, lamb, goat, clean poultry). Run meat days separate from produce-only days and follow cleaning routines below."
+    }
+  },
+  "ui": {
+    "layout": "cards/timeline",
+    "hints": {
+      "primaryCTA": "Offer Dehydration Session (Porch/Solar)",
+      "secondaryCTA": "Save as Favorite",
+      "tertiaryCTA": "Reverse-generate from Storehouse Dried Targets",
+      "showSeasonalityBadge": true,
+      "groupBy": [
+        "sourceDomain",
+        "produceType",
+        "runType"
+      ],
+      "suggestOnly": true,
+      "notes": "Present like a good homestead site: show weather-friendly day badges, available tray capacity, and which harvest lots are ready right now."
+    },
+    "badges": [
+      {
+        "text": "Dehydrate",
+        "color": "amber"
+      },
+      {
+        "text": "Porch / Solar",
+        "color": "orange"
+      },
+      {
+        "text": "User-Initiated",
+        "color": "slate"
+      }
+    ]
+  },
+  "orchestration": {
+    "bus": "window.__suka?.eventBus",
+    "emitOnLoad": [
+      "preservation.profile.loaded",
+      "preservation.dehydrate.porch-summer.loaded"
+    ],
+    "listen": [
+      "garden.harvest.completed",
+      "garden.session.request",
+      "storehouse.goal.request",
+      "meal.session.request",
+      "cleaning.session.request",
+      "inventory.restock.request",
+      "automation.schedule.request",
+      "butchery.session.completed"
+    ],
+    "sharedScopes": [
+      "garden",
+      "storehouse",
+      "meals",
+      "cleaning",
+      "animals",
+      "butchery"
+    ]
+  },
+  "engines": {
+    "primary": "preservationEngine",
+    "supports": [
+      "storehouseGoalEngine",
+      "gardenQueueEngine",
+      "mealPlanEngine",
+      "cleaningSessionEngine",
+      "animalSessionEngine"
+    ],
+    "notes": "preservationEngine should check weather/season flags from your automation runtime. On suitable porch days and when harvest lots are present, OFFER a dehydrator run sized to tray capacity. For meat runs, offer only if a clean-species butchery finished today + porch temp/humidity allow it."
+  },
+  "reverse": {
+    "generateFrom": [
+      "storehouse.targets.dried-herbs",
+      "storehouse.targets.dried-tomatoes",
+      "storehouse.targets.dried-apples-orchard",
+      "storehouse.targets.dried-greens",
+      "storehouse.targets.jerky-clean-line",
+      "mealplan.requirements.dried-components",
+      "community.feast-days.dried-snacks",
+      "coop-pool.dried-shared",
+      "garden.overflow.summer",
+      "orchard.overflow.summer"
+    ],
+    "strategies": [
+      {
+        "id": "from-storehouse-dried-herbs",
+        "title": "Back into porch runs from storehouse dried-herbs target",
+        "input": {
+          "targetJars": 12,
+          "avgHerbPerTrayGrams": 90,
+          "trayCount": 6
+        },
+        "output": {
+          "suggestedRuns": 3,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Run 3 porch dehydrations for herb jars",
+              "emitOnUserAccept": [
+                "preservation.session.request",
+                "cleaning.session.request"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "from-garden-overflow-summer",
+        "title": "Offer porch dehydration from summer garden overflow",
+        "input": {
+          "tomatoSecondsKg": 5,
+          "leafyTrimKg": 2
+        },
+        "output": {
+          "estimatedDriedKg": 2.5,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Dry 5 kg tomato seconds + 2 kg greens on porch",
+              "emitOnUserAccept": [
+                "preservation.session.request"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "from-butchered-clean-species",
+        "title": "Offer clean jerky run after butchery",
+        "input": {
+          "cleanSpecies": [
+            "beef",
+            "lamb",
+            "goat",
+            "poultry"
+          ],
+          "leanTrimKg": 3
+        },
+        "output": {
+          "driedJerkyKg": 1.5,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Dehydrate clean jerky on porch (separate day)",
+              "emitOnUserAccept": [
+                "preservation.session.request",
+                "cleaning.session.request"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "preservation": {
+    "method": "dehydrate",
+    "zone": "preserve-dehydrate-porch",
+    "dehydratorType": "solar/porch-rack",
+    "supportedSources": [
+      "garden_harvest/tomato_hot_strip",
+      "garden_harvest/leafy_shade_bed",
+      "garden_harvest/herbs_perennial_corner",
+      "garden_harvest/orchard_row_1",
+      "garden_harvest/orchard_row_1_overflow",
+      "byproducts/bones_stock_base",
+      "byproducts/tallow_beef"
+    ],
+    "batchModel": {
+      "formula": "min(trayCapacityKg, harvestAvailableKg) * drydownRate",
+      "trayCapacityKg": 6,
+      "drydownRate": 0.18,
+      "notes": "Solar porch rigs often hit 15–25% of original weight depending on veg/fruit. This is conservative for summer."
+    }
+  },
+  "storehouse": {
+    "targets": {
+      "dried_tomato_jars": 8,
+      "dried_herb_jars": 12,
+      "dried_orchard_slices_bags": 10,
+      "dried_greens_powder_bags": 6,
+      "jerky_clean_line_bags": 4
+    },
+    "grocerySectionsInspiration": [
+      "Dried Fruits & Veg",
+      "Spices, Herbs & Seasonings",
+      "Snack & Trail Foods",
+      "Pantry Meal Starters",
+      "Emergency / No-Heat"
+    ],
+    "autoPlan": {
+      "enabled": false
+    }
+  },
+  "meals": {
+    "recipes": [
+      {
+        "id": "dried-tomato-pasta-addon",
+        "title": "Dried Tomato Pasta Add-On",
+        "linksTo": [
+          "/meals/dinner",
+          "/storehouse/tomato"
+        ]
+      },
+      {
+        "id": "herb-blend-from-perennial",
+        "title": "Perennial-Corner Herb Blend (dried)",
+        "linksTo": [
+          "/meals/lunch",
+          "/garden/herbs"
+        ]
+      },
+      {
+        "id": "porch-jerky-snack",
+        "title": "Clean Jerky Snack (porch)",
+        "linksTo": [
+          "/meals/snacks",
+          "/storehouse/meat"
+        ]
+      }
+    ],
+    "autoSession": {
+      "everyDays": 0,
+      "emit": []
+    }
+  },
+  "garden": {
+    "care": [
+      {
+        "id": "prep-for-dehydrator",
+        "title": "Prep Garden Produce for Dehydrator (wash, slice, blanch-if-needed)",
+        "emit": "garden.session.request"
+      }
+    ],
+    "harvest": {
+      "autoSuggest": true,
+      "userMustConfirm": true,
+      "emitOnConfirm": [
+        "garden.session.request"
+      ]
+    },
+    "notes": "This porch profile is what connects your garden_harvest curves to long-term shelf items without firing the pressure canner on a hot day."
+  },
+  "cleaning": {
+    "routines": [
+      {
+        "id": "porch-dehydrator-tray-clean",
+        "title": "Porch Dehydrator Trays / Screens Clean",
+        "frequency": "PER_RUN",
+        "emit": "cleaning.session.request",
+        "tools": [
+          "degreaser",
+          "brush",
+          "hot-water",
+          "sanitizer"
+        ]
+      },
+      {
+        "id": "porch-area-wipe",
+        "title": "Porch Preservation Area Wipe-Down",
+        "frequency": "WEEKLY",
+        "emit": "cleaning.session.request"
+      }
+    ],
+    "sabbathGuard": true
+  },
+  "animals": {
+    "routing": {
+      "trimAndPeel": [
+        "compost",
+        "poultry",
+        "goat"
+      ],
+      "notes": "If produce shows spoil/ferment signs before drying, do NOT feed to animals — compost hot instead."
+    },
+    "emit": [
+      "animal.care.session.request"
+    ]
+  },
+  "inventory": {
+    "productId": "preservation-dehydrate-porch-summer",
+    "unit": "jar",
+    "trackLots": true,
+    "shelfLifeDays": 365
+  },
+  "favoriteSessions": [
+    {
+      "id": "fav-porch-dehydrate-garden-overflow",
+      "title": "Porch Dehydrate – Garden Overflow",
+      "domain": "preservation/dehydrate",
+      "schedule": "",
+      "sabbathGuard": true
+    },
+    {
+      "id": "fav-porch-jerky-clean-line",
+      "title": "Porch Jerky (Clean Line) – After Butchery",
+      "domain": "preservation/dehydrate",
+      "schedule": "",
+      "sabbathGuard": true
+    }
+  ],
+  "scheduleTemplates": [
+    {
+      "id": "porch-dehydrate-summer-window",
+      "title": "Summer Porch Dehydrate Window (User Confirm)",
+      "rrules": [
+        "RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;BYHOUR=9;BYMINUTE=0;BYSECOND=0"
+      ],
+      "options": {
+        "userMustConfirm": true,
+        "sabbathGuard": true,
+        "quietHoursGuard": true
+      }
+    }
+  ],
+  "userProfiles": {
+    "allowUserOwnedSchedules": true,
+    "allowUserOwnedFavorites": true,
+    "allowExportShare": true,
+    "shareFormats": [
+      "json",
+      "suka-plan",
+      "calendar-rrule"
+    ]
+  },
+  "events": {
+    "emits": [
+      "preservation.session.request",
+      "cleaning.session.request",
+      "storehouse.plan.generated",
+      "inventory.restock.request"
+    ],
+    "consumes": [
+      "garden.harvest.completed",
+      "storehouse.targets.changed",
+      "meal.session.completed",
+      "butchery.session.completed"
+    ]
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "$schema": "../../schemas/planningGraph/domains.schema.json",
+  "version": 1,
+  "lastUpdated": "2025-11-26T00:00:00.000Z",
+  "description": "Groups Planning Graph nodes into logical domains (health, storehouse, garden, calendar, stability) for UI layout and scoring/weighting.",
+  "domains": [
+    {
+      "id": "health",
+      "label": "Health & Nutrition",
+      "shortLabel": "Health",
+      "description": "Body-level health, nutrition, and resilience scores that drive energy, hair/skin, and long-term stability.",
+      "weight": 0.25,
+      "ui": {
+        "accentColor": "#7C3AED",
+        "icon": "heart-beat"
+      },
+      "nodes": [
+        "node.health.bmi",
+        "node.health.dailyEnergyRequirement",
+        "node.health.dailyMicronutrientRequirement",
+        "node.health.hairNutritionScore"
+      ]
+    },
+    {
+      "id": "storehouse",
+      "label": "Storehouse & Meals",
+      "shortLabel": "Storehouse",
+      "description": "Pantry depth, meal coverage, and protein breakdown across fresh, frozen, preserved, and dry goods.",
+      "weight": 0.30,
+      "ui": {
+        "accentColor": "#F97316",
+        "icon": "warehouse"
+      },
+      "nodes": [
+        "node.storehouse.storehouseMealsCapacity",
+        "node.storehouse.meatBreakdownCalculator",
+        "node.storehouse.storehouseMonthsOfCover",
+        "node.storehouse.priceBookCoverage",
+        "node.storehouse.couponCycleAlignment",
+        "node.storehouse.bulkPurchasingReadiness"
+      ]
+    },
+    {
+      "id": "garden",
+      "label": "Garden & Production",
+      "shortLabel": "Garden",
+      "description": "Seed viability, planned vs. actual harvests, and how well the garden feeds the storehouse and meals.",
+      "weight": 0.20,
+      "ui": {
+        "accentColor": "#16A34A",
+        "icon": "leaf"
+      },
+      "nodes": [
+        "node.garden.seedViabilityCalculator",
+        "node.garden.gardenPlanner",
+        "node.garden.harvestYieldProjection",
+        "node.garden.toStorehouseFlow",
+        "node.garden.preservationPlanner",
+        "node.garden.animalFeedSupport"
+      ]
+    },
+    {
+      "id": "calendar",
+      "label": "Calendar & Rhythm",
+      "shortLabel": "Calendar",
+      "description": "How well sessions, feast days, sabbath rhythm, and routines are aligned with the plan and actually executed.",
+      "weight": 0.15,
+      "ui": {
+        "accentColor": "#0EA5E9",
+        "icon": "calendar-clock"
+      },
+      "nodes": [
+        "node.calendar.mealCalendarCoverage",
+        "node.calendar.batchSessionDensity",
+        "node.calendar.sabbathAndFeastAlignment",
+        "node.calendar.cleaningRhythmConsistency",
+        "node.calendar.gardenTaskRhythm",
+        "node.calendar.animalTaskRhythm"
+      ]
+    },
+    {
+      "id": "stability",
+      "label": "Household Stability",
+      "shortLabel": "Stability",
+      "description": "Overall resilience: income, bills, utilities, storehouse months of cover, and stress/load balancing.",
+      "weight": 0.10,
+      "ui": {
+        "accentColor": "#475569",
+        "icon": "shield-home"
+      },
+      "nodes": [
+        "node.stability.incomeStabilityIndex",
+        "node.stability.utilityResilienceIndex",
+        "node.stability.storehouseStabilityIndex",
+        "node.stability.homesteadStressIndex",
+        "node.stability.dependencyOnExternalFood",
+        "node.stability.planningGraphCompositeScore"
+      ]
+    }
+  ]
+}

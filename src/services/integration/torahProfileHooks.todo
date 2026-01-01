@@ -1,0 +1,280 @@
+{
+  "version": "1.0.0",
+  "module": "integration.torahProfileHooks",
+  "title": "Torah Profile Hooks",
+  "ia": {
+    "nav": [
+      { "key": "integrations.torahProfile", "label": "Torah Profile Hooks", "icon": "Link", "path": "/integrations/torah-profile", "placement": "secondary" }
+    ],
+    "routes": [
+      { "path": "/integrations/torah-profile", "component": "@/pages/integrations/TorahProfileHooks.jsx", "title": "Torah Profile Hooks", "auth": "member" }
+    ]
+  },
+  "designSystem": {
+    "tokens": {
+      "radius": "1rem",
+      "gap": { "sm": "0.5rem", "md": "1rem", "lg": "1.5rem" },
+      "elevation": { "card": "shadow-lg", "modal": "shadow-2xl" }
+    },
+    "components": {
+      "button": {
+        "base": "btn btn-md rounded-2xl",
+        "variants": { "primary": "btn-primary", "secondary": "btn-secondary", "ghost": "btn-ghost", "danger": "btn-error" },
+        "states": { "loading": "loading", "disabled": "btn-disabled", "success": "btn-success" }
+      },
+      "card": { "base": "rounded-2xl border border-base-200 bg-base-100 shadow-lg p-4" },
+      "confirm": { "modal": "modal modal-open", "panel": "modal-box rounded-2xl" },
+      "empty": { "base": "text-base-content/60 flex flex-col items-center justify-center gap-2 p-8" },
+      "toast": { "success": "alert alert-success", "error": "alert alert-error", "info": "alert alert-info" },
+      "pill": { "base": "badge badge-lg rounded-2xl" }
+    }
+  },
+  "emptyStates": {
+    "/integrations/torah-profile": {
+      "title": "No hooks configured yet",
+      "subtitle": "Connect Torah profile updates to meals, preservation, inventory, labels, and shopping lists.",
+      "primaryAction": { "label": "Enable Hooks", "action": "flow.torahHooks.enable" },
+      "secondary": [
+        { "label": "Preview impact first", "action": "flow.torahHooks.runScenario" },
+        { "label": "Import preset", "action": "ui.openHookPresetImporter" }
+      ]
+    }
+  },
+  "undo": {
+    "ttlMs": 180000,
+    "actions": {
+      "torahHooks.enable": { "undoEvent": "torahHooks.disabled", "ui": { "label": "Hooks enabled", "undoLabel": "Disable" } },
+      "torahHooks.apply": { "undoEvent": "torahHooks.reverted", "ui": { "label": "Changes applied", "undoLabel": "Undo" } },
+      "torahHooks.share": { "undoEvent": "torahHooks.share.revoke", "ui": { "label": "Shared hook results", "undoLabel": "Undo share" } }
+    }
+  },
+  "nextBestAction": {
+    "afterSuccess": [
+      {
+        "when": "event == 'diet.update.success'",
+        "actions": [
+          { "type": "ui.suggest", "title": "Regenerate meals", "desc": "Apply your updated Torah rules to this week’s plan.", "cta": { "label": "Regenerate", "action": "flow.meals.regenerateFromTorahProfile" } },
+          { "type": "ui.suggest", "title": "Refresh preservation queue", "desc": "Update curing, canning, freezing tasks.", "cta": { "label": "Refresh", "action": "flow.preservation.refreshFromTorahProfile" } },
+          { "type": "ui.suggest", "title": "Update labels", "desc": "Rebuild ingredient and allergen labels.", "cta": { "label": "Rebuild labels", "action": "flow.labels.rebuildFromTorahProfile" } }
+        ]
+      },
+      {
+        "when": "event == 'torah.profile.updated'",
+        "actions": [
+          { "type": "ui.suggest", "title": "Compare scenarios", "desc": "See cost/availability/variety with rule toggles.", "cta": { "label": "Run comparison", "action": "flow.torahHooks.runScenario" } }
+        ]
+      }
+    ]
+  },
+  "flags": {
+    "enabled": true,
+    "autoApplyOnUpdate": true,
+    "shareForecastsToAgrarian": true
+  },
+  "model": {
+    "trackedFields": [
+      "shellfishAllowed",
+      "fishRequireFinsAndScales",
+      "allowBlood",
+      "allowFatCaps",
+      "allowLeaven",
+      "meatSpeciesAllowed",
+      "allergies",
+      "fastingWindows",
+      "effectiveDate"
+    ],
+    "defaults": {
+      "autoRebuildMealPlan": true,
+      "autoRebuildShoppingList": true,
+      "autoRefreshPreservation": true,
+      "autoRebuildLabels": true
+    }
+  },
+  "flows": [
+    {
+      "key": "flow.torahHooks.enable",
+      "label": "Enable Torah Hooks",
+      "steps": [
+        { "type": "confirm", "title": "Enable profile hooks?", "body": "Profile changes will automatically update meals, shopping, preservation, and labels.", "confirmLabel": "Enable" },
+        { "type": "persist", "id": "flag", "fn": "IntegrationFlags.enable", "args": { "key": "torahProfileHooks" } },
+        { "type": "emit", "event": "torahHooks.enabled" },
+        { "type": "toast", "style": "success", "message": "Torah hooks enabled" }
+      ],
+      "undoKey": "torahHooks.enable"
+    },
+    {
+      "key": "flow.meals.regenerateFromTorahProfile",
+      "label": "Regenerate Meals From Torah Profile",
+      "steps": [
+        { "type": "fetch", "id": "context", "from": "ProfileStore.getActive" },
+        { "type": "emit", "event": "mealplan.regenerate.requested", "payloadFrom": "context" },
+        { "type": "call", "id": "recompute", "fn": "MealPlanEngine.generate", "argsFrom": "context" },
+        { "type": "emit", "event": "mealplan.created" },
+        { "type": "toast", "style": "success", "message": "Meal plan updated" }
+      ],
+      "successEvent": "mealplan.created"
+    },
+    {
+      "key": "flow.shopping.rebuildFromTorahProfile",
+      "label": "Rebuild Shopping Lists",
+      "steps": [
+        { "type": "fetch", "id": "plan", "from": "MealPlanEngine.current" },
+        { "type": "call", "id": "shopping", "fn": "ShoppingListBuilder.fromMealPlan", "argsFrom": "plan" },
+        { "type": "emit", "event": "shopping.updated" },
+        { "type": "toast", "style": "info", "message": "Shopping list rebuilt" }
+      ]
+    },
+    {
+      "key": "flow.preservation.refreshFromTorahProfile",
+      "label": "Refresh Preservation Queues",
+      "steps": [
+        { "type": "fetch", "id": "outputs", "from": "MealPlanEngine.computeOutputs" },
+        { "type": "call", "id": "refresh", "fn": "PreservationPlanner.refresh", "argsFrom": "outputs" },
+        { "type": "emit", "event": "preservation.queues.updated" },
+        { "type": "toast", "style": "info", "message": "Preservation queues refreshed" }
+      ]
+    },
+    {
+      "key": "flow.labels.rebuildFromTorahProfile",
+      "label": "Rebuild Label Templates",
+      "steps": [
+        { "type": "fetch", "id": "ingredients", "from": "MealPlanEngine.ingredientsForWindow" },
+        { "type": "call", "id": "labels", "fn": "LabelTemplateBuilder.fromIngredients", "argsFrom": "ingredients" },
+        { "type": "emit", "event": "labels.updated" },
+        { "type": "toast", "style": "info", "message": "Labels rebuilt" }
+      ]
+    },
+    {
+      "key": "flow.torahHooks.runScenario",
+      "label": "Compare Scenarios (Diet Toggles)",
+      "steps": [
+        { "type": "collect", "id": "toggles", "fields": ["shellfishAllowed","allowLeaven","fishRequireFinsAndScales"] },
+        { "type": "call", "id": "scenario", "fn": "ScenarioEngine.compareDietToggle", "argsFrom": "toggles" },
+        { "type": "emit", "event": "torahHooks.scenario.ready", "payloadFrom": "scenario" },
+        { "type": "toast", "style": "info", "message": "Scenario results ready" }
+      ]
+    },
+    {
+      "key": "flow.torahHooks.applyAll",
+      "label": "Apply All Downstream Updates",
+      "steps": [
+        { "type": "parallel", "children": [
+          { "type": "flow", "ref": "flow.meals.regenerateFromTorahProfile" },
+          { "type": "flow", "ref": "flow.shopping.rebuildFromTorahProfile" },
+          { "type": "flow", "ref": "flow.preservation.refreshFromTorahProfile" },
+          { "type": "flow", "ref": "flow.labels.rebuildFromTorahProfile" }
+        ]},
+        { "type": "emit", "event": "torahHooks.apply.success" },
+        { "type": "toast", "style": "success", "message": "All downstream updates applied" }
+      ],
+      "undoKey": "torahHooks.apply"
+    },
+    {
+      "key": "flow.torahHooks.shareForecasts",
+      "label": "Share Forecasts With Roles",
+      "steps": [
+        { "type": "gather", "id": "targets", "fn": "Contracts.stakeholders.resolveTargets", "args": { "roles": ["Agrarian","Cook","Cleaner"] } },
+        { "type": "send", "id": "dispatch", "fn": "Notification.send", "argsFrom": "targets" },
+        { "type": "emit", "event": "torahHooks.forecasts.shared" },
+        { "type": "toast", "style": "info", "message": "Forecasts shared" }
+      ],
+      "undoKey": "torahHooks.share"
+    }
+  ],
+  "events": {
+    "listen": [
+      {
+        "on": "torah.profile.updated",
+        "do": [
+          { "type": "guard", "fns": ["Profile.validators.validDietShape"] },
+          { "type": "compute", "fn": "ProfileInsights.computeDietDeltas" },
+          { "type": "suggest", "flow": "flow.torahHooks.runScenario" },
+          { "type": "if", "cond": "flags.autoApplyOnUpdate == true", "then": [{ "type": "flow", "ref": "flow.torahHooks.applyAll" }] },
+          { "type": "emit", "event": "diet.update.success" }
+        ]
+      },
+      {
+        "on": "recipes.consolidated",
+        "do": [
+          { "type": "compute", "fn": "ProfileInsights.alignWithTorah" },
+          { "type": "ui.toast", "style": "info", "message": "Recipes consolidated — hooks can adjust meals & labels" },
+          { "type": "suggest", "flow": "flow.meals.regenerateFromTorahProfile" }
+        ]
+      },
+      {
+        "on": "inventory.updated",
+        "do": [
+          { "type": "compute", "fn": "ProfileInsights.inventoryDietConflicts" },
+          { "type": "ui.badge.bump", "key": "integrations.torahProfile" },
+          { "type": "suggest", "flow": "flow.shopping.rebuildFromTorahProfile" }
+        ]
+      },
+      {
+        "on": "calendar.synced",
+        "do": [
+          { "type": "refresh", "target": "TorahProfileHooks.widgets.upcomingFeasts" }
+        ]
+      },
+      {
+        "on": "mealplan.created",
+        "do": [
+          { "type": "emit", "event": "garden.plan.forecasted" },
+          { "type": "emit", "event": "cleaning.plan.forecasted" }
+        ]
+      },
+      {
+        "on": "batch.started",
+        "do": [
+          { "type": "emit", "event": "animal.plan.forecasted" }
+        ]
+      }
+    ],
+    "emitOnUI": [
+      { "ui": "TorahHooks.Enable", "emit": "torahHooks.enable.requested" },
+      { "ui": "TorahHooks.RunScenario", "emit": "torahHooks.scenario.requested" },
+      { "ui": "TorahHooks.ApplyAll", "emit": "torahHooks.apply.requested" },
+      { "ui": "TorahHooks.Share", "emit": "torahHooks.share.requested" }
+    ]
+  },
+  "uiGlue": {
+    "widgets": [
+      { "key": "TorahProfileHooks.widgets.upcomingFeasts", "source": "Calendar.getUpcomingFeasts", "refreshOn": ["calendar.synced","diet.update.success"] },
+      { "key": "TorahProfileHooks.widgets.scenarioDelta", "source": "ScenarioEngine.getLastDelta", "refreshOn": ["torahHooks.scenario.ready"] },
+      { "key": "TorahProfileHooks.widgets.downstreamStatus", "source": "IntegrationStatus.getTorahDownstream", "refreshOn": ["mealplan.created","shopping.updated","preservation.queues.updated","labels.updated"] }
+    ],
+    "badges": [
+      { "navKey": "integrations.torahProfile", "from": "IntegrationStatus.badgeCount" }
+    ]
+  },
+  "forecasting": {
+    "autoNotifyAgrarian": true,
+    "channels": ["inbox","email"],
+    "payloads": [
+      { "source": "meal.plan", "topic": "garden.plan.forecasted", "include": ["produceDemand","herbDemand","grainDemand","preservationQueue"] },
+      { "source": "batch.cooking", "topic": "animal.plan.forecasted", "include": ["offalUsage","fatRenderNeeds","sausageRuns","cureSchedules"] },
+      { "source": "cleaning.routines", "topic": "cleaning.plan.forecasted", "include": ["supplyNeeds","wasteSchedule","waterUseWindows"] }
+    ]
+  },
+  "guards": {
+    "preEnable": ["IntegrationFlags.canEnable"],
+    "preApply": [
+      "Profile.validators.validDietShape",
+      "MealPlanEngine.validators.planWindowSelected"
+    ]
+  },
+  "metrics": {
+    "kpis": [
+      { "id": "torahHooks.ttl", "label": "Time to Apply Downstream Updates", "source": "IntegrationMetrics.timeToApply" },
+      { "id": "torahHooks.impactMenuDiversity", "label": "Menu Diversity Δ", "source": "ScenarioMetrics.menuDiversityDelta" },
+      { "id": "torahHooks.costImpact", "label": "Weekly Cost Δ", "source": "ScenarioMetrics.costDelta" }
+    ]
+  },
+  "accessibility": {
+    "aria": true,
+    "keyboardShortcuts": [
+      { "keys": ["Ctrl","Shift","T"], "action": "flow.torahHooks.runScenario" },
+      { "keys": ["Ctrl","Shift","A"], "action": "flow.torahHooks.applyAll" }
+    ]
+  },
+  "autosave": { "enabled": true, "debounceMs": 1200, "emit": "torahHooks.autosave" }
+}

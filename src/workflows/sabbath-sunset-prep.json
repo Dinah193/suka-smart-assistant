@@ -1,0 +1,458 @@
+{
+  "name": "Sabbath Sunset Prep",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sabbath-prep",
+        "responseMode": "responseNode",
+        "options": {
+          "binaryData": false
+        }
+      },
+      "id": "Webhook_Trigger",
+      "name": "Webhook (Sabbath Prep)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyWeek",
+              "hour": 9,
+              "minute": 0,
+              "weeksInterval": 1,
+              "weekly": {
+                "days": [
+                  "friday"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "id": "Cron_Weekly",
+      "name": "Cron (Friday 09:00)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "tz",
+              "value": "America/Chicago"
+            }
+          ],
+          "boolean": [
+            {
+              "name": "auto",
+              "value": true
+            }
+          ]
+        }
+      },
+      "id": "Set_Defaults",
+      "name": "Set Defaults (Cron)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        -1000,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/* Normalize inbound options\nWebhook body (optional):\n{\n  userId?: string,\n  date?: 'YYYY-MM-DD' | ISO,        // any date in the target week; we'll pick that Friday\n  lat?: number,\n  lon?: number,\n  offsets?: { candle?: number, prep?: number, havdalah?: number },\n  createTasks?: boolean (default true),\n  extraTasks?: { thermostat?: boolean, lights?: boolean }\n}\n*/\nconst b = items[0]?.json || {};\nconst apiBase = $env.SUKA_API_BASE || 'http://localhost:4000';\nconst lat = (b.lat != null) ? Number(b.lat) : Number($env.SABBATH_LAT || 41.8781);\nconst lon = (b.lon != null) ? Number(b.lon) : Number($env.SABBATH_LON || -87.6298);\nconst userId = b.userId || null;\nconst tz = b.tz || 'America/Chicago';\n\nconst envCandle = Number($env.SABBATH_CANDLE_OFFSET_MIN || 18);\nconst envPrep = Number($env.SABBATH_PREP_OFFSET_MIN || 30);\nconst envHavdalah = Number($env.SABBATH_HAVDALAH_OFFSET_MIN || 42);\n\nconst offsets = {\n  candle: (b.offsets && b.offsets.candle != null) ? Number(b.offsets.candle) : envCandle,\n  prep: (b.offsets && b.offsets.prep != null) ? Number(b.offsets.prep) : envPrep,\n  havdalah: (b.offsets && b.offsets.havdalah != null) ? Number(b.offsets.havdalah) : envHavdalah\n};\n\nconst createTasks = (b.createTasks === undefined) ? true : !!b.createTasks;\nconst extra = b.extraTasks || { thermostat: true, lights: true };\nconst anyDate = b.date ? new Date(b.date) : new Date();\n\nreturn [{ json: { apiBase, lat, lon, userId, tz, offsets, createTasks, extra, anyDateISO: anyDate.toISOString() } }];"
+      },
+      "id": "Fn_Normalize",
+      "name": "Function: Normalize Input",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -1000,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "GET",
+        "url": "={{`${$json.apiBase}/preferences`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000,
+          "ignoreResponseCode": true
+        }
+      },
+      "id": "HTTP_Preferences",
+      "name": "HTTP: Get Preferences",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -800,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/* Determine this week's Friday and Saturday, merge server prefs */\nfunction fridayOfWeek(d){ const x = new Date(d); const day = x.getDay(); const diff = (5 - day + 7) % 7; x.setDate(x.getDate() + diff); x.setHours(0,0,0,0); return x; }\nfunction addDaysISO(dISO, days){ const d = new Date(dISO); d.setDate(d.getDate() + days); return d.toISOString().slice(0,10); }\n\nconst ctx = $json;\nconst pref = $items('HTTP: Get Preferences', 0, 0)[0]?.json || {};\nconst sabAware = !!(pref.calendar?.sabbathAware ?? true);\nconst prefOffset = Number(pref.calendar?.sabbathSunsetOffsetMin ?? ctx.offsets.prep);\n\nconst base = new Date(ctx.anyDateISO);\nconst fri = fridayOfWeek(base);\nconst sat = new Date(fri); sat.setDate(fri.getDate() + 1);\n\nconst friday = fri.toISOString().slice(0,10);\nconst saturday = sat.toISOString().slice(0,10);\n\nreturn [{ json: { ...ctx, sabbathAware: sabAware, offsets: { ...ctx.offsets, prep: prefOffset }, friday, saturday } }];"
+      },
+      "id": "Fn_PrepDates",
+      "name": "Function: Prep Dates + Prefs",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "GET",
+        "url": "={{`https://api.sunrise-sunset.org/json?lat=${$json.lat}&lng=${$json.lon}&date=${$json.friday}&formatted=0`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "HTTP_Sunset_Fri",
+      "name": "HTTP: Sunset (Friday)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -400,
+        -140
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "GET",
+        "url": "={{`https://api.sunrise-sunset.org/json?lat=${$json.lat}&lng=${$json.lon}&date=${$json.saturday}&formatted=0`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "HTTP_Sunset_Sat",
+      "name": "HTTP: Sunset (Saturday)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -400,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/* Build candle-lighting / prep / havdalah times and tasks */\nfunction addMinutes(iso, m){ const d = new Date(iso); d.setMinutes(d.getMinutes() + Number(m)); return d.toISOString(); }\nfunction subMinutes(iso, m){ return addMinutes(iso, -Number(m)); }\n\nfunction safeSunset(resp, fallbackISO){\n  try { const r = resp?.results?.sunset || resp?.results?.sunsetISO || null; return r || fallbackISO; } catch { return fallbackISO; }\n}\n\nconst ctx = $items('Function: Prep Dates + Prefs', 0, 0)[0].json;\nif (!ctx.sabbathAware) {\n  return [{ json: { ok: true, message: 'Sabbath-aware disabled in preferences; no tasks created.', tasks: [], ctx } }];\n}\n\nconst friResp = $items('HTTP: Sunset (Friday)', 0, 0)[0]?.json || {};\nconst satResp = $items('HTTP: Sunset (Saturday)', 0, 0)[0]?.json || {};\n\nconst fallbackFri = new Date(`${ctx.friday}T18:00:00.000Z`).toISOString();\nconst fallbackSat = new Date(`${ctx.saturday}T19:00:00.000Z`).toISOString();\nconst friSunset = safeSunset(friResp, fallbackFri);\nconst satSunset = safeSunset(satResp, fallbackSat);\n\nconst candleTime = subMinutes(friSunset, ctx.offsets.candle);\nconst prepTime = subMinutes(friSunset, ctx.offsets.prep);\nconst havdalahTime = addMinutes(satSunset, ctx.offsets.havdalah);\n\nconst tasks = [\n  { title: 'Sabbath prep: finish cooking & set warmers', category: 'sabbath', labels: ['sabbath','prep'], priority: 2, due: prepTime, meta: { fridaySunset: friSunset, offsets: ctx.offsets } },\n  { title: 'Light candles', category: 'sabbath', labels: ['sabbath','candles'], priority: 1, due: candleTime, meta: { fridaySunset: friSunset, candleOffsetMin: ctx.offsets.candle } },\n  { title: 'Havdalah', category: 'sabbath', labels: ['sabbath','havdalah'], priority: 2, due: havdalahTime, meta: { saturdaySunset: satSunset, havdalahOffsetMin: ctx.offsets.havdalah } }\n];\n\nif (ctx.extra?.thermostat) tasks.push({ title: 'Set thermostat to Sabbath mode', category: 'home', labels: ['sabbath','thermostat'], priority: 3, due: subMinutes(candleTime, 15), meta: {} });\nif (ctx.extra?.lights) tasks.push({ title: 'Set light timers / scenes', category: 'home', labels: ['sabbath','lights'], priority: 3, due: subMinutes(candleTime, 20), meta: {} });\n\n// attach for downstream\nreturn [{ json: { ...ctx, friSunset, satSunset, candleTime, prepTime, havdalahTime, tasks } }];"
+      },
+      "id": "Fn_BuildTasks",
+      "name": "Function: Build Times & Tasks",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.createTasks}}",
+              "operation": "isTrue"
+            }
+          ],
+          "number": [
+            {
+              "value1": "={{($json.tasks || []).length}}",
+              "operation": "larger"
+            }
+          ]
+        }
+      },
+      "id": "IF_ShouldCreate",
+      "name": "IF create tasks",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        40,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const out = [];\nfor (const t of ($json.tasks || [])) out.push({ json: { ...t, userId: $json.userId, apiBase: $json.apiBase } });\nreturn out.length ? out : [{ json: { skip: true } }];"
+      },
+      "id": "Fn_FanoutTasks",
+      "name": "Function: Fan-out Tasks",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        260,
+        -140
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{`${$json.apiBase}/automations/tasks`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={{$json}}"
+      },
+      "id": "HTTP_CreateTask",
+      "name": "HTTP: Create Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        480,
+        -140
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const created = ($items('HTTP: Create Task', 0, 0) || []).length;\nconst ctx = $json;\nreturn [{ json: { ok: true, friday: ctx.friday, saturday: ctx.saturday, candleTime: ctx.candleTime, prepTime: ctx.prepTime, havdalahTime: ctx.havdalahTime, tasksPlanned: (ctx.tasks||[]).length, tasksCreated: created } }];"
+      },
+      "id": "Fn_Summarize",
+      "name": "Function: Summarize",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        700,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "responseBody": "={{$json}}",
+        "responseCode": 200
+      },
+      "id": "Respond_Webhook",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        920,
+        -60
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "Error_Trigger",
+      "name": "On Error (Sabbath Prep)",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const e = items[0].json;\nreturn [{ json: { ok: false, message: e.message || 'Workflow error', node: e.node?.name, timestamp: new Date().toISOString() } }];"
+      },
+      "id": "Fn_ErrorFormat",
+      "name": "Function: Format Error",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -980,
+        560
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook (Sabbath Prep)": {
+      "main": [
+        [
+          {
+            "node": "Function: Normalize Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron (Friday 09:00)": {
+      "main": [
+        [
+          {
+            "node": "Set Defaults (Cron)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Defaults (Cron)": {
+      "main": [
+        [
+          {
+            "node": "Function: Normalize Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Normalize Input": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Get Preferences",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Get Preferences": {
+      "main": [
+        [
+          {
+            "node": "Function: Prep Dates + Prefs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Prep Dates + Prefs": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Sunset (Friday)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP: Sunset (Saturday)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Sunset (Friday)": {
+      "main": [
+        [
+          {
+            "node": "Function: Build Times & Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Sunset (Saturday)": {
+      "main": [
+        [
+          {
+            "node": "Function: Build Times & Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Build Times & Tasks": {
+      "main": [
+        [
+          {
+            "node": "IF create tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF create tasks": {
+      "main": [
+        [
+          {
+            "node": "Function: Fan-out Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Function: Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Fan-out Tasks": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Create Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Create Task": {
+      "main": [
+        [
+          {
+            "node": "Function: Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Summarize": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On Error (Sabbath Prep)": {
+      "main": [
+        [
+          {
+            "node": "Function: Format Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "timezone": "America/Chicago",
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

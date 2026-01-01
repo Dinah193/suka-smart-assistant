@@ -1,0 +1,288 @@
+{
+  "id": "pat.meals.preservation_first",
+  "domain": "meals",
+  "kind": "planning_pattern",
+  "title": "Preservation-First Meal Planning",
+  "description": "Use at-risk items first and trigger preservation sessions when surplus risk is detected.",
+  "intentTags": [
+    "plan:meals",
+    "mode:inventoryRisk",
+    "preserve:first"
+  ],
+  "inputs": [
+    {
+      "key": "householdSize",
+      "label": "Household size",
+      "type": "number",
+      "required": true,
+      "default": 4
+    },
+    {
+      "key": "dietaryLaws",
+      "label": "Dietary laws / household rules",
+      "type": "object",
+      "default": {},
+      "notes": "Use household preferences and Torah-based constraints as configured."
+    },
+    {
+      "key": "inventorySnapshot",
+      "label": "Inventory snapshot",
+      "type": "object",
+      "required": true,
+      "notes": "Include pantry/cold/frozen/root cellar/leftovers."
+    },
+    {
+      "key": "timeBudgetMinutes",
+      "label": "Time budget (minutes)",
+      "type": "number",
+      "required": true,
+      "default": 180
+    },
+    {
+      "key": "equipment",
+      "label": "Available equipment",
+      "type": "array",
+      "default": [
+        "stove",
+        "oven"
+      ],
+      "notes": "Examples: stove, oven, slowcooker, pressurecooker, grill, dehydrator, freezer."
+    },
+    {
+      "key": "budgetCap",
+      "label": "Budget cap (optional)",
+      "type": "number"
+    },
+    {
+      "key": "allergies",
+      "label": "Allergies / avoid list (optional)",
+      "type": "array",
+      "default": []
+    },
+    {
+      "key": "quietHours",
+      "label": "Quiet hours / Sabbath guard",
+      "type": "object",
+      "default": {
+        "enabled": false
+      },
+      "notes": "Use to avoid noisy tasks or disallowed work windows."
+    }
+  ],
+  "outputs": [
+    {
+      "key": "mealPlan",
+      "label": "Meal plan structure",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "sessions",
+      "label": "Session blueprints requested",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "shoppingNeeds",
+      "label": "Shopping list needs",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "storehouseTriggers",
+      "label": "Storehouse patterns triggered",
+      "type": "array",
+      "default": []
+    }
+  ],
+  "constraints": [
+    "quietHours/sabbathGuard",
+    "fastingRules",
+    "budgetCap",
+    "allergiesAvoidList",
+    "dietaryLaws"
+  ],
+  "requires": [
+    "artifact:inventorySnapshot"
+  ],
+  "produces": [
+    "artifact:mealPlan",
+    "blueprint:cookingSessions",
+    "artifact:shoppingListDraft"
+  ],
+  "lean": {
+    "wasteTargets": [
+      "defects",
+      "inventory",
+      "overprocessing"
+    ],
+    "standardWorkRefs": [
+      "stdwork.kitchen.staging",
+      "stdwork.batch.prep",
+      "stdwork.fifo.labels"
+    ],
+    "taktModelRef": "takt.household.meals",
+    "kpiTargets": {
+      "tripsPerMeal": "reduce",
+      "spoilageRate": "reduce",
+      "timeToFirstPlate": "reduce",
+      "leftoverUtilization": "increase"
+    },
+    "notes": "Advisory only; propose countermeasures via LeanOptimizer hooks."
+  },
+  "ui": {
+    "icon": "utensils",
+    "chips": [
+      "time:medium",
+      "difficulty:medium",
+      "equipment:freezer",
+      "equipment:dehydrator",
+      "inventory:risk"
+    ],
+    "defaultFilters": {
+      "domain": "meals"
+    },
+    "form": [
+      {
+        "key": "riskHorizonDays",
+        "type": "slider",
+        "label": "Spoilage risk horizon (days)",
+        "min": 1,
+        "max": 14,
+        "default": 5
+      },
+      {
+        "key": "preserveMethods",
+        "type": "multiSelect",
+        "label": "Preferred preservation methods",
+        "options": [
+          "freeze",
+          "dehydrate",
+          "ferment",
+          "cure",
+          "can"
+        ],
+        "default": [
+          "freeze",
+          "dehydrate"
+        ]
+      },
+      {
+        "key": "autoTriggerPreservation",
+        "type": "toggle",
+        "label": "Auto-trigger preservation sessions",
+        "default": true
+      }
+    ],
+    "help": [
+      "Patterns create session blueprints (prep/cook/storehouse pulls), not raw UI task lists.",
+      "Inventory snapshot enables smarter shopping + fewer duplicates."
+    ]
+  },
+  "steps": [
+    {
+      "id": "inv.snapshot.full",
+      "title": "Confirm full inventory snapshot + expiry signals",
+      "template": "tpl.inventory.snapshot.confirm",
+      "domain": "storehouse",
+      "params": {
+        "zones": [
+          "cold",
+          "pantry",
+          "frozen",
+          "rootCellar",
+          "fermentationRoom"
+        ],
+        "includeExpiry": true
+      },
+      "hints": [
+        "needsInventorySnapshot"
+      ]
+    },
+    {
+      "id": "risk.scan",
+      "title": "Detect at-risk items + surplus risk",
+      "template": "tpl.inventory.risk.scan",
+      "domain": "storehouse",
+      "params": {
+        "riskHorizonKey": "riskHorizonDays",
+        "emitEvent": "inventory.risk.scanned"
+      },
+      "hints": [
+        "leanSignal:spoilage"
+      ]
+    },
+    {
+      "id": "plan.use_first",
+      "title": "Build meal plan using at-risk items first",
+      "template": "tpl.meals.plan.useFirst",
+      "domain": "meals",
+      "params": {
+        "riskFirst": true
+      }
+    },
+    {
+      "id": "preserve.trigger",
+      "title": "Trigger preservation sessions when needed",
+      "template": "tpl.preservation.trigger.sessions",
+      "domain": "homestead",
+      "params": {
+        "methodsKey": "preserveMethods",
+        "autoKey": "autoTriggerPreservation",
+        "emitEvent": "session.blueprints.created"
+      },
+      "hints": [
+        "needsPreservationSession"
+      ]
+    },
+    {
+      "id": "shopping.gaps",
+      "title": "Generate shopping from remaining gaps",
+      "template": "tpl.shopping.from.gaps",
+      "domain": "storehouse",
+      "params": {
+        "respectBudgetKey": "budgetCap",
+        "dedupe": true
+      },
+      "hints": [
+        "needsShoppingList"
+      ]
+    },
+    {
+      "id": "storehouse.rotate",
+      "title": "Trigger FIFO rotation actions (optional)",
+      "template": "tpl.storehouse.trigger.rotation",
+      "domain": "storehouse",
+      "params": {
+        "patternId": "pat.storehouse.monthly_cycle_count"
+      },
+      "optional": true
+    }
+  ],
+  "kpis": [
+    {
+      "key": "spoilageRate",
+      "label": "Spoilage rate",
+      "direction": "down",
+      "unit": "%"
+    },
+    {
+      "key": "wastePrevented",
+      "label": "Waste prevented",
+      "direction": "up",
+      "unit": "items"
+    }
+  ],
+  "variants": [],
+  "links": {
+    "storehouseSuggested": [
+      "pat.storehouse.monthly_cycle_count",
+      "pat.storehouse.root_cellar_optimizer"
+    ]
+  },
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "tags": []
+  }
+}

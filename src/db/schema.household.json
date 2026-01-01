@@ -1,0 +1,423 @@
+{
+  "version": "2025-11-02T16:00:00-06:00",
+  "description": "SSA Household DB schema — defines all Dexie/object-store shapes needed for the household engine. This is the source of truth for imports → intelligence → automation → (optional) hub export. SSA owns all data first. If familyFundMode=true, engines may forward payloads using HubPacketFormatter + FamilyFundConnector.",
+  "notes": [
+    "This file is consumed by src/db/index.js to build Dexie stores.",
+    "Keep the shape backward-compatible; add new tables/fields via migrations (src/db/migrations).",
+    "All tables should be event-aware: the runtime can listen to changes and emit events like import.parsed, inventory.updated, inventory.shortage.detected, meal.executed, garden.harvest.logged, preservation.completed.",
+    "We keep createdAt/updatedAt as ISO timestamps to match the eventBus payload shape: { type, ts, source, data }."
+  ],
+  "tables": {
+    "households": {
+      "description": "Top-level household records. Usually only 1 in personal SSA, but we support N so SSA can host multiple households before exporting to Hub.",
+      "primaryKey": "id",
+      "indexes": [
+        "slug",
+        "name",
+        "ownerId"
+      ],
+      "schema": {
+        "id": "string",
+        "slug": "string",
+        "name": "string",
+        "ownerId": "string",
+        "description": "string?",
+        "settings": {
+          "currency": "string?",
+          "unitSystem": "string?",
+          "sabbathGuard": "boolean?",
+          "quietHours": "object?",
+          "defaultTimeZone": "string?"
+        },
+        "featureFlags": {
+          "familyFundMode": "boolean?",
+          "scanCompareTrust": "boolean?",
+          "importCleaning": "boolean?",
+          "importGarden": "boolean?",
+          "importAnimal": "boolean?",
+          "importStorehouse": "boolean?"
+        },
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    },
+
+    "householdMembers": {
+      "description": "People (and in some cases service roles) attached to a household. Used for assigning sessions (cooking, cleaning, garden, animal) and for hub-level exports.",
+      "primaryKey": "id",
+      "indexes": [
+        "householdId",
+        "email",
+        "role",
+        "[householdId+role]"
+      ],
+      "schema": {
+        "id": "string",
+        "householdId": "string",
+        "displayName": "string",
+        "email": "string?",
+        "phone": "string?",
+        "role": "string",
+        "skills": "array?",
+        "availability": "object?",
+        "preferences": "object?",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    },
+
+    "imports": {
+      "description": "Raw and partially normalized imports from outside sites (recipe, cleaning, garden/seed, animal/butchery, storehouse, video/how-to). Every import becomes context intelligence.",
+      "primaryKey": "id",
+      "indexes": [
+        "householdId",
+        "source",
+        "domain",
+        "[householdId+domain]",
+        "createdAt"
+      ],
+      "schema": {
+        "id": "string",
+        "householdId": "string",
+        "domain": "string",
+        "source": "string",
+        "status": "string",
+        "originalUrl": "string?",
+        "originalPayload": "object?",
+        "normalizedPayload": "object?",
+        "contextIntelligence": {
+          "ingredients": "array?",
+          "methods": "array?",
+          "equipment": "array?",
+          "seasonality": "array?",
+          "taskGraph": "object?"
+        },
+        "links": {
+          "inventory": "array?",
+          "storehouse": "array?",
+          "garden": "array?",
+          "animal": "array?",
+          "preservation": "array?"
+        },
+        "isFavorite": "boolean?",
+        "scheduledSessionId": "string?",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    },
+
+    "inventory": {
+      "description": "Actual, executable household inventory — what we have right now. Imports can create or update this. inventory.updated events originate here.",
+      "primaryKey": "id",
+      "indexes": [
+        "householdId",
+        "sku",
+        "category",
+        "location",
+        "[householdId+category]",
+        "[householdId+location]",
+        "updatedAt"
+      ],
+      "schema": {
+        "id": "string",
+        "householdId": "string",
+        "name": "string",
+        "sku": "string?",
+        "category": "string?",
+        "subCategory": "string?",
+        "quantity": "number",
+        "unit": "string?",
+        "minThreshold": "number?",
+        "location": "string?",
+        "tags": "array?",
+        "sourceImportId": "string?",
+        "notes": "string?",
+        "expiryDate": "string?",
+        "isTorahClean": "boolean?",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    },
+
+    "storehouseGoals": {
+      "description": "Desired/target stock (Storehouse = Goals Planner). Storehouse is the plan; Inventory is the execution.",
+      "primaryKey": "id",
+      "indexes": [
+        "householdId",
+        "category",
+        "priority",
+        "[householdId+category]"
+      ],
+      "schema": {
+        "id": "string",
+        "householdId": "string",
+        "name": "string",
+        "category": "string?",
+        "targetQuantity": "number",
+        "unit": "string?",
+        "priority": "string?",
+        "linkedInventoryId": "string?",
+        "linkedGardenPlanId": "string?",
+        "linkedAnimalAssetId": "string?",
+        "linkedPreservationPlanId": "string?",
+        "notes": "string?",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    },
+
+    "gardenPlans": {
+      "description": "Garden/seed imports get normalized here. From here, garden sessions are built. garden.harvest.logged events will reference records here.",
+      "primaryKey": "id",
+      "indexes": [
+        "householdId",
+        "zone",
+        "season",
+        "seedSource",
+        "[householdId+season]",
+        "updatedAt"
+      ],
+      "schema": {
+        "id": "string",
+        "householdId": "string",
+        "name": "string",
+        "zone": "string?",
+        "season": "string?",
+        "seedSource": "string?",
+        "crops": "array?",
+        "careSchedule": "object?",
+        "harvestTargets": "array?",
+        "linkedImports": "array?",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    },
+
+    "gardenHarvests": {
+      "description": "Actual harvest logs. On insert, automation can emit garden.harvest.logged and try to update inventory/storehouse.",
+      "primaryKey": "id",
+      "indexes": [
+        "householdId",
+        "gardenPlanId",
+        "crop",
+        "ts"
+      ],
+      "schema": {
+        "id": "string",
+        "householdId": "string",
+        "gardenPlanId": "string?",
+        "crop": "string",
+        "quantity": "number",
+        "unit": "string?",
+        "quality": "string?",
+        "ts": "string",
+        "notes": "string?",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    },
+
+    "animalAssets": {
+      "description": "Animal acquisition, care, and butchery plans. Imports from animal/butchery sites land here first.",
+      "primaryKey": "id",
+      "indexes": [
+        "householdId",
+        "species",
+        "status",
+        "butcheryPlanId",
+        "updatedAt"
+      ],
+      "schema": {
+        "id": "string",
+        "householdId": "string",
+        "name": "string?",
+        "species": "string",
+        "breed": "string?",
+        "status": "string?",
+        "acquiredAt": "string?",
+        "careSchedule": "object?",
+        "butcheryPlanId": "string?",
+        "yieldCurveRef": "string?",
+        "linkedImports": "array?",
+        "notes": "string?",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    },
+
+    "preservationBatches": {
+      "description": "Preservation sessions such as canning, dehydrating, curing, freezing, fermenting.",
+      "primaryKey": "id",
+      "indexes": [
+        "householdId",
+        "method",
+        "sourceType",
+        "ts"
+      ],
+      "schema": {
+        "id": "string",
+        "householdId": "string",
+        "name": "string?",
+        "method": "string",
+        "sourceType": "string?",
+        "sourceRefId": "string?",
+        "inputs": "array?",
+        "outputs": "array?",
+        "ts": "string",
+        "notes": "string?",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    },
+
+    "sessions": {
+      "description": "Generated actionable sessions: cooking, cleaning, garden, animal, preservation. automation.runtime schedules these.",
+      "primaryKey": "id",
+      "indexes": [
+        "householdId",
+        "type",
+        "status",
+        "scheduledFor",
+        "[householdId+type]",
+        "[householdId+status]"
+      ],
+      "schema": {
+        "id": "string",
+        "householdId": "string",
+        "type": "string",
+        "status": "string",
+        "title": "string?",
+        "tasks": "array?",
+        "linkedImports": "array?",
+        "assignedTo": "string?",
+        "scheduledFor": "string?",
+        "durationMinutes": "number?",
+        "origin": "string?",
+        "isFavorite": "boolean?",
+        "notes": "string?",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    },
+
+    "events": {
+      "description": "Event log for SSA using { type, ts, source, data }.",
+      "primaryKey": "id",
+      "indexes": [
+        "householdId",
+        "type",
+        "source",
+        "ts"
+      ],
+      "schema": {
+        "id": "string",
+        "householdId": "string",
+        "type": "string",
+        "ts": "string",
+        "source": "string",
+        "data": "object?",
+        "exportedToHub": "boolean?",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    },
+
+    "userPreferences": {
+      "description": "Per-user or per-household UI/runtime preferences, including import preferences, session display, and hub-export options.",
+      "primaryKey": "id",
+      "indexes": [
+        "householdId",
+        "userId",
+        "[householdId+userId]"
+      ],
+      "schema": {
+        "id": "string",
+        "householdId": "string",
+        "userId": "string?",
+        "importPreferences": "object?",
+        "sessionPreferences": "object?",
+        "uiPreferences": "object?",
+        "automationPreferences": "object?",
+        "hubPreferences": {
+          "enabled": "boolean?",
+          "lastExportAt": "string?"
+        },
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    },
+
+    "automations": {
+      "description": "Automation and scheduling rules defined by the user or system.",
+      "primaryKey": "id",
+      "indexes": [
+        "householdId",
+        "eventType",
+        "enabled"
+      ],
+      "schema": {
+        "id": "string",
+        "householdId": "string",
+        "name": "string",
+        "description": "string?",
+        "eventType": "string",
+        "conditions": "array?",
+        "actions": "array?",
+        "enabled": "boolean",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    },
+
+    "pricebook": {
+      "description": "Optional — used by Scan • Compare • Trust.",
+      "primaryKey": "id",
+      "indexes": [
+        "householdId",
+        "sku",
+        "retailer",
+        "[householdId+sku]",
+        "[householdId+retailer]"
+      ],
+      "schema": {
+        "id": "string",
+        "householdId": "string",
+        "sku": "string?",
+        "name": "string?",
+        "retailer": "string?",
+        "price": "number?",
+        "pricePerUnit": "number?",
+        "unit": "string?",
+        "currency": "string?",
+        "validFrom": "string?",
+        "validTo": "string?",
+        "source": "string?",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    },
+
+    "syncQueue": {
+      "description": "Outgoing sync jobs (for Hub or other integrations).",
+      "primaryKey": "id",
+      "indexes": [
+        "householdId",
+        "status",
+        "target",
+        "createdAt"
+      ],
+      "schema": {
+        "id": "string",
+        "householdId": "string",
+        "target": "string",
+        "payload": "object",
+        "status": "string",
+        "lastAttemptAt": "string?",
+        "retries": "number?",
+        "error": "string?",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    }
+  }
+}

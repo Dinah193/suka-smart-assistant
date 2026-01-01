@@ -1,0 +1,215 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka-smart-assistant.local/schemas/planningGraph/nextSteps.mappings.schema.json",
+  "title": "Planning Graph Next Steps Mapping",
+  "description": "Schema for calculator → next steps mappings used by the Planning Graph and Now CTAs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "calculator",
+    "version",
+    "status",
+    "domains",
+    "inputs",
+    "rules"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Canonical identifier for this mapping node (e.g., garden.seedViability.nextSteps)."
+    },
+    "calculator": {
+      "type": "string",
+      "description": "Name of the calculator feature that owns this mapping (e.g., SeedViabilityCalculator)."
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of this mapping definition (e.g., 1.0.0)."
+    },
+    "status": {
+      "type": "string",
+      "description": "Whether this mapping is currently active.",
+      "enum": ["active", "inactive", "experimental"]
+    },
+    "updatedAt": {
+      "type": "string",
+      "description": "ISO 8601 timestamp of the last update.",
+      "format": "date-time"
+    },
+    "domains": {
+      "type": "array",
+      "description": "Domains that this mapping touches (garden, storehouse, etc.).",
+      "items": {
+        "type": "string",
+        "enum": [
+          "cooking",
+          "cleaning",
+          "garden",
+          "animals",
+          "preservation",
+          "storehouse"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "inputs": {
+      "type": "object",
+      "description": "Mapping from semantic input keys to calculator output paths.",
+      "additionalProperties": {
+        "type": "string",
+        "description": "Dot-path from the calculator result object (e.g., viability.effectiveViabilityPct)."
+      }
+    },
+    "defaults": {
+      "type": "object",
+      "description": "Default values to be used when an input is missing.",
+      "additionalProperties": {
+        "type": ["number", "string", "boolean", "null"]
+      }
+    },
+    "rules": {
+      "type": "array",
+      "description": "Ordered set of condition → recommendation mappings.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "priority", "conditions", "recommendations"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for this rule."
+          },
+          "priority": {
+            "type": "integer",
+            "description": "Priority for evaluation. Lower numbers evaluated earlier."
+          },
+          "conditions": {
+            "type": "object",
+            "description": "Thresholds and flags used to decide when this rule applies.",
+            "additionalProperties": false,
+            "properties": {
+              "effectiveViabilityPctMin": {
+                "type": "number",
+                "description": "Minimum effective viability percentage (inclusive) for this rule."
+              },
+              "effectiveViabilityPctMax": {
+                "type": "number",
+                "description": "Maximum effective viability percentage (inclusive) for this rule."
+              },
+              "allowShortage": {
+                "type": "boolean",
+                "description": "Whether this rule can still fire when a shortage exists."
+              },
+              "fallback": {
+                "type": "boolean",
+                "description": "If true, this rule is used as a fallback when other conditions do not match."
+              }
+            }
+          },
+          "recommendations": {
+            "type": "array",
+            "description": "Concrete suggested next actions / sessions.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "label",
+                "description",
+                "cta",
+                "domain",
+                "sessionReason",
+                "sessionKind"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique identifier for this recommendation within the rule."
+                },
+                "label": {
+                  "type": "string",
+                  "description": "Short label for UI display."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Longer description explaining why this is recommended."
+                },
+                "cta": {
+                  "type": "string",
+                  "description": "Text for the call-to-action button."
+                },
+                "domain": {
+                  "type": "string",
+                  "description": "Target domain for the resulting session or plan.",
+                  "enum": [
+                    "cooking",
+                    "cleaning",
+                    "garden",
+                    "animals",
+                    "preservation",
+                    "storehouse"
+                  ]
+                },
+                "sessionReason": {
+                  "type": "string",
+                  "description": "Reason string attached to the session.requested event."
+                },
+                "sessionKind": {
+                  "type": "string",
+                  "description": "High-level kind of session (e.g., planting, refill, planning, inventory-update)."
+                },
+                "primary": {
+                  "type": "boolean",
+                  "description": "Whether this is the primary recommendation for this rule."
+                },
+                "feedsInto": {
+                  "type": "array",
+                  "description": "Planning Graph nodes or subsystems this action feeds into.",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "analyticsTags": {
+                  "type": "array",
+                  "description": "Tags for analytics and event payloads.",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "nowCtas": {
+      "type": "object",
+      "description": "Domain-specific Now CTA configuration linking to launchers.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "sessionReason", "sessionKind"],
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Label shown on the Now button for this domain."
+          },
+          "sessionReason": {
+            "type": "string",
+            "description": "Reason string used when emitting session.requested."
+          },
+          "sessionKind": {
+            "type": "string",
+            "description": "High-level category of the session (e.g., planting, refill)."
+          },
+          "preferredLauncher": {
+            "type": "string",
+            "description": "Optional hook launcher path (e.g., useSeedSessionLaunchers.launchPlantingNow)."
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,442 @@
+===============================================================================
+TOOL-ONLY LAYOUT – UI COPY & LABELS
+File: src/layout/tools/ToolOnlyLayout.txt
+Role: Shared language + labels for single-tool “Tool Mode” layouts
+===============================================================================
+
+0. CONCEPTUAL PURPOSE
+---------------------
+This file defines **UI strings / labels / microcopy** for pages that show
+a single SSA tool in **TOOL MODE**.
+
+Examples:
+- A single calculator or planner (meals, storehouse, garden bed, flock, etc.)
+- A focused flow (one preservation run, one cleaning cycle, one feast plan)
+
+The layout must:
+
+- Present each tool as a **household flow or rhythm**, not a generic module.
+- Use language tied to **cycles, seasons, storehouse, yield, provision,
+  feast, rhythm, householder, flow**.
+- Work alone (TOOL MODE) while hinting how it can connect into
+  STEWARDSHIP MODE later.
+- Stay clear and friendly, not cryptic or preachy.
+
+
+1. GLOBAL & HEADER TEXT
+-----------------------
+
+[TOOL.HEADER.TITLE_GENERIC]
+"Household Flow"
+
+[TOOL.HEADER.SUBTITLE_GENERIC]
+"Work with this one rhythm today. Later, SSA can weave it into your seasons and storehouse."
+
+[TOOL.HEADER.TITLE_COOKING]
+"Cooking & Meal Rhythm"
+
+[TOOL.HEADER.SUBTITLE_COOKING]
+"Shape a cooking flow that matches your time, season, and storehouse."
+
+[TOOL.HEADER.TITLE_STOREHOUSE]
+"Storehouse Snapshot & Planning"
+
+[TOOL.HEADER.SUBTITLE_STOREHOUSE]
+"Record what your storehouse holds and how it should carry you through the coming seasons."
+
+[TOOL.HEADER.TITLE_GARDEN]
+"Garden Bed & Planting Flow"
+
+[TOOL.HEADER.SUBTITLE_GARDEN]
+"Plan or log what goes into this soil so it can speak back in yields."
+
+[TOOL.HEADER.TITLE_ANIMALS]
+"Flock & Herd Care Rhythm"
+
+[TOOL.HEADER.SUBTITLE_ANIMALS]
+"Map feeding, watering, and observation flows for your animals."
+
+[TOOL.HEADER.TITLE_PRESERVATION]
+"Preservation Session"
+
+[TOOL.HEADER.SUBTITLE_PRESERVATION]
+"Turn today’s abundance into tomorrow’s provision for the storehouse."
+
+[TOOL.HEADER.TITLE_CLEANING]
+"Cleaning & Care Cycle"
+
+[TOOL.HEADER.SUBTITLE_CLEANING]
+"Lay out a simple flow to guard rest and dignity in this space."
+
+[TOOL.HEADER.TITLE_FEAST]
+"Feast & Gathering Planner"
+
+[TOOL.HEADER.SUBTITLE_FEAST]
+"Shape a feast rhythm that honors the season and protects the storehouse."
+
+[TOOL.HEADER.TITLE_ENTERPRISE]
+"Household Enterprise Flow"
+
+[TOOL.HEADER.SUBTITLE_ENTERPRISE]
+"Describe how your household offers goods or services without starving its own provision."
+
+[TOOL.HEADER.HOUSEHOLDER_LABEL]
+"Householder:"
+
+[TOOL.HEADER.SEASON_BADGE_LABEL]
+"Season context:"
+
+[TOOL.HEADER.SEASON_BADGE_HINT]
+"Season context helps this flow fit your planting, harvest, and lean times."
+
+[TOOL.HEADER.CTA_BACK_TO_STEWARD]
+"Return to Stewardship Overview"
+
+[TOOL.HEADER.CTA_VIEW_SESSIONS]
+"Open Active Rhythms"
+
+
+2. MODE INDICATOR & BANNER
+--------------------------
+
+[TOOL.MODE_INDICATOR.LABEL]
+"Mode: Tool Only"
+
+[TOOL.MODE_INDICATOR.DETAIL]
+"This page works on its own. You do not have to connect everything at once."
+
+[TOOL.MODE_BANNER.TITLE]
+"You’re shaping one household rhythm."
+
+[TOOL.MODE_BANNER.BODY]
+"This tool is a focused flow. As you get comfortable, SSA can link it with your
+seasons, storehouse, and other rhythms so everything speaks together."
+
+[TOOL.MODE_BANNER.CTA_CONNECT]
+"See how this flow can connect later"
+
+[TOOL.MODE_BANNER.TOOLTIP]
+"Connected stewardship can be turned on when you’re ready. For now, this page
+stands alone as a simple, steady helper."
+
+
+3. PAGE STRUCTURE LABELS – PANELS & SECTIONS
+--------------------------------------------
+
+3.1 Left/Center Main Panel (Core Work Area)
+
+[TOOL.PANEL.MAIN.TITLE]
+"Work Area"
+
+[TOOL.PANEL.MAIN.SUBTITLE]
+"Set up or adjust this household flow."
+
+[TOOL.PANEL.MAIN.EMPTY_HINT]
+"Begin by naming what this flow is for — meals, a room, a bed, a flock, or a feast."
+
+[TOOL.PANEL.MAIN.SAVE_LABEL]
+"Save this flow"
+
+[TOOL.PANEL.MAIN.UPDATE_LABEL]
+"Update this flow"
+
+[TOOL.PANEL.MAIN.RESET_LABEL]
+"Clear and start again"
+
+[TOOL.PANEL.MAIN.TOOLTIP]
+"This panel holds the core of your rhythm: ingredients, timings, steps, or notes
+that define how this part of the house is cared for."
+
+
+3.2 Right/Supporting Panel (Context & Story)
+
+[TOOL.PANEL.CONTEXT.TITLE]
+"Season, Storehouse, & Notes"
+
+[TOOL.PANEL.CONTEXT.SUBTITLE]
+"Optional context that helps this flow speak into the bigger household story."
+
+[TOOL.PANEL.CONTEXT.SEASON_LABEL]
+"Season notes"
+
+[TOOL.PANEL.CONTEXT.SEASON_HELP]
+"Write how this flow should change in planting, harvest, or lean seasons."
+
+[TOOL.PANEL.CONTEXT.STOREHOUSE_LABEL]
+"Storehouse impact"
+
+[TOOL.PANEL.CONTEXT.STOREHOUSE_HELP]
+"Describe what this flow draws from or adds to your storehouse."
+
+[TOOL.PANEL.CONTEXT.YIELD_LABEL]
+"Expected yields"
+
+[TOOL.PANEL.CONTEXT.YIELD_HELP]
+"Note what you hope this rhythm will yield: better rest, meals, jars, clean spaces, or income."
+
+[TOOL.PANEL.CONTEXT.NOTES_LABEL]
+"Householder notes"
+
+[TOOL.PANEL.CONTEXT.NOTES_HELP]
+"Record anything you want your future self – or another householder – to remember about this flow."
+
+
+3.3 Optional Bottom Panel (Preview & Cross-Domain Hints)
+
+[TOOL.PANEL.PREVIEW.TITLE]
+"How This Flow Might Connect"
+
+[TOOL.PANEL.PREVIEW.SUBTITLE]
+"This section doesn’t change how the tool works today. It simply shows where
+this flow could sit in the wider web of meaning."
+
+[TOOL.PANEL.PREVIEW.EMPTY]
+"Once you save this flow, SSA can suggest where it might connect (meals, storehouse,
+garden, animals, preservation, cleaning, feasts, or enterprise)."
+
+[TOOL.PANEL.PREVIEW.TOOLTIP]
+"Use this as a light map — you don’t have to connect anything yet, but the
+connections will be ready when you are."
+
+
+4. GENERIC FIELD LABELS – RHYTHMS, CYCLES, FLOWS
+------------------------------------------------
+
+[TOOL.FIELD.RHYTHM_NAME.LABEL]
+"Name of this rhythm or flow"
+
+[TOOL.FIELD.RHYTHM_NAME.PLACEHOLDER]
+"Example: 'Weeknight stew rhythm', 'Sunday laundry flow', 'North bed planting'"
+
+[TOOL.FIELD.CYCLE_TYPE.LABEL]
+"Cycle type"
+
+[TOOL.FIELD.CYCLE_TYPE.OPTIONS.DAILY]
+"Daily rhythm"
+
+[TOOL.FIELD.CYCLE_TYPE.OPTIONS.WEEKLY]
+"Weekly rhythm"
+
+[TOOL.FIELD.CYCLE_TYPE.OPTIONS.SEASONAL]
+"Seasonal cycle"
+
+[TOOL.FIELD.CYCLE_TYPE.OPTIONS.ONE_TIME]
+"One-time flow"
+
+[TOOL.FIELD.CYCLE_TYPE.HELP]
+"Choose how often you expect this rhythm to appear in your household life."
+
+[TOOL.FIELD.DOMAIN.LABEL]
+"Household area"
+
+[TOOL.FIELD.DOMAIN.OPTIONS.COOKING]
+"Cooking & meals"
+
+[TOOL.FIELD.DOMAIN.OPTIONS.STOREHOUSE]
+"Storehouse & provisions"
+
+[TOOL.FIELD.DOMAIN.OPTIONS.GARDEN]
+"Garden & beds"
+
+[TOOL.FIELD.DOMAIN.OPTIONS.ANIMALS]
+"Flocks & herds"
+
+[TOOL.FIELD.DOMAIN.OPTIONS.PRESERVATION]
+"Preservation"
+
+[TOOL.FIELD.DOMAIN.OPTIONS.CLEANING]
+"Cleaning & care"
+
+[TOOL.FIELD.DOMAIN.OPTIONS.TEXTILES]
+"Textiles & garments"
+
+[TOOL.FIELD.DOMAIN.OPTIONS.FEASTS]
+"Feasts & gatherings"
+
+[TOOL.FIELD.DOMAIN.OPTIONS.ENTERPRISE]
+"Household enterprise"
+
+[TOOL.FIELD.DOMAIN.HELP]
+"This helps SSA know where to place this flow in your household map."
+
+[TOOL.FIELD.TIME_WINDOW.LABEL]
+"Time window for this flow"
+
+[TOOL.FIELD.TIME_WINDOW.PLACEHOLDER]
+"Example: 'Evenings', 'Early morning', 'After harvest', 'Before feast day'"
+
+[TOOL.FIELD.TIME_WINDOW.HELP]
+"Describe when this rhythm usually happens, in clock or seasonal language."
+
+[TOOL.FIELD.STOREHOUSE_DIRECTION.LABEL]
+"Direction of provision"
+
+[TOOL.FIELD.STOREHOUSE_DIRECTION.OPTIONS.DRAWS_FROM]
+"Draws from the storehouse"
+
+[TOOL.FIELD.STOREHOUSE_DIRECTION.OPTIONS.FEEDS_INTO]
+"Feeds into the storehouse"
+
+[TOOL.FIELD.STOREHOUSE_DIRECTION.OPTIONS.NEUTRAL]
+"Supports the house indirectly (no direct storehouse change)"
+
+[TOOL.FIELD.STOREHOUSE_DIRECTION.HELP]
+"This helps SSA understand whether this flow spends or builds provision."
+
+
+5. EMPTY STATES & FIRST-RUN TEXT
+--------------------------------
+
+[TOOL.EMPTY.FIRST_RUN.TITLE]
+"Begin with one simple rhythm."
+
+[TOOL.EMPTY.FIRST_RUN.BODY]
+"This tool is here to help you shape one flow at a time – a meal pattern,
+a room’s cleaning rhythm, a garden bed, or a preservation run. You don’t have
+to plan the whole house. Just start where your hands already are."
+
+[TOOL.EMPTY.FIRST_RUN.CTA_PRIMARY]
+"Name your first rhythm"
+
+[TOOL.EMPTY.FIRST_RUN.CTA_SECONDARY]
+"Browse example flows"
+
+[TOOL.EMPTY.NO_DATA]
+"No entries yet. Once you add details, this area will show your saved flows."
+
+[TOOL.EMPTY.TOOLTIP]
+"Every householder starts somewhere. The strength comes from repeated cycles,
+not from filling every field on day one."
+
+
+6. SESSIONRUNNER / “START NOW” MICRO COPY
+-----------------------------------------
+
+[TOOL.SESSIONS.BANNER.TITLE]
+"Ready to walk this rhythm now?"
+
+[TOOL.SESSIONS.BANNER.BODY]
+"You can use SessionRunner to guide you step by step through this flow,
+with timers and gentle cues."
+
+[TOOL.SESSIONS.CTA_START]
+"Start this rhythm now"
+
+[TOOL.SESSIONS.CTA_SCHEDULE]
+"Schedule this rhythm for later"
+
+[TOOL.SESSIONS.CTA_VIEW_ACTIVE]
+"View current active rhythms"
+
+[TOOL.SESSIONS.TOOLTIP]
+"Running a session does not change your plan, it just helps your hands move
+through this cycle without losing track of time or steps."
+
+
+7. HINTS ABOUT STEWARDSHIP MODE (WITHOUT PRESSURE)
+--------------------------------------------------
+
+[TOOL.STEWARDSHIP_HINT.TITLE]
+"This tool can stand alone or join the web."
+
+[TOOL.STEWARDSHIP_HINT.BODY]
+"Right now, you’re only working inside this one flow. In Stewardship Mode,
+SSA can let this rhythm speak with your garden, storehouse, feasts, and
+cleaning cycles."
+
+[TOOL.STEWARDSHIP_HINT.CTA_VIEW_OVERVIEW]
+"See what Stewardship Overview looks like"
+
+[TOOL.STEWARDSHIP_HINT.CTA_LATER]
+"Not now – keep this as a single tool"
+
+[TOOL.STEWARDSHIP_HINT.TOOLTIP]
+"Connection is optional. It’s here when you want to see the bigger picture."
+
+
+8. SIDEBAR / BREADCRUMB LABELS FOR TOOL LAYOUT
+----------------------------------------------
+
+[BREADCRUMB.ROOT]
+"Stewardship Home"
+
+[BREADCRUMB.TOOLS_ROOT]
+"Tools"
+
+[BREADCRUMB.CURRENT_TOOL]
+"Current flow"
+
+[SIDEBAR.TOOLS_SECTION_TITLE]
+"Household Flows"
+
+[SIDEBAR.LINK.THIS_TOOL]
+"This flow (current tool)"
+
+[SIDEBAR.LINK.SWITCH_TOOL]
+"Switch to another flow"
+
+[SIDEBAR.LINK.GO_TO_STEWARDSHIP]
+"Go to Stewardship Overview"
+
+[SIDEBAR.LINK.DOCUMENTATION]
+"Learn how this tool fits your household"
+
+
+9. TOASTS / SMALL NOTIFICATIONS
+-------------------------------
+
+[NOTIFY.TOOL.SAVED.TITLE]
+"Flow saved."
+
+[NOTIFY.TOOL.SAVED.BODY]
+"This rhythm has been recorded. SSA can reuse it whenever you need it."
+
+[NOTIFY.TOOL.UPDATED.TITLE]
+"Flow updated."
+
+[NOTIFY.TOOL.UPDATED.BODY]
+"Your changes are stored. Future sessions will use this version."
+
+[NOTIFY.TOOL.DELETED.TITLE]
+"Flow removed."
+
+[NOTIFY.TOOL.DELETED.BODY]
+"This rhythm was cleared from this tool. Your other flows remain intact."
+
+[NOTIFY.TOOL.CONNECTABLE.TITLE]
+"This flow can join other rhythms."
+
+[NOTIFY.TOOL.CONNECTABLE.BODY]
+"Based on its domain and timing, this rhythm could align with garden,
+storehouse, or feast patterns later."
+
+[NOTIFY.TOOL.ERROR.GENERIC.TITLE]
+"Something interrupted this flow."
+
+[NOTIFY.TOOL.ERROR.GENERIC.BODY]
+"Please try again. If the problem continues, check your connection or settings."
+
+
+10. TODO HOOKS FOR FUTURE INTEGRATION
+-------------------------------------
+
+// TODO[seasonal-logic]:
+// - Allow TOOL.HEADER.SUBTITLE_* strings to reference the current season
+//   (e.g., “Shape a summer meal rhythm that honors lighter yields.”).
+
+// TODO[cycles-engine]:
+// - Adjust TOOL.SESSIONS.BANNER and RHYTHM_NAME suggestions based on
+//   householdCycles.engine posture (e.g., emphasize rest if cycles are heavy).
+
+// TODO[dependencies]:
+// - Use dependencyMap to enrich TOOL.PANEL.PREVIEW and NOTIFY.TOOL.CONNECTABLE
+//   with concrete suggestions like “This flow could sit in Garden → Preservation
+//   → Storehouse cycle.”
+
+// TODO[insights]:
+// - Add optional context hints under TOOL.PANEL.CONTEXT that pull from
+//   storehouseInsights, gardenInsights, or feastInsights when available,
+//   while still letting the tool function alone.
+
+END OF UI COPY SPEC
+===============================================================================

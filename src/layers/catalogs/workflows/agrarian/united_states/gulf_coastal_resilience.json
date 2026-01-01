@@ -1,0 +1,93 @@
+{
+  "id": "workflow.us.gulf_coastal_resilience",
+  "domain": "workflows",
+  "kind": "workflow_overlay",
+  "title": "Gulf/Coastal Resilience Rhythm (USA)",
+  "tags": [
+    "region:usa",
+    "region:coastal",
+    "workflow:resilience",
+    "values:preparedness"
+  ],
+  "description": "Resilience-oriented rhythm: storm-prep buffers, freezer planning, and quick preservation/triage.",
+  "optIn": true,
+  "editable": true,
+  "valuePriorities": [
+    "preparedness",
+    "time_savings",
+    "waste_reduction"
+  ],
+  "defaults": {
+    "preferredStaples": [
+      "staple:grain",
+      "staple:canned_goods_optional",
+      "staple:dry_goods"
+    ],
+    "mealRhythm": [
+      "batch_cook:weekly",
+      "freezer_meals:buffer"
+    ],
+    "preservationEmphasis": [
+      "freezing",
+      "quick_pickling_optional",
+      "drying_optional"
+    ],
+    "valuePriorities": [
+      "preparedness",
+      "time_savings",
+      "waste_reduction"
+    ]
+  },
+  "ordering": {
+    "planningOrder": [
+      "storm_window_check",
+      "inventory_snapshot",
+      "storehouse_buffer",
+      "meal_plan"
+    ]
+  },
+  "naming": {
+    "sessionPrefixes": {
+      "storehouse": "Resilience Storehouse",
+      "preservation": "Quick Preserve"
+    }
+  },
+  "constraints": {
+    "defaults": [
+      "constraint:time_budget"
+    ],
+    "seasonBias": {
+      "season:summer": [
+        "prefer:freezing",
+        "prefer:hydration_plans"
+      ]
+    }
+  },
+  "uiOverlays": {
+    "form": {
+      "defaults": {
+        "inventorySnapshot": "required",
+        "bufferWeeks": 6
+      }
+    }
+  },
+  "preferredDefaultPatterns": {
+    "storehouse": [
+      "pat.storehouse.weekly_restock",
+      "pat.storehouse.feast_buffer_build",
+      "pat.storehouse.winter_reserve"
+    ],
+    "preservation": [
+      "pat.preservation.surplus_triage",
+      "pat.preservation.batch_day"
+    ],
+    "meals": [
+      "pat.meals.weekly_batch",
+      "pat.meals.daily_fresh"
+    ]
+  },
+  "notes": [
+    "This overlay provides defaults and ordering, not mandatory rules.",
+    "All role defaults are optional and user-editable."
+  ]
+}

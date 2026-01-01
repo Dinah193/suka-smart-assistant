@@ -1,0 +1,422 @@
+{
+  "version": "2025-10-31T11:05:00-05:00",
+  "description": "CENTRAL: daily/weekly/monthly/seasonal + sabbath-prep routines for Suka Smart Assistant. Feeds Cleaning Session Planner, Home dashboard, ImportService, and automation/runtime.js. User-owned favorites and schedules supported. Reverse generation enabled so meal, garden, animal/butchery, and storehouse events can request appropriate cleaning routines.",
+  "meta": {
+    "sourceOfTruth": "scraper",
+    "lastIngestedAt": "2025-10-31T11:05:00-05:00",
+    "ingestionPipelines": [
+      "importService",
+      "scraperService",
+      "bookmarklet"
+    ],
+    "mergeStrategy": "scraper-wins",
+    "allowHubOverrides": true,
+    "overrideFields": [
+      "sabbathGuard",
+      "schedule",
+      "priority"
+    ],
+    "sharedOrchestration": {
+      "emitOnUpdate": true,
+      "reason": "scraper-update",
+      "channels": [
+        "cleaning",
+        "meals",
+        "garden",
+        "storehouse",
+        "animals"
+      ]
+    },
+    "notes": [
+      "This is the master list the UI reads to show 'suggested routines'.",
+      "Households can clone these into their own prefs table to customize cadence.",
+      "Sabbath-prep routines should respect sabbathGuard and quietHours from household prefs."
+    ]
+  },
+  "sabbathGuard": {
+    "enabled": true,
+    "defaultPrepDay": "FRI",
+    "blockDuringSabbath": [
+      "heavy-cleaning",
+      "butchery-area-deep-clean"
+    ],
+    "allowDuringSabbath": [
+      "light-tidy",
+      "dishes",
+      "sanitation-emergency"
+    ]
+  },
+  "categories": [
+    "daily",
+    "weekly",
+    "monthly",
+    "seasonal",
+    "sabbath-prep",
+    "after-cooking-session",
+    "after-garden-session",
+    "after-animal-session",
+    "storehouse-visibility"
+  ],
+  "routines": [
+    {
+      "id": "clean-daily-core",
+      "label": "Daily Core – Kitchen + High Touch",
+      "category": "daily",
+      "domain": "cleaning",
+      "priority": 1,
+      "steps": [
+        "Wipe kitchen counters and stove",
+        "Spot sweep kitchen, entry, and animal-traffic areas",
+        "Sanitize sink and dish drying area",
+        "Take out trash/compost if at threshold",
+        "Check pantry/storehouse floor for spills"
+      ],
+      "durationMinutes": 20,
+      "schedule": {
+        "type": "recurring",
+        "rule": "RRULE:FREQ=DAILY;BYHOUR=9;BYMINUTE=0;BYSECOND=0"
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "meals.cooking-session.completed",
+          "inventory.spill.detected"
+        ],
+        "generateOn": "meals.cooking-session.completed",
+        "emit": [
+          "cleaning.session.created",
+          "inventory.visibility.requested"
+        ]
+      },
+      "uiHints": {
+        "icon": "sparkles",
+        "group": "today"
+      }
+    },
+    {
+      "id": "clean-weekly-kitchen-deep",
+      "label": "Weekly Kitchen Deep",
+      "category": "weekly",
+      "domain": "cleaning",
+      "priority": 1,
+      "steps": [
+        "Clean stove top, knobs, and backsplash",
+        "Empty and wipe fridge shelves (quick pass)",
+        "Wipe cabinet fronts near cooking zone",
+        "Mop kitchen and pantry/storehouse access",
+        "Sanitize food prep boards (wood + plastic)"
+      ],
+      "durationMinutes": 45,
+      "schedule": {
+        "type": "recurring",
+        "rule": "RRULE:FREQ=WEEKLY;BYDAY=MO;BYHOUR=10;BYMINUTE=0;BYSECOND=0"
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "meals.batch-cooking.started",
+          "storehouse.intake.expected"
+        ],
+        "rules": [
+          {
+            "id": "after-batch-cook",
+            "ifEvent": "meals.batch-cooking.started",
+            "generate": "cleaning.post-batch-kitchen"
+          },
+          {
+            "id": "after-storehouse-intake",
+            "ifEvent": "storehouse.intake.expected",
+            "generate": "cleaning.pantry-reset"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "kitchen",
+        "group": "weekly"
+      }
+    },
+    {
+      "id": "clean-weekly-bath-laundry",
+      "label": "Weekly Bath + Laundry Zone",
+      "category": "weekly",
+      "domain": "cleaning",
+      "priority": 2,
+      "steps": [
+        "Scrub toilets, sinks, and tub/shower",
+        "Wipe mirrors and high-touch surfaces",
+        "Empty bathroom trash",
+        "Sweep/mop bath + laundry area",
+        "Restock bathroom/storehouse hygiene items"
+      ],
+      "durationMinutes": 40,
+      "schedule": {
+        "type": "recurring",
+        "rule": "RRULE:FREQ=WEEKLY;BYDAY=TU;BYHOUR=9;BYMINUTE=30;BYSECOND=0"
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "storehouse.hygiene.low",
+          "meals.large-gathering.completed"
+        ],
+        "rules": [
+          {
+            "id": "low-hygiene",
+            "ifEvent": "storehouse.hygiene.low",
+            "generate": "cleaning.restroom-restock"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "bath",
+        "group": "weekly"
+      }
+    },
+    {
+      "id": "clean-monthly-storehouse-audit",
+      "label": "Monthly Storehouse Clean + Audit",
+      "category": "monthly",
+      "domain": "cleaning",
+      "priority": 3,
+      "steps": [
+        "Clear main pantry shelves by section: produce, dry-goods, baking, ferments, freezer access",
+        "Wipe shelves and bins",
+        "Check for pests and moisture",
+        "Reorder items to FIFO",
+        "Emit storehouse.audit.requested"
+      ],
+      "durationMinutes": 60,
+      "schedule": {
+        "type": "recurring",
+        "rule": "RRULE:FREQ=MONTHLY;BYMONTHDAY=1;BYHOUR=8;BYMINUTE=0;BYSECOND=0"
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.harvest.logged",
+          "animals.butchery.completed",
+          "storehouse.overstock.detected"
+        ],
+        "rules": [
+          {
+            "id": "after-garden-harvest",
+            "ifEvent": "garden.harvest.logged",
+            "generate": "cleaning.storehouse-harvest-sanitize"
+          },
+          {
+            "id": "after-butchery",
+            "ifEvent": "animals.butchery.completed",
+            "generate": "cleaning.storehouse-meat-intake"
+          }
+        ]
+      },
+      "storehouseSections": [
+        "produce",
+        "dry-goods",
+        "baking",
+        "ferments",
+        "freezer"
+      ],
+      "uiHints": {
+        "icon": "warehouse",
+        "group": "monthly"
+      }
+    },
+    {
+      "id": "clean-seasonal-garden-turnover",
+      "label": "Seasonal – Garden Turnover + Tool Sanitation",
+      "category": "seasonal",
+      "domain": "cleaning",
+      "priority": 3,
+      "steps": [
+        "Collect and sanitize gardening tools (shears, hoes, shovels)",
+        "Clean and dry harvesting baskets and bins",
+        "Sweep and hose garden processing area",
+        "Check/clean irrigation filters",
+        "Emit garden.care-session.generated"
+      ],
+      "durationMinutes": 50,
+      "schedule": {
+        "type": "seasonal",
+        "rule": "SEASON:SPRING,FALL"
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.harvest.logged",
+          "garden.plan.created"
+        ],
+        "rules": [
+          {
+            "id": "harvest-trigger",
+            "ifEvent": "garden.harvest.logged",
+            "generate": "cleaning.garden-bin-sanitize"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "leaf",
+        "group": "seasonal"
+      }
+    },
+    {
+      "id": "clean-animal-processing",
+      "label": "After Animal Processing / Butchery",
+      "category": "after-animal-session",
+      "domain": "cleaning",
+      "priority": 1,
+      "steps": [
+        "Rinse and sanitize butchery tables",
+        "Sanitize knives, saws, and hooks",
+        "Manage offal: compost, render, or safe disposal per household rule",
+        "Sanitize drainage or floor area",
+        "Emit storehouse.intake.expected"
+      ],
+      "durationMinutes": 35,
+      "schedule": {
+        "type": "on-demand"
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "animals.butchery.completed",
+          "animals.large-butchery.generated"
+        ],
+        "generateOn": "animals.butchery.completed",
+        "emit": [
+          "cleaning.processing-area.requested",
+          "storehouse.intake.expected"
+        ]
+      },
+      "uiHints": {
+        "icon": "knife",
+        "group": "after-sessions"
+      }
+    },
+    {
+      "id": "clean-after-batch-cooking",
+      "label": "After Batch Cooking Session",
+      "category": "after-cooking-session",
+      "domain": "cleaning",
+      "priority": 1,
+      "steps": [
+        "Clear counters and sanitize food prep area",
+        "Wash or load large pots, pressure canner, dehydrator trays",
+        "Sweep/mop kitchen and pantry path",
+        "Check storehouse for restocking from session output"
+      ],
+      "durationMinutes": 30,
+      "schedule": {
+        "type": "on-demand"
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "meals.batch-cooking.completed",
+          "meals.cooking-session.completed"
+        ],
+        "generateOn": "meals.batch-cooking.completed",
+        "emit": [
+          "cleaning.session.created",
+          "storehouse.update.requested"
+        ]
+      },
+      "uiHints": {
+        "icon": "chef-hat",
+        "group": "after-sessions"
+      }
+    },
+    {
+      "id": "clean-sabbath-prep",
+      "label": "Sabbath Prep – Light Reset",
+      "category": "sabbath-prep",
+      "domain": "cleaning",
+      "priority": 1,
+      "steps": [
+        "Tidy main living areas",
+        "Wipe kitchen counters",
+        "Dishes to done or dishwasher",
+        "Quick bathroom freshen",
+        "Spot sweep entry and animal-traffic areas"
+      ],
+      "durationMinutes": 25,
+      "schedule": {
+        "type": "recurring",
+        "rule": "RRULE:FREQ=WEEKLY;BYDAY=FR;BYHOUR=14;BYMINUTE=0;BYSECOND=0"
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "meals.sabbath-cooking.planned"
+        ],
+        "generateOn": "meals.sabbath-cooking.planned",
+        "emit": [
+          "cleaning.sabbath-prep.requested"
+        ]
+      },
+      "uiHints": {
+        "icon": "candle",
+        "group": "sabbath"
+      }
+    },
+    {
+      "id": "clean-storehouse-visibility-pass",
+      "label": "Storehouse Visibility Pass",
+      "category": "storehouse-visibility",
+      "domain": "cleaning",
+      "priority": 2,
+      "steps": [
+        "Wipe and face pantry shelves (by grocery section: produce, dry-goods, baking, ferments, freezer)",
+        "Move expiring foods to front",
+        "Log anomalies for storehouse planner",
+        "Emit storehouse.visibility.logged"
+      ],
+      "durationMinutes": 20,
+      "schedule": {
+        "type": "recurring",
+        "rule": "RRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=11;BYMINUTE=0;BYSECOND=0"
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "storehouse.visibility.requested",
+          "inventory.reconcile.requested"
+        ],
+        "generateOn": "storehouse.visibility.requested",
+        "emit": [
+          "cleaning.session.created"
+        ]
+      },
+      "uiHints": {
+        "icon": "boxes",
+        "group": "storehouse"
+      }
+    }
+  ],
+  "favoritesTemplate": [
+    {
+      "id": "fav-cleaning-sabbath-core",
+      "source": "system",
+      "cloneOf": "clean-sabbath-prep",
+      "label": "My Sabbath Reset",
+      "allowUserScheduleOverride": true
+    },
+    {
+      "id": "fav-cleaning-after-butchery",
+      "source": "system",
+      "cloneOf": "clean-animal-processing",
+      "label": "My Butchery Clean",
+      "allowUserScheduleOverride": true
+    }
+  ],
+  "userCanSaveFavorites": true,
+  "userFavoritePolicy": {
+    "maxPerHousehold": 50,
+    "allowCustomSchedule": true,
+    "allowCustomQuietHours": true,
+    "allowCustomGuards": [
+      "sabbathGuard",
+      "weatherGuard"
+    ]
+  }
+}

@@ -1,0 +1,1076 @@
+{
+  "domain": "sausagemaking",
+  "lexiconVersion": 1,
+  "updatedAt": "2025-12-27",
+  "description": "SSA Lexicon: sausage-making parsing synonyms/keywords -> method IDs (methodKey). Uses strict actions only: boostMethodKey, downrankMethodKey, blockMethodKey, addNote, addWarning, emitHintTag.",
+  "defaults": {
+    "minimumTokenLength": 2,
+    "maxMatchesPerEntry": 35
+  },
+  "methodKeys": {
+    "SAUSAGE_GENERAL": "sausage.general",
+
+    "SAUSAGE_FRESH": "sausage.fresh",
+    "SAUSAGE_SMOKED": "sausage.smoked",
+    "SAUSAGE_COOKED": "sausage.cooked",
+    "SAUSAGE_EMULSIFIED": "sausage.emulsified",
+    "SAUSAGE_DRY_CURED": "sausage.dry_cured",
+    "SAUSAGE_FERMENTED": "sausage.fermented",
+
+    "SAUSAGE_BREAKFAST": "sausage.breakfast",
+    "SAUSAGE_ITALIAN": "sausage.italian",
+    "SAUSAGE_BRATWURST": "sausage.bratwurst",
+    "SAUSAGE_KIELBASA": "sausage.kielbasa",
+    "SAUSAGE_ANDOUILLE": "sausage.andouille",
+    "SAUSAGE_CHORIZO": "sausage.chorizo",
+    "SAUSAGE_MERGUEZ": "sausage.merguez",
+    "SAUSAGE_BOUDIN": "sausage.boudin",
+    "SAUSAGE_BLOOD_SAUSAGE": "sausage.blood",
+    "SAUSAGE_SUMMER_SAUSAGE": "sausage.summer_sausage",
+    "SAUSAGE_SALAMI": "sausage.salami",
+    "SAUSAGE_PEPPERONI": "sausage.pepperoni",
+    "SAUSAGE_HOT_DOG": "sausage.hot_dog",
+    "SAUSAGE_BOLOGNA": "sausage.bologna",
+    "SAUSAGE_LIVERWURST": "sausage.liverwurst",
+    "SAUSAGE_KNACKWURST": "sausage.knackwurst",
+    "SAUSAGE_WEISSWURST": "sausage.weisswurst",
+
+    "SAUSAGE_PROCESS_GRIND": "sausage.process.grind",
+    "SAUSAGE_PROCESS_MIX": "sausage.process.mix",
+    "SAUSAGE_PROCESS_BIND": "sausage.process.bind",
+    "SAUSAGE_PROCESS_EMULSIFY": "sausage.process.emulsify",
+    "SAUSAGE_PROCESS_STUFF": "sausage.process.stuff",
+    "SAUSAGE_PROCESS_LINK": "sausage.process.link",
+    "SAUSAGE_PROCESS_TWIST": "sausage.process.twist",
+    "SAUSAGE_PROCESS_PRICK": "sausage.process.prick",
+    "SAUSAGE_PROCESS_HANG_DRY": "sausage.process.hang_dry",
+    "SAUSAGE_PROCESS_BLOOM": "sausage.process.bloom",
+    "SAUSAGE_PROCESS_POACH": "sausage.process.poach",
+    "SAUSAGE_PROCESS_SMOKE": "sausage.process.smoke",
+    "SAUSAGE_PROCESS_COOK": "sausage.process.cook",
+    "SAUSAGE_PROCESS_CHILL": "sausage.process.chill",
+    "SAUSAGE_PROCESS_REST": "sausage.process.rest",
+
+    "SAUSAGE_EQUIPMENT_GRINDER": "sausage.equipment.grinder",
+    "SAUSAGE_EQUIPMENT_MIXER": "sausage.equipment.mixer",
+    "SAUSAGE_EQUIPMENT_STUFFER": "sausage.equipment.stuffer",
+    "SAUSAGE_EQUIPMENT_HORN_TUBES": "sausage.equipment.tubes",
+    "SAUSAGE_EQUIPMENT_SMOKER": "sausage.equipment.smoker",
+    "SAUSAGE_EQUIPMENT_SCALE": "sausage.equipment.scale",
+    "SAUSAGE_EQUIPMENT_THERMOMETER": "sausage.equipment.thermometer",
+    "SAUSAGE_EQUIPMENT_PH_METER": "sausage.equipment.ph_meter",
+    "SAUSAGE_EQUIPMENT_CURING_CHAMBER": "sausage.equipment.curing_chamber",
+
+    "SAUSAGE_INGREDIENT_CASINGS": "sausage.ingredient.casings",
+    "SAUSAGE_INGREDIENT_NATURAL_CASING": "sausage.ingredient.casings.natural",
+    "SAUSAGE_INGREDIENT_COLLAGEN_CASING": "sausage.ingredient.casings.collagen",
+    "SAUSAGE_INGREDIENT_FIBROUS_CASING": "sausage.ingredient.casings.fibrous",
+    "SAUSAGE_INGREDIENT_SHEEP_CASING": "sausage.ingredient.casings.sheep",
+    "SAUSAGE_INGREDIENT_HOG_CASING": "sausage.ingredient.casings.hog",
+    "SAUSAGE_INGREDIENT_BEEF_CASING": "sausage.ingredient.casings.beef",
+
+    "SAUSAGE_INGREDIENT_FAT_RATIO": "sausage.ingredient.fat_ratio",
+    "SAUSAGE_INGREDIENT_SALT": "sausage.ingredient.salt",
+    "SAUSAGE_INGREDIENT_SPICES": "sausage.ingredient.spices",
+    "SAUSAGE_INGREDIENT_BINDERS": "sausage.ingredient.binders",
+    "SAUSAGE_INGREDIENT_PHOSPHATE": "sausage.ingredient.phosphate",
+    "SAUSAGE_INGREDIENT_MILK_POWDER": "sausage.ingredient.milk_powder",
+    "SAUSAGE_INGREDIENT_BREADCRUMBS": "sausage.ingredient.breadcrumbs",
+    "SAUSAGE_INGREDIENT_EGG": "sausage.ingredient.egg",
+    "SAUSAGE_INGREDIENT_WATER_ICE": "sausage.ingredient.water_ice",
+
+    "SAUSAGE_CURING_SALT": "sausage.cure.curing_salt",
+    "SAUSAGE_CURE_NITRITE": "sausage.cure.nitrite",
+    "SAUSAGE_CURE_NITRATE": "sausage.cure.nitrate",
+    "SAUSAGE_CURE_CURE1": "sausage.cure.cure1",
+    "SAUSAGE_CURE_CURE2": "sausage.cure.cure2",
+    "SAUSAGE_STARTER_CULTURE": "sausage.fermentation.starter_culture",
+    "SAUSAGE_FERMENT_TEMP": "sausage.fermentation.temp_control",
+    "SAUSAGE_FERMENT_HUMIDITY": "sausage.fermentation.humidity_control",
+
+    "SAUSAGE_SAFETY_GENERAL": "sausage.safety.general",
+    "SAUSAGE_SAFETY_TEMP_CONTROL": "sausage.safety.temp_control",
+    "SAUSAGE_SAFETY_DANGER_ZONE": "sausage.safety.danger_zone",
+    "SAUSAGE_SAFETY_CROSS_CONTAM": "sausage.safety.cross_contamination",
+    "SAUSAGE_SAFETY_UNDERCOOKED": "sausage.safety.undercooked",
+    "SAUSAGE_SAFETY_CASE_HARDENING": "sausage.safety.case_hardening",
+    "SAUSAGE_SAFETY_RANCIDITY": "sausage.safety.rancidity",
+    "SAUSAGE_ISSUE_FAT_OUT": "sausage.issue.fat_out",
+    "SAUSAGE_ISSUE_SMEAR": "sausage.issue.fat_smear",
+    "SAUSAGE_ISSUE_BLOWOUT": "sausage.issue.blowout",
+    "SAUSAGE_ISSUE_AIR_POCKETS": "sausage.issue.air_pockets",
+    "SAUSAGE_ISSUE_DRY_CRUMBLY": "sausage.issue.dry_crumbly",
+    "SAUSAGE_ISSUE_RUBBERY": "sausage.issue.rubbery",
+    "SAUSAGE_ISSUE_MUSHY": "sausage.issue.mushy",
+    "SAUSAGE_ISSUE_SOUR": "sausage.issue.sour",
+    "SAUSAGE_ISSUE_MOLD": "sausage.issue.mold"
+  },
+  "entries": [
+    {
+      "id": "sausage_general_terms",
+      "priority": 10,
+      "when": {
+        "any": [
+          "sausage",
+          "sausages",
+          "sausage making",
+          "sausage-making",
+          "make sausage",
+          "homemade sausage",
+          "stuff sausage",
+          "stuffing sausage",
+          "sausage links",
+          "link sausage",
+          "ground and stuffed",
+          "casing",
+          "casings"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.general" },
+        { "action": "emitHintTag", "tag": "sausagemaking" },
+        {
+          "action": "addNote",
+          "note": "Sausage-making detected. Prefer identifying a subtype (fresh/cooked/smoked/emulsified/dry-cured/fermented) and process steps (grind/mix/stuff/link/cook/smoke/chill) from additional keywords."
+        }
+      ]
+    },
+
+    {
+      "id": "sausage_fresh_terms",
+      "priority": 22,
+      "when": {
+        "any": [
+          "fresh sausage",
+          "uncured sausage",
+          "no cure",
+          "cook before eating",
+          "raw sausage",
+          "bulk sausage",
+          "patty sausage",
+          "breakfast patties",
+          "loose sausage"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.fresh" },
+        { "action": "emitHintTag", "tag": "fresh-sausage" },
+        {
+          "action": "addNote",
+          "note": "Fresh sausage detected. Typically requires cooking to safe internal temperature; prioritize cold handling to prevent fat smear."
+        }
+      ]
+    },
+
+    {
+      "id": "sausage_cooked_terms",
+      "priority": 22,
+      "when": {
+        "any": [
+          "fully cooked sausage",
+          "pre-cooked sausage",
+          "cook to 160",
+          "cook to 165",
+          "poach",
+          "poaching",
+          "simmer",
+          "gentle simmer",
+          "water bath cook",
+          "hot water cook"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.cooked" },
+        { "action": "boostMethodKey", "methodKey": "sausage.process.poach" },
+        { "action": "boostMethodKey", "methodKey": "sausage.process.cook" },
+        { "action": "emitHintTag", "tag": "cooked-sausage" }
+      ]
+    },
+
+    {
+      "id": "sausage_smoked_terms",
+      "priority": 28,
+      "when": {
+        "any": [
+          "smoked sausage",
+          "smoke sausage",
+          "smoking sausage",
+          "in the smoker",
+          "smokehouse",
+          "cold smoke sausage",
+          "hot smoke sausage",
+          "bloom",
+          "blooming",
+          "dry in smoker",
+          "smoke at 130",
+          "smoke at 140",
+          "smoke at 150",
+          "smoke at 160",
+          "finish to temp"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.smoked" },
+        { "action": "boostMethodKey", "methodKey": "sausage.process.smoke" },
+        { "action": "boostMethodKey", "methodKey": "sausage.process.bloom" },
+        { "action": "emitHintTag", "tag": "smoked-sausage" }
+      ]
+    },
+
+    {
+      "id": "sausage_emulsified_terms",
+      "priority": 34,
+      "when": {
+        "any": [
+          "emulsified",
+          "emulsion",
+          "fine grind",
+          "double grind",
+          "bowl chopper",
+          "food processor emulsify",
+          "high speed mix",
+          "paste",
+          "smooth texture",
+          "hot dog",
+          "hotdog",
+          "frankfurter",
+          "franks",
+          "bologna",
+          "mortadella",
+          "vienna sausage",
+          "liverwurst",
+          "braunschweiger"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.emulsified" },
+        { "action": "boostMethodKey", "methodKey": "sausage.process.emulsify" },
+        { "action": "emitHintTag", "tag": "emulsified" },
+        {
+          "action": "addNote",
+          "note": "Emulsified sausage detected. Cold control (ice/water), phosphates (optional), and fine grind/emulsification steps are typical."
+        }
+      ]
+    },
+
+    {
+      "id": "sausage_dry_cured_terms",
+      "priority": 45,
+      "when": {
+        "any": [
+          "dry cured",
+          "dry-cured",
+          "dry cure",
+          "hang to dry",
+          "hanging to dry",
+          "drying chamber",
+          "curing chamber",
+          "cure chamber",
+          "fermentation chamber",
+          "weight loss",
+          "30% weight loss",
+          "35% weight loss",
+          "40% weight loss",
+          "white mold (good)",
+          "penicillium nalgiovense",
+          "bactoferm",
+          "starter culture",
+          "salami",
+          "pepperoni",
+          "summer sausage",
+          "soppressata"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.dry_cured" },
+        { "action": "boostMethodKey", "methodKey": "sausage.process.hang_dry" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.equipment.curing_chamber"
+        },
+        { "action": "emitHintTag", "tag": "dry-cured" },
+        {
+          "action": "addWarning",
+          "warning": "Dry-cured sausage keywords detected. This is safety-sensitive: requires correct salt %, curing salts, fermentation/aging temperature & humidity control, and validated processes."
+        }
+      ]
+    },
+
+    {
+      "id": "sausage_fermented_terms",
+      "priority": 44,
+      "when": {
+        "any": [
+          "fermented sausage",
+          "ferment sausage",
+          "fermentation",
+          "incubate",
+          "incubation",
+          "starter culture",
+          "bactoferm",
+          "t-spx",
+          "f-rm-52",
+          "l-hp",
+          "l hp",
+          "lactic",
+          "tangy",
+          "pH",
+          "ph",
+          "pH drop",
+          "ph drop",
+          "pH meter",
+          "ph meter"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.fermented" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.fermentation.starter_culture"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.equipment.ph_meter"
+        },
+        { "action": "emitHintTag", "tag": "fermented" },
+        {
+          "action": "addWarning",
+          "warning": "Fermented sausage keywords detected. Ensure correct fermentation temps/humidity and validated starter/cure usage to reduce safety risk."
+        }
+      ]
+    },
+
+    {
+      "id": "styles_breakfast",
+      "priority": 30,
+      "when": {
+        "any": [
+          "breakfast sausage",
+          "breakfast patties",
+          "sage sausage",
+          "maple sausage",
+          "country sausage",
+          "southern breakfast sausage"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.breakfast" },
+        { "action": "boostMethodKey", "methodKey": "sausage.fresh" },
+        { "action": "emitHintTag", "tag": "breakfast" }
+      ]
+    },
+
+    {
+      "id": "styles_italian",
+      "priority": 30,
+      "when": {
+        "any": [
+          "italian sausage",
+          "sweet italian",
+          "hot italian",
+          "fennel",
+          "anise",
+          "giardiniera (sausage)",
+          "salsiccia"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.italian" },
+        { "action": "boostMethodKey", "methodKey": "sausage.fresh" },
+        { "action": "emitHintTag", "tag": "italian" }
+      ]
+    },
+
+    {
+      "id": "styles_bratwurst",
+      "priority": 30,
+      "when": {
+        "any": [
+          "bratwurst",
+          "brats",
+          "brat",
+          "weisswurst",
+          "weisswurst (style)",
+          "bockwurst",
+          "knackwurst"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.bratwurst" },
+        { "action": "boostMethodKey", "methodKey": "sausage.weisswurst" },
+        { "action": "boostMethodKey", "methodKey": "sausage.knackwurst" },
+        { "action": "emitHintTag", "tag": "german-style" }
+      ]
+    },
+
+    {
+      "id": "styles_kielbasa_andouuille_chorizo_merguez",
+      "priority": 32,
+      "when": {
+        "any": [
+          "kielbasa",
+          "kielbasa (polish)",
+          "polish sausage",
+          "andouille",
+          "andouille sausage",
+          "cajun sausage",
+          "chorizo",
+          "mexican chorizo",
+          "spanish chorizo",
+          "merguez"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.kielbasa" },
+        { "action": "boostMethodKey", "methodKey": "sausage.andouille" },
+        { "action": "boostMethodKey", "methodKey": "sausage.chorizo" },
+        { "action": "boostMethodKey", "methodKey": "sausage.merguez" },
+        { "action": "emitHintTag", "tag": "sausage-style" }
+      ]
+    },
+
+    {
+      "id": "styles_boudin_blood",
+      "priority": 34,
+      "when": {
+        "any": [
+          "boudin",
+          "boudin blanc",
+          "boudin noir",
+          "blood sausage",
+          "black pudding",
+          "bloedworst",
+          "morcilla",
+          "blood pudding"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.boudin" },
+        { "action": "boostMethodKey", "methodKey": "sausage.blood" },
+        { "action": "emitHintTag", "tag": "blood-sausage" },
+        {
+          "action": "addNote",
+          "note": "Blood/boudin sausage detected. Typically cooked/poached and highly temperature-sensitive; prioritize rapid chilling and safe handling."
+        }
+      ]
+    },
+
+    {
+      "id": "process_grind_terms",
+      "priority": 18,
+      "when": {
+        "any": [
+          "grind",
+          "grinding",
+          "ground meat",
+          "coarse grind",
+          "fine grind",
+          "double grind",
+          "3/8 plate",
+          "1/4 plate",
+          "4.5mm plate",
+          "6mm plate",
+          "8mm plate"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.process.grind" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.equipment.grinder"
+        },
+        { "action": "emitHintTag", "tag": "grind" },
+        {
+          "action": "addNote",
+          "note": "Grinding detected. Keep meat and fat cold to reduce smear and improve texture."
+        }
+      ]
+    },
+
+    {
+      "id": "process_mix_bind_terms",
+      "priority": 20,
+      "when": {
+        "any": [
+          "mix",
+          "mixing",
+          "knead",
+          "kneading",
+          "mix until tacky",
+          "protein extraction",
+          "sticky paste",
+          "bind",
+          "binding",
+          "develop bind",
+          "emulsify by mixing",
+          "hand mix",
+          "paddle mix",
+          "stand mixer"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.process.mix" },
+        { "action": "boostMethodKey", "methodKey": "sausage.process.bind" },
+        { "action": "boostMethodKey", "methodKey": "sausage.equipment.mixer" },
+        { "action": "emitHintTag", "tag": "mix-bind" }
+      ]
+    },
+
+    {
+      "id": "process_stuff_link_twist_prick",
+      "priority": 22,
+      "when": {
+        "any": [
+          "stuff",
+          "stuffing",
+          "sausage stuffer",
+          "stuffer",
+          "horn",
+          "tube",
+          "nozzle",
+          "stuffing tube",
+          "link",
+          "linking",
+          "twist",
+          "twisting",
+          "pinch and twist",
+          "every 6 inches",
+          "every 4 inches",
+          "prick",
+          "pricking",
+          "pierce",
+          "needle",
+          "sausage pricker",
+          "remove air",
+          "air pockets"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.process.stuff" },
+        { "action": "boostMethodKey", "methodKey": "sausage.process.link" },
+        { "action": "boostMethodKey", "methodKey": "sausage.process.twist" },
+        { "action": "boostMethodKey", "methodKey": "sausage.process.prick" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.equipment.stuffer"
+        },
+        { "action": "boostMethodKey", "methodKey": "sausage.equipment.tubes" },
+        { "action": "emitHintTag", "tag": "stuff-link" }
+      ]
+    },
+
+    {
+      "id": "process_rest_chill_terms",
+      "priority": 18,
+      "when": {
+        "any": [
+          "rest overnight",
+          "rest in fridge",
+          "chill",
+          "chilled",
+          "ice bath",
+          "shock in ice water",
+          "rapid chill",
+          "cool quickly",
+          "set in refrigerator",
+          "dry the casing",
+          "dry casings",
+          "air-dry casings",
+          "pellicle"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.process.rest" },
+        { "action": "boostMethodKey", "methodKey": "sausage.process.chill" },
+        { "action": "emitHintTag", "tag": "cold-control" }
+      ]
+    },
+
+    {
+      "id": "equipment_scale_thermometer",
+      "priority": 16,
+      "when": {
+        "any": [
+          "scale",
+          "digital scale",
+          "grams",
+          "weigh",
+          "weigh ingredients",
+          "thermometer",
+          "probe thermometer",
+          "instant read",
+          "instant-read",
+          "internal temp",
+          "internal temperature"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.equipment.scale" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.equipment.thermometer"
+        },
+        { "action": "emitHintTag", "tag": "measure" }
+      ]
+    },
+
+    {
+      "id": "casings_types",
+      "priority": 28,
+      "when": {
+        "any": [
+          "natural casing",
+          "natural casings",
+          "hog casing",
+          "hog casings",
+          "sheep casing",
+          "sheep casings",
+          "beef casing",
+          "beef casings",
+          "collagen casing",
+          "collagen casings",
+          "fibrous casing",
+          "fibrous casings",
+          "edible casing",
+          "inedible casing"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.ingredient.casings"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.ingredient.casings.natural"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.ingredient.casings.hog"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.ingredient.casings.sheep"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.ingredient.casings.beef"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.ingredient.casings.collagen"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.ingredient.casings.fibrous"
+        },
+        { "action": "emitHintTag", "tag": "casings" },
+        {
+          "action": "addNote",
+          "note": "Casing type detected. Natural casings usually need rinsing/soaking; collagen/fibrous often have different prep and diameter sizing."
+        }
+      ]
+    },
+
+    {
+      "id": "ingredients_fat_ratio",
+      "priority": 24,
+      "when": {
+        "any": [
+          "fat ratio",
+          "fat content",
+          "30% fat",
+          "20% fat",
+          "25% fat",
+          "pork fat",
+          "fatback",
+          "back fat",
+          "leaf fat",
+          "tallow (sausage)",
+          "add fat",
+          "too lean",
+          "lean meat"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.ingredient.fat_ratio"
+        },
+        { "action": "emitHintTag", "tag": "fat-ratio" },
+        {
+          "action": "addNote",
+          "note": "Fat ratio keywords detected. Texture/juiciness depend heavily on fat %. Lean mixes risk dry/crumbly sausage."
+        }
+      ]
+    },
+
+    {
+      "id": "ingredients_salt_spices",
+      "priority": 18,
+      "when": {
+        "any": [
+          "salt",
+          "kosher salt",
+          "sea salt",
+          "seasoning",
+          "spices",
+          "spice blend",
+          "paprika",
+          "cayenne",
+          "black pepper",
+          "white pepper",
+          "garlic",
+          "garlic powder",
+          "onion powder",
+          "sage",
+          "fennel",
+          "marjoram",
+          "thyme",
+          "chili flakes"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.ingredient.salt" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.ingredient.spices"
+        },
+        { "action": "emitHintTag", "tag": "seasoning" }
+      ]
+    },
+
+    {
+      "id": "ingredients_binders_extenders",
+      "priority": 24,
+      "when": {
+        "any": [
+          "binder",
+          "binders",
+          "rusk",
+          "breadcrumbs",
+          "bread crumbs",
+          "panko",
+          "cracker meal",
+          "oat flour",
+          "oatmeal",
+          "egg",
+          "eggs",
+          "milk powder",
+          "nonfat dry milk",
+          "nfdm",
+          "soy protein concentrate",
+          "soy protein",
+          "potato starch",
+          "cornstarch",
+          "phosphate",
+          "sodium phosphate",
+          "polyphosphate",
+          "ice water",
+          "ice",
+          "crushed ice",
+          "added water"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.ingredient.binders"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.ingredient.breadcrumbs"
+        },
+        { "action": "boostMethodKey", "methodKey": "sausage.ingredient.egg" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.ingredient.milk_powder"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.ingredient.phosphate"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.ingredient.water_ice"
+        },
+        { "action": "emitHintTag", "tag": "binders" },
+        {
+          "action": "addNote",
+          "note": "Binders/extenders and water/ice keywords detected. These often indicate emulsified or very fine-texture sausages, or recipes designed for extra moisture retention."
+        }
+      ]
+    },
+
+    {
+      "id": "curing_salts_and_cures",
+      "priority": 60,
+      "when": {
+        "any": [
+          "curing salt",
+          "pink salt",
+          "prague powder",
+          "instacure",
+          "cure #1",
+          "cure #2",
+          "cure 1",
+          "cure 2",
+          "sodium nitrite",
+          "nitrite",
+          "nitrate",
+          "sodium nitrate",
+          "celery powder (cure)",
+          "cultured celery powder"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.cure.curing_salt" },
+        { "action": "boostMethodKey", "methodKey": "sausage.cure.nitrite" },
+        { "action": "boostMethodKey", "methodKey": "sausage.cure.nitrate" },
+        { "action": "boostMethodKey", "methodKey": "sausage.cure.cure1" },
+        { "action": "boostMethodKey", "methodKey": "sausage.cure.cure2" },
+        { "action": "emitHintTag", "tag": "curing-salt" },
+        {
+          "action": "addWarning",
+          "warning": "Curing salt keywords detected. This is safety-critical: require precise measurement and correct cure type for the sausage style (fresh vs smoked vs dry-cured/fermented)."
+        }
+      ]
+    },
+
+    {
+      "id": "fermentation_temp_humidity",
+      "priority": 55,
+      "when": {
+        "any": [
+          "ferment at",
+          "incubate at",
+          "humidity",
+          "relative humidity",
+          "rh",
+          "85% humidity",
+          "90% humidity",
+          "75% humidity",
+          "curing chamber",
+          "fermentation chamber",
+          "drying chamber",
+          "case hardening",
+          "case-hardening"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.fermentation.temp_control"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.fermentation.humidity_control"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.safety.case_hardening"
+        },
+        { "action": "emitHintTag", "tag": "humidity-temp" },
+        {
+          "action": "addNote",
+          "note": "Fermentation/drying environment detected. Control temperature & humidity to avoid case hardening and unsafe fermentation."
+        }
+      ]
+    },
+
+    {
+      "id": "safety_cold_chain_cross_contam",
+      "priority": 40,
+      "when": {
+        "any": [
+          "keep cold",
+          "keep everything cold",
+          "cold chain",
+          "meat must stay cold",
+          "below 40",
+          "below 40f",
+          "below 4c",
+          "sanitize",
+          "sanitise",
+          "disinfect",
+          "clean and sanitize",
+          "cross contamination",
+          "cross-contamination",
+          "raw meat handling",
+          "gloves",
+          "separate cutting board",
+          "danger zone",
+          "40-140",
+          "40 to 140"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.safety.temp_control"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.safety.danger_zone"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.safety.cross_contamination"
+        },
+        { "action": "emitHintTag", "tag": "safety" }
+      ]
+    },
+
+    {
+      "id": "issue_fat_smear_fat_out",
+      "priority": 50,
+      "when": {
+        "any": [
+          "fat smear",
+          "smeared fat",
+          "fatty smear",
+          "fat out",
+          "fat-out",
+          "fat rendered out",
+          "grease pockets",
+          "greasy",
+          "oily texture",
+          "grainy texture"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.issue.fat_smear" },
+        { "action": "boostMethodKey", "methodKey": "sausage.issue.fat_out" },
+        { "action": "emitHintTag", "tag": "fat-smear" },
+        {
+          "action": "addNote",
+          "note": "Fat smear/fat-out detected. Common causes: meat too warm during grind/mix, overmixing, or smoking/cooking temps too high too fast."
+        }
+      ]
+    },
+
+    {
+      "id": "issue_blowout_air_pockets",
+      "priority": 45,
+      "when": {
+        "any": [
+          "blowout",
+          "blow out",
+          "casing burst",
+          "casing broke",
+          "split casing",
+          "overstuffed",
+          "too tight",
+          "air pockets",
+          "air bubbles",
+          "voids",
+          "air gap",
+          "pockets of air",
+          "prick the casing",
+          "pierce the casing"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.issue.blowout" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.issue.air_pockets"
+        },
+        { "action": "boostMethodKey", "methodKey": "sausage.process.prick" },
+        { "action": "emitHintTag", "tag": "stuffing-issues" },
+        {
+          "action": "addNote",
+          "note": "Stuffing issues detected (blowouts/air pockets). Typical fixes: reduce stuffing pressure, keep casings properly soaked, avoid overfilling, and prick/purge air."
+        }
+      ]
+    },
+
+    {
+      "id": "issue_texture_dry_rubbery_mushy",
+      "priority": 40,
+      "when": {
+        "any": [
+          "dry",
+          "crumbly",
+          "dry and crumbly",
+          "falls apart",
+          "rubbery",
+          "bouncy",
+          "spongy",
+          "mushy",
+          "pasty",
+          "mealy",
+          "grainy"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "sausage.issue.dry_crumbly"
+        },
+        { "action": "boostMethodKey", "methodKey": "sausage.issue.rubbery" },
+        { "action": "boostMethodKey", "methodKey": "sausage.issue.mushy" },
+        { "action": "emitHintTag", "tag": "texture-issues" },
+        {
+          "action": "addNote",
+          "note": "Texture issue detected. Likely causes vary (fat %, bind development, cook temp, moisture/ice, overmix/undermix). Route to diagnostics based on sausage type."
+        }
+      ]
+    },
+
+    {
+      "id": "issue_sour_mold",
+      "priority": 65,
+      "when": {
+        "any": [
+          "sour",
+          "too sour",
+          "tangy",
+          "over fermented",
+          "over-fermented",
+          "mold",
+          "mould",
+          "fuzzy growth",
+          "green mold",
+          "black mold",
+          "pink mold",
+          "orange mold",
+          "bad mold"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "sausage.issue.sour" },
+        { "action": "boostMethodKey", "methodKey": "sausage.issue.mold" },
+        { "action": "emitHintTag", "tag": "ferment-issues" },
+        {
+          "action": "addWarning",
+          "warning": "Sour/mold keywords detected. Fermented/dry-cured sausage safety can be critical; route to strict evaluation guidance (pH, cure, temp/humidity, mold type)."
+        }
+      ]
+    },
+
+    {
+      "id": "block_unsafe_cure_language_without_measurement",
+      "priority": 90,
+      "when": {
+        "any": [
+          "add a pinch of cure",
+          "a pinch of prague powder",
+          "some curing salt",
+          "eyeball the cure",
+          "guess the cure amount",
+          "no scale for cure",
+          "measure by spoon without grams"
+        ]
+      },
+      "then": [
+        { "action": "blockMethodKey", "methodKey": "sausage.cure.curing_salt" },
+        { "action": "emitHintTag", "tag": "unsafe-pattern" },
+        {
+          "action": "addWarning",
+          "warning": "Unsafe pattern detected: curing salts require precise measurement by weight. Route user to scale-based dosing guidance before proceeding."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,363 @@
+{
+  "id": "pat.preservation.shelf_stable_buffer",
+  "domain": "preservation",
+  "kind": "planning_pattern",
+  "title": "Shelf-Stable Buffer Build",
+  "intentTags": [
+    "intent:buffer",
+    "intent:preserve",
+    "mode:buffer",
+    "storehouse:deep_pantry"
+  ],
+  "description": "Build shelf-stable buffers (dry, canned, cured) aligned to household demand and feast windows.",
+  "inputs": [
+    {
+      "key": "dietaryLaws",
+      "type": "multiselect",
+      "label": "Dietary laws",
+      "required": false,
+      "options": [
+        "no_pork",
+        "no_shellfish",
+        "halal_like",
+        "kosher_like",
+        "none"
+      ],
+      "default": [
+        "no_pork"
+      ]
+    },
+    {
+      "key": "householdSize",
+      "type": "number",
+      "label": "Household size",
+      "required": true,
+      "default": 4,
+      "min": 1,
+      "max": 30
+    },
+    {
+      "key": "inventorySnapshot",
+      "type": "select",
+      "label": "Inventory snapshot",
+      "required": false,
+      "default": "recommended",
+      "options": [
+        "missing",
+        "recommended",
+        "required"
+      ]
+    },
+    {
+      "key": "surplusItems",
+      "type": "multiselect",
+      "label": "Surplus items (tags)",
+      "required": false,
+      "options": [
+        "produce:leafy",
+        "produce:fruit",
+        "produce:root",
+        "meat:raw",
+        "dairy:raw",
+        "grain:bulk",
+        "beans:bulk"
+      ]
+    },
+    {
+      "key": "timeBudgetMin",
+      "type": "number",
+      "label": "Time budget (minutes)",
+      "required": false,
+      "default": 120,
+      "min": 30,
+      "max": 960
+    },
+    {
+      "key": "equipmentLevel",
+      "type": "select",
+      "label": "Equipment level",
+      "required": false,
+      "default": "standard",
+      "options": [
+        "limited",
+        "standard",
+        "advanced",
+        "fermentation"
+      ]
+    },
+    {
+      "key": "storageZones",
+      "type": "multiselect",
+      "label": "Storage zones available",
+      "required": false,
+      "options": [
+        "pantry",
+        "cold",
+        "frozen",
+        "root_cellar",
+        "fermentation_room",
+        "dehydration",
+        "smokehouse"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "type": "planStructure",
+      "notes": "Buffer targets + batch list."
+    },
+    {
+      "type": "inventoryMove",
+      "notes": "Move buffers to pantry and set rotation schedule."
+    },
+    {
+      "type": "shoppingDelta",
+      "notes": "Reorder packaging/salt/spices if buffer build exceeds supplies."
+    }
+  ],
+  "constraints": [
+    {
+      "type": "quietHours",
+      "tag": "constraint:quiet_hours",
+      "notes": "Avoid loud equipment during quiet hours/Sabbath."
+    },
+    {
+      "type": "foodSafety",
+      "tag": "constraint:food_safety",
+      "notes": "Prefer safe methods; surface warnings instead of silent changes."
+    },
+    {
+      "type": "budget",
+      "tag": "constraint:budget",
+      "notes": "Respect jar/lid/packaging budget caps if provided."
+    }
+  ],
+  "requires": [
+    {
+      "type": "inventory",
+      "tag": "needsInventorySnapshot",
+      "optional": true
+    },
+    {
+      "type": "calendar",
+      "tag": "seasonalTags",
+      "optional": true
+    }
+  ],
+  "produces": [
+    {
+      "type": "session",
+      "domain": "preservation",
+      "title": "Shelf-Stable Buffer Build Session"
+    },
+    {
+      "type": "inventoryMove",
+      "notes": "Placeholder inventory moves emitted per method batch."
+    },
+    {
+      "type": "shoppingDelta",
+      "notes": "Packaging & supply deltas (jars, lids, salt, vinegar, bags)."
+    }
+  ],
+  "steps": [
+    {
+      "id": "demand",
+      "title": "Estimate buffer demand",
+      "kind": "template",
+      "timeboxMin": 20,
+      "voice": {
+        "speakOnStart": true,
+        "prompt": "Estimate weeks of coverage you want for staples and proteins."
+      }
+    },
+    {
+      "id": "select",
+      "title": "Select shelf-stable methods",
+      "kind": "template",
+      "timeboxMin": 15,
+      "ui": {
+        "chips": [
+          "drying",
+          "canning",
+          "curing"
+        ],
+        "fields": [
+          "equipmentLevel"
+        ]
+      }
+    },
+    {
+      "id": "produce",
+      "title": "Produce buffer batches",
+      "kind": "template",
+      "timeboxMin": 150
+    },
+    {
+      "id": "label_store",
+      "title": "Label, FIFO, store",
+      "kind": "template",
+      "timeboxMin": 20,
+      "inventoryMoves": [
+        {
+          "type": "placeholder",
+          "from": "processing",
+          "to": "pantry",
+          "itemTag": "buffer:*"
+        }
+      ]
+    }
+  ],
+  "kpis": [
+    {
+      "key": "buffer_coverage",
+      "label": "Buffer coverage",
+      "unit": "weeks",
+      "target": "User-set"
+    },
+    {
+      "key": "stockout_rate",
+      "label": "Stockout rate",
+      "unit": "%",
+      "target": "≤2%"
+    },
+    {
+      "key": "rotation_compliance",
+      "label": "Rotation compliance",
+      "unit": "%",
+      "target": "≥90%"
+    }
+  ],
+  "lean": {
+    "wasteTargets": [
+      "overprocessing",
+      "inventory",
+      "transport"
+    ],
+    "countermeasures": [
+      {
+        "waste": "inventory",
+        "do": "Cap buffers to storage space; rotate FIFO monthly."
+      },
+      {
+        "waste": "transport",
+        "do": "Store in zones near point-of-use where possible."
+      }
+    ],
+    "standardWorkRefs": [
+      "std.storehouse.monthly_storehouse_check"
+    ]
+  },
+  "ui": {
+    "form": {
+      "fields": [
+        {
+          "key": "householdSize",
+          "type": "number",
+          "label": "Household size",
+          "required": true,
+          "default": 4,
+          "min": 1,
+          "max": 30
+        },
+        {
+          "key": "inventorySnapshot",
+          "type": "select",
+          "label": "Inventory snapshot",
+          "required": false,
+          "default": "recommended",
+          "options": [
+            "missing",
+            "recommended",
+            "required"
+          ]
+        },
+        {
+          "key": "surplusItems",
+          "type": "multiselect",
+          "label": "Surplus items (tags)",
+          "required": false,
+          "options": [
+            "produce:leafy",
+            "produce:fruit",
+            "produce:root",
+            "meat:raw",
+            "dairy:raw",
+            "grain:bulk",
+            "beans:bulk"
+          ]
+        },
+        {
+          "key": "timeBudgetMin",
+          "type": "number",
+          "label": "Time budget (minutes)",
+          "required": false,
+          "default": 120,
+          "min": 30,
+          "max": 960
+        },
+        {
+          "key": "equipmentLevel",
+          "type": "select",
+          "label": "Equipment level",
+          "required": false,
+          "default": "standard",
+          "options": [
+            "limited",
+            "standard",
+            "advanced",
+            "fermentation"
+          ]
+        },
+        {
+          "key": "storageZones",
+          "type": "multiselect",
+          "label": "Storage zones available",
+          "required": false,
+          "options": [
+            "pantry",
+            "cold",
+            "frozen",
+            "root_cellar",
+            "fermentation_room",
+            "dehydration",
+            "smokehouse"
+          ]
+        },
+        {
+          "key": "bufferWeeks",
+          "type": "slider",
+          "label": "Target buffer (weeks)",
+          "min": 1,
+          "max": 24,
+          "step": 1,
+          "default": 6
+        }
+      ]
+    },
+    "chips": [
+      {
+        "key": "mode",
+        "label": "Buffer",
+        "tag": "mode:buffer"
+      }
+    ],
+    "help": {
+      "title": "Shelf-Stable Buffer Build",
+      "intro": "Build resilience without overstocking.",
+      "tips": [
+        "Set a weeks-of-coverage target.",
+        "Plan rotation as part of the build."
+      ]
+    }
+  },
+  "links": {
+    "storehousePatterns": [
+      "pat.storehouse.root_cellar_optimizer",
+      "pat.storehouse.monthly_cycle_count"
+    ],
+    "mealPatterns": [
+      "pat.meals.preservation_first"
+    ]
+  },
+  "variants": []
+}

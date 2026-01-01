@@ -1,0 +1,317 @@
+{
+  "version": "v1.0.0",
+  "calculator": "MeatBreakdownCalculator",
+  "description": "Next Steps mapping from meat breakdown results into batch cooking, preservation, and inventory workflows for SSA.",
+  "metadata": {
+    "planningGraphNodeId": "PG_NODE_MEAT_BREAKDOWN",
+    "feedsInto": [
+      "PG_NODE_STOREHOUSE_STOCK_PLANNER",
+      "PG_NODE_MEAL_YIELD_PLANNER",
+      "PG_NODE_BATCH_COOKING_PLANNER",
+      "PG_NODE_PRESERVATION_SUITE",
+      "PG_NODE_ANIMAL_PLANNER"
+    ]
+  },
+  "nextSteps": {
+    "batchCooking": {
+      "domain": "cooking",
+      "sessionTemplates": [
+        {
+          "id": "meatbatch_ground_template",
+          "title": "Batch: Ground & Sausage Prep",
+          "description": "Group all ground and sausage-designated meat into a single batch prep session for seasoning, portioning, and packaging.",
+          "sessionIdPrefix": "meatbatch_ground_",
+          "trigger": {
+            "anyCutCategory": ["ground", "sausage"],
+            "minTotalWeight": {
+              "value": 2,
+              "unit": "lb"
+            },
+            "minPackages": 2
+          },
+          "cutSelectors": {
+            "includeCategories": ["ground", "sausage"],
+            "minYieldPctOfMeat": 1
+          },
+          "sessionPrefs": {
+            "domain": "cooking",
+            "sourceType": "manual",
+            "autoAdvance": false,
+            "voiceGuidance": true
+          }
+        },
+        {
+          "id": "meatbatch_stew_template",
+          "title": "Batch: Stew / Curry Prep",
+          "description": "Bundle all stew cuts into a batch session focused on cubing, trimming, and packaging into ready-to-cook kits.",
+          "sessionIdPrefix": "meatbatch_stew_",
+          "trigger": {
+            "anyCutCategory": ["stew"],
+            "minTotalWeight": {
+              "value": 2,
+              "unit": "lb"
+            },
+            "minPackages": 2
+          },
+          "cutSelectors": {
+            "includeCategories": ["stew"],
+            "minYieldPctOfMeat": 0.5
+          },
+          "sessionPrefs": {
+            "domain": "cooking",
+            "sourceType": "manual",
+            "autoAdvance": false,
+            "voiceGuidance": true
+          }
+        },
+        {
+          "id": "meatbatch_roasts_template",
+          "title": "Batch: Roasts & Special Cuts Labeling",
+          "description": "Use this session to inventory, organize, and label roasts, steaks, chops, and ribs by occasion and serving size.",
+          "sessionIdPrefix": "meatbatch_roasts_",
+          "trigger": {
+            "anyCutCategory": ["roast", "steak", "chop", "rib"],
+            "minTotalWeight": {
+              "value": 4,
+              "unit": "lb"
+            },
+            "minPackages": 3
+          },
+          "cutSelectors": {
+            "includeCategories": ["roast", "steak", "chop", "rib"],
+            "minYieldPctOfMeat": 0.5
+          },
+          "sessionPrefs": {
+            "domain": "cooking",
+            "sourceType": "manual",
+            "autoAdvance": false,
+            "voiceGuidance": true
+          }
+        },
+        {
+          "id": "meatbatch_broth_offal_template",
+          "title": "Batch: Broth & Offal Prep",
+          "description": "Session to sort bones and organs, bag stock bones, and triage offal for fresh cooking or freezing.",
+          "sessionIdPrefix": "meatbatch_broth_offal_",
+          "trigger": {
+            "anyByproductType": ["bone", "stock_bag", "organ"],
+            "minTotalWeight": {
+              "value": 3,
+              "unit": "lb"
+            }
+          },
+          "byproductSelectors": {
+            "includeTypes": ["bone", "stock_bag", "organ"],
+            "minWeightPerType": {
+              "value": 1,
+              "unit": "lb"
+            }
+          },
+          "sessionPrefs": {
+            "domain": "cooking",
+            "sourceType": "manual",
+            "autoAdvance": false,
+            "voiceGuidance": true
+          }
+        }
+      ]
+    },
+    "preservation": {
+      "domain": "preservation",
+      "strategies": [
+        {
+          "id": "preserve_roasts_freeze",
+          "label": "Freeze roasts for Sabbath and feast days",
+          "description": "Route higher-end roasts, steaks, and chops into labeled freezer inventory tagged for Sabbath/feast use.",
+          "cutSelectors": {
+            "includeCategories": ["roast", "steak", "chop", "rib"],
+            "minYieldPctOfMeat": 5
+          },
+          "preservationMethod": "freeze",
+          "tags": ["sabbath", "feast", "special_occasions"],
+          "defaultIntendedUse": "special_occasions"
+        },
+        {
+          "id": "preserve_ground_freeze",
+          "label": "Freeze everyday ground packs",
+          "description": "Freeze ground packs in 1–2 lb units labeled for weeknight meals and batch cooking.",
+          "cutSelectors": {
+            "includeCategories": ["ground", "sausage"],
+            "minYieldPctOfMeat": 1
+          },
+          "preservationMethod": "freeze",
+          "tags": ["weeknight", "batch_cooking"],
+          "defaultIntendedUse": "family_meals"
+        },
+        {
+          "id": "preserve_bones_broth",
+          "label": "Bag bones for broth",
+          "description": "Group bones and stock bags into broth-ready freezer packs for future stock sessions.",
+          "byproductSelectors": {
+            "includeTypes": ["bone", "stock_bag"],
+            "minWeightPerType": {
+              "value": 2,
+              "unit": "lb"
+            }
+          },
+          "preservationMethod": "freeze",
+          "tags": ["broth", "stock", "soup"],
+          "defaultIntendedUse": "stock"
+        },
+        {
+          "id": "preserve_fat_render",
+          "label": "Render fat into tallow/lard",
+          "description": "Route trim fat byproducts into rendering sessions to create cooking fats.",
+          "byproductSelectors": {
+            "includeTypes": ["fat"],
+            "minWeightPerType": {
+              "value": 2,
+              "unit": "lb"
+            }
+          },
+          "preservationMethod": "render",
+          "tags": ["tallow", "lard", "cooking_fat"],
+          "defaultIntendedUse": "render_tallow"
+        },
+        {
+          "id": "preserve_organs_freeze_or_fresh",
+          "label": "Freeze or cook organs fresh",
+          "description": "Decide which organs to cook fresh vs. which to freeze for future recipes; mark nutrient-dense packs.",
+          "byproductSelectors": {
+            "includeTypes": ["organ"],
+            "minWeightPerType": {
+              "value": 1,
+              "unit": "lb"
+            }
+          },
+          "preservationMethod": "freeze_or_fresh",
+          "tags": ["organs", "offal", "nutrient_dense"],
+          "defaultIntendedUse": "family_meals"
+        }
+      ]
+    },
+    "inventory": {
+      "domain": "storehouse",
+      "freezerZones": [
+        {
+          "id": "zone_steaks_roasts",
+          "label": "Freezer: Steaks & Roasts",
+          "cutCategories": ["steak", "roast", "chop", "rib"],
+          "defaultLocation": "Freezer: Steaks/Roasts",
+          "defaultTags": ["premium_cuts", "sabbath", "feast"],
+          "planningGraphTargets": [
+            "PG_NODE_STOREHOUSE_STOCK_PLANNER",
+            "PG_NODE_MEAL_YIELD_PLANNER"
+          ]
+        },
+        {
+          "id": "zone_ground_sausage",
+          "label": "Freezer: Ground & Sausage",
+          "cutCategories": ["ground", "sausage", "stew"],
+          "defaultLocation": "Freezer: Ground/Sausage",
+          "defaultTags": ["weeknight_meals", "batch_cooking"],
+          "planningGraphTargets": [
+            "PG_NODE_MEAL_YIELD_PLANNER",
+            "PG_NODE_BATCH_COOKING_PLANNER"
+          ]
+        },
+        {
+          "id": "zone_bones_stock",
+          "label": "Freezer: Bones & Stock",
+          "byproductTypes": ["bone", "stock_bag", "fat"],
+          "defaultLocation": "Freezer: Stock/Bones",
+          "defaultTags": ["broth", "stock", "render"],
+          "planningGraphTargets": [
+            "PG_NODE_PRESERVATION_SUITE",
+            "PG_NODE_MEAL_YIELD_PLANNER"
+          ]
+        },
+        {
+          "id": "zone_organs_offal",
+          "label": "Freezer: Organs & Offal",
+          "byproductTypes": ["organ"],
+          "defaultLocation": "Freezer: Organs",
+          "defaultTags": ["organs", "offal", "nutrient_dense"],
+          "planningGraphTargets": [
+            "PG_NODE_MEAL_YIELD_PLANNER",
+            "PG_NODE_PRESERVATION_SUITE"
+          ]
+        }
+      ],
+      "inventoryRowDefaults": {
+        "schemaHint": "ssaDB.inventory",
+        "fields": {
+          "location": {
+            "fromFreezerZone": true
+          },
+          "quantity": {
+            "from": "cut.weight|byproduct.weight"
+          },
+          "unit": {
+            "from": "summary.weightUnit",
+            "fallback": "lb"
+          },
+          "packages": {
+            "from": "cut.packagePlan.packages",
+            "fallback": 0
+          },
+          "tags": {
+            "merge": [
+              "freezerZone.defaultTags",
+              "preservation.tags",
+              "planningGraphTargets"
+            ]
+          }
+        }
+      },
+      "routingRules": [
+        {
+          "id": "route_premium_to_special_occasions",
+          "label": "Route premium cuts to 'special_occasions'",
+          "match": {
+            "cutCategories": ["steak", "roast", "chop", "rib"],
+            "minYieldPctOfMeat": 5
+          },
+          "setFields": {
+            "intendedUse": "special_occasions",
+            "tags": ["premium_cuts", "sabbath", "feast"]
+          }
+        },
+        {
+          "id": "route_ground_to_family_meals",
+          "label": "Route ground to 'family_meals'",
+          "match": {
+            "cutCategories": ["ground", "sausage"],
+            "maxYieldPctOfMeat": 20
+          },
+          "setFields": {
+            "intendedUse": "family_meals",
+            "tags": ["weeknight_meals", "batch_cooking"]
+          }
+        },
+        {
+          "id": "route_organs_to_nutrient_dense",
+          "label": "Route organs to nutrient-dense tracking",
+          "match": {
+            "byproductTypes": ["organ"]
+          },
+          "setFields": {
+            "intendedUse": "family_meals",
+            "tags": ["organs", "offal", "nutrient_dense"]
+          }
+        },
+        {
+          "id": "route_bones_to_stock",
+          "label": "Route bones to broth/stock planner",
+          "match": {
+            "byproductTypes": ["bone", "stock_bag"]
+          },
+          "setFields": {
+            "intendedUse": "stock",
+            "tags": ["broth", "stock"]
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,160 @@
+{
+  "$schema": "../../../../schemas/planningGraph/nodes.schema.json",
+  "version": "v1.0.0",
+  "kind": "calculator-node",
+  "nodeKey": "PG_NODE_FREEZER_SPACE_CALCULATOR",
+  "id": "FreezerSpaceCalculator",
+  "label": "Freezer Space Calculator",
+  "shortLabel": "Freezer Space",
+  "calculatorId": "FreezerSpaceCalculator",
+  "domain": "storehouse",
+  "description": "Estimates freezer volume usage for planned batches (meat, prepared meals, ferments, bulk buys) and returns fit reports, conflicts, and suggested rearrange plans. Feeds sessions into SessionRunner for reorganization and logs availability into the storehouse.",
+  "tags": [
+    "storehouse",
+    "freezer",
+    "capacity",
+    "planningGraph",
+    "preservation",
+    "batchCooking"
+  ],
+
+  "inputs": {},
+
+  "outputs": {},
+
+  "events": {
+    "consumes": [
+      "calculator.freezerSpace.requested",
+      "storehouse.inventory.updated",
+      "planner.batchCooking.plan.finalized",
+      "planner.meatBreakdown.plan.finalized",
+      "planner.preservation.plan.finalized",
+      "session.completed",
+      "session.aborted"
+    ],
+    "emits": [
+      "calculator.freezerSpace.completed",
+      "calculator.freezerSpace.error",
+      "storehouse.freezer.capacity.updated",
+      "storehouse.freezer.layout.suggested",
+      "storehouse.inventory.location.hints.updated",
+      "session.request.fromFreezerSpace",
+      "planningGraph.node.FREEZER_SPACE_CALCULATOR.completed"
+    ]
+  },
+
+  "edges": {
+    "feedsInto": [
+      "PG_NODE_STOREHOUSE_STOCK_PLANNER",
+      "PG_NODE_BATCH_COOKING_PLANNER",
+      "PG_NODE_PRESERVATION_SUITE",
+      "PG_NODE_MEAT_BREAKDOWN_CALCULATOR"
+    ],
+    "acceptsFrom": [
+      "PG_NODE_MEAT_BREAKDOWN_CALCULATOR",
+      "PG_NODE_BATCH_COOKING_PLANNER",
+      "PG_NODE_PRESERVATION_SUITE",
+      "PG_NODE_STOREHOUSE_STOCK_PLANNER"
+    ],
+    "priority": 55
+  },
+
+  "sessionHints": {
+    "domain": "storehouse",
+    "nowCtaLabel": "Plan Freezer Space Now",
+    "nowCtaDescription": "Use the current plan to decide where each batch will go and get a guided reorganization session.",
+    "templates": [
+      {
+        "id": "freezer_repack_session_template",
+        "title": "Repack & Label Freezer Items",
+        "description": "Guided session to repack, label, and rearrange items so the planned batches will fit.",
+        "sessionIdPrefix": "freezer_repack_",
+        "trigger": {
+          "when": "onCalculatorComplete",
+          "conditions": {
+            "hasOverflow": true
+          }
+        },
+        "sessionPrefs": {
+          "domain": "storehouse",
+          "sourceType": "manual",
+          "voiceGuidance": true,
+          "haptic": true,
+          "autoAdvance": false
+        }
+      },
+      {
+        "id": "freezer_pre_batch_session_template",
+        "title": "Prepare Freezer for Incoming Batches",
+        "description": "Short session to clear space and move older items before a big batch cooking or butchery day.",
+        "sessionIdPrefix": "freezer_pre_batch_",
+        "trigger": {
+          "when": "plannedBatchesDetected",
+          "conditions": {
+            "minNewVolumeLiters": 50
+          }
+        },
+        "sessionPrefs": {
+          "domain": "storehouse",
+          "sourceType": "manual",
+          "voiceGuidance": true,
+          "haptic": true,
+          "autoAdvance": false
+        }
+      }
+    ]
+  },
+
+  "inventoryIntegration": {
+    "enabled": true,
+    "defaultCategory": "frozen",
+    "defaultLocation": "Freezer",
+    "fields": {
+      "location": {
+        "from": "outputs.suggestedLayout"
+      },
+      "capacityGuardrails": {
+        "from": "outputs.volumeUsage"
+      }
+    },
+    "routingRules": [
+      {
+        "id": "freezer_overflow_warning",
+        "label": "Warn when planned items overflow freezers",
+        "match": {
+          "outputKey": "fitReport",
+          "path": "fitsAll",
+          "equals": false
+        },
+        "setFields": {
+          "requiresRepackSession": true
+        }
+      }
+    ]
+  },
+
+  "ui": {
+    "group": "Storehouse & Preservation",
+    "icon": "GiIceCube",
+    "color": "cyan",
+    "primaryRoute": "/tier2/household/storehouse/freezer-space",
+    "nowButton": {
+      "label": "Check Freezer Space",
+      "tooltip": "Open the freezer space calculator results and start an optional reorganization session.",
+      "opensSessionRunner": true,
+      "sessionSourceEvent": "session.request.fromFreezerSpace"
+    },
+    "badges": [
+      {
+        "type": "info",
+        "label": "Uses SessionRunner",
+        "description": "Can open guided sessions to reorganize and label freezer contents."
+      },
+      {
+        "type": "context",
+        "label": "Tied to Storehouse",
+        "description": "Capacity and layout suggestions update storehouse and batch planning."
+      }
+    ]
+  }
+}

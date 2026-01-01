@@ -1,0 +1,512 @@
+===============================================================================
+STOREHOUSE INSIGHTS – DESIGN SPEC
+File: src/intelligence/insights/storehouseInsights.txt
+Role: Contract for season-aware, cycle-aware storehouse insights in SSA
+===============================================================================
+
+0. CONCEPTUAL PURPOSE
+---------------------
+The storehouseInsights spec describes how SSA turns **raw storehouse data**
+(quantities, flows, rhythms) into **meaningful guidance** for the householder:
+
+- Are provisions aligned with the current and upcoming seasons?
+- Are yields (garden, animals, preservation) being shepherded into the storehouse?
+- Are feast and mutual-aid cycles supported without starving future seasons?
+- Where are the quiet risks and the hidden opportunities?
+
+It is NOT a UI and NOT a low-level calculator.
+It is a **logic contract** that defines:
+
+- Insight templates and rules,
+- What data they expect (storehouse + cross-domain),
+- How to derive scores and narratives,
+- How to emit eventBus events others can respond to.
+
+It must support:
+
+- TOOL MODE:
+  - A single “Storehouse Insight Viewer / Planner” can run these insights
+    locally against a snapshot (e.g., JSON import or sample data) with no Dexie.
+- STEWARDSHIP MODE:
+  - The full SSA stack can call into this insight layer regularly (or on key
+    events) and surface guidance in dashboards, SessionRunner, and the Hub.
+
+
+1. STRUCTURE – CONFIG SHAPE & DOMAINS
+-------------------------------------
+Primary domain:
+- storehouse / provisioning
+
+Connected domains:
+- garden, animals, preservation, cooking/meals, feasts/events, cleaning,
+  textiles, enterprise, mutual-aid, seasonality, dependency graph, cycles engine.
+
+Conceptual config shape (JSON-like):
+
+storehouseInsightsConfig = {
+  version: "1.0.0",
+  lastUpdatedAt: string,
+  modeHint?: "TOOL" | "STEWARDSHIP",
+
+  // How to interpret raw storehouse levels into states
+  stateThresholds: StorehouseStateThresholds,
+
+  // Insight templates and rules (what to look for and how to speak about it)
+  insightTemplates: StorehouseInsightTemplate[],
+
+  // Scoring and weighting rules
+  scoring: StorehouseInsightScoring,
+
+  // Signaling preferences
+  signals: {
+    sendRoutineInsights: boolean,
+    sendSeasonShiftInsights: boolean,
+    sendFeastReadinessInsights: boolean,
+    sendRiskAlerts: boolean,
+  },
+
+  metadata?: {
+    householdName?: string,
+    regionProfile?: string,        // influences expectations
+  },
+};
+
+
+2. PROPS – DETAILED COMPONENTS
+------------------------------
+
+2.1 StorehouseStateThresholds
+Defines how to interpret raw quantities into storehouse “states”.
+
+StorehouseStateThresholds = {
+  // Per category thresholds (grain, oil, beans, meat, preserved, cleaning, etc.)
+  categories: {
+    [storehouseCategoryKey: string]: {
+      // Absolute or relative thresholds measured in category units:
+      // (units per household, units per month, etc. — defined elsewhere)
+      comfortable: number,
+      low: number,
+      critical: number,
+    },
+  },
+
+  // Optional global fallback thresholds
+  globalDefaults?: {
+    comfortableMultiplier?: number,   // e.g. 1.0 = baseline, 1.5 for feast seasons
+    lowMultiplier?: number,
+    criticalMultiplier?: number,
+  },
+
+  // TODO[seasonal-logic]:
+  // - Allow seasonalIntelligence to adjust multipliers:
+  //   e.g., in lean winter, “comfortable” may mean deeper storehouse levels.
+
+  notes?: string,
+};
+
+
+2.2 StorehouseInsightTemplate
+Defines a **pattern** of what to look for and how to describe it.
+
+StorehouseInsightTemplate = {
+  id: string,                        // e.g. "grain-winter-shortfall-risk",
+                                     //      "harvest-flush-preservation-opportunity",
+                                     //      "feast-provision-gap"
+
+  label: string,                     // short label
+  category:
+    "seasonal" | "feast" | "provisioning" |
+    "yield-flow" | "security" | "mutual-aid" | "enterprise",
+
+  // High-level description of what this insight speaks to
+  description?: string,
+
+  // Conditions for when this insight applies
+  conditions: {
+    requiredSeasonIds?: string[],    // from seasonRulesConfig.seasons.id
+    excludedSeasonIds?: string[],
+
+    // Storehouse state expectations – category-level or tags
+    storehouseStates?: {
+      categoryStates?: {
+        [storehouseCategoryKey: string]:
+          ("comfortable" | "low" | "critical")[];
+      },
+      tagStates?: {
+        [tagKey: string]: ("comfortable" | "low" | "critical")[];
+      },
+    },
+
+    // Cross-domain hints (optionally considered)
+    feastWindowRequired?: boolean,
+    harvestFlushExpected?: boolean,
+    animalYieldExpected?: boolean,
+    preservationWindowOpen?: boolean,
+  },
+
+  // How to compute a severity score (0..1)
+  scoringRecipe?: {
+    baseWeight: number,              // baseline importance
+    seasonWeight?: number,           // strength of seasonal mismatch
+    storehouseWeight?: number,       // how much storehouse state matters
+    dependencyWeight?: number,       // from dependency graph impact
+  },
+
+  // Narrative templates – broken into reusable pieces
+  narratives: {
+    // Short message for cards or notifications
+    summary: {
+      lean?: string,                 // e.g. "Grain provisions are lean for winter."
+      flush?: string,                // e.g. "Harvest flush: grain abundance ready."
+      balanced?: string,             // e.g. "Grain provisions are on rhythm."
+    },
+
+    // Rich explanation for detail views
+    detail?: string,                 // e.g. "Your grain storehouse is low entering..."
+
+    // Optional guidance lines for next steps
+    guidance?: {
+      strengthenProvisioning?: string,
+      intensifyPreservation?: string,
+      considerMutualAid?: string,
+      considerEnterprise?: string,
+    },
+  },
+
+  // Which domains this insight should be shared with
+  domainsToNotify?: ("storehouse" | "cooking" | "garden" | "animals" |
+                     "preservation" | "feasts" | "cleaning" |
+                     "textiles" | "enterprise" | "mutual-aid")[],
+
+  // TODO[insights]:
+  // - Curate a library of templates for:
+  //   - winter grain/oil risk,
+  //   - harvest conversion momentum,
+  //   - feast readiness,
+  //   - cleaning supplies vs seasonal illness patterns,
+  //   - enterprise draws vs household security.
+
+  notes?: string,
+};
+
+
+2.3 StorehouseInsightScoring
+Defines how to combine multiple patterns into a coherent insight set.
+
+StorehouseInsightScoring = {
+  // Overall posture scoring (0..1) for storehouse
+  postureWeights: {
+    seasonalAlignment: number,
+    feastReadiness: number,
+    securityDepth: number,
+    yieldFlowHealth: number,        // inflows vs outflows
+  },
+
+  // How to cap or filter insights when many are valid
+  limits: {
+    maxInsightsPerRun: number,      // e.g. 5
+    maxImportantPerRun: number,     // e.g. 2
+  },
+
+  // Global thresholds for severity
+  severityThresholds: {
+    gentle: number,                 // e.g. 0.25
+    important: number,              // e.g. 0.6
+  },
+
+  // TODO[cycles-engine]:
+  // - Use householdCycles.engine posture data (e.g. dependency impact,
+  //   rhythm strength) as an input into seasonalAlignment, yieldFlowHealth.
+
+  notes?: string,
+};
+
+
+2.4 StorehouseInsightResult (output shape)
+Not part of the config itself, but the **shape of emitted insight objects**.
+
+StorehouseInsightResult = {
+  id: string,                        // unique per run (e.g. templateId + hash)
+  templateId: string,
+  severity: "info" | "gentle" | "important",
+  score: number,                     // 0..1
+  category: string,                  // mirrored from template.category
+
+  seasonId?: string,
+  feastCycleId?: string,
+
+  storehouseSnapshotRef?: string,    // pointer or hash to snapshot
+  affectedCategories?: string[],     // e.g. ["grains", "oils"]
+
+  summary: string,                   // final summary text
+  detail?: string,                   // expanded explanation
+  guidance?: {
+    strengthenProvisioning?: string,
+    intensifyPreservation?: string,
+    considerMutualAid?: string,
+    considerEnterprise?: string,
+  },
+
+  domainsToNotify?: string[],
+};
+
+
+3. DATA FLOW – HOW STOREHOUSE INSIGHTS ARE USED
+-----------------------------------------------
+
+3.1 TOOL MODE
+In TOOL MODE, a lightweight “Storehouse Insight Viewer / Planner” can:
+
+1) Load:
+   - storehouseInsightsConfig (static),
+   - a storehouse snapshot (from JSON, localStorage, or manual entry),
+   - optional context (seasonId, feast window, harvest info).
+
+2) Normalize storehouse levels:
+   - compare inventory against stateThresholds,
+   - compute category states: comfortable / low / critical.
+
+3) Evaluate insightTemplates:
+   - for each template:
+     - check conditions (season, storehouse states, cross-domain hints),
+     - if matched, compute a score using scoringRecipe.
+
+4) Rank and filter:
+   - apply scoring rules and limits to choose a small set of insights.
+
+5) Present results:
+   - in a friendly list or card view, with summary and guidance.
+
+6) Emit eventBus events (even in TOOL MODE, with a stub emitter if necessary).
+
+Typical TOOL MODE event flow:
+
+- After each evaluation, emit:
+  - "storehouse.insights.evaluated"
+  - "storehouse.insights.generated"
+
+See section 4 for event shapes.
+
+
+3.2 STEWARDSHIP MODE
+In STEWARDSHIP MODE, storehouseInsights become part of the **core guidance**.
+
+Flow:
+
+1) App boot:
+   - Dexie loads:
+     - storehouseInsightsConfig,
+     - seasonRulesConfig,
+     - provisioningCyclesConfig,
+     - feastCyclesConfig,
+     - dependencyMapConfig.
+   - seasonalIntelligence determines active seasonId and windows.
+   - Storehouse domain exposes a current snapshot (Dexie + live deltas).
+
+2) Triggers for running insights:
+   - On scheduled interval (e.g. daily or weekly),
+   - On key events:
+     - "season.rules.season.shifted",
+     - "feasts.window.approaching",
+     - "provisioning.storehouse.readiness" updates,
+     - "dependencies.impact.derived" with a storehouse focus.
+
+3) Insight engine:
+   - Ingests:
+     - storehouse snapshot (category quantities, inflows/outflows),
+     - seasonId, feast windows, and windows for planting/harvest/preservation,
+     - dependency impacts that touch storehouse nodes,
+     - any provisioningCycles projections.
+   - Computes:
+     - category states (comfortable/low/critical),
+     - posture metrics (seasonal alignment, yield flow, security depth, feast readiness),
+     using StorehouseInsightScoring.
+
+4) Evaluate templates:
+   - For each StorehouseInsightTemplate:
+     - Check if conditions met.
+     - Compute score and severity.
+     - Build narrative (summary, detail, guidance).
+
+5) Emit results:
+   - As eventBus events that dashboards, SessionRunner, and Hub connectors can consume.
+   - Optionally persist last result snapshot in Dexie for audit/history.
+
+6) Downstream effects:
+   - Domain-specific modules can respond:
+     - Meal Planner may adjust emphasis (e.g. more beans / fewer meats).
+     - Garden Planner may highlight crops that shore up storehouse gaps.
+     - Preservation tools may propose sessions to convert fresh surplus into depth.
+     - Mutual-aid / enterprise tools may surface opportunities:
+       - share surplus,
+       - buffer deficits through support or sales.
+
+
+4. EVENT TRIGGERS – EVENTBUS CONTRACT
+-------------------------------------
+The insight engine (or Viewer in TOOL MODE) must emit events.
+All events follow the SSA eventBus contract:
+
+  { type, ts, source, data }
+
+Where:
+- type: string
+- ts: ISO 8601 timestamp
+- source: e.g. "storehouse.insights.engine"
+- data: structured payload
+
+Recommended event types:
+
+1) Config lifecycle
+   - "storehouse.insights.config.loaded"
+     data: {
+       version,
+       templateCount,
+     }
+
+   - "storehouse.insights.config.updated"
+     data: {
+       version,
+       changedBy,                    // "householder" | "system" | "migration"
+       changesSummary,               // e.g. { templatesAdded, thresholdsAdjusted }
+     }
+
+
+2) Evaluation runs
+   - "storehouse.insights.evaluated"
+     // When the engine evaluates templates, before filtering
+     data: {
+       runId: string,
+       at: string,
+       seasonId?: string,
+       feastCycleId?: string,
+       evaluatedCount: number,
+       candidateCount: number,
+     }
+
+   - "storehouse.insights.generated"
+     // When final insight results are produced for this run
+     data: {
+       runId,
+       at: string,
+       seasonId?: string,
+       feastCycleId?: string,
+       postureSummary: {
+         seasonalAlignmentScore: number,
+         feastReadinessScore: number,
+         securityDepthScore: number,
+         yieldFlowHealthScore: number,
+       },
+       insightCount: number,
+       importantCount: number,
+       insightIds: string[],
+     }
+
+
+3) Individual insight emission
+   - "storehouse.insight"
+     // Emitted once per generated insight
+     data: StorehouseInsightResult
+
+
+4) Risk and opportunity hooks
+   - "storehouse.insights.riskAlert"
+     data: {
+       runId,
+       severity: "gentle" | "important",
+       categoryKeysAtRisk: string[],
+       message,
+     }
+
+   - "storehouse.insights.yieldOpportunity"
+     data: {
+       runId,
+       categoryKeysWithSurplus: string[],
+       message,
+       suggestedDomains?: string[],  // e.g. ["preservation", "mutual-aid"]
+     }
+
+
+5) Integration with cycles / dependencies
+   - "storehouse.insights.cycleAlignment"
+     // How storehouse rhythms align with cycles engine
+     data: {
+       runId,
+       seasonId,
+       alignmentScore: number,
+       misalignedPatterns?: string[],  // patterns from dependencyMapConfig
+       notes?: string,
+     }
+
+   - "storehouse.insights.dependencyImpact"
+     // Direct echo / fusion of dependencyMap impact for storehouse
+     data: {
+       runId,
+       rootNodeId: string,             // e.g. "storehouse.core"
+       impactScore: number,
+       upstreamNodes: string[],
+       downstreamNodes: string[],
+     }
+
+
+5. CONCEPTUAL PURPOSE – HOW STOREHOUSE INSIGHTS FIT THE WEB OF MEANING
+----------------------------------------------------------------------
+Storehouse insights are the **voice** of the storehouse within SSA’s web
+of meaning.
+
+They allow SSA to:
+
+- Speak about **cycles and seasons**, not merely counts:
+  - “For this season, your provisions are in a lean posture.”
+  - “Harvest flush has opened a preservation opportunity.”
+
+- Honor the **storehouse as memory of past faithfulness**:
+  - Insights recall that current depth is the yield of prior planting,
+    preservation, and provisioning rhythms.
+
+- Watch the **flows of yield**:
+  - From garden and animals into preservation,
+  - From preservation into the storehouse,
+  - From storehouse into meals, feasts, mutual-aid, and enterprise.
+
+- Connect **domains**:
+  - Garden and animals: Are their yields being captured, or left behind?
+  - Preservation: Are jars, salt, sugar, vinegar in place to catch the harvest?
+  - Cooking and feasts: Are menus honoring the storehouse posture?
+  - Cleaning and textiles: Are cleaning provisions steady for winter/rain seasons?
+  - Mutual-aid and enterprise: Are we sharing/selling from surplus or from the core?
+
+- Support both **TOOL MODE** and **STEWARDSHIP MODE**:
+  - TOOL MODE:
+    - A single viewer can analyze a static snapshot and teach a householder
+      to read their own storehouse rhythm.
+  - STEWARDSHIP MODE:
+    - The engine runs quietly in the background, and insights surface
+      when needed, aligned to seasons, feasts, and cyclical flows.
+
+Explicit TODO HOOKS:
+- TODO[seasonal-logic]:
+  - Wire StorehouseStateThresholds and insight conditions to seasonRulesConfig
+    so thresholds and expectations shift across planting, harvest, lean, and rest
+    seasons.
+
+- TODO[cycles-engine]:
+  - Integrate householdCycles.engine posture metrics into the scoring system
+    so storehouse insights can reference rhythm health, not just amounts.
+
+- TODO[dependencies]:
+  - Consume dependencyMapConfig impact summaries to emphasize insights where
+    storehouse is on the critical path (e.g. when many downstream patterns
+    depend on categories that are low).
+
+- TODO[insights]:
+  - Curate a library of storehouseInsightTemplates reflecting:
+    - seasonal staples (grains, oils, legumes),
+    - preserving agents (salt, sugar, vinegar, jars, lids),
+    - proteins (meats, beans, eggs),
+    - feast-specific elements (wine, special flours, spices),
+    - cleaning provisions (for hygiene and textiles),
+    - mutual-aid reserves (what can be shared without harming security).
+
+END OF SPEC
+===============================================================================

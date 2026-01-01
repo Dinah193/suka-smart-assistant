@@ -1,0 +1,395 @@
+{
+  "version": "2025-10-31T14:15:00-05:00",
+  "description": "Garden beds/plots with zone + microclimate for Suka Smart Assistant. Each bed defines which plant categories it prefers, which ones it denies, what mitigation to apply if user insists, and what to auto-clean or auto-schedule when a harvest/care/animal or storehouse event happens. Integrates with cleaning, garden planning, care & harvest, storehouse stock planning (route harvest to sections), meal planning (what is actually growing), and animal acquisition/care/butchery (for poultry passes, goat brush control). Supports user-owned favorites and schedules. Reverse generation enabled.",
+  "meta": {
+    "sourceOfTruth": "scraper",
+    "allowHubOverrides": true,
+    "mergeStrategy": "scraper-wins",
+    "ingestionPipelines": [
+      "scraperService",
+      "importService",
+      "bookmarklet",
+      "linked-accounts"
+    ],
+    "sharedOrchestration": {
+      "emitOnUpdate": true,
+      "reason": "garden-beds-update",
+      "channels": [
+        "garden",
+        "cleaning",
+        "storehouse",
+        "meals",
+        "animals"
+      ]
+    },
+    "notes": [
+      "Use locationPresets/mismatch_policies.json for common policies: warn-and-suggest, block-and-suggest, allow-with-mitigation.",
+      "This file is what central_garden_templates.json should read to know if a template is even allowed in this household.",
+      "When a user picks an out-of-zone plant, add extra cleaning + extra care to keep it safe (your earlier requirement)."
+    ]
+  },
+  "defaults": {
+    "timezone": "America/Chicago",
+    "sabbathGuard": true,
+    "quietHoursGuard": true,
+    "onMismatch": "allow-with-mitigation",
+    "defaultPolicyId": "allow-with-mitigation",
+    "harvestEmit": [
+      "storehouse.intake.from-garden",
+      "cleaning.garden-bin-sanitize"
+    ]
+  },
+  "beds": [
+    {
+      "id": "bed-a-north",
+      "label": "Bed A – North Edge",
+      "layout": "raised",
+      "sizeSqFt": 32,
+      "zone": "8b",
+      "microclimate": {
+        "sun": "full",
+        "wind": "moderate",
+        "drainage": "good"
+      },
+      "allowPlantCategories": [
+        "leafy-greens",
+        "brassicas",
+        "roots",
+        "culinary-herbs"
+      ],
+      "denyPlantCategories": [
+        "tropical-fruit",
+        "long-maturity-melon"
+      ],
+      "supports": [
+        "garden.plan.created",
+        "garden.care-session",
+        "garden.harvest.logged"
+      ],
+      "preferredStorehouseSections": [
+        "produce",
+        "ferments"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.harvest.logged",
+          "storehouse.overstock.detected"
+        ],
+        "emit": [
+          "cleaning.garden-bin-sanitize",
+          "storehouse.intake.from-garden"
+        ],
+        "rules": [
+          {
+            "id": "overstock-to-care",
+            "ifEvent": "storehouse.overstock.detected",
+            "generate": "garden.care-session.generated"
+          }
+        ]
+      },
+      "onMismatch": "warn-and-suggest",
+      "suggestAlternates": [
+        {
+          "bedId": "bed-b-shade",
+          "why": "better for heat-sensitive or partial-sun crops"
+        }
+      ],
+      "mitigation": {
+        "extraCleaningEmit": [
+          "cleaning.outdoor-zone.expected"
+        ],
+        "extraGardenEmit": [
+          "garden.care-session.generated"
+        ],
+        "risks": [
+          "crop will bolt sooner in heat",
+          "more pest pressure in full sun"
+        ]
+      },
+      "uiHints": {
+        "icon": "leaf",
+        "group": "north"
+      }
+    },
+    {
+      "id": "bed-b-shade",
+      "label": "Bed B – Partial Shade",
+      "layout": "raised",
+      "sizeSqFt": 24,
+      "zone": "8b",
+      "microclimate": {
+        "sun": "partial",
+        "wind": "low",
+        "drainage": "moderate"
+      },
+      "allowPlantCategories": [
+        "leafy-greens",
+        "culinary-herbs",
+        "medicinals"
+      ],
+      "denyPlantCategories": [
+        "vining-squash",
+        "corn",
+        "sun-loving-perennials"
+      ],
+      "supports": [
+        "garden.plan.created",
+        "garden.care-session"
+      ],
+      "preferredStorehouseSections": [
+        "produce"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.care-session.generated"
+        ],
+        "emit": [
+          "cleaning.garden-bin-sanitize"
+        ]
+      },
+      "onMismatch": "allow-with-mitigation",
+      "mitigation": {
+        "extraCleaningEmit": [
+          "cleaning.outdoor-zone.expected"
+        ],
+        "extraGardenEmit": [
+          "garden.care-session.generated"
+        ],
+        "extraResources": [
+          "stakes/trellis to improve airflow",
+          "slug/snail guards in damp shade"
+        ],
+        "risks": [
+          "powdery mildew if overcrowded",
+          "slower fruit set in shade"
+        ]
+      },
+      "uiHints": {
+        "icon": "cloud-sun",
+        "group": "central"
+      }
+    },
+    {
+      "id": "bed-c-hot-strip",
+      "label": "Bed C – Hot Strip (South Fence)",
+      "layout": "in-ground",
+      "sizeSqFt": 40,
+      "zone": "8b",
+      "microclimate": {
+        "sun": "full-hot",
+        "wind": "low",
+        "drainage": "fast"
+      },
+      "allowPlantCategories": [
+        "tomato",
+        "pepper",
+        "okra",
+        "sweet-potato"
+      ],
+      "denyPlantCategories": [
+        "cool-weather-greens"
+      ],
+      "supports": [
+        "garden.plan.created",
+        "garden.harvest.logged"
+      ],
+      "preferredStorehouseSections": [
+        "produce",
+        "baking"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.harvest.logged",
+          "storehouse.overstock.detected"
+        ],
+        "emit": [
+          "cleaning.garden-bin-sanitize"
+        ],
+        "rules": [
+          {
+            "id": "hot-harvest-to-preserve",
+            "ifEvent": "garden.harvest.logged",
+            "generate": "storehouse.preservation.canning"
+          }
+        ]
+      },
+      "onMismatch": "warn-and-suggest",
+      "suggestAlternates": [
+        {
+          "bedId": "bed-b-shade",
+          "why": "cooler for lettuces/greens"
+        }
+      ],
+      "mitigation": {
+        "extraGardenEmit": [
+          "garden.care-session.generated"
+        ],
+        "extraCleaningEmit": [
+          "cleaning.outdoor-zone.expected"
+        ],
+        "extraResources": [
+          "shade cloth 30-50%",
+          "extra irrigation cycle"
+        ],
+        "risks": [
+          "heat stress",
+          "sunscald on fruit"
+        ]
+      },
+      "uiHints": {
+        "icon": "sun",
+        "group": "south"
+      }
+    },
+    {
+      "id": "perennial-corner",
+      "label": "Perennial / Herb Corner",
+      "layout": "perennial-bed",
+      "sizeSqFt": 50,
+      "zone": "8a",
+      "microclimate": {
+        "sun": "partial-to-full",
+        "wind": "moderate",
+        "drainage": "good"
+      },
+      "allowPlantCategories": [
+        "perennial-herb",
+        "culinary-herbs",
+        "medicinals",
+        "berry"
+      ],
+      "denyPlantCategories": [
+        "annual-row-crops"
+      ],
+      "supports": [
+        "garden.plan.created",
+        "garden.harvest.logged",
+        "garden.perennial-maintenance"
+      ],
+      "preferredStorehouseSections": [
+        "ferments",
+        "produce"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.harvest.logged"
+        ],
+        "emit": [
+          "cleaning.garden-bin-sanitize"
+        ],
+        "rules": [
+          {
+            "id": "herb-harvest-to-dry",
+            "ifEvent": "garden.harvest.logged",
+            "ifCropCategoryIn": [
+              "culinary-herbs",
+              "perennial-herb"
+            ],
+            "generate": "storehouse.preservation.dehydrate"
+          }
+        ]
+      },
+      "onMismatch": "block-and-suggest",
+      "suggestAlternates": [
+        {
+          "bedId": "bed-a-north",
+          "why": "annuals go there instead"
+        }
+      ],
+      "uiHints": {
+        "icon": "flower",
+        "group": "perennial"
+      }
+    },
+    {
+      "id": "orchard-row-1",
+      "label": "Orchard Row 1 (Experimental)",
+      "layout": "row",
+      "sizeSqFt": 120,
+      "zone": "8b",
+      "microclimate": {
+        "sun": "full",
+        "wind": "high",
+        "drainage": "good"
+      },
+      "allowPlantCategories": [
+        "fruit-tree",
+        "fig",
+        "pomegranate"
+      ],
+      "denyPlantCategories": [
+        "tender-leafy",
+        "low-sun-annual"
+      ],
+      "supports": [
+        "garden.plan.created",
+        "garden.harvest.logged",
+        "animals.poultry-garden-pass"
+      ],
+      "preferredStorehouseSections": [
+        "produce",
+        "ferments",
+        "freezer"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.pest-pressure.detected"
+        ],
+        "emit": [
+          "animals.poultry-processing.generated"
+        ],
+        "rules": [
+          {
+            "id": "orchard-pest-to-poultry",
+            "ifEvent": "garden.pest-pressure.detected",
+            "generate": "animals.poultry-garden-pass"
+          }
+        ]
+      },
+      "onMismatch": "allow-with-mitigation",
+      "mitigation": {
+        "extraCleaningEmit": [
+          "cleaning.outdoor-zone.expected"
+        ],
+        "extraGardenEmit": [
+          "garden.care-session.generated"
+        ],
+        "risks": [
+          "wind stress on non-suited fruit trees",
+          "extra watering in dry spells"
+        ]
+      },
+      "uiHints": {
+        "icon": "tree-palm",
+        "group": "orchard"
+      }
+    }
+  ],
+  "userCanSaveFavorites": true,
+  "favoritesTemplate": [
+    {
+      "id": "fav-shade-bed-greens",
+      "source": "system",
+      "cloneOf": "bed-b-shade",
+      "label": "My Greens Bed",
+      "allowUserScheduleOverride": true
+    },
+    {
+      "id": "fav-hot-strip-tomatoes",
+      "source": "system",
+      "cloneOf": "bed-c-hot-strip",
+      "label": "My Tomato Strip",
+      "allowUserScheduleOverride": true
+    }
+  ],
+  "userFavoritePolicy": {
+    "maxPerHousehold": 50,
+    "allowCustomSchedule": true,
+    "allowCustomReverseGeneration": true
+  }
+}

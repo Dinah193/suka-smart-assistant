@@ -1,0 +1,154 @@
+{
+  "$id": "schemas/planningGraph/mappings.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Planning Graph Mappings",
+  "description": "Shared schema for *.mappings.json files in the SSA Planning Graph.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["nodeKey", "flows"],
+  "properties": {
+    "nodeKey": {
+      "type": "string",
+      "description": "Canonical Planning Graph node key, e.g. 'calendar.biblicalOffering'."
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "description": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "flows": {
+      "type": "array",
+      "description": "List of possible next-step flows from this node into other SSA planners, calendars, and sessions.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label", "from", "to"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable identifier for this flow, e.g. 'calendar.biblicalOffering.to.studyPlanner.modules'."
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+
+          "from": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["nodeKey"],
+            "properties": {
+              "nodeKey": {
+                "type": "string",
+                "description": "Source nodeKey for this flow (usually same as root nodeKey)."
+              },
+              "outputKeys": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Names of calculator outputs this flow depends on."
+              },
+              "conditions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Optional simple condition strings for filtering flows (interpreted by app logic)."
+              }
+            }
+          },
+
+          "to": {
+            "type": "array",
+            "description": "Target nodes this flow can feed into.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["nodeKey", "relationship"],
+              "properties": {
+                "nodeKey": {
+                  "type": "string",
+                  "description": "Target Planning Graph node key, e.g. 'studyPlanner.modules'."
+                },
+                "relationship": {
+                  "type": "string",
+                  "description": "Relationship hint, e.g. 'creates-modules', 'creates-events', 'enriches-theme'."
+                },
+                "hints": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Implementation notes / guidance for hooks and services."
+                }
+              }
+            }
+          },
+
+          "nextSteps": {
+            "type": "array",
+            "description": "UI and automation suggestions (buttons, links, session launches) exposed to the user.",
+            "items": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "description": "UI or automation kind, e.g. 'ui-link', 'launch-session', 'calendar-suggestion'."
+                },
+                "target": {
+                  "type": "string",
+                  "description": "Route or identifier for navigation-based next steps."
+                },
+                "label": {
+                  "type": "string"
+                },
+                "icon": {
+                  "type": "string"
+                },
+                "priority": {
+                  "type": "string",
+                  "description": "Optional priority hint: 'primary', 'secondary', etc."
+                },
+                "sessionTemplateKey": {
+                  "type": "string",
+                  "description": "Optional session template key when kind === 'launch-session'."
+                },
+                "sessionDomain": {
+                  "type": "string",
+                  "description": "Session domain (cooking, cleaning, garden, animals, preservation, storehouse)."
+                },
+                "sessionSourceType": {
+                  "type": "string",
+                  "description": "Source type for sessions created from this mapping (manual, studyPlan, etc.)."
+                },
+                "defaultIntervalDays": {
+                  "type": "integer",
+                  "description": "Default spacing in days for calendar suggestion flows."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "meta": {
+      "type": "object",
+      "description": "Optional metadata for tooling and authorship.",
+      "additionalProperties": true
+    }
+  }
+}

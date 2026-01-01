@@ -1,0 +1,585 @@
+===============================================================================
+COOKING INSIGHTS – DESIGN SPEC
+File: src/intelligence/insights/cookingInsights.txt
+Role: Contract for season-aware, cycle-aware cooking & meals insights in SSA
+===============================================================================
+
+0. CONCEPTUAL PURPOSE
+---------------------
+The cookingInsights spec describes how SSA turns **raw cooking + meals data**
+(recipes, menus, batch sessions, leftovers, waste, frequency, timing) into
+**meaningful guidance** for the householder:
+
+- Is the daily and weekly meal rhythm aligned with the current season?
+- Is the cooking rhythm honoring the storehouse posture and upcoming feast cycles?
+- Are garden and animal yields being welcomed into the meals cycle?
+- Are batch sessions and preservation opportunities being used to lighten
+  load while strengthening long-term provision?
+- Where is the cooking rhythm quietly drifting off cycle (too scattered,
+  too storehouse-heavy, too wasteful, or too thin)?
+
+It is NOT a UI and NOT a low-level recipe recommender by itself.
+It is a **logic contract** that defines:
+
+- Cooking insight templates and rules,
+- What data they expect (cooking + cross-domain),
+- How to derive scores and narratives,
+- How to emit eventBus events others can respond to (Meal Planner, SessionRunner,
+  storehouse, garden, preservation, feasts).
+
+It must support:
+
+- TOOL MODE:
+  - A “Cooking Insight Viewer / Planner” can run these insights against a
+    local snapshot (meal log, sample storehouse state, upcoming feast) with
+    no Dexie.
+- STEWARDSHIP MODE:
+  - The full SSA stack can call into this insight layer regularly (or on
+    key events) and surface guidance in dashboards, SessionRunner, and the Hub.
+
+
+1. STRUCTURE – CONFIG SHAPE & DOMAINS
+-------------------------------------
+Primary domain:
+- cooking / meals
+
+Connected domains:
+- storehouse/provisioning, garden, animals, preservation, feasts/events,
+  cleaning, textiles, seasonality, dependency map, cycles engine, mutual-aid,
+  enterprise (catering, food truck).
+
+Conceptual config shape (JSON-like):
+
+cookingInsightsConfig = {
+  version: "1.0.0",
+  lastUpdatedAt: string,
+  modeHint?: "TOOL" | "STEWARDSHIP",
+
+  // How to interpret raw cooking + meal logs into postures
+  stateThresholds: CookingStateThresholds,
+
+  // Cooking insight templates and rules
+  insightTemplates: CookingInsightTemplate[],
+
+  // Scoring and weighting rules
+  scoring: CookingInsightScoring,
+
+  // Signaling preferences
+  signals: {
+    sendRoutineInsights: boolean,
+    sendSeasonShiftInsights: boolean,
+    sendFeastRhythmInsights: boolean,
+    sendStorehouseAlignmentInsights: boolean,
+    sendRiskAlerts: boolean,
+  },
+
+  metadata?: {
+    householdName?: string,
+    regionProfile?: string,          // may influence seasonal meal expectations
+  },
+};
+
+
+2. PROPS – DETAILED COMPONENTS
+------------------------------
+
+2.1 CookingStateThresholds
+Defines how to interpret raw meal logs and sessions into cooking “postures”.
+
+CookingStateThresholds = {
+  // Per time-horizon thresholds (daily/weekly) and meal types
+  mealRhythm: {
+    // Expected home-cooked meals per week vs region/season/household preference
+    expectedHomeMealsPerWeek: number,
+    minimumHomeMealsPerWeek: number,
+    maximumStoreBoughtMealsPerWeek?: number,   // drive-thru, ready-made, etc.
+
+    // Batch rhythm expectations
+    expectedBatchSessionsPerMonth?: number,
+  },
+
+  // Balance between fresh, preserved, and purchased inputs
+  inputBalance: {
+    targetFreshFraction: number,              // 0..1
+    targetPreservedFraction: number,          // 0..1
+    maxPurchasedFraction?: number,            // 0..1
+  },
+
+  // Waste thresholds (by weight/volume or estimated value)
+  wasteThresholds?: {
+    gentleWarning: number,                    // e.g. 0.1 = 10% waste
+    importantWarning: number,                 // e.g. 0.25 = 25% waste
+  },
+
+  // Optional defaults adjusted by season
+  seasonalAdjustments?: {
+    // Example: heartier meals in cold season, lighter in hot season
+    [seasonId: string]: {
+      targetFreshFraction?: number,
+      targetPreservedFraction?: number,
+      expectedHomeMealsPerWeek?: number,
+    },
+  },
+
+  // TODO[seasonal-logic]:
+  // - Bind seasonalAdjustments to seasonRulesConfig so expectations change
+  //   across planting, harvest, lean, and feast seasons.
+
+  notes?: string,
+};
+
+
+2.2 CookingInsightTemplate
+Defines a **pattern** of what to look for and how to describe it.
+
+CookingInsightTemplate = {
+  id: string,                        // e.g. "meals-drifting-from-season",
+                                     //      "storehouse-heavy-meal-pattern",
+                                     //      "fresh-yield-underused",
+                                     //      "feast-menu-vs-storehouse",
+                                     //      "waste-above-threshold"
+
+  label: string,
+  category:
+    "seasonal" | "storehouse-alignment" | "yield-flow" |
+    "feast-rhythm" | "waste-and-leftovers" | "batch-rhythm" |
+    "mutual-aid" | "enterprise",
+
+  description?: string,
+
+  // Conditions for when this insight applies
+  conditions: {
+    requiredSeasonIds?: string[],          // from seasonRulesConfig
+    excludedSeasonIds?: string[],
+
+    // Feast / window requirements
+    feastWindowRequired?: boolean,
+    feastWindowNear?: boolean,            // e.g. within N days
+    restSeasonPreferred?: boolean,
+
+    // Cooking posture expectations
+    cookingStates?: {
+      mealRhythm?: (
+        "quiet" | "under-cooked" | "balanced" |
+        "storeBought-heavy" | "overextended"
+      )[],
+      inputBalance?: (
+        "fresh-lean" | "fresh-rich" |
+        "preserved-rich" | "purchased-heavy"
+      )[],
+      wasteState?: ("low" | "elevated" | "high")[],
+    },
+
+    // Cross-domain hints
+    storehouseStates?: {
+      categoryStates?: {
+        [storehouseCategoryKey: string]:
+          ("comfortable" | "low" | "critical")[];
+      },
+    },
+    gardenHarvestFlushExpected?: boolean,
+    animalYieldExpected?: boolean,        // e.g. eggs, meat, milk cycles
+    preservationWindowOpen?: boolean,
+  },
+
+  // How to compute a severity score (0..1)
+  scoringRecipe?: {
+    baseWeight: number,
+    seasonWeight?: number,
+    storehouseWeight?: number,
+    feastWeight?: number,
+    dependencyWeight?: number,           // from dependencyMap impact
+  },
+
+  // Narrative templates
+  narratives: {
+    // Short message
+    summary: {
+      lean?: string,                     // e.g. "Meals are leaning away from season rhythm."
+      flush?: string,                    // e.g. "Meals are richly aligned with harvest season."
+      balanced?: string,                 // e.g. "Cooking rhythm is balanced with storehouse posture."
+    },
+
+    // Expanded explanation
+    detail?: string,
+
+    // Guidance suggestions
+    guidance?: {
+      strengthenHomeMeals?: string,      // e.g. "Strengthen the home meal rhythm with..."
+      rebalanceInputs?: string,          // e.g. "Increase fresh garden use; reduce purchased meals..."
+      honorStorehousePosture?: string,   // e.g. "Draw more from preserved goods in this lean season..."
+      integrateGardenYields?: string,    // e.g. "Fold current harvest into soups, stews, salads..."
+      integrateAnimalYields?: string,    // e.g. "Use surplus eggs as quiches or custards..."
+      supportRest?: string,              // e.g. "Simplify menus in heavy seasons to guard rest..."
+      considerMutualAidMeals?: string,   // e.g. "Plan a shared meal rhythm with allied households..."
+      considerEnterpriseMeals?: string,  // e.g. "This stable menu could support a food stall..."
+    },
+  },
+
+  // Which domains should be notified
+  domainsToNotify?: ("cooking" | "storehouse" | "garden" | "animals" |
+                     "preservation" | "feasts" | "cleaning" |
+                     "enterprise" | "mutual-aid")[],
+
+  // TODO[insights]:
+  // - Curate templates for:
+  //   - seasonal meal alignment (winter stews vs summer fresh bowls),
+  //   - intentional drawdown/stocking relative to storehouse posture,
+  //   - harvest-integration menus,
+  //   - feast menu vs storehouse readiness,
+  //   - batch cooking vs weeknight rhythm,
+  //   - food waste vs preservation opportunities.
+
+  notes?: string,
+};
+
+
+2.3 CookingInsightScoring
+Defines how to combine multiple cooking insights into a coherent set.
+
+CookingInsightScoring = {
+  // Overall posture scoring (0..1) for cooking/meals
+  postureWeights: {
+    seasonalAlignment: number,        // menu vs season
+    storehouseAlignment: number,      // menu vs storehouse posture
+    yieldFlowBalance: number,         // harvest/animal yields vs use vs waste
+    feastRhythmAlignment: number,     // feast cycles vs menus
+  },
+
+  limits: {
+    maxInsightsPerRun: number,        // e.g. 5
+    maxImportantPerRun: number,       // e.g. 2
+  },
+
+  severityThresholds: {
+    gentle: number,                   // e.g. 0.25
+    important: number,                // e.g. 0.6
+  },
+
+  // TODO[cycles-engine]:
+  // - Use householdCycles.engine rhythm posture for cooking, storehouse,
+  //   and related patterns to inform seasonalAlignment and yieldFlowBalance.
+
+  notes?: string,
+};
+
+
+2.4 CookingInsightResult (output shape)
+Not part of the config itself, but the **shape of emitted cooking insight objects**.
+
+CookingInsightResult = {
+  id: string,                         // unique per run (templateId + hash)
+  templateId: string,
+  severity: "info" | "gentle" | "important",
+  score: number,                      // 0..1
+  category: string,
+
+  seasonId?: string,
+  feastCycleId?: string,
+
+  cookingSnapshotRef?: string,        // pointer/hash to meal log snapshot
+  affectedMealTypes?: string[],       // e.g. ["weekday-dinner", "sabbath-meal"],
+
+  summary: string,
+  detail?: string,
+  guidance?: {
+    strengthenHomeMeals?: string,
+    rebalanceInputs?: string,
+    honorStorehousePosture?: string,
+    integrateGardenYields?: string,
+    integrateAnimalYields?: string,
+    supportRest?: string,
+    considerMutualAidMeals?: string,
+    considerEnterpriseMeals?: string,
+  },
+
+  domainsToNotify?: string[],
+};
+
+
+3. DATA FLOW – HOW COOKING INSIGHTS ARE USED
+--------------------------------------------
+
+3.1 TOOL MODE
+In TOOL MODE, a standalone “Cooking Insight Viewer / Planner” can:
+
+1) Load:
+   - cookingInsightsConfig (static),
+   - a cooking snapshot (meal log for a week/month, basic storehouse state,
+     simple garden/animal yield summary, upcoming feast windows),
+   - optional context: active seasonId, feastCycleId.
+
+2) Normalize cooking state:
+   - compute:
+     - home-cooked vs purchased proportions,
+     - batch sessions vs individual sessions,
+     - balance of fresh vs preserved vs purchased ingredients,
+     - waste ratios (leftovers discarded vs preserved vs reused).
+
+3) Determine cooking posture:
+   - under-cooked vs balanced vs storeBought-heavy vs overextended,
+   - fresh-lean vs preserved-rich vs purchased-heavy,
+   - waste state vs thresholds.
+
+4) Evaluate insightTemplates:
+   - For each:
+     - check conditions (season, feast windows, cooking posture, storehouse state),
+     - compute a score using scoringRecipe.
+
+5) Rank and filter:
+   - Apply scoring and limits to produce a small, meaningful set of insights.
+
+6) Present:
+   - As cards or list items with summary, detail, and guidance suggestions.
+   - Optionally show “Start a Session” buttons that map to SessionRunner
+     session templates (e.g. batch soup, breakfast rhythm, broth-making).
+
+7) Emit eventBus events using a local or shared emitter.
+
+Typical TOOL MODE events:
+- After evaluation:
+  - "cooking.insights.evaluated"
+  - "cooking.insights.generated"
+- Then one "cooking.insight" per individual insight result.
+
+
+3.2 STEWARDSHIP MODE
+In STEWARDSHIP MODE, cookingInsights become part of **ongoing guidance**.
+
+Flow:
+
+1) App boot:
+   - Dexie loads:
+     - cookingInsightsConfig,
+     - seasonRulesConfig,
+     - feastCyclesConfig,
+     - storehouseInsightsConfig,
+     - gardenInsightsConfig,
+     - dependencyMapConfig.
+   - Cooking domain exposes:
+     - recent meal logs,
+     - recent SessionRunner cooking sessions,
+     - menu plans and batch plans.
+
+2) Triggers for running insights:
+   - On a schedule (e.g. daily scan + weekly summary),
+   - On key events:
+     - "season.rules.season.shifted",
+     - "season.rules.window.open" (feast or rest season),
+     - "storehouse.insights.generated",
+     - "garden.harvest.logged",
+     - "preservation.session.completed",
+     - "session.cooking.completed" (from SessionRunner),
+     - "feasts.rhythmMap.mapping.applied".
+
+3) Insight engine:
+   - Ingests:
+     - cooking snapshot (meal mix, sessions, waste),
+     - active seasonId and feast windows,
+     - storehouse posture and category states,
+     - garden and animal yield hints,
+     - dependency impacts (how cooking sits in core patterns).
+
+   - Computes:
+     - cooking posture,
+     - alignment with season,
+     - alignment with storehouse posture,
+     - yield flow health (fresh/preserved/animal yields vs waste),
+     - feast rhythm alignment (e.g., sabbath and appointed feasts).
+
+4) Template evaluation:
+   - For each CookingInsightTemplate:
+     - check conditions,
+     - compute score and severity,
+     - build narrative.
+
+5) Emit events:
+   - System-wide events for dashboards, SessionRunner prompts, and Hub export.
+   - Optionally persist last run to Dexie for insight history.
+
+6) Domain reactions:
+   - Meal Planner:
+     - suggest menu shifts (e.g. more preserved goods in lean season).
+   - Storehouse:
+     - reflect cooking drawdown pattern and potential shortfalls.
+   - Garden & animals:
+     - highlight yields that can be pulled into the meal rhythm.
+   - Preservation:
+     - propose using leftover surpluses in broth/jam/pickle sessions.
+   - Mutual-aid / enterprise:
+     - suggest shared meals or micro-offers when menu and rhythm are stable.
+
+
+4. EVENT TRIGGERS – EVENTBUS CONTRACT
+-------------------------------------
+The cooking insights engine (or Viewer in TOOL MODE) must emit events.
+All events follow the SSA eventBus contract:
+
+  { type, ts, source, data }
+
+Where:
+- type: string
+- ts: ISO 8601 timestamp
+- source: "cooking.insights.engine" or similar
+- data: structured payload
+
+Recommended event types:
+
+1) Config lifecycle
+   - "cooking.insights.config.loaded"
+     data: {
+       version,
+       templateCount,
+     }
+
+   - "cooking.insights.config.updated"
+     data: {
+       version,
+       changedBy,                     // "householder" | "system" | "migration"
+       changesSummary,                // e.g. { templatesAdded, thresholdsAdjusted }
+     }
+
+
+2) Evaluation runs
+   - "cooking.insights.evaluated"
+     // When templates are evaluated, before filtering
+     data: {
+       runId: string,
+       at: string,
+       seasonId?: string,
+       feastCycleId?: string,
+       evaluatedCount: number,
+       candidateCount: number,
+     }
+
+   - "cooking.insights.generated"
+     // When final insight results are produced
+     data: {
+       runId,
+       at: string,
+       seasonId?: string,
+       feastCycleId?: string,
+       postureSummary: {
+         seasonalAlignmentScore: number,
+         storehouseAlignmentScore: number,
+         yieldFlowBalanceScore: number,
+         feastRhythmAlignmentScore: number,
+       },
+       insightCount: number,
+       importantCount: number,
+       insightIds: string[],
+     }
+
+
+3) Individual insights
+   - "cooking.insight"
+     data: CookingInsightResult
+
+
+4) Risk and opportunity hooks
+   - "cooking.insights.riskAlert"
+     data: {
+       runId,
+       severity: "gentle" | "important",
+       message,
+       riskKind:
+         "storehouse-misalignment" |
+         "waste-elevated" |
+         "seasonal-mismatch" |
+         "feast-unprepared",
+       affectedMealTypes?: string[],
+     }
+
+   - "cooking.insights.yieldOpportunity"
+     data: {
+       runId,
+       seasonId?: string,
+       opportunityKind:
+         "harvest-integration" |
+         "animal-yield-integration" |
+         "batch-cooking-window" |
+         "leftover-conversion",
+       message,
+       suggestedDomains?: string[],   // e.g. ["preservation", "mutual-aid", "enterprise"]
+     }
+
+
+5) Integration with cycles / dependencies
+   - "cooking.insights.cycleAlignment"
+     data: {
+       runId,
+       seasonId,
+       alignmentScore: number,
+       misalignedPatterns?: string[], // from dependencyMapConfig.patterns
+       notes?: string,
+     }
+
+   - "cooking.insights.dependencyImpact"
+     data: {
+       runId,
+       rootNodeId: string,            // e.g. "cooking.daily-meals"
+       impactScore: number,
+       upstreamNodes: string[],
+       downstreamNodes: string[],
+     }
+
+
+5. CONCEPTUAL PURPOSE – HOW COOKING INSIGHTS FIT THE WEB OF MEANING
+--------------------------------------------------------------------
+Cooking insights are the **voice of the hearth and table** within SSA’s
+web of meaning.
+
+They allow SSA to:
+
+- Speak about **meal cycles and rhythms**, not isolated actions:
+  - “Weeknight meals are drifting from the season rhythm.”
+  - “Batch cooking rhythm is quiet while preservation window is open.”
+
+- Honor meals as the **bridge between storehouse and household**:
+  - Meals reveal how well provisions are being stewarded.
+  - Menus show whether garden and animal yields are being honored or ignored.
+  - Cooking rhythm shows whether feasts and rest seasons are truly restful.
+
+- Connect **storehouse, garden, animals, and feasts**:
+  - Menus are evaluated relative to storehouse posture (lean vs flush).
+  - Harvest and animal yields are considered for integration into soups, stews,
+    breakfast rhythms, feast menus, and preserved dishes.
+  - Feast cycles inform preparation and recovery menus.
+
+- Make **dependencies visible**:
+  - A cooking rhythm that is too thin in harvest season hints that garden
+    yields may be underused and storehouse may remain lean later.
+  - A cooking rhythm that draws heavily from storehouse while garden is quiet
+    warns of future scarcity if provisioning isn’t strengthened.
+
+- Support both **TOOL MODE and STEWARDSHIP MODE**:
+  - TOOL MODE:
+    - A viewer teaches the householder to read meal logs and menus as
+      reflections of cycles, seasons, and storehouse posture.
+  - STEWARDSHIP MODE:
+    - Insights run quietly, surfacing gentle prompts and rhythm suggestions
+      that align with the Planning Graph, SessionRunner, and overall household posture.
+
+Explicit TODO HOOKS:
+- TODO[seasonal-logic]:
+  - Bind cooking insight conditions and thresholds to seasonRulesConfig and
+    feast windows so menu expectations change with season and appointed times.
+
+- TODO[cycles-engine]:
+  - Integrate householdCycles.engine cooking posture into CookingInsightScoring
+    so insights include rhythm health, not just counts and fractions.
+
+- TODO[dependencies]:
+  - Use dependencyMapConfig to weight insights when cooking nodes are central
+    in high-priority patterns (e.g., storehouse-heavy cycles or feast cycles).
+
+- TODO[insights]:
+  - Curate specific CookingInsightTemplate entries for:
+    - sabbath meal rhythms,
+    - appointed feast menus,
+    - lean vs flush seasons,
+    - harvest-integration menus,
+    - preservation-friendly batch cooking sessions.
+
+END OF SPEC
+===============================================================================

@@ -1,0 +1,395 @@
+{
+  "id": "flow.feastPreparation",
+  "version": 1,
+  "title": "Feast Preparation Flow",
+  "description": "End-to-end planning flow for biblical/seasonal feasts: select feast, plan menus, schedule sessions across domains, and stabilize cleanup and preservation afterward.",
+  "category": "feast",
+  "priority": 0.97,
+  "domainsInvolved": [
+    "storehouse",
+    "cooking",
+    "preservation",
+    "cleaning",
+    "garden",
+    "animals"
+  ],
+  "objectives": [
+    "Help the household choose a feast, dates, and guest count with clarity.",
+    "Translate feast requirements into balanced menus, task lists, and sessions.",
+    "Align storehouse, garden, and animals with feast needs ahead of time.",
+    "Coordinate cooking, preservation, and cleaning sessions before and after the feast.",
+    "Reduce stress day-of by pre-scheduling as much work as possible into earlier sessions."
+  ],
+  "entryCriteria": {
+    "description": "When to consider activating this feast preparation flow.",
+    "triggersAny": [
+      "calendar.feastDay.approaching",
+      "user.manualFlowStart.feastPreparation",
+      "storehouse.feastGoal.set"
+    ],
+    "daysBeforeFeastRecommended": 30,
+    "supportsManualStart": true
+  },
+  "exitCriteria": {
+    "description": "When feast preparation is considered complete for this cycle.",
+    "conditionsAll": [
+      {
+        "metric": "feast.prepChecklist.completedRatio",
+        "operator": ">=",
+        "value": 0.9
+      },
+      {
+        "metric": "storehouse.feastItemsReadyRatio",
+        "operator": ">=",
+        "value": 0.9
+      },
+      {
+        "metric": "cleaning.postFeastResetCompleted",
+        "operator": "==",
+        "value": 1
+      }
+    ]
+  },
+  "guards": {
+    "sabbathAware": true,
+    "quietHoursSensitive": true,
+    "weatherAware": true,
+    "inventoryAware": true,
+    "deviceBatteryAware": true
+  },
+  "nowCtaBehavior": {
+    "description": "How the 'Now' button should behave when this flow is active.",
+    "preferredDomains": [
+      "storehouse",
+      "cooking",
+      "cleaning"
+    ],
+    "respectDomainWeights": true,
+    "boostWhenTriggersPresent": [
+      "calendar.feastDay.approaching",
+      "calendar.feastDay.tomorrow",
+      "calendar.feastDay.today"
+    ]
+  },
+  "phaseOrder": [
+    "feast_selection_and_scope",
+    "menu_planning_and_scheduling",
+    "pre_feast_preparation_sessions",
+    "day_of_execution",
+    "post_feast_reset"
+  ],
+  "phases": {
+    "feast_selection_and_scope": {
+      "id": "feast_selection_and_scope",
+      "label": "Feast Selection & Scope",
+      "goal": "Identify which feast, its dates, observance level, and who will attend.",
+      "priorityBias": 0.95,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "storehouse"
+      ],
+      "steps": [
+        {
+          "id": "step.scope.selectFeast",
+          "label": "Select Feast & Dates",
+          "description": "Choose the feast, confirm calendar dates, and connect to household calendar entries.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.feast.selector",
+          "nodeType": "planner",
+          "sessionTemplateId": "storehouse.sessions.feastSelector",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "If no feast is selected and a feast day is approaching, suggest this first."
+        },
+        {
+          "id": "step.scope.guestCount",
+          "label": "Set Guest Count & Roles",
+          "description": "Estimate how many people will attend each feast day and specify host vs. guest roles.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.feast.guestPlanner",
+          "nodeType": "planner",
+          "sessionTemplateId": "storehouse.sessions.feastGuestPlanner",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Guest count drives portions, seating, and cleaning requirements."
+        },
+        {
+          "id": "step.scope.budgetAndConstraints",
+          "label": "Define Budget & Constraints",
+          "description": "Capture budget, time constraints, and dietary limits to shape recipe and session choices.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.feast.constraintsPlanner",
+          "nodeType": "planner",
+          "sessionTemplateId": "storehouse.sessions.feastConstraintsPlanner",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Helps limit stress by aligning expectations with resources."
+        }
+      ]
+    },
+    "menu_planning_and_scheduling": {
+      "id": "menu_planning_and_scheduling",
+      "label": "Menu Planning & Schedule",
+      "goal": "Design feast menus and map them into day-by-day sessions.",
+      "priorityBias": 0.96,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "storehouse",
+        "cooking",
+        "preservation"
+      ],
+      "steps": [
+        {
+          "id": "step.menu.coreMenuPlanner",
+          "label": "Plan Feast Menu",
+          "description": "Select dishes for each feast day (and night) including mains, sides, breads, and drinks.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.feast.menuPlanner",
+          "nodeType": "planner",
+          "sessionTemplateId": "storehouse.sessions.feastMenuPlanner",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Core planning step; should appear early once feast and guest count are set."
+        },
+        {
+          "id": "step.menu.recipeImports",
+          "label": "Import or Link Recipes",
+          "description": "Attach imported recipes or household favorites to each menu item so sessions can be generated.",
+          "domain": "cooking",
+          "nodeId": "cooking.recipes.feastLinker",
+          "nodeType": "planner",
+          "sessionTemplateId": "cooking.sessions.feastRecipeLinker",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Link recipes to enable cooking sessions and shopping lists."
+        },
+        {
+          "id": "step.menu.storehouseAuditFeast",
+          "label": "Audit Storehouse for Feast Requirements",
+          "description": "Compare planned recipes against current inventory to identify feast-specific gaps and surpluses.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.feast.inventoryAudit",
+          "nodeType": "calculator",
+          "sessionTemplateId": "storehouse.sessions.feastInventoryAudit",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Highlight critical ingredients and save time before shopping."
+        },
+        {
+          "id": "step.menu.feastShoppingList",
+          "label": "Generate Feast Shopping List",
+          "description": "Create a focused shopping list, grouped by store section and priority.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.feast.shoppingListGenerator",
+          "nodeType": "planner",
+          "sessionTemplateId": "storehouse.sessions.feastShoppingTripPlanner",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Top candidate when you are heading out to shop or placing an order."
+        },
+        {
+          "id": "step.menu.schedulePrepSessions",
+          "label": "Schedule Prep & Cooking Sessions",
+          "description": "Break menu tasks into pre-feast, day-of, and post-feast cooking and preparation sessions.",
+          "domain": "cooking",
+          "nodeId": "cooking.feast.sessionsScheduler",
+          "nodeType": "planner",
+          "sessionTemplateId": "cooking.sessions.feastScheduler",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Enables the SessionRunner to surface the right 'Now' options at the right time."
+        }
+      ]
+    },
+    "pre_feast_preparation_sessions": {
+      "id": "pre_feast_preparation_sessions",
+      "label": "Pre-Feast Preparation Sessions",
+      "goal": "Spread feast workload into earlier days using preservation, baking, and make-ahead dishes.",
+      "priorityBias": 0.94,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "cooking",
+        "preservation",
+        "storehouse",
+        "cleaning",
+        "garden",
+        "animals"
+      ],
+      "steps": [
+        {
+          "id": "step.preFeast.makeAheadCooking",
+          "label": "Run Make-Ahead Cooking Session",
+          "description": "Batch cook dishes and components that hold well (stocks, breads, sauces, braises).",
+          "domain": "cooking",
+          "nodeId": "cooking.batchSession.feastMakeAhead",
+          "nodeType": "session-template",
+          "sessionTemplateId": "cooking.batchSession.feastMakeAhead",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "Shown when an open block of time appears in the days before the feast."
+        },
+        {
+          "id": "step.preFeast.preservationSession",
+          "label": "Run Preservation Session for Feast Ingredients",
+          "description": "Prepare preserved items (broths, pickles, ferments, frozen components) ahead of time.",
+          "domain": "preservation",
+          "nodeId": "preservation.session.feastIngredients",
+          "nodeType": "session-template",
+          "sessionTemplateId": "preservation.session.feastIngredients",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "Especially relevant when garden or animal harvests are tied to the feast menu."
+        },
+        {
+          "id": "step.preFeast.gardenHarvestAlignment",
+          "label": "Align Garden Harvest with Feast",
+          "description": "Plan harvest days and quantities for feast-specific produce (greens, herbs, specialty crops).",
+          "domain": "garden",
+          "nodeId": "garden.feast.harvestPlanner",
+          "nodeType": "planner",
+          "sessionTemplateId": "garden.sessions.feastHarvestPlanner",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Use when fresh garden items are part of the menu to reduce last-minute stress."
+        },
+        {
+          "id": "step.preFeast.animalButcheryPrep",
+          "label": "Plan Animal Butchery & Meat Yield",
+          "description": "If feast meat comes from your animals, plan butchery timing, yields, and preservation.",
+          "domain": "animals",
+          "nodeId": "animals.feast.butcheryPlanner",
+          "nodeType": "planner",
+          "sessionTemplateId": "animals.sessions.feastButcheryPlanner",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Enable meat breakdown and preservation sessions to be scheduled well before the feast."
+        },
+        {
+          "id": "step.preFeast.spacePreparation",
+          "label": "Prepare Dining & Serving Areas",
+          "description": "Run a cleaning and layout session to prepare tables, chairs, and serving zones ahead of time.",
+          "domain": "cleaning",
+          "nodeId": "cleaning.zoneSession.feastSpacePrep",
+          "nodeType": "session-template",
+          "sessionTemplateId": "cleaning.zoneSession.feastSpacePrep",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "Offer this a few days before the feast when guests will use the space."
+        }
+      ]
+    },
+    "day_of_execution": {
+      "id": "day_of_execution",
+      "label": "Day-of Feast Execution",
+      "goal": "Guide the household through feast day cooking, serving, and light reset with minimal chaos.",
+      "priorityBias": 0.99,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "cooking",
+        "cleaning",
+        "storehouse"
+      ],
+      "steps": [
+        {
+          "id": "step.dayOf.primaryCookingSession",
+          "label": "Run Feast Day Cooking Session",
+          "description": "Orchestrate all feast dishes using a guided multi-step SessionRunner with timers and cues.",
+          "domain": "cooking",
+          "nodeId": "cooking.batchSession.feastDayRunner",
+          "nodeType": "session-template",
+          "sessionTemplateId": "cooking.batchSession.feastDayRunner",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "On feast day, this should be the top 'Now' option during main prep windows."
+        },
+        {
+          "id": "step.dayOf.serviceAndStaging",
+          "label": "Service & Staging Checklist",
+          "description": "Use a light checklist session for setting out dishes, utensils, drinks, and seating.",
+          "domain": "cleaning",
+          "nodeId": "cleaning.zoneSession.feastServiceChecklist",
+          "nodeType": "session-template",
+          "sessionTemplateId": "cleaning.zoneSession.feastServiceChecklist",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "Recommended shortly before guests arrive or the feast time begins."
+        },
+        {
+          "id": "step.dayOf.lightResetBetweenMeals",
+          "label": "Light Reset Between Meals",
+          "description": "Short sessions to clear dishes, reset surfaces, and prepare for the next round of serving.",
+          "domain": "cleaning",
+          "nodeId": "cleaning.zoneSession.feastLightReset",
+          "nodeType": "session-template",
+          "sessionTemplateId": "cleaning.zoneSession.feastLightReset",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "Suggested between major meal times to keep overwhelm down."
+        }
+      ]
+    },
+    "post_feast_reset": {
+      "id": "post_feast_reset",
+      "label": "Post-Feast Reset & Preservation",
+      "goal": "Gently return the home and storehouse to a stable state and preserve leftovers wisely.",
+      "priorityBias": 0.92,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "preservation",
+        "storehouse",
+        "cleaning",
+        "cooking"
+      ],
+      "steps": [
+        {
+          "id": "step.postFeast.leftoverInventory",
+          "label": "Inventory Leftovers & Surplus",
+          "description": "Quickly log leftover dishes and ingredients to decide what to preserve, freeze, or share.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.feast.leftoverLogger",
+          "nodeType": "calculator",
+          "sessionTemplateId": "storehouse.sessions.feastLeftoverLogger",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Prompt this soon after the feast to prevent waste."
+        },
+        {
+          "id": "step.postFeast.leftoverPreservationSession",
+          "label": "Run Leftover Preservation Session",
+          "description": "Use a guided session to portion, package, and freeze or preserve suitable leftovers.",
+          "domain": "preservation",
+          "nodeId": "preservation.session.feastLeftovers",
+          "nodeType": "session-template",
+          "sessionTemplateId": "preservation.session.feastLeftovers",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "High priority when large amounts of food remain after the feast."
+        },
+        {
+          "id": "step.postFeast.deepCleaningSession",
+          "label": "Run Post-Feast Deep Cleaning Session",
+          "description": "Commit to a focused cleaning session for kitchen, dining, and common areas used during the feast.",
+          "domain": "cleaning",
+          "nodeId": "cleaning.zoneSession.postFeastDeepReset",
+          "nodeType": "session-template",
+          "sessionTemplateId": "cleaning.zoneSession.postFeastDeepReset",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "May be split into multiple shorter sessions if energy is low."
+        },
+        {
+          "id": "step.postFeast.gratitudeAndNotes",
+          "label": "Capture Notes & Gratitude",
+          "description": "Record what went well, what to adjust next time, and any meaningful moments from the feast.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.feast.journalAndLessons",
+          "nodeType": "planner",
+          "sessionTemplateId": "storehouse.sessions.feastJournalAndLessons",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Helps improve future feasts and preserve the joy, not just the logistics."
+        }
+      ]
+    }
+  }
+}

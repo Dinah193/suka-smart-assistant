@@ -1,0 +1,97 @@
+{
+  "id": "stability.weights.config",
+  "version": 1,
+  "description": "Global weights for household stability domains (health, food, garden, animals, environment, etc.). Higher weight = stronger influence on overall stability.",
+  "meta": {
+    "scale": "0–1 per domain, relative; engine will normalize as needed.",
+    "notes": "These weights are used to bias planning, Now CTAs, and flow recommendations toward the most stability-critical domains."
+  },
+  "domains": {
+    "health": {
+      "label": "Health & Body",
+      "weight": 1.0,
+      "notes": "Core driver of all other domains; low health stability should strongly influence flows like health reset, sleep, hydration, and movement."
+    },
+    "food": {
+      "label": "Food & Meals",
+      "weight": 0.95,
+      "notes": "Meals, nutrition, and daily energy. Composed from cooking + storehouse + preservation metrics where available."
+    },
+    "storehouse": {
+      "label": "Storehouse & Reserves",
+      "weight": 0.95,
+      "notes": "Staples, pantry, long-term reserves. Strongly affects perceived security and ability to weather shocks."
+    },
+    "cooking": {
+      "label": "Cooking & Daily Meals",
+      "weight": 0.9,
+      "notes": "Day-to-day meal execution (coverage, last-minute meals, use of batch cooking)."
+    },
+    "preservation": {
+      "label": "Preservation & Processing",
+      "weight": 0.75,
+      "notes": "Buffers food security by converting fresh goods into stable reserves; critical during harvest seasons."
+    },
+    "garden": {
+      "label": "Garden & Land",
+      "weight": 0.7,
+      "notes": "Food production, land care, and emotional connection to place; seasonally important."
+    },
+    "animals": {
+      "label": "Animals & Livestock",
+      "weight": 0.8,
+      "notes": "Ethical care plus food/production; has safety and welfare implications when unstable."
+    },
+    "cleaning": {
+      "label": "Cleaning, Order, and Visual Calm",
+      "weight": 0.85,
+      "notes": "Visual clutter and backlog heavily impact emotional stability and perceived control of the home."
+    },
+    "finance": {
+      "label": "Money & Obligations",
+      "weight": 0.9,
+      "notes": "Bills, income stability, and obligations; included for forward-compatibility with financial tools."
+    },
+    "schedule": {
+      "label": "Schedule & Time Use",
+      "weight": 0.8,
+      "notes": "Alignment between commitments and capacity; impacts stress and ability to run sessions."
+    },
+    "relationships": {
+      "label": "Relationships & Household Harmony",
+      "weight": 0.9,
+      "notes": "Communication, conflict load, and emotional climate; forward-compatibility for future tools."
+    },
+    "rest": {
+      "label": "Rest, Sleep, and Recovery",
+      "weight": 0.95,
+      "notes": "Sleep, Sabbath rhythms, and downtime; interacts with guards like Quiet Hours and Sabbath."
+    }
+  },
+  "pillars": {
+    "coreNeeds": {
+      "label": "Core Needs",
+      "weight": 1.0,
+      "domains": ["health", "food", "storehouse", "rest"],
+      "notes": "Domains that must remain stable for the household to function at all."
+    },
+    "homeEnvironment": {
+      "label": "Home Environment",
+      "weight": 0.85,
+      "domains": ["cleaning", "garden", "animals"],
+      "notes": "The visible and physical environment inside and around the home."
+    },
+    "productionAndReserves": {
+      "label": "Production & Reserves",
+      "weight": 0.9,
+      "domains": ["garden", "animals", "preservation", "storehouse"],
+      "notes": "Longer-term resilience through production and storage."
+    },
+    "rhythmAndObligations": {
+      "label": "Rhythm & Obligations",
+      "weight": 0.8,
+      "domains": ["schedule", "finance", "relationships"],
+      "notes": "Time, money, and relational commitments that shape daily life."
+    }
+  }
+}

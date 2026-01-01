@@ -1,0 +1,246 @@
+{
+  "version": "1.0.0",
+  "domain": "garden",
+  "generatedAt": "2025-11-11T00:00:00.000Z",
+  "source": "Household defaults (SSA builtin)",
+  "preferences": {
+    "units": {
+      "length": "cm",
+      "mass": "g",
+      "volume": "l",
+      "area": "m2",
+      "time": "min",
+      "temperature": "C",
+      "fallbacks": {
+        "length": ["cm", "in"],
+        "mass": ["g", "kg", "oz", "lb"],
+        "volume": ["l", "ml", "gal"],
+        "area": ["m2", "ft2", "acre"],
+        "time": ["min", "hr"],
+        "temperature": ["C", "F"]
+      }
+    },
+
+    "ethos": {
+      "organicOnly": true,
+      "heirloomPreferred": true,
+      "gmoAllowed": false,
+      "openPollinatedPreferred": true,
+      "seedSavingEnabled": true
+    },
+
+    "seedPreferences": {
+      "defaultVendors": ["high-mowing", "baker-creek", "johnny-seeds"],
+      "packetStorage": {
+        "targetHumidityPct": 35,
+        "targetTempC": 10,
+        "darkStorage": true
+      },
+      "preSoakPolicy": {
+        "enableForLargeSeeds": true,
+        "defaultSoakHours": 8
+      },
+      "scarifyPolicy": {
+        "enabled": true,
+        "applyTo": ["nasturtium", "morning glory", "okra", "sweet pea", "lupine"]
+      },
+      "inoculantForLegumes": true
+    },
+
+    "soil": {
+      "bedType": "raised",
+      "tillage": "minimal",
+      "phTarget": {
+        "default": 6.5,
+        "brassica": 6.8,
+        "blueberry": 5.2
+      },
+      "compostRateLitersPerM2": 20,
+      "amendments": {
+        "useCompost": true,
+        "useWormCastings": true,
+        "limeIfPhBelow": 6.0,
+        "sulfurIfPhAbove": 7.2,
+        "biocharPctByVolume": 5
+      },
+      "mulch": {
+        "preferredType": "shredded-leaf",
+        "alternates": ["straw", "wood-chip", "living-clover"],
+        "depthCm": 3,
+        "keepAwayFromStemCm": 3
+      }
+    },
+
+    "watering": {
+      "method": "drip",
+      "enableSoakerHoseFallback": true,
+      "automation": {
+        "enabled": true,
+        "soilMoistureThresholdPct": 25,
+        "skipIfRainForecastMm": 6
+      },
+      "schedules": {
+        "summer": { "window": "06:00-09:00", "minutesPerZone": 25 },
+        "shoulder": { "window": "07:00-10:00", "minutesPerZone": 15 }
+      }
+    },
+
+    "fertility": {
+      "organicOnly": true,
+      "baseFertilizer": "compost",
+      "allowedOrganicInputs": ["fish-emulsion", "kelp", "alfalfa-meal", "feather-meal", "rock-phosphate", "greensand"],
+      "avoidInputs": ["synthetic-npk", "biosolids"],
+      "sideDressDefaults": {
+        "corn": { "when": "knee-high", "material": "feather-meal" },
+        "tomato": { "when": "first-fruit-set", "material": "kelp+fish" }
+      }
+    },
+
+    "pestAndDisease": {
+      "integratedPestManagement": true,
+      "chemicalControlsAllowed": false,
+      "preferredControls": ["row-cover", "hand-pick", "water-jet", "bt", "neem", "insecticidal-soap", "beneficial-insects"],
+      "sprayWindow": "dawn-dusk",
+      "beeSafePolicy": {
+        "avoidBloomSprays": true,
+        "notifyBeeKeepers": false
+      },
+      "sanitation": {
+        "cleanToolsBetweenBeds": true,
+        "removeDiseasedMaterial": "bin-or-bag",
+        "compostDiseasedMaterial": false
+      }
+    },
+
+    "companionPlanting": {
+      "enabled": true,
+      "guide": [
+        {
+          "crop": "tomato",
+          "companions": ["basil", "marigold", "onion", "parsley"],
+          "avoid": ["fennel", "potato"]
+        },
+        {
+          "crop": "cucumber",
+          "companions": ["dill", "nasturtium", "radish"],
+          "avoid": ["sage", "potato"]
+        },
+        {
+          "crop": "carrot",
+          "companions": ["onion", "leek", "rosemary"],
+          "avoid": ["dill"]
+        },
+        {
+          "crop": "lettuce",
+          "companions": ["chive", "cilantro", "radish"],
+          "avoid": []
+        },
+        {
+          "crop": "corn",
+          "companions": ["pole-bean", "squash"],
+          "avoid": ["tomato"]
+        }
+      ]
+    },
+
+    "plantingStyle": {
+      "rowSpacingPolicy": "catalog-recommended",
+      "intensiveSpacingAllowed": true,
+      "squareFootGardening": false,
+      "trellisPreferredFor": ["tomato-indeterminate", "cucumber", "pea", "pole-bean"]
+    },
+
+    "seasonExtension": {
+      "useRowCover": true,
+      "useLowTunnels": true,
+      "useColdFrame": false,
+      "frostThresholdC": 0,
+      "deployCoversAtOrBelowC": 2
+    },
+
+    "cropRotation": {
+      "enabled": true,
+      "minYearsBetweenSameFamily": 3,
+      "families": {
+        "brassica": ["broccoli", "cabbage", "kale", "mustard"],
+        "allium": ["onion", "garlic", "leek"],
+        "solanaceae": ["tomato", "pepper", "eggplant", "potato"],
+        "cucurbit": ["cucumber", "squash", "melon", "pumpkin"],
+        "legume": ["pea", "bean"],
+        "umbellifer": ["carrot", "parsley", "dill"]
+      }
+    },
+
+    "loggingAndLabels": {
+      "requireBedLabels": true,
+      "labelFormat": "crop|variety|date",
+      "journalEnabled": true,
+      "photoLogEnabled": true
+    },
+
+    "harvestAndPostharvest": {
+      "harvestWindows": {
+        "leafyGreens": "morning",
+        "fruiting": "evening",
+        "roots": "evening"
+      },
+      "washStation": {
+        "enabled": true,
+        "twoBinSystem": true,
+        "finalRinsePotable": true
+      },
+      "storageTargets": {
+        "leafyGreensC": 2,
+        "rootCellarC": 4
+      }
+    },
+
+    "scheduling": {
+      "workBlocks": ["Saturday 09:00-12:00", "Wednesday 18:00-19:30"],
+      "avoidDuring": ["severe-heat-advisory"],
+      "successionPlanning": {
+        "enabled": true,
+        "quickCrops": ["radish", "lettuce", "arugula", "bush-bean"],
+        "intervalDays": 14
+      },
+      "reminders": {
+        "hardeningOffLeadDays": 10,
+        "startSeedsIndoorWeeksBeforeFrost": {
+          "tomato": 6,
+          "pepper": 8,
+          "brassica": 4
+        }
+      }
+    },
+
+    "equipment": {
+      "preferred": ["broadfork", "wheel-hoe", "drip-kit", "row-cover", "soil-thermometer", "compost-sieve"],
+      "avoid": [],
+      "powerToolsAllowed": false
+    },
+
+    "integrationAnchors": {
+      "prepAnchorsEnabled": ["pre-moisten-bed", "add-compost", "lay-mulch", "label-bed"],
+      "sessionTagsEnabled": ["organic", "heirloom", "low-water", "bee-safe"]
+    },
+
+    "localization": {
+      "language": "en",
+      "decimalSeparator": ".",
+      "thousandSeparator": ","
+    },
+
+    "advanced": {
+      "rounding": {
+        "length": "friendly",
+        "mass": "friendly",
+        "volume": "friendly",
+        "temperature": "friendly"
+      },
+      "yieldScaling": {
+        "defaultMultiplier": 1.0,
+        "allowFractionalBeds": true
+      }
+    }
+  }
+}

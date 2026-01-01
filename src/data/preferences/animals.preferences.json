@@ -1,0 +1,238 @@
+{
+  "version": "1.0.0",
+  "domain": "animals",
+  "generatedAt": "2025-11-11T00:00:00.000Z",
+  "source": "Household defaults (SSA builtin)",
+  "preferences": {
+    "units": {
+      "volume": "l",
+      "mass": "kg",
+      "time": "min",
+      "temperature": "C",
+      "fallbacks": {
+        "volume": ["l", "ml", "gal"],
+        "mass": ["kg", "g", "lb", "oz"],
+        "time": ["min", "hr"],
+        "temperature": ["C", "F"]
+      }
+    },
+
+    "ethos": {
+      "rawMilkAllowedForHousehold": true,
+      "rawMilkLabelingRequired": true,
+      "speciesIncluded": ["cow", "goat", "sheep", "duck", "chicken"],
+      "humaneHandlingPriority": true
+    },
+
+    "milkingWorkflow": {
+      "schedule": {
+        "cow": ["06:30", "18:30"],
+        "goat": ["07:00", "19:00"],
+        "sheep": ["07:00"]
+      },
+      "prep": {
+        "handWashRequired": true,
+        "equipmentSanitization": "per-session",
+        "teatPreDipContactTimeSec": 30,
+        "useSingleUseUdderWipes": true
+      },
+      "milkingMethod": {
+        "cow": "machine",
+        "goat": "hand",
+        "sheep": "hand"
+      },
+      "postMilking": {
+        "teatPostDip": true,
+        "stripCupCheckEnabled": true
+      },
+      "milkHandling": {
+        "filterRequired": true,
+        "targetChillC": 4,
+        "maxMinutesToChill": 30,
+        "coldWaterBathPreferred": true,
+        "storageContainers": ["glass-jar", "ss-milk-can"],
+        "labelFormat": "date|species|volume",
+        "maxFridgeDays": 5,
+        "freezeAllowed": true,
+        "headspacePctForFreeze": 12
+      },
+      "cleanInPlace": {
+        "enabled": true,
+        "preRinseTempC": 40,
+        "detergentWashTempC": 60,
+        "acidRinseWeekly": true,
+        "airDry": true
+      }
+    },
+
+    "milkQualityChecks": {
+      "weeklyCMT": true,
+      "cmtOnAbnormalMilk": true,
+      "discardOnMastitisSign": true,
+      "smellCheckEachJar": true,
+      "somaticCellCountTarget": "household-only",
+      "logResults": true
+    },
+
+    "electrolytesAndRehydration": {
+      "enabled": true,
+      "productsPreferred": ["homemade-salt-dextrose", "commercial-livestock-electrolyte"],
+      "mixingGuide": {
+        "homemade": {
+          "salt_g_per_l": 3,
+          "bakingSoda_g_per_l": 2.5,
+          "potassiumChloride_g_per_l": 1.5,
+          "dextrose_g_per_l": 20
+        }
+      },
+      "offerOnHeatStress": true,
+      "offerPostTransport": true,
+      "offerAtScours": true
+    },
+
+    "feedPreferences": {
+      "foragePriority": true,
+      "grainFeeding": {
+        "cow": "limited",
+        "goat": "moderate",
+        "sheep": "limited",
+        "duck": "balanced-pellet"
+      },
+      "allowedSupplements": ["loose-minerals-species-specific", "kelp-meal", "yeast-culture", "buffer"],
+      "mineralPolicy": {
+        "goat": "loose-free-choice",
+        "sheep": "low-copper-formulation",
+        "cow": "dairy-mineral",
+        "duck": "waterfowl-mineral"
+      },
+      "pastureRotation": {
+        "enabled": true,
+        "daysOnPaddock": 3,
+        "restDays": 28
+      },
+      "milkFlavorGuards": {
+        "withholdStrongAromaticsHours": 12,
+        "avoidFeeds": ["wild-onion", "garlic", "fishmeal-near-milking"]
+      }
+    },
+
+    "youngstockFeeding": {
+      "colostrumPriority": true,
+      "colostrumWithinHours": 2,
+      "bottleFeeding": {
+        "defaultTempC": 39,
+        "initialFrequencyPerDay": 6,
+        "weanByWeeks": {
+          "kid": 12,
+          "lamb": 12,
+          "calf": 10
+        }
+      }
+    },
+
+    "animalHealth": {
+      "quarantineNewArrivalsDays": 14,
+      "hoofTrimIntervalWeeks": {
+        "goat": 8,
+        "sheep": 10
+      },
+      "dewormingStrategy": "fecal-based",
+      "vaccinationsLogEnabled": true,
+      "temperatureCheckIfOffFeed": true
+    },
+
+    "butcheryPreferences": {
+      "homeProcessingAllowed": true,
+      "poultryScaldTargetC": [60, 65],
+      "poultryScaldTypicalSec": [45, 90],
+      "redMeatChillTargetC": 7,
+      "separateCleanDirtyZones": true,
+      "ppe": ["cut-gloves", "apron", "eye-protection"]
+    },
+
+    "offalRetention": {
+      "retainByDefault": true,
+      "retainItems": ["liver", "heart", "kidney", "tongue", "oxtail", "fat", "bones"],
+      "discardItems": ["gallbladder", "rumen-contents"],
+      "foodUsePlans": {
+        "liver": "freeze-portion",
+        "heart": "freeze-portion",
+        "kidney": "soak-then-freeze",
+        "bones": "stock",
+        "fat": "render"
+      },
+      "petUseAllowed": true,
+      "labelFormat": "cut|date|species"
+    },
+
+    "duckAndPoultry": {
+      "brooding": {
+        "targetStartC": 33,
+        "weeklyReductionC": 3,
+        "reentryDelayMinAfterCleaning": 15
+      },
+      "waterAccess": {
+        "drinkerType": "nipples-or-jars-with-marbles",
+        "preventSoakingBedding": true
+      }
+    },
+
+    "breedingAndMilkShare": {
+      "kidLambSharing": "overnight-separation",
+      "overnightSeparationHours": 10,
+      "morningMilkTakePct": 60,
+      "eveningMilkTakePct": 40
+    },
+
+    "scheduling": {
+      "workBlocks": ["06:00-08:00", "17:00-19:00"],
+      "avoidDuring": ["extreme-heat-advisory"],
+      "reminders": {
+        "filterPadsRestockDays": 30,
+        "teatDipRestockDays": 30,
+        "freezerInventoryAuditDays": 30
+      }
+    },
+
+    "equipment": {
+      "preferred": [
+        "ss-milk-pail",
+        "strip-cup",
+        "inline-filter",
+        "thermometer",
+        "ice-bath-tub",
+        "teat-dip-cup",
+        "machine-cluster-cow"
+      ],
+      "sparesRequired": ["jar-lids", "filters", "nitrile-gloves"],
+      "labelsRequired": true
+    },
+
+    "integrationAnchors": {
+      "prepAnchorsEnabled": ["wash-hands", "sanitize-equipment", "pre-dip", "post-dip", "rapid-chill"],
+      "sessionTagsEnabled": ["raw-milk", "bottle-feed", "brooding", "butchery"]
+    },
+
+    "localization": {
+      "language": "en",
+      "decimalSeparator": ".",
+      "thousandSeparator": ","
+    },
+
+    "advanced": {
+      "rounding": {
+        "volume": "friendly",
+        "mass": "friendly",
+        "temperature": "friendly"
+      },
+      "yieldScaling": {
+        "defaultMultiplier": 1.0,
+        "allowFractionalBatches": true
+      },
+      "safetyOverrides": {
+        "requireTeatDipAlways": true,
+        "holdMilkIfChillExceeded": true
+      }
+    }
+  }
+}

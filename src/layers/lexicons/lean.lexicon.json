@@ -1,0 +1,362 @@
+{
+  "meta": {
+    "id": "lex.lean.signals",
+    "domain": "lean",
+    "version": "1.0.0",
+    "title": "Lean Waste & Variation Lexicon",
+    "description": "Detects Lean waste and variation signals from user notes/logs and emits actions for LeanOptimizer hooks (suggestions only).",
+    "updatedAt": "2025-12-27",
+    "tags": [
+      "lean",
+      "waste",
+      "signals"
+    ]
+  },
+  "methods": {
+    "lean.waste.waiting": {
+      "label": "Lean waste: waiting",
+      "intentTags": [
+        "lean:waste:waiting"
+      ]
+    },
+    "lean.waste.motion": {
+      "label": "Lean waste: motion",
+      "intentTags": [
+        "lean:waste:motion"
+      ]
+    },
+    "lean.waste.overprocessing": {
+      "label": "Lean waste: overprocessing",
+      "intentTags": [
+        "lean:waste:overprocessing"
+      ]
+    },
+    "lean.waste.overproduction": {
+      "label": "Lean waste: overproduction",
+      "intentTags": [
+        "lean:waste:overproduction"
+      ]
+    },
+    "lean.waste.defects": {
+      "label": "Lean waste: defects",
+      "intentTags": [
+        "lean:waste:defects"
+      ]
+    },
+    "lean.waste.transport": {
+      "label": "Lean waste: transport",
+      "intentTags": [
+        "lean:waste:transport"
+      ]
+    },
+    "lean.waste.inventory": {
+      "label": "Lean waste: inventory",
+      "intentTags": [
+        "lean:waste:inventory"
+      ]
+    },
+    "lean.waste.unused_talent": {
+      "label": "Lean waste: unused_talent",
+      "intentTags": [
+        "lean:waste:unused_talent"
+      ]
+    },
+    "lean.symptom.spoilage": {
+      "label": "Symptom: spoilage",
+      "intentTags": [
+        "lean:symptom:spoilage"
+      ]
+    },
+    "lean.symptom.too_many_trips": {
+      "label": "Symptom: too many trips",
+      "intentTags": [
+        "lean:symptom:too_many_trips"
+      ]
+    },
+    "lean.symptom.always_behind": {
+      "label": "Symptom: always behind",
+      "intentTags": [
+        "lean:symptom:always_behind"
+      ]
+    },
+    "lean.symptom.prep_forever": {
+      "label": "Symptom: prep takes forever",
+      "intentTags": [
+        "lean:symptom:prep_forever"
+      ]
+    }
+  },
+  "synonyms": {
+    "waiting": {
+      "methodIds": [
+        "lean.waste.waiting"
+      ],
+      "boost": 1.2
+    },
+    "waiting around": {
+      "methodIds": [
+        "lean.waste.waiting"
+      ],
+      "boost": 1.15
+    },
+    "idle time": {
+      "methodIds": [
+        "lean.waste.waiting"
+      ],
+      "boost": 1.1
+    },
+    "too much walking": {
+      "methodIds": [
+        "lean.waste.motion"
+      ],
+      "boost": 1.2
+    },
+    "running back and forth": {
+      "methodIds": [
+        "lean.waste.motion"
+      ],
+      "boost": 1.25
+    },
+    "extra steps": {
+      "methodIds": [
+        "lean.waste.motion"
+      ],
+      "boost": 1.1
+    },
+    "overprocessing": {
+      "methodIds": [
+        "lean.waste.overprocessing"
+      ],
+      "boost": 1.2
+    },
+    "doing it twice": {
+      "methodIds": [
+        "lean.waste.overprocessing"
+      ],
+      "boost": 1.15
+    },
+    "overproduction": {
+      "methodIds": [
+        "lean.waste.overproduction"
+      ],
+      "boost": 1.2
+    },
+    "made too much": {
+      "methodIds": [
+        "lean.waste.overproduction"
+      ],
+      "boost": 1.15
+    },
+    "defects": {
+      "methodIds": [
+        "lean.waste.defects"
+      ],
+      "boost": 1.2
+    },
+    "ruined batch": {
+      "methodIds": [
+        "lean.waste.defects"
+      ],
+      "boost": 1.25
+    },
+    "transport": {
+      "methodIds": [
+        "lean.waste.transport"
+      ],
+      "boost": 1.2
+    },
+    "hauling": {
+      "methodIds": [
+        "lean.waste.transport"
+      ],
+      "boost": 1.05
+    },
+    "inventory": {
+      "methodIds": [
+        "lean.waste.inventory"
+      ],
+      "boost": 1.1
+    },
+    "too much stock": {
+      "methodIds": [
+        "lean.waste.inventory"
+      ],
+      "boost": 1.2
+    },
+    "unused talent": {
+      "methodIds": [
+        "lean.waste.unused_talent"
+      ],
+      "boost": 1.2
+    },
+    "nobody trained": {
+      "methodIds": [
+        "lean.waste.unused_talent"
+      ],
+      "boost": 1.15
+    }
+  },
+  "phrases": [
+    {
+      "text": "food keeps spoiling",
+      "methodIds": [
+        "lean.symptom.spoilage",
+        "lean.waste.defects",
+        "lean.waste.inventory"
+      ],
+      "boost": 1.5,
+      "tags": [
+        "symptom"
+      ]
+    },
+    {
+      "text": "too many trips to the pantry",
+      "methodIds": [
+        "lean.symptom.too_many_trips",
+        "lean.waste.motion",
+        "lean.waste.transport"
+      ],
+      "boost": 1.5,
+      "tags": [
+        "symptom"
+      ]
+    },
+    {
+      "text": "always behind",
+      "methodIds": [
+        "lean.symptom.always_behind",
+        "lean.waste.waiting",
+        "lean.waste.overprocessing"
+      ],
+      "boost": 1.35,
+      "tags": [
+        "symptom"
+      ]
+    },
+    {
+      "text": "prep takes forever",
+      "methodIds": [
+        "lean.symptom.prep_forever",
+        "lean.waste.motion",
+        "lean.waste.overprocessing"
+      ],
+      "boost": 1.45,
+      "tags": [
+        "symptom"
+      ]
+    },
+    {
+      "text": "we keep running out and buying again",
+      "methodIds": [
+        "lean.waste.inventory",
+        "lean.waste.transport"
+      ],
+      "boost": 1.25
+    },
+    {
+      "text": "I have to look for tools every time",
+      "methodIds": [
+        "lean.waste.motion"
+      ],
+      "boost": 1.2,
+      "tags": [
+        "5S"
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "rule.lean.optimizer.hook",
+      "when": {
+        "anyTags": [
+          "symptom",
+          "5S"
+        ],
+        "anyMethods": [
+          "lean.waste.motion",
+          "lean.waste.waiting",
+          "lean.waste.inventory"
+        ]
+      },
+      "then": [
+        {
+          "type": "emitHintTag",
+          "hintTag": "leanOptimizer:recommendStandardWork",
+          "message": "Lean signal detected. Suggest standard work + staging checklist (no forced UI changes)."
+        },
+        {
+          "type": "emitHintTag",
+          "hintTag": "leanOptimizer:recommend5S",
+          "message": "Consider 5S: sort, set-in-order, shine, standardize, sustain."
+        }
+      ]
+    },
+    {
+      "id": "rule.spoilage.buffer",
+      "when": {
+        "anyPhrases": [
+          "food keeps spoiling"
+        ],
+        "contextAny": [
+          "produce",
+          "leftovers",
+          "milk",
+          "meat",
+          "greens"
+        ]
+      },
+      "then": [
+        {
+          "type": "emitHintTag",
+          "hintTag": "leanOptimizer:recommendFIFO",
+          "message": "Spoilage suggests FIFO labeling/rotation and tighter par levels."
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "emitHintTag",
+      "hintTag": "leanSignalsActive",
+      "message": "Lean signals lexicon active. Emit signals + optimizer hooks only."
+    }
+  ],
+  "signals": [
+    {
+      "id": "sig.spoilage",
+      "type": "symptom",
+      "pattern": "spoil|spoiling|mold|went bad",
+      "severity": 4,
+      "tags": [
+        "lean:symptom:spoilage"
+      ]
+    },
+    {
+      "id": "sig.trips",
+      "type": "symptom",
+      "pattern": "too many trips|back and forth|running back",
+      "severity": 3,
+      "tags": [
+        "lean:symptom:too_many_trips"
+      ]
+    },
+    {
+      "id": "sig.behind",
+      "type": "symptom",
+      "pattern": "always behind|never caught up|overwhelmed",
+      "severity": 3,
+      "tags": [
+        "lean:symptom:always_behind"
+      ]
+    },
+    {
+      "id": "sig.prep",
+      "type": "symptom",
+      "pattern": "prep takes forever|takes forever|too long",
+      "severity": 3,
+      "tags": [
+        "lean:symptom:prep_forever"
+      ]
+    }
+  ]
+}

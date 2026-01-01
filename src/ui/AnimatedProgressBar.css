@@ -1,0 +1,221 @@
+/* src/ui/AnimatedProgressBar.css
+   Suka Progress — variable-driven, accessible, and themeable
+   - Works without Tailwind. Keep using your existing classes.
+   - Supports determinate, indeterminate, striped, stacked segments.
+   - Honors prefers-reduced-motion. */
+
+/* -------------------- Tokens (override per theme/container) -------------------- */
+:root {
+  --pb-height: 1rem;
+  --pb-radius: 9999px;
+
+  --pb-bg: #e5e7eb;               /* track background (gray-200) */
+  --pb-fill: #10b981;             /* fill color (emerald-500) */
+  --pb-fill-muted: #6ee7b7;       /* lighter for stripes */
+  --pb-border: transparent;
+
+  --pb-duration: 600ms;           /* width transition duration */
+  --pb-ease: cubic-bezier(.4,0,.2,1);
+
+  --pb-stripe-size: 24px;
+  --pb-stripe-opacity: .2;
+
+  --pb-label-color: #111827;      /* label text color (gray-900) */
+  --pb-label-size: 0.75rem;
+}
+
+/* Dark scheme defaults */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --pb-bg: #111827;             /* gray-900 */
+    --pb-fill: #34d399;           /* emerald-400 */
+    --pb-fill-muted: #10b981;     /* emerald-500 */
+    --pb-label-color: #e5e7eb;    /* gray-200 */
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --pb-duration: 1ms;
+  }
+  .progress-bar-fill,
+  .progress-segment {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+    background-size: auto !important;
+  }
+}
+
+/* ------------------------- Base / Legacy Compatibility ------------------------ */
+
+/* Container (legacy .progress-bar-container kept) */
+.progress-bar-container,
+.progress {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: var(--pb-height);
+  background-color: var(--pb-bg);
+  border-radius: var(--pb-radius);
+  overflow: hidden;
+  border: 1px solid var(--pb-border);
+}
+
+/* Fill (legacy .progress-bar-fill kept) */
+.progress-bar-fill,
+.progress__fill {
+  height: 100%;
+  width: 0%; /* set via inline style or data-value */
+  background-color: var(--pb-fill);
+  transition: width var(--pb-duration) var(--pb-ease);
+  will-change: width;
+}
+
+/* Optional label overlay (centered) */
+.progress__label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: var(--pb-label-size);
+  color: var(--pb-label-color);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ------------------------------- Sizes --------------------------------------- */
+.progress--sm { --pb-height: .5rem; }
+.progress--md { --pb-height: 1rem; }     /* default */
+.progress--lg { --pb-height: 1.25rem; }
+.progress--xl { --pb-height: 1.5rem; }
+
+/* ------------------------------ Color themes -------------------------------- */
+.progress[data-color="info"]    { --pb-fill: #3b82f6; --pb-fill-muted: #93c5fd; }   /* blue */
+.progress[data-color="success"] { --pb-fill: #10b981; --pb-fill-muted: #6ee7b7; }   /* emerald */
+.progress[data-color="warning"] { --pb-fill: #f59e0b; --pb-fill-muted: #fcd34d; }   /* amber */
+.progress[data-color="danger"]  { --pb-fill: #ef4444; --pb-fill-muted: #fca5a5; }   /* red */
+.progress[data-color="neutral"] { --pb-fill: #9ca3af; --pb-fill-muted: #d1d5db; }   /* gray */
+
+/* States (visual hints; drive from data-state attr) */
+.progress[data-state="paused"]  { opacity: .7; }
+.progress[data-state="error"]   { --pb-fill: #ef4444; --pb-fill-muted: #fca5a5; }
+.progress[data-state="complete"] .progress-bar-fill { border-right: none; }
+
+/* ------------------------------ Striped style -------------------------------- */
+.progress--striped .progress-bar-fill,
+.progress--striped .progress-segment {
+  background-image:
+    linear-gradient(
+      45deg,
+      rgba(255,255,255,var(--pb-stripe-opacity)) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255,255,255,var(--pb-stripe-opacity)) 50%,
+      rgba(255,255,255,var(--pb-stripe-opacity)) 75%,
+      transparent 75%,
+      transparent
+    );
+  background-size: var(--pb-stripe-size) var(--pb-stripe-size);
+  background-color: var(--pb-fill);
+}
+
+/* Animated stripes */
+@keyframes pb-stripes {
+  from { background-position: 0 0; }
+  to   { background-position: var(--pb-stripe-size) 0; }
+}
+.progress--animated.progress--striped .progress-bar-fill,
+.progress--animated.progress--striped .progress-segment {
+  animation: pb-stripes 1s linear infinite;
+}
+
+/* ---------------------------- Indeterminate mode ----------------------------- */
+/* Use data-indeterminate="true" on container */
+@keyframes pb-indeterminate {
+  0%   { left: -35%; right: 100%; }
+  60%  { left: 100%; right: -90%; }
+  100% { left: 100%; right: -90%; }
+}
+.progress[data-indeterminate="true"] .progress-bar-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: auto; /* width is animated by keyframes */
+  background-color: var(--pb-fill);
+  animation: pb-indeterminate 1.6s var(--pb-ease) infinite;
+}
+
+/* ---------------------------- Stacked segments ------------------------------- */
+/* For multi-part progress (e.g., phases). Place .progress-segment elements
+   inside the container instead of a single .progress-bar-fill. */
+.progress--stacked {
+  display: flex;
+  gap: 0; /* seamless */
+}
+.progress--stacked .progress-segment {
+  height: 100%;
+  min-width: 0;
+  transition: width var(--pb-duration) var(--pb-ease);
+  background-color: var(--pb-fill);
+}
+.progress--stacked .progress-segment + .progress-segment {
+  /* tiny separator using inner shadow illusion */
+  box-shadow: inset 1px 0 0 rgba(0,0,0,.06);
+}
+
+/* Allow per-segment color via data attribute */
+.progress-segment[data-color="info"]    { background-color: #3b82f6; }
+.progress-segment[data-color="success"] { background-color: #10b981; }
+.progress-segment[data-color="warning"] { background-color: #f59e0b; }
+.progress-segment[data-color="danger"]  { background-color: #ef4444; }
+.progress-segment[data-color="neutral"] { background-color: #9ca3af; }
+
+/* ----------------------------- Value binding -------------------------------- */
+/* If you prefer not to set inline styles, you can drive width via data-value (0-100). */
+.progress-bar-fill[data-value]         { width: calc(attr(data-value percentage)); }
+.progress--stacked .progress-segment[data-value] { width: calc(attr(data-value percentage)); }
+
+/* Note: attr() width support is improving; for maximum compatibility,
+   continue setting width via inline style (style="width: 42%") from JS. */
+
+/* -------------------------- Legacy class defaults --------------------------- */
+/* Keep your original look if you still use the old class names */
+.progress-bar-container {
+  background-color: var(--pb-bg);
+  border-radius: var(--pb-radius);
+  overflow: hidden;
+  height: var(--pb-height);
+}
+.progress-bar-fill {
+  background-color: var(--pb-fill);
+  height: 100%;
+  transition: width var(--pb-duration) var(--pb-ease);
+}
+
+/* ----------------------------- Utility helpers ------------------------------ */
+.progress--shadow { box-shadow: 0 1px 2px rgba(0,0,0,.04) inset; }
+.progress--thin   { --pb-height: .375rem; }
+.progress--thick  { --pb-height: 1.25rem; }
+
+/* Optional subtle gloss on the fill */
+.progress--gloss .progress-bar-fill,
+.progress--gloss .progress-segment {
+  background-image:
+    linear-gradient(to bottom, rgba(255,255,255,.15), rgba(255,255,255,0)),
+    linear-gradient(45deg,
+      rgba(255,255,255,var(--pb-stripe-opacity)) 25%,
+      transparent 25%, transparent 50%,
+      rgba(255,255,255,var(--pb-stripe-opacity)) 50%,
+      rgba(255,255,255,var(--pb-stripe-opacity)) 75%,
+      transparent 75%, transparent);
+  background-blend-mode: overlay, normal;
+}
+
+/* Example: dashed track for uploading */
+.progress--dashed {
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0 8px,
+    rgba(0,0,0,.08) 8px 12px
+  );
+}

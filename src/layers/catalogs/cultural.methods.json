@@ -1,0 +1,804 @@
+{
+  "schemaVersion": "1.0.0",
+  "domain": "cultural",
+  "catalogId": "cultural.methods",
+  "generatedAt": "2025-12-28T00:29:09Z",
+  "description": "Fixed method definitions for selecting and applying opt-in cultural workflow overlays in SSA. These methods do not hard-code culture: they guide configuration, naming, defaults, ordering, constraints, and sharing rhythms that CultureResolver can apply to planning patterns and session blueprints.",
+  "conventions": {
+    "methodIdFormat": "cultural.<area>.<slug>",
+    "stepIdFormat": "s<nn>",
+    "principles": [
+      "Opt-in overlays only (never forced).",
+      "No stereotypes: every default is user-editable and presented as a starting point.",
+      "Separation of concerns: these methods produce overlay configuration, not household tasks.",
+      "Deterministic outputs: same inputs -> same configuration patch."
+    ],
+    "overlayPatchShape": {
+      "overlayId": "string",
+      "display": {
+        "labels": "map<string,string>",
+        "icons": "map<string,string>"
+      },
+      "defaults": {
+        "staplesBias": "array<string>",
+        "mealRhythm": "object",
+        "preservationEmphasis": "array<string>",
+        "sharingMode": "object"
+      },
+      "constraints": {
+        "tags": "array<string>",
+        "quietHoursRespect": "boolean",
+        "sabbathModeRespect": "boolean"
+      },
+      "uiHints": {
+        "chips": "array<string>",
+        "toggles": "array<string>",
+        "help": "array<string>"
+      }
+    }
+  },
+  "methods": [
+    {
+      "id": "cultural.overlay.select",
+      "name": "Select a Cultural Workflow Overlay",
+      "summary": "Pick an opt-in cultural workflow overlay (or none) that influences naming, ordering, defaults, and constraints used by planning patterns.",
+      "tags": [
+        "overlay",
+        "preferences",
+        "planning",
+        "opt-in",
+        "non-stereotyped"
+      ],
+      "inputs": [
+        {
+          "key": "primaryOverlayId",
+          "type": "string",
+          "required": false,
+          "examples": [
+            "workflows/indigenous/israelite_household",
+            "workflows/modern/modern_efficiency"
+          ]
+        },
+        {
+          "key": "blendSecondaryOverlayId",
+          "type": "string",
+          "required": false,
+          "examples": [
+            "workflows/indigenous/west_african"
+          ]
+        },
+        {
+          "key": "blendMode",
+          "type": "string",
+          "required": false,
+          "examples": [
+            "primaryOnly",
+            "blend"
+          ]
+        },
+        {
+          "key": "householdValues",
+          "type": "array",
+          "required": false,
+          "examples": [
+            [
+              "value:community_sharing",
+              "value:thrift"
+            ]
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "overlaySelection",
+          "type": "object"
+        },
+        {
+          "key": "overlayPatch",
+          "type": "object"
+        }
+      ],
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Choose primary overlay",
+          "action": "Select a primary workflow overlay (or 'none').",
+          "ui": {
+            "control": "select",
+            "optionsFrom": "catalog.workflows.index"
+          }
+        },
+        {
+          "i": 2,
+          "title": "Optional blend",
+          "action": "Optionally choose a secondary overlay to blend (naming + staples + rhythm), and set blend strength.",
+          "ui": {
+            "control": "blendPicker",
+            "fields": [
+              "blendSecondaryOverlayId",
+              "blendStrength"
+            ]
+          }
+        },
+        {
+          "i": 3,
+          "title": "Review what changes",
+          "action": "Preview naming, ordering, default staples, and constraints that will be applied.",
+          "ui": {
+            "control": "previewPanel"
+          }
+        },
+        {
+          "i": 4,
+          "title": "Confirm & save",
+          "action": "Confirm selection and persist as user/household preference (opt-in).",
+          "checks": [
+            "User confirms opt-in"
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "A saved overlay preference exists for the selected scope (user/household)."
+        ],
+        "qualityChecks": [
+          "Overlay is editable: user can override staples/rhythm/constraints."
+        ],
+        "commonMistakes": [
+          "Assuming overlay is mandatory. It is optional and should never block planning."
+        ]
+      },
+      "kpiHints": {
+        "countsToward": [
+          "prefs.culture.overlay.set"
+        ],
+        "estimatedMinutes": 3
+      }
+    },
+    {
+      "id": "cultural.overlay.blend",
+      "name": "Blend Cultural Overlays (Primary + Secondary)",
+      "summary": "Create a blended overlay patch (primary dominates; secondary contributes selected dimensions like staples, ordering, and feast rhythms).",
+      "tags": [
+        "overlay",
+        "blend",
+        "preferences",
+        "planning"
+      ],
+      "inputs": [
+        {
+          "key": "primaryOverlayPatch",
+          "type": "object",
+          "required": true
+        },
+        {
+          "key": "secondaryOverlayPatch",
+          "type": "object",
+          "required": true
+        },
+        {
+          "key": "blendStrength",
+          "type": "number",
+          "required": false,
+          "examples": [
+            0.25,
+            0.5
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "blendedOverlayPatch",
+          "type": "object"
+        }
+      ],
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Set blend strength",
+          "action": "Choose how strongly the secondary overlay influences staples, rhythms, and defaults.",
+          "ui": {
+            "control": "slider",
+            "min": 0,
+            "max": 1,
+            "step": 0.05
+          }
+        },
+        {
+          "i": 2,
+          "title": "Pick blend dimensions",
+          "action": "Choose what to blend: labels, staples, rhythms, preservation emphasis, constraints.",
+          "ui": {
+            "control": "chips",
+            "options": [
+              "display.labels",
+              "defaults.staplesBias",
+              "defaults.mealRhythm",
+              "defaults.preservationEmphasis",
+              "constraints.tags"
+            ]
+          }
+        },
+        {
+          "i": 3,
+          "title": "Preview blended result",
+          "action": "Preview the resulting overlay patch before applying.",
+          "ui": {
+            "control": "previewPanel"
+          }
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "A blended overlay patch is produced."
+        ],
+        "qualityChecks": [
+          "Primary overlay remains dominant unless strength=1.0."
+        ]
+      },
+      "kpiHints": {
+        "countsToward": [
+          "prefs.culture.overlay.blended"
+        ],
+        "estimatedMinutes": 4
+      }
+    },
+    {
+      "id": "cultural.defaults.staples_bias",
+      "name": "Set Staples Bias",
+      "summary": "Set preferred staple groups (e.g., grains, legumes, tubers) and staple items that can bias meal planning without forcing it.",
+      "tags": [
+        "staples",
+        "preferences",
+        "meals",
+        "storehouse"
+      ],
+      "inputs": [
+        {
+          "key": "stapleGroups",
+          "type": "array",
+          "required": false,
+          "examples": [
+            [
+              "staple:grain",
+              "staple:legume"
+            ]
+          ]
+        },
+        {
+          "key": "stapleItems",
+          "type": "array",
+          "required": false,
+          "examples": [
+            [
+              "millet",
+              "sorghum",
+              "okra",
+              "collards"
+            ]
+          ]
+        },
+        {
+          "key": "excludeItems",
+          "type": "array",
+          "required": false,
+          "examples": [
+            [
+              "pork"
+            ]
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "overlayPatch.defaults.staplesBias",
+          "type": "array"
+        }
+      ],
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Choose staple groups",
+          "action": "Pick staple groups to prioritize (these bias suggestions, not enforce).",
+          "ui": {
+            "control": "chips",
+            "options": [
+              "staple:grain",
+              "staple:legume",
+              "staple:tuber",
+              "staple:leafy",
+              "staple:fruit",
+              "staple:fish",
+              "staple:ruminant"
+            ]
+          }
+        },
+        {
+          "i": 2,
+          "title": "Add staple items",
+          "action": "Add specific staple foods you keep on hand.",
+          "ui": {
+            "control": "tagInput",
+            "placeholder": "Add a staple (e.g., millet, lentils, yams)"
+          }
+        },
+        {
+          "i": 3,
+          "title": "Set exclusions",
+          "action": "Add exclusions (dietary law, allergy, preference).",
+          "ui": {
+            "control": "tagInput",
+            "placeholder": "Exclude item (e.g., pork, peanuts)"
+          }
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "Staples bias stored; planning suggestions reflect bias."
+        ],
+        "qualityChecks": [
+          "Exclusions are enforced by PreferenceResolver as hard/soft constraints depending on type."
+        ]
+      },
+      "kpiHints": {
+        "countsToward": [
+          "prefs.staples.set"
+        ],
+        "estimatedMinutes": 5
+      }
+    },
+    {
+      "id": "cultural.rhythm.meal_week",
+      "name": "Set Meal Rhythm (Weekly Cadence)",
+      "summary": "Set meal rhythm: number of cooked meals, leftover cadence, prep day(s), and any quiet-hours/Sabbath constraints.",
+      "tags": [
+        "rhythm",
+        "cadence",
+        "planning",
+        "lean",
+        "standard_work"
+      ],
+      "inputs": [
+        {
+          "key": "cookedMealsPerWeek",
+          "type": "number",
+          "required": false,
+          "examples": [
+            7,
+            10,
+            14
+          ]
+        },
+        {
+          "key": "leftoverDays",
+          "type": "array",
+          "required": false,
+          "examples": [
+            [
+              "Mon",
+              "Thu"
+            ]
+          ]
+        },
+        {
+          "key": "prepDays",
+          "type": "array",
+          "required": false,
+          "examples": [
+            [
+              "Sun"
+            ]
+          ]
+        },
+        {
+          "key": "quietHoursRespect",
+          "type": "boolean",
+          "required": false,
+          "examples": [
+            true
+          ]
+        },
+        {
+          "key": "sabbathModeRespect",
+          "type": "boolean",
+          "required": false,
+          "examples": [
+            true
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "overlayPatch.defaults.mealRhythm",
+          "type": "object"
+        }
+      ],
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Choose cadence",
+          "action": "Set how many cooked meals per week and which days are leftover-forward.",
+          "ui": {
+            "control": "cadenceGrid"
+          }
+        },
+        {
+          "i": 2,
+          "title": "Set prep days",
+          "action": "Pick one or more prep days for batch chopping, soaking, marinating, and dough prep.",
+          "ui": {
+            "control": "dayPicker"
+          }
+        },
+        {
+          "i": 3,
+          "title": "Respect quiet hours",
+          "action": "Enable quiet-hours/Sabbath-safe defaults (e.g., no noisy appliance steps).",
+          "ui": {
+            "control": "toggles",
+            "options": [
+              "quietHoursRespect",
+              "sabbathModeRespect"
+            ]
+          }
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "Meal rhythm saved; plans default to chosen cadence."
+        ],
+        "qualityChecks": [
+          "Cadence does not override allergies/diet laws."
+        ]
+      },
+      "kpiHints": {
+        "countsToward": [
+          "prefs.rhythm.set"
+        ],
+        "estimatedMinutes": 6
+      }
+    },
+    {
+      "id": "cultural.feast.focus",
+      "name": "Feast Focus Overlay",
+      "summary": "Enable feast-focused defaults for planning windows (prep buffers, staples emphasis, sharing mode) without adding non-scriptural commentary.",
+      "tags": [
+        "feast",
+        "planning",
+        "buffer",
+        "sharing",
+        "opt-in"
+      ],
+      "inputs": [
+        {
+          "key": "feastWindowTags",
+          "type": "array",
+          "required": false,
+          "examples": [
+            [
+              "feast:passover_window"
+            ]
+          ]
+        },
+        {
+          "key": "bufferDays",
+          "type": "number",
+          "required": false,
+          "examples": [
+            3,
+            7
+          ]
+        },
+        {
+          "key": "sharingMode",
+          "type": "string",
+          "required": false,
+          "examples": [
+            "householdOnly",
+            "communalOptIn"
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "overlayPatch.constraints.tags",
+          "type": "array"
+        }
+      ],
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Select feast window",
+          "action": "Choose feast window tags relevant to your calendar settings.",
+          "ui": {
+            "control": "chips",
+            "optionsFrom": "catalog.seasonal.feast_windows"
+          }
+        },
+        {
+          "i": 2,
+          "title": "Add buffer",
+          "action": "Set how many days before the feast you prefer to start prep and storehouse buffering.",
+          "ui": {
+            "control": "slider",
+            "min": 0,
+            "max": 14,
+            "step": 1
+          }
+        },
+        {
+          "i": 3,
+          "title": "Sharing mode",
+          "action": "Choose whether to include communal sharing suggestions as opt-in.",
+          "ui": {
+            "control": "select",
+            "options": [
+              "householdOnly",
+              "communalOptIn"
+            ]
+          }
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "Feast focus overlay applied to planning patterns."
+        ],
+        "qualityChecks": [
+          "Overlay does not add religious interpretation; it only adjusts planning defaults/constraints."
+        ]
+      },
+      "kpiHints": {
+        "countsToward": [
+          "prefs.feast.focus.set"
+        ],
+        "estimatedMinutes": 4
+      }
+    },
+    {
+      "id": "cultural.preservation.emphasis",
+      "name": "Preservation Emphasis Overlay",
+      "summary": "Bias plans toward preservation methods (drying, fermenting, canning, curing, freezing) based on household goals and storage zones.",
+      "tags": [
+        "preservation",
+        "storehouse",
+        "homestead",
+        "lean",
+        "spoilage"
+      ],
+      "inputs": [
+        {
+          "key": "emphasis",
+          "type": "array",
+          "required": false,
+          "examples": [
+            [
+              "preserve:ferment",
+              "preserve:dry"
+            ]
+          ]
+        },
+        {
+          "key": "zones",
+          "type": "array",
+          "required": false,
+          "examples": [
+            [
+              "zone:root_cellar",
+              "zone:fermentation_room"
+            ]
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "overlayPatch.defaults.preservationEmphasis",
+          "type": "array"
+        }
+      ],
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Choose preservation emphases",
+          "action": "Pick preservation emphases that SSA should suggest when surplus risk appears.",
+          "ui": {
+            "control": "chips",
+            "options": [
+              "preserve:ferment",
+              "preserve:dry",
+              "preserve:freeze",
+              "preserve:cure",
+              "preserve:canning"
+            ]
+          }
+        },
+        {
+          "i": 2,
+          "title": "Select storage zones",
+          "action": "Choose which storage zones you actively use so suggestions fit your home.",
+          "ui": {
+            "control": "chips",
+            "options": [
+              "zone:pantry",
+              "zone:cold",
+              "zone:frozen",
+              "zone:root_cellar",
+              "zone:fermentation_room"
+            ]
+          }
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "Preservation emphasis saved; storehouse triggers prefer selected methods."
+        ]
+      },
+      "kpiHints": {
+        "countsToward": [
+          "prefs.preservation.emphasis.set"
+        ],
+        "estimatedMinutes": 5
+      }
+    },
+    {
+      "id": "cultural.sharing.commual_optin",
+      "name": "Communal Sharing (Opt-In)",
+      "summary": "Enable optional sharing workflows (mutual aid, meal trains, shared bulk buys) without enforcing participation.",
+      "tags": [
+        "sharing",
+        "mutual_aid",
+        "community",
+        "opt-in"
+      ],
+      "inputs": [
+        {
+          "key": "enabled",
+          "type": "boolean",
+          "required": false,
+          "examples": [
+            true
+          ]
+        },
+        {
+          "key": "sharingChannels",
+          "type": "array",
+          "required": false,
+          "examples": [
+            [
+              "neighbor",
+              "family_fund",
+              "congregation"
+            ]
+          ]
+        },
+        {
+          "key": "defaultSharePercent",
+          "type": "number",
+          "required": false,
+          "examples": [
+            0.0,
+            0.05,
+            0.1
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "overlayPatch.defaults.sharingMode",
+          "type": "object"
+        }
+      ],
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Enable sharing mode",
+          "action": "Turn on/off optional sharing suggestions.",
+          "ui": {
+            "control": "toggle",
+            "field": "enabled"
+          }
+        },
+        {
+          "i": 2,
+          "title": "Choose channels",
+          "action": "Choose where sharing suggestions apply (if enabled).",
+          "ui": {
+            "control": "chips",
+            "options": [
+              "family",
+              "neighbor",
+              "family_fund",
+              "community_org"
+            ]
+          }
+        },
+        {
+          "i": 3,
+          "title": "Set default share %",
+          "action": "Set a default share % for surplus suggestions (0 = none).",
+          "ui": {
+            "control": "slider",
+            "min": 0,
+            "max": 0.25,
+            "step": 0.01
+          }
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "Sharing mode preferences saved."
+        ],
+        "qualityChecks": [
+          "Sharing is always opt-in at execution time; never auto-commit shares."
+        ]
+      },
+      "kpiHints": {
+        "countsToward": [
+          "prefs.sharing.set"
+        ],
+        "estimatedMinutes": 4
+      }
+    },
+    {
+      "id": "cultural.naming.labels",
+      "name": "Customize Naming + Labels",
+      "summary": "Customize labels used across planning outputs (meal names, pantry zones, roles) while staying mapped to canonical SSA tags.",
+      "tags": [
+        "naming",
+        "labels",
+        "ui",
+        "overlay"
+      ],
+      "inputs": [
+        {
+          "key": "labelMap",
+          "type": "object",
+          "required": false,
+          "examples": [
+            {
+              "zone:root_cellar": "Root Cellar",
+              "role:steward": "Household Steward"
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "overlayPatch.display.labels",
+          "type": "object"
+        }
+      ],
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Edit labels",
+          "action": "Rename visible labels (does not change canonical IDs).",
+          "ui": {
+            "control": "keyValueEditor"
+          }
+        },
+        {
+          "i": 2,
+          "title": "Preview",
+          "action": "Preview changes in a sample plan.",
+          "ui": {
+            "control": "previewPanel"
+          }
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "Label map saved; UI shows customized labels."
+        ],
+        "qualityChecks": [
+          "Canonical tags remain unchanged for resolvers."
+        ]
+      },
+      "kpiHints": {
+        "countsToward": [
+          "prefs.labels.customized"
+        ],
+        "estimatedMinutes": 6
+      }
+    }
+  ]
+}

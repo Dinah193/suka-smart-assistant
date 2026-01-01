@@ -1,0 +1,71 @@
+{
+  "$id": "https://suka-smart-assistant.local/schemas/cron.schedule.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SSA Cron Schedule",
+  "type": "object",
+  "required": ["version", "timezone", "jobs"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "_comment": { "type": "string" },
+    "version": { "type": "string" },
+    "timezone": { "type": "string", "minLength": 1 },
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "maxConcurrency": { "type": "integer", "minimum": 1 },
+        "retryPolicy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "maxAttempts": { "type": "integer", "minimum": 1 },
+            "backoff": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": { "type": "string", "enum": ["exponential", "fixed"] },
+                "initialSeconds": { "type": "integer", "minimum": 0 },
+                "maxSeconds": { "type": "integer", "minimum": 0 }
+              }
+            },
+            "retryOn": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "timeoutSeconds": { "type": "integer", "minimum": 1 },
+        "jitterSeconds": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "jobs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/job" }
+    }
+  },
+  "$defs": {
+    "job": {
+      "type": "object",
+      "required": ["id", "enabled", "cron", "payload"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "enabled": { "type": "boolean" },
+        "featureFlag": { "type": "string" },
+        "cron": { "type": "string", "minLength": 1 },
+        "timeoutSeconds": { "type": "integer", "minimum": 1 },
+        "jitterSeconds": { "type": "integer", "minimum": 0 },
+        "payload": {
+          "type": "object",
+          "required": ["module", "fn"],
+          "additionalProperties": false,
+          "properties": {
+            "module": { "type": "string", "minLength": 1 },
+            "fn": { "type": "string", "minLength": 1 },
+            "args": { "type": "object", "additionalProperties": true }
+          }
+        }
+      }
+    }
+  }
+}

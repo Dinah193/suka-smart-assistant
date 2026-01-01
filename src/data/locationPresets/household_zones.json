@@ -1,0 +1,387 @@
+{
+  "version": "2025-10-31T12:45:00-05:00",
+  "description": "Household zones (indoor + outdoor) for Suka Smart Assistant. Used by Cleaning Session Planner, Home Dashboard, Meal Planner (for cooking zones), Storehouse visibility passes, Garden post-harvest cleaning, and Animal/butchery location resolution. Supports user-owned favorites/schedules and reverse generation from meals/garden/storehouse/animals.",
+  "meta": {
+    "sourceOfTruth": "scraper",
+    "allowHubOverrides": true,
+    "mergeStrategy": "scraper-wins",
+    "ingestionPipelines": [
+      "scraperService",
+      "importService",
+      "bookmarklet",
+      "linked-accounts"
+    ],
+    "sharedOrchestration": {
+      "emitOnUpdate": true,
+      "reason": "location-presets-update",
+      "channels": [
+        "cleaning",
+        "meals",
+        "storehouse",
+        "garden",
+        "animals",
+        "ui"
+      ]
+    },
+    "notes": [
+      "This is a CENTRAL list — households can CLONE any zone to create a user-specific variant (ex: 'Kids Bath (Upstairs)').",
+      "Cleaning and session engines should always resolve a zoneId from this file before creating a session.",
+      "Reverse generation should prefer 'priority' and 'sabbathAllowed' when picking zones."
+    ]
+  },
+  "defaults": {
+    "timezone": "America/Chicago",
+    "sabbathGuard": true,
+    "quietHoursGuard": true,
+    "onMismatch": "warn-and-suggest",
+    "uiGroups": [
+      "indoor",
+      "outdoor",
+      "utility",
+      "processing"
+    ]
+  },
+  "zones": [
+    {
+      "id": "kitchen-main",
+      "label": "Kitchen – Main",
+      "kind": "indoor",
+      "priority": 1,
+      "sabbathAllowed": true,
+      "quietHoursAllowed": true,
+      "supports": [
+        "meals.cooking-session",
+        "meals.batch-cooking",
+        "storehouse.intake.light",
+        "cleaning.daily-core"
+      ],
+      "storehouseSectionsNearby": [
+        "dry-goods",
+        "baking",
+        "oils-condiments"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "meals.cooking-session.completed",
+          "meals.batch-cooking.completed",
+          "storehouse.visibility.requested"
+        ],
+        "emit": [
+          "cleaning.session.created"
+        ],
+        "rules": [
+          {
+            "id": "after-cook",
+            "ifEvent": "meals.cooking-session.completed",
+            "generate": "cleaning.after-cooking-session"
+          },
+          {
+            "id": "after-batch",
+            "ifEvent": "meals.batch-cooking.completed",
+            "generate": "cleaning.after-batch-cooking"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "chef-hat",
+        "group": "indoor"
+      }
+    },
+    {
+      "id": "pantry-main",
+      "label": "Pantry / Storehouse – Main",
+      "kind": "indoor",
+      "priority": 1,
+      "sabbathAllowed": true,
+      "quietHoursAllowed": true,
+      "supports": [
+        "storehouse.intake.expected",
+        "storehouse.audit.requested",
+        "cleaning.storehouse-visibility-pass"
+      ],
+      "storehouseSections": [
+        "produce",
+        "dry-goods",
+        "baking",
+        "ferments",
+        "freezer"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "storehouse.intake.expected",
+          "garden.harvest.logged",
+          "animals.butchery.completed"
+        ],
+        "emit": [
+          "cleaning.session.created"
+        ],
+        "rules": [
+          {
+            "id": "intake-to-cleaning",
+            "ifEvent": "storehouse.intake.expected",
+            "generate": "cleaning.storehouse-harvest-sanitize"
+          },
+          {
+            "id": "harvest-to-cleaning",
+            "ifEvent": "garden.harvest.logged",
+            "generate": "cleaning.storehouse-harvest-sanitize"
+          },
+          {
+            "id": "butchery-to-cleaning",
+            "ifEvent": "animals.butchery.completed",
+            "generate": "cleaning.storehouse-meat-intake"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "boxes",
+        "group": "indoor"
+      }
+    },
+    {
+      "id": "dining-hub",
+      "label": "Dining / Meal Service Hub",
+      "kind": "indoor",
+      "priority": 2,
+      "sabbathAllowed": true,
+      "quietHoursAllowed": true,
+      "supports": [
+        "meals.service",
+        "meals.sabbath-cooking.planned"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "meals.sabbath-cooking.planned",
+          "calendar.feast.upcoming"
+        ],
+        "emit": [
+          "cleaning.sabbath-prep.requested"
+        ]
+      },
+      "uiHints": {
+        "icon": "candle",
+        "group": "indoor"
+      }
+    },
+    {
+      "id": "bath-laundry",
+      "label": "Bath + Laundry Zone",
+      "kind": "indoor",
+      "priority": 2,
+      "sabbathAllowed": true,
+      "quietHoursAllowed": false,
+      "supports": [
+        "cleaning.sanitation",
+        "storehouse.hygiene.restock"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "storehouse.hygiene.low"
+        ],
+        "emit": [
+          "cleaning.session.created"
+        ],
+        "rules": [
+          {
+            "id": "hygiene-low",
+            "ifEvent": "storehouse.hygiene.low",
+            "generate": "cleaning.restroom-restock"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "bath",
+        "group": "indoor"
+      }
+    },
+    {
+      "id": "entry-mudroom",
+      "label": "Entry / Mudroom",
+      "kind": "indoor",
+      "priority": 2,
+      "sabbathAllowed": true,
+      "quietHoursAllowed": true,
+      "supports": [
+        "cleaning.light-tidy",
+        "garden.harvest.staging",
+        "animals.care.staging"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.harvest.logged",
+          "animals.care-session.generated"
+        ],
+        "emit": [
+          "cleaning.session.created"
+        ],
+        "rules": [
+          {
+            "id": "harvest-staging",
+            "ifEvent": "garden.harvest.logged",
+            "generate": "cleaning.garden-bin-sanitize"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "door",
+        "group": "indoor"
+      }
+    },
+    {
+      "id": "garden-processing-area",
+      "label": "Garden Processing Area (Outdoor Sink/Table)",
+      "kind": "outdoor",
+      "priority": 1,
+      "sabbathAllowed": false,
+      "quietHoursAllowed": true,
+      "supports": [
+        "garden.harvest.processing",
+        "garden.care-session",
+        "cleaning.garden-bin-sanitize"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.harvest.logged"
+        ],
+        "emit": [
+          "cleaning.garden-bin-sanitize"
+        ]
+      },
+      "climate": {
+        "zone": "8b",
+        "heatTolerance": "high",
+        "humidityTolerance": "high"
+      },
+      "uiHints": {
+        "icon": "leaf",
+        "group": "outdoor"
+      }
+    },
+    {
+      "id": "animal-processing-bay",
+      "label": "Animal Processing / Butchery Bay",
+      "kind": "outdoor",
+      "priority": 1,
+      "sabbathAllowed": false,
+      "quietHoursAllowed": false,
+      "supports": [
+        "animals.butchery",
+        "animals.processing",
+        "cleaning.processing-area",
+        "storehouse.intake.expected"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "animals.butchery.completed",
+          "animals.large-butchery.generated"
+        ],
+        "emit": [
+          "cleaning.processing-area.requested",
+          "storehouse.intake.expected"
+        ],
+        "rules": [
+          {
+            "id": "butchery-cleaning",
+            "ifEvent": "animals.butchery.completed",
+            "generate": "cleaning.animal-processing"
+          }
+        ]
+      },
+      "climate": {
+        "zone": "8b",
+        "heatTolerance": "high"
+      },
+      "uiHints": {
+        "icon": "knife",
+        "group": "processing"
+      }
+    },
+    {
+      "id": "fermentation-room",
+      "label": "Fermentation / Preservation Room",
+      "kind": "utility",
+      "priority": 2,
+      "sabbathAllowed": true,
+      "quietHoursAllowed": true,
+      "supports": [
+        "meals.batch-cooking",
+        "storehouse.preservation",
+        "cleaning.after-cooking-session"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "storehouse.intake.from-garden",
+          "meals.batch-cooking.completed"
+        ],
+        "emit": [
+          "cleaning.after-cooking-session"
+        ]
+      },
+      "uiHints": {
+        "icon": "jar",
+        "group": "utility"
+      }
+    },
+    {
+      "id": "freezer-room",
+      "label": "Freezer / Cold Storage Room",
+      "kind": "utility",
+      "priority": 2,
+      "sabbathAllowed": true,
+      "quietHoursAllowed": true,
+      "supports": [
+        "storehouse.intake.expected",
+        "animals.butchery",
+        "garden.harvest.cold"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "animals.butchery.completed",
+          "garden.harvest.logged"
+        ],
+        "emit": [
+          "cleaning.storehouse-meat-intake",
+          "cleaning.storehouse-harvest-sanitize"
+        ]
+      },
+      "uiHints": {
+        "icon": "snowflake",
+        "group": "utility"
+      }
+    }
+  ],
+  "userCanSaveFavorites": true,
+  "favoritesTemplate": [
+    {
+      "id": "fav-zone-sabbath-prep",
+      "source": "system",
+      "cloneOf": "kitchen-main",
+      "label": "My Kitchen Sabbath Prep",
+      "allowUserScheduleOverride": true
+    },
+    {
+      "id": "fav-zone-harvest-to-pantry",
+      "source": "system",
+      "cloneOf": "garden-processing-area",
+      "label": "My Harvest → Pantry Flow",
+      "allowUserScheduleOverride": true
+    }
+  ],
+  "userFavoritePolicy": {
+    "maxPerHousehold": 50,
+    "allowCustomSchedule": true,
+    "allowCustomGuards": [
+      "sabbathGuard",
+      "quietHoursGuard"
+    ]
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "$schema": "file:///c:/Users/larho/suka-smart-assistant/tools/ai-pack/schemas/knip.report.schema.json",
+  "id": "unused-deps-exports",
+  "version": 1,
+  "meta": {
+    "projectName": "suka-smart-assistant",
+    "generatedBy": "ai-pack",
+    "generatedAt": "__AUTO__",
+    "rootDir": "C:/Users/larho/suka-smart-assistant"
+  },
+  "settings": {
+    "aliases": {
+      "@": "src",
+      "~": "src",
+      "@app": "src/app",
+      "@features": "src/app/features",
+      "@services": "src/services",
+      "@engines": "src/engines",
+      "@managers": "src/managers",
+      "@components": "src/components",
+      "@stores": "src/stores"
+    },
+    "entryPoints": [
+      "src/main.jsx",
+      "src/pages/home.jsx",
+      "src/services/automation/runtime.js",
+      "src/services/session/RelativeScheduler.js",
+      "src/services/session/PrepSessionOrchestrator.js",
+      "src/engines/MealPlanEngine.js",
+      "src/managers/GardenQueueManager.js",
+      "src/managers/AnimalQueueManager.js",
+      "src/features/scan-compare-trust/index.js",
+      "src/app/features/scan-compare-trust/components/Scanner.jsx",
+      "src/app/features/scan-compare-trust/components/ScanSheet.jsx",
+      "src/features/scan-compare-trust/services/workers/ocr.worker.js",
+      "src/features/scan-compare-trust/services/pricing/StoreCatalogAdapters.js",
+      "src/features/scan-compare-trust/services/coupons/CouponService.js",
+      "src/features/scan-compare-trust/services/coupons/providers/store-integrations/aldi.js",
+      "src/features/scan-compare-trust/services/coupons/providers/store-integrations/sams.js",
+      "src/features/scan-compare-trust/services/coupons/CycleAnalyzer.js",
+      "src/features/scan-compare-trust/automation/events.catalog.js"
+    ],
+    "globs": {
+      "project": [
+        "src/**/*.{js,jsx,ts,tsx}",
+        "src/**/*.{md,mdx}",
+        "src/**/*.{css,scss}",
+        "public/**/*",
+        "schemas/**/*.json",
+        "tools/**/*.mjs"
+      ],
+      "workers": [
+        "src/**/*worker.{js,ts}",
+        "src/**/*.worker.{js,ts}"
+      ],
+      "fixtures": [
+        "src/features/scan-compare-trust/data/**/*",
+        "src/features/scan-compare-trust/data/fixtures/**/*"
+      ],
+      "pdfs": [
+        "src/features/scan-compare-trust/data/fixtures/sample-circulars/**/*.pdf"
+      ]
+    }
+  },
+  "ignore": {
+    "dependencies": [
+      "eslint*",
+      "prettier",
+      "husky",
+      "lint-staged",
+      "vite",
+      "@vitejs/*",
+      "vite-plugin-*",
+      "typescript",
+      "@types/*",
+      "jest",
+      "vitest",
+      "@testing-library/*",
+      "postcss",
+      "autoprefixer",
+      "tailwindcss"
+    ],
+    "exports": [
+      "src/**/index.{js,jsx,ts,tsx}",
+      "src/**/_app.{js,jsx,ts,tsx}",
+      "src/**/_routes.{js,jsx,ts,tsx}",
+      "src/app/features/**/index.{js,jsx,ts,tsx}",
+      "src/**/env.d.ts",
+      "src/**/mdx.d.ts"
+    ],
+    "files": [
+      "src/features/scan-compare-trust/data/fixtures/**/*",
+      "src/features/scan-compare-trust/data/templates/**/*",
+      "src/features/scan-compare-trust/data/fixtures/sample-circulars/**/*",
+      "src/features/scan-compare-trust/data/**/*.pdf",
+      "docs/**/*",
+      "**/*.md",
+      "**/*.mdx"
+    ],
+    "binaries": []
+  },
+  "ci": {
+    "thresholds": {
+      "maxUnusedDependencies": 0,
+      "maxUnusedDevDependencies": 3,
+      "maxUnusedExports": 15,
+      "maxOrphanFiles": 25
+    },
+    "failOnExceed": true
+  },
+  "actions": {
+    "onUnusedDependency": "flag",
+    "onUnusedDevDependency": "suggest-remove",
+    "onUnusedExport": "open-prune-list",
+    "onOrphanFile": "suggest-move-to-fixtures"
+  },
+  "report": {
+    "summary": {
+      "unusedDependencies": [],
+      "unusedDevDependencies": [],
+      "unusedExports": [],
+      "orphanFiles": []
+    },
+    "items": {
+      "dependencies": [],
+      "devDependencies": [],
+      "exports": [],
+      "files": []
+    },
+    "falsePositives": []
+  },
+  "explain": {
+    "orchestration": [
+      {
+        "name": "Automation Runtime",
+        "anchors": [
+          "src/services/automation/runtime.js",
+          "schemas/automation.schedule.schema.json",
+          "src/features/**/automation/**/*.json"
+        ],
+        "emits": [
+          "automation:tick",
+          "automation:job:enqueue",
+          "session:start",
+          "session:pause",
+          "session:resume",
+          "session:complete"
+        ],
+        "consumes": [
+          "scan:pricebook:update",
+          "garden:queue:build",
+          "animal:queue:build",
+          "meal:plan:build"
+        ]
+      },
+      {
+        "name": "Scan • Compare • Trust",
+        "anchors": [
+          "src/app/features/scan-compare-trust/components/Scanner.jsx",
+          "src/app/features/scan-compare-trust/components/ScanSheet.jsx",
+          "src/features/scan-compare-trust/services/workers/ocr.worker.js"
+        ],
+        "emits": [
+          "scan:parsed",
+          "price:normalized",
+          "coupon:candidates",
+          "cycle:learn:sample"
+        ],
+        "consumes": [
+          "inventory:update",
+          "meal:plan:hint",
+          "storehouse:goal:hint"
+        ]
+      },
+      {
+        "name": "Planning Engines",
+        "anchors": [
+          "src/engines/MealPlanEngine.js",
+          "src/managers/GardenQueueManager.js",
+          "src/managers/AnimalQueueManager.js",
+          "src/services/session/RelativeScheduler.js",
+          "src/services/session/PrepSessionOrchestrator.js"
+        ],
+        "emits": [
+          "plan:draft",
+          "plan:favorited",
+          "session:scheduled",
+          "calendar:write:request"
+        ],
+        "consumes": [
+          "inventory:*",
+          "pricebook:*",
+          "weather:*",
+          "quiet-hours:*"
+        ]
+      }
+    ],
+    "layout": {
+      "pages": ["src/pages/home.jsx"],
+      "features": ["src/app/features/scan-compare-trust/**"],
+      "services": ["src/services/**"],
+      "engines": ["src/engines/**", "src/managers/**"],
+      "schemas": ["schemas/**"],
+      "tools": ["tools/**"]
+    }
+  }
+}

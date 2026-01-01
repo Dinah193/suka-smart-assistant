@@ -1,0 +1,491 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "2025-10-31T13:00:00-05:00",
+  "description": "Meat yield curve for Beef – Brangus. Multi-domain: animals → butchery → storehouse → meal planner → cleaning → garden → reverse generation.",
+  "__notes": [
+    "System file. User overrides should be stored in Dexie/local DB, not in this JSON.",
+    "Reverse generation: meal/storehouse requests can compute required carcass/live animals."
+  ],
+  "animal": {
+    "species": "cattle",
+    "breed": "Brangus",
+    "class": "beef",
+    "typical_live_weight_lbs": [950, 1050, 1150, 1250],
+    "default_live_weight_lbs": 1150,
+    "live_to_hanging_yield_pct": 0.6,
+    "hanging_to_carcass_yield_pct": 0.72,
+    "default_hanging_days": 10,
+    "butchery_style_default": "household-standard",
+    "butchery_supported_styles": [
+      "household-standard",
+      "bbq/smoking",
+      "low-waste",
+      "bulk-ground",
+      "halal/torah-compliant-no-unclean-cross-contamination"
+    ],
+    "torah_compliant_profile": {
+      "allow_unclean_animals": false,
+      "separate_tools_required": true,
+      "separate_surfaces_required": true,
+      "blood_draining_required": true,
+      "notes": "Used by cleaning/sanitation tasks to pick torah-safe cleaners."
+    }
+  },
+  "yield_model": {
+    "formula_hint": "carcass = live_weight * live_to_hanging_yield_pct * hanging_to_carcass_yield_pct",
+    "example": {
+      "live_weight_lbs": 1150,
+      "live_to_hanging_yield_pct": 0.6,
+      "hanging_to_carcass_yield_pct": 0.72,
+      "calculated_hanging_weight_lbs": 690,
+      "calculated_carcass_weight_lbs": 496.8
+    },
+    "primal_breakdown_pct": {
+      "chuck": 0.27,
+      "rib": 0.09,
+      "loin": 0.17,
+      "round": 0.22,
+      "brisket": 0.05,
+      "plate_flank": 0.07,
+      "other_trim_fat_bones": 0.13
+    },
+    "retail_cut_defaults": [
+      {
+        "cut_id": "beef_ground",
+        "label": "Ground Beef 85/15",
+        "source_primals": ["chuck", "round", "trim"],
+        "default_pct_of_carcass": 0.18,
+        "storehouse_section_hint": "Meat → Ground / Mince → Beef",
+        "mealplanner_tags": ["tacos", "spaghetti", "chili", "meatloaf", "batch-cookable"],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "pressure-can", "dehydrate"],
+        "cleaning_profile_ref": "meat_heavy_sanitation"
+      },
+      {
+        "cut_id": "beef_roast_chuck",
+        "label": "Chuck Roast",
+        "source_primals": ["chuck"],
+        "default_pct_of_carcass": 0.06,
+        "storehouse_section_hint": "Meat → Roasts → Beef",
+        "mealplanner_tags": ["pot-roast", "slow-cooker", "feast"],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "smoke"],
+        "cleaning_profile_ref": "meat_heavy_sanitation"
+      },
+      {
+        "cut_id": "beef_steak_ribeye",
+        "label": "Ribeye Steak",
+        "source_primals": ["rib"],
+        "default_pct_of_carcass": 0.03,
+        "storehouse_section_hint": "Meat → Steaks → Premium",
+        "mealplanner_tags": ["grill", "pan-sear", "feast-day"],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "vac-seal"],
+        "cleaning_profile_ref": "meat_standard_sanitation"
+      },
+      {
+        "cut_id": "beef_steak_sirloin",
+        "label": "Sirloin / Loin Steak",
+        "source_primals": ["loin"],
+        "default_pct_of_carcass": 0.04,
+        "storehouse_section_hint": "Meat → Steaks → Standard",
+        "mealplanner_tags": ["weekday", "marinate", "stir-fry"],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "vac-seal"],
+        "cleaning_profile_ref": "meat_standard_sanitation"
+      },
+      {
+        "cut_id": "beef_brisket",
+        "label": "Brisket (whole or split)",
+        "source_primals": ["brisket"],
+        "default_pct_of_carcass": 0.05,
+        "storehouse_section_hint": "Meat → Roasts → Brisket",
+        "mealplanner_tags": ["smoke", "holy-day", "batch", "event"],
+        "inventory_unit": "lb",
+        "preservation": ["smoke", "freeze"],
+        "cleaning_profile_ref": "meat_heavy_sanitation"
+      },
+      {
+        "cut_id": "beef_soup_bones",
+        "label": "Soup / Marrow Bones",
+        "source_primals": ["other_trim_fat_bones"],
+        "default_pct_of_carcass": 0.03,
+        "storehouse_section_hint": "Meat → Bones / Broth Base",
+        "mealplanner_tags": ["bone-broth", "stock"],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "roast-then-freeze"],
+        "cleaning_profile_ref": "meat_heavy_sanitation"
+      },
+      {
+        "cut_id": "beef_organs",
+        "label": "Organs (liver, heart, tongue)",
+        "source_primals": ["offal"],
+        "default_pct_of_carcass": 0.01,
+        "storehouse_section_hint": "Meat → Organs",
+        "mealplanner_tags": ["nutrient-dense"],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "meat_heavy_sanitation"
+      }
+    ]
+  },
+  "storehouse_mapping": {
+    "purpose": "Map butchered output to storehouse goals and inventory execution.",
+    "sections": [
+      {
+        "id": "STH-MEAT-FRESH",
+        "label": "Meat → Fresh / Chilled",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "beef_ground",
+          "beef_roast_chuck",
+          "beef_steak_sirloin"
+        ],
+        "grocery_inspo": [
+          "Whole Foods – Meat",
+          "Kroger – Meat"
+        ]
+      },
+      {
+        "id": "STH-MEAT-FROZEN",
+        "label": "Meat → Frozen",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "beef_ground",
+          "beef_roast_chuck",
+          "beef_steak_ribeye",
+          "beef_brisket",
+          "beef_soup_bones"
+        ],
+        "grocery_inspo": [
+          "Costco – Frozen Meats"
+        ]
+      },
+      {
+        "id": "STH-MEAT-PRESERVED",
+        "label": "Meat → Preserved / Canned / Smoked",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "beef_ground",
+          "beef_brisket",
+          "beef_soup_bones"
+        ],
+        "grocery_inspo": [
+          "Amish bulk"
+        ]
+      }
+    ],
+    "reverse_generation_rules": [
+      {
+        "id": "RG-MEAL-TO-BEEF",
+        "when_event": "mealplanner.requests.meat.beef",
+        "action": "estimate required beef → map to carcass → map to live animals",
+        "notes": "Emit automation.schedule.request for co-op butchery day."
+      },
+      {
+        "id": "RG-STOREHOUSE-TO-BUTCHERY",
+        "when_event": "storehouse.goal.short.beef-ground",
+        "action": "trigger animal.acquisition.plan('beef-brangus') and butchery.session.generate"
+      }
+    ]
+  },
+  "meal_planner_hooks": {
+    "default_meal_templates": [
+      {
+        "id": "mt-beef-ground-weeknight",
+        "label": "Weeknight Ground Beef (2 meals)",
+        "uses_cuts": [
+          {
+            "cut_id": "beef_ground",
+            "qty_lb": 2
+          }
+        ],
+        "suggested_sides": [
+          "rice",
+          "roasted garden veg",
+          "flatbread"
+        ],
+        "garden_suggestions": [
+          "tomatoes",
+          "onions",
+          "garlic",
+          "bell peppers"
+        ],
+        "cleaning_profiles": [
+          "meat_standard_sanitation"
+        ]
+      },
+      {
+        "id": "mt-beef-roast-feast",
+        "label": "Feast Roast w/ Garden Root Veg",
+        "uses_cuts": [
+          {
+            "cut_id": "beef_roast_chuck",
+            "qty_lb": 3
+          }
+        ],
+        "suggested_sides": [
+          "root veg",
+          "greens",
+          "bread"
+        ],
+        "garden_suggestions": [
+          "carrot",
+          "beet",
+          "turnip",
+          "collards",
+          "kale"
+        ],
+        "cleaning_profiles": [
+          "meat_heavy_sanitation",
+          "oven_tray_deep_clean"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "can_generate_animal_plan": true,
+      "handler_event": "animal.plan.requested",
+      "notes": "When a meal plan locks in a beef amount, emit this so the Animal module can propose slaughter/purchase."
+    }
+  },
+  "garden_integration": {
+    "purpose": "Tie beef meals to garden crops for sauces, sides, preservation.",
+    "crops_to_recommend": [
+      {
+        "crop": "tomato",
+        "use_case": "sauces for beef ground dishes",
+        "harvest_window": "summer",
+        "preservation": ["can", "freeze"],
+        "cleaning_profile_ref": "garden_light"
+      },
+      {
+        "crop": "onion",
+        "use_case": "base for roasts and stews",
+        "harvest_window": "late summer",
+        "preservation": ["cure", "store dry"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "garlic",
+        "use_case": "seasoning for beef",
+        "harvest_window": "mid-summer",
+        "preservation": ["dry", "powder"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "carrot",
+        "use_case": "roasts and stocks",
+        "harvest_window": "spring-fall",
+        "preservation": ["pressure can", "freeze", "dehydrate"],
+        "cleaning_profile_ref": "garden_root"
+      }
+    ],
+    "reverse_generation": {
+      "when_meat_menu_fixed_event": "garden.plan.adjust.requested",
+      "notes": "If beef-heavy menu, ask garden to supply onions/carrots or import seeds."
+    }
+  },
+  "animal_care_and_butchery": {
+    "pre_slaughter_care_checklist": [
+      "fasting_window_12hr",
+      "clean_water_available",
+      "stress_minimized",
+      "inspect_for_disease",
+      "torah_compliant_tools_ready"
+    ],
+    "butchery_session_template": {
+      "id": "butchery-session-beef-brangus",
+      "label": "Beef Brangus – Standard Household Butchery",
+      "estimated_duration_hours": 6,
+      "roles_needed": [
+        "primary-butcher",
+        "assistant",
+        "sanitation-runner"
+      ],
+      "outputs": [
+        "primal_cuts",
+        "retail_cuts",
+        "bones",
+        "offal",
+        "rendering_fat"
+      ],
+      "emits_events": [
+        "inventory.add.requested",
+        "storehouse.update.requested",
+        "cleaning.plan.requested",
+        "mealplan.refresh.requested"
+      ],
+      "scheduling": {
+        "supports_user_favorites": true,
+        "supports_recurring": false,
+        "supports_coop_mode": true,
+        "coop_mode_notes": "Multiple households can line up animals and share labor."
+      }
+    },
+    "cleaning_after_butchery": {
+      "cleaning_profile_id": "meat_heavy_sanitation",
+      "label": "Post-Butchery Heavy Sanitation",
+      "tasks": [
+        "bag offal waste (compost/render if allowed)",
+        "wash cutting boards, tables, knives",
+        "sanitize with torah-safe cleaner",
+        "mop floor",
+        "launder aprons/towels"
+      ],
+      "emits_events": [
+        "cleaning.log.added",
+        "inventory.cleaning-supplies.decrement"
+      ]
+    }
+  },
+  "cleaning_integration": {
+    "profiles": [
+      {
+        "id": "meat_heavy_sanitation",
+        "label": "Meat – Heavy Sanitation",
+        "zone": "Kitchen / Butchery Area",
+        "supplies": [
+          "hot_water",
+          "food_safe_disinfectant",
+          "scrub_brush",
+          "mop_bucket",
+          "laundry_detergent"
+        ]
+      },
+      {
+        "id": "meat_standard_sanitation",
+        "label": "Meat – Standard Sanitation",
+        "zone": "Kitchen",
+        "supplies": [
+          "dish_soap",
+          "surface_spray",
+          "towels"
+        ]
+      },
+      {
+        "id": "garden_root",
+        "label": "Garden Root Veg Cleanup",
+        "zone": "Utility / Outdoor Sink",
+        "supplies": [
+          "hose",
+          "brush",
+          "drain_screens"
+        ]
+      },
+      {
+        "id": "garden_light",
+        "label": "Garden Light Wash",
+        "zone": "Kitchen",
+        "supplies": [
+          "sink_sanitizer",
+          "drying_rack"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "when_butchery_scheduled_event": "cleaning.session.auto-created",
+      "when_heavy_meat_meal_event": "cleaning.session.suggested"
+    }
+  },
+  "scheduling_and_favorites": {
+    "can_be_favorited": true,
+    "favorite_key": "yieldcurve:meat:beef_brangus",
+    "suggested_schedules": [
+      {
+        "id": "sched-butcher-november",
+        "label": "Annual November Beef Butchery",
+        "rule": "FREQ=YEARLY;BYMONTH=11;BYDAY=SA;BYSETPOS=3",
+        "creates": [
+          "butchery-session-beef-brangus",
+          "cleaning:meat_heavy_sanitation",
+          "storehouse:update",
+          "mealplan:refresh"
+        ]
+      },
+      {
+        "id": "sched-quarter-beef",
+        "label": "Quarter Beef Every 3 Months",
+        "rule": "FREQ=MONTHLY;INTERVAL=3;BYDAY=SA;BYSETPOS=2",
+        "creates": [
+          "butchery-session-beef-brangus"
+        ]
+      }
+    ],
+    "shared_orchestration": {
+      "event_bus_path": "window.__suka.eventBus",
+      "events_emitted": [
+        "yieldcurve.loaded",
+        "yieldcurve.butchery.session.generated",
+        "storehouse.goal.derived",
+        "cleaning.session.derived",
+        "mealplan.refresh.requested"
+      ],
+      "events_listened_for": [
+        "automation.schedule.request",
+        "mealplanner.menu.locked",
+        "storehouse.goal.short",
+        "garden.plan.adjust.requested"
+      ]
+    }
+  },
+  "reverse_generation": {
+    "enabled": true,
+    "scenarios": [
+      {
+        "id": "RG-01",
+        "source": "meal-planner",
+        "input_example": {
+          "beef_ground_lb": 20,
+          "beef_roast_lb": 12
+        },
+        "output_example": {
+          "required_carcass_lb": 180,
+          "required_live_animals": 1,
+          "suggested_date": "next-available-butchery-slot",
+          "auto_cleaning_sessions": [
+            "meat_heavy_sanitation"
+          ]
+        }
+      },
+      {
+        "id": "RG-02",
+        "source": "storehouse",
+        "input_example": {
+          "target_section": "STH-MEAT-FROZEN",
+          "target_lb": 250
+        },
+        "output_example": {
+          "required_carcass_lb": 385,
+          "required_live_animals": 1,
+          "notes": "385 is example; app should recalc using real yield."
+        }
+      }
+    ],
+    "notes": "UI should expose 'Generate Animal Plan' or 'Generate Butchery Day' using these patterns."
+  },
+  "user_overrides_placeholder": {
+    "explanation": "User-specific data lives in Dexie; these keys can be overridden.",
+    "keys": [
+      "animal.live_to_hanging_yield_pct",
+      "animal.hanging_to_carcass_yield_pct",
+      "yield_model.retail_cut_defaults",
+      "scheduling_and_favorites.suggested_schedules"
+    ]
+  },
+  "interop": {
+    "import_sources_supported": [
+      "csv-butchery-yields",
+      "google-sheets-yields",
+      "extension.capture.butchery",
+      "pinterest-board-to-planner",
+      "recipe-site-beef-detector"
+    ],
+    "export_targets_supported": [
+      "household.storehouse",
+      "household.inventory",
+      "community.coop-planner",
+      "family-fund.hub",
+      "pdf-labels"
+    ]
+  }
+}

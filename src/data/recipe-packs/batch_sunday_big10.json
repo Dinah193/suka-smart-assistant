@@ -1,0 +1,323 @@
+{
+  "id": "batch-sunday-big10",
+  "title": "Batch Sunday: Big 10 (Soul-Food Forward)",
+  "description": "A 10-dish batch set for Sunday cook-ups: freezable mains, mix-and-match sides, and flavor bases to power weeknights. Soul-Food forward with Caribbean, West African, Cajun, Creole, BBQ, Herb-Garlic, Citrus-Chili notes.",
+  "tags": [
+    "collection",
+    "batch:sunday",
+    "diet:no-pork",
+    "prep:freezer-friendly",
+    "palette:soul-food"
+  ],
+  "flavor_profile": [
+    "Soul Food",
+    "Caribbean",
+    "West African",
+    "Cajun",
+    "Creole",
+    "BBQ",
+    "Herb-Garlic",
+    "Citrus-Chili",
+    "Pantry-First",
+    "Garden-Fresh"
+  ],
+  "meta": {
+    "curation_notes": "Focus on big yield + low friction: sheet pans, pressure cooker, braise. Include bases (sofrito, pepper mash) to accelerate weeknight cooking.",
+    "serving_plan": "Cook on Sunday; cool fast; portion; freeze. Stage 2-3 fresh accents midweek (slaw, greens, herbs).",
+    "storage_policy": "2-4 days fridge (≤40°F / 4°C); 2-3 months freezer in air-tight, labeled portions.",
+    "labels_template": "YYYY-MM-DD | dish | portion size | reheating notes",
+    "craft_opportunities": [
+      "Pepper mash ferment",
+      "Non-pork bacon (turkey or beef)",
+      "Sofrito base",
+      "Quick pickles"
+    ]
+  },
+  "items": [
+    {
+      "id": "jerk-chicken-bulk-tray",
+      "title": "Caribbean Jerk Chicken (Bulk Tray)",
+      "description": "Family-size tray of jerk-marinated chicken with peppers and onion—perfect for bowls, tacos, or salads.",
+      "flavor_profile": ["Caribbean", "Citrus-Chili", "Pantry-First"],
+      "tags": ["flavor:Caribbean", "sheet-pan", "batch", "protein:chicken"],
+      "meta": { "yield": "10-12 servings", "storage": "3 days fridge / 3 months freezer", "reheat": "Oven 350°F 10–12 min or skillet rewarm" },
+      "ingredients": [
+        "5 lb chicken thighs, trimmed",
+        "2 bell peppers, sliced",
+        "1 large red onion, wedges",
+        "1/2 cup jerk marinade or spice + oil",
+        "2 limes, juice",
+        "Salt to taste"
+      ],
+      "steps": [
+        "Heat oven to 425°F / 220°C; line two sheet pans.",
+        "Toss chicken & veg with marinade, lime, salt. Spread in single layers.",
+        "Roast 30–35 min until caramelized; rest 10 min; slice. Portion and chill quickly."
+      ],
+      "images": []
+    },
+    {
+      "id": "west-african-peanut-stew-batch",
+      "title": "West African Peanut Stew (Batch Base)",
+      "description": "Creamy peanut-tomato base with greens; add chicken or beans across the week.",
+      "flavor_profile": ["West African", "Herb-Garlic"],
+      "tags": ["flavor:West African", "stew", "batch", "veg:greens"],
+      "meta": { "yield": "12 cups (8–10 servings)", "storage": "4 days fridge / 3 months freezer", "reheat": "Simmer 5–8 min; thin with broth if needed" },
+      "ingredients": [
+        "2 tbsp oil",
+        "2 onions, diced",
+        "4 cloves garlic, minced",
+        "1/4 cup tomato paste",
+        "1.5 cups peanut butter",
+        "10 cups broth or water",
+        "1 lb greens (spinach/kale), chopped",
+        "Salt, chili flake"
+      ],
+      "steps": [
+        "Sauté onion & garlic in oil 5 min. Add tomato paste; cook 1 min.",
+        "Whisk in peanut butter & broth; simmer 15–20 min.",
+        "Add greens; simmer 5 min. Season. Cool, portion, label."
+      ],
+      "images": []
+    },
+    {
+      "id": "creole-red-beans-batch-skillet",
+      "title": "Creole Red Beans (Big Skillet Batch, No Pork)",
+      "description": "Smoky-spiced red beans for rice bowls, wraps, or breakfast bowls.",
+      "flavor_profile": ["Creole", "Pantry-First"],
+      "tags": ["flavor:Creole", "beans", "batch", "diet:no-pork"],
+      "meta": { "yield": "10–12 servings", "storage": "4 days fridge / 3 months freezer", "reheat": "Microwave or simmer 5–7 min" },
+      "ingredients": [
+        "2 tbsp oil",
+        "2 onions, diced",
+        "3 celery stalks, diced",
+        "1 green bell pepper, diced",
+        "4 cloves garlic, minced",
+        "2 tsp smoked paprika",
+        "2 tsp Creole seasoning",
+        "4 cans red beans, drained",
+        "3 cups broth",
+        "Salt, hot sauce"
+      ],
+      "steps": [
+        "Sauté onion, celery, bell pepper 6–8 min. Add garlic 30 sec.",
+        "Add paprika & Creole seasoning; toast 30 sec.",
+        "Add beans & broth; simmer 15–20 min to thicken. Season to taste. Cool, portion."
+      ],
+      "images": []
+    },
+    {
+      "id": "bbq-pulled-beef-instantpot",
+      "title": "BBQ Pulled Beef (Pressure Cooker, No Pork)",
+      "description": "Shreddable beef with tangy BBQ sauce; ideal for sandwiches, bowls, and baked potatoes.",
+      "flavor_profile": ["BBQ", "Soul Food"],
+      "tags": ["flavor:BBQ", "pressure-cooker", "batch", "protein:beef", "diet:no-pork"],
+      "meta": { "yield": "10–12 sandwiches", "storage": "4 days fridge / 3 months freezer", "reheat": "Sauce + simmer 10 min or oven 300°F covered 20 min" },
+      "ingredients": [
+        "4 lb beef chuck roast, large chunks",
+        "1 onion, sliced",
+        "1 cup BBQ sauce",
+        "1/2 cup broth",
+        "1 tbsp smoked paprika",
+        "1 tsp garlic powder",
+        "Salt, pepper"
+      ],
+      "steps": [
+        "Season beef with salt/pepper. Add all to pressure cooker.",
+        "Cook High Pressure 60 min; natural release 15 min.",
+        "Shred; add extra BBQ sauce if needed. Portion with juices."
+      ],
+      "images": []
+    },
+    {
+      "id": "cajun-shrimp-rice-bulk",
+      "title": "Cajun Shrimp & Rice (Bulk Skillet)",
+      "description": "Spicy shrimp folded into seasoned rice—pack into 2-cup freezer portions.",
+      "flavor_profile": ["Cajun", "Soul Food"],
+      "tags": ["flavor:Cajun", "grain:rice", "batch", "protein:shrimp"],
+      "meta": { "yield": "8–10 portions", "storage": "3 days fridge / 2 months freezer", "reheat": "Covered microwave or skillet with splash of water" },
+      "ingredients": [
+        "2 tbsp oil",
+        "1.5 lb shrimp, peeled",
+        "1 tbsp Cajun seasoning",
+        "6 cups cooked rice (day-old ideal)",
+        "1 bell pepper, diced",
+        "2 green onions, sliced",
+        "Salt, lemon wedges"
+      ],
+      "steps": [
+        "Toss shrimp with Cajun seasoning; sear in oil 2–3 min total; remove.",
+        "Stir-fry pepper 2 min; add rice; toss to heat through.",
+        "Fold in shrimp & green onion; season. Cool & portion."
+      ],
+      "images": []
+    },
+    {
+      "id": "herb-garlic-chicken-thighs-bulk",
+      "title": "Herb-Garlic Chicken Thighs (Roaster Pan)",
+      "description": "Juicy herb chicken for salads, wraps, pastas, or grain bowls.",
+      "flavor_profile": ["Herb-Garlic", "Garden-Fresh"],
+      "tags": ["flavor:Herb-Garlic", "roast", "batch", "protein:chicken"],
+      "meta": { "yield": "10–12 servings", "storage": "4 days fridge / 3 months freezer", "reheat": "Skillet rewarm or oven 325°F 10–12 min" },
+      "ingredients": [
+        "5 lb chicken thighs",
+        "2 tbsp dried herb blend (parsley/thyme/oregano)",
+        "6 cloves garlic, minced",
+        "2 tbsp oil",
+        "1/2 cup broth for tray",
+        "Salt, pepper"
+      ],
+      "steps": [
+        "Heat oven to 400°F / 205°C. Season chicken with herbs, garlic, salt, pepper.",
+        "Arrange in roaster; add broth. Roast 35–40 min to 175°F.",
+        "Rest, slice, and portion with juices."
+      ],
+      "images": []
+    },
+    {
+      "id": "citrus-chili-roasted-veggies-bulk",
+      "title": "Citrus-Chili Roasted Veg (Mix-In Base)",
+      "description": "Zesty tray of mixed veg to fold into bowls, tacos, or omelets.",
+      "flavor_profile": ["Citrus-Chili", "Garden-Fresh"],
+      "tags": ["flavor:Citrus-Chili", "sheet-pan", "batch", "veg:roasted"],
+      "meta": { "yield": "8–10 sides", "storage": "4 days fridge / 2 months freezer", "reheat": "Skillet sauté or oven 375°F 8–10 min" },
+      "ingredients": [
+        "2 lb mixed veg (cauliflower, broccoli, carrots, peppers)",
+        "2 tbsp oil",
+        "Zest + juice of 2 limes or oranges",
+        "1–2 tsp chili flakes",
+        "Salt, pepper"
+      ],
+      "steps": [
+        "Heat oven to 425°F / 220°C. Toss veg with oil, citrus, chili, salt.",
+        "Roast on two trays 20–25 min, tossing once. Cool & portion."
+      ],
+      "images": []
+    },
+    {
+      "id": "collards-smoked-turkey-pressure",
+      "title": "Pressure Cooker Collards with Smoked Turkey",
+      "description": "Tender greens with smoky depth—reheat friendly for the week.",
+      "flavor_profile": ["Soul Food", "Herb-Garlic"],
+      "tags": ["flavor:Soul Food", "greens", "pressure-cooker", "diet:no-pork"],
+      "meta": { "yield": "8–10 sides", "storage": "4 days fridge / 2 months freezer", "reheat": "Simmer 5–7 min" },
+      "ingredients": [
+        "2 lb collard greens, chopped",
+        "1 smoked turkey wing or drumstick",
+        "1 onion, sliced",
+        "3 cloves garlic, smashed",
+        "4 cups broth",
+        "1 tsp apple cider vinegar",
+        "Salt, pepper, chili flake"
+      ],
+      "steps": [
+        "Add all to pressure cooker; cook High 20 min; natural release 10 min.",
+        "Adjust seasoning with vinegar, salt, pepper. Portion with pot liquor."
+      ],
+      "images": []
+    },
+    {
+      "id": "coconut-rice-ricecooker-batch",
+      "title": "Coconut Rice (Rice Cooker Batch)",
+      "description": "Lightly sweet, aromatic rice to pair with Caribbean & West African mains.",
+      "flavor_profile": ["Caribbean"],
+      "tags": ["flavor:Caribbean", "grain:rice", "appliance:ricecooker", "batch"],
+      "meta": { "yield": "10 cups cooked", "storage": "4 days fridge / 2 months freezer", "reheat": "Microwave with splash of water, covered" },
+      "ingredients": [
+        "4 cups jasmine rice, rinsed",
+        "2 cans (13.5 oz) coconut milk",
+        "3 cups water",
+        "1 tsp salt"
+      ],
+      "steps": [
+        "Add all to rice cooker; cook per appliance instructions.",
+        "Fluff; spread to cool; portion."
+      ],
+      "images": []
+    },
+    {
+      "id": "skillet-cornbread-muffins-freezer",
+      "title": "Skillet Cornbread (Muffin Portions, Freezer-Ready)",
+      "description": "Moist cornbread baked as muffins for easy thaw & toast.",
+      "flavor_profile": ["Soul Food"],
+      "tags": ["flavor:Soul Food", "bake", "batch", "freezer"],
+      "meta": { "yield": "18 muffins", "storage": "3 days room temp / 2 months freezer", "reheat": "Toaster or oven 350°F 6–8 min" },
+      "ingredients": [
+        "2 cups cornmeal",
+        "1 cup flour (or GF blend)",
+        "1/4 cup sugar (optional)",
+        "1 tbsp baking powder",
+        "1 tsp salt",
+        "2 cups buttermilk (or milk + 1 tbsp vinegar)",
+        "2 eggs",
+        "1/4 cup oil or melted butter"
+      ],
+      "steps": [
+        "Heat oven to 400°F / 205°C; grease muffin trays.",
+        "Whisk dry; whisk wet; combine; rest 5 min.",
+        "Fill cups; bake 12–15 min until golden. Cool & freeze."
+      ],
+      "images": []
+    },
+
+    {
+      "id": "sofrito-green-base-quart",
+      "title": "Green Sofrito Base (1 Quart)",
+      "description": "Herb-garlic pepper base—freeze in cubes to jump-start pans, beans, and rice.",
+      "flavor_profile": ["Herb-Garlic", "Caribbean"],
+      "tags": ["flavor:Herb-Garlic", "flavor:Caribbean", "craft", "base"],
+      "meta": { "yield": "1 quart (32 cubes)", "storage": "1 week fridge / 3 months freezer", "reheat": "Use from frozen; 1–2 cubes per pan" },
+      "ingredients": [
+        "2 green bell peppers, chunks",
+        "2 bunches cilantro (or culantro), rough chopped",
+        "1 head garlic, peeled",
+        "1 onion, chunks",
+        "1/2 cup oil",
+        "1 tsp salt"
+      ],
+      "steps": [
+        "Blend all smooth. Portion into ice cube trays.",
+        "Freeze; pop into bags; label."
+      ],
+      "images": []
+    },
+    {
+      "id": "pepper-mash-quick-start",
+      "title": "Pepper Mash Ferment (Quick Start Jar)",
+      "description": "Small chili mash to fuel sauces all month.",
+      "flavor_profile": ["Citrus-Chili"],
+      "tags": ["flavor:Citrus-Chili", "craft", "ferment"],
+      "meta": { "yield": "1 pint", "storage": "Refrigerated after 5–7 day ferment; 3 months", "reheat": "n/a" },
+      "ingredients": [
+        "2 cups chopped chilies",
+        "1.5 tsp salt",
+        "Splash vinegar (optional)"
+      ],
+      "steps": [
+        "Mash chilies with salt; pack in clean jar; weight & cover loosely.",
+        "Burp daily; ferment 5–7 days; refrigerate."
+      ],
+      "images": []
+    },
+    {
+      "id": "turkey-bacon-bits-batch",
+      "title": "Turkey “Bacon” Bits (No Pork, Batch)",
+      "description": "Smoky, crisp bits for beans, greens, salads, and grits.",
+      "flavor_profile": ["BBQ"],
+      "tags": ["flavor:BBQ", "craft", "non-pork", "topping"],
+      "meta": { "yield": "4 cups", "storage": "5 days fridge / 2 months freezer", "reheat": "Skillet to re-crisp, 2–3 min" },
+      "ingredients": [
+        "2 lb turkey slices or ground turkey",
+        "2 tsp smoked paprika",
+        "1 tsp garlic powder",
+        "2 tsp soy sauce or coconut aminos",
+        "2 tbsp oil"
+      ],
+      "steps": [
+        "Cook turkey in oil until browned & crisp.",
+        "Season with smoked paprika, garlic, and soy/aminos; cook 1–2 min to coat. Drain & cool on rack; portion."
+      ],
+      "images": []
+    }
+  ]
+}

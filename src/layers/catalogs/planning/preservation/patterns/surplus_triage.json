@@ -1,0 +1,341 @@
+{
+  "id": "pat.preservation.surplus_triage",
+  "domain": "preservation",
+  "kind": "planning_pattern",
+  "title": "Surplus Triage",
+  "intentTags": [
+    "intent:preserve",
+    "mode:triage",
+    "time:short",
+    "workflow:triage"
+  ],
+  "description": "Quick triage to prevent spoilage: decide freeze/chill/preserve-now routes and schedule the right sessions.",
+  "inputs": [
+    {
+      "key": "dietaryLaws",
+      "type": "multiselect",
+      "label": "Dietary laws",
+      "required": false,
+      "options": [
+        "no_pork",
+        "no_shellfish",
+        "halal_like",
+        "kosher_like",
+        "none"
+      ],
+      "default": [
+        "no_pork"
+      ]
+    },
+    {
+      "key": "householdSize",
+      "type": "number",
+      "label": "Household size",
+      "required": true,
+      "default": 4,
+      "min": 1,
+      "max": 30
+    },
+    {
+      "key": "inventorySnapshot",
+      "type": "select",
+      "label": "Inventory snapshot",
+      "required": false,
+      "default": "recommended",
+      "options": [
+        "missing",
+        "recommended",
+        "required"
+      ]
+    },
+    {
+      "key": "surplusItems",
+      "type": "multiselect",
+      "label": "Surplus items (tags)",
+      "required": false,
+      "options": [
+        "produce:leafy",
+        "produce:fruit",
+        "produce:root",
+        "meat:raw",
+        "dairy:raw",
+        "grain:bulk",
+        "beans:bulk"
+      ]
+    },
+    {
+      "key": "timeBudgetMin",
+      "type": "number",
+      "label": "Time budget (minutes)",
+      "required": false,
+      "default": 120,
+      "min": 30,
+      "max": 960
+    },
+    {
+      "key": "equipmentLevel",
+      "type": "select",
+      "label": "Equipment level",
+      "required": false,
+      "default": "standard",
+      "options": [
+        "limited",
+        "standard",
+        "advanced",
+        "fermentation"
+      ]
+    },
+    {
+      "key": "storageZones",
+      "type": "multiselect",
+      "label": "Storage zones available",
+      "required": false,
+      "options": [
+        "pantry",
+        "cold",
+        "frozen",
+        "root_cellar",
+        "fermentation_room",
+        "dehydration",
+        "smokehouse"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "type": "planStructure",
+      "notes": "Routing decisions + recommended session(s)."
+    },
+    {
+      "type": "session",
+      "domain": "preservation",
+      "notes": "Optional immediate micro-session."
+    }
+  ],
+  "constraints": [
+    {
+      "type": "quietHours",
+      "tag": "constraint:quiet_hours",
+      "notes": "Avoid loud equipment during quiet hours/Sabbath."
+    },
+    {
+      "type": "foodSafety",
+      "tag": "constraint:food_safety",
+      "notes": "Prefer safe methods; surface warnings instead of silent changes."
+    },
+    {
+      "type": "budget",
+      "tag": "constraint:budget",
+      "notes": "Respect jar/lid/packaging budget caps if provided."
+    }
+  ],
+  "requires": [
+    {
+      "type": "inventory",
+      "tag": "needsInventorySnapshot",
+      "optional": true
+    },
+    {
+      "type": "calendar",
+      "tag": "seasonalTags",
+      "optional": true
+    }
+  ],
+  "produces": [
+    {
+      "type": "session",
+      "domain": "preservation",
+      "title": "Surplus Triage Session"
+    },
+    {
+      "type": "inventoryMove",
+      "notes": "Placeholder inventory moves emitted per method batch."
+    },
+    {
+      "type": "shoppingDelta",
+      "notes": "Packaging & supply deltas (jars, lids, salt, vinegar, bags)."
+    }
+  ],
+  "steps": [
+    {
+      "id": "scan",
+      "title": "Scan perishables + risk",
+      "kind": "template",
+      "timeboxMin": 10,
+      "voice": {
+        "speakOnStart": true,
+        "prompt": "List items at risk of spoilage and their deadline (hours/days)."
+      }
+    },
+    {
+      "id": "route",
+      "title": "Route items (freeze/chill/preserve now)",
+      "kind": "template",
+      "timeboxMin": 15,
+      "ui": {
+        "chips": [
+          "disambiguation",
+          "risk_level"
+        ],
+        "help": "SSA may emit hintTags like needsInventorySnapshot."
+      }
+    },
+    {
+      "id": "schedule",
+      "title": "Schedule next preservation block",
+      "kind": "template",
+      "timeboxMin": 10,
+      "voice": {
+        "speakOnStart": false,
+        "prompt": "Create a short session now or a batch day later this week."
+      }
+    }
+  ],
+  "kpis": [
+    {
+      "key": "spoilage_avoided",
+      "label": "Spoilage avoided",
+      "unit": "%",
+      "target": "≥80% of at-risk items"
+    },
+    {
+      "key": "decision_time",
+      "label": "Decision time",
+      "unit": "min",
+      "target": "≤15"
+    }
+  ],
+  "lean": {
+    "wasteTargets": [
+      "defects",
+      "inventory",
+      "motion"
+    ],
+    "countermeasures": [
+      {
+        "waste": "defects",
+        "do": "Use a simple risk rubric: time-to-spoil, storage fit, effort."
+      },
+      {
+        "waste": "inventory",
+        "do": "Move items to correct zone immediately (freeze/chill)."
+      }
+    ],
+    "standardWorkRefs": []
+  },
+  "ui": {
+    "form": {
+      "fields": [
+        {
+          "key": "householdSize",
+          "type": "number",
+          "label": "Household size",
+          "required": true,
+          "default": 4,
+          "min": 1,
+          "max": 30
+        },
+        {
+          "key": "inventorySnapshot",
+          "type": "select",
+          "label": "Inventory snapshot",
+          "required": false,
+          "default": "recommended",
+          "options": [
+            "missing",
+            "recommended",
+            "required"
+          ]
+        },
+        {
+          "key": "surplusItems",
+          "type": "multiselect",
+          "label": "Surplus items (tags)",
+          "required": false,
+          "options": [
+            "produce:leafy",
+            "produce:fruit",
+            "produce:root",
+            "meat:raw",
+            "dairy:raw",
+            "grain:bulk",
+            "beans:bulk"
+          ]
+        },
+        {
+          "key": "timeBudgetMin",
+          "type": "number",
+          "label": "Time budget (minutes)",
+          "required": false,
+          "default": 120,
+          "min": 30,
+          "max": 960
+        },
+        {
+          "key": "equipmentLevel",
+          "type": "select",
+          "label": "Equipment level",
+          "required": false,
+          "default": "standard",
+          "options": [
+            "limited",
+            "standard",
+            "advanced",
+            "fermentation"
+          ]
+        },
+        {
+          "key": "storageZones",
+          "type": "multiselect",
+          "label": "Storage zones available",
+          "required": false,
+          "options": [
+            "pantry",
+            "cold",
+            "frozen",
+            "root_cellar",
+            "fermentation_room",
+            "dehydration",
+            "smokehouse"
+          ]
+        },
+        {
+          "key": "riskRubric",
+          "type": "select",
+          "label": "Risk rubric",
+          "default": "time_to_spoil",
+          "options": [
+            "time_to_spoil",
+            "space_pressure",
+            "event_deadline"
+          ]
+        }
+      ]
+    },
+    "chips": [
+      {
+        "key": "mode",
+        "label": "Triage",
+        "tag": "mode:triage"
+      }
+    ],
+    "help": {
+      "title": "Surplus Triage",
+      "intro": "Fast decisions to prevent spoilage.",
+      "tips": [
+        "Route immediately to zones.",
+        "Schedule a Batch Day if volume is high."
+      ]
+    }
+  },
+  "links": {
+    "storehousePatterns": [
+      "pat.storehouse.root_cellar_optimizer",
+      "pat.storehouse.monthly_cycle_count"
+    ],
+    "mealPatterns": [
+      "pat.meals.preservation_first"
+    ]
+  },
+  "variants": []
+}

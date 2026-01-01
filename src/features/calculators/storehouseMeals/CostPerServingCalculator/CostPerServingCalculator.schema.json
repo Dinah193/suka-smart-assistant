@@ -1,0 +1,165 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka.local/schemas/CostPerServingCalculator.schema.json",
+  "title": "CostPerServingCalculatorInput",
+  "description": "Schema describing inputs and outputs for cost-per-serving calculations in SSA Planning Graph.",
+  "type": "object",
+  "properties": {
+    "calculatorId": {
+      "type": "string",
+      "description": "Optional ID for this calculator run, for analytics and debugging."
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of the calculator schema/logic, e.g. '1.0.0'."
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code such as USD.",
+      "pattern": "^[A-Z]{3}$",
+      "default": "USD"
+    },
+    "householdProfileId": {
+      "type": "string",
+      "description": "Optional reference to the household profile in SSA, for Planning Graph wiring."
+    },
+    "items": {
+      "type": "array",
+      "description": "Items whose cost per serving should be calculated.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "packagePrice",
+          "packageSize",
+          "packageUnit",
+          "servingsFromPackage"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable ID so results can be merged back into inventory or recipes."
+          },
+          "name": {
+            "type": "string",
+            "description": "Human readable name of the item (e.g., 'Brown Rice 5 lb bag')."
+          },
+          "packagePrice": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Total price paid for one package, in the selected currency."
+          },
+          "packageSize": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Numeric size of the package (e.g., 80 for 80 oz)."
+          },
+          "packageUnit": {
+            "type": "string",
+            "description": "Unit for packageSize, e.g. 'oz', 'lb', 'g', 'kg', 'ml', 'L'."
+          },
+          "servingsFromPackage": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "How many servings you expect to get from one package."
+          },
+          "preferredServingSize": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Optional: household default serving size quantity."
+          },
+          "preferredServingUnit": {
+            "type": "string",
+            "description": "Optional: unit for preferredServingSize, e.g. 'cup', 'oz'."
+          },
+          "category": {
+            "type": "string",
+            "description": "Category or aisle (e.g., 'grains', 'meat', 'produce')."
+          },
+          "storeId": {
+            "type": "string",
+            "description": "Optional reference to store/source (Sam's, Aldi, etc.)."
+          },
+          "onSale": {
+            "type": "boolean",
+            "description": "Flag indicating whether this price is a sale/promo price."
+          },
+          "notes": {
+            "type": "string",
+            "description": "Free-form notes for the user or import pipeline."
+          },
+          "meta": {
+            "type": "object",
+            "description": "Extension bucket for downstream calculators or imports.",
+            "properties": {
+              "pricePerUnit": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Computed price per base unit (normalized to smallest consistent unit)."
+              },
+              "pricePerServing": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Computed price per serving for this item."
+              },
+              "currency": {
+                "type": "string",
+                "description": "Currency actually used when this item was priced (may override top-level)."
+              },
+              "source": {
+                "type": "object",
+                "description": "Details about where this row came from (scan, manual entry, import).",
+                "properties": {
+                  "importType": {
+                    "type": "string",
+                    "description": "e.g. 'scan.compare.trust', 'manual', 'bulkImport'."
+                  },
+                  "refId": {
+                    "type": "string",
+                    "description": "Any external reference ID, like UPC, circular row ID, etc."
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "summary": {
+      "type": "object",
+      "description": "Optional summary object to be filled by the shim after computation.",
+      "properties": {
+        "totalItems": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of items processed."
+        },
+        "totalSpending": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Sum of packagePrice across all items."
+        },
+        "avgPricePerServing": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Weighted average price per serving across all items."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp when this calculation was produced."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "items"
+  ],
+  "additionalProperties": false
+}

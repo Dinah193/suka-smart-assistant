@@ -1,0 +1,1747 @@
+{
+  "$schema": "../schemas/lexicon.schema.json",
+  "lexicon": {
+    "key": "animals.lexicon",
+    "version": 1,
+    "domain": "animals",
+    "title": "Animals Lexicon (Exhaustive)",
+    "description": "Synonyms, keywords, entity hints, and expressive rules for mapping user text/imported notes into fixed animal husbandry + handling + health + breeding + housing + transport + butchery/processing method IDs/keys used by SSA layer spine. Includes indigenous/culture-rooted and natural methods alongside modern livestock management. Safety-first and law-aware for regulated topics; does not provide illegal instructions.",
+    "locale": "en-US",
+    "createdAt": "2025-12-27T17:10:00Z",
+    "updatedAt": "2025-12-27T17:10:00Z",
+    "normalization": {
+      "lowercase": true,
+      "stripPunctuation": true,
+      "collapseWhitespace": true,
+      "unicodeNormalize": "NFKC",
+      "stopwords": [
+        "the",
+        "a",
+        "an",
+        "and",
+        "or",
+        "to",
+        "for",
+        "with",
+        "of",
+        "in",
+        "on",
+        "at",
+        "my",
+        "our",
+        "your",
+        "their",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "do",
+        "did",
+        "doing",
+        "this",
+        "that",
+        "these",
+        "those",
+        "please"
+      ],
+      "spellings": {
+        "hoof": ["hooves", "hoofcare", "hoof care", "hoof trimming"],
+        "deworm": ["deworming", "worming", "wormer"],
+        "vaccinate": [
+          "vaccination",
+          "vaccinations",
+          "vax",
+          "immunize",
+          "immunization"
+        ],
+        "quarantine": ["isolation", "isolate", "biosecurity quarantine"],
+        "kidding": ["kid", "goat kidding"],
+        "lambing": ["lamb", "ewe lambing"],
+        "calving": ["calf", "cow calving"],
+        "farrowing": ["farrow", "pig farrowing"],
+        "brooding": ["brood", "raise chicks", "chick brooder"],
+        "pasture": ["grazing", "graze", "range", "free range"],
+        "rotational grazing": [
+          "mob grazing",
+          "managed grazing",
+          "strip grazing",
+          "paddock rotation"
+        ],
+        "silage": ["ensilage", "haylage"],
+        "colostrum": ["first milk", "first-milk"],
+        "wean": ["weaning", "weaned"],
+        "dispatch": ["humane dispatch", "euthanize", "euthanasia"],
+        "stun": ["stunning", "stunner"],
+        "bleed": ["bleeding", "exsanguination"],
+        "scald": ["scalding", "hot water scald"],
+        "pluck": ["plucking", "pluck feathers"],
+        "eviscerate": ["evisceration", "gut", "gutted"],
+        "chill": ["chilling", "cool down", "ice bath"],
+        "age": ["aging", "dry age", "wet age"]
+      }
+    },
+    "scoring": {
+      "matchTypes": {
+        "exact_phrase": 1.0,
+        "token_phrase": 0.7,
+        "keyword": 0.45,
+        "fuzzy": 0.25,
+        "negative": -0.85
+      },
+      "minScoreToSuggest": 0.45,
+      "minScoreToAutoMap": 0.72,
+      "maxSuggestions": 7
+    },
+    "notes": [
+      "This lexicon maps animal-related language → methodKey. Each methodKey should exist in animals.methods.json.",
+      "Rules prefer low-stress handling, biosecurity, and welfare-first care.",
+      "Butchery/dispatch content is limited to high-level, safety-first workflows and explicitly avoids illegal instructions."
+    ],
+    "methods": [
+      {
+        "methodId": "animals.plan.herd_flock_plan",
+        "methodKey": "animals.plan.herd_flock_plan",
+        "weight": 0.9,
+        "aliases": [
+          "herd plan",
+          "flock plan",
+          "animal plan",
+          "livestock plan",
+          "stocking plan",
+          "animal enterprise plan"
+        ],
+        "keywords": [
+          "breed goals",
+          "numbers",
+          "stocking rate",
+          "season plan",
+          "kidding schedule",
+          "lambing schedule",
+          "calving schedule",
+          "farrowing schedule"
+        ],
+        "negative": ["slaughter today"],
+        "animalHints": [
+          "cattle",
+          "goats",
+          "sheep",
+          "pigs",
+          "chickens",
+          "ducks",
+          "turkeys",
+          "rabbits"
+        ],
+        "toolHints": ["planner", "calendar"]
+      },
+      {
+        "methodId": "animals.biosecurity.quarantine_new_animals",
+        "methodKey": "animals.biosecurity.quarantine_new_animals",
+        "weight": 1.2,
+        "aliases": [
+          "quarantine new animals",
+          "isolate new stock",
+          "biosecurity quarantine",
+          "quarantine pen",
+          "new arrival isolation"
+        ],
+        "keywords": [
+          "quarantine",
+          "isolation",
+          "new animals",
+          "biosecurity",
+          "introduce to herd",
+          "closed herd"
+        ],
+        "negative": ["mix immediately"],
+        "animalHints": ["all"],
+        "toolHints": ["separate pen", "footbath"]
+      },
+      {
+        "methodId": "animals.biosecurity.clean_disinfect",
+        "methodKey": "animals.biosecurity.clean_disinfect",
+        "weight": 1.05,
+        "aliases": [
+          "clean and disinfect",
+          "disinfect equipment",
+          "sanitize barn",
+          "wash boots",
+          "footbath"
+        ],
+        "keywords": [
+          "disinfect",
+          "sanitize",
+          "clean",
+          "biosecurity",
+          "bleach",
+          "quats",
+          "virkon",
+          "footbath"
+        ],
+        "negative": ["skip cleaning"],
+        "animalHints": ["all"],
+        "toolHints": ["sprayer", "brush"]
+      },
+
+      {
+        "methodId": "animals.housing.barn_cleanout",
+        "methodKey": "animals.housing.barn_cleanout",
+        "weight": 0.95,
+        "aliases": [
+          "barn cleanout",
+          "clean stall",
+          "muck stall",
+          "clean coop",
+          "clean pen",
+          "manure removal"
+        ],
+        "keywords": [
+          "muck",
+          "manure",
+          "bedding",
+          "stall",
+          "pen",
+          "coop",
+          "ammonia smell",
+          "deep litter"
+        ],
+        "negative": ["leave manure"],
+        "animalHints": [
+          "cattle",
+          "goats",
+          "sheep",
+          "horses",
+          "pigs",
+          "poultry",
+          "rabbits"
+        ],
+        "toolHints": ["fork", "shovel", "wheelbarrow"]
+      },
+      {
+        "methodId": "animals.housing.deep_litter_method",
+        "methodKey": "animals.housing.deep_litter_method",
+        "weight": 0.85,
+        "aliases": [
+          "deep litter",
+          "deep bedding",
+          "deep litter method",
+          "add bedding on top",
+          "composting bedding"
+        ],
+        "keywords": [
+          "deep litter",
+          "bedding",
+          "straw",
+          "wood shavings",
+          "carbon",
+          "ammonia control"
+        ],
+        "negative": ["wet bedding"],
+        "animalHints": ["poultry", "goats", "sheep", "pigs"],
+        "toolHints": ["rake", "fork"]
+      },
+      {
+        "methodId": "animals.housing.ventilation_and_ammonia_control",
+        "methodKey": "animals.housing.ventilation_and_ammonia_control",
+        "weight": 0.9,
+        "aliases": [
+          "improve ventilation",
+          "reduce ammonia",
+          "barn airflow",
+          "coop ventilation"
+        ],
+        "keywords": [
+          "ventilation",
+          "airflow",
+          "ammonia",
+          "respiratory",
+          "humidity",
+          "condensation"
+        ],
+        "negative": ["seal barn tight"],
+        "animalHints": ["all"],
+        "toolHints": ["fan", "vents"]
+      },
+      {
+        "methodId": "animals.housing.predator_proofing",
+        "methodKey": "animals.housing.predator_proofing",
+        "weight": 1.0,
+        "aliases": [
+          "predator proof",
+          "predator-proof coop",
+          "secure fencing",
+          "night lockup",
+          "anti predator"
+        ],
+        "keywords": [
+          "predator",
+          "hawk",
+          "coyote",
+          "fox",
+          "raccoon",
+          "weasel",
+          "secure coop",
+          "hardware cloth"
+        ],
+        "negative": ["leave open"],
+        "animalHints": ["poultry", "rabbits", "small livestock"],
+        "toolHints": ["hardware cloth", "fencing", "locks"]
+      },
+      {
+        "methodId": "animals.housing.winterization",
+        "methodKey": "animals.housing.winterization",
+        "weight": 0.85,
+        "aliases": [
+          "winterize barn",
+          "winterize coop",
+          "cold weather prep",
+          "winter shelter prep"
+        ],
+        "keywords": [
+          "winter",
+          "freeze",
+          "insulate",
+          "draft",
+          "heated waterer",
+          "windbreak"
+        ],
+        "negative": ["overheat barn"],
+        "animalHints": ["all"],
+        "toolHints": ["heat tape", "windbreak"]
+      },
+      {
+        "methodId": "animals.housing.summer_heat_management",
+        "methodKey": "animals.housing.summer_heat_management",
+        "weight": 0.9,
+        "aliases": [
+          "heat management",
+          "cooling animals",
+          "summer heat plan",
+          "shade and water"
+        ],
+        "keywords": [
+          "heat stress",
+          "shade",
+          "fans",
+          "misters",
+          "panting",
+          "open-mouth breathing",
+          "cool water"
+        ],
+        "negative": ["no shade"],
+        "animalHints": ["all"],
+        "toolHints": ["fans", "shade cloth"]
+      },
+
+      {
+        "methodId": "animals.feed.daily_feeding_routine",
+        "methodKey": "animals.feed.daily_feeding_routine",
+        "weight": 0.9,
+        "aliases": [
+          "feed animals",
+          "daily feeding",
+          "morning feeding",
+          "evening feeding",
+          "feeding routine"
+        ],
+        "keywords": [
+          "feed",
+          "ration",
+          "grain",
+          "hay",
+          "pellets",
+          "forage",
+          "supplement"
+        ],
+        "negative": ["fasting"],
+        "animalHints": ["all"],
+        "toolHints": ["feed scoop", "scale"]
+      },
+      {
+        "methodId": "animals.feed.forage_hay_management",
+        "methodKey": "animals.feed.forage_hay_management",
+        "weight": 0.9,
+        "aliases": [
+          "hay management",
+          "forage management",
+          "store hay",
+          "hay feeder",
+          "round bale feeder"
+        ],
+        "keywords": [
+          "hay",
+          "forage",
+          "alfalfa",
+          "grass hay",
+          "bale",
+          "moldy hay",
+          "wastage"
+        ],
+        "negative": ["feed mold"],
+        "animalHints": ["cattle", "goats", "sheep", "horses", "camelids"],
+        "toolHints": ["hay net", "feeder"]
+      },
+      {
+        "methodId": "animals.feed.mineral_supplementation",
+        "methodKey": "animals.feed.mineral_supplementation",
+        "weight": 1.0,
+        "aliases": [
+          "minerals",
+          "provide minerals",
+          "mineral block",
+          "loose minerals",
+          "salt block"
+        ],
+        "keywords": [
+          "minerals",
+          "salt",
+          "trace minerals",
+          "selenium",
+          "copper",
+          "loose mineral",
+          "block"
+        ],
+        "negative": ["wrong species mineral"],
+        "animalHints": ["cattle", "goats", "sheep", "horses", "camelids"],
+        "toolHints": ["mineral feeder"]
+      },
+      {
+        "methodId": "animals.water.ensure_clean_water",
+        "methodKey": "animals.water.ensure_clean_water",
+        "weight": 1.1,
+        "aliases": [
+          "clean water",
+          "refill water",
+          "water trough",
+          "scrub buckets",
+          "check waterer"
+        ],
+        "keywords": [
+          "water",
+          "trough",
+          "bucket",
+          "automatic waterer",
+          "algae",
+          "freeze",
+          "dehydration"
+        ],
+        "negative": ["dirty water"],
+        "animalHints": ["all"],
+        "toolHints": ["brush", "hose"]
+      },
+
+      {
+        "methodId": "animals.pasture.rotational_grazing",
+        "methodKey": "animals.pasture.rotational_grazing",
+        "weight": 1.05,
+        "aliases": [
+          "rotational grazing",
+          "managed grazing",
+          "strip grazing",
+          "paddock rotation",
+          "move fence",
+          "mob grazing"
+        ],
+        "keywords": [
+          "rotate",
+          "paddock",
+          "move fence",
+          "rest period",
+          "stock density",
+          "graze"
+        ],
+        "negative": ["continuous grazing only"],
+        "animalHints": ["cattle", "goats", "sheep", "horses"],
+        "toolHints": ["step-in posts", "polywire", "fence energizer"]
+      },
+      {
+        "methodId": "animals.pasture.browse_management_goats",
+        "methodKey": "animals.pasture.browse_management_goats",
+        "weight": 0.9,
+        "aliases": [
+          "goat browsing",
+          "brush control with goats",
+          "browse management",
+          "targeted grazing goats"
+        ],
+        "keywords": [
+          "browse",
+          "brush",
+          "brambles",
+          "poison ivy",
+          "goats",
+          "targeted grazing"
+        ],
+        "negative": ["toxic plants"],
+        "animalHints": ["goats"],
+        "toolHints": ["portable fence"]
+      },
+      {
+        "methodId": "animals.pasture.pasture_renovation",
+        "methodKey": "animals.pasture.pasture_renovation",
+        "weight": 0.8,
+        "aliases": [
+          "pasture renovation",
+          "reseed pasture",
+          "overseed pasture",
+          "soil test pasture"
+        ],
+        "keywords": [
+          "overseed",
+          "reseeding",
+          "pasture mix",
+          "liming",
+          "fertility",
+          "weeds in pasture"
+        ],
+        "negative": ["no pasture"],
+        "animalHints": ["cattle", "goats", "sheep", "horses"],
+        "toolHints": ["seed", "drag harrow"]
+      },
+
+      {
+        "methodId": "animals.handling.low_stress_handling",
+        "methodKey": "animals.handling.low_stress_handling",
+        "weight": 1.15,
+        "aliases": [
+          "low stress handling",
+          "calm handling",
+          "quiet handling",
+          "move animals calmly",
+          "stockmanship"
+        ],
+        "keywords": [
+          "low stress",
+          "calm",
+          "flight zone",
+          "point of balance",
+          "quiet",
+          "no yelling"
+        ],
+        "negative": ["chase them"],
+        "animalHints": ["all"],
+        "toolHints": ["sorting board", "flag", "panel"]
+      },
+      {
+        "methodId": "animals.handling.catch_and_restraint_small_ruminants",
+        "methodKey": "animals.handling.catch_and_restraint_small_ruminants",
+        "weight": 0.95,
+        "aliases": [
+          "catch goat",
+          "catch sheep",
+          "restrain goat",
+          "restrain sheep",
+          "set on rump"
+        ],
+        "keywords": ["catch", "restraint", "hold", "sheep", "goat", "handling"],
+        "negative": ["injure animal"],
+        "animalHints": ["goats", "sheep"],
+        "toolHints": ["collar", "halter"]
+      },
+      {
+        "methodId": "animals.handling.chute_work_cattle",
+        "methodKey": "animals.handling.chute_work_cattle",
+        "weight": 0.9,
+        "aliases": [
+          "cattle chute",
+          "work cattle in chute",
+          "squeeze chute",
+          "head gate"
+        ],
+        "keywords": [
+          "chute",
+          "head gate",
+          "squeeze",
+          "cattle handling",
+          "alley"
+        ],
+        "negative": ["no restraint"],
+        "animalHints": ["cattle"],
+        "toolHints": ["squeeze chute"]
+      },
+      {
+        "methodId": "animals.handling.halter_training",
+        "methodKey": "animals.handling.halter_training",
+        "weight": 0.75,
+        "aliases": [
+          "halter train",
+          "halter training",
+          "lead training",
+          "teach to lead"
+        ],
+        "keywords": ["halter", "lead", "training", "desensitize", "reward"],
+        "negative": ["rough handling"],
+        "animalHints": ["cattle", "goats", "sheep", "horses", "camelids"],
+        "toolHints": ["halter", "lead rope"]
+      },
+      {
+        "methodId": "animals.transport.load_and_transport",
+        "methodKey": "animals.transport.load_and_transport",
+        "weight": 0.85,
+        "aliases": [
+          "load trailer",
+          "transport animals",
+          "haul livestock",
+          "move to processor"
+        ],
+        "keywords": [
+          "trailer",
+          "load",
+          "transport",
+          "haul",
+          "bedding",
+          "ventilation",
+          "travel stress"
+        ],
+        "negative": ["overcrowd trailer"],
+        "animalHints": ["all"],
+        "toolHints": ["trailer", "bedding"]
+      },
+
+      {
+        "methodId": "animals.health.daily_observation",
+        "methodKey": "animals.health.daily_observation",
+        "weight": 1.1,
+        "aliases": [
+          "health check",
+          "daily check",
+          "observe animals",
+          "check for illness",
+          "look them over"
+        ],
+        "keywords": [
+          "appetite",
+          "behavior",
+          "limping",
+          "cough",
+          "nasal discharge",
+          "diarrhea",
+          "temperature"
+        ],
+        "negative": ["ignore symptoms"],
+        "animalHints": ["all"],
+        "toolHints": ["thermometer", "notebook"]
+      },
+      {
+        "methodId": "animals.health.body_condition_scoring",
+        "methodKey": "animals.health.body_condition_scoring",
+        "weight": 0.85,
+        "aliases": [
+          "body condition score",
+          "BCS",
+          "check condition",
+          "fat score",
+          "thin score"
+        ],
+        "keywords": [
+          "condition",
+          "BCS",
+          "rib",
+          "backbone",
+          "tailhead",
+          "weight gain",
+          "weight loss"
+        ],
+        "negative": ["guess blindly"],
+        "animalHints": ["cattle", "goats", "sheep", "horses"],
+        "toolHints": ["scale", "weight tape"]
+      },
+      {
+        "methodId": "animals.health.vaccination_schedule",
+        "methodKey": "animals.health.vaccination_schedule",
+        "weight": 0.9,
+        "aliases": [
+          "vaccinate",
+          "vaccination schedule",
+          "give vaccines",
+          "booster shots"
+        ],
+        "keywords": [
+          "vaccine",
+          "booster",
+          "CDT",
+          "rabies",
+          "clostridial",
+          "respiratory"
+        ],
+        "negative": ["dose without vet guidance"],
+        "animalHints": [
+          "cattle",
+          "goats",
+          "sheep",
+          "pigs",
+          "poultry",
+          "rabbits"
+        ],
+        "toolHints": ["syringes", "cooler"]
+      },
+      {
+        "methodId": "animals.health.deworming_strategy",
+        "methodKey": "animals.health.deworming_strategy",
+        "weight": 0.95,
+        "aliases": [
+          "deworm",
+          "deworming",
+          "worming",
+          "parasite control",
+          "worm check"
+        ],
+        "keywords": [
+          "worms",
+          "parasites",
+          "fecal",
+          "FAMACHA",
+          "coccidia",
+          "strongyles"
+        ],
+        "negative": ["overuse dewormer"],
+        "animalHints": ["goats", "sheep", "cattle", "horses", "pigs"],
+        "toolHints": ["fecal test", "drench gun"]
+      },
+      {
+        "methodId": "animals.health.famacha_scoring",
+        "methodKey": "animals.health.famacha_scoring",
+        "weight": 0.85,
+        "aliases": [
+          "FAMACHA",
+          "check eyelids",
+          "anemia check",
+          "barber pole worm check"
+        ],
+        "keywords": [
+          "famacha",
+          "anemia",
+          "eyelid",
+          "barber pole",
+          "haemonchus"
+        ],
+        "negative": ["use on non-ruminants"],
+        "animalHints": ["goats", "sheep"],
+        "toolHints": ["famacha card"]
+      },
+      {
+        "methodId": "animals.health.hoof_trimming",
+        "methodKey": "animals.health.hoof_trimming",
+        "weight": 1.0,
+        "aliases": [
+          "trim hooves",
+          "hoof trim",
+          "hoof trimming",
+          "foot care",
+          "trim feet"
+        ],
+        "keywords": ["hooves", "trim", "overgrown", "foot rot", "lameness"],
+        "negative": ["cut too deep"],
+        "animalHints": ["goats", "sheep", "cattle", "horses", "camelids"],
+        "toolHints": ["hoof trimmers", "rasp"]
+      },
+      {
+        "methodId": "animals.health.footbath_and_foot_rot_control",
+        "methodKey": "animals.health.footbath_and_foot_rot_control",
+        "weight": 0.85,
+        "aliases": [
+          "footbath",
+          "foot rot control",
+          "treat foot rot",
+          "walk through footbath"
+        ],
+        "keywords": [
+          "footbath",
+          "foot rot",
+          "lameness",
+          "hoof infection",
+          "zinc sulfate",
+          "copper sulfate"
+        ],
+        "negative": ["unsafe chemicals"],
+        "animalHints": ["goats", "sheep", "cattle"],
+        "toolHints": ["footbath tray", "PPE"]
+      },
+      {
+        "methodId": "animals.health.mastitis_check_milking_animals",
+        "methodKey": "animals.health.mastitis_check_milking_animals",
+        "weight": 0.8,
+        "aliases": [
+          "check mastitis",
+          "mastitis test",
+          "clots in milk",
+          "hot udder",
+          "strip cup"
+        ],
+        "keywords": [
+          "mastitis",
+          "udder",
+          "milk clots",
+          "swollen",
+          "hot",
+          "somatic"
+        ],
+        "negative": ["ignore udder heat"],
+        "animalHints": ["dairy cattle", "dairy goats", "dairy sheep"],
+        "toolHints": ["strip cup", "CMT test"]
+      },
+
+      {
+        "methodId": "animals.breeding.heat_detection",
+        "methodKey": "animals.breeding.heat_detection",
+        "weight": 0.85,
+        "aliases": [
+          "heat detection",
+          "in heat",
+          "estrus",
+          "standing heat",
+          "cycling"
+        ],
+        "keywords": [
+          "heat",
+          "estrus",
+          "mounting",
+          "swollen vulva",
+          "tail flagging",
+          "ram/buck interest"
+        ],
+        "negative": ["pregnant"],
+        "animalHints": ["cattle", "goats", "sheep", "pigs", "horses"],
+        "toolHints": ["calendar", "marker harness"]
+      },
+      {
+        "methodId": "animals.breeding.pairing_and_breeding_plan",
+        "methodKey": "animals.breeding.pairing_and_breeding_plan",
+        "weight": 0.8,
+        "aliases": [
+          "breeding plan",
+          "pairing plan",
+          "select sire",
+          "select buck",
+          "select ram",
+          "mate animals"
+        ],
+        "keywords": [
+          "breed",
+          "pair",
+          "genetics",
+          "linebreeding",
+          "cross",
+          "EBV",
+          "traits"
+        ],
+        "negative": ["random breeding"],
+        "animalHints": [
+          "cattle",
+          "goats",
+          "sheep",
+          "pigs",
+          "poultry",
+          "rabbits"
+        ],
+        "toolHints": ["records", "pedigree"]
+      },
+      {
+        "methodId": "animals.breeding.pregnancy_check",
+        "methodKey": "animals.breeding.pregnancy_check",
+        "weight": 0.85,
+        "aliases": [
+          "pregnancy check",
+          "preg check",
+          "ultrasound check",
+          "palpation",
+          "confirm pregnant"
+        ],
+        "keywords": [
+          "pregnant",
+          "ultrasound",
+          "palpation",
+          "blood test",
+          "due date"
+        ],
+        "negative": ["assume pregnant"],
+        "animalHints": ["cattle", "goats", "sheep", "pigs", "horses"],
+        "toolHints": ["ultrasound", "vet"]
+      },
+      {
+        "methodId": "animals.birthing.kidding_goats",
+        "methodKey": "animals.birthing.kidding_goats",
+        "weight": 0.85,
+        "aliases": ["kidding", "goat kidding", "doe giving birth", "kids born"],
+        "keywords": [
+          "kidding",
+          "doe",
+          "kids",
+          "labor",
+          "push",
+          "afterbirth",
+          "colostrum"
+        ],
+        "negative": ["ignore dystocia"],
+        "animalHints": ["goats"],
+        "toolHints": ["kidding kit"]
+      },
+      {
+        "methodId": "animals.birthing.lambing_sheep",
+        "methodKey": "animals.birthing.lambing_sheep",
+        "weight": 0.85,
+        "aliases": [
+          "lambing",
+          "ewe lambing",
+          "lambs born",
+          "sheep giving birth"
+        ],
+        "keywords": [
+          "lambing",
+          "ewe",
+          "lamb",
+          "labor",
+          "colostrum",
+          "navel dip"
+        ],
+        "negative": ["leave weak lamb"],
+        "animalHints": ["sheep"],
+        "toolHints": ["lambing jug"]
+      },
+      {
+        "methodId": "animals.birthing.calving_cattle",
+        "methodKey": "animals.birthing.calving_cattle",
+        "weight": 0.85,
+        "aliases": ["calving", "cow calving", "heifer calving", "calf born"],
+        "keywords": [
+          "calving",
+          "cow",
+          "calf",
+          "labor",
+          "water bag",
+          "colostrum",
+          "pull calf"
+        ],
+        "negative": ["unsafe pull"],
+        "animalHints": ["cattle"],
+        "toolHints": ["calving kit"]
+      },
+      {
+        "methodId": "animals.birthing.farrowing_pigs",
+        "methodKey": "animals.birthing.farrowing_pigs",
+        "weight": 0.8,
+        "aliases": [
+          "farrowing",
+          "sow farrowing",
+          "piglets born",
+          "pig farrowing crate"
+        ],
+        "keywords": [
+          "farrowing",
+          "sow",
+          "piglets",
+          "crush rail",
+          "heat lamp",
+          "colostrum"
+        ],
+        "negative": ["cold piglets"],
+        "animalHints": ["pigs"],
+        "toolHints": ["heat lamp"]
+      },
+      {
+        "methodId": "animals.poultry.brooding_chicks",
+        "methodKey": "animals.poultry.brooding_chicks",
+        "weight": 0.9,
+        "aliases": [
+          "brood chicks",
+          "brooding",
+          "raise chicks",
+          "chick brooder"
+        ],
+        "keywords": [
+          "brooder",
+          "heat plate",
+          "heat lamp",
+          "starter feed",
+          "pasty butt",
+          "draft"
+        ],
+        "negative": ["overheat"],
+        "animalHints": ["chickens", "ducks", "turkeys", "quail", "guineafowl"],
+        "toolHints": ["brooder", "thermometer"]
+      },
+      {
+        "methodId": "animals.poultry.layer_management",
+        "methodKey": "animals.poultry.layer_management",
+        "weight": 0.85,
+        "aliases": [
+          "layer management",
+          "egg production",
+          "manage laying hens",
+          "nest box management"
+        ],
+        "keywords": [
+          "layers",
+          "laying",
+          "nest box",
+          "egg collection",
+          "calcium",
+          "oyster shell"
+        ],
+        "negative": ["no nest boxes"],
+        "animalHints": ["chickens", "ducks"],
+        "toolHints": ["nest boxes"]
+      },
+
+      {
+        "methodId": "animals.processing.milk_goats_or_cows_basic",
+        "methodKey": "animals.processing.milk_goats_or_cows_basic",
+        "weight": 0.7,
+        "aliases": [
+          "milk goats",
+          "milk cows",
+          "milking routine",
+          "hand milking",
+          "machine milking"
+        ],
+        "keywords": [
+          "milk",
+          "milking",
+          "sanitize",
+          "udder prep",
+          "strip",
+          "filter",
+          "cool milk"
+        ],
+        "negative": ["dirty milking"],
+        "animalHints": ["dairy cattle", "dairy goats", "dairy sheep"],
+        "toolHints": ["milking bucket", "filters"]
+      },
+      {
+        "methodId": "animals.processing.egg_collection_and_storage",
+        "methodKey": "animals.processing.egg_collection_and_storage",
+        "weight": 0.85,
+        "aliases": [
+          "collect eggs",
+          "egg collection",
+          "store eggs",
+          "wash eggs"
+        ],
+        "keywords": [
+          "eggs",
+          "collect",
+          "wash",
+          "bloom",
+          "refrigerate",
+          "float test"
+        ],
+        "negative": ["store cracked eggs"],
+        "animalHints": ["chickens", "ducks", "quail"],
+        "toolHints": ["egg basket"]
+      },
+
+      {
+        "methodId": "animals.culling.selection_cull_plan",
+        "methodKey": "animals.culling.selection_cull_plan",
+        "weight": 0.8,
+        "aliases": [
+          "cull plan",
+          "select culls",
+          "culling",
+          "remove from herd",
+          "sell animals"
+        ],
+        "keywords": [
+          "cull",
+          "selection",
+          "temperament",
+          "production",
+          "health",
+          "structural issues"
+        ],
+        "negative": ["panic cull"],
+        "animalHints": ["all"],
+        "toolHints": ["records"]
+      },
+
+      {
+        "methodId": "animals.butchery.preharvest_withdrawal_and_records",
+        "methodKey": "animals.butchery.preharvest_withdrawal_and_records",
+        "weight": 0.9,
+        "aliases": [
+          "withdrawal period",
+          "med withdrawal",
+          "pre-harvest records",
+          "harvest readiness check"
+        ],
+        "keywords": [
+          "withdrawal",
+          "medication",
+          "antibiotics",
+          "dewormer",
+          "records",
+          "processor",
+          "label"
+        ],
+        "negative": ["ignore withdrawal"],
+        "animalHints": ["all"],
+        "toolHints": ["records", "labels"]
+      },
+      {
+        "methodId": "animals.butchery.humane_dispatch_high_level",
+        "methodKey": "animals.butchery.humane_dispatch_high_level",
+        "weight": 0.75,
+        "aliases": [
+          "humane dispatch",
+          "humane slaughter",
+          "euthanasia",
+          "put down",
+          "dispatch animal"
+        ],
+        "keywords": [
+          "humane",
+          "dispatch",
+          "euthanasia",
+          "stun",
+          "bleed out",
+          "welfare"
+        ],
+        "negative": ["cruel"],
+        "animalHints": ["all"],
+        "toolHints": ["PPE", "trained help"]
+      },
+      {
+        "methodId": "animals.butchery.poultry_processing_high_level",
+        "methodKey": "animals.butchery.poultry_processing_high_level",
+        "weight": 0.85,
+        "aliases": [
+          "process chickens",
+          "process poultry",
+          "butcher chicken",
+          "plucking",
+          "eviscerate"
+        ],
+        "keywords": [
+          "poultry",
+          "scald",
+          "pluck",
+          "eviscerate",
+          "chill",
+          "ice bath",
+          "sanitize"
+        ],
+        "negative": ["unsafe temps"],
+        "animalHints": ["chickens", "ducks", "turkeys", "geese", "quail"],
+        "toolHints": ["scalder", "plucker", "chill tank"]
+      },
+      {
+        "methodId": "animals.butchery.rabbit_processing_high_level",
+        "methodKey": "animals.butchery.rabbit_processing_high_level",
+        "weight": 0.75,
+        "aliases": [
+          "process rabbits",
+          "rabbit butchery",
+          "dispatch rabbit",
+          "skin rabbit"
+        ],
+        "keywords": [
+          "rabbit",
+          "dispatch",
+          "skin",
+          "eviscerate",
+          "chill",
+          "sanitize"
+        ],
+        "negative": ["unsafe handling"],
+        "animalHints": ["rabbits"],
+        "toolHints": ["gambrel", "knife"]
+      },
+      {
+        "methodId": "animals.butchery.large_animal_processing_high_level",
+        "methodKey": "animals.butchery.large_animal_processing_high_level",
+        "weight": 0.7,
+        "aliases": [
+          "beef processing",
+          "goat processing",
+          "lamb processing",
+          "pork processing",
+          "field dress",
+          "carcass chill"
+        ],
+        "keywords": [
+          "carcass",
+          "chill",
+          "aging",
+          "food safety",
+          "cut sheet",
+          "primal cuts",
+          "quarter"
+        ],
+        "negative": ["unsafe temperatures"],
+        "animalHints": ["cattle", "goats", "sheep", "pigs", "deer"],
+        "toolHints": ["cooler", "thermometer"]
+      }
+    ],
+    "entityHints": {
+      "animals": {
+        "cattle": [
+          "cow",
+          "cows",
+          "beef",
+          "dairy",
+          "heifer",
+          "steer",
+          "bull",
+          "calf",
+          "calves"
+        ],
+        "goats": [
+          "goat",
+          "goats",
+          "doe",
+          "does",
+          "buck",
+          "kid",
+          "kids",
+          "wether"
+        ],
+        "sheep": ["sheep", "ewe", "ewes", "ram", "lamb", "lambs", "wether"],
+        "pigs": [
+          "pig",
+          "pigs",
+          "hog",
+          "hogs",
+          "sow",
+          "boar",
+          "piglet",
+          "piglets"
+        ],
+        "poultry": [
+          "chicken",
+          "chickens",
+          "hen",
+          "hens",
+          "rooster",
+          "broiler",
+          "layer",
+          "duck",
+          "ducks",
+          "turkey",
+          "turkeys",
+          "goose",
+          "geese",
+          "quail",
+          "guineafowl"
+        ],
+        "rabbits": [
+          "rabbit",
+          "rabbits",
+          "bunny",
+          "kits",
+          "doe rabbit",
+          "buck rabbit"
+        ],
+        "camelids": ["alpaca", "alpacas", "llama", "llamas"],
+        "horses": ["horse", "horses", "mare", "stallion", "gelding", "foal"],
+        "other_farmed": [
+          "deer",
+          "elk",
+          "bison",
+          "yak",
+          "ostrich",
+          "emu",
+          "tilapia",
+          "catfish",
+          "trout",
+          "goatfish",
+          "snail",
+          "escargot"
+        ]
+      },
+      "housing": [
+        "barn",
+        "stall",
+        "pen",
+        "pasture",
+        "paddock",
+        "coop",
+        "run",
+        "brooder",
+        "hutch",
+        "crate",
+        "shed"
+      ],
+      "feeds": [
+        "hay",
+        "forage",
+        "pasture",
+        "grain",
+        "pellets",
+        "starter feed",
+        "minerals",
+        "salt",
+        "supplement"
+      ],
+      "health": [
+        "cough",
+        "snot",
+        "nasal discharge",
+        "diarrhea",
+        "scours",
+        "limp",
+        "lameness",
+        "fever",
+        "off feed",
+        "lethargy"
+      ],
+      "biosecurity": [
+        "quarantine",
+        "isolation",
+        "closed herd",
+        "sanitize",
+        "disinfect",
+        "footbath"
+      ],
+      "breeding": [
+        "heat",
+        "estrus",
+        "cycling",
+        "breed",
+        "breeding",
+        "pregnant",
+        "due date",
+        "kidding",
+        "lambing",
+        "calving",
+        "farrowing"
+      ],
+      "processing": [
+        "butcher",
+        "process",
+        "dispatch",
+        "euthanize",
+        "slaughter",
+        "cut sheet",
+        "chill",
+        "aging",
+        "plucking",
+        "eviscerate"
+      ]
+    },
+    "rules": [
+      {
+        "id": "rule.new_animals_quarantine",
+        "title": "New animal arrival cues → quarantine + biosecurity",
+        "severity": "warn",
+        "explain": "If text indicates new animals were purchased/arrived, prioritize quarantine and cleaning protocols.",
+        "when": {
+          "containsAny": [
+            "new goat",
+            "new sheep",
+            "new cow",
+            "new calf",
+            "new chickens",
+            "brought home",
+            "picked up",
+            "new arrival",
+            "introduced",
+            "new stock"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.biosecurity.quarantine_new_animals",
+            "amount": 0.75,
+            "reason": "New arrivals can introduce parasites/disease"
+          },
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.biosecurity.clean_disinfect",
+            "amount": 0.35,
+            "reason": "Biosecurity cleaning reduces spread"
+          },
+          {
+            "type": "addWarning",
+            "warning": "Quarantine new arrivals before mixing with your herd/flock. Use dedicated tools/buckets and avoid cross-contamination."
+          },
+          { "type": "emitHintTag", "tag": "biosecurity.quarantine" }
+        ]
+      },
+      {
+        "id": "rule_heat_stress_animals",
+        "title": "Heat stress cues → summer heat management + water checks",
+        "severity": "warn",
+        "when": {
+          "containsAny": [
+            "heat stress",
+            "panting",
+            "open-mouth breathing",
+            "too hot",
+            "heatwave",
+            "not eating in heat",
+            "shade needed"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.housing.summer_heat_management",
+            "amount": 0.7,
+            "reason": "Heat stress risk"
+          },
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.water.ensure_clean_water",
+            "amount": 0.55,
+            "reason": "Water is critical in heat"
+          },
+          {
+            "type": "addWarning",
+            "warning": "Heat stress can become an emergency. Provide shade, airflow, and cool clean water; contact a veterinarian if symptoms are severe."
+          },
+          { "type": "emitHintTag", "tag": "weather.heat-risk" }
+        ]
+      },
+      {
+        "id": "rule_freeze_waterers",
+        "title": "Freeze/cold cues → winterization + water checks",
+        "severity": "hint",
+        "when": {
+          "containsAny": [
+            "freeze",
+            "frozen water",
+            "ice in trough",
+            "cold snap",
+            "below zero",
+            "heated waterer"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.housing.winterization",
+            "amount": 0.6,
+            "reason": "Winter prep"
+          },
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.water.ensure_clean_water",
+            "amount": 0.5,
+            "reason": "Prevent dehydration in cold weather"
+          },
+          {
+            "type": "addNote",
+            "note": "Check water multiple times daily during freezes; animals may drink less if water is icy."
+          }
+        ]
+      },
+      {
+        "id": "rule_parasite_signals",
+        "title": "Parasite/anemia cues → deworm strategy + FAMACHA (ruminants)",
+        "severity": "hint",
+        "when": {
+          "containsAny": [
+            "worms",
+            "wormy",
+            "parasites",
+            "anemia",
+            "pale eyelids",
+            "bottle jaw",
+            "rough coat",
+            "weight loss",
+            "diarrhea",
+            "scours"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.health.deworming_strategy",
+            "amount": 0.65,
+            "reason": "Parasite cues detected"
+          },
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.health.famacha_scoring",
+            "amount": 0.35,
+            "reason": "FAMACHA is relevant for small ruminants"
+          },
+          {
+            "type": "addNote",
+            "note": "Use targeted treatment when possible (fecal tests, FAMACHA for sheep/goats) to avoid resistance."
+          }
+        ]
+      },
+      {
+        "id": "rule_lameness_to_hoofcare",
+        "title": "Lameness cues → hoof trimming + footbath/foot rot control",
+        "severity": "hint",
+        "when": {
+          "containsAny": [
+            "limp",
+            "limping",
+            "lameness",
+            "hoof",
+            "foot rot",
+            "smell from hoof",
+            "sore foot"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.health.hoof_trimming",
+            "amount": 0.6,
+            "reason": "Lameness often requires hoof assessment"
+          },
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.health.footbath_and_foot_rot_control",
+            "amount": 0.4,
+            "reason": "Foot rot cues"
+          },
+          {
+            "type": "addNote",
+            "note": "If lameness is severe or sudden, consult a veterinarian to rule out injury or systemic issues."
+          }
+        ]
+      },
+      {
+        "id": "rule_birth_event_detection",
+        "title": "Birthing cues → species-specific birthing workflow",
+        "severity": "hint",
+        "when": {
+          "containsAny": [
+            "in labor",
+            "giving birth",
+            "water bag",
+            "contractions",
+            "pushing",
+            "afterbirth",
+            "colostrum",
+            "newborn"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.health.daily_observation",
+            "amount": 0.2,
+            "reason": "Observe closely"
+          },
+          { "type": "emitHintTag", "tag": "breeding.birth-event" },
+          {
+            "type": "addNote",
+            "note": "If labor stalls or you see abnormal presentation, seek qualified help immediately."
+          }
+        ]
+      },
+      {
+        "id": "rule_kidding_specific",
+        "title": "Goat kidding cues → goat kidding method",
+        "severity": "hint",
+        "when": {
+          "containsAny": ["kidding", "doe in labor", "kids born", "goat birth"]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.birthing.kidding_goats",
+            "amount": 0.75,
+            "reason": "Goat kidding cues"
+          },
+          {
+            "type": "addNote",
+            "note": "Confirm newborns nurse colostrum promptly; keep bedding dry and warm."
+          }
+        ]
+      },
+      {
+        "id": "rule_lambing_specific",
+        "title": "Sheep lambing cues → sheep lambing method",
+        "severity": "hint",
+        "when": {
+          "containsAny": [
+            "lambing",
+            "ewe in labor",
+            "lambs born",
+            "sheep birth"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.birthing.lambing_sheep",
+            "amount": 0.75,
+            "reason": "Sheep lambing cues"
+          },
+          {
+            "type": "addNote",
+            "note": "Keep lambs warm and ensure colostrum intake; isolate in a lambing jug if needed."
+          }
+        ]
+      },
+      {
+        "id": "rule_calving_specific",
+        "title": "Cattle calving cues → cattle calving method",
+        "severity": "hint",
+        "when": {
+          "containsAny": [
+            "calving",
+            "cow in labor",
+            "heifer calving",
+            "calf born"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.birthing.calving_cattle",
+            "amount": 0.75,
+            "reason": "Calving cues"
+          },
+          {
+            "type": "addWarning",
+            "warning": "Calving complications can escalate quickly. If the calf is not progressing, contact a veterinarian or experienced handler."
+          }
+        ]
+      },
+      {
+        "id": "rule_farrowing_specific",
+        "title": "Pig farrowing cues → farrowing method",
+        "severity": "hint",
+        "when": {
+          "containsAny": [
+            "farrowing",
+            "sow in labor",
+            "piglets born",
+            "pig birth"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.birthing.farrowing_pigs",
+            "amount": 0.75,
+            "reason": "Farrowing cues"
+          },
+          {
+            "type": "addNote",
+            "note": "Piglets need warmth immediately; prevent crushing with safe pen design/rails."
+          }
+        ]
+      },
+      {
+        "id": "rule_brooding_chicks",
+        "title": "Chicks/brooder cues → brooding workflow",
+        "severity": "hint",
+        "when": {
+          "containsAny": [
+            "chicks",
+            "brooder",
+            "pasty butt",
+            "heat lamp",
+            "heat plate",
+            "starter feed"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.poultry.brooding_chicks",
+            "amount": 0.8,
+            "reason": "Brooding cues"
+          },
+          {
+            "type": "addNote",
+            "note": "Adjust heat based on chick behavior (huddling = cold; avoiding heat = too hot)."
+          }
+        ]
+      },
+      {
+        "id": "rule_processing_intent_guardrails",
+        "title": "Butchery/dispatch cues → high-level safe workflow only",
+        "severity": "warn",
+        "explain": "When processing is mentioned, suggest high-level, safety-first methods and avoid illegal or harmful instructions.",
+        "when": {
+          "containsAny": [
+            "slaughter",
+            "dispatch",
+            "butcher",
+            "process",
+            "kill",
+            "euthanize",
+            "field dress",
+            "plucking",
+            "eviscerate"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.butchery.preharvest_withdrawal_and_records",
+            "amount": 0.45,
+            "reason": "Withdrawal + records are essential"
+          },
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.butchery.humane_dispatch_high_level",
+            "amount": 0.35,
+            "reason": "Humane, safety-first framing"
+          },
+          {
+            "type": "addWarning",
+            "warning": "Follow local laws and food-safety guidance. Keep processing sanitary and chill promptly. If you’re not trained, use a licensed processor."
+          },
+          { "type": "emitHintTag", "tag": "processing.high-level-only" }
+        ]
+      },
+      {
+        "id": "rule_eggs_cues",
+        "title": "Egg cues → egg collection and storage",
+        "severity": "hint",
+        "when": {
+          "containsAny": [
+            "collect eggs",
+            "egg collection",
+            "wash eggs",
+            "store eggs",
+            "nest box",
+            "dirty eggs"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.processing.egg_collection_and_storage",
+            "amount": 0.75,
+            "reason": "Egg workflow"
+          },
+          {
+            "type": "addNote",
+            "note": "Handle eggs gently; store clean, intact eggs appropriately. Discard cracked/leaking eggs."
+          }
+        ]
+      },
+      {
+        "id": "rule_mastitis_cues",
+        "title": "Milk/udder mastitis cues → mastitis check",
+        "severity": "warn",
+        "when": {
+          "containsAny": [
+            "mastitis",
+            "hot udder",
+            "swollen udder",
+            "milk clots",
+            "stringy milk",
+            "painful udder"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "animals.health.mastitis_check_milking_animals",
+            "amount": 0.8,
+            "reason": "Mastitis cues"
+          },
+          {
+            "type": "addWarning",
+            "warning": "Mastitis can be serious. Isolate milk per guidance and contact a veterinarian for diagnosis and treatment."
+          }
+        ]
+      }
+    ]
+  }
+}

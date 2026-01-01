@@ -1,0 +1,294 @@
+{
+  "id": "seasonal.climate_zones.usda_hardiness",
+  "domain": "seasonal",
+  "kind": "climate_zones",
+  "title": "USDA Plant Hardiness Zones (Bands + Min Temp Ranges)",
+  "intentTags": [
+    "seasonal:climate",
+    "zone:usda"
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "notes": [
+      "This is a normalized reference table (zone band → average annual extreme minimum temperature range).",
+      "SSA can use zone bands to bias season constraints and garden task windows.",
+      "If the user location is missing, SeasonResolver should default to zone:unknown and proceed."
+    ]
+  },
+  "defaults": {
+    "zone": "unknown",
+    "scheme": "usda_hardiness"
+  },
+  "zones": [
+    {
+      "zone": "1a",
+      "minF": -60,
+      "maxF": -55,
+      "tags": [
+        "zone:usda:1a",
+        "freeze:risk_high"
+      ]
+    },
+    {
+      "zone": "1b",
+      "minF": -55,
+      "maxF": -50,
+      "tags": [
+        "zone:usda:1b",
+        "freeze:risk_high"
+      ]
+    },
+    {
+      "zone": "2a",
+      "minF": -50,
+      "maxF": -45,
+      "tags": [
+        "zone:usda:2a",
+        "freeze:risk_high"
+      ]
+    },
+    {
+      "zone": "2b",
+      "minF": -45,
+      "maxF": -40,
+      "tags": [
+        "zone:usda:2b",
+        "freeze:risk_high"
+      ]
+    },
+    {
+      "zone": "3a",
+      "minF": -40,
+      "maxF": -35,
+      "tags": [
+        "zone:usda:3a",
+        "freeze:risk_high"
+      ]
+    },
+    {
+      "zone": "3b",
+      "minF": -35,
+      "maxF": -30,
+      "tags": [
+        "zone:usda:3b",
+        "freeze:risk_high"
+      ]
+    },
+    {
+      "zone": "4a",
+      "minF": -30,
+      "maxF": -25,
+      "tags": [
+        "zone:usda:4a",
+        "freeze:risk_high"
+      ]
+    },
+    {
+      "zone": "4b",
+      "minF": -25,
+      "maxF": -20,
+      "tags": [
+        "zone:usda:4b",
+        "freeze:risk_high"
+      ]
+    },
+    {
+      "zone": "5a",
+      "minF": -20,
+      "maxF": -15,
+      "tags": [
+        "zone:usda:5a",
+        "freeze:risk_med"
+      ]
+    },
+    {
+      "zone": "5b",
+      "minF": -15,
+      "maxF": -10,
+      "tags": [
+        "zone:usda:5b",
+        "freeze:risk_med"
+      ]
+    },
+    {
+      "zone": "6a",
+      "minF": -10,
+      "maxF": -5,
+      "tags": [
+        "zone:usda:6a",
+        "freeze:risk_med"
+      ]
+    },
+    {
+      "zone": "6b",
+      "minF": -5,
+      "maxF": 0,
+      "tags": [
+        "zone:usda:6b",
+        "freeze:risk_med"
+      ]
+    },
+    {
+      "zone": "7a",
+      "minF": 0,
+      "maxF": 5,
+      "tags": [
+        "zone:usda:7a",
+        "freeze:risk_low"
+      ]
+    },
+    {
+      "zone": "7b",
+      "minF": 5,
+      "maxF": 10,
+      "tags": [
+        "zone:usda:7b",
+        "freeze:risk_low"
+      ]
+    },
+    {
+      "zone": "8a",
+      "minF": 10,
+      "maxF": 15,
+      "tags": [
+        "zone:usda:8a",
+        "freeze:risk_low"
+      ]
+    },
+    {
+      "zone": "8b",
+      "minF": 15,
+      "maxF": 20,
+      "tags": [
+        "zone:usda:8b",
+        "freeze:risk_low"
+      ]
+    },
+    {
+      "zone": "9a",
+      "minF": 20,
+      "maxF": 25,
+      "tags": [
+        "zone:usda:9a",
+        "freeze:risk_low",
+        "heat:high"
+      ]
+    },
+    {
+      "zone": "9b",
+      "minF": 25,
+      "maxF": 30,
+      "tags": [
+        "zone:usda:9b",
+        "freeze:risk_low",
+        "heat:high"
+      ]
+    },
+    {
+      "zone": "10a",
+      "minF": 30,
+      "maxF": 35,
+      "tags": [
+        "zone:usda:10a",
+        "freeze:risk_min",
+        "heat:high"
+      ]
+    },
+    {
+      "zone": "10b",
+      "minF": 35,
+      "maxF": 40,
+      "tags": [
+        "zone:usda:10b",
+        "freeze:risk_min",
+        "heat:high"
+      ]
+    },
+    {
+      "zone": "11a",
+      "minF": 40,
+      "maxF": 45,
+      "tags": [
+        "zone:usda:11a",
+        "freeze:risk_min",
+        "tropics:edge"
+      ]
+    },
+    {
+      "zone": "11b",
+      "minF": 45,
+      "maxF": 50,
+      "tags": [
+        "zone:usda:11b",
+        "freeze:risk_min",
+        "tropics"
+      ]
+    },
+    {
+      "zone": "12a",
+      "minF": 50,
+      "maxF": 55,
+      "tags": [
+        "zone:usda:12a",
+        "tropics"
+      ]
+    },
+    {
+      "zone": "12b",
+      "minF": 55,
+      "maxF": 60,
+      "tags": [
+        "zone:usda:12b",
+        "tropics"
+      ]
+    },
+    {
+      "zone": "13a",
+      "minF": 60,
+      "maxF": 65,
+      "tags": [
+        "zone:usda:13a",
+        "tropics"
+      ]
+    },
+    {
+      "zone": "13b",
+      "minF": 65,
+      "maxF": 70,
+      "tags": [
+        "zone:usda:13b",
+        "tropics"
+      ]
+    }
+  ],
+  "planningBias": [
+    {
+      "whenTagsAny": [
+        "freeze:risk_high"
+      ],
+      "addTags": [
+        "constraint:freeze_window_sensitive",
+        "mode:winterize_early"
+      ]
+    },
+    {
+      "whenTagsAny": [
+        "freeze:risk_med"
+      ],
+      "addTags": [
+        "constraint:frost_watch",
+        "mode:winterize"
+      ]
+    },
+    {
+      "whenTagsAny": [
+        "heat:high"
+      ],
+      "addTags": [
+        "constraint:heat_window_sensitive",
+        "trigger:water_management"
+      ]
+    }
+  ]
+}

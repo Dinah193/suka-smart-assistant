@@ -1,0 +1,226 @@
+{
+  "name": "CookingStylesTemplate",
+  "version": "3.0.0",
+  "purpose": "Generate authentic, traditional cooking styles and an INTERACTIVE execution plan with timers, cues, branching, and slider-driven adjustments that fit Suka's automation runtime.",
+  "principles": [
+    "Honor tradition first; clearly label adaptations and trade-offs.",
+    "Output STRICT JSON (no prose outside JSON).",
+    "Steps must be concise, measurable, and instrumentable (durations, temps, cues).",
+    "Prefer culturally authentic anchors; suggest respectful swaps with reasons."
+  ],
+  "inputs": {
+    "cuisine": "",
+    "dish": "",
+    "now": "",
+    "constraints": {
+      "timeMinutes": 60,
+      "diet": [],
+      "budget": "medium",
+      "skill": "intermediate"
+    },
+    "context": {
+      "kit": { "appliances": [], "utensils": [], "caps": {} },
+      "sliders": { "doneness": 50, "softness": 50, "browning": 50, "smokiness": 50, "sourness": 50, "chiliHeat": 50 },
+      "region": "US",
+      "units": "imperial",
+      "rhythm": [],
+      "packsPreferred": []
+    },
+    "houseStyle": {},
+    "dishStyle": {},
+    "textureTargets": {
+      "focusItems": [],
+      "matrix": {}
+    },
+    "inventoryHints": [],
+    "shoppingContext": {
+      "storeAvailability": [],
+      "season": "",
+      "gardenHints": []
+    }
+  },
+  "sections": [
+    {
+      "role": "system",
+      "content": [
+        "You are a culinary ethnographer-chef producing JSON for a cooking assistant.",
+        "Return ONE JSON object matching the schema below.",
+        "All times numeric, temperatures include unit keys (F and/or C).",
+        "Use short imperative steps with measurable cues (color, aroma, sound, texture)."
+      ]
+    },
+    {
+      "role": "developer",
+      "content": [
+        "INTERACTIVE REQUIREMENTS:",
+        "- Include a `plan` with steps that the UI can render as timer cards (id, label, durationSec, heatLevel, tempTarget, equipment, ingredientsRef).",
+        "- Provide `cues` for each key step (visual/auditory/aroma/texture).",
+        "- Provide `branches` for appliance-based or time-based alternatives (e.g., pressure_cooker vs stovetop), each with its own steps.",
+        "- Provide `adjustments` mapping sliders & per-item textures to concrete parameter deltas (e.g., searSeconds:+20 if browning>70).",
+        "- Provide `sensors` guidance (thermometer probe targets, skewer test, rice bite level).",
+        "- Provide `events` (automation hooks) for start/finish of plan and important steps.",
+        "TRADITION:",
+        "- Output a `traditional` block (techniques, vessels, fats, heats, moisture, textures, aromaAnchors, notes).",
+        "ADAPTATION:",
+        "- Output explicit `adaptations` for the user's kit; state trade-offs honestly.",
+        "RHYTHM & PACKS:",
+        "- If cuisine appears in weekly rhythm, set rhythmFit:true and suggest batching buckets.",
+        "- Integrate preferred packs by ID only (no URLs).",
+        "SHOPPING:",
+        "- Distinguish anchors (non-negotiables) vs. plausible swaps with reasons; include garden subs.",
+        "SAFETY:",
+        "- Include clear safety items with temps in both F and C when critical."
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        "Cuisine: {{cuisine}}",
+        "Dish: {{dish}}",
+        "Time budget: {{constraints.timeMinutes}} minutes; Diet: {{constraints.diet}}; Budget: {{constraints.budget}}; Skill: {{constraints.skill}}",
+        "Region: {{context.region}}; Units: {{context.units}}; Now: {{now}}",
+        "Weekly Flavor Rhythm: {{context.rhythm}}",
+        "Preferred Recipe Packs: {{context.packsPreferred}}",
+        "User Kit: appliances={{context.kit.appliances}}, utensils={{context.kit.utensils}}, caps={{context.kit.caps}}",
+        "Taste Sliders: {{context.sliders}}",
+        "House Style: {{houseStyle}}",
+        "Dish Style: {{dishStyle}}",
+        "Texture Targets: focus={{textureTargets.focusItems}}, matrix={{textureTargets.matrix}}",
+        "Inventory Hints: {{inventoryHints}}",
+        "Shopping/Garden Context: {{shoppingContext}}",
+        "",
+        "OUTPUT SCHEMA (JSON ONLY):",
+        "{",
+        "  \"meta\": {",
+        "    \"cuisine\": \"\",",
+        "    \"dish\": \"\",",
+        "    \"region\": \"\",",
+        "    \"units\": \"\",",
+        "    \"rhythmFit\": false,",
+        "    \"estimatedTime\": { \"orthodox\": 0, \"house\": 0, \"quick\": 0 },",
+        "    \"buckets\": [\"slow_braise\", \"pressure_cook\", \"charcoal_grill\", \"hard_sear\", \"mixed\"]",
+        "  },",
+        "  \"traditional\": {",
+        "    \"techniques\": [\"\"],",
+        "    \"vessels\": [\"\"],",
+        "    \"fats\": [\"\"],",
+        "    \"heats\": [\"low|medium|high|very_high\"],",
+        "    \"moisture\": [\"braise|steam|dry\"],",
+        "    \"textures\": [\"pull-apart|silky|al_dente|crispy\"],",
+        "    \"aromaAnchors\": [\"\"],",
+        "    \"notes\": \"\"",
+        "  },",
+        "  \"adaptations\": [",
+        "    { \"technique\": \"\", \"appliance\": \"\", \"how\": \"\", \"tradeoffs\": \"\" }",
+        "  ],",
+        "  \"textureTuning\": [",
+        "    { \"target\": \"global|itemKey\", \"slider\": \"doneness|softness|browning|smokiness|sourness|chiliHeat\", \"adjust\": \"concrete numeric action\" }",
+        "  ],",
+        "  \"variants\": {",
+        "    \"orthodox\": { \"title\": \"\", \"summary\": \"\", \"stepsRef\": \"plan::orthodox\" },",
+        "    \"house\":    { \"title\": \"\", \"summary\": \"\", \"stepsRef\": \"plan::house\" },",
+        "    \"quick\":    { \"title\": \"\", \"summary\": \"\", \"stepsRef\": \"plan::quick\" }",
+        "  },",
+        "  \"plan\": {",
+        "    \"orthodox\": [",
+        "      {",
+        "        \"id\": \"step-1\",",
+        "        \"label\": \"\",",
+        "        \"durationSec\": 0,",
+        "        \"heatLevel\": \"off|low|medium|high|very_high\",",
+        "        \"tempTarget\": { \"F\": null, \"C\": null },",
+        "        \"equipment\": [\"\"],",
+        "        \"ingredientsRef\": [\"inventoryKey or name\"],",
+        "        \"deps\": [],",
+        "        \"cues\": { \"visual\": \"\", \"aroma\": \"\", \"sound\": \"\", \"texture\": \"\" },",
+        "        \"safety\": \"\",",
+        "        \"timer\": { \"startOn\": \"step_start\", \"autoNext\": false },",
+        "        \"adjustments\": [ { \"when\": \"browning>70\", \"delta\": { \"durationSec\": +20 } } ]",
+        "      }",
+        "    ],",
+        "    \"house\": [],",
+        "    \"quick\": []",
+        "  },",
+        "  \"branches\": [",
+        "    {",
+        "      \"id\": \"appliance-pressure\",",
+        "      \"condition\": \"has:pressure_cooker OR timeMinutes<35\",",
+        "      \"appliesTo\": \"house|quick\",",
+        "      \"steps\": [",
+        "        { \"id\": \"pc-1\", \"label\": \"\", \"durationSec\": 0, \"equipment\": [\"pressure_cooker\"], \"cues\": { \"visual\": \"\" } }",
+        "      ],",
+        "      \"tradeoffs\": \"tender faster; slightly reduced Maillard depth\"",
+        "    }",
+        "  ],",
+        "  \"sensors\": [",
+        "    { \"item\": \"chicken_thigh\", \"probeTarget\": { \"F\": 175, \"C\": 79 }, \"method\": \"instant-read thermometer at thickest point\" }",
+        "  ],",
+        "  \"batching\": {",
+        "    \"compatibleBuckets\": [\"slow_braise\"],",
+        "    \"notes\": \"Group with other braises for shared oven time.\"",
+        "  },",
+        "  \"shopping\": {",
+        "    \"anchors\": [\"\"],",
+        "    \"swaps\": [ { \"for\": \"palm oil\", \"try\": \"neutral oil + smoked paprika oil\", \"why\": \"approximates smoky depth when charcoal not available\" } ],",
+        "    \"gardenSubs\": [ { \"for\": \"scallions\", \"grow\": \"spring onions\", \"season\": \"cool\" } ]",
+        "  },",
+        "  \"packIntegration\": {",
+        "    \"recommended\": [ { \"packId\": \"\", \"why\": \"\" } ]",
+        "  },",
+        "  \"events\": {",
+        "    \"onPlanStart\": [\"styles/planStart\"],",
+        "    \"onPlanComplete\": [\"styles/planDone\"],",
+        "    \"milestones\": [",
+        "      { \"stepId\": \"step-1\", \"emit\": [\"styles/stepStart\" ] },",
+        "      { \"stepId\": \"step-1\", \"emit\": [\"styles/stepDone\" ] }",
+        "    ]",
+        "  },",
+        "  \"uiHints\": {",
+        "    \"cards\": [",
+        "      { \"title\": \"Mise en Place\", \"kind\": \"checklist\", \"items\": [\"prep aromatics\", \"measure stock\"] },",
+        "      { \"title\": \"Texture Goals\", \"kind\": \"badges\", \"items\": [\"silky\", \"pull-apart\"] }",
+        "    ],",
+        "    \"progressBadges\": [\"orthodox|house|quick\"],",
+        "    \"suggestedLayout\": \"raised-horizontal\"",
+        "  }",
+        "}"
+      ]
+    }
+  ],
+  "fewShot": [
+    {
+      "when": { "cuisine": "Nigerian", "dish": "Jollof Rice" },
+      "hint": [
+        "Orthodox plan includes stew base simmer, parboil rice, steam-to-finish with smoke notes.",
+        "House branch: pressure cooker main cook with reduced liquid; finish uncovered to dry; optional smoked oil.",
+        "Quick plan: pre-parboiled rice 70% + concentrated stew; sheet-pan finish to drive off moisture."
+      ]
+    },
+    {
+      "when": { "cuisine": "West African", "dish": "Suya" },
+      "hint": [
+        "Traditional: charcoal grill high heat; yaji rub; rest and dust.",
+        "Branch air_fryer: very hot, short; brush oil; finish with smoked paprika oil.",
+        "Sensors: mince or thin cut reaches safe temp quickly; focus on browning cues."
+      ]
+    },
+    {
+      "when": { "cuisine": "Cajun", "dish": "Gumbo" },
+      "hint": [
+        "Orthodox: dark roux to color of chocolate; trinity; long simmer.",
+        "Quick branch: pressure cook stock + meats; stovetop roux separately; combine; simmer briefly to marry."
+      ]
+    }
+  ],
+  "guardrails": {
+    "forbidden": [
+      "Hallucinating brands, URLs, or non-existent packs.",
+      "Unsafe temps, esp. poultry < 165F/74C without style-specific justification.",
+      "Erasing culturally essential anchors when adapting."
+    ],
+    "unitRules": [
+      "If units=imperial, default to cups/oz/lb; if metric, use g/ml/kg.",
+      "Include key temperatures in both F and C for safety-critical steps."
+    ]
+  }
+}

@@ -1,0 +1,158 @@
+{
+"nodeId": "storehouseMeals.costPerServing",
+"label": "Cost Per Serving",
+"description": "Calculator that uses recipe quantities, batch yield, and storehouse prices to compute cost per serving, cost per batch, and highlight hair-supportive foods for Black hair nutrition planning.",
+"domain": "storehouse",
+"category": "calculator",
+"version": 1,
+"status": "active",
+"tags": [
+"storehouse",
+"meals",
+"cost",
+"budget",
+"planning-graph",
+"blackHairNutrition"
+],
+"planningGraph": {
+"group": "Storehouse Meals",
+"dependsOn": [
+"storehouse.inventorySnapshot",
+"storehouse.priceBook",
+"storehouseMeals.recipeScaling",
+"storehouseMeals.batchYield"
+],
+"feedsInto": [
+"storehouseMeals.storehouseRefill",
+"storehouseMeals.batchYield",
+"storehouseMeals.recipeScaling",
+"health.blackHairNutrition",
+"budgeting.householdFoodBudget"
+],
+"priority": "normal"
+},
+"inputs": {
+"schema": "./CostPerServingCalculator.schema.json",
+"fields": {
+"recipeContext": {
+"type": "object",
+"required": true,
+"description": "Base recipe and scaled recipe context: name, domain, baseline servings, scaled servings."
+},
+"batchYield": {
+"type": "object",
+"required": false,
+"description": "Optional batch yield summary used to normalize cost per serving across batch sizes."
+},
+"ingredientLines": {
+"type": "array",
+"required": true,
+"description": "Ingredients with quantities, units, and price-per-unit from the price book or manual entry."
+},
+"hairNutritionProfile": {
+"type": "object",
+"required": false,
+"description": "Optional per-ingredient hair-support tags and scores for Black hair nutrition analysis."
+},
+"currency": {
+"type": "string",
+"required": false,
+"default": "USD",
+"description": "Currency code for all cost outputs."
+},
+"prefs": {
+"type": "object",
+"required": false,
+"description": "User preferences for rounding, cost emphasis, and highlighting of Black hair nutrition foods."
+}
+}
+},
+"outputs": {
+"schema": "./CostPerServingCalculator.schema.json",
+"fields": {
+"totals": {
+"type": "object",
+"description": "Overall cost totals including costPerServing, costPerBatch, and costPerDay if a daily plan is available."
+},
+"perIngredientCosts": {
+"type": "array",
+"description": "Cost share per ingredient, including any hair nutrition-related tags or notes."
+},
+"hairNutritionCosts": {
+"type": "object",
+"description": "Subset and summary for ingredients that support Black hair nutrition, with per-serving and per-period costs."
+},
+"meta": {
+"type": "object",
+"description": "Metadata including calculatorVersion, runContext, and warning messages."
+}
+}
+},
+"shim": {
+"module": "./CostPerServingCalculator.shim.js",
+"export": "runCostPerServingCalculator",
+"mode": "background-safe",
+"description": "Pure-logic shim that accepts validated input and returns cost-per-serving outputs. Designed to be invoked from React hooks, workers, or SessionRunner steps without UI coupling."
+},
+"ui": {
+"viewComponent": "./CostPerServingCalculator.view.jsx",
+"title": "Cost Per Serving",
+"icon": "mdi-currency-usd",
+"route": "/calculators/storehouse-meals/cost-per-serving",
+"supportsNowButton": true,
+"sections": [
+"recipe-summary",
+"cost-per-serving-card",
+"ingredient-cost-breakdown",
+"hair-nutrition-highlight",
+"next-steps"
+],
+"hairNutritionHighlight": {
+"enabled": true,
+"field": "hairNutritionCosts",
+"defaultFocus": true
+}
+},
+"sessionRunner": {
+"enabled": true,
+"domain": "storehouse",
+"defaultTitleTemplate": "Review cost per serving for {{recipeName}}",
+"stepTemplates": [
+{
+"id": "review-cost-summary",
+"title": "Review cost per serving",
+"desc": "Look over the total cost per serving and per batch. Adjust your scaled servings if the cost feels too high for your budget.",
+"durationSec": 180,
+"blockers": [],
+"metadata": {
+"donenessCue": "timer",
+"cueNotes": "Use this moment to decide whether to scale the recipe up or down for your household and budget."
+}
+},
+{
+"id": "hair-nutrition-review",
+"title": "Check Black hair nutrition foods",
+"desc": "Review which ingredients support hair and scalp health, and confirm you want to keep or enhance them in this meal plan.",
+"durationSec": 180,
+"blockers": [],
+"metadata": {
+"donenessCue": "timer",
+"cueNotes": "Prioritize hair-supportive foods even if they cost a bit more, when your budget allows."
+}
+}
+]
+},
+"featureFlags": {
+"requiresFamilyFundModeForHubExport": true,
+"supportsBlackHairNutritionMode": true
+},
+"telemetry": {
+"eventSource": "calculators/storehouseMeals/CostPerServingCalculator",
+"emitOnRun": true,
+"events": [
+"calculator.costPerServing.invoked",
+"calculator.costPerServing.completed",
+"calculator.costPerServing.error"
+]
+}
+}

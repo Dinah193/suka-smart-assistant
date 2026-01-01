@@ -1,0 +1,36 @@
+{
+  "$schema": "../../../../schemas/planningGraph/nodes.schema.json",
+  "nodeKey": "calendar.scripturalYearLength",
+  "kind": "calculator-node",
+  "id": "calendar.scripturalYearLength",
+  "domain": "storehouse",
+  "label": "Scriptural Year Length Calculator",
+  "description": "Determines the length of the scriptural year and key anchor points based on selected month start rules, equinox/season markers, and agricultural signs.",
+  "calculatorId": "calendar.ScripturalYearLengthCalculator",
+  "category": "calendar",
+  "tags": [
+    "calendar",
+    "scripturalYear",
+    "hebrew",
+    "feasts",
+    "storehouse",
+    "planningGraph"
+  ],
+  "inputRefs": [
+    "calendar.hebrewMonthStart",
+    "calendar.astronomy",
+    "garden.seasonMarkers"
+  ],
+  "outputRefs": [
+    "calendar.feastDayAlignment",
+    "garden.plantingWindows",
+    "storehouse.annualProvisioning"
+  ],
+  "version": "1.0.0",
+  "ui": {
+    "group": "Calendar",
+    "icon": "CalendarRange",
+    "primaryActionLabel": "Calculate Scriptural Year",
+    "showInPlanner": true
+  }
+}

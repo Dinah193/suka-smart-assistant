@@ -1,0 +1,502 @@
+===============================================================================
+PROVISIONING CYCLES CONFIG – DESIGN SPEC
+File: src/intelligence/cycles/provisioningCycles.config.txt
+Role: Config contract for provisioning & storehouse rhythms across the household
+===============================================================================
+
+0. CONCEPTUAL PURPOSE
+---------------------
+The provisioningCycles config describes how the householder plans and maintains
+the *flow of provisions* into the storehouse across seasons and cycles.
+
+SSA uses this to:
+
+- Treat provisioning as a **cycle**, not random shopping.
+- Tie provisioning rhythms to:
+  - storehouse levels and long-term yield goals,
+  - cooking and feast rhythms (demand),
+  - garden and animal yields (supply),
+  - preservation cycles (conversion flows),
+  - enterprise (food truck, cottage foods, mutual-aid meals).
+- Provide cycle-aware insights and SessionRunner guidance:
+  - “Your protein provisions will dip in 3 weeks if the current rhythm holds.”
+  - “A feast window is approaching; storehouse provisions for grains are low.”
+
+This is a **config contract**, not an engine. It defines:
+- core provisioning rhythms,
+- seasonal adjustments,
+- domain bindings,
+- readiness thresholds.
+
+It must support:
+
+- TOOL MODE:
+  - A single planner or calculator can use it alone to model provisioning
+    rhythms (e.g., “Storehouse Provision Planner”) without Dexie or global
+    state.
+- STEWARDSHIP MODE:
+  - SSA loads/persists this config in Dexie, merges with seasonal intelligence,
+    and feeds the householdCycles.engine and storehouse domain.
+
+Language: cycle, season, storehouse, provision, yield, rhythm, feast, householder.
+Avoid “task list”, “todo”, or generic productivity phrases.
+
+
+1. STRUCTURE – CONFIG SHAPE & DOMAINS
+-------------------------------------
+Primary domains:
+- storehouse/provisioning
+- cooking (demand)
+- garden (supply)
+- animals (supply)
+- preservation (conversion)
+- feasts/events (demand peaks)
+- enterprise (external demand)
+
+Connected domains:
+- cleaning/hygiene (cleaning provisions),
+- textiles (laundry detergents, soaps),
+- mutual-aid cooking days (provision sharing cycles).
+
+Conceptual config shape (JSON-like):
+
+provisioningCyclesConfig = {
+  version: "1.0.0",
+  lastUpdatedAt: string,
+  modeHint?: "TOOL" | "STEWARDSHIP",
+
+  // The core “streams” of provisions into/out of the storehouse
+  streams: ProvisionStreamConfig[],
+
+  // Reusable provisioning rhythm templates (weekly market run, monthly bulk,
+  // harvest intake, mutual-aid share day, enterprise stock-up, feast stock-up)
+  cycleTemplates: ProvisioningCycleTemplate[],
+
+  // Seasonal adjustments (lean seasons, harvest seasons, feast-heavy seasons)
+  seasonalAdjustments: ProvisioningSeasonalAdjustment[],
+
+  // Bindings that tie provisioning cycles to storehouse items and domains
+  bindings: {
+    storehouseItems: ProvisionStorehouseBinding[],
+    domainSignals: ProvisionDomainSignalBinding[],
+  },
+
+  // Preferences for alerts/insights around provisioning
+  signals: {
+    demandHorizonDays: number,       // how far ahead to consider cooking/feasts
+    yieldHorizonDays: number,        // how far ahead to consider harvest/animals
+    sendShortfallAlerts: boolean,
+    sendSurplusAlerts: boolean,
+    sendFeastProvisionAlerts: boolean,
+  },
+
+  metadata?: {
+    householdName?: string,
+    provisioningStyle?: "weekly-market" | "bulk-monthly" | "mixed",
+  },
+};
+
+
+2. PROPS – DETAILED CONFIG COMPONENTS
+-------------------------------------
+
+2.1 ProvisionStreamConfig
+Represents a **flow** of provisions related to a domain or channel.
+
+ProvisionStreamConfig = {
+  id: string,                        // e.g. "weekly-grocery-market", "garden-harvest",
+                                     // "animal-yields", "mutual-aid-share", "enterprise-stock"
+  label: string,                     // human-facing label
+  streamType: "purchase" | "harvest" | "yield" | "donation" | "mutual-aid" | "enterprise",
+
+  domains: string[],                 // e.g. ["storehouse", "cooking"], ["garden"], ["animals"]
+  priority: "core" | "supporting",   // core streams define the main household rhythm
+
+  // Rhythmic pattern in ordinary seasons
+  baseRhythm: {
+    frequency: "daily" | "weekly" | "biweekly" | "monthly" | "seasonal" | "event-bound",
+    typicalDayOfWeek?: number,       // 0–6 for weekly patterns
+    typicalDayOfMonth?: number,      // 1–31 for monthly patterns
+    typicalSeasonId?: string,        // e.g. "spring", "harvest-season"
+  },
+
+  // Connection to concrete storehouse categories
+  storehouseCategoryKeys: string[],  // e.g. ["grains", "oils", "meat", "cleaning-supplies"]
+
+  // Expected yield per rhythm cycle (for modeling)
+  expectedYieldPerCycle?: {
+    [storehouseCategoryKey: string]: {
+      typicalQuantity: number,       // units per cycle (kg, lb, count, jars)
+      variability?: number,          // 0..1 how much this often fluctuates
+    },
+  },
+
+  // Conceptual yield for insights (what this stream “secures”)
+  yields: {
+    baselineCalorieShare?: number,   // 0..1 share of calories it usually covers
+    proteinShare?: number,           // 0..1 share of protein
+    feastSupportScore?: number,      // 0..1 support for feast days
+  },
+
+  notes?: string,
+};
+
+
+2.2 ProvisioningCycleTemplate
+Reusable patterns for planning provisioning cycles.
+
+ProvisioningCycleTemplate = {
+  id: string,                        // e.g. "weekly-market-provisions"
+  label: string,                     // e.g. "Weekly Market Rhythm"
+  rhythmType: "weekly" | "monthly" | "pre-feast" | "post-feast" | "harvest-intake",
+  intensity: "light" | "standard" | "heavy", // heavy = feast or bulk stocking
+
+  // Which streams this template normally belongs to
+  streamIds: string[],
+
+  // How it touches the storehouse in broad terms
+  storehouseImpact: {
+    inflowCategories?: {
+      [storehouseCategoryKey: string]: {
+        magnitude: "low" | "medium" | "high",
+      },
+    },
+    outflowCategories?: {
+      [storehouseCategoryKey: string]: {
+        magnitude: "low" | "medium" | "high",
+      },
+    },
+  },
+
+  // For SessionRunner estimations and plan visualization
+  typicalDurationMinutes?: number,
+
+  // TODO[cycles-engine]:
+  // - Map this template + stream frequency into a provisioning rhythmSignal.
+  // - Use this to project storehouse inflow/outflow for householdCycles.engine.
+
+  description?: string,
+};
+
+
+2.3 ProvisioningSeasonalAdjustment
+Describes how provisioning rhythms shift for seasons and feast windows.
+
+ProvisioningSeasonalAdjustment = {
+  id: string,
+  label: string,                     // e.g. "Lean Winter Season Provisions",
+                                     //      "Autumn Harvest Flush",
+                                     //      "Passover/Unleavened Bread Feast Provisions"
+
+  seasonIdPattern: string,           // e.g. "winter", "summer", "feast:passover"
+  activeWindow?: {
+    startOffsetFromSeasonStartDays?: number,
+    endOffsetFromSeasonStartDays?: number,
+  },
+
+  // Rhythmic adjustments
+  adjustments: {
+    streamOverrides?: {
+      [streamId: string]: {
+        frequencyMultiplier?: number,// e.g. 0.5 (less frequent), 1.5 (more)
+        intensityOverride?: "light" | "standard" | "heavy",
+        expectedYieldMultiplier?: number, // harvest flush or lean times
+      },
+    },
+
+    storehouseReadiness?: {
+      // How high the storehouse should be for this season to feel secure
+      categoryTargets?: {
+        [storehouseCategoryKey: string]: {
+          comfortable: number,       // quantity considered secure
+          low: number,
+          critical: number,
+        },
+      },
+    },
+  },
+
+  // TODO[seasonal-logic]:
+  // - Tie to seasonalIntelligence + feast calendar so provisioning
+  //   windows are recognized by dashboards and the cycles engine.
+
+  notes?: string,
+};
+
+
+2.4 ProvisionStorehouseBinding
+Connects specific storehouse items/categories to provisioning cycles.
+
+ProvisionStorehouseBinding = {
+  id: string,
+  label: string,
+  storehouseItemKey: string,         // or category key
+  linkedStreamIds: string[],         // where this item typically comes from
+  linkedTemplateIds: string[],       // where this item is emphasized
+
+  // Readiness thresholds for this provision
+  readinessThresholds?: {
+    comfortable: number,
+    low: number,
+    critical: number,
+  },
+
+  // Optional mapping to nutrition or use (meals, feasts, preservation)
+  useTags?: string[],                // e.g. ["daily-bread", "feast-desserts", "preservation-jars"]
+
+  // TODO[storehouse]:
+  // - When combined with live storehouse inventory, SSA can compute
+  //   "provision shortfall" vs upcoming demand and seasonal targets.
+
+  notes?: string,
+};
+
+
+2.5 ProvisionDomainSignalBinding
+Describes how other domains’ rhythms influence provisioning.
+
+ProvisionDomainSignalBinding = {
+  id: string,
+  sourceDomain: string,              // "cooking" | "garden" | "animals" | "feasts" | "enterprise"
+  sourceEventType: string,           // e.g. "mealPlan.updated", "harvest.logged",
+                                     //      "butchery.session.completed", "feast.window.approaching"
+  // How strong the influence is on provisioning rhythms
+  influence: "strong" | "moderate" | "gentle",
+
+  // Which streams & templates this signal should touch
+  affectedStreamIds: string[],
+  preferredTemplateIds?: string[],
+
+  // Example:
+  //  - A "harvest.logged" event from garden might:
+  //      - strengthen "harvest-intake" provisioning cycles for jars, salt, etc.
+  //  - A "feast.window.approaching" event might:
+  //      - trigger pre-feast provisioning templates with heavy intensity.
+
+  // TODO[dependencies]:
+  // - householdCycles.engine uses these bindings to see how demand (meals/feasts)
+  //   and supply (garden/animals) should reshape provisioning cycles.
+
+  notes?: string,
+};
+
+
+3. DATA FLOW – HOW THIS CONFIG IS USED
+--------------------------------------
+
+3.1 TOOL MODE
+In TOOL MODE, a single “Provisioning & Storehouse Planner” view can:
+
+1) Build or import a provisioningCyclesConfig in memory.
+2) Allow the householder to:
+   - define streams (market trips, harvests, mutual-aid days, etc.),
+   - configure cycle templates (weekly market, monthly bulk, feast stock-up),
+   - set seasonal adjustments (lean vs plentiful seasons),
+   - bind specific storehouse categories and items.
+3) Use this config to:
+   - visualize provisioning rhythms across weeks and seasons,
+   - simulate storehouse inflow/outflow given a simple consumption baseline,
+   - compute a “storehouse readiness” view ahead of a feast or seasonal shift.
+
+TOOL MODE does **not** require Dexie or global state.
+The feature can still emit eventBus events so session logs, dashboards, or
+other tools listening in can react.
+
+Typical TOOL MODE flow:
+
+- Planner loads default provisioningCyclesConfig (static JS/JSON).
+- Householder refines streams, thresholds, and templates.
+- Planner emits:
+  - "provisioning.cycles.config.updated"
+- If householdCycles.engine is active, it can be informed via:
+  - a manual call or event-driven pattern to recompute household posture
+    for provisioning.
+
+3.2 STEWARDSHIP MODE
+In STEWARDSHIP MODE, provisioningCyclesConfig becomes **shared intelligence**.
+
+Flow:
+
+1) On app boot, Dexie loads provisioningCyclesConfig from e.g.
+   "provisioningCyclesConfig" table, combining with defaults if needed.
+
+2) The config is injected into:
+   - storehouse dashboards,
+   - meal planning and cooking intelligence,
+   - garden and animal planning (for feed and harvest containers),
+   - preservation planning (jars, lids, salt, sugar, vinegar),
+   - householdCycles.engine as part of the provisioning domain snapshot.
+
+3) As meal plans, feast windows, harvest logs, animal yield logs,
+   preservation sessions, and enterprise orders change, they emit domain events.
+   Those events intersect with ProvisionDomainSignalBinding to update
+   provisioning rhythm expectations.
+
+4) householdCycles.engine uses:
+   - provisioning streams,
+   - seasonal adjustments,
+   - storehouse bindings,
+   - domain signals
+   to derive:
+   - projected inflow/outflow,
+   - risk of provision shortfall or surplus,
+   - household posture in terms of provisioning readiness.
+
+5) When the householder updates provisioning cycles (e.g., switching from
+   weekly to biweekly bulk), a config update is saved back to Dexie, and
+   optionally, a high-level summary can be exported to the Family Fund Hub.
+
+
+4. EVENT TRIGGERS – EVENTBUS CONTRACT
+-------------------------------------
+The config itself is data, but code using this config MUST emit events.
+
+All events follow SSA’s eventBus contract:
+
+  { type, ts, source, data }
+
+Recommended event types:
+
+1) Config lifecycle
+   - "provisioning.cycles.config.loaded"
+     data: {
+       version,
+       streamCount,
+       templateCount,
+       seasonalAdjustmentCount,
+     }
+
+   - "provisioning.cycles.config.updated"
+     data: {
+       version,
+       changedBy,         // "householder" | "system" | "migration"
+       changesSummary,    // e.g. { streamsAdded, streamsModified, thresholdsUpdated }
+     }
+
+2) Rhythm and planning
+   - "provisioning.cycles.plan.derived"
+     // Called when the planner or engine uses this config to project future
+     // provisioning cycles (e.g. upcoming market trips, harvest intakes).
+     data: {
+       horizonDays,
+       plannedCycles: [{
+         streamId,
+         templateId,
+         estimatedAt,      // date/time of the planned cycle
+         intensity,
+         storehouseImpactSummary,
+       }],
+     }
+
+   - "provisioning.cycles.seasonal.window"
+     // When seasonal adjustments take effect
+     data: {
+       adjustmentId,
+       seasonId,
+       from,
+       to,
+       affectedStreamIds,
+     }
+
+3) Storehouse readiness & provisions
+   - "provisioning.storehouse.readiness"
+     data: {
+       horizonDays,
+       categoryReadiness: {
+         [storehouseCategoryKey: string]: {
+           state: "comfortable" | "low" | "critical",
+           projectedShortfallAt?: string, // ISO date if known
+           projectedSurplusNote?: string,
+         },
+       },
+     }
+
+   - "provisioning.storehouse.provision.shortfall"
+     data: {
+       horizonDays,
+       categoryKeysAtRisk: string[],
+       message,
+     }
+
+   - "provisioning.storehouse.provision.surplus"
+     data: {
+       horizonDays,
+       categoryKeysWithSurplus: string[],
+       suggestedUses?: string[],   // e.g. “convert extra apples to preserved yields”
+     }
+
+4) Insights for householder
+   - "provisioning.cycles.insight"
+     data: {
+       insightId,
+       kind: "seasonal" | "feast" | "demand" | "supply" | "storehouse",
+       severity: "info" | "gentle" | "important",
+       message,
+       relatedStreamIds?: string[],
+       relatedCategoryKeys?: string[],
+     }
+
+These events let:
+- dashboards display provisioning readiness and rhythm health,
+- SessionRunner suggest provisioning sessions aligned with cycles,
+- storehouse planners and Meal Planner align demand and supply across seasons,
+
+
+5. CONCEPTUAL PURPOSE – HOW IT FITS THE WEB OF MEANING
+------------------------------------------------------
+The provisioningCycles config anchors **provisioning and storehouse** in the
+SSA web of meaning.
+
+- It views the storehouse as the **heart of provisions**, not a static pantry:
+  - Streams (garden, animals, purchases, mutual-aid) flow in.
+  - Cooking, feasts, preservation, enterprise draw out.
+
+- It respects **seasons**:
+  - Harvest flush has different provisioning logic than lean winter.
+  - Feast cycles (festival seasons, mutual-aid cooking days) define special
+    rhythms, not ad-hoc shopping.
+
+- It defines **yields**:
+  - Each stream and template has a yield: calories, protein, feast readiness,
+    preservation opportunities, mutual-aid generosity.
+
+- It connects **domains**:
+  - Garden harvests drive preservation and storehouse grain/produce levels.
+  - Animals yield meat, milk, eggs; these then drive preservation and meals.
+  - Feasts heighten provisions demand.
+  - Enterprise (food truck/mobile kitchen) adds an outward flow that must
+    still honor household storehouse stability.
+  - Mutual-aid days coordinate provisions across households.
+
+- It supports **TOOL MODE** and **STEWARDSHIP MODE**:
+  - TOOL MODE: used by a single “Provisioning Cycle Planner” to model
+    rhythms for an individual householder.
+  - STEWARDSHIP MODE: becomes a shared pattern for SSA’s storehouse,
+    householdCycles.engine, SessionRunner, and Family Fund Hub to keep
+    the household’s storehouse in a stable, season-aware rhythm.
+
+Explicit TODO HOOKS:
+- TODO[seasonal-logic]:
+  - Bind ProvisioningSeasonalAdjustment entries to the seasonalIntelligence
+    engine and feast calendar so provisioning cycles shift automatically
+    as seasons and feasts approach.
+
+- TODO[cycles-engine]:
+  - Define how streams + cycleTemplates map into provisioning rhythmInputs
+    for householdCycles.engine (part of the "storehouse/provisioning"
+    domain snapshot).
+
+- TODO[dependencies]:
+  - Enumerate which cooking, feast, garden, animals, preservation, and
+    enterprise events should dynamically adjust provisioning rhythms via
+    ProvisionDomainSignalBinding.
+
+- TODO[insights]:
+  - Name and standardize common insight patterns:
+    - “Winter shortfall risk in staples.”
+    - “Harvest flush: extra opportunity for preserved yield.”
+    - “Feast window approaching: grains/oils provisions not yet comfortable.”
+    - “Enterprise orders outpacing household provisioning rhythm.”
+
+END OF SPEC
+===============================================================================

@@ -1,0 +1,95 @@
+
+21) Preservation & Sausage/Charcuterie Integration
+
+A) Scope
+- Preservation: water-bath & pressure canning, fermenting (veg/dairy), pickling, dehydrating, smoking, confit, jam/jelly, vinegar, kombucha, yogurt, freeze-drying (future).
+- Sausage/Charcuterie: fresh sausage, emulsified sausage (hot dogs, mortadella), smoked sausage (kielbasa), semi-dry/dry (pepperoni, salami), bacon, pancetta, ham, pastrami, jerky, biltong, terrines/pâté.
+- Goal: plan → prep → process → label → inventory with **Long-Lead alerts**, safety nudges, Hebrew guard, and budget/consumables.
+
+B) UI (new/updated cards)
+- PreservationWorkbench (NEW): choose method, recipe scaling, jar/capacity planner, pH/log inputs, outputs → Inventory.
+- SmokingPlanner (NEW): wood/time/temp curves, hold/warm windows; Sabbath-guarded schedule.
+- SausageMakerPanel (NEW): grind maps (plate sizes), mix/bind check (protein extraction), **Cure Wizard** (ppm), **Casing Calculator**, ice/water additions, batch split by flavors.
+- LongLeadAlerts (exists): shows ferments, cures, brines, dries, acetification, smoke rests.
+- Labels: method/date/lot/pH/salt%/ppm/safe-handling; “medical-safe” icons honored.
+
+C) Agents
+- preservationAgent.js
+  ☐ planBatch(method, recipe, inputs) → steps + consumables + InventoryDelta draft
+  ☐ registerProcess(meta) → id; attach logs (temp, pH, salinity)
+  ☐ finalizeBatch(measurements) → InventoryDelta + labels
+- sausageAgent.js
+  ☐ scaleRecipe(form) → ingredient grams (salt %, cure ppm), ice/water %, yield
+  ☐ casingNeeds(len_m, dia_mm, shrinkPct) → qty/size rolls
+  ☐ grindPlan(cuts, plates) → ops list; bindCheck(mixTime/temp) → warning
+  ☐ smokeSchedule(style) → time/temp targets, **Hebrew guard** shifts
+- cureCalc.js
+  ☐ computePPM({batch_g, cure1_g, nitriteFraction}) → ppm
+  ☐ cure1FromPPM({batch_g, targetPPM}) → grams
+  ☐ equilibriumBrine({meat_g, water_g, saltPct, sugarPct, nitritePPM}) → grams
+- longLeadAgent.js (exists)
+  ☐ add: charcuterie phases (cure → equalize → smoke → rest → slice)
+- inventoryAgent.js (extend)
+  ☐ track materials (casings/spice/pink salt) consume[], finished goods produce[], location plans
+- labelAgent.js (extend)
+  ☐ buildPreservationLabels(meta) with method/pH/salt%/lot
+  ☐ buildCharcuterieLabels(meta) with cure ppm, smoke date, safe-handling
+
+D) Meal Planner touchpoints
+- “Use what you make”: preservation outputs (jams, pickles, sauce) offered into plans via PantryMatch (FEFO).
+- “Batch days”: sausage/smoking sessions appear in BatchBuilder with appliance conflicts resolved.
+- Hebrew Guard: blocks active smoking/cooking on feast/Sabbath; offers Fri pre-smoke or post-Sabbath finish; warmers do not alter smoke steps.
+
+E) Lists & Budget
+- Add consumables: jars, lids, rings, pectin, vinegar, salt, sugar, spices, casings (natural/collagen), **Cure #1/#2**, wood/chips, butcher paper, netting, twine, vac bags, ice.
+- Group by store aisle; show cost/return (e.g., jars reused; $/lb vs retail deli).
+
+F) Safety & Guardrails (non-medical)
+- Canning: surface tested-recipe cues (headspace, altitude, vent/purge, PSI/time).  
+- Nitrite/nitrate: ppm calculator + label disclosure; never hard-prescribe—user sets targets.  
+- Temperature: show ranges & “danger zone” warnings; require cold-chain for meats.  
+- Hebrew/Sabbath: if enabled, no adjustments during Sabbath; shift to prep-day.
+
+G) Events
+Emit:
+  • preservation.batch.planned|started|completed ({batchId, method, delta})
+  • preservation.process.logged ({processId, metric, value, ts})  # pH/salinity/temp
+  • charcuterie.batch.planned|started|completed ({batchId, style})
+  • charcuterie.smoke.scheduled|completed ({batchId})
+  • longlead.process.created|step.due|step.completed (reuse §20)
+Subscribe:
+  • calendar.updated|hebrewCalendar.updated → shift schedules
+  • inventory.updated → FEFO & materials check
+  • animals/butchery.completed → sausage suggestions from trim/fat
+
+H) Minimal Data Shapes
+/** PreservationBatch */
+{
+  "batchId":"PR-2025-10-02-01","method":"pressure_canning",
+  "recipeId":"beef_bone_broth","altitude_ft":850,"psi":10,"processMin":25,
+  "inputs":{"jars_qt":7,"salt_g":0,"vinegar_ml":0},
+  "logs":{"ventMin":10,"pH":5.8},
+  "outputs":[{"sku":"BROTH_BEEF_QT","qty":7,"unit":"qt","lotId":"LOT-..."}]
+}
+
+/** SausageBatch */
+{
+  "batchId":"SG-2025-10-02-01","style":"smoked_kielbasa",
+  "meat_g":9000,"fat_g":1000,"saltPct":1.8,
+  "cure":{"type":"cure1","targetPPM":156,"cure_g":24.3,"nitriteFraction":0.0625},
+  "waterIcePct":8,"bindTargetTempC":3,"casing":{"type":"collagen","dia_mm":28,"len_m":38},
+  "grind":["10mm","6mm"],"smoke":{"wood":"hickory","scheduleId":"SMK-..."},
+  "outputs":[{"sku":"SAUSAGE_KIELBASA_1LB","qty":18,"unit":"lb","lotId":"LOT-..."}]
+}
+
+/** SmokeSchedule */
+{
+  "id":"SMK-2025-10-02-01","style":"kielbasa",
+  "steps":[
+    {"key":"dry","tempF":110,"timeMin":30,"active":true},
+    {"key":"smoke_stage1","tempF":130,"timeMin":60},
+    {"key":"smoke_stage2","tempF":155,"timeMin":90},
+    {"key":"finish","tempF":170,"untilITF":152}
+  ],
+  "hebrewGuard":true
+}

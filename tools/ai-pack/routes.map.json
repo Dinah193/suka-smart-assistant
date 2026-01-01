@@ -1,0 +1,452 @@
+{
+  "meta": {
+    "name": "Suka Smart Assistant – Routes Map",
+    "version": "1.1.0",
+    "generatedAt": "2025-10-29T16:55:00Z"
+  },
+  "layouts": {
+    "DefaultLayout": {
+      "path": "@/components/layout/DefaultLayout.jsx",
+      "slots": ["header", "sidebar", "main", "rightbar", "footer"]
+    },
+    "AuthLayout": {
+      "path": "@/components/layout/AuthLayout.jsx",
+      "slots": ["main"]
+    }
+  },
+  "routes": [
+    {
+      "path": "/",
+      "name": "home",
+      "title": "Home",
+      "layout": "DefaultLayout",
+      "page": "@/pages/home.jsx",
+      "lazy": false,
+      "guards": ["SabbathGuard", "QuietHoursGuard"],
+      "subscriptions": [
+        "useUserProfile",
+        "usePlans",
+        "useSessions",
+        "useInventory",
+        "useGarden",
+        "useAnimals",
+        "useTags",
+        "useRecipes",
+        "useEntitlementFlags"
+      ],
+      "features": [
+        {
+          "slot": "main",
+          "component": "@/components/home/HouseholdProfile.jsx",
+          "lazy": false
+        },
+        {
+          "slot": "main",
+          "component": "@/components/home/RecipeConsolidatorCard.jsx",
+          "lazy": false
+        },
+        {
+          "slot": "main",
+          "component": "@/features/meals/BatchSessionTray.jsx",
+          "lazy": true
+        },
+        {
+          "slot": "main",
+          "component": "@/features/sessions/MultiTimerPanel.jsx",
+          "lazy": true
+        },
+        {
+          "slot": "rightbar",
+          "component": "@/features/sessions/IntegratedTaskParser.jsx",
+          "lazy": true
+        },
+        {
+          "slot": "rightbar",
+          "component": "@/features/garden/GardenPlanner.jsx",
+          "lazy": true
+        },
+        {
+          "slot": "rightbar",
+          "component": "@/features/animals/AnimalPlanner.jsx",
+          "lazy": true
+        },
+        {
+          "slot": "rightbar",
+          "component": "@/features/meals/GroceryListGenerator.jsx",
+          "lazy": true
+        },
+        {
+          "slot": "rightbar",
+          "component": "@/features/scan-compare-trust/ui/SafetyBadges.jsx",
+          "lazy": true
+        }
+      ],
+      "onMountEmit": [
+        {
+          "event": "EVENT_UI_NAVIGATE",
+          "payload": { "route": "/", "ts": "$now" }
+        }
+      ],
+      "seo": { "canonical": "/", "breadcrumbs": ["Home"] }
+    },
+    {
+      "path": "/meals",
+      "name": "meals",
+      "title": "Meal Planning",
+      "layout": "DefaultLayout",
+      "page": "@/pages/meals/index.jsx",
+      "lazy": true,
+      "guards": ["SabbathGuard"],
+      "subscriptions": ["usePlans", "useRecipes", "useInventory"],
+      "features": [
+        {
+          "slot": "main",
+          "component": "@/features/meals/RecipeVault.jsx",
+          "lazy": true
+        },
+        {
+          "slot": "rightbar",
+          "component": "@/features/meals/BatchSessionTray.jsx",
+          "lazy": true
+        },
+        {
+          "slot": "rightbar",
+          "component": "@/features/sessions/MultiTimerPanel.jsx",
+          "lazy": true
+        }
+      ],
+      "seo": { "canonical": "/meals", "breadcrumbs": ["Home", "Meals"] }
+    },
+    {
+      "path": "/cleaning",
+      "name": "cleaning",
+      "title": "Cleaning Plans",
+      "layout": "DefaultLayout",
+      "page": "@/pages/cleaning/index.jsx",
+      "lazy": true,
+      "guards": ["SabbathGuard", "QuietHoursGuard"],
+      "subscriptions": ["usePlans"],
+      "features": [
+        {
+          "slot": "main",
+          "component": "@/features/sessions/IntegratedTaskParser.jsx",
+          "lazy": true
+        },
+        {
+          "slot": "rightbar",
+          "component": "@/features/sessions/MultiTimerPanel.jsx",
+          "lazy": true
+        }
+      ],
+      "seo": { "canonical": "/cleaning", "breadcrumbs": ["Home", "Cleaning"] }
+    },
+    {
+      "path": "/garden",
+      "name": "garden",
+      "title": "Garden Planner",
+      "layout": "DefaultLayout",
+      "page": "@/pages/garden/index.jsx",
+      "lazy": true,
+      "guards": ["WeatherGuard"],
+      "subscriptions": ["useGarden", "usePlans"],
+      "features": [
+        {
+          "slot": "main",
+          "component": "@/features/garden/GardenPlanner.jsx",
+          "lazy": false
+        }
+      ],
+      "seo": { "canonical": "/garden", "breadcrumbs": ["Home", "Garden"] }
+    },
+    {
+      "path": "/animals",
+      "name": "animals",
+      "title": "Animal Planner",
+      "layout": "DefaultLayout",
+      "page": "@/pages/animals/index.jsx",
+      "lazy": true,
+      "subscriptions": ["useAnimals", "usePlans"],
+      "features": [
+        {
+          "slot": "main",
+          "component": "@/features/animals/AnimalPlanner.jsx",
+          "lazy": false
+        }
+      ],
+      "seo": { "canonical": "/animals", "breadcrumbs": ["Home", "Animals"] }
+    },
+    {
+      "path": "/inventory",
+      "name": "inventory",
+      "title": "Inventory",
+      "layout": "DefaultLayout",
+      "page": "@/pages/inventory/index.jsx",
+      "lazy": true,
+      "subscriptions": ["useInventory", "usePlans"],
+      "features": [],
+      "seo": { "canonical": "/inventory", "breadcrumbs": ["Home", "Inventory"] }
+    },
+    {
+      "path": "/storehouse",
+      "name": "storehouse",
+      "title": "Storehouse Goals",
+      "layout": "DefaultLayout",
+      "page": "@/pages/storehouse/index.jsx",
+      "lazy": true,
+      "subscriptions": ["usePlans", "useUserProfile"],
+      "features": [],
+      "seo": {
+        "canonical": "/storehouse",
+        "breadcrumbs": ["Home", "Storehouse"]
+      }
+    },
+    {
+      "path": "/sessions",
+      "name": "sessions",
+      "title": "Sessions",
+      "layout": "DefaultLayout",
+      "page": "@/pages/sessions/index.jsx",
+      "lazy": true,
+      "subscriptions": ["useSessions", "usePlans"],
+      "features": [
+        {
+          "slot": "main",
+          "component": "@/features/sessions/MultiTimerPanel.jsx",
+          "lazy": false
+        }
+      ],
+      "seo": { "canonical": "/sessions", "breadcrumbs": ["Home", "Sessions"] }
+    },
+    {
+      "path": "/calendar",
+      "name": "calendar",
+      "title": "Calendar",
+      "layout": "DefaultLayout",
+      "page": "@/pages/calendar.jsx",
+      "lazy": true,
+      "subscriptions": ["usePlans"],
+      "features": [],
+      "onMountEmit": [
+        {
+          "event": "EVENT_CALENDAR_SYNC_REQUESTED",
+          "payload": {
+            "range": { "from": "$startOfMonth", "to": "$endOfMonth" },
+            "ts": "$now"
+          }
+        }
+      ],
+      "seo": { "canonical": "/calendar", "breadcrumbs": ["Home", "Calendar"] }
+    },
+    {
+      "path": "/scan",
+      "name": "scan",
+      "title": "Scan • Compare • Trust",
+      "layout": "DefaultLayout",
+      "page": "@/features/scan-compare-trust/ui/ScanLanding.jsx",
+      "lazy": true,
+      "subscriptions": ["useCouponPrefs"],
+      "features": [
+        {
+          "slot": "main",
+          "component": "@/app/features/scan-compare-trust/components/Scanner.jsx",
+          "lazy": true
+        },
+        {
+          "slot": "main",
+          "component": "@/app/features/scan-compare-trust/components/ScanSheet.jsx",
+          "lazy": true
+        }
+      ],
+      "pipeline": [
+        "ocr.worker",
+        "ProductResolver",
+        "PriceComparator",
+        "CouponService",
+        "SafetyRules"
+      ],
+      "seo": {
+        "canonical": "/scan",
+        "breadcrumbs": ["Home", "Scan • Compare • Trust"]
+      }
+    },
+    {
+      "path": "/scan/sheet",
+      "name": "scan-sheet",
+      "title": "Scan Sheet",
+      "layout": "DefaultLayout",
+      "page": "@/features/scan-compare-trust/ui/ScanSheetPage.jsx",
+      "lazy": true,
+      "subscriptions": ["useCouponPrefs"],
+      "features": [
+        {
+          "slot": "main",
+          "component": "@/app/features/scan-compare-trust/components/ScanSheet.jsx",
+          "lazy": true
+        }
+      ],
+      "seo": {
+        "canonical": "/scan/sheet",
+        "breadcrumbs": ["Home", "Scan • Compare • Trust", "Sheet"]
+      }
+    },
+    {
+      "path": "/plans/:planId",
+      "name": "plan-detail",
+      "title": "Plan Detail",
+      "layout": "DefaultLayout",
+      "page": "@/pages/plan/PlanDetail.jsx",
+      "lazy": true,
+      "params": { "planId": "string" },
+      "subscriptions": ["usePlans", "useRecipes", "useInventory"],
+      "features": [],
+      "seo": {
+        "canonical": "/plans/:planId",
+        "breadcrumbs": ["Home", "Plans", ":planId"]
+      }
+    },
+    {
+      "path": "/sessions/:sessionId",
+      "name": "session-detail",
+      "title": "Session Detail",
+      "layout": "DefaultLayout",
+      "page": "@/pages/sessions/SessionDetail.jsx",
+      "lazy": true,
+      "params": { "sessionId": "string" },
+      "subscriptions": ["useSessions", "usePlans"],
+      "features": [
+        {
+          "slot": "main",
+          "component": "@/features/sessions/MultiTimerPanel.jsx",
+          "lazy": false
+        },
+        {
+          "slot": "rightbar",
+          "component": "@/features/sessions/IntegratedTaskParser.jsx",
+          "lazy": true
+        }
+      ],
+      "seo": {
+        "canonical": "/sessions/:sessionId",
+        "breadcrumbs": ["Home", "Sessions", ":sessionId"]
+      }
+    },
+    {
+      "path": "/coop",
+      "name": "coop",
+      "title": "Co-op Planning",
+      "layout": "DefaultLayout",
+      "page": "@/features/coop/CoOpPage.jsx",
+      "lazy": true,
+      "requiresEntitlements": ["coopPlanning"],
+      "subscriptions": ["useEntitlementFlags"],
+      "features": [
+        {
+          "slot": "main",
+          "component": "@/features/coop/CoOpPlanningUI.jsx",
+          "lazy": true
+        }
+      ],
+      "seo": { "canonical": "/coop", "breadcrumbs": ["Home", "Co-op"] }
+    },
+    {
+      "path": "/kb",
+      "name": "kb",
+      "title": "Knowledge Base",
+      "layout": "DefaultLayout",
+      "page": "@/pages/kb/index.jsx",
+      "lazy": true,
+      "features": [],
+      "seo": { "canonical": "/kb", "breadcrumbs": ["Home", "Knowledge Base"] }
+    },
+    {
+      "path": "/settings",
+      "name": "settings",
+      "title": "Settings",
+      "layout": "DefaultLayout",
+      "page": "@/pages/settings/index.jsx",
+      "lazy": true,
+      "subscriptions": ["useUserProfile", "useEntitlementFlags"],
+      "features": [],
+      "seo": { "canonical": "/settings", "breadcrumbs": ["Home", "Settings"] }
+    },
+    {
+      "path": "/auth/login",
+      "name": "login",
+      "title": "Login",
+      "layout": "AuthLayout",
+      "page": "@/pages/auth/Login.jsx",
+      "lazy": true,
+      "features": [],
+      "seo": { "canonical": "/auth/login", "breadcrumbs": ["Login"] }
+    },
+    {
+      "path": "/auth/callback/svffh",
+      "name": "svffh-callback",
+      "title": "SVFFH Callback",
+      "layout": "AuthLayout",
+      "page": "@/pages/auth/SVFFHCallback.jsx",
+      "lazy": true,
+      "onMountEmit": [
+        {
+          "event": "EVENT_ENTITLEMENTS_UPDATED",
+          "payload": { "claims": "$svffhClaims", "ts": "$now" }
+        }
+      ],
+      "seo": {
+        "canonical": "/auth/callback/svffh",
+        "breadcrumbs": ["Login", "SVFFH Callback"]
+      }
+    },
+    {
+      "path": "/account",
+      "name": "account",
+      "title": "My Account",
+      "layout": "DefaultLayout",
+      "page": "@/pages/account/index.jsx",
+      "lazy": true,
+      "subscriptions": ["useUserProfile", "useEntitlementFlags"],
+      "features": [],
+      "seo": { "canonical": "/account", "breadcrumbs": ["Home", "Account"] }
+    }
+  ],
+  "deepLinks": [
+    {
+      "pattern": "scan://?upc=:barcode",
+      "navigateTo": "/scan/sheet",
+      "params": { "barcode": "string" },
+      "onNavigateEmit": [
+        {
+          "event": "EVENT_RECIPE_SCANNED",
+          "payload": {
+            "scanId": "$uuid",
+            "source": "camera",
+            "imageCount": 1,
+            "ts": "$now"
+          }
+        }
+      ]
+    },
+    {
+      "pattern": "plan://:domain/:planId",
+      "navigateTo": "/plans/:planId",
+      "params": { "domain": "string", "planId": "string" }
+    },
+    {
+      "pattern": "session://:sessionId",
+      "navigateTo": "/sessions/:sessionId",
+      "params": { "sessionId": "string" }
+    }
+  ],
+  "preload": {
+    "critical": [
+      "@/components/home/HouseholdProfile.jsx",
+      "@/components/home/RecipeConsolidatorCard.jsx"
+    ],
+    "onIdle": [
+      "@/features/garden/GardenPlanner.jsx",
+      "@/features/animals/AnimalPlanner.jsx",
+      "@/features/meals/BatchSessionTray.jsx",
+      "@/features/sessions/MultiTimerPanel.jsx"
+    ]
+  }
+}

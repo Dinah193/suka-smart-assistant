@@ -1,0 +1,124 @@
+{
+  "version": "1.0.0",
+  "domain": "cooking",
+  "generatedAt": "2025-11-11T00:00:00.000Z",
+  "rules": [
+    {
+      "id": "boil-water-early",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 400,
+      "tags": ["pasta", "boil", "staging"],
+      "match": { "byIngredient": { "names": ["pasta", "spaghetti", "penne"] } },
+      "guards": { "requiresEquipmentAny": ["stovetop", "stockpot"] },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "prestage-boiling-water",
+            "title": "Prestage boiling water",
+            "description": "Fill a large pot with water and bring to a rolling boil. Salt generously (1–2% by weight).",
+            "duration": "PT10M",
+            "setTimer": true,
+            "equipment": ["stockpot", "stovetop"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "doneness-lamb-general",
+      "ruleType": "doneness",
+      "enabled": true,
+      "priority": 350,
+      "tags": ["lamb", "probe", "visual-cues"],
+      "applyTo": { "byIngredient": { "names": ["lamb", "lamb chop", "lamb rack"] } },
+      "doneness": {
+        "species": "lamb",
+        "cut": "general",
+        "targets": [
+          {
+            "label": "medium-rare",
+            "internalTemp": { "unit": "F", "value": 130 },
+            "carryoverTemp": { "unit": "F", "value": 135 },
+            "visualCues": ["warm ruby center", "juices bead on surface"],
+            "notes": "Sear 2–3 min/side; rest 5 minutes."
+          },
+          {
+            "label": "medium",
+            "internalTemp": { "unit": "F", "value": 140 },
+            "carryoverTemp": { "unit": "F", "value": 145 },
+            "visualCues": ["pink center fading", "clear juices"]
+          }
+        ]
+      }
+    },
+    {
+      "id": "aromatics-for-saute",
+      "ruleType": "aromatics",
+      "enabled": true,
+      "priority": 500,
+      "applyTo": { "byMethod": { "methodsAny": ["saute", "sweat"], "applianceAny": ["stovetop"] } },
+      "guards": { "householdPrefs": { "aromaticsAllowed": true } },
+      "actions": [
+        {
+          "action": "recommendAromatics",
+          "aromatics": [
+            { "name": "onion", "when": "start", "amount": { "unit": "cup", "value": 1 } },
+            { "name": "garlic", "when": "mid", "amount": { "unit": "clove", "value": 3 } }
+          ],
+          "applyIfMissing": true,
+          "avoidIfAllergen": true
+        }
+      ]
+    },
+    {
+      "id": "preheat-oven-for-roast",
+      "ruleType": "timing",
+      "enabled": true,
+      "priority": 420,
+      "tags": ["roast", "oven", "preheat"],
+      "applyTo": { "byMethod": { "methodsAny": ["roast", "bake"], "applianceAny": ["oven"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "preheat-oven",
+            "title": "Preheat the oven",
+            "description": "Set oven to target temperature before you begin prep.",
+            "duration": "PT10M",
+            "setTimer": true,
+            "equipment": ["oven"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "swap-dairy-when-allergic",
+      "ruleType": "substitution",
+      "enabled": true,
+      "priority": 700,
+      "applyTo": { "byIngredient": { "names": ["milk", "cream", "butter"] } },
+      "guards": { "allergenSafeFor": ["dairy"] },
+      "actions": [
+        {
+          "action": "swapIngredient",
+          "applyTo": { "byIngredient": { "names": ["milk"] } },
+          "replacement": { "name": "oat milk", "ratio": 1.0 },
+          "reason": "allergen"
+        }
+      ]
+    },
+    {
+      "id": "scale-yield-friendly",
+      "ruleType": "scaling",
+      "enabled": true,
+      "priority": 900,
+      "tags": ["batching"],
+      "actions": [
+        { "action": "scaleYield", "multiplier": 2, "rounding": "friendly" }
+      ]
+    }
+  ]
+}

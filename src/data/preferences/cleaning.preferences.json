@@ -1,0 +1,194 @@
+{
+  "version": "1.0.0",
+  "domain": "cleaning",
+  "generatedAt": "2025-11-11T00:00:00.000Z",
+  "source": "Household defaults (SSA builtin)",
+  "preferences": {
+    "units": {
+      "volume": "ml",
+      "mass": "g",
+      "time": "min",
+      "fallbacks": {
+        "volume": ["ml", "l", "tsp", "tbsp", "cup", "qt"],
+        "mass": ["g", "kg", "oz", "lb"],
+        "time": ["min", "hr"]
+      }
+    },
+    "scentAndAromatics": {
+      "scentSensitivity": "medium",
+      "allowFragrance": true,
+      "avoidFragranceInFoodAreas": true,
+      "useUnscentedWhereAvailable": true,
+      "essentialOils": {
+        "allowed": ["lemon", "lavender", "eucalyptus", "tea-tree"],
+        "disallowed": ["cinnamon-bark", "clove-bud"],
+        "petCaution": {
+          "cats": ["tea-tree", "eucalyptus", "wintergreen"],
+          "dogs": ["wintergreen"]
+        },
+        "diffusion": {
+          "enabled": false,
+          "maxDurationMin": 20,
+          "roomExitWhileDiffusing": true,
+          "keepAwayFromFoodPrep": true
+        },
+        "surfaceUse": {
+          "dilutionCarrierOilPct": 1,
+          "testSpotFirst": true
+        }
+      }
+    },
+    "VOCPolicy": {
+      "targetVOCClass": "low",
+      "maxSessionVOCmgm3": 300,
+      "ventilationPreferred": "natural-first",
+      "minVentilationMinutes": 5,
+      "openWindowsIfWeatherPermits": true,
+      "maskRequiredAboveVOC": 500,
+      "avoidAerosolsIfPossible": true
+    },
+    "disinfectantPolicy": {
+      "precleanRequired": true,
+      "preferredOrder": ["hydrogen-peroxide", "quats", "bleach"],
+      "surfaceCompatibility": {
+        "bleach": {
+          "avoidOn": ["unsealed-wood", "wool", "silk", "non-colorfast-fabrics", "stone-marble-granite"],
+          "okOn": ["ceramic", "porcelain", "white-cotton", "stainless"],
+          "requiresRinseOnFoodContact": true
+        },
+        "quats": {
+          "avoidOn": ["unfinished-wood", "porous-stone"],
+          "requiresRinseOnFoodContact": true
+        },
+        "hydrogen-peroxide": {
+          "avoidOn": ["unsealed-wood"],
+          "requiresRinseOnFoodContact": false
+        }
+      },
+      "compatibilityGuards": {
+        "forbidMix": [["bleach", "ammonia"], ["bleach", "acids"]],
+        "rinseBetweenDifferentProducts": true,
+        "drySurfaceBetweenProducts": true
+      },
+      "contactTimeOverrides": {
+        "bleach": 5,
+        "quats": 10,
+        "hydrogen-peroxide": 3
+      }
+    },
+    "dilutionGuides": {
+      "bleach": {
+        "generalDisinfection": { "ratio": "1:49", "unit": "bleach:water" },
+        "heavySoil": { "ratio": "1:10", "unit": "bleach:water" }
+      },
+      "quats": {
+        "labelDefault": { "ratio": "per-label", "unit": "ml/l" }
+      },
+      "hydrogen-peroxide": {
+        "readyToUse": { "ratio": "RTU", "unit": "n/a" }
+      },
+      "vinegar": {
+        "deodorize": { "ratio": "1:4", "unit": "vinegar:water" },
+        "avoidOn": ["natural-stone", "cement-grout-unsealed"]
+      }
+    },
+    "surfaceCare": {
+      "kitchen": {
+        "preferredCleaner": "mild-detergent",
+        "disinfectant": "hydrogen-peroxide",
+        "requiresFinalRinseFoodContact": true,
+        "clothType": "microfiber"
+      },
+      "bathroom": {
+        "preferredCleaner": "mild-acid-bath-cleaner",
+        "disinfectant": "bleach",
+        "ventilationRequired": true
+      },
+      "floors": {
+        "woodSealed": { "cleaner": "neutral-ph-wood", "avoid": ["bleach", "ammonia"] },
+        "tile": { "cleaner": "neutral-ph", "disinfectant": "quats" }
+      },
+      "fabrics": {
+        "deodorize": { "method": "baking-soda", "dwellMin": 20, "vacuumAfter": true },
+        "stainPreTreat": "enzyme"
+      }
+    },
+    "ppeDefaults": {
+      "alwaysHave": ["gloves-nitrile"],
+      "eyeProtectionOn": ["bleach", "ammonia", "acids", "solvent"],
+      "apronFor": ["bleach", "quats", "hydrogen-peroxide", "oven-cleaner"],
+      "respiratorFor": {
+        "enabled": true,
+        "chemicals": ["solvent", "aerosol-disinfectant"],
+        "maskType": "P100-or-OV"
+      }
+    },
+    "equipment": {
+      "preferred": ["microfiber-cloths", "spray-bottles-labeled", "bucket-with-measure", "scrub-brush-soft", "scrub-brush-stiff"],
+      "avoid": ["steel-wool-on-stainless", "abrasive-pads-on-nonstick"],
+      "labelsRequiredOnBottles": true,
+      "colorCoding": {
+        "enabled": true,
+        "bathroom": "red",
+        "kitchen": "blue",
+        "general": "green",
+        "glass": "yellow"
+      }
+    },
+    "scheduling": {
+      "dailyWindows": ["08:00-10:00", "18:00-20:00"],
+      "avoidDuring": ["meal-prep"],
+      "batching": {
+        "allowed": true,
+        "maxConcurrentRooms": 2
+      },
+      "coolingOffBetweenChemistriesMin": 5
+    },
+    "alertsAndTimers": {
+      "timerOutput": "device",
+      "speakTimers": false,
+      "chimeStyle": "soft",
+      "prealerts": [
+        { "scenario": "contact-time-finish", "offsetSec": -30 },
+        { "scenario": "ventilation-minimum", "offsetSec": 0 }
+      ],
+      "postTaskReminders": ["wash-hands", "sanitize-tools", "label-and-store-chemicals"]
+    },
+    "storageAndLabeling": {
+      "requireChildproofStorage": true,
+      "originalContainersPreferred": true,
+      "secondaryContainerLabelFormat": "name|dilution|date",
+      "separateIncompatibles": true,
+      "storeAwayFromFood": true
+    },
+    "petAndAllergySafety": {
+      "keepPetsOutDuringCleaning": true,
+      "reentryDelayMin": 15,
+      "rinseFoodBowlsAfterDisinfect": true,
+      "allergenAvoidList": []
+    },
+    "integrationAnchors": {
+      "prepAnchorsEnabled": ["open-windows", "start-kettle-for-hot-water", "lay-out-ppe"],
+      "sessionTagsEnabled": ["low-voc", "fragrance-free", "food-contact"]
+    },
+    "localization": {
+      "language": "en",
+      "decimalSeparator": ".",
+      "thousandSeparator": ","
+    },
+    "advanced": {
+      "rounding": {
+        "volume": "friendly",
+        "mass": "friendly"
+      },
+      "yieldScaling": {
+        "defaultMultiplier": 1.0,
+        "allowFractionalBatches": true
+      },
+      "ruleOverrides": {
+        "preferPeroxideOverBleach": true,
+        "rinseBetweenProductsStrict": true
+      }
+    }
+  }
+}

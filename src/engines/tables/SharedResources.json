@@ -1,0 +1,296 @@
+{
+  "metadata": {
+    "name": "SharedResources",
+    "version": "1.0.0",
+    "updatedAt": "2025-11-10T00:00:00.000Z",
+    "notes": "Catalog of shareable household prep resources used by SynthesisDeDup and the scheduler to coalesce steps, avoid conflicts, and respect capacities. Engines refer to resources using stable IDs like device:oven-1, station:sanitizer-1, capacity:stovetop-burner.",
+    "envelope": "read-only tables consumed by engines; not user data"
+  },
+
+  "schema": {
+    "_comment": "Shape hints for consumers; not enforced here.",
+    "resource": {
+      "id": "string (e.g., device:oven-1)",
+      "class": "string (e.g., OVEN, BURNER, SINK, SANITIZER_BUCKET, WORKSPACE)",
+      "sharePolicy": "exclusive | parallel | pooled",
+      "capacity": {
+        "units": "e.g., burners, racks, liters, boards, watts",
+        "max": "number",
+        "parallelSlots": "number (if parallel)"
+      },
+      "capabilities": "object (class-specific)",
+      "merge": {
+        "key": "string (e.g., oven@targetC)",
+        "tolerance": "number | object (class-specific)",
+        "windowMin": "minutes (optional, to ensure decent grouping)"
+      },
+      "constraints": {
+        "requires": ["optional list of preconditions (e.g., power.circuit:Kitchen-20A)"],
+        "excludes": ["optional list of mutual exclusions"]
+      },
+      "safety": ["free-form precautions"]
+    }
+  },
+
+  "resourceClasses": {
+    "OVEN": {
+      "sharePolicy": "parallel",
+      "capacity": { "units": "racks", "max": 2, "parallelSlots": 2 },
+      "capabilities": {
+        "modes": ["bake", "roast", "convection"],
+        "tempCMin": 50,
+        "tempCMax": 300,
+        "hasFan": true
+      },
+      "merge": {
+        "_comment": "Steps can be merged if temp target is within tolerance; prefer higher airflow mode if any step requires it.",
+        "key": "oven@targetC@mode",
+        "tolerance": { "tempC": 10 },
+        "windowMin": 15
+      },
+      "constraints": {
+        "requires": ["power.circuit:Kitchen-20A"]
+      },
+      "safety": ["Use oven mitts; keep kids clear; verify racks are positioned before preheat"]
+    },
+
+    "BURNER": {
+      "sharePolicy": "exclusive",
+      "capacity": { "units": "burners", "max": 1 },
+      "capabilities": {
+        "heatLevels": 10,
+        "btus": 9000
+      },
+      "merge": {
+        "_comment": "Exclusive use per step; no merge other than back-to-back scheduling.",
+        "key": "burner@exclusive",
+        "tolerance": 0,
+        "windowMin": 0
+      },
+      "constraints": { "requires": ["gas.line:Kitchen|or|power.circuit:Kitchen-15A"] },
+      "safety": ["Turn pan handles inward; never leave oil unattended"]
+    },
+
+    "COUNTER_WORKSPACE": {
+      "sharePolicy": "parallel",
+      "capacity": { "units": "boards", "max": 3, "parallelSlots": 3 },
+      "capabilities": {
+        "surface": "sealed_wood_or_stone",
+        "foodSafe": true
+      },
+      "merge": {
+        "key": "workspace@foodType",
+        "tolerance": 0,
+        "windowMin": 10
+      },
+      "constraints": {
+        "excludes": ["raw_meat and ready_to_eat on same slot without sanitize"]
+      },
+      "safety": ["Sanitize between raw proteins and produce (validator enforces)"]
+    },
+
+    "SINK": {
+      "sharePolicy": "parallel",
+      "capacity": { "units": "basins", "max": 2, "parallelSlots": 2 },
+      "capabilities": { "hotWater": true, "sprayer": true },
+      "merge": {
+        "_comment": "Allow parallel if basins are independent; otherwise serialize by basin.",
+        "key": "sink@basin",
+        "tolerance": 0,
+        "windowMin": 5
+      },
+      "constraints": { "requires": ["water.line:Kitchen"] },
+      "safety": ["Scald caution with near-boiling tasks"]
+    },
+
+    "SANITIZER_BUCKET": {
+      "sharePolicy": "pooled",
+      "capacity": { "units": "liters", "max": 8 },
+      "capabilities": {
+        "chemistry": ["quat_200ppm", "chlorine_50ppm", "iodine_12_5ppm"],
+        "contactTimeMinDefault": 10
+      },
+      "merge": {
+        "_comment": "Steps merge if chemistry and ppm match exactly; contact time may extend to meet longest requirement.",
+        "key": "sanitizer@chemistry@ppm",
+        "tolerance": 0,
+        "windowMin": 10
+      },
+      "constraints": {
+        "requires": ["test.strips:available"],
+        "excludes": ["mixed_chemistries_in_one_bucket"]
+      },
+      "safety": ["Keep out of reach of children/pets", "Do not mix bleach with ammonia or acids"]
+    },
+
+    "MIXER": {
+      "sharePolicy": "exclusive",
+      "capacity": { "units": "batches", "max": 1 },
+      "capabilities": { "bowlL": 4.7, "attachments": ["dough", "paddle", "whisk"] },
+      "merge": {
+        "key": "mixer@exclusive",
+        "tolerance": 0,
+        "windowMin": 0
+      },
+      "constraints": { "requires": ["power.circuit:Kitchen-15A"] },
+      "safety": ["Unplug before changing attachments"]
+    },
+
+    "DEHYDRATOR": {
+      "sharePolicy": "parallel",
+      "capacity": { "units": "trays", "max": 6, "parallelSlots": 6 },
+      "capabilities": { "tempCMin": 35, "tempCMax": 75 },
+      "merge": {
+        "key": "dehydrator@targetC",
+        "tolerance": { "tempC": 5 },
+        "windowMin": 30
+      },
+      "constraints": { "requires": ["power.circuit:Pantry-15A"] },
+      "safety": ["Ventilate; avoid blocking intake/exhaust"]
+    },
+
+    "WATER_KETTLE": {
+      "sharePolicy": "exclusive",
+      "capacity": { "units": "liters", "max": 1.7 },
+      "capabilities": { "watt": 1500, "autoOff": true },
+      "merge": {
+        "key": "kettle@exclusive",
+        "tolerance": 0,
+        "windowMin": 0
+      },
+      "constraints": { "requires": ["power.circuit:Kitchen-15A"] },
+      "safety": ["Steam burn risk; place away from edges"]
+    },
+
+    "CANNER_POT": {
+      "sharePolicy": "exclusive",
+      "capacity": { "units": "jars_per_batch", "max": 7 },
+      "capabilities": { "type": "water_bath", "jarSizesMl": [250, 500, 1000] },
+      "merge": {
+        "key": "canner@recipeType@altitudeBand",
+        "tolerance": 0,
+        "windowMin": 20
+      },
+      "constraints": { "requires": ["BURNER"], "excludes": ["simultaneous_fryer_on_same_burner"] },
+      "safety": ["Boil-over risk; use rack; mind altitude adjustments"]
+    }
+  },
+
+  "mergeStrategies": {
+    "_comment": "Named strategies referenced by SynthesisDeDup; engines can register custom logic at runtime.",
+    "temperatureBand": {
+      "description": "Group if targets within +/- tolerance (°C).",
+      "params": ["toleranceC"],
+      "appliesTo": ["OVEN", "DEHYDRATOR"]
+    },
+    "chemistryExact": {
+      "description": "Group only if chemistry and ppm match exactly.",
+      "params": [],
+      "appliesTo": ["SANITIZER_BUCKET"]
+    },
+    "exclusiveSerial": {
+      "description": "No overlap; allow back-to-back with minimal gap.",
+      "params": ["gapMin"],
+      "appliesTo": ["BURNER", "MIXER", "WATER_KETTLE"]
+    },
+    "parallelSlots": {
+      "description": "Up to N concurrent tasks bounded by slots.",
+      "params": ["parallelSlots"],
+      "appliesTo": ["OVEN", "COUNTER_WORKSPACE", "SINK", "DEHYDRATOR"]
+    }
+  },
+
+  "householdDefaults": {
+    "_comment": "Optional starter inventory; integrators may override via setup wizard.",
+    "resources": [
+      {
+        "id": "device:oven-1",
+        "class": "OVEN",
+        "sharePolicy": "parallel",
+        "capacity": { "units": "racks", "max": 2, "parallelSlots": 2 },
+        "capabilities": { "modes": ["bake", "convection"], "tempCMin": 50, "tempCMax": 275, "hasFan": true },
+        "constraints": { "requires": ["power.circuit:Kitchen-20A"] }
+      },
+      {
+        "id": "capacity:stovetop-burner-1",
+        "class": "BURNER",
+        "sharePolicy": "exclusive",
+        "capacity": { "units": "burners", "max": 1 }
+      },
+      {
+        "id": "capacity:stovetop-burner-2",
+        "class": "BURNER",
+        "sharePolicy": "exclusive",
+        "capacity": { "units": "burners", "max": 1 }
+      },
+      {
+        "id": "station:sanitizer-1",
+        "class": "SANITIZER_BUCKET",
+        "sharePolicy": "pooled",
+        "capacity": { "units": "liters", "max": 8 },
+        "capabilities": { "chemistry": ["quat_200ppm"] }
+      },
+      {
+        "id": "workspace:counter-A",
+        "class": "COUNTER_WORKSPACE",
+        "sharePolicy": "parallel",
+        "capacity": { "units": "boards", "max": 2, "parallelSlots": 2 }
+      },
+      {
+        "id": "device:dehydrator-1",
+        "class": "DEHYDRATOR",
+        "sharePolicy": "parallel",
+        "capacity": { "units": "trays", "max": 6, "parallelSlots": 6 }
+      }
+    ]
+  },
+
+  "compatibilityRules": {
+    "_comment": "Lightweight matrix to guide validator and deduper.",
+    "foodTypes": ["raw_meat", "ready_to_eat", "produce", "jar_preservation"],
+    "workspace": {
+      "COUNTER_WORKSPACE": {
+        "raw_meat": { "canShareSlot": false, "requiresAfter": ["sanitize"] },
+        "produce":  { "canShareSlot": true,  "requiresAfter": [] },
+        "ready_to_eat": { "canShareSlot": true, "requiresBefore": ["sanitize_if_previous_raw"] }
+      }
+    },
+    "heat": {
+      "OVEN": {
+        "maxConcurrent": 2,
+        "temperatureBandC": 10
+      },
+      "DEHYDRATOR": {
+        "maxConcurrent": 6,
+        "temperatureBandC": 5
+      }
+    },
+    "sanitizer": {
+      "SANITIZER_BUCKET": {
+        "requires": ["test.strip_check", "label_compliant_ppm"],
+        "contactTimeFloorMin": 10
+      }
+    }
+  },
+
+  "plannerHints": {
+    "_comment": "Helpers for SynthesisEngine/SynthesisDeDup.",
+    "resourceIdPrefixes": {
+      "device": ["oven", "dehydrator", "mixer"],
+      "capacity": ["stovetop-burner"],
+      "station": ["sanitizer"],
+      "workspace": ["counter"]
+    },
+    "mergeWindows": {
+      "OVEN": 15,
+      "DEHYDRATOR": 30,
+      "SANITIZER_BUCKET": 10
+    },
+    "eventMap": {
+      "preheat.start": { "resourceClass": "OVEN", "payload": ["targetC", "mode"] },
+      "preheat.ready": { "resourceClass": "OVEN", "payload": ["actualC"] },
+      "sanitize.contact": { "resourceClass": "SANITIZER_BUCKET", "payload": ["chemistry", "ppm", "minutes"] },
+      "workspace.reserve": { "resourceClass": "COUNTER_WORKSPACE", "payload": ["slots"] }
+    }
+  }
+}

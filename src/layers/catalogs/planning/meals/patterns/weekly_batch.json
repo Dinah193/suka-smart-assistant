@@ -1,0 +1,339 @@
+{
+  "id": "pat.meals.weekly_batch",
+  "domain": "meals",
+  "kind": "planning_pattern",
+  "title": "Weekly Batch Meal Plan",
+  "description": "Plan a full week anchored by one batch session plus light fresh add-ons.",
+  "intentTags": [
+    "plan:meals",
+    "horizon:week",
+    "mode:batch"
+  ],
+  "inputs": [
+    {
+      "key": "householdSize",
+      "label": "Household size",
+      "type": "number",
+      "required": true,
+      "default": 4
+    },
+    {
+      "key": "dietaryLaws",
+      "label": "Dietary laws / household rules",
+      "type": "object",
+      "default": {},
+      "notes": "Use household preferences and Torah-based constraints as configured."
+    },
+    {
+      "key": "inventorySnapshot",
+      "label": "Inventory snapshot",
+      "type": "object",
+      "required": true,
+      "notes": "Include pantry/cold/frozen/root cellar/leftovers."
+    },
+    {
+      "key": "timeBudgetMinutes",
+      "label": "Time budget (minutes)",
+      "type": "number",
+      "required": true,
+      "default": 180
+    },
+    {
+      "key": "equipment",
+      "label": "Available equipment",
+      "type": "array",
+      "default": [
+        "stove",
+        "oven"
+      ],
+      "notes": "Examples: stove, oven, slowcooker, pressurecooker, grill, dehydrator, freezer."
+    },
+    {
+      "key": "budgetCap",
+      "label": "Budget cap (optional)",
+      "type": "number"
+    },
+    {
+      "key": "allergies",
+      "label": "Allergies / avoid list (optional)",
+      "type": "array",
+      "default": []
+    },
+    {
+      "key": "quietHours",
+      "label": "Quiet hours / Sabbath guard",
+      "type": "object",
+      "default": {
+        "enabled": false
+      },
+      "notes": "Use to avoid noisy tasks or disallowed work windows."
+    }
+  ],
+  "outputs": [
+    {
+      "key": "mealPlan",
+      "label": "Meal plan structure",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "sessions",
+      "label": "Session blueprints requested",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "shoppingNeeds",
+      "label": "Shopping list needs",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "storehouseTriggers",
+      "label": "Storehouse patterns triggered",
+      "type": "array",
+      "default": []
+    }
+  ],
+  "constraints": [
+    "quietHours/sabbathGuard",
+    "fastingRules",
+    "budgetCap",
+    "allergiesAvoidList",
+    "dietaryLaws"
+  ],
+  "requires": [
+    "artifact:inventorySnapshot"
+  ],
+  "produces": [
+    "artifact:mealPlan",
+    "blueprint:cookingSessions",
+    "artifact:shoppingListDraft"
+  ],
+  "lean": {
+    "wasteTargets": [
+      "waiting",
+      "motion",
+      "overprocessing",
+      "defects",
+      "inventory"
+    ],
+    "standardWorkRefs": [
+      "stdwork.kitchen.staging",
+      "stdwork.batch.prep",
+      "stdwork.fifo.labels"
+    ],
+    "taktModelRef": "takt.household.meals",
+    "kpiTargets": {
+      "tripsPerMeal": "reduce",
+      "spoilageRate": "reduce",
+      "timeToFirstPlate": "reduce",
+      "leftoverUtilization": "increase"
+    },
+    "notes": "Advisory only; propose countermeasures via LeanOptimizer hooks."
+  },
+  "ui": {
+    "icon": "utensils",
+    "chips": [
+      "time:medium",
+      "difficulty:medium",
+      "equipment:stove",
+      "equipment:oven",
+      "household:2-8"
+    ],
+    "defaultFilters": {
+      "domain": "meals"
+    },
+    "form": [
+      {
+        "key": "days",
+        "type": "multiSelect",
+        "label": "Days to plan",
+        "options": [
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thu",
+          "Fri",
+          "Sat",
+          "Sun"
+        ],
+        "default": [
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thu",
+          "Fri",
+          "Sat",
+          "Sun"
+        ]
+      },
+      {
+        "key": "batchSlot",
+        "type": "select",
+        "label": "Batch session day",
+        "options": [
+          "Sat",
+          "Sun",
+          "Mon"
+        ],
+        "default": "Sun"
+      },
+      {
+        "key": "leftoversNights",
+        "type": "slider",
+        "label": "Leftover nights",
+        "min": 0,
+        "max": 4,
+        "default": 2
+      },
+      {
+        "key": "includeBreakfast",
+        "type": "toggle",
+        "label": "Include breakfast",
+        "default": true
+      },
+      {
+        "key": "includeLunch",
+        "type": "toggle",
+        "label": "Include lunch",
+        "default": true
+      }
+    ],
+    "help": [
+      "Patterns create session blueprints (prep/cook/storehouse pulls), not raw UI task lists.",
+      "Inventory snapshot enables smarter shopping + fewer duplicates."
+    ]
+  },
+  "steps": [
+    {
+      "id": "inv.snapshot",
+      "title": "Confirm inventory snapshot",
+      "template": "tpl.inventory.snapshot.confirm",
+      "domain": "storehouse",
+      "params": {
+        "zones": [
+          "pantry",
+          "cold",
+          "frozen",
+          "rootCellar"
+        ],
+        "includeLeftovers": true
+      },
+      "hints": [
+        "needsInventorySnapshot"
+      ]
+    },
+    {
+      "id": "plan.structure",
+      "title": "Build weekly meal structure",
+      "template": "tpl.meals.plan.structure",
+      "domain": "meals",
+      "params": {
+        "horizonDays": 7,
+        "include": [
+          "breakfast",
+          "lunch",
+          "dinner"
+        ],
+        "leftoverNightsKey": "leftoversNights"
+      }
+    },
+    {
+      "id": "select.batch.menu",
+      "title": "Select batch-friendly menu set",
+      "template": "tpl.meals.select.batchMenu",
+      "domain": "meals",
+      "params": {
+        "batchFriendly": true,
+        "equipmentKey": "equipment",
+        "timeBudgetKey": "timeBudgetMinutes"
+      },
+      "hints": [
+        "preferOnePot",
+        "preferSheetPan"
+      ]
+    },
+    {
+      "id": "build.sessions",
+      "title": "Generate cooking session blueprints",
+      "template": "tpl.blueprint.build.sessions",
+      "domain": "meals",
+      "params": {
+        "sessionStyles": [
+          "batch",
+          "prep_only"
+        ],
+        "includeTimers": true,
+        "emitEvent": "session.blueprints.created"
+      },
+      "hints": [
+        "emitBlueprint"
+      ]
+    },
+    {
+      "id": "shopping.draft",
+      "title": "Generate shopping draft from gaps",
+      "template": "tpl.shopping.from.gaps",
+      "domain": "storehouse",
+      "params": {
+        "respectBudgetKey": "budgetCap",
+        "respectAllergiesKey": "allergies"
+      },
+      "hints": [
+        "needsShoppingList"
+      ]
+    },
+    {
+      "id": "storehouse.triggers",
+      "title": "Trigger storehouse actions (optional)",
+      "template": "tpl.storehouse.trigger.from.mealPlan",
+      "domain": "storehouse",
+      "params": {
+        "suggestPatterns": [
+          "pat.storehouse.weekly_restock",
+          "pat.storehouse.monthly_cycle_count"
+        ]
+      },
+      "optional": true
+    }
+  ],
+  "kpis": [
+    {
+      "key": "timeToPlan",
+      "label": "Time to complete planning",
+      "direction": "down",
+      "unit": "min"
+    },
+    {
+      "key": "tripsPerWeek",
+      "label": "Trips per week",
+      "direction": "down",
+      "unit": "trips"
+    },
+    {
+      "key": "spoilageRate",
+      "label": "Spoilage rate",
+      "direction": "down",
+      "unit": "%"
+    },
+    {
+      "key": "leftoverUtilization",
+      "label": "Leftover utilization",
+      "direction": "up",
+      "unit": "%"
+    }
+  ],
+  "variants": [],
+  "links": {
+    "storehouseSuggested": [
+      "pat.storehouse.weekly_restock",
+      "pat.storehouse.monthly_cycle_count"
+    ]
+  },
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "tags": []
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "id": "workflow.wca.sahel_dryland_household",
+  "domain": "workflows",
+  "kind": "workflow_overlay",
+  "title": "Sahel Dryland Household Rhythm (West/Central Africa)",
+  "tags": [
+    "region:wca",
+    "zone:sahel",
+    "values:water_stewardship",
+    "workflow:seasonal"
+  ],
+  "description": "Dryland rhythm emphasizing water stewardship, heat-aware scheduling, and shelf-stable buffers.",
+  "optIn": true,
+  "editable": true,
+  "valuePriorities": [
+    "water_stewardship",
+    "heat_safety",
+    "buffer_stock"
+  ],
+  "defaults": {
+    "preferredStaples": [
+      "staple:grain",
+      "staple:legumes",
+      "staple:dry_goods",
+      "staple:leaf_powders_optional"
+    ],
+    "mealRhythm": [
+      "cook_early:morning",
+      "rest_midday:heat",
+      "cook_evening:cooler"
+    ],
+    "preservationEmphasis": [
+      "drying",
+      "fermentation_optional",
+      "smoking_optional"
+    ],
+    "valuePriorities": [
+      "water_stewardship",
+      "heat_safety",
+      "buffer_stock"
+    ]
+  },
+  "ordering": {
+    "planningOrder": [
+      "heat_window_check",
+      "water_plan",
+      "meal_plan",
+      "buffer_build"
+    ]
+  },
+  "naming": {
+    "sessionPrefixes": {
+      "preservation": "Preserve (Low-Water)",
+      "animals": "Livestock Care"
+    }
+  },
+  "constraints": {
+    "defaults": [
+      "constraint:time_budget"
+    ],
+    "seasonBias": {
+      "season:summer": [
+        "prefer:drying",
+        "prefer:early_cook"
+      ]
+    }
+  },
+  "uiOverlays": {
+    "form": {
+      "defaults": {
+        "equipmentLevel": "standard",
+        "bufferWeeks": 10
+      }
+    }
+  },
+  "preferredDefaultPatterns": {
+    "preservation": [
+      "pat.preservation.shelf_stable_buffer",
+      "pat.preservation.batch_day"
+    ],
+    "storehouse": [
+      "pat.storehouse.winter_reserve",
+      "pat.storehouse.monthly_cycle_count"
+    ],
+    "animals_estimate_recommendation": [
+      "pat.animals.feed_water_plan",
+      "pat.animals.stocking_estimate_land_labor"
+    ]
+  },
+  "notes": [
+    "This overlay provides defaults and ordering, not mandatory rules.",
+    "All role defaults are optional and user-editable."
+  ]
+}

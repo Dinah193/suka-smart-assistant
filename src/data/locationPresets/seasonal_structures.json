@@ -1,0 +1,295 @@
+{
+  "version": "2025-10-31T13:45:00-05:00",
+  "description": "Seasonal / feast / temporary outdoor structures for Suka Smart Assistant. Used for Sukkot/Feast prep, outdoor batch cooking, temporary harvest stations, overflow storehouse staging, animal shade in extreme heat, and event-based cleaning. Only active in specific months/seasons. Supports user-owned favorites and schedules. Reverse generation so calendar/feast/garden/animals/storehouse events can light these up.",
+  "meta": {
+    "sourceOfTruth": "scraper",
+    "allowHubOverrides": true,
+    "mergeStrategy": "scraper-wins",
+    "ingestionPipelines": [
+      "scraperService",
+      "importService",
+      "bookmarklet",
+      "linked-accounts"
+    ],
+    "sharedOrchestration": {
+      "emitOnUpdate": true,
+      "reason": "seasonal-structures-update",
+      "channels": [
+        "calendar",
+        "cleaning",
+        "meals",
+        "garden",
+        "storehouse",
+        "animals"
+      ]
+    },
+    "notes": [
+      "Do NOT include Jewish traditions / Talmud / Mishna — this is for Torah-feast/Sukkot style events only.",
+      "Meal planner and cleaning planner should check 'isActive' and 'seasonWindow' before scheduling here.",
+      "Garden + animals can use these as covered processing/shade spaces if active."
+    ]
+  },
+  "defaults": {
+    "timezone": "America/Chicago",
+    "sabbathGuard": true,
+    "quietHoursGuard": true,
+    "onMismatch": "allow-with-mitigation",
+    "supportsReverseGeneration": true
+  },
+  "structures": [
+    {
+      "id": "sukkot-outdoor-kitchen",
+      "label": "Sukkot Outdoor Kitchen",
+      "kind": "feast-cooking",
+      "priority": 1,
+      "activeMonths": ["09", "10"], 
+      "activeSeasons": ["fall"],
+      "sabbathAllowed": false,
+      "quietHoursAllowed": false,
+      "location": "back-yard",
+      "supports": [
+        "meals.feast-cooking",
+        "meals.sabbath-cooking.planned",
+        "storehouse.intake.feast",
+        "cleaning.after-cooking-session"
+      ],
+      "targetStorehouseSections": [
+        "produce",
+        "baking",
+        "meat"
+      ],
+      "climate": {
+        "zone": "8b",
+        "heatTolerance": "medium",
+        "humidityTolerance": "high"
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "calendar.feast.upcoming",
+          "meals.sabbath-cooking.planned",
+          "storehouse.overstock.detected"
+        ],
+        "emit": [
+          "cleaning.after-cooking-session"
+        ],
+        "rules": [
+          {
+            "id": "feast-to-outdoor-kitchen",
+            "ifEvent": "calendar.feast.upcoming",
+            "generate": "meals.feast-cooking-session"
+          },
+          {
+            "id": "overstock-to-feast-cook",
+            "ifEvent": "storehouse.overstock.detected",
+            "generate": "meals.feast-cooking-session"
+          }
+        ]
+      },
+      "mitigation": {
+        "extraCleaningEmit": [
+          "cleaning.outdoor-zone.expected"
+        ],
+        "risks": [
+          "outdoor cooking may attract pests",
+          "weather may interrupt cooking session"
+        ]
+      },
+      "uiHints": {
+        "icon": "chef-hat",
+        "group": "feast"
+      }
+    },
+    {
+      "id": "feast-dining-canopy",
+      "label": "Feast Dining Canopy",
+      "kind": "feast-dining",
+      "priority": 2,
+      "activeMonths": ["09", "10", "04"],
+      "activeSeasons": ["spring", "fall"],
+      "sabbathAllowed": true,
+      "quietHoursAllowed": true,
+      "location": "side-yard",
+      "supports": [
+        "meals.service",
+        "meals.family-cycles",
+        "cleaning.sabbath-prep"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "calendar.feast.upcoming",
+          "meals.sabbath-cooking.planned"
+        ],
+        "emit": [
+          "cleaning.sabbath-prep.requested"
+        ],
+        "rules": [
+          {
+            "id": "feast-to-dining-clean",
+            "ifEvent": "calendar.feast.upcoming",
+            "generate": "cleaning.sabbath-prep"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "candle",
+        "group": "feast"
+      }
+    },
+    {
+      "id": "harvest-shade-tent",
+      "label": "Harvest Shade Tent",
+      "kind": "harvest-staging",
+      "priority": 1,
+      "activeMonths": ["06", "07", "08", "09"],
+      "activeSeasons": ["summer", "fall"],
+      "sabbathAllowed": false,
+      "quietHoursAllowed": true,
+      "location": "near-garden-processing",
+      "supports": [
+        "garden.harvest.staging",
+        "storehouse.intake.from-garden",
+        "cleaning.garden-bin-sanitize"
+      ],
+      "climate": {
+        "zone": "8b",
+        "heatTolerance": "high"
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.harvest.logged"
+        ],
+        "emit": [
+          "cleaning.garden-bin-sanitize"
+        ]
+      },
+      "mitigation": {
+        "extraCleaningEmit": [
+          "cleaning.outdoor-zone.expected"
+        ],
+        "extraGardenEmit": [
+          "garden.care-session.generated"
+        ],
+        "risks": [
+          "hot weather accelerates spoilage",
+          "dust/wind may require extra rinse"
+        ]
+      },
+      "uiHints": {
+        "icon": "leaf",
+        "group": "garden"
+      }
+    },
+    {
+      "id": "animal-summer-shade",
+      "label": "Animal Summer Shade / Misting",
+      "kind": "animal-support",
+      "priority": 1,
+      "activeMonths": ["06", "07", "08"],
+      "activeSeasons": ["summer"],
+      "sabbathAllowed": true,
+      "quietHoursAllowed": false,
+      "location": "near-animal-processing-bay",
+      "supports": [
+        "animals.care-session",
+        "animals.butchery.hot-weather",
+        "cleaning.outdoor-zone.expected"
+      ],
+      "climate": {
+        "zone": "8b",
+        "heatTolerance": "high"
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "animals.butchery.completed",
+          "animals.heat-alert.detected"
+        ],
+        "emit": [
+          "cleaning.outdoor-zone.expected"
+        ],
+        "rules": [
+          {
+            "id": "heat-alert-to-shade",
+            "ifEvent": "animals.heat-alert.detected",
+            "generate": "animals.care-session"
+          }
+        ]
+      },
+      "mitigation": {
+        "extraStorehouseEmit": [
+          "storehouse.water-buffer.requested"
+        ],
+        "risks": [
+          "standing water may attract pests",
+          "misters require more frequent cleaning"
+        ]
+      },
+      "uiHints": {
+        "icon": "paw-print",
+        "group": "animals"
+      }
+    },
+    {
+      "id": "winter-root-cellar-tunnel",
+      "label": "Winter Root Cellar Tunnel",
+      "kind": "seasonal-storehouse",
+      "priority": 3,
+      "activeMonths": ["11", "12", "01", "02"],
+      "activeSeasons": ["winter"],
+      "sabbathAllowed": true,
+      "quietHoursAllowed": true,
+      "location": "storehouse-side",
+      "supports": [
+        "storehouse.intake.root",
+        "garden.harvest.winter",
+        "cleaning.storehouse-harvest-sanitize"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.harvest.logged",
+          "storehouse.overstock.detected"
+        ],
+        "emit": [
+          "cleaning.storehouse-harvest-sanitize"
+        ],
+        "rules": [
+          {
+            "id": "winter-harvest-to-cellar",
+            "ifEvent": "garden.harvest.logged",
+            "generate": "storehouse.intake.root"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "snowflake",
+        "group": "storehouse"
+      }
+    }
+  ],
+  "userCanSaveFavorites": true,
+  "favoritesTemplate": [
+    {
+      "id": "fav-feast-cooking",
+      "source": "system",
+      "cloneOf": "sukkot-outdoor-kitchen",
+      "label": "My Feast Outdoor Cook",
+      "allowUserScheduleOverride": true
+    },
+    {
+      "id": "fav-harvest-tent",
+      "source": "system",
+      "cloneOf": "harvest-shade-tent",
+      "label": "My Harvest Tent",
+      "allowUserScheduleOverride": true
+    }
+  ],
+  "userFavoritePolicy": {
+    "maxPerHousehold": 30,
+    "allowCustomSchedule": true,
+    "allowCustomReverseGeneration": true
+  }
+}

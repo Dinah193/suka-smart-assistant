@@ -1,0 +1,352 @@
+{
+  "version": "2025-10-31T13:25:00-05:00",
+  "description": "Animal facilities/pens/yards for Suka Smart Assistant. These locations tell the Animal Planner, Cleaning Planner, Storehouse Intake, and Garden (for brush/pest passes) WHERE to run a session. Includes climate + species + breed constraints and mitigation so users can still run slightly out-of-zone animals if they accept the added work/resources/risks. Supports user-owned favorites and schedules. Reverse generation enabled so meal/storehouse/garden events can create animal sessions here.",
+  "meta": {
+    "sourceOfTruth": "scraper",
+    "allowHubOverrides": true,
+    "mergeStrategy": "scraper-wins",
+    "ingestionPipelines": [
+      "scraperService",
+      "importService",
+      "bookmarklet",
+      "linked-accounts"
+    ],
+    "sharedOrchestration": {
+      "emitOnUpdate": true,
+      "reason": "animal-facilities-update",
+      "channels": [
+        "animals",
+        "cleaning",
+        "storehouse",
+        "garden",
+        "meals"
+      ]
+    },
+    "notes": [
+      "Use with central_animal_plans.json so each plan can pick an actual facility.",
+      "Use with breeds.json to filter breeds to only the facilities that support their climate zone.",
+      "If meal planning calls for meat that isn't in storehouse, we can reverse-generate an animal session here.",
+      "Mitigation sections add the extra cleaning/storehouse/water tasks that your user specifically asked to see."
+    ]
+  },
+  "defaults": {
+    "timezone": "America/Chicago",
+    "sabbathGuard": true,
+    "quietHoursGuard": true,
+    "onMismatch": "allow-with-mitigation",
+    "climate": {
+      "zone": "8b",
+      "heatTolerance": "high",
+      "humidityTolerance": "high"
+    }
+  },
+  "facilities": [
+    {
+      "id": "butchery-bay-outdoor",
+      "label": "Outdoor Butchery Bay",
+      "type": "butchery",
+      "indoor": false,
+      "priority": 1,
+      "sabbathAllowed": false,
+      "quietHoursAllowed": false,
+      "climate": {
+        "zone": "8b",
+        "heatTolerance": "high",
+        "humidityTolerance": "high"
+      },
+      "acceptedSpecies": ["sheep", "goat", "poultry"],
+      "acceptedBreedZones": ["7b", "8a", "8b", "9a"],
+      "rejectedSpecies": ["cattle"],
+      "supports": [
+        "animals.butchery",
+        "animals.processing",
+        "storehouse.intake.expected",
+        "cleaning.processing-area"
+      ],
+      "requiresCleaningRoutineId": "cleaning.processing-area.requested",
+      "onMismatch": "allow-with-mitigation",
+      "mitigation": {
+        "extraCleaningEmit": [
+          "cleaning.processing-area.requested"
+        ],
+        "extraStorehouseEmit": [
+          "storehouse.water-buffer.requested"
+        ],
+        "extraResources": [
+          "portable shade or misting in high heat",
+          "flies/pest control kit",
+          "sanitizer for knives/saws"
+        ],
+        "risks": [
+          "heat stress for large animals",
+          "increased pest/odor if cleaning is skipped",
+          "longer chill time before storehouse intake"
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "animals.butchery.completed",
+          "meals.batch-cooking.completed",
+          "storehouse.meat.low"
+        ],
+        "emit": [
+          "cleaning.processing-area.requested",
+          "storehouse.intake.expected"
+        ],
+        "rules": [
+          {
+            "id": "low-meat-to-butchery",
+            "ifEvent": "storehouse.meat.low",
+            "generate": "animals.plan.fromStorehouse.low-meat"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "knife",
+        "group": "processing"
+      }
+    },
+    {
+      "id": "milking-shed-8b",
+      "label": "Milking Shed – Zone 8b",
+      "type": "milking",
+      "indoor": true,
+      "priority": 2,
+      "sabbathAllowed": true,
+      "quietHoursAllowed": false,
+      "climate": {
+        "zone": "8b",
+        "heatTolerance": "medium",
+        "humidityTolerance": "medium"
+      },
+      "acceptedSpecies": ["goat", "cattle"],
+      "acceptedBreedZones": ["7a", "7b", "8a", "8b"],
+      "supports": [
+        "animals.milking-session",
+        "cleaning.milking-station",
+        "storehouse.intake.milk"
+      ],
+      "requiresCleaningRoutineId": "cleaning.milking-station.expected",
+      "onMismatch": "warn-and-suggest",
+      "suggestAlternates": [
+        {
+          "facilityId": "quarantine-pen-shaded",
+          "why": "animal is heat sensitive; milk here, keep there"
+        }
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "storehouse.milk.low",
+          "meals.dairy-plan.requested"
+        ],
+        "emit": [
+          "animals.milking-session.generated",
+          "cleaning.milking-station.expected"
+        ],
+        "rules": [
+          {
+            "id": "milk-low-to-milking",
+            "ifEvent": "storehouse.milk.low",
+            "generate": "animals.milking-session"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "milk",
+        "group": "utility"
+      }
+    },
+    {
+      "id": "quarantine-pen-shaded",
+      "label": "Quarantine / Recovery Pen (Shaded)",
+      "type": "quarantine",
+      "indoor": false,
+      "priority": 3,
+      "sabbathAllowed": true,
+      "quietHoursAllowed": true,
+      "climate": {
+        "zone": "8b",
+        "heatTolerance": "high",
+        "humidityTolerance": "high"
+      },
+      "acceptedSpecies": ["goat", "sheep", "poultry"],
+      "acceptedBreedZones": ["8a", "8b", "9a"],
+      "supports": [
+        "animals.care-session",
+        "animals.health-check",
+        "cleaning.outdoor-zone"
+      ],
+      "requiresCleaningRoutineId": "cleaning.outdoor-zone.expected",
+      "onMismatch": "block-and-suggest",
+      "suggestAlternates": [
+        {
+          "facilityId": "milking-shed-8b",
+          "why": "indoor, better for recovery in extreme heat/cold"
+        }
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "animals.health-alert",
+          "import.animals.health-record.detected"
+        ],
+        "emit": [
+          "animals.care-session.generated",
+          "cleaning.outdoor-zone.expected"
+        ]
+      },
+      "uiHints": {
+        "icon": "shield-plus",
+        "group": "care"
+      }
+    },
+    {
+      "id": "poultry-tractor-parking",
+      "label": "Poultry Tractor Parking / Staging",
+      "type": "poultry-staging",
+      "indoor": false,
+      "priority": 2,
+      "sabbathAllowed": false,
+      "quietHoursAllowed": true,
+      "climate": {
+        "zone": "8b",
+        "heatTolerance": "high",
+        "humidityTolerance": "high"
+      },
+      "acceptedSpecies": ["poultry", "chicken", "duck"],
+      "acceptedBreedZones": ["7b", "8a", "8b", "9a"],
+      "supports": [
+        "animals.poultry-processing.generated",
+        "garden.pest-pressure.reduced",
+        "cleaning.garden-bin-sanitize"
+      ],
+      "requiresCleaningRoutineId": "cleaning.garden-bin-sanitize",
+      "onMismatch": "allow-with-mitigation",
+      "mitigation": {
+        "extraCleaningEmit": [
+          "cleaning.garden-bin-sanitize"
+        ],
+        "extraGardenEmit": [
+          "garden.care-session.generated"
+        ],
+        "risks": [
+          "more droppings near garden edge",
+          "standing water → mosquitoes"
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.pest-pressure.detected",
+          "garden.cover-crop.ready-for-termination"
+        ],
+        "emit": [
+          "animals.poultry-processing.generated"
+        ],
+        "rules": [
+          {
+            "id": "pest-to-poultry",
+            "ifEvent": "garden.pest-pressure.detected",
+            "generate": "animals.poultry-garden-pass"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "chicken",
+        "group": "staging"
+      }
+    },
+    {
+      "id": "large-animal-bay",
+      "label": "Large Animal / Cattle Bay",
+      "type": "butchery-large",
+      "indoor": true,
+      "priority": 1,
+      "sabbathAllowed": false,
+      "quietHoursAllowed": false,
+      "climate": {
+        "zone": "8b",
+        "heatTolerance": "medium",
+        "humidityTolerance": "medium"
+      },
+      "acceptedSpecies": ["cattle"],
+      "acceptedBreedZones": ["7b", "8a", "8b"],
+      "rejectedSpecies": ["poultry"],
+      "supports": [
+        "animals.large-butchery.generated",
+        "storehouse.beef-intake.expected",
+        "cleaning.heavy-duty-requested"
+      ],
+      "requiresCleaningRoutineId": "cleaning.heavy-duty-requested",
+      "onMismatch": "allow-with-mitigation",
+      "mitigation": {
+        "extraCleaningEmit": [
+          "cleaning.heavy-duty-requested"
+        ],
+        "extraStorehouseEmit": [
+          "storehouse.intake.expected"
+        ],
+        "extraResources": [
+          "extra ice/chill capacity",
+          "drainage inspection",
+          "blood-meal handling"
+        ],
+        "risks": [
+          "blood/water runoff",
+          "odor if not sanitized",
+          "longer labor session"
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "meals.plan.created",
+          "storehouse.beef-intake.low"
+        ],
+        "emit": [
+          "animals.large-butchery.generated",
+          "cleaning.heavy-duty-requested",
+          "storehouse.beef-intake.expected"
+        ],
+        "rules": [
+          {
+            "id": "meal-beef-to-large-butchery",
+            "ifEvent": "meals.plan.created",
+            "ifProteinIn": [
+              "beef"
+            ],
+            "generate": "animals.plan.fromMeals.generated"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "cow",
+        "group": "processing"
+      }
+    }
+  ],
+  "userCanSaveFavorites": true,
+  "favoritesTemplate": [
+    {
+      "id": "fav-butchery-small-ruminant",
+      "source": "system",
+      "cloneOf": "butchery-bay-outdoor",
+      "label": "My Small Ruminant Day",
+      "allowUserScheduleOverride": true
+    },
+    {
+      "id": "fav-poultry-staging",
+      "source": "system",
+      "cloneOf": "poultry-tractor-parking",
+      "label": "My Poultry Garden Pass",
+      "allowUserScheduleOverride": true
+    }
+  ],
+  "userFavoritePolicy": {
+    "maxPerHousehold": 40,
+    "allowCustomSchedule": true,
+    "allowCustomReverseGeneration": true
+  }
+}

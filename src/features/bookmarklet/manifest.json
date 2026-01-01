@@ -1,0 +1,167 @@
+{
+  "manifest_version": 3,
+  "name": "Suka Smart Assistant – Universal Import Bookmarklet",
+  "short_name": "Suka Import",
+  "version": "1.1.0",
+  "description": "Capture recipes, meal plans, cleaning plans, garden planning/care/harvest, storehouse stock (grocery sections), animal acquisition/care/butchery, store ads, and social posts into Suka Smart Assistant. Users can save their own favorites, attach schedules, and auto-mark for reverse generation.",
+  "icons": {
+    "16": "icons/suka-16.png",
+    "32": "icons/suka-32.png",
+    "48": "icons/suka-48.png",
+    "128": "icons/suka-128.png"
+  },
+  "action": {
+    "default_title": "Send to Suka",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-suka-bookmarklet.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "bookmarklet.min.js",
+        "config/import-types.json"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "commands": {
+    "suka-import-current-page": {
+      "suggested_key": {
+        "default": "Alt+Shift+S"
+      },
+      "description": "Capture the current page into Suka Smart Assistant (recipes, cleaning, garden, storehouse, animals, butchery)"
+    },
+    "suka-import-as-cleaning": {
+      "suggested_key": {
+        "default": "Alt+Shift+C"
+      },
+      "description": "Force import current page as Cleaning Plan (rooms/zones/surfaces)"
+    },
+    "suka-import-as-garden": {
+      "suggested_key": {
+        "default": "Alt+Shift+G"
+      },
+      "description": "Force import current page as Garden Plan / Garden Care / Harvest"
+    },
+    "suka-import-as-storehouse": {
+      "suggested_key": {
+        "default": "Alt+Shift+H"
+      },
+      "description": "Force import current page as Storehouse Stock (grocery sections)"
+    },
+    "suka-import-as-animal": {
+      "suggested_key": {
+        "default": "Alt+Shift+A"
+      },
+      "description": "Force import current page as Animal Acquisition / Care / Butchery"
+    }
+  },
+  "suka": {
+    "integration": "bookmarklet",
+    "features": {
+      "saveUserFavorites": true,
+      "attachSchedule": true,
+      "reverseGeneration": true,
+      "sharedOrchestration": true,
+      "sources": [
+        "bookmarklet",
+        "pinterest",
+        "file",
+        "scan-compare-trust",
+        "social-recipe",
+        "garden-site",
+        "cleaning-blog",
+        "grocery-circular",
+        "livestock-listing",
+        "butchery-post"
+      ],
+      "importTypes": [
+        "recipe",
+        "mealPlan",
+        "cleaningPlan",
+        "gardenPlan",
+        "gardenCare",
+        "harvestPlan",
+        "storehouseGoal",
+        "storehouseStock",
+        "animalAcquisition",
+        "animalPlan",
+        "butcherySession",
+        "inventoryUpdate",
+        "generic"
+      ]
+    },
+    "events": {
+      "emit": [
+        "import.queue.enqueue",
+        "import.preview.open",
+        "automation.schedule.request",
+        "import.bookmarklet.replayed"
+      ],
+      "listen": [
+        "import.settings.changed",
+        "import.queue.updated",
+        "automation.schedule.updated"
+      ]
+    },
+    "defaults": {
+      "autoOpenPreview": true,
+      "autoSaveFavorite": false,
+      "autoSchedule": false,
+      "autoScheduleRule": "once+5min",
+      "reverseMeta": {
+        "shareTarget": "family-fund-hub",
+        "includeShare": true,
+        "format": "json",
+        "reverseFromId": null
+      },
+      "sessionTemplates": {
+        "cleaningPlan": {
+          "kind": "cleaning",
+          "recurring": "weekly"
+        },
+        "gardenCare": {
+          "kind": "garden-care",
+          "recurring": "2x/week"
+        },
+        "harvestPlan": {
+          "kind": "garden-harvest",
+          "recurring": null
+        },
+        "storehouseStock": {
+          "kind": "storehouse-restock",
+          "recurring": "weekly"
+        },
+        "butcherySession": {
+          "kind": "butchery",
+          "recurring": null
+        },
+        "animalAcquisition": {
+          "kind": "inventory-sync",
+          "recurring": null
+        }
+      }
+    }
+  }
+}

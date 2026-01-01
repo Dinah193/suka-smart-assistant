@@ -1,0 +1,525 @@
+===============================================================================
+HOUSEHOLD CYCLES ENGINE – DESIGN SPEC
+File: src/intelligence/cycles/householdCycles.engine.txt
+Role: Concept + contract for household-wide cycles intelligence in SSA
+===============================================================================
+
+0. CONCEPTUAL PURPOSE
+---------------------
+The householdCycles engine is the central "rhythm reader" for SSA.
+
+It:
+- Watches domain rhythms (cooking, storehouse, garden, animals, preservation,
+  cleaning, textiles, home maintenance, feasts, enterprise).
+- Combines them with season context to understand where the householder is in
+  each cycle (planting, tending, harvest, preservation, feast prep, recovery).
+- Produces cycle-aware insights (provisions needed, yields expected, bottlenecks).
+- Emits eventBus events so other domains can respond (SessionRunner, planners,
+  calculators, dashboards, Family Fund Hub).
+
+It operates in two modes:
+- TOOL MODE:
+  - Works purely from data passed into it (domain snapshots / config).
+  - No Dexie or global stores required.
+- STEWARDSHIP MODE:
+  - Connects to Dexie, domain stores, and seasonal intelligence.
+  - Keeps long-term rhythm and provisions history for the whole house.
+
+Language:
+- Uses "cycle, season, storehouse, yield, provision, rhythm, feast, householder".
+- Avoids “task app” framing and isolated widgets.
+
+
+1. STRUCTURE (ENGINE SHAPE)
+---------------------------
+The implementation file for this spec will likely be:
+
+- src/intelligence/cycles/householdCycles.engine.js
+
+The engine itself is a factory that returns a stateful controller:
+
+- createHouseholdCyclesEngine(config) → householdCyclesEngine
+
+Core internal structure:
+
+1) CONFIG & CONTEXT
+   - Resolved once at initialization, updated via `refreshContext()`.
+   - Holds:
+     - current date/time
+     - season context
+     - domain snapshots
+     - feature flags
+     - mode (TOOL vs STEWARDSHIP)
+
+2) DOMAIN INPUT LAYERS
+   - Normalizers for each domain:
+     - cookingCycleInput
+     - storehouseCycleInput
+     - gardenCycleInput
+     - animalsCycleInput
+     - preservationCycleInput
+     - cleaningCycleInput
+     - textilesCycleInput
+     - maintenanceCycleInput
+     - feastsCycleInput
+     - enterpriseCycleInput
+
+3) CYCLES ENGINE CORE
+   - Functions that:
+     - map domain inputs to cycle states
+     - map cycle states to provisions and yields
+     - detect blockages and missed rhythms
+     - aggregate into "household cycle posture" for the householder
+
+4) INSIGHTS LAYER
+   - Produces:
+     - immediate cycle insights (what rhythm is active)
+     - near-term provisions (what the storehouse must hold)
+     - seasonal opportunities (e.g., “time to plan preservation cycle”)
+     - gentle alerts for rhythms that are drifting
+
+5) EVENT LAYER
+   - Responsible for:
+     - emitting eventBus events
+     - optionally persisting cycle snapshots in STEWARDSHIP MODE
+     - exporting cycle insights to the Family Fund Hub when enabled
+
+
+2. PUBLIC API – PROPS / CONFIG
+------------------------------
+The engine is constructed with a configuration object. This is how TOOL MODE
+and STEWARDSHIP MODE are handled.
+
+Signature (conceptual):
+
+createHouseholdCyclesEngine(config) → {
+  mode,
+  getMode,
+  refreshContext(nextContext),
+  ingestDomainSnapshot(domainKey, snapshot),
+  recomputeCycles(reason),
+  getCycleState(),
+  getHouseholdPosture(),
+  onInsight(handler),
+  destroy()
+}
+
+CONFIG SHAPE (conceptual, JS-style, not yet implemented):
+
+config = {
+  // CORE
+  now: Date | string,          // current date/time
+  seasonContext: {             // optional in TOOL MODE, enriched in STEWARDSHIP MODE
+    seasonId: string,
+    label: string,
+    start: string,
+    end: string,
+    climateProfile?: object,
+    feastWindow?: object,      // e.g., upcoming feast cycles
+  },
+
+  // DOMAIN SNAPSHOTS (optional; can be filled progressively)
+  domainSnapshots: {
+    cooking?: object,
+    storehouse?: object,
+    garden?: object,
+    animals?: object,
+    preservation?: object,
+    cleaning?: object,
+    textiles?: object,
+    maintenance?: object,
+    feasts?: object,
+    enterprise?: object,
+  },
+
+  // MODE
+  mode?: "TOOL" | "STEWARDSHIP", // default: infer; TOOL if no Dexie/eventBus
+
+  // WIRES
+  eventBus?: {
+    emit: ({ type, ts, source, data }) => void,
+  },
+
+  // STEWARDSHIP EXTENSIONS
+  dexie?: any,                   // Dexie instance (optional)
+  seasonalIntelligence?: {
+    getSeasonContext: (now) => Promise | object,
+  },
+  dependencyGraph?: {
+    analyze: (domainSnapshots) => object,
+  },
+
+  // FEATURE FLAGS
+  featureFlags?: {
+    familyFundMode?: boolean,
+    cyclesPersistenceEnabled?: boolean,
+  },
+
+  // OPTIONAL CALLBACKS
+  onInsight?: (insight) => void,
+  onError?: (err) => void,
+};
+
+
+3. DATA FLOW – HOW THE ENGINE BREATHES
+--------------------------------------
+High-level rhythm:
+
+1) INIT → determine mode → emit initialized
+2) CONTEXT REFRESH → attach season, storehouse, yields
+3) DOMAIN INGEST → normalize domain snapshots → update internal state
+4) CYCLE RECOMPUTE → derive cycle states & provisions
+5) INSIGHTS EMIT → fire events and callbacks
+6) OPTIONAL PERSIST → record cycle history in Dexie (STEWARD MODE)
+7) OPTIONAL HUB EXPORT → send cycle posture packet when familyFundMode
+
+Detailed steps:
+
+(1) INIT
+- Called with config.
+- If eventBus is available, the engine announces itself:
+
+  type: "cycles.household.initialized"
+  ts: ISO-8601
+  source: "householdCycles.engine"
+  data: {
+    mode,
+    hasSeasonContext: !!seasonContext,
+    domainsObserved: Object.keys(config.domainSnapshots || {}),
+  }
+
+- Mode decision:
+  - If config.mode explicitly set → use it.
+  - Else if dexie or seasonalIntelligence or dependencyGraph present → "STEWARDSHIP".
+  - Else → "TOOL".
+
+(2) CONTEXT REFRESH
+- Called via engine.refreshContext(nextContext).
+- Merges new seasonContext, featureFlags, domainSnapshots as needed.
+- In STEWARDSHIP MODE:
+  - If no seasonContext provided, calls seasonalIntelligence.getSeasonContext(now)
+    to bind cycles to the active season, feasts, and climate.
+- Emits:
+
+  type: "cycles.household.context.updated"
+  source: "householdCycles.engine"
+  data: {
+    mode,
+    seasonContextSummary,
+    featureFlags,
+  }
+
+- TODO[seasonal-logic]:
+  - Enrich context with:
+    - estimated daylight hours
+    - local planting windows
+    - preservation windows
+    - feast cycle proximities
+
+(3) DOMAIN INGEST
+- Called via engine.ingestDomainSnapshot(domainKey, snapshot).
+- Normalizes domain-specific structures into a generic cycle input:
+
+  cycleInput = {
+    domain: domainKey,
+    lastActivityAt: ts,
+    frequency: "daily" | "weekly" | "seasonal" | "event-bound",
+    yieldEstimates: { ... },
+    storehouseImpact: { inflow: {...}, outflow: {...} },
+    dependencies: [ ... ],
+    rhythmSignal: {
+      state: "on-rhythm" | "lagging" | "paused" | "emerging",
+      strength: 0..1,
+    },
+  };
+
+- Stores this internal input.
+- Emits:
+
+  type: "cycles.domainSnapshot.ingested"
+  source: "householdCycles.engine"
+  data: {
+    domain: domainKey,
+    rhythmSignal,
+    storehouseImpactSummary,
+  }
+
+- TODO[dependencies]:
+  - Use dependencyGraph.analyze(domainSnapshots) when available to refine
+    the dependency list and highlight garden→animals→storehouse→meals feedback.
+
+(4) CYCLE RECOMPUTE
+- Called explicitly via engine.recomputeCycles(reason) or implicitly after ingest.
+- Steps:
+  a) Build per-domain cycleState from cycleInput.
+  b) Aggregate storehouse provisions and yields:
+     - How much is flowing IN (garden, animals, purchase).
+     - How much is flowing OUT (cooking, feasts, preservation, enterprise).
+  c) Map season + provisions to cycle posture.
+
+- cycleState (per domain) example:
+
+  cycleState = {
+    domain: "garden",
+    cycleStage: "planting" | "tending" | "harvest" | "rest",
+    rhythmSignal,
+    expectedYields: { ... },        // annotated with season info
+    storehouseImpact: { inflow, outflow },
+    nextRhythmWindow: { from, to }, // when the householder should pay attention
+  };
+
+- householdPosture example:
+
+  householdPosture = {
+    seasonId: seasonContext?.seasonId,
+    dominantRhythm: "harvest" | "rest" | "preservation" | "pre-feast",
+    cycleStagesByDomain: { [domain]: cycleStage },
+    storehouseBalance: {
+      inflowSummary,
+      outflowSummary,
+      riskAreas: [
+        // e.g. "protein shortfall in 4 weeks if animals cycle remains paused"
+      ],
+    },
+    feastPressure: {
+      upcomingFeast: seasonContext?.feastWindow,
+      readinessScore: 0..1,
+    },
+    suggestions: [
+      // human-readable prompts in stewardship language
+    ],
+  };
+
+- Emits:
+
+  type: "cycles.household.recomputed"
+  source: "householdCycles.engine"
+  data: {
+    reason,
+    householdPosture,
+  };
+
+
+(5) INSIGHTS EMIT
+- Based on householdPosture, the engine identifies insight events, e.g.:
+
+  - "cycles.insight.storehouse.risk"
+  - "cycles.insight.seasonal.opportunity"
+  - "cycles.insight.feast.readiness"
+  - "cycles.insight.rhythm.drift"
+
+- Each insight includes:
+  {
+    insightId: string,
+    kind: string,
+    domain?: string,
+    severity: "info" | "gentle" | "important",
+    message: string,           // e.g. “Your preservation rhythm is emerging...”
+    seasonId?: string,
+    storehouseImpact?: object,
+    suggestedActions?: object, // high-level, not low-level steps
+  }
+
+- If config.onInsight is provided, it is called with each insight.
+- Emits events for each insight:
+
+  type: "cycles.household.insight"
+  source: "householdCycles.engine"
+  data: {
+    insight,
+    householdPostureSummary,
+  }
+
+- TODO[insights]:
+  - Add structured insight categories that other engines can subscribe to:
+    - cooking session suggestions
+    - preservation batch suggestions
+    - garden succession-planting suggestions
+    - mutual-aid feast day cooking suggestions
+
+
+(6) OPTIONAL PERSIST (STEWARDSHIP MODE)
+- If config.featureFlags.cyclesPersistenceEnabled is true and dexie is available:
+  - Writes or updates a record in a "householdCycles" table, e.g.:
+
+    {
+      id,
+      observedAt,
+      seasonId,
+      householdPosture,
+      domainCycleStates,
+    }
+
+- Emits:
+
+  type: "cycles.household.persisted"
+  source: "householdCycles.engine"
+  data: {
+    id,
+    observedAt,
+    seasonId,
+  }
+
+- TODO[cycles-history]:
+  - Add rolling history analysis for:
+    - how often rhythms are kept vs drift
+    - how storehouse levels respond across seasons
+    - what yields actually occurred vs expected
+
+
+(7) OPTIONAL HUB EXPORT (FAMILY FUND)
+- If featureFlags.familyFundMode is true and Hub connectors are present,
+  engine can format a summary packet:
+
+  {
+    packetType: "householdCycles.summary",
+    householdId,
+    observedAt,
+    seasonId,
+    householdPosture,
+    minimalDomainCycleStates,
+  }
+
+- Emits:
+
+  type: "cycles.household.hub.exported"
+  source: "householdCycles.engine"
+  data: {
+    householdId,
+    observedAt,
+    seasonId,
+  }
+
+- TODO[hub]:
+  - Define HubPacketFormatter and FamilyFundConnector integration details in
+    a separate spec and reference them here by contract only.
+
+
+4. EVENT TRIGGERS – EVENTBUS CONTRACT
+-------------------------------------
+All events emitted by this engine MUST follow the SSA eventBus shape:
+
+  { type, ts, source, data }
+
+Where:
+- type: string (see below)
+- ts: ISO 8601 timestamp when emitted
+- source: "householdCycles.engine"
+- data: object payload
+
+Proposed event types:
+
+1) Initialization + context
+   - "cycles.household.initialized"
+   - "cycles.household.context.updated"
+
+2) Domain ingestion
+   - "cycles.domainSnapshot.ingested"
+
+3) Cycle recomputation
+   - "cycles.household.recomputed"
+
+4) Insights
+   - "cycles.household.insight"
+   - "cycles.household.warning" (for stronger rhythm drift or provisions risk)
+
+5) Persistence & Hub
+   - "cycles.household.persisted"
+   - "cycles.household.hub.exported"
+
+Event consumers might include:
+- SessionRunner (to time sessions with cycles)
+- Domain dashboards (garden, storehouse, cooking, feasts)
+- Notification system (gentle seasonal nudges)
+- Family Fund Hub connector (shared provisions intelligence)
+
+
+5. TOOL MODE VS STEWARDSHIP MODE
+--------------------------------
+TOOL MODE:
+- The calling page (e.g. a single calculator or planner) creates an engine
+  instance with:
+  - now
+  - minimal seasonContext (or none)
+  - local domainSnapshots for that view only
+  - optional eventBus (can be stubbed)
+- No Dexie, no Hub, no long-lived history.
+- Used for:
+  - ex: a single “Harvest Planning” view that wants to know:
+    - "If I plant this many beds now, what kind of preservation cycle will that
+       force in 8 weeks?"
+
+STEWARDSHIP MODE:
+- SSA core (or a top-level provider) creates a single engine instance that:
+  - lives as long as the app session
+  - connects to Dexie, seasonal intelligence, dependencyGraph
+  - watches cross-domain updates to maintain a whole-of-household posture
+- All domain pages and SessionRunner subscribe to this posture.
+- Used for:
+  - daily/weekly rhythms across seasons
+  - aligning storehouse, garden, animals, preservation, feasts, enterprise
+  - exporting household rhythm summaries to the Family Fund
+
+
+6. CROSS-DOMAIN HOOKS & TODOS
+-----------------------------
+The engine is explicitly designed to sit in the WEB OF MEANING, not as a
+standalone utility.
+
+Planned hooks:
+
+- Garden → Preservation → Storehouse → Meals → Cleaning → Compost → Garden
+  - TODO[garden-hook]:
+    - Garden dashboard calls ingestDomainSnapshot("garden", snapshot)
+      whenever planting, tending, or harvest logs are updated.
+  - TODO[preservation-hook]:
+    - Preservation tools (canning, drying, curing) call ingestDomainSnapshot
+      for "preservation" with yield and storehouse inflow.
+  - TODO[storehouse-hook]:
+    - Storehouse updates (purchase, harvest move, depletion) feed into
+      "storehouse" cycleInput and storehouseBalance.
+  - TODO[cooking-hook]:
+    - Cooking sessions and meal plans call ingestDomainSnapshot("cooking")
+      with outflow from storehouse and rhythm signals (daily meals, feast prep).
+  - TODO[cleaning-hook]:
+    - Cleaning/hygiene rhythms signal "recovery" cycles after big feasts
+      (restoring the house rhythm).
+
+- Animals → Storehouse → Enterprise
+  - TODO[animals-hook]:
+    - Animal yields (milk, eggs, meat) join inflow for storehouse.
+  - TODO[enterprise-hook]:
+    - Enterprise (food truck, mobile kitchen, catering) draws from the
+      same storehouse; their cycles are added as outflows and revenue rhythms.
+
+- Feasts/Events → All domains
+  - TODO[feasts-hook]:
+    - Feast/event planner informs the engine of upcoming feastWindow and
+      expected provisions load so it can anticipate storehouse & preservation
+      pressure.
+
+All these hooks ultimately converge here in the householdCycles engine, which
+interprets them not as isolated events but as changing rhythms in a single
+household story.
+
+
+7. IMPLEMENTATION NOTES (FOR FUTURE .JS FILE)
+---------------------------------------------
+When implementing `householdCycles.engine.js`:
+
+- Keep the API simple and stable.
+- Make mode detection explicit and debuggable.
+- Never assume a domain snapshot exists; handle missing domains gracefully
+  and still derive a partial household posture.
+- Provide clear log messages for:
+  - mode changes
+  - context refresh
+  - large shifts in storehouseBalance or rhythmSignal.
+- Make all insights optional but structured; pages can filter by kind or
+  severity to show what matters to that particular householder view.
+- Do not embed UI in this engine; it is pure intelligence with eventBus
+  integration.
+- Always think in terms of cycles and seasons, not isolated one-off moves.
+
+END OF SPEC
+===============================================================================

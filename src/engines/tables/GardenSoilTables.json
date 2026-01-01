@@ -1,0 +1,163 @@
+{
+  "phTargets": {
+    "overrides": {
+      "_comment_international": "Cuisine-forward crops (baseline pH targets).",
+      "bok_choy":        { "min": 6.2, "opt": 6.5, "max": 7.2 },
+      "mizuna":          { "min": 6.2, "opt": 6.5, "max": 7.2 },
+      "tatsoi":          { "min": 6.2, "opt": 6.5, "max": 7.2 },
+      "shiso_perilla":   { "min": 5.5, "opt": 6.2, "max": 7.0 },
+      "thai_basil":      { "min": 6.0, "opt": 6.5, "max": 7.5 },
+      "lemongrass":      { "min": 5.5, "opt": 6.2, "max": 7.0 },
+      "bitter_melon":    { "min": 5.8, "opt": 6.4, "max": 7.0 },
+      "yardlong_bean":   { "min": 6.0, "opt": 6.6, "max": 7.2 },
+      "amaranth_leaf":   { "min": 5.5, "opt": 6.2, "max": 7.0 },
+      "jute_mallow":     { "min": 6.0, "opt": 6.5, "max": 7.5 },
+      "african_eggplant":{ "min": 6.0, "opt": 6.5, "max": 7.2 },
+      "moringa":         { "min": 6.2, "opt": 6.8, "max": 7.5 },
+      "chayote":         { "min": 6.0, "opt": 6.5, "max": 7.0 },
+      "taro":            { "min": 5.5, "opt": 6.0, "max": 6.5 },
+      "cassava":         { "min": 5.5, "opt": 6.2, "max": 7.0 },
+      "culantro":        { "min": 6.0, "opt": 6.5, "max": 7.2 },
+      "epazote":         { "min": 6.0, "opt": 6.5, "max": 7.5 },
+      "turmeric":        { "min": 5.5, "opt": 6.2, "max": 7.0 },
+      "galangal":        { "min": 5.5, "opt": 6.2, "max": 7.0 },
+      "pandan":          { "min": 5.5, "opt": 6.0, "max": 6.8 }
+    }
+  },
+
+  "germination": {
+    "_comment_international": "Soil temps and days to emergence at the optimal range.",
+    "bok_choy":        { "minC": 7,  "optRangeC": [16, 21], "maxC": 28, "daysAtOpt": 5 },
+    "mizuna":          { "minC": 7,  "optRangeC": [16, 21], "maxC": 28, "daysAtOpt": 4 },
+    "tatsoi":          { "minC": 7,  "optRangeC": [16, 21], "maxC": 28, "daysAtOpt": 5 },
+    "shiso_perilla":   { "minC": 18, "optRangeC": [22, 28], "maxC": 32, "daysAtOpt": 10 },
+    "thai_basil":      { "minC": 18, "optRangeC": [22, 30], "maxC": 35, "daysAtOpt": 6 },
+    "lemongrass":      { "minC": 18, "optRangeC": [24, 30], "maxC": 35, "daysAtOpt": 10 },
+    "bitter_melon":    { "minC": 18, "optRangeC": [24, 32], "maxC": 38, "daysAtOpt": 6 },
+    "yardlong_bean":   { "minC": 18, "optRangeC": [24, 32], "maxC": 35, "daysAtOpt": 5 },
+    "amaranth_leaf":   { "minC": 18, "optRangeC": [24, 32], "maxC": 35, "daysAtOpt": 5 },
+    "jute_mallow":     { "minC": 18, "optRangeC": [24, 32], "maxC": 35, "daysAtOpt": 6 },
+    "african_eggplant":{ "minC": 18, "optRangeC": [24, 32], "maxC": 35, "daysAtOpt": 8 },
+    "moringa":         { "minC": 20, "optRangeC": [24, 34], "maxC": 38, "daysAtOpt": 7 },
+    "chayote":         { "minC": 20, "optRangeC": [24, 32], "maxC": 38, "daysAtOpt": 7 },
+    "taro":            { "minC": 20, "optRangeC": [24, 32], "maxC": 35, "daysAtOpt": 12 },
+    "cassava":         { "minC": 22, "optRangeC": [25, 32], "maxC": 38, "daysAtOpt": 10 },
+    "culantro":        { "minC": 18, "optRangeC": [20, 24], "maxC": 30, "daysAtOpt": 10 },
+    "epazote":         { "minC": 16, "optRangeC": [20, 26], "maxC": 32, "daysAtOpt": 7 },
+    "turmeric":        { "minC": 20, "optRangeC": [24, 32], "maxC": 36, "daysAtOpt": 12 },
+    "galangal":        { "minC": 20, "optRangeC": [24, 32], "maxC": 36, "daysAtOpt": 12 },
+    "pandan":          { "minC": 20, "optRangeC": [24, 32], "maxC": 36, "daysAtOpt": 12 }
+  },
+
+  "spacing": {
+    "_comment_international": "Row and in-row spacing; trellis flags where appropriate.",
+    "bok_choy":        { "inRowCm": 20, "betweenRowCm": 30 },
+    "mizuna":          { "inRowCm": 15, "betweenRowCm": 25 },
+    "tatsoi":          { "inRowCm": 15, "betweenRowCm": 25 },
+    "shiso_perilla":   { "inRowCm": 25, "betweenRowCm": 45 },
+    "thai_basil":      { "inRowCm": 25, "betweenRowCm": 45 },
+    "lemongrass":      { "inRowCm": 45, "betweenRowCm": 60 },
+    "bitter_melon":    { "inRowCm": 45, "betweenRowCm": 150, "trellis": true },
+    "yardlong_bean":   { "inRowCm": 20, "betweenRowCm": 90,  "trellis": true },
+    "amaranth_leaf":   { "inRowCm": 20, "betweenRowCm": 30 },
+    "jute_mallow":     { "inRowCm": 25, "betweenRowCm": 45 },
+    "african_eggplant":{ "inRowCm": 45, "betweenRowCm": 75 },
+    "moringa":         { "inRowCm": 100, "betweenRowCm": 150, "note": "Prune heavily; can be kept shrub-sized" },
+    "chayote":         { "inRowCm": 150, "betweenRowCm": 300, "trellis": true },
+    "taro":            { "inRowCm": 60, "betweenRowCm": 90 },
+    "cassava":         { "inRowCm": 100, "betweenRowCm": 120 },
+    "culantro":        { "inRowCm": 20, "betweenRowCm": 30 },
+    "epazote":         { "inRowCm": 30, "betweenRowCm": 60 },
+    "turmeric":        { "inRowCm": 30, "betweenRowCm": 45 },
+    "galangal":        { "inRowCm": 30, "betweenRowCm": 45 },
+    "pandan":          { "inRowCm": 60, "betweenRowCm": 90 }
+  },
+
+  "fertilization": {
+    "_comment_international": "Simple timelines; prefer soil test + split dosing.",
+    "bok_choy": {
+      "preplant": { "npk": "5-10-10", "gPerM2": 40 },
+      "sideDress": [{ "when": "DAE21", "npk": "10-0-0", "gPerM2": 15 }]
+    },
+    "asian_greens_mix": {
+      "preplant": { "npk": "5-10-10", "gPerM2": 40 },
+      "sideDress": [{ "when": "DAE14", "npk": "10-0-0", "gPerM2": 10 }]
+    },
+    "shiso_perilla": {
+      "preplant": { "npk": "5-5-5", "gPerM2": 30 }
+    },
+    "lemongrass": {
+      "preplant": { "npk": "5-10-10", "gPerM2": 50 },
+      "sideDress": [{ "when": "monthly", "npk": "10-0-0", "gPerM2": 15 }]
+    },
+    "bitter_melon": {
+      "preplant": { "npk": "5-10-10", "gPerM2": 60 },
+      "sideDress": [{ "when": "vining", "npk": "10-10-10", "gPerM2": 25 }]
+    },
+    "yardlong_bean": {
+      "preplant": { "npk": "5-10-10", "gPerM2": 40 },
+      "notes": ["Light feeders; fix N—avoid heavy N side-dress"]
+    },
+    "amaranth_leaf": {
+      "preplant": { "npk": "5-5-5", "gPerM2": 30 },
+      "sideDress": [{ "when": "DAE21", "npk": "10-0-0", "gPerM2": 10 }]
+    },
+    "jute_mallow": {
+      "preplant": { "npk": "5-5-5", "gPerM2": 30 }
+    },
+    "african_eggplant": {
+      "preplant": { "npk": "5-10-10", "gPerM2": 50 },
+      "sideDress": [{ "when": "bud_set", "npk": "10-10-10", "gPerM2": 20 }]
+    },
+    "moringa": {
+      "preplant": { "npk": "5-5-5", "gPerM2": 20 },
+      "notes": ["Avoid waterlogging; light feeder once established"]
+    },
+    "chayote": {
+      "preplant": { "npk": "5-10-10", "gPerM2": 50 },
+      "sideDress": [{ "when": "vining", "npk": "10-10-10", "gPerM2": 25 }]
+    },
+    "taro": {
+      "preplant": { "npk": "5-10-10", "gPerM2": 50 },
+      "sideDress": [{ "when": "DAE30", "npk": "10-10-10", "gPerM2": 25 }],
+      "notes": ["Prefers consistent moisture; thrives in wet beds"]
+    },
+    "cassava": {
+      "preplant": { "npk": "5-10-10", "gPerM2": 40 },
+      "notes": ["Low input; avoid excess N (leafy growth over roots)"]
+    },
+    "culantro": {
+      "preplant": { "npk": "5-5-5", "gPerM2": 25 }
+    },
+    "epazote": {
+      "preplant": { "npk": "5-5-5", "gPerM2": 20 },
+      "notes": ["Can be assertive; consider container control"]
+    },
+    "turmeric": {
+      "preplant": { "npk": "5-10-10", "gPerM2": 40 },
+      "sideDress": [{ "when": "monthly", "npk": "10-0-0", "gPerM2": 15 }]
+    },
+    "galangal": {
+      "preplant": { "npk": "5-10-10", "gPerM2": 40 }
+    },
+    "pandan": {
+      "preplant": { "npk": "5-5-5", "gPerM2": 30 }
+    }
+  },
+
+  "transplant": {
+    "_comment_international": "Transplant and night-air thresholds for warmth-loving crops.",
+    "thresholds": {
+      "bitter_melon":    { "soilMinC": 18, "airNightMinC": 12 },
+      "yardlong_bean":   { "soilMinC": 18, "airNightMinC": 12 },
+      "african_eggplant":{ "soilMinC": 18, "airNightMinC": 12 },
+      "lemongrass":      { "soilMinC": 18, "airNightMinC": 12 },
+      "turmeric":        { "soilMinC": 20, "airNightMinC": 15 },
+      "galangal":        { "soilMinC": 20, "airNightMinC": 15 },
+      "moringa":         { "soilMinC": 20, "airNightMinC": 15 },
+      "chayote":         { "soilMinC": 20, "airNightMinC": 15 },
+      "cassava":         { "soilMinC": 22, "airNightMinC": 18 },
+      "taro":            { "soilMinC": 20, "airNightMinC": 15 }
+    }
+  }
+}

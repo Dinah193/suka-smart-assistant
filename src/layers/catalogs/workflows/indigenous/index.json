@@ -1,0 +1,70 @@
+{
+  "id": "catalog.workflows.indigenous",
+  "domain": "workflow",
+  "kind": "catalog_index",
+  "title": "Indigenous Workflow Overlays",
+  "intentTags": [
+    "catalog:index",
+    "overlay:workflow",
+    "group:indigenous"
+  ],
+  "inputs": [],
+  "outputs": [],
+  "constraints": [
+    "optInOnly",
+    "neverStereotype",
+    "userEditable"
+  ],
+  "steps": [],
+  "kpis": [],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial indigenous workflow overlay index."
+      }
+    ]
+  },
+  "patterns": [
+    {
+      "id": "wf.indigenous.west_african",
+      "path": "src/layers/catalogs/workflows/indigenous/west_african.json",
+      "title": "West African-Inspired Household Rhythm (Opt-in Overlay)",
+      "tags": [
+        "culture:west_african",
+        "workflow:communal_optional",
+        "staple:grain_legume"
+      ]
+    },
+    {
+      "id": "wf.indigenous.israelite_household",
+      "path": "src/layers/catalogs/workflows/indigenous/israelite_household.json",
+      "title": "Israelite Household Rhythm (Scripture-anchored, Opt-in Overlay)",
+      "tags": [
+        "culture:israelite",
+        "workflow:feast_focus",
+        "staple:grain"
+      ]
+    }
+  ],
+  "filters": {
+    "culture": [
+      "culture:west_african",
+      "culture:israelite"
+    ],
+    "values": [
+      "value:sharing",
+      "value:thrift",
+      "value:feastFocus",
+      "value:stewardship"
+    ],
+    "preservation": [
+      "preservation:fermentation",
+      "preservation:drying",
+      "preservation:rootCellar",
+      "preservation:freezing"
+    ]
+  }
+}

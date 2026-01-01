@@ -1,0 +1,269 @@
+{
+  "id": "pat.textiles.sewing_batch_session",
+  "domain": "textiles",
+  "kind": "planning_pattern",
+  "title": "Sewing Batch Session",
+  "intentTags": [
+    "intent:sew",
+    "mode:batch",
+    "workflow:batching"
+  ],
+  "description": "Plan a sewing batch session across multiple items to reduce setup and tool changes.",
+  "inputs": [
+    {
+      "key": "householdSize",
+      "type": "number",
+      "label": "Household size",
+      "required": false,
+      "default": 4,
+      "min": 1,
+      "max": 30
+    },
+    {
+      "key": "timeBudgetMin",
+      "type": "number",
+      "label": "Time budget (minutes)",
+      "required": false,
+      "default": 120,
+      "min": 30,
+      "max": 960
+    },
+    {
+      "key": "equipment",
+      "type": "multiselect",
+      "label": "Equipment",
+      "required": false,
+      "options": [
+        "needle_thread",
+        "machine_basic",
+        "machine_serger",
+        "loom",
+        "spindle",
+        "dye_pots",
+        "iron"
+      ]
+    },
+    {
+      "key": "fiberPreferences",
+      "type": "multiselect",
+      "label": "Fiber preferences",
+      "required": false,
+      "options": [
+        "cotton",
+        "linen",
+        "wool",
+        "hemp",
+        "silk",
+        "synthetic"
+      ],
+      "default": [
+        "cotton",
+        "linen"
+      ]
+    },
+    {
+      "key": "budgetCap",
+      "type": "number",
+      "label": "Budget cap ($)",
+      "required": false,
+      "default": 0,
+      "min": 0,
+      "max": 5000
+    },
+    {
+      "key": "items",
+      "type": "multiselect",
+      "label": "Items involved",
+      "required": false,
+      "options": [
+        "shirts",
+        "pants",
+        "dresses",
+        "headwraps",
+        "aprons",
+        "blankets",
+        "children_clothes",
+        "workwear"
+      ]
+    },
+    {
+      "key": "skillLevel",
+      "type": "select",
+      "label": "Skill level",
+      "required": false,
+      "default": "beginner",
+      "options": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "type": "sessions",
+      "notes": "Blueprint for sewing batch with operation grouping."
+    }
+  ],
+  "constraints": [
+    {
+      "type": "safety",
+      "tag": "constraint:safety",
+      "notes": "Heat, dyes, sharp tools—surface safety checks."
+    },
+    {
+      "type": "time",
+      "tag": "constraint:time_budget",
+      "notes": "Respect time caps; propose splitting sessions."
+    }
+  ],
+  "requires": [
+    {
+      "type": "inventory",
+      "tag": "needsTextileInventory",
+      "optional": true
+    }
+  ],
+  "produces": [
+    {
+      "type": "session",
+      "domain": "textiles",
+      "title": "Sewing Batch Session Session"
+    }
+  ],
+  "steps": [
+    {
+      "id": "prep",
+      "title": "Prep patterns + cut stack",
+      "kind": "template",
+      "timeboxMin": 30
+    },
+    {
+      "id": "setup",
+      "title": "Machine setup + thread plan",
+      "kind": "template",
+      "timeboxMin": 15
+    },
+    {
+      "id": "sew",
+      "title": "Sew in operation batches",
+      "kind": "template",
+      "timeboxMin": 120
+    },
+    {
+      "id": "finish",
+      "title": "Finish/press + inventory log",
+      "kind": "template",
+      "timeboxMin": 20
+    }
+  ],
+  "kpis": [
+    {
+      "key": "setup_time",
+      "label": "Setup time",
+      "unit": "min",
+      "target": "Trend down"
+    },
+    {
+      "key": "output_count",
+      "label": "Items finished",
+      "unit": "count",
+      "target": "User-set"
+    }
+  ],
+  "lean": {
+    "wasteTargets": [
+      "motion",
+      "waiting"
+    ],
+    "countermeasures": [
+      {
+        "waste": "waiting",
+        "do": "Pre-wind bobbins; stage notions."
+      }
+    ]
+  },
+  "ui": {
+    "form": {
+      "fields": [
+        {
+          "key": "householdSize",
+          "type": "number",
+          "label": "Household size",
+          "required": false,
+          "default": 4,
+          "min": 1,
+          "max": 30
+        },
+        {
+          "key": "timeBudgetMin",
+          "type": "number",
+          "label": "Time budget (minutes)",
+          "required": false,
+          "default": 120,
+          "min": 30,
+          "max": 960
+        },
+        {
+          "key": "equipment",
+          "type": "multiselect",
+          "label": "Equipment",
+          "required": false,
+          "options": [
+            "needle_thread",
+            "machine_basic",
+            "machine_serger",
+            "loom",
+            "spindle",
+            "dye_pots",
+            "iron"
+          ]
+        },
+        {
+          "key": "fiberPreferences",
+          "type": "multiselect",
+          "label": "Fiber preferences",
+          "required": false,
+          "options": [
+            "cotton",
+            "linen",
+            "wool",
+            "hemp",
+            "silk",
+            "synthetic"
+          ],
+          "default": [
+            "cotton",
+            "linen"
+          ]
+        },
+        {
+          "key": "budgetCap",
+          "type": "number",
+          "label": "Budget cap ($)",
+          "required": false,
+          "default": 0,
+          "min": 0,
+          "max": 5000
+        }
+      ]
+    },
+    "help": {
+      "title": "Sewing Batch",
+      "intro": "Reduce setup by batching operations.",
+      "tips": [
+        "Cut first, then sew.",
+        "Group by stitch/operation."
+      ]
+    }
+  },
+  "links": {
+    "storehousePatterns": [
+      "pat.storehouse.monthly_cycle_count"
+    ],
+    "homesteadPatterns": [
+      "pat.homestead.mixed_subsistence"
+    ]
+  },
+  "variants": []
+}

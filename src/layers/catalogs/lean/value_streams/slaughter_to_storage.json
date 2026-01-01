@@ -1,0 +1,233 @@
+{
+  "id": "lean.vs.slaughter_to_storage",
+  "domain": "lean",
+  "kind": "value_stream",
+  "title": "Value Stream: Slaughter/Processing → Storage",
+  "intentTags": [
+    "lean:value_stream"
+  ],
+  "inputs": [
+    {
+      "key": "demandModelRef",
+      "label": "Demand model ref",
+      "type": "string"
+    },
+    {
+      "key": "inventorySnapshot",
+      "label": "Inventory snapshot",
+      "type": "object"
+    },
+    {
+      "key": "season",
+      "label": "Season",
+      "type": "string"
+    },
+    {
+      "key": "householdSize",
+      "label": "Household size",
+      "type": "number",
+      "default": 4
+    }
+  ],
+  "outputs": [
+    {
+      "key": "stageMetrics",
+      "label": "Stage metrics",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "bottlenecks",
+      "label": "Detected bottlenecks",
+      "type": "array",
+      "required": true
+    }
+  ],
+  "constraints": [
+    "measureFirst",
+    "respectQuietHours",
+    "nonPunitiveMetrics"
+  ],
+  "steps": [],
+  "kpis": [
+    {
+      "key": "leadTime",
+      "label": "Total lead time",
+      "direction": "down",
+      "unit": "min"
+    },
+    {
+      "key": "touchTime",
+      "label": "Total touch time",
+      "direction": "down",
+      "unit": "min"
+    },
+    {
+      "key": "firstPassYield",
+      "label": "First-pass yield",
+      "direction": "up",
+      "unit": "%"
+    },
+    {
+      "key": "reworkRate",
+      "label": "Rework rate",
+      "direction": "down",
+      "unit": "%"
+    }
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial Lean Six Sigma catalog."
+      }
+    ]
+  },
+  "valueStream": {
+    "stages": [
+      {
+        "id": "stage_window_plan",
+        "title": "Plan Humane + Weather Window",
+        "inputs": [
+          "humaneWindows",
+          "weatherWindows",
+          "laborCapacity"
+        ],
+        "outputs": [
+          "processingWindow"
+        ],
+        "commonDelays": [
+          "bad_weather",
+          "labor_shortage"
+        ],
+        "kpis": [
+          {
+            "key": "windowHitRate",
+            "label": "Window hit rate",
+            "direction": "up",
+            "unit": "%"
+          },
+          {
+            "key": "reschedules",
+            "label": "Reschedules",
+            "direction": "down",
+            "unit": "count"
+          }
+        ]
+      },
+      {
+        "id": "stage_process",
+        "title": "Process + Chill",
+        "inputs": [
+          "animal",
+          "equipment"
+        ],
+        "outputs": [
+          "cuts",
+          "offal",
+          "bones"
+        ],
+        "commonDelays": [
+          "insufficient_chill_space",
+          "tool_search"
+        ],
+        "kpis": [
+          {
+            "key": "processTime",
+            "label": "Process time",
+            "direction": "down",
+            "unit": "min"
+          },
+          {
+            "key": "contaminationIncidents",
+            "label": "Incidents",
+            "direction": "down",
+            "unit": "count"
+          }
+        ]
+      },
+      {
+        "id": "stage_package",
+        "title": "Package + Label",
+        "inputs": [
+          "cuts"
+        ],
+        "outputs": [
+          "labeledPackages"
+        ],
+        "commonDelays": [
+          "label_shortage",
+          "bag_shortage"
+        ],
+        "kpis": [
+          {
+            "key": "labelCompliance",
+            "label": "Label compliance",
+            "direction": "up",
+            "unit": "%"
+          },
+          {
+            "key": "reworkRate",
+            "label": "Rework rate",
+            "direction": "down",
+            "unit": "%"
+          }
+        ]
+      },
+      {
+        "id": "stage_store_update",
+        "title": "Store + Update Inventory",
+        "inputs": [
+          "labeledPackages"
+        ],
+        "outputs": [
+          "updatedInventory"
+        ],
+        "commonDelays": [
+          "freezer_full",
+          "unclear_zone_assignment"
+        ],
+        "kpis": [
+          {
+            "key": "timeToStore",
+            "label": "Time to store",
+            "direction": "down",
+            "unit": "min"
+          },
+          {
+            "key": "freezerUtilization",
+            "label": "Freezer utilization",
+            "direction": "down",
+            "unit": "%"
+          }
+        ]
+      }
+    ],
+    "commonDelays": [
+      "handoff_wait",
+      "missing_inputs",
+      "equipment_unavailable"
+    ],
+    "handoffs": [
+      "household",
+      "storehouse",
+      "garden",
+      "animals",
+      "preservation"
+    ]
+  },
+  "links": {
+    "affectsPatterns": [
+      "pat.homestead.animal_led",
+      "pat.homestead.mixed_subsistence",
+      "pat.storehouse.monthly_cycle_count"
+    ],
+    "suggestsStandardWork": [
+      "lean.sw.seasonal_preservation_push",
+      "lean.sw.monthly_storehouse_check"
+    ],
+    "taktModelRef": "lean.takt.household_meal_takt"
+  }
+}

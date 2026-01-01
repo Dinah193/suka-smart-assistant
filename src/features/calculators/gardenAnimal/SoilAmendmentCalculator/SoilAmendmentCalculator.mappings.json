@@ -1,0 +1,54 @@
+{
+  "inputs": [
+    {
+      "fromNode": "GardenPlantingCalendarCalculator",
+      "fromOutput": "plannedBeds",
+      "toInput": "soilProfile",
+      "description": "Use the planting layout and selected crops to scope which beds require soil analysis and amendments before planting dates."
+    },
+    {
+      "fromNode": "GardenPlantingCalendarCalculator",
+      "fromOutput": "cropRequirements",
+      "toInput": "targetFertility",
+      "description": "Derive target fertility ranges (pH and NPK bands) from crop families and planting windows."
+    },
+    {
+      "fromNode": "GardenYieldCalculator",
+      "fromOutput": "yieldTargets",
+      "toInput": "targetFertility",
+      "description": "Optionally tighten or relax fertility targets based on desired yield intensity per bed."
+    }
+  ],
+  "outputs": [
+    {
+      "toNode": "GardenYieldCalculator",
+      "fromOutput": "soilYieldHints",
+      "toInput": "soilModifiers",
+      "description": "Provide per-bed stability ratings and yield modifiers to adjust harvest predictions up or down."
+    },
+    {
+      "toNode": "GardenYieldCalculator",
+      "fromOutput": "amendmentPlan",
+      "toInput": "bedConstraints",
+      "description": "Flag beds as constrained until amendments are applied, so yield calculations can reflect realistic limits."
+    },
+    {
+      "toNode": "GardenPlantingCalendarCalculator",
+      "fromOutput": "amendmentSessions",
+      "toInput": "prePlantTasks",
+      "description": "Insert soil amendment sessions as required pre-plant tasks that must be scheduled before sowing or transplant dates."
+    },
+    {
+      "toNode": "SessionRunner",
+      "fromOutput": "amendmentSessions",
+      "toInput": "sessions",
+      "description": "Enable one-tap 'Now' sessions from the garden domain to execute soil amendment work with timers and step guidance."
+    },
+    {
+      "toNode": "StorehousePlanner",
+      "fromOutput": "soilStabilityTrend",
+      "toInput": "riskProfile",
+      "description": "Expose long-term soil stability trends to storehouse planning so preserved food targets can account for future yield risk."
+    }
+  ]
+}

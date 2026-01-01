@@ -1,0 +1,478 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka-smart-assistant.local/schemas/health/MicronutrientCalculator.schema.json",
+  "title": "MicronutrientCalculatorPayload",
+  "description": "Schema for Micronutrient Calculator inputs (profile, health focus, constraints) and outputs (daily micronutrient targets) used by SSA UI, shims, and Planning Graph.",
+
+  "type": "object",
+  "additionalProperties": false,
+
+  "properties": {
+    "input": {
+      "$ref": "#/$defs/MicronutrientCalculatorInput"
+    },
+    "output": {
+      "$ref": "#/$defs/MicronutrientCalculatorOutput"
+    },
+    "meta": {
+      "type": "object",
+      "description": "Optional metadata attached by SSA (calculator id, timestamps, source).",
+      "additionalProperties": false,
+      "properties": {
+        "calculatorId": {
+          "type": "string",
+          "description": "Internal calculator id (e.g., 'health.micronutrients')."
+        },
+        "nodeId": {
+          "type": "string",
+          "description": "Planning Graph node id (e.g., 'pg.health.micronutrientCalculator')."
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp when this payload was generated."
+        },
+        "source": {
+          "type": "string",
+          "description": "Module or UI component that produced this payload."
+        },
+        "version": {
+          "type": "string",
+          "description": "Version of the calculator logic or schema the result was generated with."
+        }
+      }
+    }
+  },
+
+  "required": ["input", "output"],
+
+  "$defs": {
+    "MicronutrientCalculatorInput": {
+      "type": "object",
+      "description": "Inputs required to compute micronutrient targets.",
+      "additionalProperties": false,
+      "properties": {
+        "profile": {
+          "$ref": "#/$defs/PersonProfile"
+        },
+        "unitSystem": {
+          "type": "string",
+          "enum": ["imperial", "metric", "mixed"],
+          "description": "Preferred unit system for outputs; used for display and suggested ranges."
+        },
+        "dietaryPattern": {
+          "$ref": "#/$defs/DietaryPattern"
+        },
+        "healthFocus": {
+          "$ref": "#/$defs/HealthFocus"
+        },
+        "constraints": {
+          "$ref": "#/$defs/Constraints"
+        },
+        "rounding": {
+          "$ref": "#/$defs/NutrientRounding"
+        },
+        "ssaIntegration": {
+          "$ref": "#/$defs/SSAIntegrationHints"
+        }
+      },
+      "required": ["profile"]
+    },
+
+    "PersonProfile": {
+      "type": "object",
+      "description": "Basic profile fields that influence micronutrient targets.",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Optional display name for this profile or household member."
+        },
+        "sex": {
+          "type": "string",
+          "enum": ["female", "male", "other", "unspecified"],
+          "description": "Biological sex setting used for nutrient reference ranges."
+        },
+        "ageYears": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 120,
+          "description": "Age in years."
+        },
+        "weight": {
+          "$ref": "#/$defs/Weight"
+        },
+        "height": {
+          "$ref": "#/$defs/Height"
+        },
+        "pregnancyStatus": {
+          "type": "string",
+          "enum": [
+            "none",
+            "trimester1",
+            "trimester2",
+            "trimester3",
+            "postpartum"
+          ],
+          "description": "Pregnancy status, if applicable."
+        },
+        "lactationStatus": {
+          "type": "string",
+          "enum": ["none", "exclusive", "partial"],
+          "description": "Lactation status, if applicable."
+        },
+        "isElderly": {
+          "type": "boolean",
+          "description": "Optional explicit flag for elderly ranges when ageYears is approximate."
+        }
+      },
+      "required": ["sex", "ageYears"]
+    },
+
+    "Weight": {
+      "type": "object",
+      "description": "Weight value and unit.",
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Weight numeric value."
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["lb", "kg"],
+          "description": "Weight unit."
+        }
+      },
+      "required": ["value", "unit"]
+    },
+
+    "Height": {
+      "type": "object",
+      "description": "Height value and unit (optional for micronutrients but useful for related calculations).",
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Height numeric value."
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["in", "cm"],
+          "description": "Height unit."
+        }
+      },
+      "required": ["value", "unit"]
+    },
+
+    "DietaryPattern": {
+      "type": "object",
+      "description": "Diet pattern and restrictions that influence nutrient sources and suggestions.",
+      "additionalProperties": false,
+      "properties": {
+        "primaryPattern": {
+          "type": "string",
+          "enum": [
+            "omnivore",
+            "vegetarian",
+            "lacto-ovo-vegetarian",
+            "pescatarian",
+            "vegan",
+            "other"
+          ],
+          "description": "High-level dietary pattern."
+        },
+        "avoidsPork": {
+          "type": "boolean",
+          "description": "Avoids pork-derived sources."
+        },
+        "avoidsShellfish": {
+          "type": "boolean",
+          "description": "Avoids shellfish-derived sources."
+        },
+        "avoidsDairy": {
+          "type": "boolean",
+          "description": "Avoids dairy (lactose intolerance or preference)."
+        },
+        "avoidsGluten": {
+          "type": "boolean",
+          "description": "Avoids gluten-containing foods."
+        },
+        "otherRestrictions": {
+          "type": "array",
+          "description": "Freeform list of other restriction labels.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "HealthFocus": {
+      "type": "object",
+      "description": "Flags indicating which health focus areas to emphasize in micronutrient planning.",
+      "additionalProperties": false,
+      "properties": {
+        "boneHealth": {
+          "type": "boolean",
+          "description": "Focus on bone/joint health (e.g., calcium, vitamin D, K, magnesium)."
+        },
+        "bloodHealth": {
+          "type": "boolean",
+          "description": "Focus on iron, folate, B12, etc."
+        },
+        "immuneSupport": {
+          "type": "boolean",
+          "description": "Focus on C, D, zinc, selenium, etc."
+        },
+        "heartHealth": {
+          "type": "boolean",
+          "description": "Focus on heart & vascular support."
+        },
+        "brainHealth": {
+          "type": "boolean",
+          "description": "Focus on cognitive and nervous system support."
+        },
+        "metabolicHealth": {
+          "type": "boolean",
+          "description": "Focus on insulin sensitivity, energy metabolism, and related micros."
+        }
+      }
+    },
+
+    "Constraints": {
+      "type": "object",
+      "description": "Environment and health constraints that may set upper limits or modify targets.",
+      "additionalProperties": false,
+      "properties": {
+        "limitSodium": {
+          "type": "boolean",
+          "description": "If true, sodium targets should be conservative."
+        },
+        "limitAddedSugar": {
+          "type": "boolean",
+          "description": "If true, favor micronutrient sources with low added sugar."
+        },
+        "limitSaturatedFat": {
+          "type": "boolean",
+          "description": "If true, favor micronutrient sources with lower saturated fat."
+        },
+        "kidneyIssues": {
+          "type": "boolean",
+          "description": "If true, may limit certain minerals (e.g., potassium, phosphorus) depending on plan."
+        },
+        "liverIssues": {
+          "type": "boolean",
+          "description": "If true, may adjust fat-soluble vitamin recommendations."
+        },
+        "medicationInteractions": {
+          "type": "array",
+          "description": "Freeform labels for known medication interactions (for notes only; no medication logic here).",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "NutrientRounding": {
+      "type": "object",
+      "description": "Rounding preferences for micronutrient displays.",
+      "additionalProperties": false,
+      "properties": {
+        "gramsDecimals": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 4,
+          "description": "Decimal places for gram-level nutrients."
+        },
+        "milligramsDecimals": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 4,
+          "description": "Decimal places for mg-level nutrients."
+        },
+        "microgramsDecimals": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 4,
+          "description": "Decimal places for mcg-level nutrients."
+        }
+      }
+    },
+
+    "SSAIntegrationHints": {
+      "type": "object",
+      "description": "Optional hints for how SSA should persist and route micronutrient results.",
+      "additionalProperties": false,
+      "properties": {
+        "autosaveProfile": {
+          "type": "boolean",
+          "description": "If true, SSA may persist profile and focus selections to a household profile store."
+        },
+        "allowLinkToMealPlanner": {
+          "type": "boolean",
+          "description": "If true, Planning Graph and Health flows may link directly into meal planner with micro targets."
+        },
+        "allowLinkToInventoryGaps": {
+          "type": "boolean",
+          "description": "If true, SSA may generate storehouse 'nutrition gaps' views from these targets."
+        }
+      }
+    },
+
+    "MicronutrientCalculatorOutput": {
+      "type": "object",
+      "description": "Micronutrient targets derived from the provided inputs.",
+      "additionalProperties": false,
+      "properties": {
+        "unitSystem": {
+          "type": "string",
+          "enum": ["imperial", "metric", "mixed"],
+          "description": "Unit system used in these outputs."
+        },
+        "dailyTargets": {
+          "type": "array",
+          "description": "Per-nutrient daily target information.",
+          "items": {
+            "$ref": "#/$defs/MicronutrientTarget"
+          }
+        },
+        "aggregate": {
+          "$ref": "#/$defs/AggregateMicronutrientSummary"
+        },
+        "warnings": {
+          "type": "array",
+          "description": "General warnings or caveats associated with the targets.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "array",
+          "description": "General notes or coaching tips for interpreting these targets.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["dailyTargets"]
+    },
+
+    "MicronutrientTarget": {
+      "type": "object",
+      "description": "Target information for a single micronutrient.",
+      "additionalProperties": false,
+      "properties": {
+        "nutrientId": {
+          "type": "string",
+          "description": "Stable id for this nutrient (e.g., 'vitamin-c', 'magnesium', 'iron')."
+        },
+        "label": {
+          "type": "string",
+          "description": "Human-readable nutrient name."
+        },
+        "group": {
+          "type": "string",
+          "enum": ["vitamin", "mineral", "traceElement", "other"],
+          "description": "Type/group of the micronutrient."
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["g", "mg", "mcg", "IU", "other"],
+          "description": "Measurement unit for the target."
+        },
+        "amount": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Primary daily target amount in the given unit."
+        },
+        "recommendedRange": {
+          "type": "object",
+          "description": "Optional recommended range around the primary amount.",
+          "additionalProperties": false,
+          "properties": {
+            "min": {
+              "type": "number",
+              "minimum": 0
+            },
+            "max": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "upperLimit": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Tolerable upper intake level if applicable (same unit)."
+        },
+        "priority": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Relative priority (0–100) for highlighting this nutrient in planning."
+        },
+        "sourceStandard": {
+          "type": "string",
+          "description": "Short reference to underlying standard or baseline (e.g., 'RDA-approx', 'custom')."
+        },
+        "emphasisReasons": {
+          "type": "array",
+          "description": "Reasons this nutrient is emphasized (health focus, profile, constraints).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "description": "Tag list for graph/explorer and UI filtering.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "array",
+          "description": "Per-nutrient notes or coaching tips.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["nutrientId", "label", "group", "unit", "amount"]
+    },
+
+    "AggregateMicronutrientSummary": {
+      "type": "object",
+      "description": "Roll-up information for Planning Graph and dashboards.",
+      "additionalProperties": false,
+      "properties": {
+        "totalMicronutrientsTracked": {
+          "type": "number",
+          "minimum": 0,
+          "description": "How many micronutrients have explicit targets."
+        },
+        "emphasisAreas": {
+          "type": "array",
+          "description": "High-level areas being emphasized (e.g., 'boneHealth', 'immuneSupport').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cautionNotes": {
+          "type": "array",
+          "description": "Summary caution notes (e.g., 'watch upper limits for fat-soluble vitamins').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "bmiCategoryHint": {
+          "type": "string",
+          "description": "Optional BMI category hint if BMI input was available."
+        }
+      }
+    }
+  }
+}

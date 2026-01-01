@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "calculatorId": "health.bmi",
+  "version": "1.0.0",
+  "description": "Next Steps and module relationships for BMI Calculator within the SSA Planning Graph.",
+
+  "nextSteps": [
+    {
+      "id": "health.bmr",
+      "label": "Calculate Basal Metabolic Rate (BMR)",
+      "reason": "BMR uses BMI inputs to estimate calorie needs for baseline metabolism.",
+      "when": "always",
+      "tags": ["metabolism", "calories", "health"]
+    },
+    {
+      "id": "health.tdee",
+      "label": "Calculate Total Daily Energy Expenditure (TDEE)",
+      "reason": "TDEE uses BMI + activity level to estimate daily calorie burn.",
+      "when": "after:bmr",
+      "tags": ["energy", "weight-management", "metabolism"]
+    },
+    {
+      "id": "health.macros",
+      "label": "Generate Daily Macronutrient Targets",
+      "reason": "Macros depend heavily on BMI, goal weight, and TDEE.",
+      "when": "after:tdee",
+      "tags": ["nutrition", "protein", "fat", "carbs"]
+    },
+    {
+      "id": "health.nutrients",
+      "label": "Check Daily Micronutrient Requirements",
+      "reason": "Micronutrient needs differ for BMI categories and age/sex profiles.",
+      "when": "always",
+      "tags": ["vitamins", "minerals", "health"]
+    },
+    {
+      "id": "health.hydration",
+      "label": "Calculate Daily Water Requirements",
+      "reason": "BMI influences body mass, which affects hydration levels.",
+      "when": "always",
+      "tags": ["water", "hydration"]
+    },
+    {
+      "id": "health.idealWeight",
+      "label": "Estimate Ideal Weight Range",
+      "reason": "BMI result indicates whether a user should explore ideal body weight ranges.",
+      "when": "if:bmiOutsideNormal",
+      "tags": ["weight-management"]
+    }
+  ],
+
+  "suggestedModules": [
+    {
+      "moduleId": "meals.planner",
+      "label": "Meal Planning",
+      "reason": "Post-BMI nutrient guidance assists in planning meals and caloric targets.",
+      "tags": ["food", "nutrition", "meal-prep"]
+    },
+    {
+      "moduleId": "exercise.planner",
+      "label": "Activity & Exercise Planner",
+      "reason": "BMI influences recommended activity intensity and schedule.",
+      "tags": ["fitness", "energy", "health"]
+    },
+    {
+      "moduleId": "health.goals",
+      "label": "Set Health and Weight Goals",
+      "reason": "BMI category helps determine realistic short- and long-term health goals.",
+      "tags": ["goals", "health", "tracking"]
+    },
+    {
+      "moduleId": "health.tracker",
+      "label": "Health Progress Tracker",
+      "reason": "Track BMI changes over time along with caloric intake and activity.",
+      "tags": ["tracking", "analytics"]
+    }
+  ],
+
+  "feedsInto": {
+    "bmiOutput": [
+      {
+        "nodeId": "health.bmr",
+        "field": "bmi",
+        "reason": "BMI is an influencing factor for metabolic rate estimations."
+      },
+      {
+        "nodeId": "health.macros",
+        "field": "bodyWeightContext",
+        "reason": "Body composition assumptions (lean vs adipose) are influenced by BMI."
+      },
+      {
+        "nodeId": "meals.planner",
+        "field": "dailyCalorieTarget",
+        "reason": "Meal planning uses TDEE → which relies on BMI."
+      },
+      {
+        "nodeId": "exercise.planner",
+        "field": "intensityRecommendation",
+        "reason": "BMI helps determine intensity guidelines."
+      }
+    ]
+  },
+
+  "conditions": {
+    "bmiOutsideNormal": {
+      "operator": "OR",
+      "rules": [
+        { "field": "category", "op": "=", "value": "Underweight" },
+        { "field": "category", "op": "=", "value": "Overweight" },
+        { "field": "category", "op": "=", "value": "Obese Class I" },
+        { "field": "category", "op": "=", "value": "Obese Class II" },
+        { "field": "category", "op": "=", "value": "Obese Class III" }
+      ]
+    }
+  },
+
+  "ui": {
+    "showNowButton": true,
+    "nextStepsHeader": "Recommended Next Steps",
+    "suggestedModulesHeader": "Helpful Modules to Continue"
+  }
+}

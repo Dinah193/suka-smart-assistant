@@ -1,0 +1,293 @@
+{
+  "id": "pat.textiles.capsule_mending_cycle",
+  "domain": "textiles",
+  "kind": "planning_pattern",
+  "title": "Capsule Mending Cycle",
+  "intentTags": [
+    "intent:mend",
+    "mode:repair",
+    "workflow:batching",
+    "time:short"
+  ],
+  "description": "Run a recurring mending cycle to keep garments functional and reduce repurchase.",
+  "inputs": [
+    {
+      "key": "householdSize",
+      "type": "number",
+      "label": "Household size",
+      "required": false,
+      "default": 4,
+      "min": 1,
+      "max": 30
+    },
+    {
+      "key": "timeBudgetMin",
+      "type": "number",
+      "label": "Time budget (minutes)",
+      "required": false,
+      "default": 120,
+      "min": 30,
+      "max": 960
+    },
+    {
+      "key": "equipment",
+      "type": "multiselect",
+      "label": "Equipment",
+      "required": false,
+      "options": [
+        "needle_thread",
+        "machine_basic",
+        "machine_serger",
+        "loom",
+        "spindle",
+        "dye_pots",
+        "iron"
+      ]
+    },
+    {
+      "key": "fiberPreferences",
+      "type": "multiselect",
+      "label": "Fiber preferences",
+      "required": false,
+      "options": [
+        "cotton",
+        "linen",
+        "wool",
+        "hemp",
+        "silk",
+        "synthetic"
+      ],
+      "default": [
+        "cotton",
+        "linen"
+      ]
+    },
+    {
+      "key": "budgetCap",
+      "type": "number",
+      "label": "Budget cap ($)",
+      "required": false,
+      "default": 0,
+      "min": 0,
+      "max": 5000
+    },
+    {
+      "key": "items",
+      "type": "multiselect",
+      "label": "Items involved",
+      "required": false,
+      "options": [
+        "shirts",
+        "pants",
+        "dresses",
+        "headwraps",
+        "aprons",
+        "blankets",
+        "children_clothes",
+        "workwear"
+      ]
+    },
+    {
+      "key": "skillLevel",
+      "type": "select",
+      "label": "Skill level",
+      "required": false,
+      "default": "beginner",
+      "options": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "type": "planStructure",
+      "notes": "Mending session blueprint + next cycle reminder."
+    }
+  ],
+  "constraints": [
+    {
+      "type": "safety",
+      "tag": "constraint:safety",
+      "notes": "Heat, dyes, sharp tools—surface safety checks."
+    },
+    {
+      "type": "time",
+      "tag": "constraint:time_budget",
+      "notes": "Respect time caps; propose splitting sessions."
+    }
+  ],
+  "requires": [
+    {
+      "type": "inventory",
+      "tag": "needsTextileInventory",
+      "optional": true
+    }
+  ],
+  "produces": [
+    {
+      "type": "session",
+      "domain": "textiles",
+      "title": "Capsule Mending Cycle Session"
+    }
+  ],
+  "steps": [
+    {
+      "id": "collect",
+      "title": "Collect mend pile + triage",
+      "kind": "template",
+      "timeboxMin": 15,
+      "voice": {
+        "speakOnStart": true,
+        "prompt": "Collect items, tag repair type, and decide quick fixes vs larger projects."
+      }
+    },
+    {
+      "id": "batch",
+      "title": "Batch by repair type",
+      "kind": "template",
+      "timeboxMin": 10,
+      "ui": {
+        "chips": [
+          "holes",
+          "seams",
+          "buttons",
+          "hemming"
+        ]
+      }
+    },
+    {
+      "id": "repair",
+      "title": "Repair batch session",
+      "kind": "template",
+      "timeboxMin": 90,
+      "voice": {
+        "speakOnStart": false,
+        "prompt": "Work in batches: same stitch/tools to reduce changeovers."
+      }
+    },
+    {
+      "id": "log",
+      "title": "Log outcomes + next cycle",
+      "kind": "template",
+      "timeboxMin": 10
+    }
+  ],
+  "kpis": [
+    {
+      "key": "items_repaired",
+      "label": "Items repaired",
+      "unit": "count",
+      "target": "User-set"
+    },
+    {
+      "key": "repurchase_avoided",
+      "label": "Repurchase avoided",
+      "unit": "$",
+      "target": "Trend up"
+    },
+    {
+      "key": "changeovers",
+      "label": "Tool/stitch changeovers",
+      "unit": "count",
+      "target": "≤3"
+    }
+  ],
+  "lean": {
+    "wasteTargets": [
+      "motion",
+      "waiting",
+      "overprocessing"
+    ],
+    "countermeasures": [
+      {
+        "waste": "motion",
+        "do": "Stage needles, thread, scissors; batch repairs."
+      }
+    ]
+  },
+  "ui": {
+    "form": {
+      "fields": [
+        {
+          "key": "householdSize",
+          "type": "number",
+          "label": "Household size",
+          "required": false,
+          "default": 4,
+          "min": 1,
+          "max": 30
+        },
+        {
+          "key": "timeBudgetMin",
+          "type": "number",
+          "label": "Time budget (minutes)",
+          "required": false,
+          "default": 120,
+          "min": 30,
+          "max": 960
+        },
+        {
+          "key": "equipment",
+          "type": "multiselect",
+          "label": "Equipment",
+          "required": false,
+          "options": [
+            "needle_thread",
+            "machine_basic",
+            "machine_serger",
+            "loom",
+            "spindle",
+            "dye_pots",
+            "iron"
+          ]
+        },
+        {
+          "key": "fiberPreferences",
+          "type": "multiselect",
+          "label": "Fiber preferences",
+          "required": false,
+          "options": [
+            "cotton",
+            "linen",
+            "wool",
+            "hemp",
+            "silk",
+            "synthetic"
+          ],
+          "default": [
+            "cotton",
+            "linen"
+          ]
+        },
+        {
+          "key": "budgetCap",
+          "type": "number",
+          "label": "Budget cap ($)",
+          "required": false,
+          "default": 0,
+          "min": 0,
+          "max": 5000
+        }
+      ]
+    },
+    "help": {
+      "title": "Capsule Mending",
+      "intro": "Keep clothes usable and reduce waste.",
+      "tips": [
+        "Batch by repair type.",
+        "Track repurchase avoided."
+      ]
+    }
+  },
+  "links": {
+    "storehousePatterns": [
+      "pat.storehouse.monthly_cycle_count"
+    ],
+    "homesteadPatterns": [
+      "pat.homestead.mixed_subsistence"
+    ]
+  },
+  "variants": []
+}

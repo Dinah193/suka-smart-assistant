@@ -1,0 +1,11 @@
+{
+  "agent": "gardenHarvestAgent",
+  "template_id": "harvest_preservation",
+  "context": {
+    "upcoming": [
+      { "crop": "tomato", "qty": 35, "fresh_capacity": 12, "window_start": "2025-08-20", "window_end": "2025-08-26" },
+      { "crop": "cucumber", "qty": 18, "fresh_capacity": 10, "window_start": "2025-08-22", "window_end": "2025-08-27" }
+    ],
+    "prefs": { "tomato": "can", "cucumber": "pickle" }
+  }
+}

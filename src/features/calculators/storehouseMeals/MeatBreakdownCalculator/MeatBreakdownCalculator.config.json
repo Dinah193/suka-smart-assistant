@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "id": "MeatBreakdownCalculator.node",
+  "kind": "calculator-node",
+  "version": "1.0.0",
+
+  "nodeKey": "meatBreakdownCalculator",
+  "label": "Meat Breakdown & Yield",
+  "description": "Calculator for breaking whole animals or primals into cuts, estimating yield, and routing cuts into freezer/storehouse and meal planning.",
+
+  "domain": "animals",
+  "category": "storehouseMeals",
+  "tags": [
+    "butchery",
+    "yield",
+    "storehouse",
+    "freezer",
+    "planning"
+  ],
+
+  "inputs": {
+    "required": [
+      "animalType",
+      "carcassWeightLbs"
+    ],
+    "optional": [
+      "liveWeightLbs",
+      "targetCutPlan",
+      "trimPreferences",
+      "fatRetentionPreferences",
+      "boneRetentionPreferences"
+    ],
+    "schemaRef": "./MeatBreakdownCalculator.schema.json",
+    "description": "Animal and carcass data, preferred cut plan, and trimming/fat/bone preferences."
+  },
+
+  "outputs": {
+    "provides": [
+      "CutYieldTable",
+      "TotalUsableMeatLbs",
+      "BoneWeightLbs",
+      "FatTrimWeightLbs",
+      "OffalWeightLbs",
+      "FreezerLoadEstimate",
+      "StorehouseLabelTemplates"
+    ],
+    "description": "Detailed cut list with weights, percentages, recommended storage locations, and label data for printing and inventory logging."
+  },
+
+  "ui": {
+    "route": "/calculators/storehouse/meat-breakdown",
+    "icon": "knife",
+    "group": "Storehouse & Animals",
+    "displayOrder": 35,
+    "nowButton": {
+      "label": "Plan Meat Breakdown Session Now",
+      "tooltip": "Turn this carcass or primal into labeled cuts, freezer loads, and meal planning in one guided session."
+    }
+  },
+
+  "sessionTemplate": {
+    "domain": "animals",
+    "title": "Meat Breakdown & Labeling Session",
+    "sourceType": "manual",
+    "steps": [
+      {
+        "title": "Confirm animal and carcass details",
+        "desc": "Verify animal type, carcass weight, and any special notes (grass-fed, age, hanging time) so yield estimates are realistic.",
+        "durationSec": 600,
+        "blockers": [
+          "inventory",
+          "equipment"
+        ],
+        "metadata": {
+          "tempTargetF": 0,
+          "donenessCue": "timer",
+          "cueNotes": "This is a planning and prep step. Make sure scales, knives, and packaging supplies are ready."
+        }
+      },
+      {
+        "title": "Plan cut list and destinations",
+        "desc": "Choose which primals, roasts, steaks, ground, bones, and offal you want, and assign each to freezer sections or storehouse destinations.",
+        "durationSec": 900,
+        "blockers": [
+          "inventory",
+          "equipment"
+        ],
+        "metadata": {
+          "tempTargetF": 0,
+          "donenessCue": "timer",
+          "cueNotes": "Focus on how your household really eats: roasts vs steaks, ground vs stew meat, bones for broth, etc."
+        }
+      },
+      {
+        "title": "Estimate yields and packaging",
+        "desc": "Review estimated yields for each cut, adjust based on your trim preferences, and decide how many packages of each size to prepare.",
+        "durationSec": 1200,
+        "blockers": [
+          "inventory",
+          "equipment",
+          "quietHours"
+        ],
+        "metadata": {
+          "tempTargetF": 0,
+          "donenessCue": "timer",
+          "cueNotes": "This step sets expectations for the physical work session and freezer space required."
+        }
+      },
+      {
+        "title": "Generate labels and inventory entries",
+        "desc": "Print or preview labels and create draft entries for freezer and storehouse inventory so you can log everything as you cut and package.",
+        "durationSec": 900,
+        "blockers": [
+          "inventory",
+          "equipment"
+        ],
+        "metadata": {
+          "tempTargetF": 0,
+          "donenessCue": "timer",
+          "cueNotes": "This step prepares the paperwork and digital tracking so nothing is lost when you’re busy cutting."
+        }
+      }
+    ]
+  },
+
+  "nextStepsMapping": "MeatBreakdownCalculator.mappings.json",
+
+  "integration": {
+    "feedsInto": [
+      "freezerInventory",
+      "storehouseInventory",
+      "batchYieldCalculator",
+      "costPerServingCalculator",
+      "blackHairNutritionCalculator",
+      "preservationTimeCalculator"
+    ],
+    "acceptsFrom": [
+      "animalIntakeLog",
+      "butcheringSessionPlanner",
+      "storehouseRefillCalculator"
+    ],
+    "notes": "This node is the bridge between animal intake/butchery and long-term storehouse & freezer planning. Outputs from meat breakdown can be analyzed for cost-per-serving, Black hair nutrition, and preservation timing, then scheduled as sessions with SessionRunner."
+  }
+}

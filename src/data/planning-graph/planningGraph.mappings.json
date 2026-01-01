@@ -1,0 +1,549 @@
+{
+  "version": 1,
+  "lastUpdated": "2025-11-26T00:00:00.000Z",
+  "description": "Maps Planning Graph node IDs to routes, UI components, and feature modules used by Suka Smart Assistant for dashboards, calculators, and automation.",
+  "mappings": [
+    {
+      "nodeId": "node.health.bmi",
+      "routes": {
+        "primary": "/tier2/calculators/bmi",
+        "dashboard": "/tier2/dashboard",
+        "settings": "/tier2/health/profile"
+      },
+      "components": {
+        "page": "BmiCalculatorPage",
+        "widget": "BmiScoreCard",
+        "runnerCard": "HealthStepSummaryCard"
+      },
+      "featureModule": "features/calculators/health/BmiCalculator",
+      "automation": {
+        "plannerAgent": "healthPlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.health.bmi"
+        }
+      }
+    },
+    {
+      "nodeId": "node.health.dailyEnergyRequirement",
+      "routes": {
+        "primary": "/tier2/calculators/daily-energy",
+        "dashboard": "/tier2/dashboard"
+      },
+      "components": {
+        "page": "DailyEnergyRequirementCalculatorPage",
+        "widget": "DailyEnergyScoreCard",
+        "runnerCard": "MealEnergyHintCard"
+      },
+      "featureModule": "features/calculators/health/DailyEnergyRequirementCalculator",
+      "automation": {
+        "plannerAgent": "mealPlanEngine",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.health.dailyEnergyRequirement"
+        }
+      }
+    },
+    {
+      "nodeId": "node.health.dailyMicronutrientRequirement",
+      "routes": {
+        "primary": "/tier2/calculators/daily-micronutrients",
+        "dashboard": "/tier2/dashboard"
+      },
+      "components": {
+        "page": "DailyMicronutrientRequirementCalculatorPage",
+        "widget": "MicronutrientCoverageCard",
+        "runnerCard": "MicronutrientHintCard"
+      },
+      "featureModule": "features/calculators/health/DailyMicronutrientRequirementCalculator",
+      "automation": {
+        "plannerAgent": "mealPlanEngine",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.health.dailyMicronutrientRequirement"
+        }
+      }
+    },
+    {
+      "nodeId": "node.health.hairNutritionScore",
+      "routes": {
+        "primary": "/tier2/calculators/hair-nutrition",
+        "dashboard": "/tier2/dashboard"
+      },
+      "components": {
+        "page": "HairNutritionCalculatorPage",
+        "widget": "HairNutritionScoreCard",
+        "runnerCard": "HairNutritionTipsCard"
+      },
+      "featureModule": "features/calculators/health/HairNutritionCalculator",
+      "automation": {
+        "plannerAgent": "healthPlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.health.hairNutritionScore"
+        }
+      }
+    },
+
+    {
+      "nodeId": "node.storehouse.storehouseMealsCapacity",
+      "routes": {
+        "primary": "/tier2/storehouse/meals-capacity",
+        "dashboard": "/tier2/storehouse",
+        "planner": "/tier2/storehouse/planner"
+      },
+      "components": {
+        "page": "StorehouseMealsCapacityPage",
+        "widget": "StorehouseMealsCapacityCard",
+        "runnerCard": "StorehouseCoverageHintCard"
+      },
+      "featureModule": "features/calculators/storehouseMeals/StorehouseMealsCapacityCalculator",
+      "automation": {
+        "plannerAgent": "storehousePlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.storehouse.storehouseMealsCapacity"
+        }
+      }
+    },
+    {
+      "nodeId": "node.storehouse.meatBreakdownCalculator",
+      "routes": {
+        "primary": "/tier2/calculators/meat-breakdown",
+        "dashboard": "/tier2/storehouse",
+        "butchery": "/tier2/storehouse/butchery"
+      },
+      "components": {
+        "page": "MeatBreakdownCalculatorPage",
+        "widget": "MeatBreakdownSummaryCard",
+        "runnerCard": "MeatSessionHintCard"
+      },
+      "featureModule": "features/calculators/storehouseMeals/MeatBreakdownCalculator",
+      "automation": {
+        "plannerAgent": "butcheryPlanningAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.storehouse.meatBreakdownCalculator"
+        }
+      }
+    },
+    {
+      "nodeId": "node.storehouse.storehouseMonthsOfCover",
+      "routes": {
+        "primary": "/tier2/storehouse/months-of-cover",
+        "dashboard": "/tier2/storehouse"
+      },
+      "components": {
+        "page": "StorehouseMonthsOfCoverPage",
+        "widget": "MonthsOfCoverGauge",
+        "runnerCard": "MonthsOfCoverHintCard"
+      },
+      "featureModule": "features/storehouse/StorehouseMonthsOfCover",
+      "automation": {
+        "plannerAgent": "storehousePlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.storehouse.storehouseMonthsOfCover"
+        }
+      }
+    },
+    {
+      "nodeId": "node.storehouse.priceBookCoverage",
+      "routes": {
+        "primary": "/tier2/scan-compare-trust/price-book",
+        "dashboard": "/tier2/storehouse"
+      },
+      "components": {
+        "page": "PriceBookPage",
+        "widget": "PriceBookCoverageCard",
+        "runnerCard": "PriceHintCard"
+      },
+      "featureModule": "features/scan-compare-trust/priceBook/PriceBookCoverage",
+      "automation": {
+        "plannerAgent": "scanCompareTrustAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.storehouse.priceBookCoverage"
+        }
+      }
+    },
+    {
+      "nodeId": "node.storehouse.couponCycleAlignment",
+      "routes": {
+        "primary": "/tier2/scan-compare-trust/coupon-cycle",
+        "dashboard": "/tier2/storehouse"
+      },
+      "components": {
+        "page": "CouponCycleAnalyzerPage",
+        "widget": "CouponCycleAlignmentCard",
+        "runnerCard": "CouponTimingHintCard"
+      },
+      "featureModule": "features/scan-compare-trust/couponCycle/CouponCycleAnalyzer",
+      "automation": {
+        "plannerAgent": "scanCompareTrustAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.storehouse.couponCycleAlignment"
+        }
+      }
+    },
+    {
+      "nodeId": "node.storehouse.bulkPurchasingReadiness",
+      "routes": {
+        "primary": "/tier2/storehouse/bulk-purchasing-readiness",
+        "dashboard": "/tier2/storehouse"
+      },
+      "components": {
+        "page": "BulkPurchasingReadinessPage",
+        "widget": "BulkReadinessScoreCard",
+        "runnerCard": "BulkPurchaseHintCard"
+      },
+      "featureModule": "features/storehouse/BulkPurchasingReadiness",
+      "automation": {
+        "plannerAgent": "storehousePlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.storehouse.bulkPurchasingReadiness"
+        }
+      }
+    },
+
+    {
+      "nodeId": "node.garden.seedViabilityCalculator",
+      "routes": {
+        "primary": "/tier2/garden/seed-viability",
+        "dashboard": "/tier2/garden"
+      },
+      "components": {
+        "page": "SeedViabilityCalculatorPage",
+        "widget": "SeedViabilityScoreCard",
+        "runnerCard": "SeedViabilityHintCard"
+      },
+      "featureModule": "features/calculators/garden/SeedViabilityCalculator",
+      "automation": {
+        "plannerAgent": "gardenPlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.garden.seedViabilityCalculator"
+        }
+      }
+    },
+    {
+      "nodeId": "node.garden.gardenPlanner",
+      "routes": {
+        "primary": "/tier2/garden/planner",
+        "dashboard": "/tier2/garden"
+      },
+      "components": {
+        "page": "GardenPlannerPage",
+        "widget": "GardenPlannerSummaryCard",
+        "runnerCard": "GardenTaskHintCard"
+      },
+      "featureModule": "features/garden/GardenPlanner",
+      "automation": {
+        "plannerAgent": "gardenPlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.garden.gardenPlanner"
+        }
+      }
+    },
+    {
+      "nodeId": "node.garden.harvestYieldProjection",
+      "routes": {
+        "primary": "/tier2/garden/yield-projection",
+        "dashboard": "/tier2/garden"
+      },
+      "components": {
+        "page": "HarvestYieldProjectionPage",
+        "widget": "HarvestYieldGaugeCard",
+        "runnerCard": "YieldProjectionHintCard"
+      },
+      "featureModule": "features/garden/HarvestYieldProjection",
+      "automation": {
+        "plannerAgent": "gardenPlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.garden.harvestYieldProjection"
+        }
+      }
+    },
+    {
+      "nodeId": "node.garden.toStorehouseFlow",
+      "routes": {
+        "primary": "/tier2/garden/to-storehouse",
+        "dashboard": "/tier2/garden",
+        "storehouse": "/tier2/storehouse/harvest-intake"
+      },
+      "components": {
+        "page": "GardenToStorehouseFlowPage",
+        "widget": "HarvestToStorehouseFlowCard",
+        "runnerCard": "HarvestIntakeHintCard"
+      },
+      "featureModule": "features/garden/GardenToStorehouseFlow",
+      "automation": {
+        "plannerAgent": "storehousePlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.garden.toStorehouseFlow"
+        }
+      }
+    },
+    {
+      "nodeId": "node.garden.preservationPlanner",
+      "routes": {
+        "primary": "/tier2/garden/preservation-planner",
+        "dashboard": "/tier2/garden",
+        "preservation": "/tier2/preservation/batch-planner"
+      },
+      "components": {
+        "page": "GardenPreservationPlannerPage",
+        "widget": "PreservationPlannerCard",
+        "runnerCard": "PreservationSessionHintCard"
+      },
+      "featureModule": "features/preservation/GardenPreservationPlanner",
+      "automation": {
+        "plannerAgent": "preservationPlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.garden.preservationPlanner"
+        }
+      }
+    },
+    {
+      "nodeId": "node.garden.animalFeedSupport",
+      "routes": {
+        "primary": "/tier2/garden/animal-feed-support",
+        "dashboard": "/tier2/garden",
+        "animals": "/tier2/animals/feed-planner"
+      },
+      "components": {
+        "page": "GardenAnimalFeedSupportPage",
+        "widget": "AnimalFeedSupportCard",
+        "runnerCard": "AnimalFeedHintCard"
+      },
+      "featureModule": "features/garden/GardenAnimalFeedSupport",
+      "automation": {
+        "plannerAgent": "animalPlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.garden.animalFeedSupport"
+        }
+      }
+    },
+
+    {
+      "nodeId": "node.calendar.mealCalendarCoverage",
+      "routes": {
+        "primary": "/tier2/calendar/meals",
+        "dashboard": "/tier2/calendar"
+      },
+      "components": {
+        "page": "MealCalendarCoveragePage",
+        "widget": "MealCalendarCoverageCard",
+        "runnerCard": "MealSessionHintCard"
+      },
+      "featureModule": "features/calendar/MealCalendarCoverage",
+      "automation": {
+        "plannerAgent": "mealPlanEngine",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.calendar.mealCalendarCoverage"
+        }
+      }
+    },
+    {
+      "nodeId": "node.calendar.batchSessionDensity",
+      "routes": {
+        "primary": "/tier2/calendar/batch-sessions",
+        "dashboard": "/tier2/calendar"
+      },
+      "components": {
+        "page": "BatchSessionDensityPage",
+        "widget": "BatchSessionDensityCard",
+        "runnerCard": "BatchSessionHintCard"
+      },
+      "featureModule": "features/calendar/BatchSessionDensity",
+      "automation": {
+        "plannerAgent": "sessionPlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.calendar.batchSessionDensity"
+        }
+      }
+    },
+    {
+      "nodeId": "node.calendar.sabbathAndFeastAlignment",
+      "routes": {
+        "primary": "/tier2/calendar/feasts",
+        "dashboard": "/tier2/calendar"
+      },
+      "components": {
+        "page": "SabbathAndFeastAlignmentPage",
+        "widget": "FeastAlignmentScoreCard",
+        "runnerCard": "FeastPrepHintCard"
+      },
+      "featureModule": "features/calendar/SabbathAndFeastAlignment",
+      "automation": {
+        "plannerAgent": "feastPlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.calendar.sabbathAndFeastAlignment"
+        }
+      }
+    },
+    {
+      "nodeId": "node.calendar.cleaningRhythmConsistency",
+      "routes": {
+        "primary": "/tier2/calendar/cleaning-rhythm",
+        "dashboard": "/tier2/calendar"
+      },
+      "components": {
+        "page": "CleaningRhythmConsistencyPage",
+        "widget": "CleaningRhythmScoreCard",
+        "runnerCard": "CleaningSessionHintCard"
+      },
+      "featureModule": "features/calendar/CleaningRhythmConsistency",
+      "automation": {
+        "plannerAgent": "cleaningPlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.calendar.cleaningRhythmConsistency"
+        }
+      }
+    },
+    {
+      "nodeId": "node.calendar.gardenTaskRhythm",
+      "routes": {
+        "primary": "/tier2/calendar/garden-rhythm",
+        "dashboard": "/tier2/calendar"
+      },
+      "components": {
+        "page": "GardenTaskRhythmPage",
+        "widget": "GardenRhythmScoreCard",
+        "runnerCard": "GardenSessionHintCard"
+      },
+      "featureModule": "features/calendar/GardenTaskRhythm",
+      "automation": {
+        "plannerAgent": "gardenPlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.calendar.gardenTaskRhythm"
+        }
+      }
+    },
+    {
+      "nodeId": "node.calendar.animalTaskRhythm",
+      "routes": {
+        "primary": "/tier2/calendar/animal-rhythm",
+        "dashboard": "/tier2/calendar"
+      },
+      "components": {
+        "page": "AnimalTaskRhythmPage",
+        "widget": "AnimalRhythmScoreCard",
+        "runnerCard": "AnimalSessionHintCard"
+      },
+      "featureModule": "features/calendar/AnimalTaskRhythm",
+      "automation": {
+        "plannerAgent": "animalPlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.calendar.animalTaskRhythm"
+        }
+      }
+    },
+
+    {
+      "nodeId": "node.stability.incomeStabilityIndex",
+      "routes": {
+        "primary": "/tier2/stability/income",
+        "dashboard": "/tier2/stability"
+      },
+      "components": {
+        "page": "IncomeStabilityIndexPage",
+        "widget": "IncomeStabilityGaugeCard",
+        "runnerCard": "IncomeStabilityHintCard"
+      },
+      "featureModule": "features/stability/IncomeStabilityIndex",
+      "automation": {
+        "plannerAgent": "stabilityPlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.stability.incomeStabilityIndex"
+        }
+      }
+    },
+    {
+      "nodeId": "node.stability.utilityResilienceIndex",
+      "routes": {
+        "primary": "/tier2/stability/utilities",
+        "dashboard": "/tier2/stability"
+      },
+      "components": {
+        "page": "UtilityResilienceIndexPage",
+        "widget": "UtilityResilienceGaugeCard",
+        "runnerCard": "UtilityResilienceHintCard"
+      },
+      "featureModule": "features/stability/UtilityResilienceIndex",
+      "automation": {
+        "plannerAgent": "stabilityPlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.stability.utilityResilienceIndex"
+        }
+      }
+    },
+    {
+      "nodeId": "node.stability.storehouseStabilityIndex",
+      "routes": {
+        "primary": "/tier2/stability/storehouse",
+        "dashboard": "/tier2/stability"
+      },
+      "components": {
+        "page": "StorehouseStabilityIndexPage",
+        "widget": "StorehouseStabilityGaugeCard",
+        "runnerCard": "StorehouseStabilityHintCard"
+      },
+      "featureModule": "features/stability/StorehouseStabilityIndex",
+      "automation": {
+        "plannerAgent": "stabilityPlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.stability.storehouseStabilityIndex"
+        }
+      }
+    },
+    {
+      "nodeId": "node.stability.homesteadStressIndex",
+      "routes": {
+        "primary": "/tier2/stability/stress",
+        "dashboard": "/tier2/stability"
+      },
+      "components": {
+        "page": "HomesteadStressIndexPage",
+        "widget": "HomesteadStressGaugeCard",
+        "runnerCard": "StressReliefHintCard"
+      },
+      "featureModule": "features/stability/HomesteadStressIndex",
+      "automation": {
+        "plannerAgent": "stabilityPlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.stability.homesteadStressIndex"
+        }
+      }
+    },
+    {
+      "nodeId": "node.stability.dependencyOnExternalFood",
+      "routes": {
+        "primary": "/tier2/stability/external-dependency",
+        "dashboard": "/tier2/stability"
+      },
+      "components": {
+        "page": "DependencyOnExternalFoodPage",
+        "widget": "ExternalFoodDependencyGaugeCard",
+        "runnerCard": "SelfRelianceHintCard"
+      },
+      "featureModule": "features/stability/DependencyOnExternalFood",
+      "automation": {
+        "plannerAgent": "stabilityPlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.stability.dependencyOnExternalFood"
+        }
+      }
+    },
+    {
+      "nodeId": "node.stability.planningGraphCompositeScore",
+      "routes": {
+        "primary": "/tier2/stability/composite-score",
+        "dashboard": "/tier2/stability"
+      },
+      "components": {
+        "page": "PlanningGraphCompositeScorePage",
+        "widget": "PlanningGraphCompositeScoreCard",
+        "runnerCard": "CompositeScoreHintCard"
+      },
+      "featureModule": "features/stability/PlanningGraphCompositeScore",
+      "automation": {
+        "plannerAgent": "stabilityPlannerAgent",
+        "events": {
+          "onScoreUpdated": "planningGraph.nodeScore.updated.stability.planningGraphCompositeScore"
+        }
+      }
+    }
+  ]
+}

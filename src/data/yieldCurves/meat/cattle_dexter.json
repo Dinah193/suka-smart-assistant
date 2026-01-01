@@ -1,0 +1,535 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "2025-10-31T13:40:00-05:00",
+  "description": "Meat yield curve for small-frame cattle – Dexter. Tuned for family-scale butchery and for Suka Smart Assistant’s cross-domain flow: animal acquisition → butchery → storehouse stock planning (with grocery-section inspiration) → meal planning → garden planning/care/harvest → cleaning/sanitation → reverse generation → user-favoriteable sessions/schedules.",
+  "__notes": [
+    "Dexters are ideal for your 'family-scale' path where you don’t want 450–500 lb of carcass showing up at once.",
+    "This JSON follows the same high-signal structure as beef_brangus.json and beef_senepol.json so your import/normalizer can treat them uniformly.",
+    "Reverse generation works in both directions: (1) meal/storehouse → how many Dexters do we need and when? (2) animal/butchery planned → tell meals/storehouse/garden/cleaning what to do.",
+    "User favorites are referenced, but actual user data should live in Dexie/local DB."
+  ],
+  "animal": {
+    "species": "cattle",
+    "breed": "Dexter",
+    "class": "beef",
+    "small_frame": true,
+    "family_scale": true,
+    "typical_live_weight_lbs": [550, 650, 750, 850],
+    "default_live_weight_lbs": 700,
+    "live_to_hanging_yield_pct": 0.58,
+    "hanging_to_carcass_yield_pct": 0.7,
+    "default_hanging_days": 7,
+    "butchery_style_default": "family-kitchen",
+    "butchery_supported_styles": [
+      "family-kitchen",
+      "bbq/smoking",
+      "low-waste",
+      "bulk-ground",
+      "halal/torah-compliant-no-unclean-cross-contamination"
+    ],
+    "torah_compliant_profile": {
+      "allow_unclean_animals": false,
+      "separate_tools_required": true,
+      "separate_surfaces_required": true,
+      "blood_draining_required": true,
+      "notes": "Use this when scheduling butchery inside a Torah-compliant, no-pork facility. Cleaning module should pick torah-safe cleaner sets."
+    }
+  },
+  "yield_model": {
+    "formula_hint": "carcass = live_weight * live_to_hanging_yield_pct * hanging_to_carcass_yield_pct",
+    "example": {
+      "live_weight_lbs": 700,
+      "live_to_hanging_yield_pct": 0.58,
+      "hanging_to_carcass_yield_pct": 0.7,
+      "calculated_hanging_weight_lbs": 406,
+      "calculated_carcass_weight_lbs": 284.2
+    },
+    "primal_breakdown_pct": {
+      "chuck": 0.25,
+      "rib": 0.08,
+      "loin": 0.15,
+      "round": 0.22,
+      "brisket": 0.06,
+      "plate_flank": 0.07,
+      "other_trim_fat_bones": 0.17
+    },
+    "retail_cut_defaults": [
+      {
+        "cut_id": "dexter_ground",
+        "label": "Ground Beef (Dexter)",
+        "source_primals": ["chuck", "round", "trim"],
+        "default_pct_of_carcass": 0.19,
+        "storehouse_section_hint": "Meat → Ground / Mince → Beef",
+        "mealplanner_tags": [
+          "family-quick",
+          "tacos",
+          "spaghetti",
+          "meat-sauce",
+          "batch-cookable"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "pressure-can"],
+        "cleaning_profile_ref": "meat_standard_sanitation"
+      },
+      {
+        "cut_id": "dexter_roast",
+        "label": "Dexter Pot Roast",
+        "source_primals": ["chuck"],
+        "default_pct_of_carcass": 0.055,
+        "storehouse_section_hint": "Meat → Roasts → Beef",
+        "mealplanner_tags": [
+          "slow-cooker",
+          "sabbath/feast",
+          "root-veg"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "smoke"],
+        "cleaning_profile_ref": "meat_heavy_sanitation"
+      },
+      {
+        "cut_id": "dexter_steak",
+        "label": "Dexter Family Steaks",
+        "source_primals": ["rib", "loin"],
+        "default_pct_of_carcass": 0.04,
+        "storehouse_section_hint": "Meat → Steaks → Family",
+        "mealplanner_tags": [
+          "grill",
+          "pan-sear",
+          "special-meal"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "vac-seal"],
+        "cleaning_profile_ref": "meat_standard_sanitation"
+      },
+      {
+        "cut_id": "dexter_brisket",
+        "label": "Dexter Brisket (smaller)",
+        "source_primals": ["brisket"],
+        "default_pct_of_carcass": 0.055,
+        "storehouse_section_hint": "Meat → Roasts → Brisket",
+        "mealplanner_tags": [
+          "smoke",
+          "event",
+          "holiday"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["smoke", "freeze"],
+        "cleaning_profile_ref": "meat_heavy_sanitation"
+      },
+      {
+        "cut_id": "dexter_stew",
+        "label": "Dexter Stew Meat",
+        "source_primals": ["chuck", "round"],
+        "default_pct_of_carcass": 0.06,
+        "storehouse_section_hint": "Meat → Stew / Curry",
+        "mealplanner_tags": [
+          "soups",
+          "curries",
+          "winter"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "pressure-can"],
+        "cleaning_profile_ref": "meat_standard_sanitation"
+      },
+      {
+        "cut_id": "dexter_soup_bones",
+        "label": "Soup / Marrow Bones (Dexter)",
+        "source_primals": ["other_trim_fat_bones"],
+        "default_pct_of_carcass": 0.035,
+        "storehouse_section_hint": "Meat → Bones / Broth Base",
+        "mealplanner_tags": [
+          "bone-broth",
+          "ramen-stock"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "roast-then-freeze"],
+        "cleaning_profile_ref": "meat_heavy_sanitation"
+      },
+      {
+        "cut_id": "dexter_organs",
+        "label": "Organs (Dexter)",
+        "source_primals": ["offal"],
+        "default_pct_of_carcass": 0.012,
+        "storehouse_section_hint": "Meat → Organs",
+        "mealplanner_tags": [
+          "nutrient-dense",
+          "pâté",
+          "dog-food"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "meat_heavy_sanitation"
+      }
+    ]
+  },
+  "storehouse_mapping": {
+    "purpose": "Map family-scale Dexter butchery output → storehouse goals & inventory execution.",
+    "sections": [
+      {
+        "id": "STH-MEAT-FRESH",
+        "label": "Meat → Fresh / Chilled",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "dexter_ground",
+          "dexter_roast",
+          "dexter_steak"
+        ],
+        "grocery_inspo": [
+          "Aldi → Fresh meat (small packs)",
+          "Lidl → Beef (small families)"
+        ]
+      },
+      {
+        "id": "STH-MEAT-FROZEN",
+        "label": "Meat → Frozen",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "dexter_ground",
+          "dexter_stew",
+          "dexter_brisket",
+          "dexter_soup_bones"
+        ],
+        "grocery_inspo": [
+          "Costco → but in single-family portioning",
+          "Farm freezer share"
+        ]
+      },
+      {
+        "id": "STH-MEAT-PRESERVED",
+        "label": "Meat → Preserved / Canned / Smoked",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "dexter_stew",
+          "dexter_soup_bones"
+        ],
+        "grocery_inspo": [
+          "Canned beef (Caribbean / African markets)",
+          "Homestead pantry – pressure-canned beef"
+        ]
+      }
+    ],
+    "reverse_generation_rules": [
+      {
+        "id": "RG-MEAL-TO-DEXTER",
+        "when_event": "mealplanner.requests.meat.beef.family",
+        "action": "estimate required beef → map to Dexter carcass → map to live animals → emit automation.schedule.request",
+        "notes": "This is the family-scale path. If user says ‘I only have a chest freezer’, pick Dexter instead of large-frame."
+      },
+      {
+        "id": "RG-STOREHOUSE-TO-BUTCHERY",
+        "when_event": "storehouse.goal.short.beef-dexter",
+        "action": "trigger animal.acquisition.plan('cattle-dexter') and butchery.session.generate"
+      }
+    ]
+  },
+  "meal_planner_hooks": {
+    "default_meal_templates": [
+      {
+        "id": "mt-dexter-ground-family",
+        "label": "Dexter Ground – Family Weeknight (2–3 meals)",
+        "uses_cuts": [
+          {
+            "cut_id": "dexter_ground",
+            "qty_lb": 2
+          }
+        ],
+        "suggested_sides": [
+          "rice",
+          "garden veg",
+          "bread"
+        ],
+        "garden_suggestions": [
+          "tomato",
+          "onion",
+          "bell pepper",
+          "leafy greens"
+        ],
+        "cleaning_profiles": [
+          "meat_standard_sanitation"
+        ]
+      },
+      {
+        "id": "mt-dexter-roast-rootveg",
+        "label": "Dexter Roast w/ Root Veg",
+        "uses_cuts": [
+          {
+            "cut_id": "dexter_roast",
+            "qty_lb": 3
+          }
+        ],
+        "suggested_sides": [
+          "roasted carrots",
+          "potatoes or sweet potatoes",
+          "greens"
+        ],
+        "garden_suggestions": [
+          "carrot",
+          "potato",
+          "onion",
+          "garlic",
+          "kale/collards"
+        ],
+        "cleaning_profiles": [
+          "meat_heavy_sanitation",
+          "oven_tray_deep_clean"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "can_generate_animal_plan": true,
+      "handler_event": "animal.plan.requested",
+      "notes": "When a family locks in 8–10 lb beef for the month and has small cold storage, ask Dexter first."
+    }
+  },
+  "garden_integration": {
+    "purpose": "Connect Dexter beef meals to home garden crops, especially for small households.",
+    "crops_to_recommend": [
+      {
+        "crop": "tomato",
+        "use_case": "sauce for ground beef pasta",
+        "harvest_window": "summer",
+        "preservation": ["can", "freeze"],
+        "cleaning_profile_ref": "garden_light"
+      },
+      {
+        "crop": "onion",
+        "use_case": "base for roasts/stews",
+        "harvest_window": "late summer",
+        "preservation": ["cure", "store dry"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "carrot",
+        "use_case": "roast side, soup, broth",
+        "harvest_window": "spring-fall (succession)",
+        "preservation": ["pressure can", "dehydrate"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "greens",
+        "use_case": "side dish to beef meals",
+        "harvest_window": "cool seasons",
+        "preservation": ["blanch-freeze"],
+        "cleaning_profile_ref": "garden_light"
+      }
+    ],
+    "reverse_generation": {
+      "when_meat_menu_fixed_event": "garden.plan.adjust.requested",
+      "notes": "If family chooses Dexter roast + stew often, schedule onions/carrots in garden and send harvest window to calendar."
+    }
+  },
+  "animal_care_and_butchery": {
+    "pre_slaughter_care_checklist": [
+      "fasting_window_8hr",
+      "fresh_water_available",
+      "low_stress_handling",
+      "inspect_for_disease",
+      "torah_compliant_tools_ready"
+    ],
+    "butchery_session_template": {
+      "id": "butchery-session-cattle-dexter",
+      "label": "Dexter – Family-Scale Butchery",
+      "estimated_duration_hours": 4,
+      "roles_needed": [
+        "primary-butcher",
+        "assistant",
+        "sanitation-runner"
+      ],
+      "outputs": [
+        "primal_cuts",
+        "retail_cuts",
+        "bones",
+        "offal",
+        "rendering_fat"
+      ],
+      "emits_events": [
+        "inventory.add.requested",
+        "storehouse.update.requested",
+        "cleaning.plan.requested",
+        "mealplan.refresh.requested",
+        "garden.plan.adjust.requested"
+      ],
+      "scheduling": {
+        "supports_user_favorites": true,
+        "supports_recurring": true,
+        "supports_coop_mode": true,
+        "coop_mode_notes": "Co-op households can each bring 1 Dexter; output is manageable for each freezer."
+      }
+    },
+    "cleaning_after_butchery": {
+      "cleaning_profile_id": "meat_heavy_sanitation",
+      "label": "Post-Butchery Heavy Sanitation",
+      "tasks": [
+        "collect offal / byproducts for compost or render (if allowed)",
+        "wash food-contact surfaces",
+        "sanitize with torah-safe cleaner",
+        "mop floor",
+        "launder aprons/towels"
+      ],
+      "emits_events": [
+        "cleaning.log.added",
+        "inventory.cleaning-supplies.decrement"
+      ]
+    }
+  },
+  "cleaning_integration": {
+    "profiles": [
+      {
+        "id": "meat_heavy_sanitation",
+        "label": "Meat – Heavy Sanitation",
+        "zone": "Kitchen / Butchery Area",
+        "supplies": [
+          "hot_water",
+          "food_safe_disinfectant",
+          "scrub_brush",
+          "mop_bucket",
+          "laundry_detergent"
+        ]
+      },
+      {
+        "id": "meat_standard_sanitation",
+        "label": "Meat – Standard Sanitation",
+        "zone": "Kitchen",
+        "supplies": [
+          "dish_soap",
+          "surface_spray",
+          "towels"
+        ]
+      },
+      {
+        "id": "garden_root",
+        "label": "Garden Root Veg Cleanup",
+        "zone": "Utility / Outdoor Sink",
+        "supplies": [
+          "hose",
+          "brush",
+          "drain_screens"
+        ]
+      },
+      {
+        "id": "garden_light",
+        "label": "Garden Light Wash",
+        "zone": "Kitchen",
+        "supplies": [
+          "sink_sanitizer",
+          "drying_rack"
+        ]
+      },
+      {
+        "id": "oven_tray_deep_clean",
+        "label": "Oven/Tray Deep Clean (post-roast)",
+        "zone": "Kitchen",
+        "supplies": [
+          "degreaser",
+          "scrub_pad"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "when_butchery_scheduled_event": "cleaning.session.auto-created",
+      "when_heavy_meat_meal_event": "cleaning.session.suggested"
+    }
+  },
+  "scheduling_and_favorites": {
+    "can_be_favorited": true,
+    "favorite_key": "yieldcurve:meat:cattle_dexter",
+    "suggested_schedules": [
+      {
+        "id": "sched-dexter-spring",
+        "label": "Dexter Butchery – Spring",
+        "rule": "FREQ=YEARLY;BYMONTH=4;BYDAY=SA;BYSETPOS=2",
+        "creates": [
+          "butchery-session-cattle-dexter",
+          "cleaning:meat_heavy_sanitation",
+          "storehouse:update",
+          "mealplan:refresh"
+        ]
+      },
+      {
+        "id": "sched-dexter-quarter",
+        "label": "Dexter Every Quarter",
+        "rule": "FREQ=MONTHLY;INTERVAL=3;BYDAY=SA;BYSETPOS=2",
+        "creates": [
+          "butchery-session-cattle-dexter"
+        ]
+      }
+    ],
+    "shared_orchestration": {
+      "event_bus_path": "window.__suka.eventBus",
+      "events_emitted": [
+        "yieldcurve.loaded",
+        "yieldcurve.butchery.session.generated",
+        "storehouse.goal.derived",
+        "cleaning.session.derived",
+        "mealplan.refresh.requested",
+        "garden.plan.adjust.requested"
+      ],
+      "events_listened_for": [
+        "automation.schedule.request",
+        "mealplanner.menu.locked",
+        "storehouse.goal.short",
+        "garden.plan.adjust.requested"
+      ]
+    }
+  },
+  "reverse_generation": {
+    "enabled": true,
+    "scenarios": [
+      {
+        "id": "RG-DEX-01",
+        "source": "meal-planner",
+        "input_example": {
+          "dexter_ground_lb": 10,
+          "dexter_roast_lb": 6
+        },
+        "output_example": {
+          "required_carcass_lb": 100,
+          "required_live_animals": 1,
+          "suggested_date": "next-available-family-weekend",
+          "auto_cleaning_sessions": [
+            "meat_heavy_sanitation"
+          ]
+        }
+      },
+      {
+        "id": "RG-DEX-02",
+        "source": "storehouse",
+        "input_example": {
+          "target_section": "STH-MEAT-FROZEN",
+          "target_lb": 120
+        },
+        "output_example": {
+          "required_carcass_lb": 170,
+          "required_live_animals": 1,
+          "notes": "170 is example; app should recalc from actual Dexter yield."
+        }
+      }
+    ],
+    "notes": "Because Dexters are small, reverse generation is more likely to result in 1 animal per event, which is more comfortable for new households. UI should highlight that."
+  },
+  "user_overrides_placeholder": {
+    "explanation": "User-specific data belongs in Dexie/local DB.",
+    "keys": [
+      "animal.live_to_hanging_yield_pct",
+      "animal.hanging_to_carcass_yield_pct",
+      "yield_model.retail_cut_defaults",
+      "scheduling_and_favorites.suggested_schedules"
+    ]
+  },
+  "interop": {
+    "import_sources_supported": [
+      "csv-butchery-yields",
+      "google-sheets-yields",
+      "extension.capture.butchery",
+      "pinterest-board-to-planner",
+      "recipe-site-beef-detector"
+    ],
+    "export_targets_supported": [
+      "household.storehouse",
+      "household.inventory",
+      "community.coop-planner",
+      "family-fund.hub",
+      "pdf-labels"
+    ]
+  }
+}

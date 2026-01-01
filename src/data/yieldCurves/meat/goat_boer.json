@@ -1,0 +1,570 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "2025-10-31T14:25:00-05:00",
+  "description": "Meat yield curve for meat goat – Boer. This variant is for warm-zone presets (Gulf Coast, Caribbean, West/Central Africa, Sahel-adjacent) so it ties into your garden (peppers, okra, tomatoes), storehouse (frozen goat chunks, curry packs), meal planner (pepper soup, curry goat, grilled goat), cleaning (goat/butchery sanitation, grill clean), and shared orchestration (event bus). It supports user-favoriteable sessions/schedules via Dexie and supports reverse generation so storehouse or meal requests can produce animal acquisition + butchery jobs.",
+  "__notes": [
+    "Boer is usually a bit bigger and meatier than Kiko in smallholder contexts, so we bump default live weight and slightly better hanging yield.",
+    "Pattern stays aligned with your other yieldCurves so ImportService.js / ImportSettings.jsx won’t have to special-case Boer.",
+    "This file is system-level. Let users save their own ‘Goat – Curry Pack’ or ‘Goat – Feast Day’ templates in Dexie.",
+    "Torah-compliant profile is included so your USDA-Torah facility configuration can filter out unclean sequences."
+  ],
+  "animal": {
+    "species": "goat",
+    "breed": "Boer",
+    "class": "chevon/goat",
+    "meat_goat": true,
+    "warm_zone_preset": true,
+    "typical_live_weight_lbs": [90, 105, 125, 145],
+    "default_live_weight_lbs": 110,
+    "live_to_hanging_yield_pct": 0.5,
+    "hanging_to_carcass_yield_pct": 0.72,
+    "default_hanging_days": 2,
+    "butchery_style_default": "whole-or-primal-goat",
+    "butchery_supported_styles": [
+      "whole-or-primal-goat",
+      "stew-heavy",
+      "roast/BBQ",
+      "halal/torah-compliant-no-unclean-cross-contamination"
+    ],
+    "torah_compliant_profile": {
+      "allow_unclean_animals": false,
+      "separate_tools_required": true,
+      "separate_surfaces_required": true,
+      "blood_draining_required": true,
+      "notes": "Same rules as Kiko, but you can attach a ‘Boer only’ cleaning profile if you want heavier post-butchery sanitation."
+    }
+  },
+  "yield_model": {
+    "formula_hint": "carcass = live_weight * live_to_hanging_yield_pct * hanging_to_carcass_yield_pct",
+    "example": {
+      "live_weight_lbs": 110,
+      "live_to_hanging_yield_pct": 0.5,
+      "hanging_to_carcass_yield_pct": 0.72,
+      "calculated_hanging_weight_lbs": 55,
+      "calculated_carcass_weight_lbs": 39.6
+    },
+    "primal_breakdown_pct": {
+      "leg": 0.24,
+      "shoulder": 0.21,
+      "loin": 0.11,
+      "rib_breast": 0.09,
+      "neck_shank_trim": 0.11,
+      "fat_bones_other": 0.24
+    },
+    "retail_cut_defaults": [
+      {
+        "cut_id": "boer_leg",
+        "label": "Boer Goat Leg (whole/half)",
+        "source_primals": ["leg"],
+        "default_pct_of_carcass": 0.15,
+        "storehouse_section_hint": "Meat → Goat → Roasts / Pepper Soup",
+        "mealplanner_tags": [
+          "feast",
+          "holiday",
+          "sabbath",
+          "pepper-soup",
+          "roast-goat"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "marinate-freeze"],
+        "cleaning_profile_ref": "goat_meat_sanitation"
+      },
+      {
+        "cut_id": "boer_shoulder",
+        "label": "Boer Goat Shoulder (roast or stew)",
+        "source_primals": ["shoulder"],
+        "default_pct_of_carcass": 0.13,
+        "storehouse_section_hint": "Meat → Goat → Roasts / Stew",
+        "mealplanner_tags": [
+          "goat-stew",
+          "jollof-meat",
+          "curry-goat",
+          "tagine"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "pressure-can"],
+        "cleaning_profile_ref": "goat_meat_sanitation"
+      },
+      {
+        "cut_id": "boer_curry_cubes",
+        "label": "Boer Curry / Stew Cubes",
+        "source_primals": ["shoulder", "neck_shank_trim"],
+        "default_pct_of_carcass": 0.15,
+        "storehouse_section_hint": "Meat → Goat → Stew / Curry",
+        "mealplanner_tags": [
+          "curry-goat",
+          "pepper-soup",
+          "stew",
+          "goat-and-okra"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "pressure-can"],
+        "cleaning_profile_ref": "goat_meat_sanitation"
+      },
+      {
+        "cut_id": "boer_ribs_breast",
+        "label": "Boer Ribs / Breast (grill/smoke)",
+        "source_primals": ["rib_breast"],
+        "default_pct_of_carcass": 0.085,
+        "storehouse_section_hint": "Meat → Goat → Grill/Smoke",
+        "mealplanner_tags": [
+          "grill",
+          "bbq",
+          "smoker",
+          "braai"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "goat_meat_sanitation"
+      },
+      {
+        "cut_id": "boer_ground",
+        "label": "Ground Boer (sausages/mixed dishes)",
+        "source_primals": ["trim", "neck_shank_trim"],
+        "default_pct_of_carcass": 0.09,
+        "storehouse_section_hint": "Meat → Goat → Ground / Sausage",
+        "mealplanner_tags": [
+          "sausages",
+          "meatballs",
+          "mixed-mince"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "goat_meat_sanitation"
+      },
+      {
+        "cut_id": "boer_bones",
+        "label": "Boer Bones (stock / pepper-soup base)",
+        "source_primals": ["fat_bones_other"],
+        "default_pct_of_carcass": 0.07,
+        "storehouse_section_hint": "Meat → Bones / Broth Base",
+        "mealplanner_tags": [
+          "pepper-soup",
+          "broth",
+          "ramen-stock"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "roast-then-freeze"],
+        "cleaning_profile_ref": "goat_meat_sanitation"
+      },
+      {
+        "cut_id": "boer_organs",
+        "label": "Boer Organs (liver, heart, kidney)",
+        "source_primals": ["offal"],
+        "default_pct_of_carcass": 0.03,
+        "storehouse_section_hint": "Meat → Goat → Organs",
+        "mealplanner_tags": [
+          "nutrient-dense",
+          "traditional"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "goat_meat_sanitation"
+      }
+    ]
+  },
+  "storehouse_mapping": {
+    "purpose": "Map Boer goat output → storehouse goals & inventory execution (family + co-op).",
+    "sections": [
+      {
+        "id": "STH-BOER-FRESH",
+        "label": "Meat → Boer Goat → Fresh / Chilled",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "boer_leg",
+          "boer_shoulder"
+        ],
+        "grocery_inspo": [
+          "West African butcher – fresh goat",
+          "Caribbean grocery – fresh goat"
+        ]
+      },
+      {
+        "id": "STH-BOER-FROZEN",
+        "label": "Meat → Boer Goat → Frozen",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "boer_curry_cubes",
+          "boer_ground",
+          "boer_ribs_breast",
+          "boer_bones"
+        ],
+        "grocery_inspo": [
+          "Restaurant supply – frozen goat chunks",
+          "Ethnic markets – frozen goat"
+        ]
+      },
+      {
+        "id": "STH-BOER-PRESERVED",
+        "label": "Meat → Boer Goat → Preserved / Canned / Smoked",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "boer_curry_cubes",
+          "boer_bones"
+        ],
+        "grocery_inspo": [
+          "West African pantry – smoked meats",
+          "Caribbean stewed/canned goat"
+        ]
+      }
+    ],
+    "reverse_generation_rules": [
+      {
+        "id": "RG-BOER-FEAST",
+        "when_event": "mealplanner.requests.meat.goat.boer.feast",
+        "action": "estimate feast portions → map to Boer legs + shoulders → map to live goats → emit automation.schedule.request (butchery + cleaning + storehouse)",
+        "notes": "Use this when your Feast / Sukkot / Hanukkah-as-original demands goat instead of lamb."
+      },
+      {
+        "id": "RG-BOER-STOREHOUSE",
+        "when_event": "storehouse.goal.short.boer-curry",
+        "action": "trigger animal.acquisition.plan('goat-boer') and boer-butchery.session.generate"
+      }
+    ]
+  },
+  "meal_planner_hooks": {
+    "default_meal_templates": [
+      {
+        "id": "mt-boer-pepper-soup",
+        "label": "Boer Goat Pepper Soup",
+        "uses_cuts": [
+          {
+            "cut_id": "boer_curry_cubes",
+            "qty_lb": 2.5
+          },
+          {
+            "cut_id": "boer_bones",
+            "qty_lb": 1
+          }
+        ],
+        "suggested_sides": [
+          "rice",
+          "yam",
+          "plantain"
+        ],
+        "garden_suggestions": [
+          "hot_pepper",
+          "tomato",
+          "onion",
+          "garlic"
+        ],
+        "cleaning_profiles": [
+          "goat_meat_sanitation"
+        ]
+      },
+      {
+        "id": "mt-boer-curry",
+        "label": "Curry Goat (Boer, Caribbean style)",
+        "uses_cuts": [
+          {
+            "cut_id": "boer_curry_cubes",
+            "qty_lb": 3
+          }
+        ],
+        "suggested_sides": [
+          "rice and peas",
+          "roti",
+          "salad"
+        ],
+        "garden_suggestions": [
+          "scotch_bonnet_or_hot_pepper",
+          "onion",
+          "garlic",
+          "thyme"
+        ],
+        "cleaning_profiles": [
+          "goat_meat_sanitation"
+        ]
+      },
+      {
+        "id": "mt-boer-grill",
+        "label": "Grilled/Smoked Boer Goat (Event)",
+        "uses_cuts": [
+          {
+            "cut_id": "boer_ribs_breast",
+            "qty_lb": 3.5
+          }
+        ],
+        "suggested_sides": [
+          "fermented veg",
+          "salad",
+          "flatbread"
+        ],
+        "garden_suggestions": [
+          "pepper (sweet/hot)",
+          "leafy_greens",
+          "cucumber"
+        ],
+        "cleaning_profiles": [
+          "goat_meat_sanitation",
+          "grill_clean"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "can_generate_animal_plan": true,
+      "handler_event": "animal.plan.requested",
+      "notes": "If user pins 3 Boer curries + 1 pepper soup in same warm month, emit this so Animals module can propose 1 Boer goat (110 lb live), plus post-butchery cleaning."
+    }
+  },
+  "garden_integration": {
+    "purpose": "Connect Boer goat meals to hot-climate garden crops so the meal planner can ‘bring in’ what goat dishes need from the garden.",
+    "crops_to_recommend": [
+      {
+        "crop": "hot_pepper",
+        "use_case": "pepper soup, curry goat",
+        "harvest_window": "summer-fall",
+        "preservation": ["dry", "ferment", "freeze"],
+        "cleaning_profile_ref": "garden_light"
+      },
+      {
+        "crop": "tomato",
+        "use_case": "stew/curry base",
+        "harvest_window": "summer",
+        "preservation": ["can", "freeze"],
+        "cleaning_profile_ref": "garden_light"
+      },
+      {
+        "crop": "onion",
+        "use_case": "base aromatics",
+        "harvest_window": "late summer",
+        "preservation": ["cure", "store dry"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "garlic",
+        "use_case": "curry, marinade",
+        "harvest_window": "mid-summer",
+        "preservation": ["dry", "powder"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "okra",
+        "use_case": "goat & okra stew",
+        "harvest_window": "summer-long",
+        "preservation": ["freeze", "dry"],
+        "cleaning_profile_ref": "garden_light"
+      }
+    ],
+    "reverse_generation": {
+      "when_meat_menu_fixed_event": "garden.plan.adjust.requested",
+      "notes": "If Boer goat is heavy in the warm-season menu, garden should schedule peppers, okra, tomatoes and send harvest to calendar."
+    }
+  },
+  "animal_care_and_butchery": {
+    "pre_slaughter_care_checklist": [
+      "fasting_window_6hr",
+      "clean_water_available",
+      "shade/low_stress_handling",
+      "inspect_for_disease_parasites",
+      "torah_compliant_tools_ready"
+    ],
+    "butchery_session_template": {
+      "id": "butchery-session-goat-boer",
+      "label": "Boer Goat – Household / Co-op Butchery",
+      "estimated_duration_hours": 1.75,
+      "roles_needed": [
+        "primary-butcher",
+        "assistant",
+        "sanitation-runner"
+      ],
+      "outputs": [
+        "whole_or_halves",
+        "retail_cuts",
+        "bones",
+        "offal",
+        "fat_for_rendering"
+      ],
+      "emits_events": [
+        "inventory.add.requested",
+        "storehouse.update.requested",
+        "cleaning.plan.requested",
+        "mealplan.refresh.requested",
+        "garden.plan.adjust.requested"
+      ],
+      "scheduling": {
+        "supports_user_favorites": true,
+        "supports_recurring": true,
+        "supports_coop_mode": true,
+        "coop_mode_notes": "Multiple households can each bring 1 Boer; sanitation task must scale according to headcount."
+      }
+    },
+    "cleaning_after_butchery": {
+      "cleaning_profile_id": "goat_meat_sanitation",
+      "label": "Post-Boer Butchery Sanitation",
+      "tasks": [
+        "bag offal / byproducts for compost/render/blood-meal",
+        "wash all tables, knives, tubs",
+        "sanitize with torah-safe cleaner",
+        "mop floor",
+        "launder aprons/towels"
+      ],
+      "emits_events": [
+        "cleaning.log.added",
+        "inventory.cleaning-supplies.decrement"
+      ]
+    }
+  },
+  "cleaning_integration": {
+    "profiles": [
+      {
+        "id": "goat_meat_sanitation",
+        "label": "Goat – Meat Sanitation",
+        "zone": "Kitchen / Butchery Area",
+        "supplies": [
+          "hot_water",
+          "food_safe_disinfectant",
+          "scrub_brush",
+          "mop_bucket",
+          "laundry_detergent"
+        ]
+      },
+      {
+        "id": "meat_standard_sanitation",
+        "label": "Meat – Standard Sanitation",
+        "zone": "Kitchen",
+        "supplies": [
+          "dish_soap",
+          "surface_spray",
+          "towels"
+        ]
+      },
+      {
+        "id": "garden_root",
+        "label": "Garden Root Veg Cleanup",
+        "zone": "Utility / Outdoor Sink",
+        "supplies": [
+          "hose",
+          "brush",
+          "drain_screens"
+        ]
+      },
+      {
+        "id": "garden_light",
+        "label": "Garden Light Wash",
+        "zone": "Kitchen",
+        "supplies": [
+          "sink_sanitizer",
+          "drying_rack"
+        ]
+      },
+      {
+        "id": "grill_clean",
+        "label": "Grill / Smoker Clean (after Boer grill)",
+        "zone": "Outdoor Cooking",
+        "supplies": [
+          "grill_brush",
+          "ash_disposal",
+          "degreaser"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "when_butchery_scheduled_event": "cleaning.session.auto-created",
+      "when_boer_grill_event": "cleaning.session.suggested"
+    }
+  },
+  "scheduling_and_favorites": {
+    "can_be_favorited": true,
+    "favorite_key": "yieldcurve:meat:goat_boer",
+    "suggested_schedules": [
+      {
+        "id": "sched-boer-feast-warm",
+        "label": "Boer – Warm Season Feast",
+        "rule": "FREQ=YEARLY;BYMONTH=5;BYDAY=SA;BYSETPOS=2",
+        "creates": [
+          "butchery-session-goat-boer",
+          "cleaning:goat_meat_sanitation",
+          "storehouse:update",
+          "mealplan:refresh",
+          "garden.plan.adjust.requested"
+        ]
+      },
+      {
+        "id": "sched-boer-quarter",
+        "label": "Boer Every Quarter",
+        "rule": "FREQ=MONTHLY;INTERVAL=3;BYDAY=SA;BYSETPOS=2",
+        "creates": [
+          "butchery-session-goat-boer"
+        ]
+      }
+    ],
+    "shared_orchestration": {
+      "event_bus_path": "window.__suka.eventBus",
+      "events_emitted": [
+        "yieldcurve.loaded",
+        "yieldcurve.butchery.session.generated",
+        "storehouse.goal.derived",
+        "cleaning.session.derived",
+        "mealplan.refresh.requested",
+        "garden.plan.adjust.requested"
+      ],
+      "events_listened_for": [
+        "automation.schedule.request",
+        "mealplanner.menu.locked",
+        "storehouse.goal.short",
+        "garden.plan.adjust.requested"
+      ]
+    }
+  },
+  "reverse_generation": {
+    "enabled": true,
+    "scenarios": [
+      {
+        "id": "RG-BOER-01",
+        "source": "meal-planner",
+        "input_example": {
+          "boer_curry_meals": 3,
+          "boer_pepper_soup_events": 1
+        },
+        "output_example": {
+          "required_carcass_lb": 85,
+          "required_live_goats": 2,
+          "suggested_date": "next-available-weekend-slot",
+          "auto_cleaning_sessions": [
+            "goat_meat_sanitation"
+          ]
+        }
+      },
+      {
+        "id": "RG-BOER-02",
+        "source": "storehouse",
+        "input_example": {
+          "target_section": "STH-BOER-FROZEN",
+          "target_lb": 60
+        },
+        "output_example": {
+          "required_carcass_lb": 90,
+          "required_live_goats": 2,
+          "notes": "2 Boers at ~40–45 lb carcass each ≈ 80–90 lb; app should recalc from actual yield."
+        }
+      }
+    ],
+    "notes": "Expose a ‘Generate Boer Butchery Day’ action in UI and auto-add cleaning + garden adjustments."
+  },
+  "user_overrides_placeholder": {
+    "explanation": "User-specific edits (more curry cubes, smaller grill pack, different schedule) go to Dexie/local DB.",
+    "keys": [
+      "animal.live_to_hanging_yield_pct",
+      "animal.hanging_to_carcass_yield_pct",
+      "yield_model.retail_cut_defaults",
+      "scheduling_and_favorites.suggested_schedules"
+    ]
+  },
+  "interop": {
+    "import_sources_supported": [
+      "csv-butchery-yields",
+      "google-sheets-yields",
+      "extension.capture.butchery",
+      "pinterest-board-to-planner",
+      "recipe-site-goat-detector"
+    ],
+    "export_targets_supported": [
+      "household.storehouse",
+      "household.inventory",
+      "community.coop-planner",
+      "family-fund.hub",
+      "pdf-labels"
+    ]
+  }
+}

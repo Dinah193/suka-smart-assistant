@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "/schemas/planningGraph/domains.schema.json",
+  "title": "Planning Graph Domains Definition",
+  "description": "Schema for grouping Planning Graph nodes into logical domains (health, storehouse, garden, calendar, stability) for UI layout and scoring/weighting.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "lastUpdated", "domains"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional JSON Schema declaration for tooling. This is allowed in config files so VS Code can locate this schema.",
+      "format": "uri-reference"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Incrementing schema version for the domains config file."
+    },
+    "lastUpdated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of the last update to this domains mapping."
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional human-readable description of this domains config."
+    },
+    "domains": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Logical groupings of Planning Graph nodes for UI and scoring.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "shortLabel",
+          "description",
+          "weight",
+          "ui",
+          "nodes"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]*$",
+            "description": "Stable machine id for the domain (e.g., 'health', 'storehouse')."
+          },
+          "label": {
+            "type": "string",
+            "description": "Full display label for the domain (e.g., 'Health & Nutrition')."
+          },
+          "shortLabel": {
+            "type": "string",
+            "description": "Compact label for chips, tabs, or tight UI (e.g., 'Health')."
+          },
+          "description": {
+            "type": "string",
+            "description": "Narrative description of what this domain represents."
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Relative weight for scoring/aggregation. Does not have to sum to 1, but is treated proportionally."
+          },
+          "ui": {
+            "type": "object",
+            "description": "UI hints for dashboards and visualizations.",
+            "required": ["accentColor", "icon"],
+            "additionalProperties": true,
+            "properties": {
+              "accentColor": {
+                "type": "string",
+                "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$",
+                "description": "Hex color used for charts, badges, and emphasis for this domain."
+              },
+              "icon": {
+                "type": "string",
+                "description": "Icon token/name used by the icon system (e.g., 'heart-beat', 'warehouse')."
+              }
+            }
+          },
+          "nodes": {
+            "type": "array",
+            "description": "List of Planning Graph node ids that belong to this domain.",
+            "items": {
+              "type": "string",
+              "pattern": "^node\\.[a-zA-Z0-9_.-]+$",
+              "description": "Planning Graph node id (e.g., 'node.health.bmi')."
+            }
+          },
+          "meta": {
+            "type": "object",
+            "description": "Optional arbitrary metadata for this domain (e.g., sorting priority, feature flags, score caps).",
+            "additionalProperties": true
+          }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "version": 1,
+      "lastUpdated": "2025-11-26T00:00:00.000Z",
+      "description": "Groups Planning Graph nodes into logical domains (health, storehouse, garden, calendar, stability) for UI layout and scoring/weighting.",
+      "domains": [
+        {
+          "id": "health",
+          "label": "Health & Nutrition",
+          "shortLabel": "Health",
+          "description": "Body-level health, nutrition, and resilience scores that drive energy, hair/skin, and long-term stability.",
+          "weight": 0.25,
+          "ui": {
+            "accentColor": "#7C3AED",
+            "icon": "heart-beat"
+          },
+          "nodes": [
+            "node.health.bmi",
+            "node.health.dailyEnergyRequirement",
+            "node.health.dailyMicronutrientRequirement",
+            "node.health.hairNutritionScore"
+          ]
+        }
+      ]
+    }
+  ]
+}

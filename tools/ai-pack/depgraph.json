@@ -1,0 +1,1073 @@
+{
+  "meta": {
+    "name": "Suka Smart Assistant – Dependency Graph",
+    "version": "1.0.0",
+    "generatedAt": "2025-10-29T16:00:00Z",
+    "notes": [
+      "SVFFH app is NOT included. Only entitlement-based gating remains via SVFFHAuthBridge ➜ SVFFHClaims ➜ EntitlementFlags.",
+      "Graph groups by clusters (UI, Features, Engines, Managers, Services, Stores, DB, External, Identity, Orchestration).",
+      "Edges carry semantics (event, schedule, read, write, sync, import, export, gate)."
+    ]
+  },
+  "legend": {
+    "types": {
+      "page": { "color": "#EEF2FF" },
+      "feature": { "color": "#F0FDFA" },
+      "engine": { "color": "#FFF7ED" },
+      "manager": { "color": "#FEF3C7" },
+      "service": { "color": "#F3F4F6" },
+      "store": { "color": "#ECFCCB" },
+      "orchestration": { "color": "#FFE4E6" },
+      "db": { "color": "#FAE8FF" },
+      "external": { "color": "#E0F2FE" },
+      "identity": { "color": "#F3F4F6" }
+    },
+    "edgeKinds": [
+      "dispatch",
+      "emit",
+      "schedule",
+      "run",
+      "delegate",
+      "read",
+      "write",
+      "sync",
+      "import",
+      "export",
+      "validate",
+      "seed",
+      "subscribe",
+      "enrich",
+      "compare",
+      "learn",
+      "map",
+      "gate",
+      "enable"
+    ]
+  },
+  "clusters": [
+    { "id": "orch", "label": "Automation & Orchestration" },
+    { "id": "ui", "label": "UI / Pages" },
+    { "id": "features", "label": "Features" },
+    { "id": "engines", "label": "Engines" },
+    { "id": "managers", "label": "Managers" },
+    { "id": "services", "label": "Domain Services" },
+    { "id": "stores", "label": "State Stores" },
+    { "id": "db", "label": "Data & DB" },
+    { "id": "external", "label": "External Integrations" },
+    { "id": "identity", "label": "Identity & Entitlements" }
+  ],
+  "nodes": [
+    {
+      "id": "eventBus",
+      "label": "eventBus",
+      "type": "orchestration",
+      "cluster": "orch",
+      "path": "@/services/eventBus",
+      "tags": ["events", "pubsub"]
+    },
+    {
+      "id": "automationRuntime",
+      "label": "automation/runtime.js",
+      "type": "orchestration",
+      "cluster": "orch",
+      "path": "@/services/automation/runtime.js",
+      "tags": ["event-driven", "local", "sabbath-guardable"]
+    },
+    {
+      "id": "relativeScheduler",
+      "label": "RelativeScheduler",
+      "type": "orchestration",
+      "cluster": "orch",
+      "path": "@/services/schedule/RelativeScheduler",
+      "tags": ["recurring", "offsets", "ics"]
+    },
+    {
+      "id": "sessionRunner",
+      "label": "SessionRunner",
+      "type": "orchestration",
+      "cluster": "orch",
+      "path": "@/services/session/SessionRunner",
+      "tags": ["sessions", "start-pause-resume-undo"]
+    },
+    {
+      "id": "prepSessionOrchestrator",
+      "label": "PrepSessionOrchestrator",
+      "type": "orchestration",
+      "cluster": "orch",
+      "path": "@/services/session/PrepSessionOrchestrator",
+      "tags": ["cooking", "cleaning", "gardening"]
+    },
+    {
+      "id": "guards",
+      "label": "Guards (Sabbath/Quiet/Weather/Inventory)",
+      "type": "orchestration",
+      "cluster": "orch",
+      "path": "@/services/session/guards/*",
+      "tags": ["policy", "availability"]
+    },
+    {
+      "id": "nbaOrchestrator",
+      "label": "NBA Orchestrator",
+      "type": "orchestration",
+      "cluster": "orch",
+      "path": "@/services/nba/Orchestrator",
+      "tags": ["next-best-action"]
+    },
+    {
+      "id": "planStorageRouter",
+      "label": "PlanStorageRouter",
+      "type": "orchestration",
+      "cluster": "orch",
+      "path": "@/services/storage/PlanStorageRouter",
+      "tags": ["local", "cloud", "export"]
+    },
+    {
+      "id": "dexieDB",
+      "label": "DexieDB (@/db)",
+      "type": "db",
+      "cluster": "db",
+      "path": "@/db",
+      "tags": ["indexeddb", "persistence"]
+    },
+    {
+      "id": "tables",
+      "label": "tables: inventory/supplies/batches/plans/sessions/coupons/pricebook/recipes/gardens/animals/tags",
+      "type": "db",
+      "cluster": "db",
+      "path": "@/db/tables",
+      "tags": ["schema"]
+    },
+    {
+      "id": "filesSchemas",
+      "label": "/schemas/*.json",
+      "type": "db",
+      "cluster": "db",
+      "path": "/schemas",
+      "tags": ["contracts"]
+    },
+    {
+      "id": "filesFixtures",
+      "label": "fixtures/*",
+      "type": "db",
+      "cluster": "db",
+      "path": "@/features/**/data/fixtures",
+      "tags": ["seed"]
+    },
+    {
+      "id": "productResolver",
+      "label": "ProductResolver",
+      "type": "service",
+      "cluster": "services",
+      "path": "@/features/scan-compare-trust/services/products/ProductResolver.js",
+      "tags": ["normalize", "providers"]
+    },
+    {
+      "id": "couponService",
+      "label": "CouponService",
+      "type": "service",
+      "cluster": "services",
+      "path": "@/features/scan-compare-trust/services/coupons/CouponService.js",
+      "tags": ["stacking", "providers"]
+    },
+    {
+      "id": "storeCatalogAdapters",
+      "label": "StoreCatalogAdapters",
+      "type": "service",
+      "cluster": "services",
+      "path": "@/features/scan-compare-trust/services/pricing/StoreCatalogAdapters.js",
+      "tags": ["walmart", "kroger", "costco", "sams", "aldi"]
+    },
+    {
+      "id": "cycleAnalyzer",
+      "label": "CycleAnalyzer",
+      "type": "service",
+      "cluster": "services",
+      "path": "@/features/scan-compare-trust/services/coupons/CycleAnalyzer.js",
+      "tags": ["discount-cadence", "learning"]
+    },
+    {
+      "id": "priceComparator",
+      "label": "PriceComparator",
+      "type": "service",
+      "cluster": "services",
+      "path": "@/features/scan-compare-trust/services/pricing/PriceComparator.js",
+      "tags": ["unit-math", "pack-math"]
+    },
+    {
+      "id": "ocrWorker",
+      "label": "OCR Worker (Tesseract)",
+      "type": "service",
+      "cluster": "services",
+      "path": "@/features/scan-compare-trust/services/workers/ocr.worker.js",
+      "tags": ["web-worker", "ocr"]
+    },
+    {
+      "id": "safetyRules",
+      "label": "Safety/Allergen Rules",
+      "type": "service",
+      "cluster": "services",
+      "path": "@/features/scan-compare-trust/services/safety/SafetyRules.js",
+      "tags": ["recalls", "ingredients"]
+    },
+    {
+      "id": "calendarMapper",
+      "label": "Calendar Mapping Engine",
+      "type": "service",
+      "cluster": "services",
+      "path": "@/services/calendar/CalendarMapper.js",
+      "tags": ["hebrew", "gregorian", "astronomy"]
+    },
+    {
+      "id": "exporters",
+      "label": "Exporters (PDF/CSV/ICS)",
+      "type": "service",
+      "cluster": "services",
+      "path": "@/services/export/*",
+      "tags": ["pdf", "csv", "ics"]
+    },
+    {
+      "id": "knowledgeBase",
+      "label": "Engines KB / How-To",
+      "type": "service",
+      "cluster": "services",
+      "path": "@/content/kb",
+      "tags": ["docs", "tooltips"]
+    },
+    {
+      "id": "templateConnector",
+      "label": "TemplateConnector (remote, read-only)",
+      "type": "service",
+      "cluster": "services",
+      "path": "@/services/templates/TemplateConnector.js",
+      "tags": ["market-import", "read-only"],
+      "gatedBy": ["EntitlementFlags"]
+    },
+    {
+      "id": "useCouponPrefs",
+      "label": "useCouponPrefs",
+      "type": "store",
+      "cluster": "stores",
+      "path": "@/features/scan-compare-trust/stores/useCouponPrefs.js"
+    },
+    {
+      "id": "useInventory",
+      "label": "useInventory",
+      "type": "store",
+      "cluster": "stores",
+      "path": "@/stores/useInventory.js"
+    },
+    {
+      "id": "useRecipes",
+      "label": "useRecipes",
+      "type": "store",
+      "cluster": "stores",
+      "path": "@/stores/useRecipes.js"
+    },
+    {
+      "id": "usePlans",
+      "label": "usePlans (draft/favorite)",
+      "type": "store",
+      "cluster": "stores",
+      "path": "@/stores/usePlans.js"
+    },
+    {
+      "id": "useSessions",
+      "label": "useSessions",
+      "type": "store",
+      "cluster": "stores",
+      "path": "@/stores/useSessions.js"
+    },
+    {
+      "id": "useGarden",
+      "label": "useGarden",
+      "type": "store",
+      "cluster": "stores",
+      "path": "@/stores/useGarden.js"
+    },
+    {
+      "id": "useAnimals",
+      "label": "useAnimals",
+      "type": "store",
+      "cluster": "stores",
+      "path": "@/stores/useAnimals.js"
+    },
+    {
+      "id": "useTags",
+      "label": "useTags",
+      "type": "store",
+      "cluster": "stores",
+      "path": "@/stores/useTags.js"
+    },
+    {
+      "id": "useUserProfile",
+      "label": "useUserProfile (zone/prefs/roles)",
+      "type": "store",
+      "cluster": "stores",
+      "path": "@/stores/useUserProfile.js"
+    },
+    {
+      "id": "entitlementFlags",
+      "label": "Entitlement Flags (feature gates)",
+      "type": "store",
+      "cluster": "stores",
+      "path": "@/stores/useEntitlementFlags.js"
+    },
+    {
+      "id": "homePage",
+      "label": "pages/home.jsx",
+      "type": "page",
+      "cluster": "ui",
+      "path": "@/pages/home.jsx"
+    },
+    {
+      "id": "mealsPage",
+      "label": "pages/meals/index.jsx",
+      "type": "page",
+      "cluster": "ui",
+      "path": "@/pages/meals/index.jsx"
+    },
+    {
+      "id": "cleaningPage",
+      "label": "pages/cleaning/index.jsx",
+      "type": "page",
+      "cluster": "ui",
+      "path": "@/pages/cleaning/index.jsx"
+    },
+    {
+      "id": "gardenPage",
+      "label": "pages/garden/index.jsx",
+      "type": "page",
+      "cluster": "ui",
+      "path": "@/pages/garden/index.jsx"
+    },
+    {
+      "id": "animalsPage",
+      "label": "pages/animals/index.jsx",
+      "type": "page",
+      "cluster": "ui",
+      "path": "@/pages/animals/index.jsx"
+    },
+    {
+      "id": "inventoryPage",
+      "label": "pages/inventory/index.jsx",
+      "type": "page",
+      "cluster": "ui",
+      "path": "@/pages/inventory/index.jsx"
+    },
+    {
+      "id": "storehousePage",
+      "label": "pages/storehouse/index.jsx (Goals Planner)",
+      "type": "page",
+      "cluster": "ui",
+      "path": "@/pages/storehouse/index.jsx"
+    },
+    {
+      "id": "sessionsPage",
+      "label": "pages/sessions/index.jsx",
+      "type": "page",
+      "cluster": "ui",
+      "path": "@/pages/sessions/index.jsx"
+    },
+    {
+      "id": "calendarPage",
+      "label": "pages/calendar.jsx",
+      "type": "page",
+      "cluster": "ui",
+      "path": "@/pages/calendar.jsx"
+    },
+    {
+      "id": "scanTrustPage",
+      "label": "features/scan-compare-trust/ui/*",
+      "type": "page",
+      "cluster": "ui",
+      "path": "@/features/scan-compare-trust/ui"
+    },
+    {
+      "id": "recipeVault",
+      "label": "Recipe Vault + Batch Planner",
+      "type": "feature",
+      "cluster": "features",
+      "path": "@/features/meals/RecipeVault"
+    },
+    {
+      "id": "batchSessionTray",
+      "label": "Batch Session Planner/Builder",
+      "type": "feature",
+      "cluster": "features",
+      "path": "@/features/meals/BatchSessionTray"
+    },
+    {
+      "id": "multiTimerPanel",
+      "label": "MultiTimer Panel",
+      "type": "feature",
+      "cluster": "features",
+      "path": "@/features/sessions/MultiTimerPanel"
+    },
+    {
+      "id": "integratedTaskParser",
+      "label": "Integrated Task Parser",
+      "type": "feature",
+      "cluster": "features",
+      "path": "@/features/sessions/IntegratedTaskParser"
+    },
+    {
+      "id": "gardenPlanner",
+      "label": "Garden Planner",
+      "type": "feature",
+      "cluster": "features",
+      "path": "@/features/garden/GardenPlanner"
+    },
+    {
+      "id": "animalPlanner",
+      "label": "Animal Planner",
+      "type": "feature",
+      "cluster": "features",
+      "path": "@/features/animals/AnimalPlanner"
+    },
+    {
+      "id": "pinterestImporter",
+      "label": "Pinterest / Web Importer",
+      "type": "feature",
+      "cluster": "features",
+      "path": "@/features/importers/PinterestImporter"
+    },
+    {
+      "id": "groceryListGen",
+      "label": "Shopping + Grocery List Generator",
+      "type": "feature",
+      "cluster": "features",
+      "path": "@/features/meals/GroceryListGenerator"
+    },
+    {
+      "id": "safetyBadges",
+      "label": "Safety Badges",
+      "type": "feature",
+      "cluster": "features",
+      "path": "@/features/scan-compare-trust/ui/SafetyBadges"
+    },
+    {
+      "id": "coOpPlanningUI",
+      "label": "Co-op Planning UI (gated)",
+      "type": "feature",
+      "cluster": "features",
+      "path": "@/features/coop/CoOpPlanningUI",
+      "gatedBy": ["EntitlementFlags"]
+    },
+    {
+      "id": "mealPlanEngine",
+      "label": "MealPlanEngine",
+      "type": "engine",
+      "cluster": "engines",
+      "path": "@/engines/meal/MealPlanEngine.js"
+    },
+    {
+      "id": "cleaningPlanManagerEngine",
+      "label": "CleaningPlanManager",
+      "type": "engine",
+      "cluster": "engines",
+      "path": "@/engines/cleaning/CleaningPlanManager.js"
+    },
+    {
+      "id": "gardenQueueManagerEngine",
+      "label": "GardenQueueManager",
+      "type": "engine",
+      "cluster": "engines",
+      "path": "@/managers/GardenQueueManager.js"
+    },
+    {
+      "id": "animalQueueManagerEngine",
+      "label": "AnimalQueueManager",
+      "type": "engine",
+      "cluster": "engines",
+      "path": "@/managers/AnimalQueueManager.js"
+    },
+    {
+      "id": "storehouseEngine",
+      "label": "StorehouseEngine (Goals ➜ Targets)",
+      "type": "engine",
+      "cluster": "engines",
+      "path": "@/engines/storehouse/StorehouseEngine.js"
+    },
+    {
+      "id": "inventoryEngine",
+      "label": "InventoryEngine (Execution ➜ Stock Levels)",
+      "type": "engine",
+      "cluster": "engines",
+      "path": "@/engines/inventory/InventoryEngine.js"
+    },
+    {
+      "id": "coopPlannerEngine",
+      "label": "Co-op Planner Engine",
+      "type": "engine",
+      "cluster": "engines",
+      "path": "@/engines/coop/CoopPlannerEngine.js",
+      "gatedBy": ["EntitlementFlags"]
+    },
+    {
+      "id": "calendarEngine",
+      "label": "CalendarEngine",
+      "type": "engine",
+      "cluster": "engines",
+      "path": "@/engines/calendar/CalendarEngine.js"
+    },
+    {
+      "id": "planManager",
+      "label": "Plan Manager (draft/favorite/templates)",
+      "type": "manager",
+      "cluster": "managers",
+      "path": "@/managers/PlanManager.js"
+    },
+    {
+      "id": "sessionManager",
+      "label": "Session Manager (start/pause/resume/undo)",
+      "type": "manager",
+      "cluster": "managers",
+      "path": "@/managers/SessionManager.js"
+    },
+    {
+      "id": "inventorySync",
+      "label": "InventorySync (Recipe↔Inventory)",
+      "type": "manager",
+      "cluster": "managers",
+      "path": "@/managers/InventorySync.js"
+    },
+    {
+      "id": "prepChecklist",
+      "label": "Prep Checklist Generator",
+      "type": "manager",
+      "cluster": "managers",
+      "path": "@/managers/PrepChecklistGenerator.js"
+    },
+    {
+      "id": "labelPrinter",
+      "label": "Label Printer",
+      "type": "manager",
+      "cluster": "managers",
+      "path": "@/managers/LabelPrinter.js"
+    },
+    {
+      "id": "pricebookManager",
+      "label": "Pricebook Manager",
+      "type": "manager",
+      "cluster": "managers",
+      "path": "@/features/scan-compare-trust/managers/PricebookManager.js"
+    },
+    {
+      "id": "googleCalendar",
+      "label": "Google Calendar",
+      "type": "external",
+      "cluster": "external"
+    },
+    {
+      "id": "cloudDrive",
+      "label": "Cloud Storage (Drive/S3)",
+      "type": "external",
+      "cluster": "external"
+    },
+    {
+      "id": "priceAPIs",
+      "label": "Store APIs / Scrapers",
+      "type": "external",
+      "cluster": "external"
+    },
+    {
+      "id": "couponProviders",
+      "label": "Coupons/Ibotta/Rakuten",
+      "type": "external",
+      "cluster": "external"
+    },
+    {
+      "id": "timeAndDateAPI",
+      "label": "Astronomy Data (timeanddate)",
+      "type": "external",
+      "cluster": "external"
+    },
+    {
+      "id": "mapWaze",
+      "label": "Waze / Maps",
+      "type": "external",
+      "cluster": "external"
+    },
+    {
+      "id": "templateMarket",
+      "label": "Template Market (read-only)",
+      "type": "external",
+      "cluster": "external"
+    },
+    {
+      "id": "appAuth",
+      "label": "AppAuth (local/email)",
+      "type": "identity",
+      "cluster": "identity",
+      "path": "@/services/auth/AppAuth.js"
+    },
+    {
+      "id": "svffhAuthBridge",
+      "label": "SVFFHAuthBridge (OIDC/SAML/Token verify)",
+      "type": "identity",
+      "cluster": "identity",
+      "path": "@/services/auth/SVFFHAuthBridge.js"
+    },
+    {
+      "id": "svffhClaims",
+      "label": "SVFFH Claims ➜ Tiers/Roles",
+      "type": "identity",
+      "cluster": "identity",
+      "path": "@/services/auth/SVFFHClaims.js"
+    }
+  ],
+  "edges": [
+    {
+      "source": "homePage",
+      "target": "eventBus",
+      "kind": "dispatch",
+      "label": "UI events"
+    },
+    { "source": "eventBus", "target": "automationRuntime", "kind": "emit" },
+    {
+      "source": "automationRuntime",
+      "target": "relativeScheduler",
+      "kind": "schedule"
+    },
+    { "source": "automationRuntime", "target": "sessionRunner", "kind": "run" },
+    {
+      "source": "sessionRunner",
+      "target": "prepSessionOrchestrator",
+      "kind": "delegate"
+    },
+    {
+      "source": "mealPlanEngine",
+      "target": "nbaOrchestrator",
+      "kind": "emit",
+      "label": "NBAs"
+    },
+    {
+      "source": "cleaningPlanManagerEngine",
+      "target": "nbaOrchestrator",
+      "kind": "emit"
+    },
+    {
+      "source": "gardenQueueManagerEngine",
+      "target": "nbaOrchestrator",
+      "kind": "emit"
+    },
+    {
+      "source": "animalQueueManagerEngine",
+      "target": "nbaOrchestrator",
+      "kind": "emit"
+    },
+    {
+      "source": "storehouseEngine",
+      "target": "nbaOrchestrator",
+      "kind": "emit"
+    },
+    {
+      "source": "inventoryEngine",
+      "target": "nbaOrchestrator",
+      "kind": "emit"
+    },
+    {
+      "source": "planStorageRouter",
+      "target": "cloudDrive",
+      "kind": "export",
+      "label": "sync/export"
+    },
+    { "source": "dexieDB", "target": "tables", "kind": "read" },
+    { "source": "dexieDB", "target": "useInventory", "kind": "read" },
+    { "source": "dexieDB", "target": "useRecipes", "kind": "read" },
+    { "source": "dexieDB", "target": "usePlans", "kind": "read" },
+    { "source": "dexieDB", "target": "useSessions", "kind": "read" },
+    { "source": "dexieDB", "target": "useGarden", "kind": "read" },
+    { "source": "dexieDB", "target": "useAnimals", "kind": "read" },
+    { "source": "dexieDB", "target": "useTags", "kind": "read" },
+    { "source": "dexieDB", "target": "useUserProfile", "kind": "read" },
+    { "source": "dexieDB", "target": "entitlementFlags", "kind": "read" },
+    {
+      "source": "filesSchemas",
+      "target": "automationRuntime",
+      "kind": "validate"
+    },
+    { "source": "filesFixtures", "target": "dexieDB", "kind": "seed" },
+    {
+      "source": "homePage",
+      "target": "recipeVault",
+      "kind": "read",
+      "label": "widget"
+    },
+    { "source": "homePage", "target": "batchSessionTray", "kind": "read" },
+    { "source": "homePage", "target": "gardenPlanner", "kind": "read" },
+    { "source": "homePage", "target": "animalPlanner", "kind": "read" },
+    { "source": "homePage", "target": "pinterestImporter", "kind": "read" },
+    { "source": "homePage", "target": "groceryListGen", "kind": "read" },
+    { "source": "homePage", "target": "multiTimerPanel", "kind": "read" },
+    { "source": "homePage", "target": "integratedTaskParser", "kind": "read" },
+    { "source": "homePage", "target": "safetyBadges", "kind": "read" },
+    { "source": "homePage", "target": "scanTrustPage", "kind": "read" },
+    { "source": "homePage", "target": "storehousePage", "kind": "read" },
+    { "source": "homePage", "target": "inventoryPage", "kind": "read" },
+    { "source": "homePage", "target": "sessionsPage", "kind": "read" },
+    { "source": "homePage", "target": "calendarPage", "kind": "read" },
+    {
+      "source": "homePage",
+      "target": "coOpPlanningUI",
+      "kind": "read",
+      "gatedBy": ["EntitlementFlags"]
+    },
+    {
+      "source": "recipeVault",
+      "target": "mealPlanEngine",
+      "kind": "emit",
+      "label": "recipes → plan"
+    },
+    { "source": "recipeVault", "target": "inventorySync", "kind": "emit" },
+    { "source": "recipeVault", "target": "planManager", "kind": "write" },
+    {
+      "source": "batchSessionTray",
+      "target": "sessionManager",
+      "kind": "write"
+    },
+    {
+      "source": "batchSessionTray",
+      "target": "prepSessionOrchestrator",
+      "kind": "emit"
+    },
+    {
+      "source": "batchSessionTray",
+      "target": "multiTimerPanel",
+      "kind": "emit"
+    },
+    {
+      "source": "integratedTaskParser",
+      "target": "sessionManager",
+      "kind": "write"
+    },
+    {
+      "source": "integratedTaskParser",
+      "target": "prepChecklist",
+      "kind": "write"
+    },
+    {
+      "source": "integratedTaskParser",
+      "target": "labelPrinter",
+      "kind": "write"
+    },
+    {
+      "source": "gardenPlanner",
+      "target": "gardenQueueManagerEngine",
+      "kind": "emit"
+    },
+    {
+      "source": "animalPlanner",
+      "target": "animalQueueManagerEngine",
+      "kind": "emit"
+    },
+    {
+      "source": "storehousePage",
+      "target": "storehouseEngine",
+      "kind": "emit"
+    },
+    { "source": "inventoryPage", "target": "inventoryEngine", "kind": "emit" },
+    { "source": "sessionsPage", "target": "sessionManager", "kind": "write" },
+    { "source": "calendarPage", "target": "calendarEngine", "kind": "emit" },
+    { "source": "mealPlanEngine", "target": "planManager", "kind": "write" },
+    { "source": "mealPlanEngine", "target": "usePlans", "kind": "write" },
+    {
+      "source": "cleaningPlanManagerEngine",
+      "target": "planManager",
+      "kind": "write"
+    },
+    {
+      "source": "gardenQueueManagerEngine",
+      "target": "planManager",
+      "kind": "write"
+    },
+    {
+      "source": "gardenQueueManagerEngine",
+      "target": "useGarden",
+      "kind": "write"
+    },
+    {
+      "source": "animalQueueManagerEngine",
+      "target": "planManager",
+      "kind": "write"
+    },
+    {
+      "source": "animalQueueManagerEngine",
+      "target": "useAnimals",
+      "kind": "write"
+    },
+    { "source": "storehouseEngine", "target": "usePlans", "kind": "write" },
+    {
+      "source": "storehouseEngine",
+      "target": "useUserProfile",
+      "kind": "read"
+    },
+    { "source": "inventoryEngine", "target": "useInventory", "kind": "write" },
+    { "source": "planManager", "target": "usePlans", "kind": "write" },
+    { "source": "planManager", "target": "useTags", "kind": "write" },
+    { "source": "sessionManager", "target": "useSessions", "kind": "write" },
+    { "source": "sessionManager", "target": "usePlans", "kind": "read" },
+    { "source": "inventorySync", "target": "useInventory", "kind": "sync" },
+    { "source": "inventorySync", "target": "useRecipes", "kind": "sync" },
+    { "source": "inventorySync", "target": "usePlans", "kind": "sync" },
+    { "source": "prepChecklist", "target": "usePlans", "kind": "write" },
+    { "source": "labelPrinter", "target": "usePlans", "kind": "read" },
+    {
+      "source": "mealPlanEngine",
+      "target": "automationRuntime",
+      "kind": "emit",
+      "label": "plan events"
+    },
+    {
+      "source": "cleaningPlanManagerEngine",
+      "target": "automationRuntime",
+      "kind": "emit"
+    },
+    {
+      "source": "gardenQueueManagerEngine",
+      "target": "automationRuntime",
+      "kind": "emit"
+    },
+    {
+      "source": "animalQueueManagerEngine",
+      "target": "automationRuntime",
+      "kind": "emit"
+    },
+    {
+      "source": "inventoryEngine",
+      "target": "automationRuntime",
+      "kind": "emit"
+    },
+    {
+      "source": "relativeScheduler",
+      "target": "calendarEngine",
+      "kind": "emit",
+      "label": "occurrences"
+    },
+    { "source": "calendarEngine", "target": "googleCalendar", "kind": "sync" },
+    { "source": "calendarEngine", "target": "exporters", "kind": "export" },
+    { "source": "calendarEngine", "target": "calendarMapper", "kind": "map" },
+    {
+      "source": "scanTrustPage",
+      "target": "ocrWorker",
+      "kind": "emit",
+      "label": "image/scan"
+    },
+    {
+      "source": "ocrWorker",
+      "target": "productResolver",
+      "kind": "emit",
+      "label": "normalize"
+    },
+    {
+      "source": "productResolver",
+      "target": "priceComparator",
+      "kind": "enrich"
+    },
+    {
+      "source": "productResolver",
+      "target": "storeCatalogAdapters",
+      "kind": "enrich"
+    },
+    { "source": "productResolver", "target": "safetyRules", "kind": "enrich" },
+    { "source": "storeCatalogAdapters", "target": "priceAPIs", "kind": "read" },
+    { "source": "couponService", "target": "couponProviders", "kind": "read" },
+    { "source": "cycleAnalyzer", "target": "couponProviders", "kind": "read" },
+    {
+      "source": "priceComparator",
+      "target": "couponService",
+      "kind": "compare"
+    },
+    { "source": "priceComparator", "target": "cycleAnalyzer", "kind": "learn" },
+    {
+      "source": "priceComparator",
+      "target": "pricebookManager",
+      "kind": "write"
+    },
+    { "source": "pricebookManager", "target": "recipeVault", "kind": "enrich" },
+    { "source": "couponService", "target": "recipeVault", "kind": "enrich" },
+    { "source": "cycleAnalyzer", "target": "recipeVault", "kind": "enrich" },
+    { "source": "safetyRules", "target": "recipeVault", "kind": "enrich" },
+    { "source": "productResolver", "target": "inventorySync", "kind": "sync" },
+    { "source": "priceComparator", "target": "inventorySync", "kind": "sync" },
+    { "source": "safetyRules", "target": "inventorySync", "kind": "sync" },
+    {
+      "source": "coOpPlanningUI",
+      "target": "coopPlannerEngine",
+      "kind": "emit",
+      "gatedBy": ["EntitlementFlags"]
+    },
+    {
+      "source": "entitlementFlags",
+      "target": "coOpPlanningUI",
+      "kind": "enable"
+    },
+    {
+      "source": "entitlementFlags",
+      "target": "coopPlannerEngine",
+      "kind": "enable"
+    },
+    {
+      "source": "entitlementFlags",
+      "target": "templateConnector",
+      "kind": "enable"
+    },
+    {
+      "source": "templateConnector",
+      "target": "templateMarket",
+      "kind": "read"
+    },
+    {
+      "source": "templateConnector",
+      "target": "planManager",
+      "kind": "import"
+    },
+    { "source": "mealPlanEngine", "target": "knowledgeBase", "kind": "read" },
+    {
+      "source": "cleaningPlanManagerEngine",
+      "target": "knowledgeBase",
+      "kind": "read"
+    },
+    {
+      "source": "gardenQueueManagerEngine",
+      "target": "knowledgeBase",
+      "kind": "read"
+    },
+    {
+      "source": "animalQueueManagerEngine",
+      "target": "knowledgeBase",
+      "kind": "read"
+    },
+    { "source": "storehouseEngine", "target": "knowledgeBase", "kind": "read" },
+    { "source": "inventoryEngine", "target": "knowledgeBase", "kind": "read" },
+    { "source": "scanTrustPage", "target": "knowledgeBase", "kind": "read" },
+    { "source": "sessionRunner", "target": "guards", "kind": "read" },
+    { "source": "prepSessionOrchestrator", "target": "guards", "kind": "read" },
+    { "source": "guards", "target": "relativeScheduler", "kind": "gate" },
+    { "source": "calendarMapper", "target": "timeAndDateAPI", "kind": "read" },
+    {
+      "source": "storehouseEngine",
+      "target": "inventoryEngine",
+      "kind": "emit",
+      "label": "targets ➜ picklists"
+    },
+    {
+      "source": "storehousePage",
+      "target": "homePage",
+      "kind": "emit",
+      "label": "KPIs"
+    },
+    {
+      "source": "inventoryPage",
+      "target": "homePage",
+      "kind": "emit",
+      "label": "alerts"
+    },
+    { "source": "appAuth", "target": "useUserProfile", "kind": "write" },
+    {
+      "source": "svffhAuthBridge",
+      "target": "svffhClaims",
+      "kind": "emit",
+      "label": "token → claims"
+    },
+    { "source": "svffhClaims", "target": "entitlementFlags", "kind": "write" },
+    { "source": "homePage", "target": "useUserProfile", "kind": "subscribe" },
+    { "source": "homePage", "target": "usePlans", "kind": "subscribe" },
+    { "source": "homePage", "target": "useSessions", "kind": "subscribe" },
+    { "source": "homePage", "target": "useInventory", "kind": "subscribe" },
+    { "source": "homePage", "target": "useGarden", "kind": "subscribe" },
+    { "source": "homePage", "target": "useAnimals", "kind": "subscribe" },
+    { "source": "homePage", "target": "useTags", "kind": "subscribe" },
+    { "source": "homePage", "target": "useRecipes", "kind": "subscribe" },
+    { "source": "homePage", "target": "entitlementFlags", "kind": "subscribe" },
+    { "source": "mealsPage", "target": "usePlans", "kind": "subscribe" },
+    { "source": "cleaningPage", "target": "usePlans", "kind": "subscribe" },
+    { "source": "gardenPage", "target": "useGarden", "kind": "subscribe" },
+    { "source": "animalsPage", "target": "useAnimals", "kind": "subscribe" },
+    {
+      "source": "inventoryPage",
+      "target": "useInventory",
+      "kind": "subscribe"
+    },
+    { "source": "storehousePage", "target": "usePlans", "kind": "subscribe" },
+    { "source": "sessionsPage", "target": "useSessions", "kind": "subscribe" },
+    { "source": "calendarPage", "target": "usePlans", "kind": "subscribe" },
+    {
+      "source": "scanTrustPage",
+      "target": "useCouponPrefs",
+      "kind": "subscribe"
+    }
+  ],
+  "views": {
+    "default": {
+      "rankdir": "LR",
+      "clusters": [
+        "orch",
+        "ui",
+        "features",
+        "engines",
+        "managers",
+        "services",
+        "stores",
+        "db",
+        "external",
+        "identity"
+      ]
+    },
+    "scanCompareTrustOnly": {
+      "includeNodes": [
+        "scanTrustPage",
+        "ocrWorker",
+        "productResolver",
+        "storeCatalogAdapters",
+        "priceComparator",
+        "couponService",
+        "cycleAnalyzer",
+        "pricebookManager",
+        "safetyRules",
+        "recipeVault",
+        "inventorySync",
+        "useCouponPrefs",
+        "priceAPIs",
+        "couponProviders"
+      ],
+      "rankdir": "LR"
+    },
+    "planningOnly": {
+      "includeNodes": [
+        "recipeVault",
+        "batchSessionTray",
+        "mealPlanEngine",
+        "cleaningPlanManagerEngine",
+        "gardenQueueManagerEngine",
+        "animalQueueManagerEngine",
+        "planManager",
+        "sessionManager",
+        "multiTimerPanel",
+        "integratedTaskParser",
+        "prepChecklist",
+        "labelPrinter",
+        "calendarEngine",
+        "relativeScheduler",
+        "sessionRunner",
+        "prepSessionOrchestrator",
+        "guards",
+        "usePlans",
+        "useSessions"
+      ],
+      "rankdir": "LR"
+    },
+    "entitlementGated": {
+      "includeNodes": [
+        "svffhAuthBridge",
+        "svffhClaims",
+        "entitlementFlags",
+        "coOpPlanningUI",
+        "coopPlannerEngine",
+        "templateConnector",
+        "templateMarket"
+      ],
+      "rankdir": "LR"
+    }
+  }
+}

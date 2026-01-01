@@ -1,0 +1,83 @@
+{
+  "id": "workflow.wca.riverine_market_garden",
+  "domain": "workflows",
+  "kind": "workflow_overlay",
+  "title": "Riverine Market-Garden Rhythm (West/Central Africa)",
+  "tags": [
+    "region:wca",
+    "mode:garden",
+    "values:market",
+    "workflow:high_throughput_optional"
+  ],
+  "description": "Market-garden rhythm emphasizing harvest triage, quick turnover, and preservation of surplus.",
+  "optIn": true,
+  "editable": true,
+  "valuePriorities": [
+    "time_savings",
+    "waste_reduction",
+    "income_optional"
+  ],
+  "defaults": {
+    "preferredStaples": [
+      "staple:produce",
+      "staple:grain",
+      "staple:legumes"
+    ],
+    "mealRhythm": [
+      "fresh_markets:frequent",
+      "cook_small:often"
+    ],
+    "preservationEmphasis": [
+      "surplus_triage",
+      "drying_optional",
+      "freezing_optional"
+    ],
+    "valuePriorities": [
+      "time_savings",
+      "waste_reduction",
+      "income_optional"
+    ]
+  },
+  "ordering": {
+    "planningOrder": [
+      "harvest_push",
+      "surplus_triage",
+      "storehouse_reset",
+      "meal_plan"
+    ]
+  },
+  "naming": {
+    "sessionPrefixes": {
+      "homestead": "Garden Rhythm",
+      "preservation": "Surplus Save"
+    }
+  },
+  "constraints": {
+    "defaults": [
+      "constraint:time_budget"
+    ]
+  },
+  "uiOverlays": {
+    "form": {
+      "defaults": {
+        "timeBudgetMin": 120
+      }
+    }
+  },
+  "preferredDefaultPatterns": {
+    "homestead": [
+      "pat.homestead.garden_led"
+    ],
+    "preservation": [
+      "pat.preservation.surplus_triage",
+      "pat.preservation.batch_day"
+    ],
+    "storehouse": [
+      "pat.storehouse.weekly_restock"
+    ]
+  },
+  "notes": [
+    "This overlay provides defaults and ordering, not mandatory rules.",
+    "All role defaults are optional and user-editable."
+  ]
+}

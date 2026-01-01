@@ -1,0 +1,3740 @@
+{
+  "schemaVersion": 1,
+  "domain": "animals",
+  "catalogId": "animals.methods",
+  "title": "SSA Animals Methods Catalog",
+  "description": "Fixed method definitions for animal husbandry, handling, welfare, breeding, feeding, health, housing, transport, and legally compliant slaughter/processing across commonly farmed and traditionally consumed species. Includes indigenous/culture-specific, natural, and modern methods. Designed for SSA session blueprints (steps + cues + checklists + timers).",
+  "generatedAt": "2025-12-27T15:38:55Z",
+  "defaults": {
+    "units": {
+      "temp": "F",
+      "weight": "lb",
+      "length": "in",
+      "volume": "gal",
+      "time": "min"
+    },
+    "quietHoursRespect": true,
+    "sabbathModeRespect": true,
+    "safety": {
+      "disclaimer": "Always follow local laws, veterinary guidance, and humane handling/slaughter regulations. If you are inexperienced, work with a mentor, licensed processor, or veterinarian.",
+      "ppe": [
+        "gloves",
+        "closed-toe shoes/boots",
+        "eye protection when spraying/pressure-washing"
+      ],
+      "biosecurity": [
+        "handwashing",
+        "boot wash or dedicated footwear",
+        "tool sanitation between pens"
+      ],
+      "recordkeeping": [
+        "date",
+        "animal/group id",
+        "observations",
+        "actions",
+        "products/meds used"
+      ]
+    }
+  },
+  "speciesGroups": [
+    {
+      "key": "ruminants_small",
+      "name": "Small ruminants",
+      "examples": [
+        "goats",
+        "sheep"
+      ]
+    },
+    {
+      "key": "ruminants_large",
+      "name": "Large ruminants",
+      "examples": [
+        "cattle",
+        "buffalo",
+        "bison",
+        "yak"
+      ]
+    },
+    {
+      "key": "camelids",
+      "name": "Camelids",
+      "examples": [
+        "alpaca",
+        "llama",
+        "camel"
+      ]
+    },
+    {
+      "key": "swine",
+      "name": "Swine",
+      "examples": [
+        "pigs",
+        "wild boar (managed)"
+      ]
+    },
+    {
+      "key": "poultry",
+      "name": "Poultry",
+      "examples": [
+        "chicken",
+        "turkey",
+        "duck",
+        "goose",
+        "guinea fowl",
+        "quail",
+        "pheasant"
+      ]
+    },
+    {
+      "key": "rabbits",
+      "name": "Rabbits",
+      "examples": [
+        "meat rabbits"
+      ]
+    },
+    {
+      "key": "aquaculture",
+      "name": "Aquaculture",
+      "examples": [
+        "tilapia",
+        "catfish",
+        "trout",
+        "carp",
+        "prawns/shrimp (legal)"
+      ]
+    },
+    {
+      "key": "game_ranch",
+      "name": "Game ranching (legal)",
+      "examples": [
+        "deer",
+        "elk",
+        "antelope",
+        "wild hog (managed)",
+        "crocodilian (licensed)"
+      ]
+    },
+    {
+      "key": "exotics_other",
+      "name": "Other exotics (where legal)",
+      "examples": [
+        "ostrich/emu/rhea",
+        "guinea pig/cuy (where culturally traditional)",
+        "frog (licensed)",
+        "snails/escargot"
+      ]
+    }
+  ],
+  "methods": [
+    {
+      "id": "animals.daily-welfare-rounds",
+      "title": "Daily Welfare Rounds",
+      "summary": "A fast, consistent daily check across groups to catch problems early: water, feed, posture, breathing, manure, injuries, predators, and enclosure integrity.",
+      "tags": [
+        "husbandry",
+        "welfare",
+        "daily",
+        "routine",
+        "low-tech"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "camelids",
+          "swine",
+          "poultry",
+          "rabbits",
+          "game_ranch"
+        ],
+        "notes": "Adapt route order to reduce stress (quietest groups first)."
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Start with quiet observation (2–5 minutes per area)",
+          "cues": [
+            "Stand still; watch movement and breathing.",
+            "Listen for coughing, sneezing, abnormal vocalization."
+          ],
+          "checklist": [
+            "Count animals visually vs expected headcount"
+          ],
+          "timers": [
+            {
+              "label": "Observe",
+              "minutes": 5
+            }
+          ],
+          "notes": ""
+        },
+        {
+          "title": "Water check + clean refill if needed",
+          "cues": [
+            "Check flow/nipples; look for algae or slime."
+          ],
+          "checklist": [
+            "Verify at least one functioning water point per group",
+            "Remove debris from troughs"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Feed + forage check",
+          "cues": [
+            "Look for refusal, sorting, or sudden appetite change."
+          ],
+          "checklist": [
+            "Confirm feeder access for smaller/weaker animals",
+            "Note leftover feed level"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Health scan",
+          "cues": [
+            "Check eyes/nose discharge, lameness, bloating, diarrhea, feather/coat condition."
+          ],
+          "checklist": [
+            "Identify any animal needing isolate pen",
+            "Record temps only if trained/indicated"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Fence/house integrity + predator signs",
+          "cues": [
+            "Look for digging, tracks, bent wire, loose latches."
+          ],
+          "checklist": [
+            "Close gates",
+            "Inspect electric fence voltage if used"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log findings + trigger tasks",
+          "cues": [
+            "If any red flags, create a 'care session' in SSA immediately."
+          ],
+          "checklist": [
+            "Update notes in SSA",
+            "Flag follow-up schedule"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "welfare_log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.biosecurity-entry-exit",
+      "title": "Biosecurity Entry/Exit Protocol",
+      "summary": "Simple biosecurity routine to reduce disease introduction and spread between pens/pastures.",
+      "tags": [
+        "biosecurity",
+        "sanitation",
+        "preventive",
+        "routine"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "swine",
+          "poultry",
+          "rabbits",
+          "aquaculture",
+          "game_ranch"
+        ],
+        "notes": "Critical for poultry/swine; scale to operation size."
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Designate clean/dirty zones",
+          "cues": [],
+          "checklist": [
+            "Mark boot-wash area",
+            "Store clean PPE separate from dirty"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Entry routine",
+          "cues": [],
+          "checklist": [
+            "Wash/sanitize hands",
+            "Boot wash or change footwear",
+            "Put on pen-specific gloves if needed"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Tool control",
+          "cues": [
+            "Never mix bleach with acids/ammonia; follow product labels."
+          ],
+          "checklist": [
+            "Use dedicated tools per zone when possible",
+            "If shared, sanitize between areas"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Exit routine",
+          "cues": [],
+          "checklist": [
+            "Remove gross debris",
+            "Sanitize boots/tools",
+            "Wash hands before touching phone/vehicle"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Visitor policy",
+          "cues": [],
+          "checklist": [
+            "Log visitors",
+            "Ask about recent livestock contact"
+          ],
+          "timers": [],
+          "notes": "Consider a 48–72 hour livestock-free window for visitors when feasible."
+        }
+      ],
+      "outputs": [
+        "biosecurity_log_entry"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.pasture-rotation-paddocks",
+      "title": "Rotational Grazing (Paddock System)",
+      "summary": "Move animals through paddocks to protect pasture, manage parasites, and improve forage utilization.",
+      "tags": [
+        "grazing",
+        "pasture",
+        "regenerative",
+        "parasite-management",
+        "indigenous-informed"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "camelids",
+          "game_ranch"
+        ],
+        "notes": "Works with traditional herding patterns and modern polywire paddocks."
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan rotation map",
+          "cues": [
+            "Rest length depends on season/growth rate."
+          ],
+          "checklist": [
+            "Identify paddocks and rest periods",
+            "Confirm water access per paddock"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Set up temporary fencing (if used)",
+          "cues": [],
+          "checklist": [
+            "Test energizer voltage",
+            "Check ground rod connections"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Move animals calmly",
+          "cues": [
+            "Use pressure-and-release; avoid chasing."
+          ],
+          "checklist": [
+            "Close old paddock gate",
+            "Open new paddock gate"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor utilization",
+          "cues": [],
+          "checklist": [
+            "Leave adequate residual height",
+            "Avoid grazing to bare soil"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Record move + condition",
+          "cues": [],
+          "checklist": [
+            "Log paddock ID and date",
+            "Note forage height/condition",
+            "Log any parasite concerns"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "rotation_log",
+        "next_move_date"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.fodder-sprouting-system",
+      "title": "Fodder Sprouting System (Low-Tech)",
+      "summary": "Sprout grains/legumes to supplement greens when pasture is limited; common in many traditional systems and modern micro-farms.",
+      "tags": [
+        "feeding",
+        "fodder",
+        "sprouting",
+        "low-tech",
+        "resourceful"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "camelids",
+          "swine",
+          "poultry",
+          "rabbits"
+        ],
+        "notes": "Follow safe sprouting hygiene; discard any moldy batches."
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Select seed and rinse",
+          "cues": [
+            "Avoid cracked/moldy seed."
+          ],
+          "checklist": [
+            "Use clean food/feed-grade seed",
+            "Rinse until water runs clear"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Soak + drain",
+          "cues": [],
+          "checklist": [
+            "Drain fully to prevent standing water"
+          ],
+          "timers": [
+            {
+              "label": "Soak",
+              "minutes": 480
+            }
+          ],
+          "notes": ""
+        },
+        {
+          "title": "Rinse twice daily",
+          "cues": [
+            "If sour smell or visible mold, discard."
+          ],
+          "checklist": [
+            "Rinse AM/PM",
+            "Keep trays draining with airflow"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Harvest at target length",
+          "cues": [
+            "Typically 5–7 days depending on temperature."
+          ],
+          "checklist": [
+            "Cut/tear into portions"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Introduce gradually",
+          "cues": [],
+          "checklist": [
+            "Start small to avoid digestive upset",
+            "Observe manure/rumen"
+          ],
+          "timers": [],
+          "notes": "Fodder is a supplement; keep a fiber base for ruminants."
+        }
+      ],
+      "outputs": [
+        "fodder_batch_log"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.breeding-records-planning",
+      "title": "Breeding Plan + Records (Seasonal)",
+      "summary": "A structured breeding plan: selection, pairing, timing, and records to improve outcomes and prevent inbreeding.",
+      "tags": [
+        "breeding",
+        "records",
+        "seasonal",
+        "planning"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "swine",
+          "poultry",
+          "rabbits",
+          "camelids",
+          "game_ranch"
+        ],
+        "notes": "Align breeding windows to forage availability and climate."
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Define breeding goal",
+          "cues": [
+            "One primary goal reduces conflicting selections."
+          ],
+          "checklist": [
+            "Meat, milk, fiber, eggs, work, conservation, show, dual-purpose"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Select sires/dams",
+          "cues": [],
+          "checklist": [
+            "Check body condition score",
+            "Evaluate temperament",
+            "Review health history"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Prevent inbreeding",
+          "cues": [
+            "Use a simple sire rotation plan if no software."
+          ],
+          "checklist": [
+            "Track lineage IDs",
+            "Plan pairings with genetic distance"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Set breeding window and exposure days",
+          "cues": [
+            "Shorter windows produce tighter birthing windows."
+          ],
+          "checklist": [
+            "Choose start/end dates",
+            "Plan regrouping"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log service/mating events",
+          "cues": [],
+          "checklist": [
+            "Record date, IDs, method (natural/AI)",
+            "Create expected due date task"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "breeding_plan",
+        "expected_due_dates"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.heat-detection-basic",
+      "title": "Heat Detection (Basic Signals)",
+      "summary": "Simple, species-appropriate heat detection for timely breeding. Includes low-tech observation and optional tools.",
+      "tags": [
+        "breeding",
+        "observation",
+        "low-tech",
+        "repro"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "swine",
+          "camelids",
+          "rabbits"
+        ],
+        "notes": "Bird breeding is handled via flock management and nesting behaviors."
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Set observation times",
+          "cues": [
+            "Heat signs are often brief."
+          ],
+          "checklist": [
+            "Observe early morning + late evening"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Look for primary signs",
+          "cues": [
+            "Standing to be mounted, tail flagging, vocalization, swelling/discharge (species-dependent)."
+          ],
+          "checklist": [
+            "Note ID and time observed"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Use teaser/marker if available",
+          "cues": [
+            "Use safely and per welfare guidance."
+          ],
+          "checklist": [
+            "Teaser male or marking harness (as appropriate)"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Confirm and schedule breeding",
+          "cues": [],
+          "checklist": [
+            "Plan exposure/AI timing",
+            "Create SSA breeding task"
+          ],
+          "timers": [],
+          "notes": "When uncertain, extend observation rather than rushing."
+        }
+      ],
+      "outputs": [
+        "heat_log",
+        "breeding_task"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.parasite-management-fecal-monitoring",
+      "title": "Parasite Management with Fecal Monitoring",
+      "summary": "Targeted deworming and pasture management using fecal checks rather than routine blanket treatments.",
+      "tags": [
+        "health",
+        "parasites",
+        "integrated",
+        "modern",
+        "low-resistance"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "camelids"
+        ],
+        "notes": "Coordinate with a veterinarian/lab; resistance is a serious risk."
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Set sampling cadence",
+          "cues": [
+            "High-risk: young, lactating, thin animals."
+          ],
+          "checklist": [
+            "Baseline: spring + late summer (or as advised)",
+            "Extra after new arrivals"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Collect samples hygienically",
+          "cues": [
+            "Wear gloves; wash hands afterward."
+          ],
+          "checklist": [
+            "Label bags with ID/date",
+            "Keep cool; deliver promptly"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Interpret results",
+          "cues": [],
+          "checklist": [
+            "Identify high shedders",
+            "Compare to body condition/clinical signs"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Treat selectively",
+          "cues": [
+            "Follow label/legal use; withdrawal compliance is mandatory."
+          ],
+          "checklist": [
+            "Treat only indicated animals",
+            "Record product/lot/withdrawal times"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Pasture + nutrition adjustments",
+          "cues": [],
+          "checklist": [
+            "Increase rest periods",
+            "Avoid overstocking",
+            "Provide minerals/fiber"
+          ],
+          "timers": [],
+          "notes": "Record changes and recheck to validate."
+        }
+      ],
+      "outputs": [
+        "fecal_results_log",
+        "treatment_log"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.quarantine-new-arrivals",
+      "title": "Quarantine New Arrivals",
+      "summary": "Reduce disease introduction with a quarantine routine and observation period for new animals.",
+      "tags": [
+        "health",
+        "biosecurity",
+        "quarantine",
+        "preventive"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "swine",
+          "poultry",
+          "rabbits",
+          "camelids",
+          "game_ranch"
+        ],
+        "notes": "Duration and tests vary by species and local disease risk."
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Prepare quarantine area",
+          "cues": [],
+          "checklist": [
+            "Separate airflow/space",
+            "Dedicated tools/feeders/waterers",
+            "Footbath or footwear change"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Arrival intake check",
+          "cues": [
+            "Document seller info and transport time."
+          ],
+          "checklist": [
+            "Visual exam",
+            "Weight/body condition",
+            "Check for external parasites"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Observation period",
+          "cues": [],
+          "checklist": [
+            "Daily check at same time",
+            "Watch appetite and manure"
+          ],
+          "timers": [
+            {
+              "label": "Quarantine (recommended minimum)",
+              "minutes": 20160
+            }
+          ],
+          "notes": ""
+        },
+        {
+          "title": "Testing/vaccination plan",
+          "cues": [],
+          "checklist": [
+            "Coordinate with vet/lab as needed",
+            "Schedule boosters"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Graduated introduction",
+          "cues": [],
+          "checklist": [
+            "Fence-line contact first",
+            "Then supervised mixing"
+          ],
+          "timers": [],
+          "notes": "Mixing too fast is a common cause of stress and injury."
+        }
+      ],
+      "outputs": [
+        "quarantine_log",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.housing-deep-litter",
+      "title": "Deep Litter Bedding System",
+      "summary": "Manage bedding by layering dry carbon materials to control odor and moisture; used in many traditional barns and modern systems.",
+      "tags": [
+        "housing",
+        "bedding",
+        "natural",
+        "odor-control",
+        "compost"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "swine",
+          "poultry",
+          "rabbits"
+        ],
+        "notes": "Monitor ammonia and moisture; adjust ventilation."
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Start with dry base layer",
+          "cues": [],
+          "checklist": [
+            "Add straw/wood chips/other carbon",
+            "Keep waterers from leaking"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Daily spot management",
+          "cues": [
+            "If ammonia smell is strong, bedding is too wet or ventilation is insufficient."
+          ],
+          "checklist": [
+            "Remove wet clumps",
+            "Add fresh dry layer"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Ventilation check",
+          "cues": [],
+          "checklist": [
+            "Open vents without drafts on animals"
+          ],
+          "timers": [],
+          "notes": "Balance fresh air with warmth, especially for young stock."
+        },
+        {
+          "title": "Turn or cap layer",
+          "cues": [
+            "Avoid creating dusty conditions."
+          ],
+          "checklist": [
+            "Light rake/turn if appropriate",
+            "Add carbon cap"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "End-of-season cleanout + composting",
+          "cues": [
+            "Wear mask if dusty; ammonia can irritate lungs."
+          ],
+          "checklist": [
+            "Remove and compost properly",
+            "Disinfect floor if needed"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "bedding_log",
+        "compost_batch"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.low-stress-handling",
+      "title": "Low-Stress Handling (Pressure & Release)",
+      "summary": "Humane handling principles that reduce injury and improve productivity: point of balance, flight zone, calm movement.",
+      "tags": [
+        "handling",
+        "welfare",
+        "safety",
+        "training",
+        "indigenous-informed"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "camelids",
+          "swine",
+          "game_ranch"
+        ],
+        "notes": "Adjust to species; avoid loud noises and rough handling."
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Prepare route and equipment",
+          "cues": [],
+          "checklist": [
+            "Clear paths",
+            "Set gates",
+            "Have panels/boards ready"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Use pressure-and-release",
+          "cues": [
+            "Step into flight zone to start movement; step out to reward."
+          ],
+          "checklist": [
+            "Move in small groups",
+            "Avoid sharp corners"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Minimize slips/falls",
+          "cues": [],
+          "checklist": [
+            "Non-slip flooring",
+            "Avoid overcrowding chutes"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Pause and reset if stress rises",
+          "cues": [
+            "If bunching, backing, or vocalization increases, slow down."
+          ],
+          "checklist": [
+            "Give animals time to see the path forward"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Record incidents",
+          "cues": [],
+          "checklist": [
+            "Log any injuries or escapes",
+            "Create repair tasks for facilities"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "handling_log",
+        "facility_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.processing-humane-slaughter-planning",
+      "title": "Humane Slaughter Planning (Compliance & Readiness)",
+      "summary": "Plan a legal, humane slaughter day: scheduling, transport, welfare prep, equipment readiness, and cold-chain.",
+      "tags": [
+        "processing",
+        "butchery",
+        "compliance",
+        "planning",
+        "food-safety"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "swine",
+          "poultry",
+          "rabbits",
+          "game_ranch",
+          "exotics_other",
+          "aquaculture"
+        ],
+        "notes": "Local laws vary; many operations must use licensed facilities for certain species or sales channels."
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Confirm legal path",
+          "cues": [
+            "When in doubt, use a licensed processor."
+          ],
+          "checklist": [
+            "Home use vs sale",
+            "Processor requirements",
+            "Species-specific rules"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Schedule + prep logistics",
+          "cues": [],
+          "checklist": [
+            "Processing slot booked",
+            "Transport plan",
+            "Ice/cooler capacity",
+            "Packaging labels"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Animal welfare prep",
+          "cues": [],
+          "checklist": [
+            "Minimize stress day-of",
+            "Handle calmly",
+            "Follow appropriate fasting guidance per species/vet"
+          ],
+          "timers": [],
+          "notes": "Maintain water access unless directed otherwise."
+        },
+        {
+          "title": "Sanitation plan",
+          "cues": [
+            "Food safety is non-negotiable. Use potable water and approved sanitizers."
+          ],
+          "checklist": [
+            "Cleanable surfaces",
+            "Handwashing station",
+            "Tool sanitation approach"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Cold chain readiness",
+          "cues": [
+            "Rapid chilling reduces spoilage risk."
+          ],
+          "checklist": [
+            "Chill space/freezer capacity verified",
+            "Thermometers available"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "processing_plan",
+        "compliance_checklist"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.processing-cold-chain-and-aging",
+      "title": "Cold Chain & Aging (Meat Quality)",
+      "summary": "Cold-chain and aging guidance for better tenderness and safety, adjusted by species and scale.",
+      "tags": [
+        "processing",
+        "meat-quality",
+        "cold-chain",
+        "modern"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "swine",
+          "game_ranch",
+          "exotics_other"
+        ],
+        "notes": "Aging depends on species, fat cover, and cooler control. Follow food-safety guidance."
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Immediate chilling plan",
+          "cues": [],
+          "checklist": [
+            "Move product into chilling environment quickly",
+            "Avoid blocking airflow"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Temperature monitoring",
+          "cues": [],
+          "checklist": [
+            "Use thermometer(s)",
+            "Log temps at intervals"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Choose aging window (if applicable)",
+          "cues": [
+            "Skip aging if you cannot control temperature/humidity."
+          ],
+          "checklist": [
+            "Select target days",
+            "Plan cutting date"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Package and label",
+          "cues": [],
+          "checklist": [
+            "Label cuts/date/species",
+            "Vac seal or wrap appropriately"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Record yield + quality notes",
+          "cues": [],
+          "checklist": [
+            "Log yield (optional)",
+            "Note tenderness outcomes for next time"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "cold_chain_log",
+        "yield_log"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.butchery-cut-sheet-planning",
+      "title": "Cut Sheet Planning (Whole Animal)",
+      "summary": "Create a cut plan that matches household preferences: roasts vs ground, organ meats, bones, fat, and preservation routing.",
+      "tags": [
+        "butchery",
+        "planning",
+        "inventory",
+        "preferences"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "swine",
+          "game_ranch",
+          "exotics_other"
+        ],
+        "notes": "This is planning/coordination; execution may be by a licensed processor."
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Set household priorities",
+          "cues": [],
+          "checklist": [
+            "Steaks/chops vs roasts vs ground",
+            "Soup bones/stock",
+            "Offal preferences",
+            "Fat rendering needs"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Choose thickness and pack sizes",
+          "cues": [],
+          "checklist": [
+            "Steak/chop thickness",
+            "Ground pack size",
+            "Sausage seasoning preferences"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Preservation routing",
+          "cues": [],
+          "checklist": [
+            "Fresh vs frozen vs cured vs canned",
+            "Allocate bones to stock/canning"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Communicate to processor/team",
+          "cues": [],
+          "checklist": [
+            "Send cut sheet",
+            "Confirm pickup time and storage"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Import into SSA inventory",
+          "cues": [],
+          "checklist": [
+            "Create inventory batch entry",
+            "Attach labels/locations"
+          ],
+          "timers": [],
+          "notes": "Link batch to animal ID and processing date."
+        }
+      ],
+      "outputs": [
+        "cut_sheet",
+        "inventory_batch_plan"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.poultry.deep-clean-coop",
+      "title": "Deep Clean Poultry Coop",
+      "summary": "Periodic coop sanitation to reduce ammonia and parasites.",
+      "tags": [
+        "poultry",
+        "housing",
+        "sanitation",
+        "natural"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "poultry"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Remove birds to safe pen",
+          "cues": [],
+          "checklist": [
+            "Provide water",
+            "Minimize handling time"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Dry scrape and remove bedding",
+          "cues": [],
+          "checklist": [
+            "Bag/compost bedding appropriately"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Wash surfaces",
+          "cues": [
+            "Avoid aerosolizing dust."
+          ],
+          "checklist": [
+            "Use mild detergent and rinse"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Disinfect and dry",
+          "cues": [],
+          "checklist": [
+            "Apply approved disinfectant",
+            "Allow full dry time"
+          ],
+          "timers": [],
+          "notes": "Drying is key for effectiveness."
+        },
+        {
+          "title": "Refresh bedding + check ventilation",
+          "cues": [],
+          "checklist": [
+            "Add clean bedding",
+            "Verify airflow without drafts"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.swine.wallow-management",
+      "title": "Swine Wallow & Shade Management",
+      "summary": "Maintain cooling options for pigs in hot weather.",
+      "tags": [
+        "swine",
+        "welfare",
+        "heat"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "swine"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Provide shade",
+          "cues": [
+            "Heat stress rises quickly."
+          ],
+          "checklist": [
+            "Shade cloth/trees/roofed area"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Maintain wallow or sprinklers",
+          "cues": [],
+          "checklist": [
+            "Keep area muddy (if using wallow)",
+            "Avoid standing foul water"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Water check",
+          "cues": [],
+          "checklist": [
+            "High-flow water access confirmed"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor for heat stress",
+          "cues": [
+            "Open-mouth breathing, lethargy, piling in shade."
+          ],
+          "checklist": [
+            "Adjust cooling immediately"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.rabbits.heat-management",
+      "title": "Rabbit Heat Management",
+      "summary": "Prevent heat stress for rabbits with airflow, frozen bottles, and timing.",
+      "tags": [
+        "rabbits",
+        "welfare",
+        "heat",
+        "low-tech"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "rabbits"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Ventilation audit",
+          "cues": [],
+          "checklist": [
+            "Fans/airflow path",
+            "No direct drafts on kits"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Cooling aids",
+          "cues": [],
+          "checklist": [
+            "Frozen water bottles/tiles available",
+            "Shade and insulation"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Feeding timing",
+          "cues": [],
+          "checklist": [
+            "Feed during coolest hours"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Daily check",
+          "cues": [],
+          "checklist": [
+            "Observe panting/lethargy",
+            "Ensure constant water"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.aquaculture.water-quality-basics",
+      "title": "Aquaculture Water Quality Basics",
+      "summary": "Routine checks for dissolved oxygen, temperature, and clarity; prevents losses.",
+      "tags": [
+        "aquaculture",
+        "water",
+        "modern",
+        "routine"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "aquaculture"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Measure key parameters",
+          "cues": [
+            "Low oxygen is a common emergency."
+          ],
+          "checklist": [
+            "Temperature",
+            "Dissolved oxygen (if device)",
+            "Clarity/odor"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Feed management",
+          "cues": [],
+          "checklist": [
+            "Avoid overfeeding",
+            "Remove uneaten feed"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Aeration check",
+          "cues": [],
+          "checklist": [
+            "Aerators working",
+            "Backup power plan (if critical)"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Record + respond",
+          "cues": [],
+          "checklist": [
+            "Log readings",
+            "Trigger corrective task if out of range"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.camelids.fiber-care",
+      "title": "Camelid Fiber Care Routine",
+      "summary": "Routine grooming and fiber management for alpaca/llama/camelids.",
+      "tags": [
+        "camelids",
+        "fiber",
+        "routine",
+        "traditional"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "camelids"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Groom gently",
+          "cues": [],
+          "checklist": [
+            "Use appropriate brush",
+            "Check for mats"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Check skin and parasites",
+          "cues": [],
+          "checklist": [
+            "Look for irritation",
+            "Note scratching/rubbing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Trim as needed (if practiced)",
+          "cues": [],
+          "checklist": [
+            "Plan trimming/shearing schedule",
+            "Avoid heat stress"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Store fiber clean and dry",
+          "cues": [],
+          "checklist": [
+            "Bag and label",
+            "Keep off ground"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.mineral-program",
+      "title": "Mineral & Salt Program",
+      "summary": "Provide species-appropriate minerals/salt; monitor intake and adjust by season.",
+      "tags": [
+        "nutrition",
+        "minerals",
+        "preventive"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "camelids",
+          "swine"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.water-system-winterization",
+      "title": "Water System Winterization",
+      "summary": "Prevent freeze-ups and ensure continuous water access in cold seasons.",
+      "tags": [
+        "infrastructure",
+        "winter",
+        "water"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "swine",
+          "poultry",
+          "rabbits"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.lambing-kidding-prep",
+      "title": "Lambing/Kidding Prep",
+      "summary": "Prepare birthing area, supplies, and observation plan for small ruminants.",
+      "tags": [
+        "birthing",
+        "ruminants",
+        "seasonal"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Optional culturally traditional variant",
+          "cues": [
+            "If you use a traditional practice in your community, document it as a variant and ensure it is lawful and humane."
+          ],
+          "checklist": [
+            "Capture tools/materials",
+            "Record outcomes for future refinement"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.calving-prep",
+      "title": "Calving Prep",
+      "summary": "Prepare calving area and monitoring plan for cattle/bison/yak/buffalo.",
+      "tags": [
+        "birthing",
+        "ruminants",
+        "seasonal"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_large"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Optional culturally traditional variant",
+          "cues": [
+            "If you use a traditional practice in your community, document it as a variant and ensure it is lawful and humane."
+          ],
+          "checklist": [
+            "Capture tools/materials",
+            "Record outcomes for future refinement"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.poultry.incubation-hatch",
+      "title": "Incubation & Hatch (Basic)",
+      "summary": "Manage incubation schedule and brooder readiness for chicks/ducklings/quail.",
+      "tags": [
+        "poultry",
+        "breeding",
+        "incubation"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "poultry"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Optional culturally traditional variant",
+          "cues": [
+            "If you use a traditional practice in your community, document it as a variant and ensure it is lawful and humane."
+          ],
+          "checklist": [
+            "Capture tools/materials",
+            "Record outcomes for future refinement"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.brooder-setup",
+      "title": "Brooder Setup",
+      "summary": "Safe brooder setup: heat source, bedding, water, feed, and temp checks.",
+      "tags": [
+        "poultry",
+        "chicks",
+        "housing"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "poultry"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Optional culturally traditional variant",
+          "cues": [
+            "If you use a traditional practice in your community, document it as a variant and ensure it is lawful and humane."
+          ],
+          "checklist": [
+            "Capture tools/materials",
+            "Record outcomes for future refinement"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.colostrum-plan",
+      "title": "Colostrum Plan",
+      "summary": "Ensure newborns receive adequate colostrum; track timing and interventions.",
+      "tags": [
+        "newborn",
+        "welfare",
+        "health"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.hoof-trimming-schedule",
+      "title": "Hoof Care Schedule",
+      "summary": "Routine hoof care planning and safe handling reminders.",
+      "tags": [
+        "health",
+        "hooves",
+        "routine"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "camelids"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.shearing-plan",
+      "title": "Shearing Plan (Wool/Fiber)",
+      "summary": "Plan shearing, cleanliness, and fiber storage workflow.",
+      "tags": [
+        "fiber",
+        "sheep",
+        "alpaca"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "camelids"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.milking-hygiene",
+      "title": "Milking Hygiene Routine",
+      "summary": "Clean milking routine to reduce mastitis and improve quality.",
+      "tags": [
+        "dairy",
+        "hygiene",
+        "routine"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Optional culturally traditional variant",
+          "cues": [
+            "If you use a traditional practice in your community, document it as a variant and ensure it is lawful and humane."
+          ],
+          "checklist": [
+            "Capture tools/materials",
+            "Record outcomes for future refinement"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.fence-line-training",
+      "title": "Fence Line Training (Electric)",
+      "summary": "Introduce animals to electric fencing safely.",
+      "tags": [
+        "infrastructure",
+        "training",
+        "safety"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "swine"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.predator-deterrence",
+      "title": "Predator Deterrence Routine",
+      "summary": "Layered deterrence: fencing, lighting, guardian animals, and night checks.",
+      "tags": [
+        "security",
+        "predators",
+        "routine"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "poultry",
+          "rabbits",
+          "game_ranch"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Optional culturally traditional variant",
+          "cues": [
+            "If you use a traditional practice in your community, document it as a variant and ensure it is lawful and humane."
+          ],
+          "checklist": [
+            "Capture tools/materials",
+            "Record outcomes for future refinement"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.cull-selection",
+      "title": "Cull/Keep Selection",
+      "summary": "Decision framework for culling to improve herd/flock health and productivity.",
+      "tags": [
+        "management",
+        "records",
+        "ethics"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "swine",
+          "poultry",
+          "rabbits",
+          "game_ranch"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.transport-prep",
+      "title": "Transport Prep (Low Stress)",
+      "summary": "Prepare crates/trailers, timing, and hydration for safe transport.",
+      "tags": [
+        "transport",
+        "welfare",
+        "planning"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "swine",
+          "poultry",
+          "rabbits",
+          "game_ranch",
+          "exotics_other"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.manure-composting",
+      "title": "Manure Handling & Composting",
+      "summary": "Safe manure handling and composting to protect soil and reduce pathogens.",
+      "tags": [
+        "manure",
+        "compost",
+        "sanitation",
+        "natural"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "swine",
+          "poultry",
+          "rabbits"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Optional culturally traditional variant",
+          "cues": [
+            "If you use a traditional practice in your community, document it as a variant and ensure it is lawful and humane."
+          ],
+          "checklist": [
+            "Capture tools/materials",
+            "Record outcomes for future refinement"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.pastured-poultry-tractors",
+      "title": "Pastured Poultry Tractors",
+      "summary": "Moveable shelters to spread fertility and reduce parasite load.",
+      "tags": [
+        "poultry",
+        "pasture",
+        "regenerative"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "poultry"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Optional culturally traditional variant",
+          "cues": [
+            "If you use a traditional practice in your community, document it as a variant and ensure it is lawful and humane."
+          ],
+          "checklist": [
+            "Capture tools/materials",
+            "Record outcomes for future refinement"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.multi-species-grazing",
+      "title": "Multi-Species Grazing Sequence",
+      "summary": "Use different species to utilize forage and disrupt parasite cycles.",
+      "tags": [
+        "regenerative",
+        "pasture",
+        "parasites"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Optional culturally traditional variant",
+          "cues": [
+            "If you use a traditional practice in your community, document it as a variant and ensure it is lawful and humane."
+          ],
+          "checklist": [
+            "Capture tools/materials",
+            "Record outcomes for future refinement"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.ethno-vet-herbal-support",
+      "title": "Ethno-Veterinary Herbal Support (Adjunct)",
+      "summary": "Culture-informed herbal supports as adjuncts (not replacements) to veterinary care.",
+      "tags": [
+        "traditional",
+        "herbal",
+        "adjunct",
+        "culture-specific"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "poultry",
+          "swine",
+          "rabbits"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.recordkeeping-withdrawals",
+      "title": "Medication & Withdrawal Tracking",
+      "summary": "Track treatments and withdrawal windows to stay compliant and safe.",
+      "tags": [
+        "records",
+        "compliance",
+        "health"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "swine",
+          "poultry",
+          "rabbits",
+          "game_ranch"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.finishing-feed-strategy",
+      "title": "Finishing Strategy (Feed/Forage)",
+      "summary": "Plan finishing phase for flavor and condition using legal, species-appropriate rations.",
+      "tags": [
+        "nutrition",
+        "planning",
+        "meat-quality"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "ruminants_small",
+          "ruminants_large",
+          "swine",
+          "game_ranch"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.poultry.processing-day-prep",
+      "title": "Poultry Processing Day Prep (Compliance)",
+      "summary": "High-level workflow planning for poultry processing within legal limits; prioritize welfare and sanitation.",
+      "tags": [
+        "poultry",
+        "processing",
+        "planning",
+        "food-safety"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "poultry"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Optional culturally traditional variant",
+          "cues": [
+            "If you use a traditional practice in your community, document it as a variant and ensure it is lawful and humane."
+          ],
+          "checklist": [
+            "Capture tools/materials",
+            "Record outcomes for future refinement"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.rabbit-processing-day-prep",
+      "title": "Rabbit Processing Day Prep (Compliance)",
+      "summary": "High-level workflow planning for rabbit processing within legal limits; prioritize welfare and sanitation.",
+      "tags": [
+        "rabbits",
+        "processing",
+        "planning",
+        "food-safety"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "rabbits"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Optional culturally traditional variant",
+          "cues": [
+            "If you use a traditional practice in your community, document it as a variant and ensure it is lawful and humane."
+          ],
+          "checklist": [
+            "Capture tools/materials",
+            "Record outcomes for future refinement"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    },
+    {
+      "id": "animals.fish-harvest-plan",
+      "title": "Aquaculture Harvest Plan",
+      "summary": "Plan harvest timing, holding, icing, and processing handoff for food safety.",
+      "tags": [
+        "aquaculture",
+        "harvest",
+        "planning",
+        "food-safety"
+      ],
+      "appliesTo": {
+        "speciesGroups": [
+          "aquaculture"
+        ],
+        "notes": ""
+      },
+      "defaults": {
+        "estimatedActiveMinutes": null,
+        "estimatedElapsedMinutes": null
+      },
+      "steps": [
+        {
+          "title": "Plan scope + gather supplies",
+          "cues": [
+            "Bundle tasks in SSA for repeats."
+          ],
+          "checklist": [
+            "Define group/animals affected",
+            "Gather tools/materials"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Perform core action(s)",
+          "cues": [],
+          "checklist": [
+            "Follow species-appropriate best practice",
+            "Work calmly and consistently"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Monitor and adjust",
+          "cues": [
+            "If unsure, consult a veterinarian/experienced handler."
+          ],
+          "checklist": [
+            "Watch for stress or adverse outcomes",
+            "Adjust environment or timing"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Optional culturally traditional variant",
+          "cues": [
+            "If you use a traditional practice in your community, document it as a variant and ensure it is lawful and humane."
+          ],
+          "checklist": [
+            "Capture tools/materials",
+            "Record outcomes for future refinement"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Quality check",
+          "cues": [],
+          "checklist": [
+            "Verify outcome and animal comfort",
+            "Check water/feed access"
+          ],
+          "timers": [],
+          "notes": ""
+        },
+        {
+          "title": "Log + schedule next",
+          "cues": [],
+          "checklist": [
+            "Record key notes",
+            "Schedule next interval"
+          ],
+          "timers": [],
+          "notes": ""
+        }
+      ],
+      "outputs": [
+        "log_entry",
+        "followup_tasks"
+      ],
+      "variants": [],
+      "safetyNotes": []
+    }
+  ]
+}

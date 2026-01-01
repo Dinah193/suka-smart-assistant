@@ -1,0 +1,376 @@
+{
+  "$schema": "file:///c:/Users/larho/suka-smart-assistant/src/data/schemas/gardenHarvest.schema.json",
+  "version": "2025-10-31T17:05:00-05:00",
+  "meta": {
+    "id": "leafy_shade_bed",
+    "title": "Leafy Greens – Shade/Partial Sun Bed (bed-b-shade)",
+    "description": "Harvest/yield profile for a leafy-greens bed in partial shade (e.g. bed-b-shade). Tuned for cut-and-come-again crops (lettuce mixes, mustards, chard, spinach in cool shoulder, bok choy) under your Hebrew calendar (full-moon start). Feeds garden-care (water, light, pest check), harvest-session offers, storehouse stock planning (salad mixes, ferments, green powders), meal planning (fresh-use windows), cleaning/sanitizing (harvest bins/knives), and animal routing (older leaves or pest damage → poultry/rabbits/compost). Supports reverse-gen from storehouse salad targets or co-op salad goals.",
+    "source": "suka-smart-assistant",
+    "tags": [
+      "garden",
+      "harvest",
+      "leafy",
+      "shade-bed",
+      "storehouse",
+      "meal-planning",
+      "cleaning",
+      "animals",
+      "reverse-gen"
+    ],
+    "calendar": {
+      "hebrewMonthStart": "full-moon",
+      "supportsAltStart": true,
+      "notes": "Use bed’s cool/shoulder windows to align with feast-prep salads and early spring offerings."
+    },
+    "locationPreset": "garden_beds/bed-b-shade"
+  },
+  "ui": {
+    "layout": "cards/timeline",
+    "hints": {
+      "primaryCTA": "Create Leafy Harvest Session",
+      "secondaryCTA": "Save as Favorite",
+      "tertiaryCTA": "Reverse-generate From Salad / Ferment Targets",
+      "showSeasonalityBadge": true,
+      "groupBy": [
+        "weekOfSeason",
+        "bedId",
+        "cropGroup"
+      ],
+      "suggestOnly": true,
+      "notes": "Render like modern garden planners: show next 2–3 cuts, show ‘quality score’ (shade → slower → higher salad quality)."
+    },
+    "badges": [
+      { "text": "Garden", "color": "emerald" },
+      { "text": "Leafy / Cut & Come Again", "color": "lime" },
+      { "text": "Bed B – Shade", "color": "cyan" }
+    ]
+  },
+  "orchestration": {
+    "bus": "window.__suka?.eventBus",
+    "emitOnLoad": [
+      "garden.harvest.curve.loaded",
+      "garden.leafy.shade-bed.loaded"
+    ],
+    "listen": [
+      "garden.session.request",
+      "garden.plan.changed",
+      "storehouse.goal.request",
+      "meal.session.request",
+      "cleaning.session.request",
+      "inventory.restock.request",
+      "automation.schedule.request"
+    ],
+    "sharedScopes": [
+      "garden",
+      "storehouse",
+      "meals",
+      "cleaning",
+      "animals"
+    ]
+  },
+  "engines": {
+    "primary": "gardenQueueEngine",
+    "supports": [
+      "storehouseGoalEngine",
+      "mealPlanEngine",
+      "cleaningSessionEngine",
+      "animalSessionEngine"
+    ],
+    "notes": "Garden engine should treat this as a multi-cut bed. After each user-confirmed harvest, schedule next cut in 5–10 days depending on season/care level; do not hard auto-run during Sabbaths/feast prep if user enabled sabbathGuard."
+  },
+  "reverse": {
+    "generateFrom": [
+      "storehouse.targets.salad-mix",
+      "storehouse.targets.fermented-greens",
+      "storehouse.targets.green-powder",
+      "mealplan.requirements.fresh-salad",
+      "coop-pool.salad",
+      "community.feast-days.greens",
+      "garden.bed.shade.target"
+    ],
+    "strategies": [
+      {
+        "id": "from-storehouse-salad-target",
+        "title": "Back into shade-bed harvests from storehouse salad mix target",
+        "input": {
+          "saladMixLitersTarget": 12,
+          "avgYieldPerCutLiters": 1.5
+        },
+        "output": {
+          "suggestedHarvestSessions": 8,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Schedule 8 light cuts from bed-b-shade over next month",
+              "emitOnUserAccept": [
+                "garden.session.request"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "from-mealplan-salads",
+        "title": "Back into harvest from meal plan salads (fresh windows)",
+        "input": {
+          "saladMealsPerWeek": 4,
+          "litersPerMeal": 0.75
+        },
+        "output": {
+          "requiredWeeklyHarvestLiters": 3,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Cut 3 L from shade bed for this week’s salads",
+              "emitOnUserAccept": [
+                "garden.session.request",
+                "meal.session.request"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "from-coop-salad-goal",
+        "title": "Back into harvest from co-op pooled salad goal",
+        "input": {
+          "coopSaladLitersGoal": 40,
+          "householdSharePct": 0.3
+        },
+        "output": {
+          "householdSaladLitersGoal": 12,
+          "suggestedHarvestSessions": 5,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Contribute 12 L salads from shade bed to co-op",
+              "emitOnUserAccept": [
+                "garden.session.request",
+                "storehouse.plan.generated"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "curve": {
+    "units": "kg-per-harvest",
+    "seasonLengthDays": 70,
+    "base": [
+      { "day": 1, "value": 0.25, "stage": "first-cut" },
+      { "day": 7, "value": 0.5, "stage": "established" },
+      { "day": 14, "value": 0.7, "stage": "established" },
+      { "day": 21, "value": 0.7, "stage": "steady" },
+      { "day": 28, "value": 0.65, "stage": "steady" },
+      { "day": 35, "value": 0.6, "stage": "steady" },
+      { "day": 42, "value": 0.55, "stage": "steady" },
+      { "day": 56, "value": 0.45, "stage": "late" },
+      { "day": 70, "value": 0.35, "stage": "late" }
+    ],
+    "weeklyView": [
+      { "week": 1, "avg": 0.4 },
+      { "week": 2, "avg": 0.6 },
+      { "week": 3, "avg": 0.7 },
+      { "week": 4, "avg": 0.65 },
+      { "week": 5, "avg": 0.6 },
+      { "week": 6, "avg": 0.55 },
+      { "week": 7, "avg": 0.45 },
+      { "week": 8, "avg": 0.35 },
+      { "week": 9, "avg": 0.3 }
+    ],
+    "bed": {
+      "id": "bed-b-shade",
+      "areaSqft": 24,
+      "plantSpacingIn": 8,
+      "rowCount": 2,
+      "trellised": false,
+      "notes": "Shade bed used for lettuces/greens that prefer lower heat. Curve assumes drip or consistent watering."
+    }
+  },
+  "adjustments": {
+    "byClimateZone": [
+      {
+        "zone": "hot-humid",
+        "multiplier": 0.85,
+        "notes": "Heat → bolt risk → suggest earlier, smaller, more frequent cuts + tool sanitizing."
+      },
+      {
+        "zone": "hot-dry",
+        "multiplier": 0.9,
+        "notes": "Needs mulching/irrigation; surface ‘Check irrigation’ garden session."
+      },
+      {
+        "zone": "cooler-shoulder",
+        "multiplier": 1.05,
+        "notes": "Cool temps favor leafy greens; you can lengthen seasonLengthDays."
+      }
+    ],
+    "byCareLevel": [
+      { "level": "intensive", "multiplier": 1.15 },
+      { "level": "standard", "multiplier": 1.0 },
+      { "level": "minimal", "multiplier": 0.8 }
+    ]
+  },
+  "storehouse": {
+    "targets": {
+      "salad_mix_liters": 10,
+      "fermented_greens_jars_quart": 4,
+      "green_powder_dehydrated_kg": 1
+    },
+    "grocerySectionsInspiration": [
+      "Fresh Produce / Bagged Salads",
+      "Fermented / Pickled",
+      "Meal Starters",
+      "Smoothie / Wellness",
+      "Feast / Gathering Prep"
+    ],
+    "autoPlan": {
+      "enabled": false
+    }
+  },
+  "meals": {
+    "recipes": [
+      {
+        "id": "fresh-shade-salad",
+        "title": "Fresh Shade-Bed Salad",
+        "useWithinHours": 48,
+        "linksTo": [
+          "/meals/lunch",
+          "/inventory/fresh-produce"
+        ]
+      },
+      {
+        "id": "greens-ferment",
+        "title": "Fermented Greens (Small Batch)",
+        "linksTo": [
+          "/storehouse/ferments",
+          "/cleaning/kitchen"
+        ],
+        "emit": "cooking.session.request"
+      }
+    ],
+    "autoSession": {
+      "everyDays": 0,
+      "emit": []
+    }
+  },
+  "cleaning": {
+    "routines": [
+      {
+        "id": "harvest-bins-sanitize",
+        "title": "Sanitize Harvest Bins / Knives (Leafy)",
+        "frequency": "PER_HARVEST",
+        "emit": "cleaning.session.request",
+        "tools": [
+          "sanitizer",
+          "soft-brush",
+          "drying-rack"
+        ]
+      },
+      {
+        "id": "shade-bed-weekly-tidy",
+        "title": "Shade Bed Weekly Tidy (remove yellowed leaves)",
+        "frequency": "WEEKLY",
+        "emit": "cleaning.session.request"
+      }
+    ],
+    "sabbathGuard": true
+  },
+  "garden": {
+    "care": [
+      {
+        "id": "check-mulch",
+        "title": "Check Mulch / Moisture – Shade Bed",
+        "emit": "garden.session.request"
+      },
+      {
+        "id": "pest-scout-leafy",
+        "title": "Pest Scout – Leafy Greens",
+        "emit": "garden.session.request"
+      }
+    ],
+    "harvest": {
+      "autoSuggest": true,
+      "userMustConfirm": true,
+      "emitOnConfirm": [
+        "garden.session.request"
+      ]
+    },
+    "notes": "Because this is a shade/cool bed, it’s ideal for succession. Let user copy this curve to bed-b-shade-2 for staggered harvests."
+  },
+  "animals": {
+    "routing": {
+      "spentVines": [],
+      "surplusGreens": [
+        "poultry",
+        "rabbits",
+        "compost"
+      ],
+      "notes": "Bug-damaged or bitter leaves can be routed to poultry/rabbits, but diseased material should go to hot compost only."
+    },
+    "emit": [
+      "animal.care.session.request"
+    ]
+  },
+  "inventory": {
+    "productId": "garden-leafy-shade-bed",
+    "unit": "kg",
+    "trackLots": true,
+    "harvestTag": "shade-bed",
+    "shelfLifeDays": 3
+  },
+  "favoriteSessions": [
+    {
+      "id": "fav-shade-bed-mon-thu",
+      "title": "Shade Bed Harvest – Mon/Thu (User Confirm)",
+      "domain": "garden/harvest",
+      "schedule": "RRULE:FREQ=WEEKLY;BYDAY=MO,TH;BYHOUR=7;BYMINUTE=0;BYSECOND=0",
+      "sabbathGuard": true
+    },
+    {
+      "id": "fav-small-ferment",
+      "title": "Small Ferment from Shade Bed",
+      "domain": "storehouse/ferments",
+      "schedule": ""
+    }
+  ],
+  "scheduleTemplates": [
+    {
+      "id": "shade-3x-week-peak",
+      "title": "Shade Bed Harvest 3x/Week (Peak Cool)",
+      "rrules": [
+        "RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;BYHOUR=7;BYMINUTE=0;BYSECOND=0"
+      ],
+      "options": {
+        "sabbathGuard": true,
+        "quietHoursGuard": true,
+        "userMustConfirm": true
+      }
+    }
+  ],
+  "userProfiles": {
+    "allowUserOwnedSchedules": true,
+    "allowUserOwnedFavorites": true,
+    "allowExportShare": true,
+    "shareFormats": [
+      "json",
+      "suka-plan",
+      "calendar-rrule"
+    ]
+  },
+  "events": {
+    "emits": [
+      "garden.session.request",
+      "cleaning.session.request",
+      "meal.session.request",
+      "storehouse.plan.generated",
+      "inventory.restock.request"
+    ],
+    "consumes": [
+      "garden.plan.changed",
+      "storehouse.targets.changed",
+      "meal.session.completed"
+    ]
+  }
+}

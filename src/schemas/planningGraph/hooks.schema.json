@@ -1,0 +1,6 @@
+{
+  "$id": "hooks.schema.json",
+  "title": "Planning Graph Hooks Schema",
+  "type": "object",
+  "additionalProperties": true
+}

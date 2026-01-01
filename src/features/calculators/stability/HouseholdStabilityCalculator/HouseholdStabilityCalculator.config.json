@@ -1,0 +1,38 @@
+{
+  "nodeKey": "stability.householdStability",
+  "kind": "calculator-node",
+  "label": "Household Stability Calculator",
+  "description": "Aggregates calendar, feast, year-length, storehouse, and routine data into a simple stability score and narrative for the household.",
+  "domain": "stability",
+  "version": "1.0.0",
+  "createdBy": "suka-smart-assistant",
+  "updatedBy": "suka-smart-assistant",
+  "tags": [
+    "stability",
+    "household",
+    "planning-graph",
+    "calculator",
+    "calendar-linked"
+  ],
+  "inputSchemaRef": "src/features/calculators/stability/HouseholdStabilityCalculator/HouseholdStabilityCalculator.schema.json",
+  "outputSchemaRef": "src/features/calculators/stability/HouseholdStabilityCalculator/HouseholdStabilityCalculator.schema.json",
+  "shimPath": "src/features/calculators/stability/HouseholdStabilityCalculator/HouseholdStabilityCalculator.shim.js",
+  "preferredViews": [
+    "stability.householdStability.view"
+  ],
+  "nextMappingRef": "src/features/calculators/stability/HouseholdStabilityCalculator/HouseholdStabilityCalculator.mappings.json",
+  "upstream": [
+    "calendar.scripturalYearLength",
+    "calendar.feastDayAlignment",
+    "calendar.biblicalOffering",
+    "storehouse.storehouseReadiness",
+    "meals.macroAndMenuBalance"
+  ],
+  "downstream": [
+    "planning.householdPlan",
+    "planning.curriculumTracks",
+    "planning.seasonalFocus",
+    "planning.routineStrengthener"
+  ],
+  "notes": "This node acts as a summarizing calculator for household stability, using calendar and planning inputs (year length, feasts, offerings, storehouse readiness, and meal balance) to generate a stability score, narrative, and suggested next actions. It is designed to feed into higher-level planning flows (household plan, curriculum, seasonal focus) and to be re-used by the SessionRunner when suggesting stabilizing sessions (cleaning, cooking, garden, and preservation)."
+}

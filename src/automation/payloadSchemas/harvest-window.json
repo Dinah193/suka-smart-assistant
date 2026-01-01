@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "HarvestWindow",
+  "type": "object",
+  "required": ["userId", "plantings"],
+  "properties": {
+    "userId": { "type": "string", "minLength": 1 },
+    "plantings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["crop", "plotId", "expectedYield", "windowStart", "windowEnd"],
+        "properties": {
+          "crop": { "type": "string" },
+          "plotId": { "type": "string" },
+          "expectedYield": { "type": "number", "minimum": 0 },
+          "unit": { "type": "string", "default": "lb" },
+          "windowStart": { "type": "string" },
+          "windowEnd": { "type": "string" },
+          "preferredPreservation": {
+            "type": "string",
+            "enum": ["can", "freeze", "cure", "dehydrate", "ferment", "fresh"],
+            "default": "fresh"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "forecast": { "type": "object", "additionalProperties": true }
+  },
+  "additionalProperties": false
+}

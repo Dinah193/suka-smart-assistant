@@ -1,0 +1,248 @@
+{
+  "id": "animal-planner-next-steps",
+  "calculator": "planning-next-steps",
+  "status": "active",
+
+  "domains": [
+    "animals",
+    "storehouse",
+    "garden",
+    "preservation",
+    "cooking"
+  ],
+
+  "inputs": {
+    "fromNodeKey": "animal-planner",
+    "fromLabel": "Animal Planner",
+    "fromGroup": "Homestead / Animals",
+    "flows": [
+      {
+        "id": "animal-acquisition-plan",
+        "label": "Acquisition & On-Ramp",
+        "source": "AnimalPlannerView",
+        "eventType": "planning.flow.completed"
+      },
+      {
+        "id": "animal-breeding-calendar",
+        "label": "Breeding Calendar & Replacement",
+        "source": "AnimalPlannerView",
+        "eventType": "planning.flow.completed"
+      },
+      {
+        "id": "animal-usage-flow",
+        "label": "Usage Flow – Meat, Milk, Eggs, Fiber, Work",
+        "source": "AnimalPlannerView",
+        "eventType": "planning.flow.completed"
+      },
+      {
+        "id": "animal-risk-resilience",
+        "label": "Risk & Resilience",
+        "source": "AnimalPlannerView",
+        "eventType": "planning.flow.completed"
+      }
+    ]
+  },
+
+  "rules": [
+    {
+      "id": "after-animal-acquisition-plan",
+      "when": {
+        "flowId": "animal-acquisition-plan",
+        "eventType": "planning.flow.completed",
+        "source": "AnimalPlannerView"
+      },
+      "nextSteps": [
+        {
+          "kind": "session-template",
+          "label": "Start Animal Acquisition Session Now",
+          "reason": "Walks you through confirming housing, fencing, feed, and arrival dates so animals land in a ready system.",
+          "sessionDomain": "animals",
+          "sessionSourceType": "animalTask",
+          "flowKey": "acquisition",
+          "nodeKey": "animal-planner",
+          "nowIntent": {
+            "eventType": "session.requestNext",
+            "focusArea": "animal-acquisition-plan",
+            "domainHints": ["animals", "storehouse", "garden"]
+          }
+        },
+        {
+          "kind": "calculator-node",
+          "label": "Storehouse Duration Calculator",
+          "reason": "Checks how long current feed and food reserves will last if you add these animals.",
+          "nodeKey": "calc-storehouse-duration",
+          "route": "/calculators/storehouse/duration",
+          "domainHints": ["storehouse", "stability"]
+        },
+        {
+          "kind": "planner-node",
+          "label": "Food Stabilization Plan",
+          "reason": "Aligns incoming animals with a realistic storehouse and grocery strategy.",
+          "nodeKey": "node-food-stabilization",
+          "route": "/planning/food-stabilization",
+          "domainHints": ["storehouse", "animals", "planning"]
+        },
+        {
+          "kind": "planner-node",
+          "label": "Garden Season Setup",
+          "reason": "Lets you sync garden outputs (fodder, kitchen scraps) with animal feed and manure use.",
+          "nodeKey": "node-garden-season",
+          "route": "/planning/garden-season",
+          "domainHints": ["garden", "animals", "planning"]
+        },
+        {
+          "kind": "calculator-node",
+          "label": "Household Stability Dashboard",
+          "reason": "Shows how animal acquisition affects household stability (food, money, and time).",
+          "nodeKey": "node-stability",
+          "route": "/calculators/stability/household-stability",
+          "domainHints": ["stability", "storehouse", "animals"]
+        }
+      ]
+    },
+    {
+      "id": "after-animal-breeding-calendar",
+      "when": {
+        "flowId": "animal-breeding-calendar",
+        "eventType": "planning.flow.completed",
+        "source": "AnimalPlannerView"
+      },
+      "nextSteps": [
+        {
+          "kind": "session-template",
+          "label": "Breeding Calendar Session",
+          "reason": "Turns your breeding decisions into a timed checklist you can actually follow.",
+          "sessionDomain": "animals",
+          "sessionSourceType": "animalTask",
+          "flowKey": "breeding",
+          "nodeKey": "animal-planner",
+          "nowIntent": {
+            "eventType": "session.requestNext",
+            "focusArea": "animal-breeding-calendar",
+            "domainHints": ["animals", "storehouse"]
+          }
+        },
+        {
+          "kind": "calculator-node",
+          "label": "Meat Breakdown Calculator",
+          "reason": "Estimates meat, bones, fat, and organ yields from projected butcher dates.",
+          "nodeKey": "calc-meat-breakdown",
+          "route": "/calculators/storehouse/meat-breakdown",
+          "domainHints": ["storehouse", "animals", "preservation"]
+        },
+        {
+          "kind": "calculator-node",
+          "label": "Daily Micronutrient Requirements",
+          "reason": "Compares expected animal yields to your household’s daily nutrient needs.",
+          "nodeKey": "calc-daily-micronutrients",
+          "route": "/calculators/health/daily-micronutrients",
+          "domainHints": ["health", "nutrition", "animals"]
+        },
+        {
+          "kind": "planner-node",
+          "label": "Health Reset Planning Flow",
+          "reason": "Uses upcoming meat and eggs for a health reset instead of random meals.",
+          "nodeKey": "node-health-reset",
+          "route": "/planning/health-reset",
+          "domainHints": ["health", "cooking", "animals"]
+        }
+      ]
+    },
+    {
+      "id": "after-animal-usage-flow",
+      "when": {
+        "flowId": "animal-usage-flow",
+        "eventType": "planning.flow.completed",
+        "source": "AnimalPlannerView"
+      },
+      "nextSteps": [
+        {
+          "kind": "session-template",
+          "label": "Usage Flow Session",
+          "reason": "Maps each animal to butcher windows, preservation sessions, and regular meals.",
+          "sessionDomain": "animals",
+          "sessionSourceType": "animalTask",
+          "flowKey": "usage",
+          "nodeKey": "animal-planner",
+          "nowIntent": {
+            "eventType": "session.requestNext",
+            "focusArea": "animal-usage-flow",
+            "domainHints": ["animals", "cooking", "preservation", "storehouse"]
+          }
+        },
+        {
+          "kind": "planner-node",
+          "label": "Feast Preparation Planning Flow",
+          "reason": "Connects special animals and cuts to upcoming feasts and holy days.",
+          "nodeKey": "node-feast-prep",
+          "route": "/planning/feast-prep",
+          "domainHints": ["cooking", "preservation", "calendar"]
+        },
+        {
+          "kind": "planner-node",
+          "label": "Food Stabilization Plan",
+          "reason": "Aligns animal-based meals with your long-term pantry and freezer plan.",
+          "nodeKey": "node-food-stabilization",
+          "route": "/planning/food-stabilization",
+          "domainHints": ["storehouse", "cooking", "preservation"]
+        },
+        {
+          "kind": "calculator-node",
+          "label": "Storehouse Duration Calculator",
+          "reason": "Checks if your projected animal yields and preserved foods can cover target months.",
+          "nodeKey": "calc-storehouse-duration",
+          "route": "/calculators/storehouse/duration",
+          "domainHints": ["storehouse", "planning"]
+        }
+      ]
+    },
+    {
+      "id": "after-animal-risk-resilience",
+      "when": {
+        "flowId": "animal-risk-resilience",
+        "eventType": "planning.flow.completed",
+        "source": "AnimalPlannerView"
+      },
+      "nextSteps": [
+        {
+          "kind": "session-template",
+          "label": "Risk & Resilience Session",
+          "reason": "Walks you through what to do first if feed, money, or health get tight.",
+          "sessionDomain": "animals",
+          "sessionSourceType": "animalTask",
+          "flowKey": "risk",
+          "nodeKey": "animal-planner",
+          "nowIntent": {
+            "eventType": "session.requestNext",
+            "focusArea": "animal-risk-resilience",
+            "domainHints": ["animals", "storehouse", "garden"]
+          }
+        },
+        {
+          "kind": "calculator-node",
+          "label": "Household Stability Dashboard",
+          "reason": "Shows how animal cull/sell decisions affect stability in food, time, and money.",
+          "nodeKey": "node-stability",
+          "route": "/calculators/stability/household-stability",
+          "domainHints": ["stability", "finance", "storehouse", "animals"]
+        },
+        {
+          "kind": "planner-node",
+          "label": "Food Stabilization Plan",
+          "reason": "Adjusts your food and feed plan after you downsize or rebalance animals.",
+          "nodeKey": "node-food-stabilization",
+          "route": "/planning/food-stabilization",
+          "domainHints": ["storehouse", "animals", "planning"]
+        },
+        {
+          "kind": "planner-node",
+          "label": "Garden Season Setup",
+          "reason": "Shifts garden plans (fodder, compost crops) after changing animal load.",
+          "nodeKey": "node-garden-season",
+          "route": "/planning/garden-season",
+          "domainHints": ["garden", "animals", "planning"]
+        }
+      ]
+    }
+  ]
+}

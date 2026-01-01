@@ -1,0 +1,161 @@
+{
+  "$schema": "../../schemas/planningGraph/nodes.schema.json",
+
+  "nodeKey": "animal-planner",
+  "version": "1.0.0",
+  "kind": "planner-node",
+  "domain": "animals",
+
+  "id": "animal-planner",
+  "label": "Animal Planner",
+  "description": "Plans animal acquisition, breeding, and usage so animals line up with storehouse, garden, and preservation goals instead of becoming random pets eating money.",
+
+  "feature": {
+    "view": "src/features/animal/AnimalPlanner.view.jsx",
+    "logic": "src/features/animal/AnimalPlanner.logic.js",
+    "domains": ["animals", "storehouse", "garden", "preservation", "cooking"],
+    "tags": [
+      "planning",
+      "animals",
+      "meat",
+      "eggs",
+      "milk",
+      "fiber",
+      "work"
+    ]
+  },
+
+  "planningGraph": {
+    "nodeType": "feature",
+    "graphNodeId": "node-animal-planner",
+    "group": "Homestead / Animals",
+    "priority": 50,
+
+    "feedsInto": [
+      "node-food-stabilization",
+      "node-garden-season",
+      "node-feast-prep",
+      "node-stability"
+    ],
+
+    "supportedBy": [
+      "calc-storehouse-duration",
+      "calc-meat-breakdown",
+      "calc-daily-micronutrients",
+      "node-planning-any"
+    ],
+
+    "exposes": [
+      "animal-acquisition-plan",
+      "animal-breeding-calendar",
+      "animal-usage-flow",
+      "animal-risk-resilience"
+    ]
+  },
+
+  "nowIntent": {
+    "eventType": "session.requestNext",
+    "source": "AnimalPlannerView",
+    "defaultFocusArea": "animal-planning",
+    "defaultDomainHints": [
+      "animals",
+      "storehouse",
+      "garden",
+      "preservation",
+      "cooking"
+    ],
+    "flows": [
+      {
+        "id": "animal-acquisition-plan",
+        "label": "Acquisition & On-Ramp",
+        "description": "Clarify which animals to bring in, why, and whether housing and feed are ready.",
+        "domainHints": ["animals", "storehouse", "garden"],
+        "focusArea": "animal-acquisition-plan"
+      },
+      {
+        "id": "animal-breeding-calendar",
+        "label": "Breeding Calendar & Replacement",
+        "description": "Plan breeding windows and replacement rules so herd size stays under control.",
+        "domainHints": ["animals", "storehouse"],
+        "focusArea": "animal-breeding-calendar"
+      },
+      {
+        "id": "animal-usage-flow",
+        "label": "Usage Flow – Meat, Milk, Eggs, Fiber, Work",
+        "description": "Connect animals to meals, preservation sessions, and real work jobs.",
+        "domainHints": ["animals", "cooking", "preservation", "storehouse"],
+        "focusArea": "animal-usage-flow"
+      },
+      {
+        "id": "animal-risk-resilience",
+        "label": "Risk & Resilience",
+        "description": "Decide what happens if feed, health, or money get tight.",
+        "domainHints": ["animals", "storehouse", "garden"],
+        "focusArea": "animal-risk-resilience"
+      }
+    ]
+  },
+
+  "sessions": {
+    "generator": "generateAnimalSessionsFromPlan",
+    "persistence": "syncAnimalPlanToSessions",
+    "sessionDomain": "animals",
+    "sourceType": "animalTask",
+    "analyticsLabel": "animal-planning",
+    "templates": [
+      {
+        "flowKey": "acquisition",
+        "titleTemplate": "Animal Acquisition for {{planLabel}}",
+        "defaultDurationSec": 420,
+        "blockers": ["inventory", "quietHours"]
+      },
+      {
+        "flowKey": "breeding",
+        "titleTemplate": "Breeding Calendar for {{planLabel}}",
+        "defaultDurationSec": 600,
+        "blockers": ["inventory", "quietHours"]
+      },
+      {
+        "flowKey": "usage",
+        "titleTemplate": "Usage Flow for {{planLabel}}",
+        "defaultDurationSec": 720,
+        "blockers": ["inventory", "quietHours"]
+      },
+      {
+        "flowKey": "risk",
+        "titleTemplate": "Risk & Resilience for {{planLabel}}",
+        "defaultDurationSec": 480,
+        "blockers": ["inventory", "quietHours"]
+      }
+    ]
+  },
+
+  "integration": {
+    "feedDemand": {
+      "logicFn": "calculateFeedDemand",
+      "notes": "Uses FeedProfile per animalId to estimate daily dry matter, pasture, and purchased feed demand across horizonDays."
+    },
+    "butcherySchedule": {
+      "logicFn": "estimateButcherySchedule",
+      "notes": "Uses YieldProfile per animalId to generate butcher events and yields connected to preservation and batch cooking."
+    },
+    "micronutrients": {
+      "logicFn": "mapButcheryToMicronutrients",
+      "feedsInto": ["calc-daily-micronutrients", "node-health-reset"],
+      "notes": "Aggregates meat yields into micronutrient coverage; designed to sync with the Daily Micronutrient Requirement calculators."
+    }
+  },
+
+  "uiHints": {
+    "layout": "planner",
+    "summaryRow": true,
+    "showQuickNowPanel": true,
+    "showRelatedLinks": true,
+    "recommendedRoutes": [
+      "/planning/food-stabilization",
+      "/planning/garden-season",
+      "/calculators/stability/household-stability",
+      "/calculators/storehouse/duration"
+    ]
+  }
+}

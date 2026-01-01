@@ -1,0 +1,553 @@
+===============================================================================
+FEAST CYCLES CONFIG – DESIGN SPEC
+File: src/intelligence/cycles/feastCycles.config.txt
+Role: Config contract for feast/event rhythms across the household
+===============================================================================
+
+0. CONCEPTUAL PURPOSE
+---------------------
+The feastCycles config describes how the householder’s feasts and gatherings
+unfold as **cycles** that touch every domain:
+
+- cooking & meals (special menus, advance prep, leftovers),
+- storehouse/provisioning (stocking up, using reserved yields),
+- garden & animals (selecting harvest and animals for offerings/meats),
+- preservation (converting feast surplus into future yields),
+- cleaning & textiles (pre-feast preparation, post-feast recovery),
+- home maintenance (readiness of spaces and infrastructure),
+- mutual aid & enterprise (shared feasts, community days, catered events).
+
+SSA uses this config to:
+
+- Understand feasts as **rhythms anchored in seasons**, not one-off events.
+- See feast cycles as high points in the household’s yearly story.
+- Align cooking, storehouse, cleaning, preservation, and mutual-aid rhythms
+  with the feast calendar.
+- Provide cycle-aware insights and SessionRunner guidance:
+  - “Feast window approaching: storehouse provisions for grains and oil
+     are below comfortable levels.”
+  - “Post-feast recovery window: textiles and cleaning rhythms are rising.”
+
+This is a **config contract**, not an engine.
+It defines:
+- feast cycle templates,
+- seasonal feast windows,
+- domain bindings,
+- readiness thresholds and recovery windows.
+
+It must support:
+
+- TOOL MODE:
+  - A single “Feast Cycle Planner” or calendar tool can use this config alone
+    to help a householder think through a feast cycle without Dexie or global
+    state.
+- STEWARDSHIP MODE:
+  - SSA loads/persists this config in Dexie and merges it with seasonal
+    intelligence, storehouse, and the householdCycles.engine so the whole
+    house is guided through feast rhythms.
+
+Language: cycle, season, storehouse, provision, yield, rhythm, feast, householder.
+Avoid “task list”, “todo”, or generic productivity phrasing.
+
+
+1. STRUCTURE – CONFIG SHAPE & DOMAINS
+-------------------------------------
+Primary domains:
+- feasts/events
+- cooking/meals
+- storehouse/provisioning
+- cleaning/hygiene
+- textiles
+- garden
+- animals
+- preservation
+- mutual aid / community feasting
+- enterprise (catering, food truck, feast services)
+
+Conceptual config shape (JSON-like, implemented via JS/JSON later):
+
+feastCyclesConfig = {
+  version: "1.0.0",
+  lastUpdatedAt: string,
+  modeHint?: "TOOL" | "STEWARDSHIP",
+
+  // Canonical feast cycles and their rhythms
+  feastCycles: FeastCycleConfig[],
+
+  // Reusable templates for feast phases (preparation, feast day, recovery)
+  phaseTemplates: FeastPhaseTemplate[],
+
+  // Seasonal calendar bindings and windows
+  seasonalBindings: FeastSeasonBinding[],
+
+  // Bindings into storehouse and other domains
+  bindings: {
+    storehouseProvisions: FeastProvisionBinding[],
+    domainSignals: FeastDomainSignalBinding[],
+  },
+
+  // Preferences for how prominently feast insights are surfaced
+  signals: {
+    anticipationHorizonDays: number,       // how far ahead to start feast alerts
+    recoveryWindowDays: number,            // default length of post-feast rhythm
+    sendProvisionReadinessAlerts: boolean,
+    sendHouseholdReadinessAlerts: boolean,
+    sendRecoveryAlerts: boolean,
+  },
+
+  metadata?: {
+    householdName?: string,
+    feastCultureNotes?: string,           // high-level narrative notes
+  },
+};
+
+
+2. PROPS – DETAILED CONFIG COMPONENTS
+-------------------------------------
+
+2.1 FeastCycleConfig
+Represents a specific recurring feast or event cycle.
+
+FeastCycleConfig = {
+  id: string,                        // e.g. "passover", "feast-of-weeks", "sukkot",
+                                     //      "weekly-sabbath", "mutual-aid-feast"
+  label: string,                     // display name
+  category: "appointed" | "weekly" | "family" | "mutual-aid" | "enterprise",
+  priority: "core" | "supporting",   // core feasts shape the year most strongly
+
+  // Ties to seasonal intelligence or calendar
+  seasonBindingId: string,           // link into FeastSeasonBinding
+
+  // How the feast cycle is structured in phases
+  phases: {
+    preparation: {
+      templateId: string,            // reference into FeastPhaseTemplate
+      anticipationDays: number,      // how many days ahead prep rhythm rises
+    },
+    feastDay: {
+      templateId: string,
+      days: number,                  // 1 or multi-day feasts
+    },
+    recovery: {
+      templateId: string,
+      recoveryDaysDefault: number,   // default post-feast recovery window
+    },
+  },
+
+  // Conceptual yields of this feast for insights:
+  yields: {
+    hospitalityScore: number,        // 0..1
+    spiritualRestScore: number,      // 0..1
+    communityBondScore: number,      // 0..1
+  },
+
+  // Domain emphasis:
+  domainWeights: {
+    cooking?: number,                // 0..1
+    storehouse?: number,
+    garden?: number,
+    animals?: number,
+    preservation?: number,
+    cleaning?: number,
+    textiles?: number,
+    mutualAid?: number,
+    enterprise?: number,
+  },
+
+  notes?: string,
+};
+
+
+2.2 FeastPhaseTemplate
+Reusable patterns for feast-related rhythms.
+
+FeastPhaseTemplate = {
+  id: string,                        // e.g. "pre-passover-prep", "feast-day", "post-feast-recovery"
+  label: string,
+  phaseType: "preparation" | "feast-day" | "recovery",
+
+  // Intensity of household demand in this phase
+  intensity: "gentle" | "strong" | "peak",
+
+  // Broad domain emphasis
+  domainFocus: {
+    cooking?: "light" | "moderate" | "heavy",
+    storehouse?: "light" | "moderate" | "heavy",
+    cleaning?: "light" | "moderate" | "heavy",
+    textiles?: "light" | "moderate" | "heavy",
+    garden?: "light" | "moderate" | "heavy",
+    animals?: "light" | "moderate" | "heavy",
+    preservation?: "light" | "moderate" | "heavy",
+  },
+
+  // Storehouse impact for modeling purposes (no exact quantities here)
+  storehouseImpact: {
+    inflowCategories?: {
+      [storehouseCategoryKey: string]: {
+        magnitude: "low" | "medium" | "high",
+      },
+    },
+    outflowCategories?: {
+      [storehouseCategoryKey: string]: {
+        magnitude: "low" | "medium" | "high",
+      },
+    },
+  },
+
+  // Guidance for SessionRunner: how long a “typical” block might be
+  typicalSessionDurations?: {
+    cookingMinutes?: number,
+    cleaningMinutes?: number,
+    textilesMinutes?: number,
+  },
+
+  // TODO[cycles-engine]:
+  // - Map these domainFocus and storehouseImpact values into a rhythmSignal
+  //   for the "feasts/events" domain inside householdCycles.engine.
+
+  description?: string,
+};
+
+
+2.3 FeastSeasonBinding
+Connects feast cycles to the seasonal intelligence and calendar system.
+
+FeastSeasonBinding = {
+  id: string,                        // referenced in FeastCycleConfig
+  label: string,
+
+  // Scriptural / calendar reference (dependent on your Hebrew calendar config)
+  calendarKey: string,               // e.g. "passover", "unleavened-bread", "shavuot", "sukkot",
+                                     //      "weekly-sabbath", "new-moon-feast"
+  seasonIdPattern: string,           // e.g. "spring", "summer", "autumn", "feast:passover"
+
+  // Window relative to season start or calendar anchor
+  window: {
+    anchorType: "season-start" | "full-moon" | "calendar-ordinal",
+    startOffsetDays: number,         // e.g. -7 for a week before
+    endOffsetDays: number,           // e.g. +1 day after the last feast day
+  },
+
+  // Optionally include hints for climate or harvest profile:
+  climateHints?: {
+    likelyHarvestFocus?: string[],   // e.g. ["barley", "wheat", "grapes"]
+  },
+
+  // TODO[seasonal-logic]:
+  // - Bind this to the seasonalIntelligence + Hebrew calendar engine so
+  //   that upcoming feast windows are computed automatically.
+
+  notes?: string,
+};
+
+
+2.4 FeastProvisionBinding
+Connects specific storehouse provisions to feast cycles and phases.
+
+FeastProvisionBinding = {
+  id: string,
+  label: string,
+  storehouseItemKey: string,         // or category key
+
+  // Which feast cycles and phases depend on this provision
+  feastCycleIds: string[],
+  phaseTypes: ("preparation" | "feast-day" | "recovery")[],
+
+  // Readiness thresholds for feast comfort
+  readinessThresholds: {
+    comfortable: number,
+    low: number,
+    critical: number,
+  },
+
+  // Conceptual usage notes
+  usageRole?: "core-meal" | "symbolic" | "hospitality" | "cleaning" | "textiles",
+
+  // TODO[storehouse]:
+  // - Use this with live storehouse levels to compute feast readiness:
+  //   “Your oil and flour provisions are not yet comfortable for the
+  //    upcoming feast window.”
+
+  notes?: string,
+};
+
+
+2.5 FeastDomainSignalBinding
+Describes how other domains’ events interact with feast cycles.
+
+FeastDomainSignalBinding = {
+  id: string,
+  sourceDomain: string,              // "cooking" | "storehouse" | "garden" | "animals" |
+                                     // "preservation" | "cleaning" | "textiles" |
+                                     // "mutual-aid" | "enterprise"
+  sourceEventType: string,           // e.g. "mealPlan.updated", "storehouse.level.changed",
+                                     //      "harvest.logged", "butchery.session.completed",
+                                     //      "mutualAid.meal.planned"
+
+  // How the signal interacts with feast cycles
+  effect: "preparation-intensify" |
+          "feast-day-adjust" |
+          "recovery-extend" |
+          "provision-alert" |
+          "yield-opportunity",
+
+  affectedFeastCycleIds: string[],   // specific cycles
+  affectedPhaseTypes?: ("preparation" | "feast-day" | "recovery")[],
+
+  // Example:
+  // - A large garden harvest near a feast phase might create a
+  //   "yield-opportunity" to shape the feast menu and preservation.
+
+  // TODO[dependencies]:
+  // - householdCycles.engine uses these bindings to see how feast cycles
+  //   depend on and reshape garden, animals, storehouse, and preservation
+  //   rhythms.
+
+  notes?: string,
+};
+
+
+3. DATA FLOW – HOW THIS CONFIG IS USED
+--------------------------------------
+
+3.1 TOOL MODE
+In TOOL MODE, a “Feast Cycle Planner” or calendar view can:
+
+1) Import or construct a feastCyclesConfig object in memory (static default, or
+   customized per household).
+2) Let the householder:
+   - choose which feasts are observed,
+   - adjust preparation/feast/recovery windows,
+   - set storehouse thresholds for key feast provisions,
+   - connect feast cycles to their garden/animal yields and preservation plans.
+3) Use this config to:
+   - render feast windows on a calendar (with pre-feast and recovery shading),
+   - display readiness indicators (storehouse & household),
+   - suggest SessionRunner sessions (e.g. “Pre-Feast Bread & Broth Rhythm”,
+     “Post-Feast Recovery Rhythm”).
+
+No Dexie is required; config can be in component state or local storage.
+The tool can still emit eventBus events so that if the broader SSA is loaded,
+it can respond to upcoming feasts.
+
+Typical TOOL MODE flow:
+
+- Page loads default feastCyclesConfig.
+- Householder adjusts feast cycles and provisions.
+- Planner emits:
+  - "feasts.cycles.config.updated" with a simple summary.
+- Optionally, if householdCycles.engine is active, the planner triggers a
+  recompute so the household posture reflects the updated feast rhythms.
+
+
+3.2 STEWARDSHIP MODE
+In STEWARDSHIP MODE, feastCyclesConfig becomes shared intelligence that shapes
+the entire yearly household rhythm.
+
+Flow:
+
+1) App boot:
+   - Dexie loads feastCyclesConfig from a table like "feastCyclesConfig".
+   - SeasonalIntelligence + Hebrew calendar compute actual feast windows
+     using FeastSeasonBinding.
+
+2) The config is injected into:
+   - feast & calendar dashboards,
+   - Meal Planner and cooking intelligence,
+   - provisioningCycles & storehouse analytics,
+   - preservation/planning tools (for surplus yield),
+   - cleaningCycles & textiles for pre- and post-feast rhythms,
+   - householdCycles.engine as the “feasts/events” domain snapshot.
+
+3) As the date approaches a feast window:
+   - seasonalIntelligence or the calendar emits events such as:
+     "feast.window.approaching".
+   - The feastCyclesConfig guides what “preparation” and “provision readiness”
+     actually mean in this season.
+
+4) householdCycles.engine uses:
+   - feast cycle phases,
+   - storehouse feast provision bindings,
+   - domain signals (meal plans, harvests, preservation sessions),
+   to derive:
+   - feast readiness posture (storehouse + household),
+   - increased rhythm in cooking, preservation, cleaning, and textiles.
+
+5) After feast days:
+   - recovery phase templates inform cleaning, textiles, and rest rhythms.
+   - preservation tools are nudged to convert leftovers into future yields.
+
+6) When the householder updates feast cycles (adding/removing feasts, altering
+   windows, thresholds, or bindings), the config is persisted to Dexie and,
+   when familyFundMode is enabled, high-level feast posture summaries can be
+   exported to the Family Fund Hub as part of shared mutual-aid intelligence.
+
+
+4. EVENT TRIGGERS – EVENTBUS CONTRACT
+-------------------------------------
+The config itself is static data, but **code that uses this config** must emit
+events so other parts of SSA can respond.
+
+All events follow SSA’s eventBus contract:
+
+  { type, ts, source, data }
+
+Recommended event types:
+
+1) Config lifecycle
+   - "feasts.cycles.config.loaded"
+     data: {
+       version,
+       feastCycleCount,
+       phaseTemplateCount,
+       seasonalBindingCount,
+     }
+
+   - "feasts.cycles.config.updated"
+     data: {
+       version,
+       changedBy,            // "householder" | "system" | "migration"
+       changesSummary,       // e.g. { feastsAdded, feastsModified, thresholdsUpdated }
+     }
+
+2) Feast windows & phases
+   - "feasts.window.calculated"
+     // When seasonalIntelligence binds FeastSeasonBinding to concrete dates
+     data: {
+       feastCycleId,
+       seasonBindingId,
+       from,                 // ISO dates
+       to,
+       phaseWindows: {
+         preparationFrom: string,
+         preparationTo: string,
+         feastFrom: string,
+         feastTo: string,
+         recoveryFrom: string,
+         recoveryTo: string,
+       },
+     }
+
+   - "feasts.window.approaching"
+     data: {
+       feastCycleId,
+       daysUntil,
+       currentPhaseHint: "preparation" | "feast-day" | "recovery",
+     }
+
+   - "feasts.phase.active"
+     // For SessionRunner and dashboards – which phase is live now?
+     data: {
+       feastCycleId,
+       phaseType: "preparation" | "feast-day" | "recovery",
+       startedAt,
+       endsAt,
+       domainFocus,
+     }
+
+3) Storehouse & provisions
+   - "feasts.storehouse.readiness"
+     data: {
+       feastCycleId,
+       horizonDays,
+       provisionStates: {
+         [storehouseItemKey: string]: {
+           state: "comfortable" | "low" | "critical",
+           requiredForPhaseTypes: ("preparation" | "feast-day" | "recovery")[],
+         },
+       },
+     }
+
+   - "feasts.storehouse.provision.shortfall"
+     data: {
+       feastCycleId,
+       horizonDays,
+       itemKeysAtRisk: string[],
+       message,
+     }
+
+4) Insights for householder
+   - "feasts.cycles.insight"
+     data: {
+       insightId,
+       feastCycleId,
+       phaseType?: "preparation" | "feast-day" | "recovery",
+       kind: "readiness" | "provision" | "yield" | "recovery" | "mutual-aid",
+       severity: "info" | "gentle" | "important",
+       message,
+     }
+
+These events allow:
+- dashboards to show feast readiness and current phase,
+- storehouse & provisioning engines to adjust cycles,
+- SessionRunner to surface feast-specific cooking/cleaning/preservation
+  sessions in appropriate windows,
+- mutual-aid and enterprise tools to coordinate feast-related efforts.
+
+
+5. CONCEPTUAL PURPOSE – HOW IT FITS THE WEB OF MEANING
+------------------------------------------------------
+The feastCycles config anchors **feasts and appointed times** within SSA’s
+web of meaning.
+
+- It treats feasts as **seasonal rhythms**:
+  - Each feast has phases that touch cooking, storehouse, cleaning, textiles,
+    garden, animals, preservation, mutual aid, and enterprise.
+
+- It respects **seasons and the storehouse**:
+  - Feasts do not stand alone; they draw from the storehouse and often
+    trigger preservation and mutual-aid flows.
+  - Feast readiness is not just about menu selection; it is about having
+    provisions in place, tools and linens prepared, and spaces ready.
+
+- It defines **yields**:
+  - A feast yields more than a big meal:
+    - hospitality (welcoming others),
+    - spiritual rest and remembrance,
+    - community bonds,
+    - preserved leftovers that extend into future seasons.
+
+- It connects **domains and cycles**:
+  - Garden harvests near a feast shape the menu and preserved yields.
+  - Animals prepared for a feast influence butchery and preservation rhythms.
+  - Storehouse provisions guide what is possible without straining the
+    long-term household rhythm.
+  - Cleaning and textiles rhythms rise before and after feasts for hospitality
+    and recovery.
+  - Mutual-aid days and enterprise projects (catering, food truck events)
+    layer on top of core feast cycles.
+
+- It supports **TOOL MODE** and **STEWARDSHIP MODE**:
+  - TOOL MODE:
+    - A stand-alone feast planner can visualize feast cycles, windows, and
+      provisions for one household.
+  - STEWARDSHIP MODE:
+    - The feastCyclesConfig becomes shared yearly rhythm knowledge: the
+      householdCycles.engine, SessionRunner, storehouse planning, garden and
+      animal modules, and mutual-aid tools all align to these feast cycles.
+
+Explicit TODO HOOKS:
+- TODO[seasonal-logic]:
+  - Complete binding between FeastSeasonBinding and your Hebrew calendar +
+    seasonalIntelligence engine so feast windows are automatically computed.
+
+- TODO[cycles-engine]:
+  - Define how FeastPhaseTemplate domainFocus + storehouseImpact become a
+    "feasts" domain rhythmInput for householdCycles.engine.
+
+- TODO[dependencies]:
+  - Enumerate key cross-domain events:
+    - mealPlan.feastMenu.updated,
+    - harvest.logged near feast,
+    - animals.selectedForFeast,
+    - preservation.session.afterFeast,
+    and map them into FeastDomainSignalBinding for dynamic feast rhythm shifts.
+
+- TODO[insights]:
+  - Standardize named insights like:
+    - “Feast window approaching – grains and oil not yet comfortable.”
+    - “Post-feast recovery window open – consider preservation of leftovers.”
+    - “Mutual-aid feast: invite allied households to share provisions and yields.”
+
+END OF SPEC
+===============================================================================

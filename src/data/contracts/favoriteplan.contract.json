@@ -1,0 +1,203 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:suka:contracts:favoriteplan",
+  "title": "Favorite Plan Contract",
+  "description": "Canonical entity contract for a single plan saved in the Favorites system. Supports user-authored and featured/system plans across domains (meals, cleaning, garden, animals, etc.). Aligns with FavoritePlans manager normalize/save/export behavior.",
+  "x-version": "2.1.1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique plan identifier (uuid or app-generated).",
+      "pattern": "^(fav_[a-z0-9]{6,}_[0-9]{10,}|[0-9a-fA-F-]{18,}|plan:[A-Za-z0-9:_-]+)$"
+    },
+    "domain": {
+      "type": "string",
+      "description": "Functional domain this plan belongs to.",
+      "enum": ["meals", "cleaning", "garden", "animals", "inventory", "health"]
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "summary": {
+      "type": "string",
+      "maxLength": 400
+    },
+    "tags": {
+      "type": "array",
+      "description": "Lightweight labels for filtering and discovery.",
+      "items": { "type": "string", "maxLength": 48 },
+      "maxItems": 20,
+      "uniqueItems": true
+    },
+    "planBody": {
+      "description": "Domain-shaped body. Validates against a domain contract when available; otherwise accepts an object.",
+      "anyOf": [
+        { "$ref": "urn:suka:contracts:mealplan" },
+        { "$ref": "urn:suka:contracts:cleanplan" },
+        { "$ref": "urn:suka:contracts:gardenplan" },
+        { "$ref": "urn:suka:contracts:animalplan" },
+        { "type": "object", "description": "Fallback shape when specific domain contract is not present.", "additionalProperties": true }
+      ]
+    },
+    "session": {
+      "type": "object",
+      "description": "Execution hints used by session engines and calendar sync.",
+      "additionalProperties": false,
+      "properties": {
+        "timers": {
+          "type": "array",
+          "description": "Timer hints (name + offset). Example: +20m, PT1H.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string", "maxLength": 80 },
+              "offset": {
+                "type": "string",
+                "description": "Relative or ISO 8601 duration. Parsed by offsetParser.",
+                "pattern": "^(\\+\\d+[smhdw]|P(T\\d+[HMS]|\\d+W|\\d+D|\\d+M|\\d+Y).*)$"
+              },
+              "notes": { "type": "string", "maxLength": 200 }
+            },
+            "required": ["name", "offset"]
+          },
+          "maxItems": 32
+        },
+        "blockers": {
+          "type": "array",
+          "description": "Preconditions that may pause or delay execution.",
+          "items": {
+            "type": "string",
+            "enum": ["weather", "withhold", "inventory", "appliance", "biohazard", "time"]
+          },
+          "maxItems": 10,
+          "uniqueItems": true
+        },
+        "schedule": {
+          "type": "array",
+          "description": "Optional schedule hints for calendar writer.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "title": { "type": "string", "maxLength": 160 },
+              "start": { "type": "string", "format": "date-time" },
+              "end": { "type": "string", "format": "date-time" },
+              "allDay": { "type": "boolean" },
+              "notes": { "type": "string", "maxLength": 400 }
+            },
+            "required": ["title"]
+          },
+          "maxItems": 24
+        }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "createdBy": { "type": "string", "description": "User id that authored the plan." },
+        "visibility": { "type": "string", "enum": ["private", "unlisted", "shared"], "default": "private" },
+        "source": { "type": "string", "enum": ["user", "featured", "imported"], "default": "user" },
+        "version": { "type": "integer", "minimum": 1, "default": 1 }
+      },
+      "required": ["source"]
+    },
+    "createdAt": { "type": "integer", "description": "Unix ms timestamp" },
+    "updatedAt": { "type": "integer", "description": "Unix ms timestamp" },
+    "isFavorite": {
+      "type": "boolean",
+      "description": "Convenience flag for UI listings; canonical favorite state is stored separately in favorites map.",
+      "default": false
+    }
+  },
+  "required": ["id", "domain", "title", "meta"],
+  "definitions": {
+    "FavoritesExport": {
+      "title": "Favorites Export Blob",
+      "description": "Export/import container used by FavoritePlans.exportAll/importAll.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "suka.favorites.export" },
+        "version": { "type": "integer", "minimum": 1 },
+        "exportedAt": { "type": "integer" },
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "version": { "type": "integer" },
+            "featured": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": { "$ref": "urn:suka:contracts:favoriteplan" }
+              }
+            },
+            "userPlans": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": { "$ref": "urn:suka:contracts:favoriteplan" }
+              }
+            },
+            "favorites": {
+              "type": "object",
+              "description": "Map of domain -> { planId: true }",
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": { "type": "boolean" }
+              }
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": { "type": "string" },
+                  "label": { "type": "string", "maxLength": 48 },
+                  "color": { "type": "string", "maxLength": 24 }
+                },
+                "required": ["label"]
+              }
+            },
+            "updatedAt": { "type": "integer" }
+          },
+          "required": ["version", "featured", "userPlans", "favorites"]
+        }
+      },
+      "required": ["kind", "version", "exportedAt", "data"]
+    }
+  },
+  "examples": [
+    {
+      "id": "fav_abcd1234_1730000000000",
+      "domain": "meals",
+      "title": "7-Day Winter Comforts (My Copy)",
+      "summary": "Soups, braises, and fresh-milled bread. Auto-timers for proofing and simmer.",
+      "tags": ["winter", "bread", "soup"],
+      "planBody": {
+        "$comment": "Would validate against urn:suka:contracts:mealplan if present."
+      },
+      "session": {
+        "timers": [{ "name": "Proof dough", "offset": "+90m" }],
+        "blockers": ["inventory"],
+        "schedule": [
+          { "title": "Batch bread", "start": "2025-11-02T14:00:00Z", "end": "2025-11-02T18:00:00Z" }
+        ]
+      },
+      "meta": { "createdBy": "user:rhonda", "visibility": "private", "source": "user", "version": 2 },
+      "createdAt": 1730000000000,
+      "updatedAt": 1730003600000,
+      "isFavorite": true
+    },
+    {
+      "$ref": "#/definitions/FavoritesExport",
+      "$comment": "Example of export blob shape accepted by importAll."
+    }
+  ]
+}

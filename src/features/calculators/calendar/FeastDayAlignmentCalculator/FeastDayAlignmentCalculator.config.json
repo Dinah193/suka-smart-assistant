@@ -1,0 +1,19 @@
+{
+  "id": "calendar.feastAlignment",
+  "kind": "calculator-node",
+  "domain": "storehouse",
+  "label": "Feast Day Alignment",
+  "description": "Aligns feasts and appointed times to Hebrew month starts and Gregorian calendar dates for downstream planning.",
+  "version": "1.0.0",
+  "calculator": "FeastDayAlignmentCalculator",
+  "config": {
+    "inputSchemaRef": "@/features/calculators/calendar/FeastDayAlignmentCalculator/FeastDayAlignmentCalculator.schema.json",
+    "shimModule": "@/features/calculators/calendar/FeastDayAlignmentCalculator/FeastDayAlignmentCalculator.shim.js",
+    "viewComponent": "@/features/calculators/calendar/FeastDayAlignmentCalculator/FeastDayAlignmentCalculator.view.jsx",
+    "flags": [
+      "requiresHebrewMonthStarts",
+      "timeSensitive",
+      "calendarAnchor"
+    ]
+  }
+}

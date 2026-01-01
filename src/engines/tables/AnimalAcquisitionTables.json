@@ -1,0 +1,407 @@
+{
+  "metadata": {
+    "name": "AnimalAcquisitionTables",
+    "version": "1.0.0",
+    "updatedAt": "2025-11-10T00:00:00.000Z",
+    "units": "metric",
+    "notes": "Baseline acquisition and intake planning tables for smallholder animals used by synthesis/validator. Always defer to local regulations and veterinarian guidance."
+  },
+
+  "schemaHints": {
+    "_comment": "Shape guidance for consumers; not enforced.",
+    "speciesRecord": {
+      "id": "string",
+      "commonName": "string",
+      "acquisitionAges": ["list of strings like 'day-old', 'weaner', 'point-of-lay'"],
+      "seasonality": { "preferredMonths": ["1..12"], "notes": "string" },
+      "vendorChecklist": ["items to verify before purchase"],
+      "paperwork": ["docs such as CVI, bill of sale, NPIP"],
+      "transport": {
+        "crateSize": { "widthCm": "number", "depthCm": "number", "heightCm": "number" },
+        "maxCrateOccupancy": "int (typical safe max per crate)",
+        "stockingDensityTransportKgPerM2": "number",
+        "tempCRecommended": { "min": "number", "max": "number" },
+        "ventilation": "notes"
+      },
+      "intake": {
+        "quarantineDays": "int",
+        "isolationDistanceM": "number",
+        "biosecurity": ["notes"],
+        "initialHealthChecks": ["notes"],
+        "vaccination": { "recommended": ["items"], "optional": ["items"], "timingNotes": "string" },
+        "parasiteControl": { "strategy": "string", "timingNotes": "string" },
+        "withdrawalIfRescueDays": "int",
+        "intakeWeightExpectationsKg": { "min": "number", "max": "number" },
+        "mortalityScreenWindowDays": "int"
+      },
+      "feedingTransition": {
+        "startFeed": "string",
+        "transitionPlan": ["steps"],
+        "waterSupplements": ["items"]
+      },
+      "welfare": {
+        "grouping": "notes",
+        "enrichment": ["items"]
+      },
+      "eventsMap": {
+        "acquire.scheduled": ["species", "count", "vendor"],
+        "transport.prep": ["crates", "ventilation", "tempTargetC"],
+        "intake.quarantine.start": ["days", "location"],
+        "health.vaccination.planned": ["vaccines", "dayOffset"],
+        "feeding.transition.planned": ["from", "to", "days"],
+        "records.paperwork.logged": ["docs"]
+      },
+      "source": "manual:curated"
+    }
+  },
+
+  "plannerDefaults": {
+    "quarantineMinDays": 21,
+    "paperworkCommon": ["bill_of_sale", "vendor_contact", "health_history_if_any"],
+    "npipRequiredForPoultry": true,
+    "maxTransportDurationHours": 8,
+    "nightTransportPreferredForHeat": true
+  },
+
+  "species": [
+    {
+      "id": "chicken_layer",
+      "commonName": "Chicken (Layer)",
+      "acquisitionAges": ["day-old", "started_pullets (12–16 wks)", "point_of_lay (18–20 wks)"],
+      "seasonality": { "preferredMonths": [2,3,4,5,8,9], "notes": "Avoid peak heat/cold for transport of day-old chicks." },
+      "vendorChecklist": [
+        "NPIP certificate valid",
+        "vaccination card (Marek’s at hatch)",
+        "no nasal discharge, clear eyes, active behavior",
+        "uniform body size within group"
+      ],
+      "paperwork": ["bill_of_sale", "NPIP_certificate"],
+      "transport": {
+        "crateSize": { "widthCm": 60, "depthCm": 40, "heightCm": 30 },
+        "maxCrateOccupancy": 6,
+        "stockingDensityTransportKgPerM2": 40,
+        "tempCRecommended": { "min": 20, "max": 25 },
+        "ventilation": "Use perforated chick boxes; avoid drafts on floor."
+      },
+      "intake": {
+        "quarantineDays": 21,
+        "isolationDistanceM": 15,
+        "biosecurity": ["footbath at entry", "tools not shared with resident flock"],
+        "initialHealthChecks": ["check vent pasting", "check navel closure for day-olds", "weigh 10% sample"],
+        "vaccination": { "recommended": ["Marek’s (at hatch)"], "optional": ["Coccidiosis vaccine", "Newcastle/IB"], "timingNotes": "If not vaccinated, consider coccidiostat in starter feed." },
+        "parasiteControl": { "strategy": "Observation first; fecal check at day 14; treat only if indicated.", "timingNotes": "Avoid prophylactic dewormers without diagnosis." },
+        "withdrawalIfRescueDays": 30,
+        "intakeWeightExpectationsKg": { "min": 0.036, "max": 0.045 },
+        "mortalityScreenWindowDays": 7
+      },
+      "feedingTransition": {
+        "startFeed": "Starter crumbles 18–20% protein with coccidiostat (if not vaccinated for cocci).",
+        "transitionPlan": ["Day 0–7: free-choice starter", "Day 8–42: starter-grower 16–18%", "Week 16+: layer 16% with calcium access"],
+        "waterSupplements": ["electrolytes first 24h in heat", "probiotic optional 3 days"]
+      },
+      "welfare": { "grouping": "Same-age cohorts only for first 2 weeks.", "enrichment": ["pecking blocks", "perches after week 3"] },
+      "eventsMap": {
+        "acquire.scheduled": ["species", "count", "vendor"],
+        "transport.prep": ["crates", "ventilation", "tempTargetC"],
+        "intake.quarantine.start": ["days", "location"],
+        "health.vaccination.planned": ["vaccines", "dayOffset"],
+        "feeding.transition.planned": ["from", "to", "days"],
+        "records.paperwork.logged": ["docs"]
+      },
+      "source": "manual:curated"
+    },
+    {
+      "id": "chicken_broiler",
+      "commonName": "Chicken (Broiler)",
+      "acquisitionAges": ["day-old"],
+      "seasonality": { "preferredMonths": [3,4,5,6,8,9], "notes": "Plan around processing date; avoid deep winter for pasture systems." },
+      "vendorChecklist": ["NPIP certificate", "uniform hatch date", "strong navels", "active peeping"],
+      "paperwork": ["bill_of_sale", "NPIP_certificate"],
+      "transport": {
+        "crateSize": { "widthCm": 60, "depthCm": 40, "heightCm": 30 },
+        "maxCrateOccupancy": 8,
+        "stockingDensityTransportKgPerM2": 45,
+        "tempCRecommended": { "min": 20, "max": 25 },
+        "ventilation": "Perforated chick boxes; avoid piling by keeping level."
+      },
+      "intake": {
+        "quarantineDays": 14,
+        "isolationDistanceM": 15,
+        "biosecurity": ["dedicated brooder gear", "daily litter checks for moisture"],
+        "initialHealthChecks": ["check for spraddle leg", "record average weight day 1"],
+        "vaccination": { "recommended": ["Marek’s"], "optional": ["Coccidiosis vaccine"], "timingNotes": "If vaccinated for cocci, avoid medicated feed." },
+        "parasiteControl": { "strategy": "Short lifecycle; monitor coccidia; rotate pasture.", "timingNotes": "Litter management is primary." },
+        "withdrawalIfRescueDays": 42,
+        "intakeWeightExpectationsKg": { "min": 0.036, "max": 0.045 },
+        "mortalityScreenWindowDays": 7
+      },
+      "feedingTransition": {
+        "startFeed": "Meat bird starter 20–22% protein.",
+        "transitionPlan": ["Day 0–14: starter", "Day 15–28: grower 18–20%", "Day 29 to harvest: finisher 16–18%"],
+        "waterSupplements": ["electrolytes first 24h during heat waves"]
+      },
+      "welfare": { "grouping": "Uniform group sizes; reduce crowding after week 2.", "enrichment": ["ramps, small perches (low)"] },
+      "eventsMap": { "acquire.scheduled": ["species", "count", "vendor"], "transport.prep": ["crates", "ventilation", "tempTargetC"], "intake.quarantine.start": ["days", "location"], "health.vaccination.planned": ["vaccines", "dayOffset"], "feeding.transition.planned": ["from", "to", "days"], "records.paperwork.logged": ["docs"] },
+      "source": "manual:curated"
+    },
+    {
+      "id": "duck",
+      "commonName": "Duck (layer/meat)",
+      "acquisitionAges": ["day-old", "started (6–8 wks)"],
+      "seasonality": { "preferredMonths": [3,4,5,6,8,9], "notes": "Protect from chilling; ducks wet themselves easily." },
+      "vendorChecklist": ["NPIP certificate if available", "strong legs/feet", "clean vents", "no eye foam"],
+      "paperwork": ["bill_of_sale"],
+      "transport": {
+        "crateSize": { "widthCm": 70, "depthCm": 50, "heightCm": 35 },
+        "maxCrateOccupancy": 6,
+        "stockingDensityTransportKgPerM2": 45,
+        "tempCRecommended": { "min": 18, "max": 24 },
+        "ventilation": "Dry bedding in crate; avoid water spills."
+      },
+      "intake": {
+        "quarantineDays": 21,
+        "isolationDistanceM": 20,
+        "biosecurity": ["dry bedding; change wet spots twice daily"],
+        "initialHealthChecks": ["wet feather check", "gait check"],
+        "vaccination": { "recommended": [], "optional": [], "timingNotes": "Programs vary; consult vet for regional risks." },
+        "parasiteControl": { "strategy": "Fecal check day 14; treat if indicated.", "timingNotes": "Snail control if liver fluke risk area." },
+        "withdrawalIfRescueDays": 30,
+        "intakeWeightExpectationsKg": { "min": 0.045, "max": 0.055 },
+        "mortalityScreenWindowDays": 7
+      },
+      "feedingTransition": {
+        "startFeed": "Waterfowl starter 20% with niacin supplementation.",
+        "transitionPlan": ["0–2 wks: starter + niacin", "3–8 wks: grower 18%", "lay: 16% with grit"],
+        "waterSupplements": ["niacin (50–70 mg/kg feed equivalent) first 2–3 wks"]
+      },
+      "welfare": { "grouping": "Brood with dry, non-slip mats.", "enrichment": ["shallow water pan supervised after week 2"] },
+      "eventsMap": { "acquire.scheduled": ["species", "count", "vendor"], "transport.prep": ["crates", "ventilation", "tempTargetC"], "intake.quarantine.start": ["days", "location"], "health.vaccination.planned": ["vaccines", "dayOffset"], "feeding.transition.planned": ["from", "to", "days"], "records.paperwork.logged": ["docs"] },
+      "source": "manual:curated"
+    },
+    {
+      "id": "turkey_poult",
+      "commonName": "Turkey (Poult)",
+      "acquisitionAges": ["day-old"],
+      "seasonality": { "preferredMonths": [4,5,6], "notes": "Turkeys are sensitive early; plan diligent brooder care." },
+      "vendorChecklist": ["NPIP certificate", "bright eyes", "strong stance", "no huddling from cold during pickup"],
+      "paperwork": ["bill_of_sale", "NPIP_certificate"],
+      "transport": {
+        "crateSize": { "widthCm": 70, "depthCm": 50, "heightCm": 35 },
+        "maxCrateOccupancy": 6,
+        "stockingDensityTransportKgPerM2": 40,
+        "tempCRecommended": { "min": 22, "max": 27 },
+        "ventilation": "Warm vehicle, prevent drafts."
+      },
+      "intake": {
+        "quarantineDays": 21,
+        "isolationDistanceM": 30,
+        "biosecurity": ["separate from chickens; blackhead risk in some areas"],
+        "initialHealthChecks": ["check navels/legs", "observe feeding behavior day 1"],
+        "vaccination": { "recommended": [], "optional": ["HE", "other regionals"], "timingNotes": "Consult local vet programs." },
+        "parasiteControl": { "strategy": "Monitor coccidia; dry litter.", "timingNotes": "" },
+        "withdrawalIfRescueDays": 42,
+        "intakeWeightExpectationsKg": { "min": 0.05, "max": 0.06 },
+        "mortalityScreenWindowDays": 10
+      },
+      "feedingTransition": {
+        "startFeed": "Turkey/gamebird starter 26–28% protein.",
+        "transitionPlan": ["0–6 wks: high protein starter", "7–12 wks: grower 22–24%", "finish: 18–20%"],
+        "waterSupplements": ["electrolytes first 24h if heat stress"]
+      },
+      "welfare": { "grouping": "Small groups; easy access to feed/water.", "enrichment": ["bright chick plates day 1–2 to teach pecking"] },
+      "eventsMap": { "acquire.scheduled": ["species", "count", "vendor"], "transport.prep": ["crates", "ventilation", "tempTargetC"], "intake.quarantine.start": ["days", "location"], "health.vaccination.planned": ["vaccines", "dayOffset"], "feeding.transition.planned": ["from", "to", "days"], "records.paperwork.logged": ["docs"] },
+      "source": "manual:curated"
+    },
+    {
+      "id": "quail",
+      "commonName": "Quail (Coturnix)",
+      "acquisitionAges": ["day-old", "started (4–6 wks)"],
+      "seasonality": { "preferredMonths": [3,4,5,6,8,9], "notes": "Protect from drafts; tiny body mass." },
+      "vendorChecklist": ["active behavior", "clean vents", "steady gait"],
+      "paperwork": ["bill_of_sale"],
+      "transport": {
+        "crateSize": { "widthCm": 40, "depthCm": 30, "heightCm": 20 },
+        "maxCrateOccupancy": 10,
+        "stockingDensityTransportKgPerM2": 55,
+        "tempCRecommended": { "min": 22, "max": 27 },
+        "ventilation": "Fine mesh crate; prevent escapes."
+      },
+      "intake": {
+        "quarantineDays": 21,
+        "isolationDistanceM": 10,
+        "biosecurity": ["fine-mesh brooders", "no shared feeders with chickens"],
+        "initialHealthChecks": ["check toes/legs", "ensure eating by hour 2"],
+        "vaccination": { "recommended": [], "optional": [], "timingNotes": "" },
+        "parasiteControl": { "strategy": "Low; monitor litter dryness.", "timingNotes": "" },
+        "withdrawalIfRescueDays": 30,
+        "intakeWeightExpectationsKg": { "min": 0.007, "max": 0.009 },
+        "mortalityScreenWindowDays": 5
+      },
+      "feedingTransition": {
+        "startFeed": "Gamebird starter 26–28% protein (crumbles).",
+        "transitionPlan": ["0–4 wks: starter", "5–6 wks: grower 22–24%", "lay: 18–20% with calcium"],
+        "waterSupplements": ["vitamin-electrolyte if shipping stress noted"]
+      },
+      "welfare": { "grouping": "Small groups; low perch heights.", "enrichment": ["dust bath pan", "visual barriers"] },
+      "eventsMap": { "acquire.scheduled": ["species", "count", "vendor"], "transport.prep": ["crates", "ventilation", "tempTargetC"], "intake.quarantine.start": ["days", "location"], "health.vaccination.planned": ["vaccines", "dayOffset"], "feeding.transition.planned": ["from", "to", "days"], "records.paperwork.logged": ["docs"] },
+      "source": "manual:curated"
+    },
+    {
+      "id": "kid_goat",
+      "commonName": "Goat (Kid)",
+      "acquisitionAges": ["bottle_kid (3–7 days)", "weaned (8–12 wks)"],
+      "seasonality": { "preferredMonths": [2,3,4,5,9,10], "notes": "Avoid peak parasite season for naïve kids when possible." },
+      "vendorChecklist": ["CVI/health certificate", "disbudding status if desired", "CL/CAE/Johne’s herd testing where applicable", "strong suckle reflex or eating solids if weaned"],
+      "paperwork": ["bill_of_sale", "CVI_health_certificate"],
+      "transport": {
+        "crateSize": { "widthCm": 90, "depthCm": 60, "heightCm": 60 },
+        "maxCrateOccupancy": 2,
+        "stockingDensityTransportKgPerM2": 120,
+        "tempCRecommended": { "min": 10, "max": 20 },
+        "ventilation": "Bedding for traction; offer water on long trips."
+      },
+      "intake": {
+        "quarantineDays": 30,
+        "isolationDistanceM": 30,
+        "biosecurity": ["separate equipment, boots dip", "fecal check day 7 and 21"],
+        "initialHealthChecks": ["TPR baseline", "FAMACHA score", "navel healed", "weight record"],
+        "vaccination": { "recommended": ["CD/T (enterotoxemia+tetanus)"], "optional": ["caseous_lymphadenitis where endemic"], "timingNotes": "CD/T at 4 and 8 weeks, booster annually." },
+        "parasiteControl": { "strategy": "Targeted selective treatment based on fecal/FAMACHA.", "timingNotes": "" },
+        "withdrawalIfRescueDays": 60,
+        "intakeWeightExpectationsKg": { "min": 5, "max": 10 },
+        "mortalityScreenWindowDays": 14
+      },
+      "feedingTransition": {
+        "startFeed": "Milk or milk replacer 16–18% solids if bottle; high-quality hay and starter pellet for weaned.",
+        "transitionPlan": ["If bottle: gradual wean by 8–12 wks", "Introduce browse gradually"],
+        "waterSupplements": ["electrolytes if scours risk", "coccidiostat per vet if indicated"]
+      },
+      "welfare": { "grouping": "Pair or small group for social needs.", "enrichment": ["climb structures", "browse branches"] },
+      "eventsMap": { "acquire.scheduled": ["species", "count", "vendor"], "transport.prep": ["crates", "ventilation", "tempTargetC"], "intake.quarantine.start": ["days", "location"], "health.vaccination.planned": ["vaccines", "dayOffset"], "feeding.transition.planned": ["from", "to", "days"], "records.paperwork.logged": ["docs"] },
+      "source": "manual:curated"
+    },
+    {
+      "id": "lamb",
+      "commonName": "Sheep (Lamb)",
+      "acquisitionAges": ["bottle_lamb (3–7 days)", "weaned (10–12 wks)"],
+      "seasonality": { "preferredMonths": [2,3,4,5,9,10], "notes": "Parasite season planning is critical in warm/wet regions." },
+      "vendorChecklist": ["CVI/health certificate", "Scrapie ID compliance", "sound legs, clear eyes", "strong suckle or eating starter well"],
+      "paperwork": ["bill_of_sale", "CVI_health_certificate", "scrapie_ID_docs"],
+      "transport": {
+        "crateSize": { "widthCm": 90, "depthCm": 60, "heightCm": 60 },
+        "maxCrateOccupancy": 2,
+        "stockingDensityTransportKgPerM2": 120,
+        "tempCRecommended": { "min": 10, "max": 20 },
+        "ventilation": "Dry bedding; shade in hot weather."
+      },
+      "intake": {
+        "quarantineDays": 30,
+        "isolationDistanceM": 30,
+        "biosecurity": ["separate pasture paddock", "disinfect trailer tires"],
+        "initialHealthChecks": ["TPR", "FAMACHA", "navel healed", "weight record"],
+        "vaccination": { "recommended": ["CD/T"], "optional": ["Campylobacter, Chlamydia for breeding programs"], "timingNotes": "Consult vet regionally." },
+        "parasiteControl": { "strategy": "Targeted selective treatment; fecal egg counts baseline.", "timingNotes": "" },
+        "withdrawalIfRescueDays": 60,
+        "intakeWeightExpectationsKg": { "min": 6, "max": 12 },
+        "mortalityScreenWindowDays": 14
+      },
+      "feedingTransition": {
+        "startFeed": "Milk or replacer if bottle; high-quality forage and lamb starter for weaned.",
+        "transitionPlan": ["If bottle: wean 8–10 wks with gradual reduction", "Mineral: sheep-safe (no added copper)"],
+        "waterSupplements": ["electrolytes if scours risk"]
+      },
+      "welfare": { "grouping": "Companionship essential.", "enrichment": ["grazing rotation", "shade structures"] },
+      "eventsMap": { "acquire.scheduled": ["species", "count", "vendor"], "transport.prep": ["crates", "ventilation", "tempTargetC"], "intake.quarantine.start": ["days", "location"], "health.vaccination.planned": ["vaccines", "dayOffset"], "feeding.transition.planned": ["from", "to", "days"], "records.paperwork.logged": ["docs"] },
+      "source": "manual:curated"
+    },
+    {
+      "id": "calf_dairy",
+      "commonName": "Calf (Dairy)",
+      "acquisitionAges": ["bottle_calf (3–10 days)", "weaned (8–12 wks)"],
+      "seasonality": { "preferredMonths": [2,3,4,9,10], "notes": "Avoid heat stress for neonates." },
+      "vendorChecklist": ["CVI/health certificate", "navel dipped at birth", "colostrum intake documented (≥10% BW within 6h)"],
+      "paperwork": ["bill_of_sale", "CVI_health_certificate"],
+      "transport": {
+        "crateSize": { "widthCm": 120, "depthCm": 80, "heightCm": 100 },
+        "maxCrateOccupancy": 1,
+        "stockingDensityTransportKgPerM2": 250,
+        "tempCRecommended": { "min": 10, "max": 20 },
+        "ventilation": "Ample airflow; avoid direct wind on calf."
+      },
+      "intake": {
+        "quarantineDays": 30,
+        "isolationDistanceM": 50,
+        "biosecurity": ["dedicated boots and coveralls", "sanitize bottles/nipples"],
+        "initialHealthChecks": ["TPR", "dehydration pinch test", "fecal for scour pathogens if diarrhea"],
+        "vaccination": { "recommended": ["IBR/BVD/PI3/BRSV per vet schedule"], "optional": ["clostridials"], "timingNotes": "Programs vary; consult vet." },
+        "parasiteControl": { "strategy": "Fecal check at 3–4 wks post-arrival.", "timingNotes": "" },
+        "withdrawalIfRescueDays": 60,
+        "intakeWeightExpectationsKg": { "min": 35, "max": 50 },
+        "mortalityScreenWindowDays": 14
+      },
+      "feedingTransition": {
+        "startFeed": "Milk or high-quality replacer 12–15% solids; calf starter and water free-choice.",
+        "transitionPlan": ["Wean when eating ≥1kg starter/day for 3 days", "Post-wean: grower ration"],
+        "waterSupplements": ["electrolytes for scours per vet"]
+      },
+      "welfare": { "grouping": "Individual housing initially, then paired/group housing for social development.", "enrichment": ["brushes", "calf jackets in cold"] },
+      "eventsMap": { "acquire.scheduled": ["species", "count", "vendor"], "transport.prep": ["crates", "ventilation", "tempTargetC"], "intake.quarantine.start": ["days", "location"], "health.vaccination.planned": ["vaccines", "dayOffset"], "feeding.transition.planned": ["from", "to", "days"], "records.paperwork.logged": ["docs"] },
+      "source": "manual:curated"
+    },
+    {
+      "id": "rabbit_meat",
+      "commonName": "Rabbit (Meat Type)",
+      "acquisitionAges": ["weaned (8 wks)", "grow-out (10–12 wks)"],
+      "seasonality": { "preferredMonths": [3,4,5,9,10], "notes": "Heat sensitive; plan transport in cool hours." },
+      "vendorChecklist": ["clear eyes/nose", "no diarrhea", "sound incisors (no malocclusion)"],
+      "paperwork": ["bill_of_sale"],
+      "transport": {
+        "crateSize": { "widthCm": 60, "depthCm": 40, "heightCm": 35 },
+        "maxCrateOccupancy": 2,
+        "stockingDensityTransportKgPerM2": 150,
+        "tempCRecommended": { "min": 10, "max": 18 },
+        "ventilation": "Solid floor with absorbent bedding; avoid wire floors in transit."
+      },
+      "intake": {
+        "quarantineDays": 21,
+        "isolationDistanceM": 10,
+        "biosecurity": ["separate cages", "sanitize crocks/bottles"],
+        "initialHealthChecks": ["fecal float if diarrhea", "teeth check", "skin for mites"],
+        "vaccination": { "recommended": [], "optional": [], "timingNotes": "Vaccines availability varies by region." },
+        "parasiteControl": { "strategy": "Treat only on diagnosis; coccidia common in stress.", "timingNotes": "" },
+        "withdrawalIfRescueDays": 30,
+        "intakeWeightExpectationsKg": { "min": 1.0, "max": 1.5 },
+        "mortalityScreenWindowDays": 7
+      },
+      "feedingTransition": {
+        "startFeed": "High-quality hay unlimited; gradual pellet introduction (16–18% protein).",
+        "transitionPlan": ["Days 0–3: 75% previous feed + 25% new", "Days 4–7: 50/50", "Days 8–10: 25/75", "Day 11+: 100% new"],
+        "waterSupplements": ["none unless indicated"]
+      },
+      "welfare": { "grouping": "Avoid overcrowding to reduce fighting.", "enrichment": ["chew blocks", "hides"] },
+      "eventsMap": { "acquire.scheduled": ["species", "count", "vendor"], "transport.prep": ["crates", "ventilation", "tempTargetC"], "intake.quarantine.start": ["days", "location"], "health.vaccination.planned": ["vaccines", "dayOffset"], "feeding.transition.planned": ["from", "to", "days"], "records.paperwork.logged": ["docs"] },
+      "source": "manual:curated"
+    }
+  ],
+
+  "intakeStationChecklist": [
+    "Dedicated quarantine pen/cages prepared",
+    "Clean, dry bedding staged",
+    "Species-appropriate starter feed on hand",
+    "Clean waterers/bottles sanitized",
+    "Thermometer for ambient and brooder (if applicable)",
+    "Scale for intake weights and growth tracking",
+    "Footbath set up and signage",
+    "Paperwork folder prepared"
+  ],
+
+  "eventTemplates": {
+    "_comment": "Canonical event payload shapes for synthesis pipeline emission.",
+    "acquire.scheduled": { "type": "acquire.scheduled", "ts": "<ISO>", "source": "animal.acquisition", "data": { "species": "", "count": 0, "vendor": "", "plannedDate": "<ISO>" } },
+    "transport.prep": { "type": "transport.prep", "ts": "<ISO>", "source": "animal.acquisition", "data": { "crates": 0, "ventilation": "string", "tempTargetC": 0 } },
+    "intake.quarantine.start": { "type": "intake.quarantine.start", "ts": "<ISO>", "source": "animal.acquisition", "data": { "species": "", "days": 0, "location": "" } },
+    "health.vaccination.planned": { "type": "health.vaccination.planned", "ts": "<ISO>", "source": "animal.acquisition", "data": { "vaccines": ["list"], "dayOffset": 0 } },
+    "feeding.transition.planned": { "type": "feeding.transition.planned", "ts": "<ISO>", "source": "animal.acquisition", "data": { "from": "", "to": "", "days": 0 } },
+    "records.paperwork.logged": { "type": "records.paperwork.logged", "ts": "<ISO>", "source": "animal.acquisition", "data": { "docs": ["list"] } }
+  }
+}

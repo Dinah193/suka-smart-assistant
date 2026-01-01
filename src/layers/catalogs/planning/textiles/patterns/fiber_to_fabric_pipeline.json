@@ -1,0 +1,276 @@
+{
+  "id": "pat.textiles.fiber_to_fabric_pipeline",
+  "domain": "textiles",
+  "kind": "planning_pattern",
+  "title": "Fiber → Fabric Pipeline",
+  "intentTags": [
+    "intent:spin",
+    "intent:weave",
+    "mode:pipeline",
+    "difficulty:high"
+  ],
+  "description": "Plan a fiber-to-fabric pipeline (clean → spin → ply → weave/knit → finish) with checkpoints.",
+  "inputs": [
+    {
+      "key": "householdSize",
+      "type": "number",
+      "label": "Household size",
+      "required": false,
+      "default": 4,
+      "min": 1,
+      "max": 30
+    },
+    {
+      "key": "timeBudgetMin",
+      "type": "number",
+      "label": "Time budget (minutes)",
+      "required": false,
+      "default": 120,
+      "min": 30,
+      "max": 960
+    },
+    {
+      "key": "equipment",
+      "type": "multiselect",
+      "label": "Equipment",
+      "required": false,
+      "options": [
+        "needle_thread",
+        "machine_basic",
+        "machine_serger",
+        "loom",
+        "spindle",
+        "dye_pots",
+        "iron"
+      ]
+    },
+    {
+      "key": "fiberPreferences",
+      "type": "multiselect",
+      "label": "Fiber preferences",
+      "required": false,
+      "options": [
+        "cotton",
+        "linen",
+        "wool",
+        "hemp",
+        "silk",
+        "synthetic"
+      ],
+      "default": [
+        "cotton",
+        "linen"
+      ]
+    },
+    {
+      "key": "budgetCap",
+      "type": "number",
+      "label": "Budget cap ($)",
+      "required": false,
+      "default": 0,
+      "min": 0,
+      "max": 5000
+    },
+    {
+      "key": "items",
+      "type": "multiselect",
+      "label": "Items involved",
+      "required": false,
+      "options": [
+        "shirts",
+        "pants",
+        "dresses",
+        "headwraps",
+        "aprons",
+        "blankets",
+        "children_clothes",
+        "workwear"
+      ]
+    },
+    {
+      "key": "skillLevel",
+      "type": "select",
+      "label": "Skill level",
+      "required": false,
+      "default": "beginner",
+      "options": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "type": "planStructure",
+      "notes": "Pipeline sessions + material checkpoints."
+    }
+  ],
+  "constraints": [
+    {
+      "type": "safety",
+      "tag": "constraint:safety",
+      "notes": "Heat, dyes, sharp tools—surface safety checks."
+    },
+    {
+      "type": "time",
+      "tag": "constraint:time_budget",
+      "notes": "Respect time caps; propose splitting sessions."
+    }
+  ],
+  "requires": [
+    {
+      "type": "inventory",
+      "tag": "needsTextileInventory",
+      "optional": true
+    }
+  ],
+  "produces": [
+    {
+      "type": "session",
+      "domain": "textiles",
+      "title": "Fiber → Fabric Pipeline Session"
+    }
+  ],
+  "steps": [
+    {
+      "id": "prep_fiber",
+      "title": "Prep fiber (wash/card)",
+      "kind": "template",
+      "timeboxMin": 60
+    },
+    {
+      "id": "spin",
+      "title": "Spin yarn",
+      "kind": "template",
+      "timeboxMin": 120
+    },
+    {
+      "id": "ply",
+      "title": "Ply + set twist",
+      "kind": "template",
+      "timeboxMin": 60
+    },
+    {
+      "id": "fabric",
+      "title": "Weave/knit fabric",
+      "kind": "template",
+      "timeboxMin": 180
+    },
+    {
+      "id": "finish",
+      "title": "Finish + wash + dry",
+      "kind": "template",
+      "timeboxMin": 60
+    }
+  ],
+  "kpis": [
+    {
+      "key": "pipeline_yield",
+      "label": "Pipeline yield",
+      "unit": "yards",
+      "target": "User-set"
+    },
+    {
+      "key": "breakage_rate",
+      "label": "Breakage rate",
+      "unit": "%",
+      "target": "Trend down"
+    }
+  ],
+  "lean": {
+    "wasteTargets": [
+      "waiting",
+      "defects"
+    ],
+    "countermeasures": [
+      {
+        "waste": "waiting",
+        "do": "Stage next step tools; schedule drying/setting windows."
+      }
+    ]
+  },
+  "ui": {
+    "form": {
+      "fields": [
+        {
+          "key": "householdSize",
+          "type": "number",
+          "label": "Household size",
+          "required": false,
+          "default": 4,
+          "min": 1,
+          "max": 30
+        },
+        {
+          "key": "timeBudgetMin",
+          "type": "number",
+          "label": "Time budget (minutes)",
+          "required": false,
+          "default": 120,
+          "min": 30,
+          "max": 960
+        },
+        {
+          "key": "equipment",
+          "type": "multiselect",
+          "label": "Equipment",
+          "required": false,
+          "options": [
+            "needle_thread",
+            "machine_basic",
+            "machine_serger",
+            "loom",
+            "spindle",
+            "dye_pots",
+            "iron"
+          ]
+        },
+        {
+          "key": "fiberPreferences",
+          "type": "multiselect",
+          "label": "Fiber preferences",
+          "required": false,
+          "options": [
+            "cotton",
+            "linen",
+            "wool",
+            "hemp",
+            "silk",
+            "synthetic"
+          ],
+          "default": [
+            "cotton",
+            "linen"
+          ]
+        },
+        {
+          "key": "budgetCap",
+          "type": "number",
+          "label": "Budget cap ($)",
+          "required": false,
+          "default": 0,
+          "min": 0,
+          "max": 5000
+        }
+      ]
+    },
+    "help": {
+      "title": "Fiber → Fabric",
+      "intro": "A staged pipeline with checkpoints.",
+      "tips": [
+        "Schedule drying windows.",
+        "Log yarn specs for repeatability."
+      ]
+    }
+  },
+  "links": {
+    "storehousePatterns": [
+      "pat.storehouse.monthly_cycle_count"
+    ],
+    "homesteadPatterns": [
+      "pat.homestead.mixed_subsistence"
+    ]
+  },
+  "variants": []
+}

@@ -1,0 +1,386 @@
+{
+  "id": "pat.animals.feed_water_plan",
+  "domain": "animals_estimate_recommendation",
+  "kind": "planning_pattern",
+  "title": "Feed + Water Planning",
+  "intentTags": [
+    "intent:feed_plan",
+    "goal:feed",
+    "mode:plan"
+  ],
+  "description": "Plan feed and water logistics aligned to household routes, buffer stock, and seasonal constraints.",
+  "inputs": [
+    {
+      "key": "householdSize",
+      "type": "number",
+      "label": "Household size",
+      "required": true,
+      "default": 4,
+      "min": 1,
+      "max": 30
+    },
+    {
+      "key": "spaceType",
+      "type": "select",
+      "label": "Space type",
+      "required": false,
+      "default": "mixed",
+      "options": [
+        "urban_backyard",
+        "suburban",
+        "rural",
+        "mixed"
+      ]
+    },
+    {
+      "key": "landAcres",
+      "type": "number",
+      "label": "Land (acres)",
+      "required": false,
+      "default": 1,
+      "min": 0,
+      "max": 500
+    },
+    {
+      "key": "laborHoursPerWeek",
+      "type": "number",
+      "label": "Labor hours/week",
+      "required": false,
+      "default": 10,
+      "min": 1,
+      "max": 200
+    },
+    {
+      "key": "climateZone",
+      "type": "select",
+      "label": "Climate zone",
+      "required": false,
+      "default": "unknown",
+      "options": [
+        "unknown",
+        "usda:6",
+        "usda:7",
+        "usda:8",
+        "usda:9",
+        "usda:10",
+        "usda:11"
+      ]
+    },
+    {
+      "key": "dietaryLaws",
+      "type": "multiselect",
+      "label": "Dietary laws",
+      "required": false,
+      "options": [
+        "no_pork",
+        "no_shellfish",
+        "no_blood",
+        "none"
+      ],
+      "default": [
+        "no_pork"
+      ]
+    },
+    {
+      "key": "equipmentLevel",
+      "type": "select",
+      "label": "Equipment level",
+      "required": false,
+      "default": "standard",
+      "options": [
+        "limited",
+        "standard",
+        "advanced"
+      ]
+    },
+    {
+      "key": "proteinGoalPerWeek",
+      "type": "number",
+      "label": "Protein goal (meals/week)",
+      "required": false,
+      "default": 7,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "preferredSpecies",
+      "type": "multiselect",
+      "label": "Preferred species",
+      "required": false,
+      "options": [
+        "chicken",
+        "turkey",
+        "duck",
+        "goat",
+        "sheep",
+        "cattle",
+        "rabbit",
+        "fish",
+        "quail"
+      ]
+    },
+    {
+      "key": "processingPreference",
+      "type": "select",
+      "label": "Processing preference",
+      "required": false,
+      "default": "outsourced",
+      "options": [
+        "outsourced",
+        "on_farm",
+        "mixed"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "type": "planStructure",
+      "notes": "Chore cadence + reorder triggers."
+    },
+    {
+      "type": "shoppingDelta",
+      "notes": "Bulk feed/water system supplies if missing."
+    },
+    {
+      "type": "session",
+      "domain": "storehouse",
+      "notes": "Optional: bulk restock session blueprint."
+    }
+  ],
+  "constraints": [
+    {
+      "type": "humane",
+      "tag": "constraint:humane_windows",
+      "notes": "Respect humane windows for breeding, transport, and slaughter; recommend rather than force."
+    },
+    {
+      "type": "time",
+      "tag": "constraint:time_budget",
+      "notes": "Plans must respect labor capacity."
+    },
+    {
+      "type": "neighbors",
+      "tag": "constraint:local_rules",
+      "notes": "Local ordinances vary; surface as a check, not a blocker."
+    }
+  ],
+  "requires": [
+    {
+      "type": "seasonal",
+      "tag": "seasonTags",
+      "optional": true
+    }
+  ],
+  "produces": [
+    {
+      "type": "session",
+      "domain": "animals",
+      "title": "Feed + Water Planning Session"
+    },
+    {
+      "type": "session",
+      "domain": "storehouse",
+      "title": "Storehouse Provisioning Follow-on",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "demand",
+      "title": "Estimate feed/water demand by species",
+      "kind": "template",
+      "timeboxMin": 20
+    },
+    {
+      "id": "route",
+      "title": "Design daily/weekly chore route",
+      "kind": "template",
+      "timeboxMin": 20,
+      "ui": {
+        "chips": [
+          "route",
+          "batching"
+        ],
+        "help": "Reduce trips via station placement and buffer bins."
+      }
+    },
+    {
+      "id": "buffers",
+      "title": "Set feed buffer stock + reorder triggers",
+      "kind": "template",
+      "timeboxMin": 20
+    },
+    {
+      "id": "season",
+      "title": "Seasonal adjustments (winter, heat)",
+      "kind": "template",
+      "timeboxMin": 15
+    },
+    {
+      "id": "sync",
+      "title": "Sync storehouse (bulk feed) + procurement",
+      "kind": "template",
+      "timeboxMin": 10
+    }
+  ],
+  "kpis": [
+    {
+      "key": "trips_per_week",
+      "label": "Trips per week",
+      "unit": "count",
+      "target": "Trend down"
+    },
+    {
+      "key": "stockouts",
+      "label": "Feed stockouts",
+      "unit": "count",
+      "target": "0"
+    },
+    {
+      "key": "spoilage_feed",
+      "label": "Feed spoilage",
+      "unit": "%",
+      "target": "≤1%"
+    }
+  ],
+  "lean": {
+    "wasteTargets": [
+      "motion",
+      "transport",
+      "waiting"
+    ],
+    "countermeasures": [
+      {
+        "waste": "motion",
+        "do": "Create a single-loop chore route; stage refill bins."
+      }
+    ]
+  },
+  "ui": {
+    "form": {
+      "fields": [
+        {
+          "key": "householdSize",
+          "type": "number",
+          "label": "Household size",
+          "required": true,
+          "default": 4,
+          "min": 1,
+          "max": 30
+        },
+        {
+          "key": "spaceType",
+          "type": "select",
+          "label": "Space type",
+          "required": false,
+          "default": "mixed",
+          "options": [
+            "urban_backyard",
+            "suburban",
+            "rural",
+            "mixed"
+          ]
+        },
+        {
+          "key": "landAcres",
+          "type": "number",
+          "label": "Land (acres)",
+          "required": false,
+          "default": 1,
+          "min": 0,
+          "max": 500
+        },
+        {
+          "key": "laborHoursPerWeek",
+          "type": "number",
+          "label": "Labor hours/week",
+          "required": false,
+          "default": 10,
+          "min": 1,
+          "max": 200
+        },
+        {
+          "key": "climateZone",
+          "type": "select",
+          "label": "Climate zone",
+          "required": false,
+          "default": "unknown",
+          "options": [
+            "unknown",
+            "usda:6",
+            "usda:7",
+            "usda:8",
+            "usda:9",
+            "usda:10",
+            "usda:11"
+          ]
+        },
+        {
+          "key": "dietaryLaws",
+          "type": "multiselect",
+          "label": "Dietary laws",
+          "required": false,
+          "options": [
+            "no_pork",
+            "no_shellfish",
+            "no_blood",
+            "none"
+          ],
+          "default": [
+            "no_pork"
+          ]
+        },
+        {
+          "key": "equipmentLevel",
+          "type": "select",
+          "label": "Equipment level",
+          "required": false,
+          "default": "standard",
+          "options": [
+            "limited",
+            "standard",
+            "advanced"
+          ]
+        },
+        {
+          "key": "feedBufferWeeks",
+          "type": "slider",
+          "label": "Feed buffer (weeks)",
+          "min": 1,
+          "max": 12,
+          "step": 1,
+          "default": 4
+        }
+      ]
+    },
+    "chips": [
+      {
+        "key": "goal",
+        "label": "Feed/Water",
+        "tag": "goal:feed"
+      }
+    ],
+    "help": {
+      "title": "Feed + Water Plan",
+      "intro": "Reduce trips and prevent stockouts.",
+      "tips": [
+        "Use buffer triggers.",
+        "Align bulk orders with storehouse restock cadence."
+      ]
+    }
+  },
+  "links": {
+    "valueStreams": [
+      "vs.slaughter_to_storage"
+    ],
+    "storehousePatterns": [
+      "pat.storehouse.winter_reserve",
+      "pat.storehouse.weekly_restock"
+    ],
+    "homesteadPatterns": [
+      "pat.homestead.animal_led",
+      "pat.homestead.mixed_subsistence"
+    ]
+  },
+  "variants": []
+}

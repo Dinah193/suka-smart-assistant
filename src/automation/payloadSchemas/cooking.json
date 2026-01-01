@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CookingEvent",
+  "type": "object",
+  "required": ["eventType", "userId", "sessionId"],
+  "properties": {
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "cooking.session.start",
+        "cooking.session.pause",
+        "cooking.step.start",
+        "cooking.step.done",
+        "cooking.session.done"
+      ]
+    },
+    "userId": { "type": "string", "minLength": 1 },
+    "sessionId": { "type": "string", "minLength": 1 },
+    "recipeId": { "type": "string" },
+    "stepId": { "type": "string" },
+    "stepName": { "type": "string" },
+    "expectedDurationSec": { "type": "number", "minimum": 0 },
+    "startedAt": { "type": "number" },
+    "doneness": { "type": "string", "enum": ["soft", "medium", "crisp"], "nullable": true },
+    "tools": { "type": "array", "items": { "type": "string" } },
+    "inventoryDelta": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["sku", "qty", "unit"],
+        "properties": {
+          "sku": { "type": "string" },
+          "qty": { "type": "number" },
+          "unit": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "notes": { "type": "string" }
+  },
+  "additionalProperties": false
+}

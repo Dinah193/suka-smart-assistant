@@ -1,0 +1,325 @@
+{
+  "id": "wf.indigenous.israelite_household",
+  "domain": "workflow",
+  "kind": "workflow_overlay",
+  "title": "Israelite Household Rhythm (Scripture-anchored, Opt-in Overlay)",
+  "intentTags": [
+    "overlay:workflow",
+    "culture:israelite",
+    "group:indigenous"
+  ],
+  "inputs": [
+    {
+      "key": "enabled",
+      "label": "Enabled (opt-in)",
+      "type": "boolean",
+      "required": true,
+      "default": false,
+      "notes": "Overlays must be explicitly enabled by user/household."
+    },
+    {
+      "key": "householdMode",
+      "label": "Household mode",
+      "type": "string",
+      "default": "default",
+      "notes": "Examples: default, communal, travel, recovery."
+    },
+    {
+      "key": "dietaryLaws",
+      "label": "Dietary laws / household rules",
+      "type": "object",
+      "default": {},
+      "notes": "Merged with household prefs; overlay never overrides hard constraints."
+    },
+    {
+      "key": "quietHours",
+      "label": "Quiet hours / Sabbath guard",
+      "type": "object",
+      "default": {
+        "enabled": false
+      }
+    },
+    {
+      "key": "season",
+      "label": "Season",
+      "type": "string"
+    }
+  ],
+  "outputs": [
+    {
+      "key": "tagOverlays",
+      "label": "Canonical tags to apply",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "patternBiases",
+      "label": "Pattern bias suggestions",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "constraintOverlays",
+      "label": "Constraint overlays (soft)",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "uiOverlays",
+      "label": "UI label/order defaults",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "roleDefaults",
+      "label": "Role-based defaults (optional)",
+      "type": "object",
+      "default": {}
+    }
+  ],
+  "constraints": [
+    "optInOnly",
+    "neverStereotype",
+    "userEditable",
+    "respectDietaryLaws",
+    "respectQuietHours"
+  ],
+  "steps": [
+    {
+      "id": "overlay.apply",
+      "title": "Apply workflow overlay",
+      "template": "tpl.workflow.overlay.apply",
+      "domain": "workflow",
+      "params": {
+        "cultureTag": "culture:israelite",
+        "mergeMode": "soft"
+      },
+      "hints": [
+        "emitHintTag:applyWorkflowOverlay"
+      ]
+    }
+  ],
+  "kpis": [
+    {
+      "key": "adoptionRate",
+      "label": "Overlay adoption rate",
+      "direction": "up",
+      "unit": "%",
+      "notes": "How often households keep overlay enabled."
+    },
+    {
+      "key": "overrideEdits",
+      "label": "User edits vs defaults",
+      "direction": "down",
+      "unit": "count",
+      "notes": "High edits may indicate defaults need tuning."
+    }
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial workflow overlay catalog (opt-in, non-stereotyped)."
+      }
+    ],
+    "tags": [
+      "culture:israelite",
+      "group:indigenous"
+    ],
+    "family": "workflows"
+  },
+  "workflow": {
+    "preferredStaples": {
+      "canonicalTags": [
+        "grain",
+        "olive_oil",
+        "fruit",
+        "legume",
+        "herbs",
+        "lamb_goat_beef_optional"
+      ],
+      "examples": [
+        {
+          "tag": "staple:grain",
+          "examples": [
+            "wheat",
+            "barley",
+            "spelt (if used)",
+            "millet (regional)"
+          ]
+        },
+        {
+          "tag": "staple:fruit",
+          "examples": [
+            "grapes",
+            "figs",
+            "dates"
+          ]
+        },
+        {
+          "tag": "staple:olive_oil",
+          "examples": [
+            "olive oil (or nearest equivalent if unavailable)"
+          ]
+        }
+      ],
+      "notes": "These are planning defaults (staple bias), not mandatory foods."
+    },
+    "mealRhythms": {
+      "canonicalTags": [
+        "sabbath_guard",
+        "feast_focus_optional",
+        "make_ahead_bias"
+      ],
+      "defaults": {
+        "weeklyCadence": {
+          "prepAheadDay": "Fri (or day before rest day)",
+          "batchCookBias": true
+        },
+        "structure": [
+          "simple_staples",
+          "seasonal_produce",
+          "protein_optional"
+        ],
+        "quietHours": {
+          "enabledByDefault": true,
+          "avoid": [
+            "loud_grinding",
+            "smoking_heavy"
+          ]
+        }
+      },
+      "notes": "Overlay nudges SSA to propose make-ahead sessions and Sabbath-safe modes when enabled."
+    },
+    "preservationEmphasis": {
+      "canonicalTags": [
+        "drying",
+        "fermentation",
+        "oil_storage",
+        "rootCellar_optional"
+      ],
+      "defaults": {
+        "prioritize": [
+          "drying",
+          "fermentation"
+        ],
+        "secondary": [
+          "rootCellar_optional"
+        ]
+      },
+      "notes": "Used to suggest preservation when harvest/surplus is detected."
+    },
+    "valuePriorities": {
+      "canonicalTags": [
+        "stewardship",
+        "feastFocus_optional",
+        "thrift",
+        "hospitality_optional"
+      ],
+      "defaults": {
+        "stewardshipMode": "on",
+        "feastFocus": "optional",
+        "hospitality": "optional"
+      },
+      "notes": "Values influence pattern bias and constraints (e.g., avoid last-minute noisy tasks)."
+    },
+    "notes": "All fields are suggestions. Users can disable any default and replace with their own."
+  },
+  "outputs_default": {
+    "tagOverlays": [
+      "staple:grain",
+      "staple:herbs",
+      "rhythm:sabbath_guard",
+      "rhythm:feast_focus_optional",
+      "preservation:drying",
+      "value:thrift",
+      "value:hospitality_optional",
+      "staple:fruit",
+      "staple:olive_oil",
+      "rhythm:make_ahead_bias",
+      "staple:lamb_goat_beef_optional",
+      "preservation:fermentation",
+      "value:feastFocus_optional",
+      "staple:legume",
+      "preservation:rootCellar_optional",
+      "preservation:oil_storage",
+      "value:stewardship"
+    ],
+    "patternBiases": {
+      "favor": {
+        "pat.meals.weekly_batch": 1.1,
+        "pat.meals.feast_anchored": 1.15,
+        "pat.storehouse.feast_buffer_build": 1.1
+      },
+      "avoid": {
+        "pat.meals.daily_fresh": 0.97
+      },
+      "notes": "Biases are advisory; resolvers may downrank/boost patterns, not block unless user also sets a hard constraint.",
+      "emitHintTags": [
+        "workflow:sabbath_guard",
+        "workflow:feast_focus_optional"
+      ]
+    },
+    "constraintOverlays": {
+      "soft": {
+        "preferSabbathSafe": true,
+        "preferMakeAhead": true
+      },
+      "hard": {}
+    },
+    "uiOverlays": {
+      "labels": {},
+      "ordering": {
+        "plannerSections": [
+          "calendar",
+          "inventory",
+          "menu",
+          "makeAhead",
+          "sessions",
+          "storehouse"
+        ]
+      },
+      "defaults": {
+        "showSabbathSafeToggle": true,
+        "defaultMealMode": "make_ahead_bias"
+      }
+    },
+    "roleDefaults": {
+      "notes": "Roles are optional and user-editable.",
+      "roles": [
+        {
+          "roleId": "role.household_steward",
+          "label": "Household Steward",
+          "defaults": {
+            "owns": [
+              "calendarAwarePlanning",
+              "quietHoursGuard"
+            ]
+          }
+        },
+        {
+          "roleId": "role.kitchen_steward",
+          "label": "Kitchen Steward",
+          "defaults": {
+            "owns": [
+              "makeAheadPrep",
+              "sabbathSafeMenu"
+            ]
+          }
+        },
+        {
+          "roleId": "role.storehouse_keeper",
+          "label": "Storehouse Keeper",
+          "defaults": {
+            "owns": [
+              "fifoRotation",
+              "bufferStock"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

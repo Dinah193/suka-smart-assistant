@@ -1,0 +1,222 @@
+{
+  "description": "Sample SSA event envelope for `meal.executed`. Emit this when a cooking/meal session is actually completed. This is the point where inventory has been decremented (or should be decremented) and household analytics can count the meal. If familyFundMode=true, a downstream listener can export this to the Hub so the community sees what dishes are actually being cooked and which ingredients are in active rotation.",
+  "envelopeShape": {
+    "type": "meal.executed",
+    "ts": "2025-11-02T13:25:00.000Z",
+    "source": "domain/meals/MealSessionEngine",
+    "data": {
+      "sessionId": "meal_xxxxxxxx",
+      "recipes": [
+        {
+          "id": "rec_xxxxxxxx",
+          "name": "string",
+          "servingsCooked": 4
+        }
+      ],
+      "inventoryDeltas": [
+        {
+          "itemId": "inv_xxxxxxxx",
+          "name": "string",
+          "delta": -1,
+          "unit": "each"
+        }
+      ],
+      "notes": "string | null"
+    }
+  },
+  "samples": [
+    {
+      "label": "Single recipe, all ingredients found in inventory",
+      "event": {
+        "type": "meal.executed",
+        "ts": "2025-11-02T13:25:00.000Z",
+        "source": "domain/meals/MealSessionEngine",
+        "data": {
+          "sessionId": "meal_9b6d0201",
+          "recipes": [
+            {
+              "id": "rec_lamb_rosemary_sheetpan",
+              "name": "Rosemary Lamb Sheetpan Dinner",
+              "servingsCooked": 6
+            }
+          ],
+          "inventoryDeltas": [
+            {
+              "itemId": "inv_lamb_shoulder",
+              "name": "Lamb Shoulder",
+              "delta": -2,
+              "unit": "lb"
+            },
+            {
+              "itemId": "inv_rosemary_dried",
+              "name": "Rosemary (Dried)",
+              "delta": -1,
+              "unit": "tbsp"
+            },
+            {
+              "itemId": "inv_olive_oil",
+              "name": "Olive Oil",
+              "delta": -3,
+              "unit": "tbsp"
+            },
+            {
+              "itemId": "inv_root_veggies_mix",
+              "name": "Root Veggies Mix",
+              "delta": -1.5,
+              "unit": "lb"
+            }
+          ],
+          "notes": "Cooked for Sabbath eve."
+        }
+      }
+    },
+    {
+      "label": "Batch cooking execution (multiple recipes cooked together)",
+      "event": {
+        "type": "meal.executed",
+        "ts": "2025-11-02T13:27:45.000Z",
+        "source": "domain/meals/MealSessionEngine",
+        "data": {
+          "sessionId": "meal_batch_2025_11_02_am",
+          "recipes": [
+            {
+              "id": "rec_beef_stew",
+              "name": "Hearty Beef Stew",
+              "servingsCooked": 8
+            },
+            {
+              "id": "rec_goat_sausage_breakfast",
+              "name": "Goat Breakfast Sausage Patties",
+              "servingsCooked": 12
+            }
+          ],
+          "inventoryDeltas": [
+            {
+              "itemId": "inv_beef_brangus_roast",
+              "name": "Beef Brangus Roast",
+              "delta": -3,
+              "unit": "lb"
+            },
+            {
+              "itemId": "inv_carrots_fresh",
+              "name": "Carrots",
+              "delta": -4,
+              "unit": "each"
+            },
+            {
+              "itemId": "inv_potatoes_russet",
+              "name": "Potatoes (Russet)",
+              "delta": -6,
+              "unit": "each"
+            },
+            {
+              "itemId": "inv_goat_ground",
+              "name": "Goat (Ground)",
+              "delta": -2,
+              "unit": "lb"
+            },
+            {
+              "itemId": "inv_sausage_spice_blend",
+              "name": "Sausage Spice Blend",
+              "delta": -3,
+              "unit": "tbsp"
+            }
+          ],
+          "notes": "Batch session from planned menu. Goat sausage frozen in 1-lb packs."
+        }
+      }
+    },
+    {
+      "label": "Meal executed but required substitutions (from your substitutions.*.json)",
+      "event": {
+        "type": "meal.executed",
+        "ts": "2025-11-02T13:30:10.000Z",
+        "source": "domain/meals/MealSessionEngine",
+        "data": {
+          "sessionId": "meal_subs_13_30",
+          "recipes": [
+            {
+              "id": "rec_clean_taco_meat",
+              "name": "Clean Taco Meat (No Pork)",
+              "servingsCooked": 5
+            }
+          ],
+          "inventoryDeltas": [
+            {
+              "itemId": "inv_ground_lamb",
+              "name": "Ground Lamb (sub for pork)",
+              "delta": -1.5,
+              "unit": "lb"
+            },
+            {
+              "itemId": "inv_onion_yellow",
+              "name": "Onion (Yellow)",
+              "delta": -1,
+              "unit": "each"
+            },
+            {
+              "itemId": "inv_tomato_paste",
+              "name": "Tomato Paste",
+              "delta": -1,
+              "unit": "can"
+            },
+            {
+              "itemId": "inv_taco_spice_clean",
+              "name": "Taco Spice (Clean)",
+              "delta": -2,
+              "unit": "tbsp"
+            }
+          ],
+          "notes": "Used lamb instead of pork due to Torah clean rules – pulled from substitutions.torah.json."
+        }
+      }
+    },
+    {
+      "label": "Meal executed from imported recipe (importId present for traceability)",
+      "event": {
+        "type": "meal.executed",
+        "ts": "2025-11-02T13:32:30.000Z",
+        "source": "domain/meals/MealSessionEngine",
+        "data": {
+          "sessionId": "meal_from_import_693a",
+          "importId": "imp_7c4a7b21", 
+          "recipes": [
+            {
+              "id": "rec_imported_7c4a7b21",
+              "name": "Imported: One-Pot Chicken & Rice",
+              "servingsCooked": 4
+            }
+          ],
+          "inventoryDeltas": [
+            {
+              "itemId": "inv_chicken_thighs",
+              "name": "Chicken Thighs",
+              "delta": -4,
+              "unit": "each"
+            },
+            {
+              "itemId": "inv_rice_longgrain",
+              "name": "Long Grain Rice",
+              "delta": -2,
+              "unit": "cup"
+            },
+            {
+              "itemId": "inv_chicken_stock",
+              "name": "Chicken Stock",
+              "delta": -2,
+              "unit": "cup"
+            }
+          ],
+          "notes": "Executed from an imported recipe; good candidate for popularity analytics."
+        }
+      }
+    }
+  ],
+  "notes": [
+    "1. This event should be emitted *after* inventory has been decremented (or at least after the deltas are known).",
+    "2. Automation may listen to this to trigger preservation suggestions, storehouse replenishment, or to update meal analytics dashboards.",
+    "3. If featureFlags.familyFundMode=true, a listener (like src/events/eventMappers.js) can map this to hub:meal.executed and send it to the Hub.",
+    "4. Always include `sessionId` so the UI can navigate back to the completed session.",
+    "5. Keep JSON-only (no $schema) to avoid VS Code schema fetch errors."
+  ]
+}

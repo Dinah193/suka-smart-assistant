@@ -1,0 +1,241 @@
+{
+  "version": "1.0.0",
+  "updatedAt": "2025-11-14T00:00:00.000Z",
+  "scope": "suka-smart-assistant/agents",
+  "description": "Centralized budget policy for SSA agents: daily and per-intent token/time caps for Session-related skills and supporting automations.",
+  "meta": {
+    "notes": [
+      "All token values are approximate model tokens (prompt + completion).",
+      "All time values are wall-clock time caps for a single agent run, in milliseconds.",
+      "Soft caps should trigger early-termination or degraded detail; hard caps must cause a hard stop.",
+      "Intents not listed here should fall back to the `defaults` section."
+    ],
+    "owner": "SSA-runtime",
+    "source": "src/agents/policies/budget.json"
+  },
+  "defaults": {
+    "softTokenCap": 6000,
+    "hardTokenCap": 9000,
+    "softTimeCapMs": 18000,
+    "hardTimeCapMs": 25000,
+    "cooldownMsBetweenCalls": 500,
+    "daily": {
+      "totalTokenCap": 600000,
+      "totalTimeCapMs": 7200000
+    }
+  },
+  "domains": {
+    "sessions": {
+      "dailyTokenCap": 250000,
+      "dailyTimeCapMs": 3600000
+    },
+    "imports": {
+      "dailyTokenCap": 120000,
+      "dailyTimeCapMs": 1800000
+    },
+    "nutrition": {
+      "dailyTokenCap": 80000,
+      "dailyTimeCapMs": 1200000
+    },
+    "automation": {
+      "dailyTokenCap": 120000,
+      "dailyTimeCapMs": 1800000
+    },
+    "searchAndScrape": {
+      "dailyTokenCap": 50000,
+      "dailyTimeCapMs": 900000
+    }
+  },
+  "intents": {
+    "session.compose.generic": {
+      "description": "Domain-agnostic session composition from imported plans, recipes, or manual inputs.",
+      "priority": "high",
+      "softTokenCap": 7000,
+      "hardTokenCap": 10000,
+      "softTimeCapMs": 20000,
+      "hardTimeCapMs": 30000,
+      "dailyTokenCap": 80000,
+      "dailyTimeCapMs": 900000
+    },
+    "session.compose.cooking": {
+      "description": "Cooking-specific session composition with doneness cues, timers, and inventory links.",
+      "priority": "high",
+      "softTokenCap": 7500,
+      "hardTokenCap": 11000,
+      "softTimeCapMs": 22000,
+      "hardTimeCapMs": 32000,
+      "dailyTokenCap": 90000,
+      "dailyTimeCapMs": 900000
+    },
+    "session.compose.cleaning": {
+      "description": "Cleaning session composition (room-by-room, product usage, safety checks).",
+      "priority": "normal",
+      "softTokenCap": 6000,
+      "hardTokenCap": 9000,
+      "softTimeCapMs": 18000,
+      "hardTimeCapMs": 26000,
+      "dailyTokenCap": 60000,
+      "dailyTimeCapMs": 600000
+    },
+    "session.compose.garden": {
+      "description": "Garden session composition (beds, tasks, weather-aware steps).",
+      "priority": "normal",
+      "softTokenCap": 6500,
+      "hardTokenCap": 9500,
+      "softTimeCapMs": 20000,
+      "hardTimeCapMs": 28000,
+      "dailyTokenCap": 65000,
+      "dailyTimeCapMs": 600000
+    },
+    "session.compose.animals": {
+      "description": "Animal care session composition (feeding, watering, health checks).",
+      "priority": "normal",
+      "softTokenCap": 6500,
+      "hardTokenCap": 9500,
+      "softTimeCapMs": 20000,
+      "hardTimeCapMs": 28000,
+      "dailyTokenCap": 65000,
+      "dailyTimeCapMs": 600000
+    },
+    "session.compose.preservation": {
+      "description": "Preservation session composition (canning, dehydrating, curing, etc.).",
+      "priority": "normal",
+      "softTokenCap": 7000,
+      "hardTokenCap": 10500,
+      "softTimeCapMs": 22000,
+      "hardTimeCapMs": 30000,
+      "dailyTokenCap": 70000,
+      "dailyTimeCapMs": 600000
+    },
+    "session.compose.storehouse": {
+      "description": "Storehouse session composition (inventory audits, bulk moves, cycle counts).",
+      "priority": "normal",
+      "softTokenCap": 6000,
+      "hardTokenCap": 9000,
+      "softTimeCapMs": 18000,
+      "hardTimeCapMs": 26000,
+      "dailyTokenCap": 60000,
+      "dailyTimeCapMs": 600000
+    },
+    "session.nowResolver": {
+      "description": "Resolve 'Now' CTA into the next runnable session (multi-domain filter + guard pre-check).",
+      "priority": "high",
+      "softTokenCap": 3500,
+      "hardTokenCap": 5000,
+      "softTimeCapMs": 10000,
+      "hardTimeCapMs": 16000,
+      "dailyTokenCap": 30000,
+      "dailyTimeCapMs": 300000
+    },
+    "session.guardCheck": {
+      "description": "Evaluate guards (Sabbath, Quiet Hours, Weather, Inventory, Battery) per-step or pre-session.",
+      "priority": "high",
+      "softTokenCap": 2500,
+      "hardTokenCap": 4000,
+      "softTimeCapMs": 7000,
+      "hardTimeCapMs": 12000,
+      "dailyTokenCap": 25000,
+      "dailyTimeCapMs": 240000
+    },
+    "session.swapSuggestions": {
+      "description": "Suggest alternate steps/sessions when guards block current step (inventory/weather/quiet hours/Sabbath).",
+      "priority": "high",
+      "softTokenCap": 4500,
+      "hardTokenCap": 6500,
+      "softTimeCapMs": 12000,
+      "hardTimeCapMs": 18000,
+      "dailyTokenCap": 35000,
+      "dailyTimeCapMs": 360000
+    },
+    "session.analytics.summarize": {
+      "description": "Summarize completed/aborted sessions into analytics records and Hub-ready payloads.",
+      "priority": "low",
+      "softTokenCap": 3000,
+      "hardTokenCap": 4500,
+      "softTimeCapMs": 8000,
+      "hardTimeCapMs": 14000,
+      "dailyTokenCap": 30000,
+      "dailyTimeCapMs": 240000
+    },
+    "session.exportToHub": {
+      "description": "Format and export completed/aborted session analytics to the Family Fund Hub when enabled.",
+      "priority": "normal",
+      "softTokenCap": 2500,
+      "hardTokenCap": 4000,
+      "softTimeCapMs": 8000,
+      "hardTimeCapMs": 14000,
+      "dailyTokenCap": 25000,
+      "dailyTimeCapMs": 240000
+    },
+    "import.recipe": {
+      "description": "Parse and normalize recipe imports before session composition.",
+      "priority": "high",
+      "softTokenCap": 5000,
+      "hardTokenCap": 8000,
+      "softTimeCapMs": 16000,
+      "hardTimeCapMs": 24000,
+      "dailyTokenCap": 50000,
+      "dailyTimeCapMs": 480000
+    },
+    "import.cleaningPlan": {
+      "description": "Parse and normalize cleaning plans before session composition.",
+      "priority": "normal",
+      "softTokenCap": 4000,
+      "hardTokenCap": 6500,
+      "softTimeCapMs": 14000,
+      "hardTimeCapMs": 22000,
+      "dailyTokenCap": 40000,
+      "dailyTimeCapMs": 420000
+    },
+    "import.gardenPlan": {
+      "description": "Parse and normalize garden/seed data into runnable tasks.",
+      "priority": "normal",
+      "softTokenCap": 4500,
+      "hardTokenCap": 7000,
+      "softTimeCapMs": 16000,
+      "hardTimeCapMs": 24000,
+      "dailyTokenCap": 45000,
+      "dailyTimeCapMs": 420000
+    },
+    "import.animalTask": {
+      "description": "Parse and normalize animal care/butchery tasks.",
+      "priority": "normal",
+      "softTokenCap": 4500,
+      "hardTokenCap": 7000,
+      "softTimeCapMs": 16000,
+      "hardTimeCapMs": 24000,
+      "dailyTokenCap": 45000,
+      "dailyTimeCapMs": 420000
+    },
+    "nutrition.scrapeAndNormalize": {
+      "description": "Scrape and normalize nutrition for session-linked recipes and meal plans.",
+      "priority": "low",
+      "softTokenCap": 5000,
+      "hardTokenCap": 7500,
+      "softTimeCapMs": 16000,
+      "hardTimeCapMs": 24000,
+      "dailyTokenCap": 50000,
+      "dailyTimeCapMs": 420000
+    },
+    "automation.scheduler.tick": {
+      "description": "Periodic automation tick to suggest or schedule sessions based on events.",
+      "priority": "low",
+      "softTokenCap": 2000,
+      "hardTokenCap": 3000,
+      "softTimeCapMs": 5000,
+      "hardTimeCapMs": 8000,
+      "dailyTokenCap": 20000,
+      "dailyTimeCapMs": 180000
+    },
+    "automation.backgroundGuardRefresh": {
+      "description": "Lightweight background guard re-evaluation (weather, Sabbath, Quiet Hours) used by SessionRunner and Now CTAs.",
+      "priority": "low",
+      "softTokenCap": 1500,
+      "hardTokenCap": 2500,
+      "softTimeCapMs": 4000,
+      "hardTimeCapMs": 7000,
+      "dailyTokenCap": 15000,
+      "dailyTimeCapMs": 180000
+    }
+  }
+}

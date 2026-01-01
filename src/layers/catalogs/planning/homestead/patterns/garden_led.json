@@ -1,0 +1,272 @@
+{
+  "id": "pat.homestead.garden_led",
+  "domain": "homestead",
+  "kind": "planning_pattern",
+  "title": "Garden-Led Homestead Planning",
+  "description": "Plan around garden windows and yields; align animals and storehouse provisioning.",
+  "intentTags": [
+    "plan:homestead",
+    "focus:garden"
+  ],
+  "inputs": [
+    {
+      "key": "landOrSpace",
+      "label": "Land/space available",
+      "type": "object",
+      "required": true,
+      "default": {
+        "type": "yard",
+        "size": 0.25,
+        "unit": "acre"
+      }
+    },
+    {
+      "key": "laborCapacity",
+      "label": "Labor capacity",
+      "type": "object",
+      "required": true,
+      "default": {
+        "adults": 1,
+        "kids": 0,
+        "hoursPerWeek": 10
+      }
+    },
+    {
+      "key": "season",
+      "label": "Season",
+      "type": "string",
+      "required": true,
+      "default": "spring"
+    },
+    {
+      "key": "climateZone",
+      "label": "Climate zone",
+      "type": "string"
+    },
+    {
+      "key": "equipment",
+      "label": "Equipment",
+      "type": "array",
+      "default": [
+        "hand_tools"
+      ]
+    },
+    {
+      "key": "schoolWorkSchedule",
+      "label": "School/work schedules",
+      "type": "object"
+    },
+    {
+      "key": "weatherWindows",
+      "label": "Weather windows",
+      "type": "object"
+    },
+    {
+      "key": "humaneWindows",
+      "label": "Humane windows / animal constraints",
+      "type": "object"
+    }
+  ],
+  "outputs": [
+    {
+      "key": "weeklySchedule",
+      "label": "Weekly task schedule",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "yieldForecasts",
+      "label": "Yield forecasts",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "sessions",
+      "label": "Session blueprints requested",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "storehouseProvisioning",
+      "label": "Storehouse provisioning links",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "preservationSessions",
+      "label": "Preservation sessions",
+      "type": "array",
+      "required": true
+    }
+  ],
+  "constraints": [
+    "humaneWindows",
+    "weatherWindows",
+    "schoolWorkSchedules",
+    "quietHours/sabbathGuard"
+  ],
+  "requires": [
+    "catalog:gardenTasks",
+    "catalog:animalTasks"
+  ],
+  "produces": [
+    "artifact:weeklySchedule",
+    "artifact:yieldForecasts",
+    "blueprint:homesteadSessions",
+    "trigger:storehouseProvisioning",
+    "trigger:preservation"
+  ],
+  "lean": {
+    "wasteTargets": [
+      "waiting",
+      "motion",
+      "transport",
+      "overprocessing"
+    ],
+    "standardWorkRefs": [
+      "stdwork.garden.batch",
+      "stdwork.animals.rounds",
+      "stdwork.harvest.sort"
+    ],
+    "taktModelRef": "takt.homestead.weekly",
+    "kpiTargets": {
+      "tasksCompleted": "increase",
+      "missedWindows": "reduce",
+      "tripsPerWeek": "reduce"
+    }
+  },
+  "ui": {
+    "icon": "leaf",
+    "chips": [
+      "time:medium",
+      "difficulty:medium",
+      "focus:garden"
+    ],
+    "defaultFilters": {
+      "domain": "homestead"
+    },
+    "form": [
+      {
+        "key": "gardenPriority",
+        "type": "select",
+        "label": "Garden priority",
+        "options": [
+          "greens",
+          "roots",
+          "grains",
+          "mixed"
+        ],
+        "default": "mixed"
+      },
+      {
+        "key": "batchByZone",
+        "type": "toggle",
+        "label": "Batch tasks by zone",
+        "default": true
+      }
+    ]
+  },
+  "steps": [
+    {
+      "id": "season.window",
+      "title": "Resolve season windows",
+      "template": "tpl.homestead.season.resolve",
+      "domain": "homestead",
+      "params": {
+        "seasonKey": "season",
+        "climateZoneKey": "climateZone"
+      }
+    },
+    {
+      "id": "garden.plan",
+      "title": "Build garden task schedule",
+      "template": "tpl.garden.plan.week",
+      "domain": "homestead",
+      "params": {
+        "priorityKey": "gardenPriority",
+        "batchByZoneKey": "batchByZone"
+      }
+    },
+    {
+      "id": "yield.forecast",
+      "title": "Forecast yields + harvest windows",
+      "template": "tpl.garden.yield.forecast",
+      "domain": "homestead",
+      "params": {
+        "seasonKey": "season"
+      }
+    },
+    {
+      "id": "storehouse.provision",
+      "title": "Link yields to storehouse provisioning",
+      "template": "tpl.storehouse.provision.from.yields",
+      "domain": "storehouse",
+      "params": {
+        "zones": [
+          "pantry",
+          "cold",
+          "rootCellar",
+          "frozen"
+        ]
+      },
+      "hints": [
+        "needsInventorySnapshot"
+      ]
+    },
+    {
+      "id": "preserve.sessions",
+      "title": "Trigger preservation sessions as needed",
+      "template": "tpl.preservation.trigger.sessions",
+      "domain": "homestead",
+      "params": {
+        "methods": [
+          "freeze",
+          "dehydrate",
+          "ferment",
+          "can"
+        ],
+        "emitEvent": "session.blueprints.created"
+      },
+      "optional": true
+    },
+    {
+      "id": "sessions.build",
+      "title": "Generate homestead session blueprints",
+      "template": "tpl.blueprint.build.sessions",
+      "domain": "homestead",
+      "params": {
+        "sessionStyles": [
+          "garden",
+          "storehouse_pull"
+        ],
+        "emitEvent": "session.blueprints.created"
+      }
+    }
+  ],
+  "kpis": [
+    {
+      "key": "missedWindows",
+      "label": "Missed planting/harvest windows",
+      "direction": "down",
+      "unit": "count"
+    },
+    {
+      "key": "yieldCaptured",
+      "label": "Yield captured",
+      "direction": "up",
+      "unit": "units"
+    }
+  ],
+  "variants": [],
+  "links": {
+    "storehouseSuggested": [
+      "pat.storehouse.weekly_restock",
+      "pat.storehouse.winter_reserve"
+    ]
+  },
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "tags": []
+  }
+}

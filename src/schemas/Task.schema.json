@@ -1,0 +1,489 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka-smart-assistant/schemas/Task.schema.json",
+  "title": "SSA Universal Task",
+  "description": "A normalized, event-driven task contract used across SSA domains (cooking, cleaning, garden, animal, preservation, storehouse, video/how-to). Tasks are schedulable, can consume/produce household resources, and can emit SSA events.",
+  "type": "object",
+  "required": ["taskId", "title", "domain", "steps"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "default": "1.0.0",
+      "description": "Schema payload version for forward-compat migrations."
+    },
+    "taskId": {
+      "type": "string",
+      "description": "Stable unique identifier for this task (UUID or deterministic hash)."
+    },
+    "parentTaskId": {
+      "type": "string",
+      "description": "If this task is a subtask of a larger plan/session, reference its parent task."
+    },
+    "sessionId": {
+      "type": "string",
+      "description": "Optional session identifier when the task is grouped into an execution session."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-friendly name (e.g., “Roast Chicken Dinner”, “Sanitize Fridge”)."
+    },
+    "summary": {
+      "type": "string",
+      "description": "One-paragraph summary for UI cards and notifications."
+    },
+    "domain": {
+      "type": "string",
+      "enum": ["recipe", "cooking", "cleaning", "garden", "animal", "preservation", "storehouse", "maintenance", "other"],
+      "description": "Primary domain used by automation routing."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Freeform tags (seasonality, equipment, dietary, safety)."
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["low", "normal", "high", "critical"],
+      "default": "normal"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["planned", "scheduled", "in_progress", "paused", "completed", "canceled", "failed"],
+      "default": "planned"
+    },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "source": {
+      "type": "object",
+      "description": "Provenance details from imports → intelligence.",
+      "properties": {
+        "url": { "type": "string", "format": "uri" },
+        "title": { "type": "string" },
+        "normalizerKind": { "type": "string" },
+        "normalizedId": { "type": "string" },
+        "fingerprint": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "assignees": {
+      "type": "array",
+      "description": "Household members or agents responsible.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "displayName": { "type": "string" },
+          "role": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "schedule": {
+      "type": "object",
+      "description": "Scheduling hints for automation runtime.",
+      "properties": {
+        "start": { "type": "string", "format": "date-time" },
+        "end": { "type": "string", "format": "date-time" },
+        "duration": { "$ref": "#/definitions/isoDuration" },
+        "window": {
+          "type": "object",
+          "properties": {
+            "earliest": { "type": "string", "format": "date-time" },
+            "latest": { "type": "string", "format": "date-time" }
+          },
+          "additionalProperties": false
+        },
+        "recurrence": { "$ref": "#/definitions/recurrence" },
+        "suggestOnly": { "type": "boolean", "default": false }
+      },
+      "additionalProperties": false
+    },
+    "location": {
+      "type": "object",
+      "description": "Where the task should occur.",
+      "properties": {
+        "zone": { "type": "string", "description": "Kitchen, Pantry, Garden Bed A, Barn, Freezer." },
+        "geo": {
+          "type": "object",
+          "properties": {
+            "lat": { "type": "number" },
+            "lng": { "type": "number" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "prepOptions": {
+      "type": "object",
+      "description": "Prep-time options (thawing, brining, sanitizing).",
+      "properties": {
+        "thaw": { "type": "boolean" },
+        "marinate": { "type": "boolean" },
+        "sanitize": { "type": "boolean" },
+        "notes": { "type": "string" },
+        "leadTime": { "$ref": "#/definitions/isoDuration" }
+      },
+      "additionalProperties": false
+    },
+    "safety": {
+      "type": "object",
+      "description": "Safety constraints and advisories.",
+      "properties": {
+        "ppe": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Gloves, goggles, mask."
+        },
+        "temperatureTargetsF": {
+          "type": "array",
+          "items": { "type": "number" }
+        },
+        "chemicalWarnings": { "type": "array", "items": { "type": "string" } },
+        "allergens": { "type": "array", "items": { "type": "string" } },
+        "notes": { "type": "string" },
+        "sources": {
+          "type": "array",
+          "items": { "type": "string", "format": "uri" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "equipment": {
+      "type": "array",
+      "description": "Equipment required or recommended.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "equipmentId": { "type": "string" },
+          "name": { "type": "string" },
+          "required": { "type": "boolean", "default": true }
+        },
+        "additionalProperties": false
+      }
+    },
+    "resources": {
+      "type": "object",
+      "description": "Inventory/storehouse I/O for this task.",
+      "properties": {
+        "inputs": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/resourceRef" }
+        },
+        "outputs": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/resourceRef" }
+        },
+        "tools": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Time and effort estimates for planning.",
+      "properties": {
+        "prepMinutes": { "type": "integer", "minimum": 0 },
+        "activeMinutes": { "type": "integer", "minimum": 0 },
+        "totalMinutes": { "type": "integer", "minimum": 0 },
+        "complexity": { "type": "string", "enum": ["easy", "moderate", "hard"], "default": "easy" }
+      },
+      "additionalProperties": false
+    },
+    "cost": {
+      "type": "object",
+      "properties": {
+        "estimated": { "$ref": "#/definitions/money" },
+        "currency": { "type": "string", "minLength": 3, "maxLength": 3 }
+      },
+      "additionalProperties": false
+    },
+    "dependencies": {
+      "type": "array",
+      "description": "Tasks that must complete before this one.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "taskId": { "type": "string" },
+          "relation": { "type": "string", "enum": ["blocks", "blocked_by", "relates_to"] }
+        },
+        "additionalProperties": false
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Ordered execution steps.",
+      "items": { "$ref": "#/definitions/step" }
+    },
+    "checklists": {
+      "type": "array",
+      "description": "Optional grouped checklists for QA or safety.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": { "type": "string" },
+                "checked": { "type": "boolean", "default": false },
+                "notes": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "automation": {
+      "type": "object",
+      "description": "Automation runtime hints and event hooks.",
+      "properties": {
+        "onEvents": {
+          "type": "array",
+          "description": "SSA event types that should trigger scheduling or updates.",
+          "items": { "type": "string" }
+        },
+        "emitOnComplete": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/eventEnvelope" }
+        },
+        "retryPolicy": {
+          "type": "object",
+          "properties": {
+            "maxAttempts": { "type": "integer", "minimum": 1, "default": 1 },
+            "backoff": { "$ref": "#/definitions/isoDuration" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "notes": { "type": "string" },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["image", "pdf", "video", "link", "other"] },
+          "url": { "type": "string", "format": "uri" },
+          "title": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "export": {
+      "type": "object",
+      "description": "Hub export preferences. SSA owns data first; export is optional.",
+      "properties": {
+        "familyFundModeOverride": { "type": "boolean" },
+        "shareLevel": { "type": "string", "enum": ["none", "summary", "full"], "default": "summary" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "isoDuration": {
+      "type": "string",
+      "pattern": "^P(?!$)(\\d+Y)?(\\d+M)?(\\d+D)?(T(\\d+H)?(\\d+M)?(\\d+S)?)?$",
+      "description": "ISO-8601 duration, e.g., PT45M, P1DT2H."
+    },
+    "recurrence": {
+      "type": "object",
+      "description": "RFC 5545-like recurrence hints for automation.",
+      "properties": {
+        "rrule": { "type": "string", "description": "RRULE string such as FREQ=WEEKLY;BYDAY=MO,WE;INTERVAL=1" },
+        "count": { "type": "integer", "minimum": 1 },
+        "until": { "type": "string", "format": "date-time" },
+        "exceptions": {
+          "type": "array",
+          "items": { "type": "string", "format": "date-time" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "quantity": {
+      "type": "object",
+      "properties": {
+        "amount": { "type": "number" },
+        "unit": { "type": "string" }
+      },
+      "required": ["amount"],
+      "additionalProperties": false
+    },
+    "money": {
+      "type": "object",
+      "properties": {
+        "value": { "type": "number" },
+        "currency": { "type": "string", "minLength": 3, "maxLength": 3 }
+      },
+      "required": ["value", "currency"],
+      "additionalProperties": false
+    },
+    "resourceRef": {
+      "type": "object",
+      "description": "Reference to an inventory or storehouse item.",
+      "properties": {
+        "refType": { "type": "string", "enum": ["inventory", "storehouse", "equipment", "other"], "default": "inventory" },
+        "id": { "type": "string", "description": "System item id when known." },
+        "sku": { "type": "string" },
+        "name": { "type": "string" },
+        "quantity": { "$ref": "#/definitions/quantity" },
+        "location": { "type": "string", "description": "Pantry A, Freezer, Bed 2, Barn." },
+        "substitutions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Allowed substitutions by name or tag."
+        },
+        "notes": { "type": "string" },
+        "consumable": { "type": "boolean", "default": true }
+      },
+      "additionalProperties": false
+    },
+    "timer": {
+      "type": "object",
+      "properties": {
+        "kind": { "type": "string", "enum": ["prep", "active", "rest", "other"], "default": "active" },
+        "duration": { "$ref": "#/definitions/isoDuration" },
+        "targetTempF": { "type": "number" }
+      },
+      "additionalProperties": false
+    },
+    "eventEnvelope": {
+      "type": "object",
+      "description": "SSA event envelope to emit on certain hooks.",
+      "properties": {
+        "type": { "type": "string" },
+        "data": { "type": "object" }
+      },
+      "required": ["type"],
+      "additionalProperties": false
+    },
+    "step": {
+      "type": "object",
+      "required": ["stepId", "text"],
+      "properties": {
+        "stepId": { "type": "string" },
+        "order": { "type": "integer", "minimum": 1 },
+        "text": { "type": "string", "description": "Instruction text. Keep actionable and concise." },
+        "notes": { "type": "string" },
+        "domain": {
+          "type": "string",
+          "enum": ["recipe", "cooking", "cleaning", "garden", "animal", "preservation", "storehouse", "maintenance", "other"]
+        },
+        "timers": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/timer" }
+        },
+        "inputs": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/resourceRef" }
+        },
+        "outputs": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/resourceRef" }
+        },
+        "equipment": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "safety": {
+          "type": "array",
+          "description": "Step-specific safety reminders.",
+          "items": { "type": "string" }
+        },
+        "checkpoints": {
+          "type": "array",
+          "description": "Observable cues or acceptance criteria (e.g., 'internal temp 165°F', 'soil moist to 2cm').",
+          "items": { "type": "string" }
+        },
+        "waitForEvent": {
+          "type": "string",
+          "description": "SSA event type that must be observed before this step can proceed."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "examples": [
+    {
+      "version": "1.0.0",
+      "taskId": "task_recipe_4f8a2",
+      "title": "Sheet-Pan Roast Chicken with Vegetables",
+      "domain": "cooking",
+      "priority": "normal",
+      "status": "planned",
+      "createdAt": "2025-11-11T19:35:00.000Z",
+      "source": {
+        "url": "https://example.com/roast-chicken",
+        "title": "Roast Chicken",
+        "normalizerKind": "builtin.recipe",
+        "normalizedId": "recipe_ab12cd",
+        "fingerprint": "k1p9z0"
+      },
+      "assignees": [{ "id": "user_amy", "displayName": "Amy", "role": "cook" }],
+      "schedule": {
+        "start": "2025-11-12T00:00:00.000Z",
+        "duration": "PT90M",
+        "suggestOnly": true
+      },
+      "prepOptions": { "thaw": true, "leadTime": "P1D" },
+      "safety": {
+        "ppe": [],
+        "temperatureTargetsF": [165],
+        "allergens": ["poultry"],
+        "sources": ["https://www.fda.gov/food"]
+      },
+      "equipment": [{ "equipmentId": "eq_sheet_pan", "name": "Sheet Pan", "required": true }],
+      "resources": {
+        "inputs": [
+          { "refType": "inventory", "name": "Whole Chicken", "quantity": { "amount": 1, "unit": "each" } },
+          { "refType": "inventory", "name": "Carrots", "quantity": { "amount": 500, "unit": "g" } }
+        ],
+        "outputs": [
+          { "refType": "storehouse", "name": "Leftovers", "quantity": { "amount": 2, "unit": "servings" }, "consumable": true }
+        ],
+        "tools": ["Oven", "Thermometer"]
+      },
+      "metrics": { "prepMinutes": 15, "activeMinutes": 20, "totalMinutes": 90, "complexity": "easy" },
+      "steps": [
+        {
+          "stepId": "s1",
+          "order": 1,
+          "text": "Preheat oven to 425°F.",
+          "domain": "cooking",
+          "timers": [{ "kind": "prep", "duration": "PT10M" }]
+        },
+        {
+          "stepId": "s2",
+          "order": 2,
+          "text": "Season chicken and vegetables on sheet pan.",
+          "inputs": [
+            { "refType": "inventory", "name": "Salt", "quantity": { "amount": 8, "unit": "g" } },
+            { "refType": "inventory", "name": "Pepper", "quantity": { "amount": 2, "unit": "g" } }
+          ]
+        },
+        {
+          "stepId": "s3",
+          "order": 3,
+          "text": "Roast until chicken reaches 165°F and skin is golden.",
+          "timers": [{ "kind": "active", "duration": "PT45M", "targetTempF": 165 }],
+          "checkpoints": ["internal temp 165°F", "golden brown"]
+        }
+      ],
+      "automation": {
+        "emitOnComplete": [
+          { "type": "meal.executed", "data": { "taskId": "task_recipe_4f8a2", "servings": 4 } }
+        ]
+      }
+    }
+  ]
+}

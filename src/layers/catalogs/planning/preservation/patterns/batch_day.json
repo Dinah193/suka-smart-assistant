@@ -1,0 +1,433 @@
+{
+  "id": "pat.preservation.batch_day",
+  "domain": "preservation",
+  "kind": "planning_pattern",
+  "title": "Batch Preservation Day",
+  "intentTags": [
+    "intent:preserve",
+    "mode:batch",
+    "time:half_day",
+    "workflow:batching"
+  ],
+  "description": "Plan a single focused preservation block (1–6 hours) to convert surplus into shelf-stable or cold/frozen stores.",
+  "inputs": [
+    {
+      "key": "dietaryLaws",
+      "type": "multiselect",
+      "label": "Dietary laws",
+      "required": false,
+      "options": [
+        "no_pork",
+        "no_shellfish",
+        "halal_like",
+        "kosher_like",
+        "none"
+      ],
+      "default": [
+        "no_pork"
+      ]
+    },
+    {
+      "key": "householdSize",
+      "type": "number",
+      "label": "Household size",
+      "required": true,
+      "default": 4,
+      "min": 1,
+      "max": 30
+    },
+    {
+      "key": "inventorySnapshot",
+      "type": "select",
+      "label": "Inventory snapshot",
+      "required": false,
+      "default": "recommended",
+      "options": [
+        "missing",
+        "recommended",
+        "required"
+      ]
+    },
+    {
+      "key": "surplusItems",
+      "type": "multiselect",
+      "label": "Surplus items (tags)",
+      "required": false,
+      "options": [
+        "produce:leafy",
+        "produce:fruit",
+        "produce:root",
+        "meat:raw",
+        "dairy:raw",
+        "grain:bulk",
+        "beans:bulk"
+      ]
+    },
+    {
+      "key": "timeBudgetMin",
+      "type": "number",
+      "label": "Time budget (minutes)",
+      "required": false,
+      "default": 120,
+      "min": 30,
+      "max": 960
+    },
+    {
+      "key": "equipmentLevel",
+      "type": "select",
+      "label": "Equipment level",
+      "required": false,
+      "default": "standard",
+      "options": [
+        "limited",
+        "standard",
+        "advanced",
+        "fermentation"
+      ]
+    },
+    {
+      "key": "storageZones",
+      "type": "multiselect",
+      "label": "Storage zones available",
+      "required": false,
+      "options": [
+        "pantry",
+        "cold",
+        "frozen",
+        "root_cellar",
+        "fermentation_room",
+        "dehydration",
+        "smokehouse"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "type": "planStructure",
+      "notes": "Preservation session blueprint + batch grouping by method."
+    },
+    {
+      "type": "inventoryMove",
+      "notes": "Move preserved items into zones and mark FIFO date."
+    },
+    {
+      "type": "shoppingDelta",
+      "notes": "Packaging delta if jars/lids/salt/vinegar are low."
+    }
+  ],
+  "constraints": [
+    {
+      "type": "quietHours",
+      "tag": "constraint:quiet_hours",
+      "notes": "Avoid loud equipment during quiet hours/Sabbath."
+    },
+    {
+      "type": "foodSafety",
+      "tag": "constraint:food_safety",
+      "notes": "Prefer safe methods; surface warnings instead of silent changes."
+    },
+    {
+      "type": "budget",
+      "tag": "constraint:budget",
+      "notes": "Respect jar/lid/packaging budget caps if provided."
+    }
+  ],
+  "requires": [
+    {
+      "type": "inventory",
+      "tag": "needsInventorySnapshot",
+      "optional": true
+    },
+    {
+      "type": "calendar",
+      "tag": "seasonalTags",
+      "optional": true
+    }
+  ],
+  "produces": [
+    {
+      "type": "session",
+      "domain": "preservation",
+      "title": "Batch Preservation Day Session"
+    },
+    {
+      "type": "inventoryMove",
+      "notes": "Placeholder inventory moves emitted per method batch."
+    },
+    {
+      "type": "shoppingDelta",
+      "notes": "Packaging & supply deltas (jars, lids, salt, vinegar, bags)."
+    }
+  ],
+  "steps": [
+    {
+      "id": "intake",
+      "title": "Intake + triage surplus",
+      "kind": "template",
+      "timeboxMin": 15,
+      "voice": {
+        "speakOnStart": true,
+        "prompt": "Gather surplus items, note perishability, and choose 1–2 methods per item."
+      },
+      "inventoryMoves": [
+        {
+          "type": "placeholder",
+          "from": "kitchen",
+          "to": "prep_zone",
+          "itemTag": "surplus:*",
+          "notes": "Stage items"
+        }
+      ],
+      "ui": {
+        "chips": [
+          "perishability",
+          "method_choice"
+        ],
+        "fields": [
+          "surplusItems",
+          "timeBudgetMin",
+          "storageZones"
+        ]
+      }
+    },
+    {
+      "id": "method_select",
+      "title": "Select methods + packaging",
+      "kind": "template",
+      "timeboxMin": 20,
+      "voice": {
+        "speakOnStart": false,
+        "prompt": "Choose methods that match time, equipment, and storage zones."
+      },
+      "ui": {
+        "fields": [
+          "equipmentLevel"
+        ],
+        "help": "SSA will recommend safe options; you choose."
+      }
+    },
+    {
+      "id": "prep",
+      "title": "Prep + sanitize workflow",
+      "kind": "template",
+      "timeboxMin": 30,
+      "timers": [
+        {
+          "label": "Sanitize / preheat / chill (as needed)",
+          "seconds": 1200
+        }
+      ],
+      "voice": {
+        "speakOnStart": true,
+        "prompt": "Set up clean workflow: sanitize, label stations, stage containers."
+      },
+      "ui": {
+        "chips": [
+          "clean_flow",
+          "labeling"
+        ],
+        "toggles": [
+          "labelPrinter",
+          "batchLabels"
+        ]
+      }
+    },
+    {
+      "id": "process",
+      "title": "Process batch by method",
+      "kind": "template",
+      "timeboxMin": 120,
+      "voice": {
+        "speakOnStart": false,
+        "prompt": "Work in method blocks to reduce changeovers."
+      },
+      "ui": {
+        "help": "SSA can generate sub-steps per method from your preservation lexicon."
+      }
+    },
+    {
+      "id": "cool_store",
+      "title": "Cool, store, and log inventory",
+      "kind": "template",
+      "timeboxMin": 25,
+      "inventoryMoves": [
+        {
+          "type": "placeholder",
+          "from": "prep_zone",
+          "to": "pantry|cold|frozen|root_cellar",
+          "itemTag": "preserved:*"
+        }
+      ],
+      "ui": {
+        "chips": [
+          "fifo",
+          "rotation"
+        ],
+        "fields": [
+          "inventorySnapshot"
+        ]
+      }
+    }
+  ],
+  "kpis": [
+    {
+      "key": "surplus_saved_rate",
+      "label": "Surplus saved rate",
+      "unit": "%",
+      "target": "≥70%"
+    },
+    {
+      "key": "changeover_count",
+      "label": "Changeovers (method switches)",
+      "unit": "count",
+      "target": "≤3"
+    },
+    {
+      "key": "label_completeness",
+      "label": "Label completeness",
+      "unit": "%",
+      "target": "≥95%"
+    }
+  ],
+  "lean": {
+    "wasteTargets": [
+      "motion",
+      "waiting",
+      "overprocessing",
+      "defects"
+    ],
+    "countermeasures": [
+      {
+        "waste": "motion",
+        "do": "Stage tools + containers before starting; batch by method."
+      },
+      {
+        "waste": "waiting",
+        "do": "Preheat/ice baths early; run parallel timers."
+      },
+      {
+        "waste": "defects",
+        "do": "Use checklists for seals/temperatures; log lot numbers."
+      }
+    ],
+    "standardWorkRefs": [
+      "std.preservation.seasonal_preservation_push"
+    ]
+  },
+  "ui": {
+    "form": {
+      "fields": [
+        {
+          "key": "householdSize",
+          "type": "number",
+          "label": "Household size",
+          "required": true,
+          "default": 4,
+          "min": 1,
+          "max": 30
+        },
+        {
+          "key": "inventorySnapshot",
+          "type": "select",
+          "label": "Inventory snapshot",
+          "required": false,
+          "default": "recommended",
+          "options": [
+            "missing",
+            "recommended",
+            "required"
+          ]
+        },
+        {
+          "key": "surplusItems",
+          "type": "multiselect",
+          "label": "Surplus items (tags)",
+          "required": false,
+          "options": [
+            "produce:leafy",
+            "produce:fruit",
+            "produce:root",
+            "meat:raw",
+            "dairy:raw",
+            "grain:bulk",
+            "beans:bulk"
+          ]
+        },
+        {
+          "key": "timeBudgetMin",
+          "type": "number",
+          "label": "Time budget (minutes)",
+          "required": false,
+          "default": 120,
+          "min": 30,
+          "max": 960
+        },
+        {
+          "key": "equipmentLevel",
+          "type": "select",
+          "label": "Equipment level",
+          "required": false,
+          "default": "standard",
+          "options": [
+            "limited",
+            "standard",
+            "advanced",
+            "fermentation"
+          ]
+        },
+        {
+          "key": "storageZones",
+          "type": "multiselect",
+          "label": "Storage zones available",
+          "required": false,
+          "options": [
+            "pantry",
+            "cold",
+            "frozen",
+            "root_cellar",
+            "fermentation_room",
+            "dehydration",
+            "smokehouse"
+          ]
+        },
+        {
+          "key": "labelPrinter",
+          "type": "toggle",
+          "label": "Use labels",
+          "default": true
+        }
+      ]
+    },
+    "chips": [
+      {
+        "key": "mode",
+        "label": "Batch Day",
+        "tag": "mode:batch"
+      },
+      {
+        "key": "equipment",
+        "label": "Equipment",
+        "tag": "equipment:*"
+      }
+    ],
+    "help": {
+      "title": "Batch Preservation Day",
+      "intro": "A focused block to preserve surplus with minimal changeovers.",
+      "tips": [
+        "Choose 1–2 methods per item.",
+        "Batch by method to reduce cleanup and tool swaps.",
+        "Log FIFO dates immediately."
+      ]
+    }
+  },
+  "links": {
+    "storehousePatterns": [
+      "pat.storehouse.root_cellar_optimizer",
+      "pat.storehouse.monthly_cycle_count"
+    ],
+    "mealPatterns": [
+      "pat.meals.preservation_first"
+    ]
+  },
+  "variants": []
+}

@@ -1,0 +1,211 @@
+{
+  "version": "1.0.0",
+  "domain": "storehouse",
+  "generatedAt": "2025-11-11T00:00:00.000Z",
+  "source": "Household defaults (SSA builtin)",
+  "preferences": {
+    "units": {
+      "mass": "g",
+      "volume": "ml",
+      "count": "ea",
+      "temperature": "C",
+      "time": "day",
+      "fallbacks": {
+        "mass": ["g", "kg", "oz", "lb"],
+        "volume": ["ml", "l", "qt", "gal"],
+        "count": ["ea"],
+        "temperature": ["C", "F"],
+        "time": ["day"]
+      }
+    },
+
+    "zones": {
+      "pantry": {
+        "targetTempC": [15, 21],
+        "targetHumidityPct": [40, 60],
+        "dark": true,
+        "airflow": "low"
+      },
+      "rootCellar": {
+        "enabled": true,
+        "targetTempC": [2, 6],
+        "targetHumidityPct": [85, 95]
+      },
+      "refrigerator": {
+        "targetTempC": [1, 4]
+      },
+      "freezer": {
+        "targetTempC": -18
+      },
+      "bulkDry": {
+        "enabled": true,
+        "targetTempC": [10, 16],
+        "oxygenAbsorbersAllowed": true,
+        "mylarBagsAllowed": true
+      }
+    },
+
+    "labeling": {
+      "labelFormat": "name|open-date|best-by|lot",
+      "requireLotWhenAvailable": true,
+      "printableLabels": true,
+      "colorCoding": {
+        "enabled": true,
+        "pantry": "blue",
+        "freezer": "green",
+        "bulkDry": "yellow",
+        "cleaners": "red"
+      }
+    },
+
+    "rotationPolicy": {
+      "method": "FEFO",
+      "allowFIFOIfNoDates": true,
+      "reserveOnPlan": true,
+      "autoUnreserveWhenCanceled": true,
+      "safetyDaysBeforeBestBy": 7
+    },
+
+    "alerts": {
+      "lowStock": true,
+      "lowStockThresholds": {
+        "white-rice_g": 1000,
+        "dried-beans_g": 800,
+        "olive-oil_ml": 250,
+        "flour-all-purpose_g": 1000,
+        "yeast_g": 20,
+        "toilet-paper_ea": 8
+      },
+      "expirySoon": true,
+      "expirySoonDays": 14,
+      "expiredAction": "quarantine",
+      "notifyChannels": ["device"]
+    },
+
+    "procurement": {
+      "autoGenerateShoppingList": true,
+      "groupBy": "store-aisle",
+      "preferredVendors": ["costco", "aldi", "local-coop", "online-amazon"],
+      "substitutionPolicy": "prefer-house-brand",
+      "budgetWeeklyUSD": 120,
+      "bulkBuyRules": {
+        "enabled": true,
+        "minDiscountPct": 15,
+        "allowedItems": ["rice", "beans", "flour", "oats", "canned-tomato", "stock"],
+        "maxStorageMonths": 12
+      }
+    },
+
+    "containerization": {
+      "pantry": ["glass-jar", "plastic-bin-bpa-free", "steel-canister"],
+      "freezer": ["vac-seal", "zip-bag-freezer", "rigid-pp-box"],
+      "bulkDry": ["mylar-5mil", "bucket-food-grade-gamma-lid"],
+      "allowVacuumSeal": true,
+      "headspacePctForLiquidsFreeze": 10
+    },
+
+    "safetyAndSegregation": {
+      "separateChemicalsFromFood": true,
+      "chemicalsZone": "cleaners-closet",
+      "noGlassOnHighShelf": true,
+      "allergenSegregation": {
+        "enabled": true,
+        "allergens": ["peanut", "tree-nut", "gluten"],
+        "dedicatedBins": true
+      },
+      "pestPrevention": {
+        "snapTrapsAllowed": true,
+        "bayLeavesInRice": false,
+        "diatomaceousEarthAllowed": true,
+        "inspectMonthly": true
+      }
+    },
+
+    "inventoryCatalog": {
+      "trackLots": true,
+      "trackOpenDate": true,
+      "trackUseByBestBy": true,
+      "requirePhotoForUnknownItems": false,
+      "autoClassifyByName": true
+    },
+
+    "targets": {
+      "daysOfFoodOnHand": 30,
+      "waterLitersPerPersonPerDay": 4,
+      "fuelForCookingDays": 7,
+      "petFoodDays": 30
+    },
+
+    "preservationIntegration": {
+      "allowDehydrate": true,
+      "allowCanning": true,
+      "allowFreeze": true,
+      "triggerWhenSurplusPctAbove": 25,
+      "autoSuggestRecipesForSurplus": true
+    },
+
+    "donationAndWaste": {
+      "donateNearExpiry": true,
+      "donationLeadDays": 10,
+      "preferredCharities": ["local-food-bank"],
+      "compostOrganics": true
+    },
+
+    "scanningAndIntake": {
+      "barcodeScanEnabled": true,
+      "ocrEnabled": true,
+      "defaultIntakeZone": "pantry",
+      "autoApplyBestByFromCatalog": true,
+      "photoOnIntakeOptional": true
+    },
+
+    "pickLists": {
+      "kitchenReplenishment": {
+        "enabled": true,
+        "windowTimes": ["Sun 15:00-16:00"],
+        "include": ["salt", "pepper", "oil", "flour", "sugar"]
+      },
+      "cleaningCaddy": {
+        "enabled": true,
+        "include": ["gloves-nitrile", "microfiber-cloths", "spray-bottle", "labels-marker"]
+      }
+    },
+
+    "integrationAnchors": {
+      "emitEvents": true,
+      "events": [
+        "inventory.updated",
+        "inventory.low",
+        "inventory.shortage.detected",
+        "inventory.item.expiring",
+        "inventory.item.expired",
+        "inventory.reserved",
+        "shopping.list.generated"
+      ],
+      "prepAnchorsEnabled": ["label-containers", "sanitize-bins", "rotate-first"],
+      "sessionTagsEnabled": ["bulk", "rotation", "donation"]
+    },
+
+    "localization": {
+      "language": "en",
+      "decimalSeparator": ".",
+      "thousandSeparator": ",",
+      "timezone": "America/Chicago"
+    },
+
+    "advanced": {
+      "rounding": {
+        "mass": "friendly",
+        "volume": "friendly"
+      },
+      "reservationPolicy": {
+        "softHoldHours": 48,
+        "convertToHardHoldOnStart": true
+      },
+      "conflictResolution": {
+        "onShortage": "substitute",
+        "onExpiryVsPlan": "use-sooner"
+      }
+    }
+  }
+}

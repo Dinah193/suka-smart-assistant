@@ -1,0 +1,297 @@
+{
+  "id": "meal-plan-weekly",
+  "kind": "AI_AUTOMATION_TEMPLATE",
+  "version": "1.0.0",
+  "name": "Weekly Meal Planner",
+  "purpose": "Generate a 7-day meal plan using current inventory, family preferences, and calendar constraints. Consolidate recipes for batch cooking, schedule Sabbath-friendly reheats, and create a single grocery list.",
+  "tags": ["meals", "meal-planning", "inventory", "batch-cooking", "calendar", "nutrition", "sabbath-aware"],
+  "triggers": [
+    { "type": "manual", "label": "Build/Update Weekly Plan" },
+    { "type": "schedule", "rrule": "FREQ=WEEKLY;BYDAY=SU;BYHOUR=8;BYMINUTE=0;BYSECOND=0", "label": "Weekly Refresh (Sun 08:00)" },
+    { "type": "event", "source": "inventory", "match": "low_stock|item_added|harvest_logged" },
+    { "type": "event", "source": "calendar", "match": "holiday_added|feast_day_added|travel_added" }
+  ],
+  "inputs": {
+    "house": {
+      "members": "{{ user.household.members || 2 }}",
+      "ages": "{{ user.household.ages || [] }}",
+      "cookSkill": "{{ user.household.cookSkill || 'intermediate' }}"
+    },
+    "preferences": {
+      "diet": "{{ user.prefs.diet || 'omnivore' }}",
+      "allergens": "{{ user.prefs.allergens || [] }}",
+      "avoid": "{{ user.prefs.avoid || [] }}",
+      "favorites": "{{ user.prefs.favorites || ['eggs','waffles','lamb_sausage','beef_bacon','goat'] }}",
+      "cuisineBias": "{{ user.prefs.cuisineBias || ['american','mediterranean','west_african'] }}",
+      "sabbathAware": "{{ user.prefs.sabbathAware || true }}",
+      "fridayCutoffSource": "{{ user.prefs.fridayCutoffSource || 'calendar.sunset' }}",
+      "breakfastTime": "{{ user.prefs.breakfastTime || '08:00' }}",
+      "lunchTime": "{{ user.prefs.lunchTime || '12:30' }}",
+      "dinnerTime": "{{ user.prefs.dinnerTime || '18:30' }}",
+      "snackPolicy": "{{ user.prefs.snackPolicy || 'fruit_or_leftovers' }}"
+    },
+    "goals": {
+      "budgetWeeklyUSD": "{{ user.meals.budgetWeeklyUSD || 125 }}",
+      "targetCaloriesPerPerson": "{{ user.meals.targetCaloriesPerPerson || 2200 }}",
+      "proteinGramsPerPerson": "{{ user.meals.proteinGramsPerPerson || 90 }}",
+      "planLeftoversFor": "{{ user.meals.planLeftoversFor || ['MO','WE'] }}",
+      "batchCookDays": "{{ user.meals.batchCookDays || ['SU','WE'] }}",
+      "mealCountPerDay": "{{ user.meals.mealCountPerDay || 3 }}"
+    },
+    "calendar": {
+      "busyBlocks": "{{ calendarService.getBusyBlocks(10) || [] }}",
+      "sunsetTimes": "{{ calendarService.getSunsetTimes(10) || [] }}",
+      "feastDays": "{{ calendarService.getFeastDays(10) || [] }}"
+    },
+    "inventory": {
+      "snapshot": "{{ getInventory() || [] }}",
+      "lowStockThresholds": "{{ InventoryMonitor.getLowStockThresholds() || {} }}"
+    },
+    "recipes": {
+      "all": "{{ getRecipes() || [] }}",
+      "tags": "{{ RecipeStore.getTags ? RecipeStore.getTags() : [] }}"
+    },
+    "tools": "{{ KitchenStore.getAppliances ? KitchenStore.getAppliances() : ['stovetop','oven','pressure_cooker'] }}"
+  },
+  "params": {
+    "portions": {
+      "breakfastPerPerson": 1,
+      "lunchPerPerson": 1,
+      "dinnerPerPerson": 1.25,
+      "snackPerPerson": 1
+    },
+    "rotation": {
+      "proteinBias": ["chicken","beef","fish","goat","eggs","legume"],
+      "veggiesCommon": ["lettuce","spinach","kale","tomato","pepper","cucumber","carrot","onion","garlic","potato"],
+      "grainsCommon": ["rice","pasta","cornmeal","wheat","oats"]
+    },
+    "sabbath": {
+      "finishByMinutesBeforeSunset": 30,
+      "reheatOnly": true
+    },
+    "consolidation": {
+      "mergeBy": ["Breakfast","Lunch","Dinner"],
+      "allowIngredientSubstitutions": true
+    },
+    "nutrition": {
+      "calorieSlackPct": 0.1,
+      "proteinSlackPct": 0.1
+    },
+    "defaults": {
+      "prepLeadMinutes": 30,
+      "cookLeadMinutes": 60
+    }
+  },
+  "derived": {
+    "weekDays": { "expr": "buildDays(7, [], inputs.preferences.sabbathAware, inputs.calendar.sunsetTimes, {start:'06:00',end:'21:00'})" },
+    "inventoryIndex": { "expr": "indexInventory(inputs.inventory.snapshot)" },
+    "recipeIndex": { "expr": "indexRecipes(inputs.recipes.all)" },
+    "feastAdjustments": { "expr": "deriveFeastMealRules(inputs.calendar.feastDays)" }
+  },
+  "logic": [
+    {
+      "id": "select-meals",
+      "description": "Choose recipes per day and meal slot, prioritizing inventory, goals, favorites, and rotation.",
+      "expr": "selectMeals(derived.weekDays, inputs.recipes.all, inputs.preferences, inputs.goals, derived.inventoryIndex, params.rotation, derived.feastAdjustments)"
+    },
+    {
+      "id": "consolidate",
+      "description": "Merge meals with the same slot across the week to create batch-friendly sets.",
+      "expr": "consolidateRecipes(context.plan, params.consolidation)"
+    },
+    {
+      "id": "schedule-batch",
+      "description": "Schedule batch cook sessions on preferred days, sabbath-aware, and create reheat plans.",
+      "expr": "scheduleBatch(context.plan, inputs.goals.batchCookDays, inputs.calendar.busyBlocks, inputs.preferences.sabbathAware, inputs.calendar.sunsetTimes, params.sabbath)"
+    },
+    {
+      "id": "nutrition-budget-check",
+      "description": "Compute nutrition and estimated cost; adjust if exceeds slack.",
+      "expr": "balanceNutritionAndBudget(context.plan, inputs.house.members, inputs.goals, params.nutrition)"
+    },
+    {
+      "id": "shopping-deltas",
+      "description": "Compute grocery list deltas from inventory.",
+      "expr": "estimateGroceries(context.plan, derived.inventoryIndex, inputs.inventory.lowStockThresholds)"
+    },
+    {
+      "id": "prep-checklists",
+      "description": "Create daily and batch prep checklists with technique and doneness tips.",
+      "expr": "buildPrepChecklists(context.plan, inputs.tools)"
+    }
+  ],
+  "actions": [
+    {
+      "type": "calendar.create_events",
+      "title": "Meal • {{ block.slot }} — {{ block.title }}",
+      "date": "{{ block.date }}",
+      "start": "{{ block.start }}",
+      "end": "{{ block.end }}",
+      "color": "{{ chooseMealColor(block.slot) }}",
+      "metadata": {
+        "slot": "{{ block.slot }}",
+        "recipes": "{{ block.recipes }}",
+        "reheatPlan": "{{ block.reheatPlan || null }}",
+        "sabbathAware": "{{ inputs.preferences.sabbathAware }}"
+      },
+      "forEach": "{{ context.plan.blocks }}"
+    },
+    {
+      "type": "calendar.create_events",
+      "title": "Batch Cooking — {{ batch.title }}",
+      "date": "{{ batch.date }}",
+      "start": "{{ batch.start }}",
+      "end": "{{ batch.end }}",
+      "color": "#f59e0b",
+      "metadata": {
+        "recipes": "{{ batch.recipes }}",
+        "outputs": "{{ batch.outputs }}",
+        "labels": "{{ batch.labels }}"
+      },
+      "forEach": "{{ context.plan.batchSessions || [] }}"
+    },
+    {
+      "type": "reminders.schedule",
+      "message": "Start prep: {{ item.title }}",
+      "offsetMinutes": -15,
+      "date": "{{ item.date }}",
+      "time": "{{ item.start }}",
+      "forEach": "{{ context.plan.reminders || [] }}"
+    },
+    {
+      "type": "inventory.reserve_or_restock",
+      "items": "{{ context.groceryList.reserveItems }}",
+      "policy": "min_threshold",
+      "notes": "Auto-generated by meal-plan-weekly"
+    },
+    {
+      "type": "inventory.create_shopping_list",
+      "items": "{{ context.groceryList.toBuy }}",
+      "groupBy": "store_section"
+    },
+    {
+      "type": "agents.emit",
+      "agentId": "recipeConsolidatorAgent",
+      "payload": {
+        "consolidated": "{{ context.consolidated }}",
+        "plan": "{{ context.plan }}"
+      }
+    },
+    {
+      "type": "agents.emit",
+      "agentId": "cookingAgent",
+      "payload": {
+        "today": "{{ filterToday(context.plan.blocks) }}",
+        "preferences": "{{ inputs.preferences }}",
+        "inventory": "{{ inputs.inventory.snapshot }}"
+      }
+    },
+    {
+      "type": "agents.emit",
+      "agentId": "batchCookingAgent",
+      "payload": {
+        "sessions": "{{ context.plan.batchSessions || [] }}",
+        "checklists": "{{ context.checklists.batch || [] }}"
+      }
+    }
+  ],
+  "outputs": {
+    "summary": {
+      "daysPlanned": "{{ len(context.plan.days) }}",
+      "mealsPlanned": "{{ len(context.plan.blocks) }}",
+      "batchSessions": "{{ len(context.plan.batchSessions || []) }}",
+      "estCostUSD": "{{ context.groceryList.estimateUSD || 0 }}",
+      "caloriesPerPersonAvg": "{{ context.nutrition.avgCaloriesPerPerson || 0 }}",
+      "proteinPerPersonAvg": "{{ context.nutrition.avgProteinPerPerson || 0 }}"
+    },
+    "plan": "{{ context.plan }}",
+    "consolidated": "{{ context.consolidated }}",
+    "groceryList": "{{ context.groceryList }}",
+    "checklists": "{{ context.checklists }}",
+    "printables": [
+      {
+        "type": "checklist",
+        "name": "Weekly Grocery List",
+        "data": "{{ context.groceryList.toBuy }}"
+      },
+      {
+        "type": "table",
+        "name": "Weekly Meal Plan",
+        "data": "{{ map(groupBy(context.plan.blocks,'date'), (date, blocks) => ({ date, items: map(sortBy(blocks,'start'), b => ({ slot: b.slot, title: b.title, recipes: b.recipes })) })) }}"
+      },
+      {
+        "type": "list",
+        "name": "Batch Cooking Outputs",
+        "data": "{{ context.plan.batchSessions || [] }}"
+      }
+    ]
+  },
+  "fallbacks": [
+    {
+      "condition": "budget_exceeded",
+      "action": {
+        "type": "agent.suggest",
+        "agentId": "mealPlanningAgent",
+        "payload": { "strategy": "swap_to_pantry_heavy" }
+      }
+    },
+    {
+      "condition": "inventory_shortage",
+      "action": {
+        "type": "inventory.create_shopping_list",
+        "items": "{{ context.groceryList.toBuy }}",
+        "groupBy": "store_section"
+      }
+    },
+    {
+      "condition": "approaching_sunset",
+      "when": "{{ inputs.preferences.sabbathAware }}",
+      "action": {
+        "type": "calendar.move_or_shorten",
+        "policy": "finish_30m_before_sunset"
+      }
+    }
+  ],
+  "integrations": {
+    "agents": [
+      { "id": "mealPlanningAgent", "mode": "planner" },
+      { "id": "recipeConsolidatorAgent", "mode": "consolidate" },
+      { "id": "cookingAgent", "mode": "suggestions" },
+      { "id": "batchCookingAgent", "mode": "sessions" },
+      { "id": "inventoryAgent", "mode": "supplies" }
+    ],
+    "services": [
+      { "id": "calendarService", "routes": ["/api/calendar/create", "/api/calendar/move-or-shorten"] },
+      { "id": "inventoryService", "routes": ["/api/inventory/reserve", "/api/inventory/restock", "/api/inventory/shopping-list"] }
+    ],
+    "ui": {
+      "panel": "AutomationPanel",
+      "widgets": [
+        { "type": "summary", "source": "outputs.summary" },
+        { "type": "table", "title": "Plan (7 days)", "source": "outputs.plan.blocks" },
+        { "type": "list", "title": "Grocery List", "source": "outputs.groceryList.toBuy" },
+        { "type": "list", "title": "Batch Sessions", "source": "outputs.plan.batchSessions" }
+      ]
+    }
+  },
+  "engine": {
+    "helpers": {
+      "buildDays": "fn(days, skipDays, sabbathAware, sunsetTimes, window) => return /* [{date,start,end,isFriday,isSabbath}] */",
+      "indexInventory": "fn(items) => return /* map by sku + quantities */",
+      "indexRecipes": "fn(recipes) => return /* map by id and tags */",
+      "deriveFeastMealRules": "fn(feastDays) => return /* rules per feast date: no-leaven, special dishes, etc. */",
+      "selectMeals": "fn(days, recipes, prefs, goals, invIndex, rotation, feast) => return /* {days, blocks[]} with Breakfast/Lunch/Dinner per day using inventory-first and rotation */",
+      "consolidateRecipes": "fn(plan, consolidation) => return /* merge same-slot meals across days; output grouped sets */",
+      "scheduleBatch": "fn(plan, batchDays, busyBlocks, sabbathAware, sunsetTimes, sabbathParams) => return /* attach batchSessions[] and reheat plans for Fri/Feast */",
+      "balanceNutritionAndBudget": "fn(plan, members, goals, slack) => return /* compute nutrition & cost; adjust if > slack */",
+      "estimateGroceries": "fn(plan, invIndex, thresholds) => return /* {reserveItems:[], toBuy:[], estimateUSD} */",
+      "buildPrepChecklists": "fn(plan, tools) => return /* {daily:[], batch:[]} with technique and visual doneness tips */",
+      "filterToday": "fn(blocks) => return /* today’s blocks */",
+      "chooseMealColor": "fn(slot) => return /* map Breakfast/Lunch/Dinner/Snack → color */",
+      "len": "fn(x) => return x.length",
+      "map": "fn(objOrArr, mapper) => return /* map over arrays or entries */",
+      "groupBy": "fn(arr, key) => return /* groups by key value */",
+      "sortBy": "fn(arr, key) => return /* sort array by key */"
+    }
+  }
+}

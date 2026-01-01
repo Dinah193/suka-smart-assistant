@@ -1,0 +1,582 @@
+{
+  "name": "Food Safety Monitor",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "food-safety/temp",
+        "responseMode": "responseNode",
+        "options": {
+          "binaryData": false
+        }
+      },
+      "id": "Webhook_Temp",
+      "name": "Webhook (Sensor Temp)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1060,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/*\nExpected body example:\n{\n  \"userId\": \"user_123\",\n  \"deviceId\": \"fridge_1\",\n  \"zone\": \"fridge\" | \"freezer\" | \"hot_hold\",\n  \"temp\": 41.2,          // number\n  \"unit\": \"F\" | \"C\",   // optional; default F\n  \"sampledAt\": \"ISO\"     // optional\n}\n*/\nconst b = items[0]?.json || {};\n\nfunction toF(v, unit) {\n  const u = String(unit || 'F').toUpperCase();\n  if (u === 'F') return Number(v);\n  return Number(v) * 9/5 + 32; // C->F\n}\n\nconst apiBase = $env.SUKA_API_BASE || 'http://localhost:4000';\nconst alertsWebhook = $env.ALERTS_WEBHOOK || null;\n\nconst zone = String(b.zone || '').toLowerCase();\nconst tempF = toF(b.temp, b.unit || 'F');\nconst userId = b.userId || null;\nconst deviceId = b.deviceId || null;\nconst sampledAt = b.sampledAt ? new Date(b.sampledAt).toISOString() : new Date().toISOString();\n\n// Thresholds (°F). Adjust here if needed.\nconst limits = {\n  fridge: { min: 33, max: 41 },\n  freezer: { min: -10, max: 5 },\n  hot_hold: { min: 135, max: 212 }\n};\n\nconst L = limits[zone] || { min: 33, max: 41 };\nconst inRange = tempF >= L.min && tempF <= L.max;\n\n// Severity heuristic\nlet severity = 'info';\nif (!inRange) {\n  const diff = tempF < L.min ? (L.min - tempF) : (tempF - L.max);\n  severity = diff >= 10 ? 'critical' : diff >= 5 ? 'warning' : 'info';\n}\n\nreturn [{ json: {\n  apiBase, alertsWebhook, userId, deviceId, sampledAt,\n  zone, tempF, limits: L, inRange, severity,\n  alertTitle: inRange ? 'Temp OK' : `Temp out of range: ${zone}`,\n  alertBody: inRange\n    ? `Sensor ${deviceId || ''} at ${tempF.toFixed(1)}°F (${zone})`\n    : `Sensor ${deviceId || ''} reported ${tempF.toFixed(1)}°F in ${zone}. Expected ${L.min}–${L.max}°F.`,\n  taskPayload: inRange ? null : {\n    title: `Investigate ${zone} temperature (${tempF.toFixed(1)}°F)`,\n    category: 'food-safety',\n    labels: [ `zone:${zone}`, 'temperature' ],\n    priority: severity === 'critical' ? 1 : 2,\n    due: new Date().toISOString(),\n    meta: { zone, tempF, deviceId, sampledAt, severity },\n    userId\n  }\n} }];"
+      },
+      "id": "Fn_EvalTemp",
+      "name": "Function: Evaluate Temp",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -840,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [],
+          "string": [],
+          "number": [
+            {
+              "value1": "={{$json.inRange ? 0 : 1}}",
+              "operation": "larger"
+            }
+          ]
+        }
+      },
+      "id": "IF_OutOfRange",
+      "name": "IF out of range",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{$json.apiBase}}/alerts",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={\n  \"userId\": $json.userId,\n  \"title\": $json.alertTitle,\n  \"body\": $json.alertBody,\n  \"severity\": $json.severity,\n  \"tags\": [\"food-safety\", $json.zone],\n  \"meta\": {\"deviceId\": $json.deviceId, \"tempF\": $json.tempF, \"limits\": $json.limits, \"sampledAt\": $json.sampledAt}\n}"
+      },
+      "id": "HTTP_CreateAlert",
+      "name": "HTTP: Create Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -380,
+        -220
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{$json.apiBase}}/automations/tasks",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={{$json.taskPayload}}"
+      },
+      "id": "HTTP_CreateTask",
+      "name": "HTTP: Create Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -380,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{$json.alertsWebhook}}",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\n  \"text\": `:warning: ${$json.alertTitle} — ${$json.alertBody}`\n}"
+      },
+      "id": "HTTP_NotifyWebhook",
+      "name": "HTTP: Notify (optional)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -380,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "responseBody": "={{({ ok: true, zone: $json.zone, tempF: $json.tempF, inRange: $json.inRange, severity: $json.severity })}}",
+        "responseCode": 200
+      },
+      "id": "Respond_Temp",
+      "name": "Respond (Temp Webhook)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyDay",
+              "hour": 7,
+              "minute": 0
+            }
+          ]
+        }
+      },
+      "id": "Cron_Expiry",
+      "name": "Cron (Daily Expiry Sweep)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -1060,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "GET",
+        "url": "={{`${$env.SUKA_API_BASE || 'http://localhost:4000'}/inventory/expiring?days=3`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "HTTP_GetExpiring",
+      "name": "HTTP: Get Expiring (<=3d)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -840,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const list = Array.isArray(items[0]?.json) ? items[0].json : (items[0]?.json?.items || []);\nif (!list.length) return [{ json: { count: 0, tasks: [] } }];\nconst tasks = list.map((it) => ({\n  title: `Use or preserve: ${it.name}`,\n  category: 'food-safety',\n  labels: ['expiring'],\n  priority: 2,\n  due: new Date().toISOString(),\n  meta: { item: it }\n}));\nreturn [{ json: { count: tasks.length, tasks } }];"
+      },
+      "id": "Fn_PrepExpiryTasks",
+      "name": "Function: Prep Expiry Tasks",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -620,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json.count}}",
+              "operation": "larger"
+            }
+          ]
+        }
+      },
+      "id": "IF_HasExpiring",
+      "name": "IF any expiring",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const out = [];\nfor (const t of ($json.tasks || [])) out.push({ json: t });\nreturn out.length ? out : [{ json: { skip: true } }];"
+      },
+      "id": "Fn_FanoutTasks",
+      "name": "Function: Fan‑out Tasks",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{`${$env.SUKA_API_BASE || 'http://localhost:4000'}/automations/tasks`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={{$json}}"
+      },
+      "id": "HTTP_CreateExpiryTask",
+      "name": "HTTP: Create Expiry Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        40,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyDay",
+              "hour": 8,
+              "minute": 0
+            }
+          ]
+        }
+      },
+      "id": "Cron_Recalls",
+      "name": "Cron (Recall Watch)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -1060,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "GET",
+        "url": "={{`${$env.SUKA_API_BASE || 'http://localhost:4000'}/inventory/brands`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "HTTP_GetBrands",
+      "name": "HTTP: Get Inventory Brands",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -840,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "GET",
+        "url": "={{$env.FOOD_RECALLS_URL || 'https://api.fda.gov/food/enforcement.json?search=report_date:[NOW-14DAY+TO+NOW]&limit=100'}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "HTTP_GetRecalls",
+      "name": "HTTP: Get Recalls (past 14d)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -620,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const inv = Array.isArray($items('HTTP: Get Inventory Brands', 0, 0)[0]?.json) ? $items('HTTP: Get Inventory Brands', 0, 0)[0].json : ($items('HTTP: Get Inventory Brands', 0, 0)[0]?.json?.brands || []);\nconst recalls = items[0]?.json?.results || items[0]?.json || [];\nconst brands = inv.map(x => String(x).toLowerCase());\nconst hits = [];\nfor (const r of recalls) {\n  const desc = (r.product_description || r.recall_initiation_date || JSON.stringify(r)).toLowerCase();\n  const m = brands.find(b => b && desc.includes(b));\n  if (m) hits.push({ recall: r, match: m });\n}\nreturn [{ json: { count: hits.length, hits } }];"
+      },
+      "id": "Fn_FilterRecalls",
+      "name": "Function: Filter Recalls vs Inventory",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json.count}}",
+              "operation": "larger"
+            }
+          ]
+        }
+      },
+      "id": "IF_HasRecallHits",
+      "name": "IF recall hits > 0",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const out = [];\nfor (const h of ($json.hits || [])) {\n  const r = h.recall;\n  out.push({ json: {\n    title: `Recall alert: ${h.match}`,\n    category: 'food-safety',\n    labels: ['recall', h.match],\n    priority: 1,\n    due: new Date().toISOString(),\n    meta: { recall: r }\n  }});\n}\nreturn out.length ? out : [{ json: { skip: true } }];"
+      },
+      "id": "Fn_FanoutRecallTasks",
+      "name": "Function: Fan‑out Recall Tasks",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        40,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{`${$env.SUKA_API_BASE || 'http://localhost:4000'}/automations/tasks`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={{$json}}"
+      },
+      "id": "HTTP_CreateRecallTask",
+      "name": "HTTP: Create Recall Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        260,
+        440
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "Error_Trigger",
+      "name": "On Error (Food Safety)",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1060,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const e = items[0].json;\nreturn [{ json: { ok: false, message: e.message || 'Workflow error', node: e.node?.name, timestamp: new Date().toISOString() } }];"
+      },
+      "id": "Fn_ErrorFormat",
+      "name": "Function: Format Error",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -840,
+        780
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook (Sensor Temp)": {
+      "main": [
+        [
+          {
+            "node": "Function: Evaluate Temp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Evaluate Temp": {
+      "main": [
+        [
+          {
+            "node": "IF out of range",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF out of range": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Create Alert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP: Create Task",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP: Notify (optional)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond (Temp Webhook)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond (Temp Webhook)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron (Daily Expiry Sweep)": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Get Expiring (<=3d)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Get Expiring (<=3d)": {
+      "main": [
+        [
+          {
+            "node": "Function: Prep Expiry Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Prep Expiry Tasks": {
+      "main": [
+        [
+          {
+            "node": "IF any expiring",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF any expiring": {
+      "main": [
+        [
+          {
+            "node": "Function: Fan‑out Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Function: Fan‑out Tasks": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Create Expiry Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron (Recall Watch)": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Get Inventory Brands",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Get Inventory Brands": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Get Recalls (past 14d)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Get Recalls (past 14d)": {
+      "main": [
+        [
+          {
+            "node": "Function: Filter Recalls vs Inventory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Filter Recalls vs Inventory": {
+      "main": [
+        [
+          {
+            "node": "IF recall hits > 0",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF recall hits > 0": {
+      "main": [
+        [
+          {
+            "node": "Function: Fan‑out Recall Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Function: Fan‑out Recall Tasks": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Create Recall Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On Error (Food Safety)": {
+      "main": [
+        [
+          {
+            "node": "Function: Format Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "timezone": "America/Chicago",
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

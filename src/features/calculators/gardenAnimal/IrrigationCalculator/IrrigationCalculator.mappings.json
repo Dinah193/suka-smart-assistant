@@ -1,0 +1,197 @@
+{
+  "id": "irrigationCalculator.nextSteps",
+  "kind": "planning.nextSteps",
+  "label": "Irrigation Planner – Next Steps",
+  "description": "Mappings that turn irrigation calculator outputs into concrete next actions, garden sessions, and stability updates across the Planning Graph.",
+  "domain": "garden",
+  "calculatorKey": "IrrigationCalculator",
+  "version": 1,
+  "nextSteps": [
+    {
+      "id": "irrigation.scheduleToGardenSessions",
+      "label": "Create garden irrigation sessions",
+      "description": "Convert each scheduled irrigation event into a runnable garden session so the user can tap 'Now' on the garden page and immediately run the next irrigation block.",
+      "target": "sessions",
+      "action": "suggestSessionsFromIrrigationSchedule",
+      "conditions": {
+        "requireSchedule": true,
+        "minEvents": 1
+      },
+      "sessionTemplate": {
+        "domain": "garden",
+        "sourceType": "gardenPlan",
+        "prefsDefaults": {
+          "voiceGuidance": true,
+          "haptic": true,
+          "autoAdvance": false
+        },
+        "blockersDefaults": [
+          "weather",
+          "quietHours",
+          "sabbath",
+          "equipment"
+        ]
+      },
+      "planningGraphEdges": [
+        {
+          "from": "IrrigationCalculator",
+          "to": "SessionRunner",
+          "type": "supports",
+          "notes": "Irrigation events become domain=garden sessions that can be launched via 'Now' buttons and run inside the SessionRunner modal."
+        }
+      ]
+    },
+    {
+      "id": "irrigation.toYieldStability",
+      "label": "Update yield & stability expectations",
+      "description": "Feed weekly water totals and stability signals into the Garden Yield Calculator so projected harvests can reflect over- or under-watering patterns.",
+      "target": "calculators.gardenYield",
+      "action": "updateYieldStabilityFromIrrigation",
+      "conditions": {
+        "requireWaterRequirements": true
+      },
+      "yieldInputsMapping": {
+        "sourceWaterRequirementsPath": "outputs.waterRequirements",
+        "sourceStabilityPath": "outputs.stability",
+        "targetCalculatorKey": "GardenYieldCalculator",
+        "targetFields": {
+          "irrigation.totalGallonsPerWeek": "outputs.waterRequirements.totalGallonsPerWeek",
+          "irrigation.perZoneGallonsPerWeek": "outputs.waterRequirements.perZoneGallonsPerWeek",
+          "stability.irrigationRiskLevel": "outputs.stability.riskLevel"
+        }
+      },
+      "planningGraphEdges": [
+        {
+          "from": "IrrigationCalculator",
+          "to": "GardenYieldCalculator",
+          "type": "informs",
+          "notes": "Water availability and stability influence expected crop performance and harvest windows."
+        }
+      ]
+    },
+    {
+      "id": "irrigation.toSoilAmendmentFeedback",
+      "label": "Flag soil moisture issues for amendment planning",
+      "description": "When irrigation stability indicates chronic over- or under-watering, flag beds for soil structure or organic matter review in the Soil Amendment Calculator.",
+      "target": "calculators.soilAmendment",
+      "action": "suggestSoilReviewFromIrrigation",
+      "conditions": {
+        "triggerOnRiskLevels": [
+          "high",
+          "critical"
+        ]
+      },
+      "soilFeedbackMapping": {
+        "sourceStabilityPath": "outputs.stability",
+        "riskToFlagReason": {
+          "high": "Irrigation risk detected – consider improving soil structure, mulch, or organic matter to hold moisture more evenly.",
+          "critical": "Severe irrigation instability – soil may be compacted, poorly drained, or lacking organic matter. Review amendment plan."
+        }
+      },
+      "planningGraphEdges": [
+        {
+          "from": "IrrigationCalculator",
+          "to": "SoilAmendmentCalculator",
+          "type": "feedback",
+          "notes": "Watering problems sometimes signal soil issues; this edge helps close the loop between water, soil, and plant health."
+        }
+      ]
+    },
+    {
+      "id": "irrigation.toStorehouseAndPreservation",
+      "label": "Align irrigation with storehouse & preservation goals",
+      "description": "For beds linked to storehouse targets, surface reminders that consistent irrigation supports planned harvest volumes and preservation sessions (canning, dehydrating, freezing).",
+      "target": "planningGraph",
+      "action": "annotateGoalsFromIrrigation",
+      "conditions": {
+        "requireLinkedStorehouseGoals": true
+      },
+      "goalAnnotations": {
+        "notesTemplate": "This bed has storehouse targets. Maintain irrigation schedule to support planned harvest and preservation sessions.",
+        "linkTargets": [
+          "StorehousePlanner",
+          "PreservationPlanner"
+        ]
+      },
+      "planningGraphEdges": [
+        {
+          "from": "IrrigationCalculator",
+          "to": "StorehousePlanner",
+          "type": "supports",
+          "notes": "Stable irrigation underpins reliable harvests for storehouse stocking plans."
+        },
+        {
+          "from": "IrrigationCalculator",
+          "to": "PreservationPlanner",
+          "type": "supports",
+          "notes": "Water consistency improves predictability of batch preservation sessions tied to harvest windows."
+        }
+      ]
+    },
+    {
+      "id": "irrigation.toNextBestAction",
+      "label": "Next best irrigation actions",
+      "description": "Provide simple, actionable suggestions (NBA) for the user based on current irrigation schedule and risk level: run the next session, adjust timing, or hold due to recent rain.",
+      "target": "nba",
+      "action": "suggestIrrigationNextBestActions",
+      "conditions": {
+        "requireSchedule": true
+      },
+      "nbaRules": [
+        {
+          "id": "runNextIrrigationSession",
+          "label": "Run next irrigation session now",
+          "when": {
+            "upcomingWithinMinutes": 90,
+            "riskLevelIn": [
+              "low",
+              "moderate"
+            ]
+          },
+          "then": {
+            "ctaType": "runNow",
+            "sessionSource": "nextScheduleEvent",
+            "eventType": "session.request.start"
+          }
+        },
+        {
+          "id": "skipDueToRain",
+          "label": "Consider skipping due to recent rain",
+          "when": {
+            "recentRainInGreaterOrEqual": 0.5,
+            "riskLevelIn": [
+              "overwater"
+            ]
+          },
+          "then": {
+            "ctaType": "info",
+            "message": "Recent rain may have provided enough moisture. Check soil before running this irrigation session.",
+            "eventType": "irrigation.advice.info"
+          }
+        },
+        {
+          "id": "shortenDuration",
+          "label": "Shorten irrigation duration for this zone",
+          "when": {
+            "riskLevelIn": [
+              "overwater"
+            ]
+          },
+          "then": {
+            "ctaType": "adjust",
+            "message": "Beds in this zone may be getting too much water. Reduce run time or shift to fewer days per week.",
+            "eventType": "irrigation.plan.adjustmentSuggested"
+          }
+        }
+      ],
+      "planningGraphEdges": [
+        {
+          "from": "IrrigationCalculator",
+          "to": "NowButtons",
+          "type": "drives",
+          "notes": "NBA rules decide when the garden 'Now' CTA should point to irrigation sessions vs. other garden tasks."
+        }
+      ]
+    }
+  ]
+}

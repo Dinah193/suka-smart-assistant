@@ -1,0 +1,195 @@
+{
+  "$schema": "../../../../../src/schemas/planningGraph/nodes.schema.json",
+
+  "version": "v1.0.0",
+  "nodeKey": "PG_NODE_GARDEN_PLANTING_CALENDAR_CALCULATOR",
+  "kind": "calculator-node",
+
+  "id": "GardenPlantingCalendarCalculator",
+  "label": "Garden Planting Calendar",
+  "shortLabel": "Planting Calendar",
+  "calculatorId": "GardenPlantingCalendarCalculator",
+  "domain": "garden",
+
+  "description": "Calculates optimal planting dates, succession intervals, and harvest windows for garden crops based on climate, frost dates, varieties, and household needs. Feeds into garden sessions, storehouse stock planning, animal fodder planning, and feast-day coordination.",
+  "tags": [
+    "garden",
+    "plantingCalendar",
+    "successionPlanting",
+    "storehouseMeals",
+    "planningGraph"
+  ],
+
+  "inputs": {},
+
+  "outputs": {},
+
+  "events": {
+    "consumes": [
+      "calculator.gardenPlantingCalendar.requested",
+      "garden.layout.updated",
+      "seed.inventory.updated",
+      "storehouse.stock.targetDemand.updated",
+      "calendar.feastDays.updated"
+    ],
+    "emits": [
+      "calculator.gardenPlantingCalendar.completed",
+      "calculator.gardenPlantingCalendar.error",
+      "calendar.garden.plantingSchedule.upserted",
+      "calendar.garden.harvestWindows.upserted",
+      "storehouse.garden.intakeWindow.updated",
+      "animal.fodder.gardenWindows.updated",
+      "session.request.fromGardenPlantingCalendar",
+      "planningGraph.node.GARDEN_PLANTING_CALENDAR_CALCULATOR.completed"
+    ]
+  },
+
+  "edges": {
+    "feedsInto": [
+      "PG_NODE_GARDEN_LAYOUT_PLANNER",
+      "PG_NODE_STOREHOUSE_STOCK_PLANNER",
+      "PG_NODE_MEAL_YIELD_PLANNER",
+      "PG_NODE_PRESERVATION_SUITE",
+      "PG_NODE_ANIMAL_PLANNER",
+      "PG_NODE_SESSION_RUNTIME"
+    ],
+    "acceptsFrom": [
+      "PG_NODE_GARDEN_LAYOUT_PLANNER",
+      "PG_NODE_SEED_INVENTORY_CALCULATOR",
+      "PG_NODE_STOREHOUSE_STOCK_PLANNER",
+      "PG_NODE_MEAL_YIELD_PLANNER",
+      "PG_NODE_ANIMAL_PLANNER"
+    ],
+    "priority": 40
+  },
+
+  "sessionHints": {
+    "domain": "garden",
+    "nowCtaLabel": "Plan Planting Session",
+    "nowCtaDescription": "Use the calculated planting calendar to queue up today’s garden work in SessionRunner.",
+    "templates": [
+      {
+        "id": "garden_bed_prep_session",
+        "title": "Prepare Beds for Planting",
+        "description": "Session to prep specific beds for upcoming plantings: clear, amend soil, and set irrigation if needed.",
+        "sessionIdPrefix": "garden_bed_prep_",
+        "trigger": {
+          "when": "onCalculatorComplete",
+          "conditions": {
+            "hasUpcomingPlantingsWithinDays": 7
+          }
+        },
+        "sessionPrefs": {
+          "domain": "garden",
+          "sourceType": "manual",
+          "voiceGuidance": true,
+          "haptic": true,
+          "autoAdvance": false
+        }
+      },
+      {
+        "id": "garden_main_planting_day_session",
+        "title": "Main Planting Day",
+        "description": "Session guiding the day’s plantings across beds and crops, including notes on spacing and succession.",
+        "sessionIdPrefix": "garden_planting_day_",
+        "trigger": {
+          "when": "dayHasMultiplePlantings",
+          "conditions": {
+            "minPlantingsCount": 3
+          }
+        },
+        "sessionPrefs": {
+          "domain": "garden",
+          "sourceType": "manual",
+          "voiceGuidance": true,
+          "haptic": true,
+          "autoAdvance": false
+        }
+      },
+      {
+        "id": "garden_succession_check_session",
+        "title": "Succession Planting Check",
+        "description": "Short recurring session to check beds for succession readiness and trigger next sowings.",
+        "sessionIdPrefix": "garden_succession_",
+        "trigger": {
+          "when": "successionDue",
+          "conditions": {
+            "hasSuccessionEnabled": true
+          }
+        },
+        "sessionPrefs": {
+          "domain": "garden",
+          "sourceType": "manual",
+          "voiceGuidance": true,
+          "haptic": true,
+          "autoAdvance": false
+        }
+      }
+    ]
+  },
+
+  "inventoryIntegration": {
+    "enabled": true,
+    "defaultCategory": "gardenProduce",
+    "defaultLocation": "Garden / Beds",
+    "fields": {
+      "intakeWindow": {
+        "from": "outputs.harvestWindows"
+      },
+      "cropName": {
+        "from": "inputs.crops[*].name"
+      },
+      "targetUse": {
+        "from": "inputs.crops[*].targetUse",
+        "fallback": "fresh"
+      }
+    },
+    "routingRules": [
+      {
+        "id": "garden_to_storehouse_intake",
+        "label": "Route projected garden harvest into storehouse stock planner",
+        "match": {
+          "outputKey": "harvestWindows"
+        },
+        "setFields": {
+          "eligibleForStorehouseIntake": true
+        }
+      },
+      {
+        "id": "garden_to_animal_fodder",
+        "label": "Flag fodder crops for animal planner",
+        "match": {
+          "outputKey": "animalFodderHints"
+        },
+        "setFields": {
+          "eligibleForAnimalPlanner": true
+        }
+      }
+    ]
+  },
+
+  "ui": {
+    "group": "Garden & Animals",
+    "icon": "GiPlantSeed",
+    "color": "green",
+    "primaryRoute": "/tier2/household/garden/planting-calendar",
+    "nowButton": {
+      "label": "Use Planting Calendar",
+      "tooltip": "Open the planting calendar results and start a guided garden session.",
+      "opensSessionRunner": true,
+      "sessionSourceEvent": "session.request.fromGardenPlantingCalendar"
+    },
+    "badges": [
+      {
+        "type": "info",
+        "label": "Succession-aware",
+        "description": "Supports single and succession plantings across the whole garden season."
+      },
+      {
+        "type": "context",
+        "label": "Feeds Storehouse",
+        "description": "Harvest windows are shared with storehouse and preservation planners."
+      }
+    ]
+  }
+}

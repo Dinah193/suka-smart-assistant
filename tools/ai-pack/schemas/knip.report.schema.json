@@ -1,0 +1,121 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AI-Pack Knip Report",
+  "type": "object",
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string" },
+    "version": { "type": "integer" },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "projectName": { "type": "string" },
+        "generatedBy": { "type": "string" },
+        "generatedAt": { "type": "string" },
+        "rootDir": { "type": "string" }
+      },
+      "required": ["projectName", "rootDir"]
+    },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "aliases": { "type": "object", "additionalProperties": { "type": "string" } },
+        "entryPoints": { "type": "array", "items": { "type": "string" } },
+        "globs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "required": ["aliases", "entryPoints"]
+    },
+    "ignore": {
+      "type": "object",
+      "properties": {
+        "dependencies": { "type": "array", "items": { "type": "string" } },
+        "exports": { "type": "array", "items": { "type": "string" } },
+        "files": { "type": "array", "items": { "type": "string" } },
+        "binaries": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "ci": {
+      "type": "object",
+      "properties": {
+        "thresholds": {
+          "type": "object",
+          "properties": {
+            "maxUnusedDependencies": { "type": "integer" },
+            "maxUnusedDevDependencies": { "type": "integer" },
+            "maxUnusedExports": { "type": "integer" },
+            "maxOrphanFiles": { "type": "integer" }
+          }
+        },
+        "failOnExceed": { "type": "boolean" }
+      }
+    },
+    "actions": {
+      "type": "object",
+      "properties": {
+        "onUnusedDependency": { "type": "string" },
+        "onUnusedDevDependency": { "type": "string" },
+        "onUnusedExport": { "type": "string" },
+        "onOrphanFile": { "type": "string" }
+      }
+    },
+    "report": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "object",
+          "properties": {
+            "unusedDependencies": { "type": "array", "items": { "type": "string" } },
+            "unusedDevDependencies": { "type": "array", "items": { "type": "string" } },
+            "unusedExports": { "type": "array", "items": { "type": "string" } },
+            "orphanFiles": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "items": {
+          "type": "object",
+          "properties": {
+            "dependencies": { "type": "array", "items": { "type": "string" } },
+            "devDependencies": { "type": "array", "items": { "type": "string" } },
+            "exports": { "type": "array", "items": { "type": "string" } },
+            "files": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "falsePositives": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "explain": {
+      "type": "object",
+      "properties": {
+        "orchestration": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "anchors": { "type": "array", "items": { "type": "string" } },
+              "emits": { "type": "array", "items": { "type": "string" } },
+              "consumes": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "layout": {
+          "type": "object",
+          "properties": {
+            "pages": { "type": "array", "items": { "type": "string" } },
+            "features": { "type": "array", "items": { "type": "string" } },
+            "services": { "type": "array", "items": { "type": "string" } },
+            "engines": { "type": "array", "items": { "type": "string" } },
+            "schemas": { "type": "array", "items": { "type": "string" } },
+            "tools": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    }
+  },
+  "required": ["id", "version", "meta", "settings"]
+}

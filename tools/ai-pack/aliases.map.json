@@ -1,0 +1,119 @@
+{
+  "meta": {
+    "name": "Suka Smart Assistant – Aliases Map",
+    "version": "1.0.0",
+    "generatedAt": "2025-10-29T17:05:00Z"
+  },
+  "projectRoot": "C:/Users/larho/suka-smart-assistant",
+  "extensions": [".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".json", ".mdx"],
+  "aliases": {
+    "@": "src",
+    "@/app": "src/app",
+    "@/pages": "src/pages",
+    "@/components": "src/components",
+    "@/features": "src/features",
+    "@/engines": "src/engines",
+    "@/managers": "src/managers",
+    "@/services": "src/services",
+    "@/stores": "src/stores",
+    "@/db": "src/db",
+    "@/content": "src/content",
+    "@/schemas": "schemas",
+    "@/assets": "src/assets",
+    "@/styles": "src/styles",
+    "@/workers": "src/**/services/workers"
+  },
+  "tooling": {
+    "vite": {
+      "resolve": [
+        { "find": "@", "replacement": "C:/Users/larho/suka-smart-assistant/src" },
+        { "find": "@/app", "replacement": "C:/Users/larho/suka-smart-assistant/src/app" },
+        { "find": "@/pages", "replacement": "C:/Users/larho/suka-smart-assistant/src/pages" },
+        { "find": "@/components", "replacement": "C:/Users/larho/suka-smart-assistant/src/components" },
+        { "find": "@/features", "replacement": "C:/Users/larho/suka-smart-assistant/src/features" },
+        { "find": "@/engines", "replacement": "C:/Users/larho/suka-smart-assistant/src/engines" },
+        { "find": "@/managers", "replacement": "C:/Users/larho/suka-smart-assistant/src/managers" },
+        { "find": "@/services", "replacement": "C:/Users/larho/suka-smart-assistant/src/services" },
+        { "find": "@/stores", "replacement": "C:/Users/larho/suka-smart-assistant/src/stores" },
+        { "find": "@/db", "replacement": "C:/Users/larho/suka-smart-assistant/src/db" },
+        { "find": "@/content", "replacement": "C:/Users/larho/suka-smart-assistant/src/content" },
+        { "find": "@/schemas", "replacement": "C:/Users/larho/suka-smart-assistant/schemas" },
+        { "find": "@/assets", "replacement": "C:/Users/larho/suka-smart-assistant/src/assets" },
+        { "find": "@/styles", "replacement": "C:/Users/larho/suka-smart-assistant/src/styles" },
+        { "find": "@/workers", "replacement": "C:/Users/larho/suka-smart-assistant/src" }
+      ]
+    },
+    "tsconfig": {
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["src/*"],
+        "@/app/*": ["src/app/*"],
+        "@/pages/*": ["src/pages/*"],
+        "@/components/*": ["src/components/*"],
+        "@/features/*": ["src/features/*"],
+        "@/engines/*": ["src/engines/*"],
+        "@/managers/*": ["src/managers/*"],
+        "@/services/*": ["src/services/*"],
+        "@/stores/*": ["src/stores/*"],
+        "@/db/*": ["src/db/*"],
+        "@/content/*": ["src/content/*"],
+        "@/schemas/*": ["schemas/*"],
+        "@/assets/*": ["src/assets/*"],
+        "@/styles/*": ["src/styles/*"],
+        "@/workers/*": ["src/**/services/workers/*"]
+      }
+    },
+    "jest": {
+      "moduleNameMapper": {
+        "^@/(.*)$": "<rootDir>/src/$1",
+        "^@/app/(.*)$": "<rootDir>/src/app/$1",
+        "^@/pages/(.*)$": "<rootDir>/src/pages/$1",
+        "^@/components/(.*)$": "<rootDir>/src/components/$1",
+        "^@/features/(.*)$": "<rootDir>/src/features/$1",
+        "^@/engines/(.*)$": "<rootDir>/src/engines/$1",
+        "^@/managers/(.*)$": "<rootDir>/src/managers/$1",
+        "^@/services/(.*)$": "<rootDir>/src/services/$1",
+        "^@/stores/(.*)$": "<rootDir>/src/stores/$1",
+        "^@/db/(.*)$": "<rootDir>/src/db/$1",
+        "^@/content/(.*)$": "<rootDir>/src/content/$1",
+        "^@/schemas/(.*)$": "<rootDir>/schemas/$1",
+        "^@/assets/(.*)$": "<rootDir>/src/assets/$1",
+        "^@/styles/(.*)$": "<rootDir>/src/styles/$1",
+        "^@/workers/(.*)$": "<rootDir>/src/$1"
+      }
+    },
+    "eslint": {
+      "settings": {
+        "import/resolver": {
+          "alias": {
+            "map": [
+              ["@", "./src"],
+              ["@/app", "./src/app"],
+              ["@/pages", "./src/pages"],
+              ["@/components", "./src/components"],
+              ["@/features", "./src/features"],
+              ["@/engines", "./src/engines"],
+              ["@/managers", "./src/managers"],
+              ["@/services", "./src/services"],
+              ["@/stores", "./src/stores"],
+              ["@/db", "./src/db"],
+              ["@/content", "./src/content"],
+              ["@/schemas", "./schemas"],
+              ["@/assets", "./src/assets"],
+              ["@/styles", "./src/styles"],
+              ["@/workers", "./src"]
+            ],
+            "extensions": [".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".json", ".mdx"]
+          },
+          "node": {
+            "extensions": [".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".json", ".mdx"]
+          }
+        }
+      }
+    }
+  },
+  "guards": {
+    "ensureWindowsPathsAbsoluteForVite": true,
+    "verifyAllPathsExist": true
+  }
+}

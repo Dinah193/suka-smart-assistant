@@ -1,0 +1,501 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://suka.local/schemas/calculators/storehouseMeals/MeatBreakdownCalculator.schema.json",
+  "title": "MeatBreakdownCalculatorPayload",
+  "description": "Schema for carcass inputs and per-cut yield outputs used by the Suka Smart Assistant Meat Breakdown Calculator.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "calculator", "inputs", "outputs"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Semantic version of this payload shape.",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$",
+      "examples": ["v1.0.0"]
+    },
+    "calculator": {
+      "type": "string",
+      "const": "MeatBreakdownCalculator",
+      "description": "Identifier for the calculator that produced/consumes this payload."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Optional metadata for SSA plumbing and Planning Graph wiring.",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Optional unique id for this calculation record (e.g., Dexie primary key)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp when this calculation was first created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp of last update."
+        },
+        "source": {
+          "type": "string",
+          "description": "Free-form description of where this carcass came from (e.g., farm name, processor, batch id)."
+        },
+        "notes": {
+          "type": "string",
+          "description": "User notes about this breakdown session."
+        },
+        "planningGraph": {
+          "type": "object",
+          "description": "Optional Planning Graph wiring to other SSA calculators and planners.",
+          "additionalProperties": false,
+          "properties": {
+            "nodeId": {
+              "type": "string",
+              "description": "Id of the Planning Graph node representing this calculator instance."
+            },
+            "feedsInto": {
+              "type": "array",
+              "description": "Ids of downstream nodes that this breakdown feeds, e.g. Storehouse Stock Planner, Meal Yield Planner, Animal Planner.",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "inputs": {
+      "type": "object",
+      "description": "Carcass and processing inputs used to compute per-cut yields.",
+      "additionalProperties": false,
+      "required": ["animal", "carcass", "processingPreferences"],
+      "properties": {
+        "animal": {
+          "type": "object",
+          "description": "Animal identity and context.",
+          "additionalProperties": false,
+          "required": ["species"],
+          "properties": {
+            "species": {
+              "type": "string",
+              "description": "Animal species for the carcass.",
+              "enum": ["beef", "lamb", "goat", "pork", "poultry", "other"]
+            },
+            "otherSpeciesLabel": {
+              "type": "string",
+              "description": "If species is 'other', a human-friendly label."
+            },
+            "breed": {
+              "type": "string",
+              "description": "Optional breed (e.g., Angus, Dorper)."
+            },
+            "sex": {
+              "type": "string",
+              "description": "Sex of the animal when known.",
+              "enum": ["male", "female", "castrated_male", "unknown"],
+              "default": "unknown"
+            },
+            "ageCategory": {
+              "type": "string",
+              "description": "Age category at slaughter.",
+              "enum": ["veal", "yearling", "mature", "unknown"],
+              "default": "unknown"
+            },
+            "tagId": {
+              "type": "string",
+              "description": "Farm tag/ear tag or internal animal id."
+            }
+          }
+        },
+        "carcass": {
+          "type": "object",
+          "description": "Weights, dates, and dressing info for the carcass.",
+          "additionalProperties": false,
+          "required": ["weightUnit"],
+          "properties": {
+            "weightUnit": {
+              "$ref": "#/$defs/weightUnit"
+            },
+            "liveWeight": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Live weight of the animal before slaughter in weightUnit."
+            },
+            "hotCarcassWeight": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Hot hanging carcass weight in weightUnit."
+            },
+            "chilledCarcassWeight": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Chilled carcass weight after hanging in weightUnit."
+            },
+            "dressingPercentage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Dressing percentage (hot carcass weight / live weight * 100)."
+            },
+            "slaughterDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Date of slaughter."
+            },
+            "processingDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Date carcass was cut and wrapped."
+            },
+            "butcherName": {
+              "type": "string",
+              "description": "Name of processor or butcher."
+            }
+          },
+          "oneOf": [
+            {
+              "description": "At minimum, either hot or chilled carcass weight must be provided.",
+              "required": ["hotCarcassWeight"]
+            },
+            {
+              "required": ["chilledCarcassWeight"]
+            }
+          ]
+        },
+        "processingPreferences": {
+          "type": "object",
+          "description": "User preferences that influence expected yields and cut mapping.",
+          "additionalProperties": false,
+          "properties": {
+            "trimLevel": {
+              "type": "string",
+              "description": "How aggressively surface fat is trimmed.",
+              "enum": ["heavy_trim", "standard_trim", "leave_fat_cap"],
+              "default": "standard_trim"
+            },
+            "bonePreference": {
+              "type": "string",
+              "description": "Preference for bone-in vs boneless cuts.",
+              "enum": ["mostly_bone_in", "mixed", "mostly_boneless"],
+              "default": "mixed"
+            },
+            "grindPreference": {
+              "type": "string",
+              "description": "How much meat is routed to ground products.",
+              "enum": ["minimal_grind", "balanced_grind", "max_grind"],
+              "default": "balanced_grind"
+            },
+            "targetFatPercentGround": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Target fat percentage for ground products."
+            },
+            "keepOffal": {
+              "type": "boolean",
+              "description": "Whether offal/organs are kept for human consumption.",
+              "default": true
+            },
+            "expectedYieldProfileId": {
+              "type": "string",
+              "description": "Id of a stored yield profile template (species+cut map) if used."
+            }
+          }
+        },
+        "batchContext": {
+          "type": "object",
+          "description": "Optional context for multiple carcasses processed together.",
+          "additionalProperties": false,
+          "properties": {
+            "batchId": {
+              "type": "string",
+              "description": "Identifier for this butchery batch."
+            },
+            "headCount": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Number of animals included if yields are pooled."
+            },
+            "shareFactor": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Proportion of this batch assigned to this household (0–1)."
+            }
+          }
+        }
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "description": "Computed yields for cuts and byproducts, plus summary metrics.",
+      "additionalProperties": false,
+      "required": ["summary", "cuts"],
+      "properties": {
+        "summary": {
+          "type": "object",
+          "description": "Overall yield summary for the carcass.",
+          "additionalProperties": false,
+          "required": ["basisWeight", "basisType"],
+          "properties": {
+            "basisType": {
+              "type": "string",
+              "description": "Reference weight used for percentage calculations.",
+              "enum": ["hot_carcass", "chilled_carcass", "live"],
+              "default": "chilled_carcass"
+            },
+            "basisWeight": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Reference weight (in weightUnit) for yield percentages."
+            },
+            "weightUnit": {
+              "$ref": "#/$defs/weightUnit"
+            },
+            "totalUsableMeatWeight": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Total weight of cuts considered edible meat (excluding bones-only, pet-only, or waste)."
+            },
+            "totalBoneWeight": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Total weight of bones (usable + waste)."
+            },
+            "totalTrimFatWeight": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Total weight of fat trim (before any rendering)."
+            },
+            "totalOffalWeight": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Total weight of organs/offal kept for any use."
+            },
+            "yieldPercentages": {
+              "type": "object",
+              "description": "Yield percentages based on basisWeight.",
+              "additionalProperties": false,
+              "properties": {
+                "meatPct": {
+                  "$ref": "#/$defs/percentage"
+                },
+                "bonePct": {
+                  "$ref": "#/$defs/percentage"
+                },
+                "trimFatPct": {
+                  "$ref": "#/$defs/percentage"
+                },
+                "offalPct": {
+                  "$ref": "#/$defs/percentage"
+                },
+                "shrinkLossPct": {
+                  "$ref": "#/$defs/percentage",
+                  "description": "Estimated shrink loss (evaporation, waste, unusable material)."
+                }
+              }
+            },
+            "estimatedTotalServings": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Approximate number of servings obtainable from all edible cuts."
+            }
+          }
+        },
+        "cuts": {
+          "type": "array",
+          "description": "Per-cut yield details for all edible and usable products.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "name", "category", "weight", "weightUnit"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Internal id for this cut record (stable per calculation)."
+              },
+              "name": {
+                "type": "string",
+                "description": "User-facing cut name (e.g., Ribeye Steak, Loin Chop, Ground Beef)."
+              },
+              "category": {
+                "type": "string",
+                "description": "Cut category for grouping and planning.",
+                "enum": [
+                  "steak",
+                  "roast",
+                  "chop",
+                  "rib",
+                  "ground",
+                  "stew",
+                  "organ",
+                  "bone",
+                  "fat",
+                  "trim",
+                  "sausage",
+                  "other"
+                ]
+              },
+              "primal": {
+                "type": "string",
+                "description": "Primal or major section (e.g., Chuck, Loin, Leg)."
+              },
+              "subPrimal": {
+                "type": "string",
+                "description": "Sub-primal or more specific anatomical location."
+              },
+              "boneIn": {
+                "type": "boolean",
+                "description": "Whether this cut contains bone.",
+                "default": false
+              },
+              "weight": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Total weight of this cut in weightUnit."
+              },
+              "weightUnit": {
+                "$ref": "#/$defs/weightUnit"
+              },
+              "yieldPctOfBasis": {
+                "$ref": "#/$defs/percentage",
+                "description": "Percentage of basisWeight represented by this cut."
+              },
+              "yieldPctOfMeat": {
+                "$ref": "#/$defs/percentage",
+                "description": "Percentage of totalUsableMeatWeight represented by this cut."
+              },
+              "estimatedServings": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Estimated servings for this cut."
+              },
+              "servingSizeUnit": {
+                "type": "string",
+                "description": "Unit used to estimate servings.",
+                "enum": ["oz", "g", "lb", "kg", "piece", "slice", "unknown"],
+                "default": "oz"
+              },
+              "packagePlan": {
+                "type": "object",
+                "description": "Packaging breakdown for storehouse inventory.",
+                "additionalProperties": false,
+                "properties": {
+                  "packages": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Number of packages for this cut."
+                  },
+                  "weightPerPackage": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Weight per package in weightUnit."
+                  },
+                  "servingsPerPackage": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Estimated servings per package."
+                  }
+                }
+              },
+              "intendedUse": {
+                "type": "string",
+                "description": "Primary use of this cut in the household.",
+                "enum": ["family_meals", "special_occasions", "sale", "barter", "pet_food", "stock_only", "other"],
+                "default": "family_meals"
+              },
+              "storehouseLink": {
+                "type": "object",
+                "description": "Optional link into inventory/storehouse and meal planners.",
+                "additionalProperties": false,
+                "properties": {
+                  "inventoryItemId": {
+                    "type": "string",
+                    "description": "Id of the inventory item this cut maps to."
+                  },
+                  "preferredRecipeIds": {
+                    "type": "array",
+                    "description": "Optional list of recipe ids that commonly use this cut.",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "notes": {
+                "type": "string",
+                "description": "User notes or butchery comments about this cut."
+              }
+            }
+          }
+        },
+        "byproducts": {
+          "type": "array",
+          "description": "Non-primary products captured from the carcass (bones for stock, fat for rendering, pet food, hides, etc.).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "weight", "weightUnit"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Type of byproduct.",
+                "enum": ["bone", "fat", "organ", "stock_bag", "hide", "pet_food", "other"]
+              },
+              "label": {
+                "type": "string",
+                "description": "User-facing label for this byproduct group."
+              },
+              "weight": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Total weight of the byproduct in weightUnit."
+              },
+              "weightUnit": {
+                "$ref": "#/$defs/weightUnit"
+              },
+              "yieldPctOfBasis": {
+                "$ref": "#/$defs/percentage",
+                "description": "Percentage of basisWeight represented by this byproduct."
+              },
+              "intendedUse": {
+                "type": "string",
+                "description": "How this byproduct is planned to be used.",
+                "enum": ["stock", "render_tallow", "render_lard", "pet_food", "fertilizer", "discard", "sell", "other"],
+                "default": "stock"
+              },
+              "storehouseLink": {
+                "type": "object",
+                "description": "Optional link into inventory/storehouse tracking.",
+                "additionalProperties": false,
+                "properties": {
+                  "inventoryItemId": {
+                    "type": "string",
+                    "description": "Inventory id this byproduct maps to."
+                  }
+                }
+              },
+              "notes": {
+                "type": "string",
+                "description": "User notes about this byproduct."
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "weightUnit": {
+      "type": "string",
+      "description": "Supported weight units for carcass and cut weights.",
+      "enum": ["lb", "kg"]
+    },
+    "percentage": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Percentage value between 0 and 100."
+    }
+  }
+}

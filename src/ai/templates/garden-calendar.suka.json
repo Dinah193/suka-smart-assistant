@@ -1,0 +1,291 @@
+{
+  "id": "garden-calendar",
+  "kind": "AI_AUTOMATION_TEMPLATE",
+  "version": "1.0.0",
+  "name": "Garden Master Calendar",
+  "purpose": "Generate and maintain a season-aware garden calendar (seed starting, transplanting, succession, scouting, harvest, and preservation) using frost dates, growing degree days (GDD), weather, and user preferences.",
+  "tags": ["garden", "calendar", "harvest", "weather", "inventory", "preservation", "soil", "irrigation"],
+  "triggers": [
+    { "type": "manual", "label": "Build/Update Garden Calendar" },
+    { "type": "schedule", "rrule": "FREQ=WEEKLY;BYDAY=SU;BYHOUR=7;BYMINUTE=0;BYSECOND=0", "label": "Weekly Refresh (Sun 07:00)" },
+    { "type": "event", "source": "weather", "match": "frost_warning|heatwave|heavy_rain|drought_watch" },
+    { "type": "event", "source": "inventory", "match": "seed_batch_added|amendments_low|preservation_supplies_low" }
+  ],
+  "inputs": {
+    "location": {
+      "zipcode": "{{ user.location.zipcode || '00000' }}",
+      "usdaZone": "{{ user.garden.usdaZone || '8a' }}",
+      "lat": "{{ user.location.lat || null }}",
+      "lon": "{{ user.location.lon || null }}"
+    },
+    "frost": {
+      "lastSpringFrost": "{{ gardenAgent.getLastSpringFrostDate() || '2025-04-05' }}",
+      "firstFallFrost": "{{ gardenAgent.getFirstFallFrostDate() || '2025-11-03' }}"
+    },
+    "weather": {
+      "forecast14d": "{{ weatherService.getForecast(14) || [] }}",
+      "historicalNormals": "{{ weatherService.getNormals(30) || {} }}",
+      "gddBase": "{{ user.garden.gddBase || 50 }}",
+      "gddToDate": "{{ weatherService.getGDDToDate(user.location, user.garden.gddBase) || 0 }}"
+    },
+    "beds": "{{ GardenStore.getBeds() || [] }}",
+    "crops": "{{ GardenStore.getPlannedCrops() || [] }}",
+    "companionRules": "{{ CompanionDB.getRules() || [] }}",
+    "soil": {
+      "latestTest": "{{ SoilStore.getLatestTest() || null }}",
+      "amendmentPrefs": "{{ user.garden.amendmentPrefs || {} }}"
+    },
+    "preferences": {
+      "sabbathAware": "{{ user.prefs.sabbathAware || true }}",
+      "fridayCutoffSource": "{{ user.prefs.fridayCutoffSource || 'calendar.sunset' }}",
+      "dailyWindow": "{{ user.prefs.gardenWindow || {\"start\":\"06:30\",\"end\":\"19:30\"} }}",
+      "skipDays": "{{ user.prefs.skipDays || [\"SAT\"] }}",
+      "harvestBufferDays": "{{ user.prefs.harvestBufferDays || 3 }}",
+      "successionEveryWeeks": "{{ user.garden.successionEveryWeeks || 2 }}",
+      "preservationDays": "{{ user.garden.preservationDays || [\"TU\",\"TH\",\"SU\"] }}",
+      "scoutingDay": "{{ user.garden.scoutingDay || 'WE' }}"
+    },
+    "inventory": {
+      "seeds": "{{ inventoryAgent.listSeeds() || [] }}",
+      "amendments": "{{ inventoryAgent.listAmendments() || [] }}",
+      "preservation": "{{ inventoryAgent.listPreservationSupplies() || [] }}"
+    },
+    "calendar": {
+      "sunsetTimes": "{{ calendarService.getSunsetTimes(60) || [] }}",
+      "busyBlocks": "{{ calendarService.getBusyBlocks(30) || [] }}"
+    }
+  },
+  "params": {
+    "windows": {
+      "seedStartLeadDays": 28,
+      "hardeningOffDays": 7,
+      "transplantRainPreference": true,
+      "minDryHoursForTransplant": 12
+    },
+    "defaults": {
+      "scoutingMins": 20,
+      "irrigationMins": 15,
+      "bedPrepMins": 45,
+      "transplantMinsPer10": 25,
+      "seedStartMinsPerTray": 15,
+      "harvestMinsPer10lbs": 18,
+      "preserveMinsPerBatch": 75
+    },
+    "preservation": {
+      "methodPrefs": "{{ user.garden.preservationPrefs || {\"tomato\":\"can_hot_water\",\"cucumber\":\"ferment\",\"peach\":\"freeze\",\"greens\":\"dehydrate\"} }}",
+      "batchSizeLbs": 8,
+      "minJarCount": 12
+    },
+    "consumableThresholds": [
+      { "sku": "seed_start_mix", "min": 1, "unit": "bag" },
+      { "sku": "seed_trays_72", "min": 4, "unit": "trays" },
+      { "sku": "amend_blood_meal", "min": 1, "unit": "bag" },
+      { "sku": "amend_bone_meal", "min": 1, "unit": "bag" },
+      { "sku": "amend_compost", "min": 2, "unit": "bag" },
+      { "sku": "jar_quart", "min": 24, "unit": "ea" },
+      { "sku": "jar_lids", "min": 24, "unit": "ea" },
+      { "sku": "pickling_salt", "min": 1, "unit": "bag" }
+    ]
+  },
+  "derived": {
+    "gddToday": { "expr": "inputs.weather.gddToDate" },
+    "cropModels": {
+      "expr": "map(inputs.crops, c => ({...c, gddMaturity: maturityGDD(c), dth: daysToHarvest(c), companions: bestCompanions(c, inputs.companionRules)}))"
+    },
+    "seedStartWindows": {
+      "expr": "buildSeedStarts(derived.cropModels, inputs.frost.lastSpringFrost, params.windows.seedStartLeadDays)"
+    },
+    "transplantWindows": {
+      "expr": "buildTransplants(derived.cropModels, inputs.frost.lastSpringFrost, params.windows.hardeningOffDays, inputs.weather.forecast14d, params.windows)"
+    },
+    "successionWindows": {
+      "expr": "buildSuccessions(derived.cropModels, inputs.frost.firstFallFrost, inputs.preferences.successionEveryWeeks)"
+    },
+    "harvestWindows": {
+      "expr": "buildHarvests(derived.cropModels, derived.gddToday, inputs.preferences.harvestBufferDays)"
+    },
+    "preservationSlots": {
+      "expr": "slotPreservation(derived.harvestWindows, inputs.preferences.preservationDays, params.preservation.batchSizeLbs, params.preservation.methodPrefs)"
+    },
+    "soilPlan": {
+      "expr": "planSoilAmendments(inputs.soil.latestTest, inputs.soil.amendmentPrefs, inputs.beds)"
+    },
+    "irrigationPlan": {
+      "expr": "planIrrigation(inputs.weather.forecast14d, inputs.beds, inputs.preferences.skipDays)"
+    },
+    "scoutingPlan": {
+      "expr": "planScouting(inputs.preferences.scoutingDay, params.defaults.scoutingMins, inputs.beds)"
+    },
+    "daysPlan": {
+      "expr": "buildDays(35, inputs.preferences.skipDays, inputs.preferences.sabbathAware, inputs.calendar.sunsetTimes, inputs.preferences.dailyWindow)"
+    }
+  },
+  "logic": [
+    {
+      "id": "pack-calendar-blocks",
+      "description": "Pack all windows into actionable calendar blocks around user busy times and sabbath constraints.",
+      "expr": "packGardenBlocks(derived.daysPlan, {seed: derived.seedStartWindows, transplant: derived.transplantWindows, succession: derived.successionWindows, harvest: derived.harvestWindows, preserve: derived.preservationSlots, soil: derived.soilPlan, irrigation: derived.irrigationPlan, scouting: derived.scoutingPlan}, inputs.calendar.busyBlocks, params.defaults)"
+    },
+    {
+      "id": "compute-inventory-needs",
+      "description": "Estimate supplies for seed starting, amending, and preservation for the next 5 weeks.",
+      "expr": "estimateGardenConsumables(context.blocks, inputs.inventory, params.consumableThresholds, params.preservation)"
+    },
+    {
+      "id": "companion-adjustments",
+      "description": "Suggest companion layout tweaks if conflicts detected.",
+      "expr": "suggestCompanionAdjustments(derived.cropModels, inputs.beds)"
+    }
+  ],
+  "actions": [
+    {
+      "type": "calendar.create_events",
+      "title": "Garden • {{ block.kind | capitalize }} — {{ block.title }}",
+      "date": "{{ block.date }}",
+      "start": "{{ block.start }}",
+      "end": "{{ block.end }}",
+      "color": "{{ chooseColor(block.kind) }}",
+      "metadata": {
+        "kind": "{{ block.kind }}",
+        "bedId": "{{ block.bedId || null }}",
+        "crop": "{{ block.crop || null }}",
+        "details": "{{ block.details || {} }}",
+        "sabbathAware": "{{ inputs.preferences.sabbathAware }}"
+      },
+      "forEach": "{{ context.blocks }}"
+    },
+    {
+      "type": "reminders.schedule",
+      "message": "Garden: {{ block.kind }} — {{ block.title }}",
+      "offsetMinutes": -30,
+      "date": "{{ block.date }}",
+      "time": "{{ block.start }}",
+      "forEach": "{{ context.blocks }}"
+    },
+    {
+      "type": "inventory.reserve_or_restock",
+      "items": "{{ context.consumablesNeeded }}",
+      "policy": "min_threshold",
+      "notes": "Auto-generated by garden-calendar"
+    },
+    {
+      "type": "agents.emit",
+      "agentId": "gardenHarvestAgent",
+      "payload": {
+        "harvestWindows": "{{ derived.harvestWindows }}",
+        "preservationSlots": "{{ derived.preservationSlots }}"
+      }
+    },
+    {
+      "type": "agents.emit",
+      "agentId": "soilAndWaterAgent",
+      "payload": {
+        "irrigationPlan": "{{ derived.irrigationPlan }}",
+        "soilPlan": "{{ derived.soilPlan }}"
+      }
+    }
+  ],
+  "outputs": {
+    "summary": {
+      "eventsCreated": "{{ len(context.blocks) }}",
+      "seedStarts": "{{ count(context.blocks, b => b.kind === 'seed') }}",
+      "transplants": "{{ count(context.blocks, b => b.kind === 'transplant') }}",
+      "successions": "{{ count(context.blocks, b => b.kind === 'succession') }}",
+      "harvests": "{{ count(context.blocks, b => b.kind === 'harvest') }}",
+      "preservation": "{{ count(context.blocks, b => b.kind === 'preserve') }}",
+      "soilTasks": "{{ count(context.blocks, b => b.kind === 'soil') }}",
+      "irrigation": "{{ count(context.blocks, b => b.kind === 'irrigation') }}",
+      "scouting": "{{ count(context.blocks, b => b.kind === 'scouting') }}"
+    },
+    "blocks": "{{ context.blocks }}",
+    "consumablesNeeded": "{{ context.consumablesNeeded }}",
+    "companionSuggestions": "{{ context.companionSuggestions || [] }}",
+    "printables": [
+      {
+        "type": "checklist",
+        "name": "Garden Week-at-a-Glance",
+        "data": "{{ map(groupBy(context.blocks,'date'), (date, blocks) => ({ date, items: map(blocks, b => ({ kind: b.kind, title: b.title, bed: b.bedId || '-', crop: b.crop || '-', start: b.start, end: b.end })) })) }}"
+      }
+    ]
+  },
+  "fallbacks": [
+    {
+      "condition": "rain_expected_transplant",
+      "action": {
+        "type": "calendar.move_or_suggest",
+        "policy": "move_to_dry_window",
+        "notes": "Transplant moved due to rain forecast and minDryHours rule."
+      }
+    },
+    {
+      "condition": "frost_warning",
+      "action": {
+        "type": "reminders.broadcast",
+        "message": "Frost warning: cover sensitive crops or move containers indoors.",
+        "channels": ["push", "email"]
+      }
+    },
+    {
+      "condition": "inventory_shortage",
+      "action": {
+        "type": "inventory.create_shopping_list",
+        "items": "{{ context.consumablesNeeded }}",
+        "groupBy": "store_section"
+      }
+    },
+    {
+      "condition": "approaching_sunset",
+      "when": "{{ inputs.preferences.sabbathAware }}",
+      "action": {
+        "type": "calendar.move_or_shorten",
+        "policy": "finish_30m_before_sunset"
+      }
+    }
+  ],
+  "integrations": {
+    "agents": [
+      { "id": "gardenAgent", "mode": "planner" },
+      { "id": "gardenHarvestAgent", "mode": "harvest" },
+      { "id": "soilAndWaterAgent", "mode": "schedule" },
+      { "id": "inventoryAgent", "mode": "supplies" }
+    ],
+    "services": [
+      { "id": "calendarService", "routes": ["/api/calendar/create", "/api/calendar/move-or-suggest"] },
+      { "id": "weatherService", "routes": ["/api/weather/forecast", "/api/weather/gdd"] },
+      { "id": "inventoryService", "routes": ["/api/inventory/reserve", "/api/inventory/restock", "/api/inventory/shopping-list"] }
+    ],
+    "ui": {
+      "panel": "AutomationPanel",
+      "widgets": [
+        { "type": "summary", "source": "outputs.summary" },
+        { "type": "table", "title": "Planned Blocks (35 days)", "source": "outputs.blocks" },
+        { "type": "list", "title": "Consumables Needed", "source": "outputs.consumablesNeeded" },
+        { "type": "list", "title": "Companion Suggestions", "source": "outputs.companionSuggestions" }
+      ]
+    }
+  },
+  "engine": {
+    "helpers": {
+      "maturityGDD": "fn(crop) => return /* GDD to maturity by variety or default */",
+      "daysToHarvest": "fn(crop) => return /* days to harvest by variety/zone/season */",
+      "bestCompanions": "fn(crop, rules) => return /* {good:[],avoid:[]} */",
+      "buildSeedStarts": "fn(crops, lastFrost, leadDays) => return /* tray windows based on frost offsets */",
+      "buildTransplants": "fn(crops, lastFrost, hardenDays, forecast14d, windowsParams) => return /* harden + transplant windows honoring rain/dry rules */",
+      "buildSuccessions": "fn(crops, firstFrost, everyWeeks) => return /* rolling successions until cutoff */",
+      "buildHarvests": "fn(crops, gddToday, bufferDays) => return /* GDD/DTH → harvest date windows */",
+      "slotPreservation": "fn(harvests, prefDays, batchSize, methodPrefs) => return /* cluster surplus into preservation slots */",
+      "planSoilAmendments": "fn(latestTest, prefs, beds) => return /* lime/compost/NPK timings before planting */",
+      "planIrrigation": "fn(forecast14d, beds, skipDays) => return /* recurring irrigation schedule adjusted for rainfall */",
+      "planScouting": "fn(weekday, mins, beds) => return /* weekly pest/disease scouting blocks */",
+      "packGardenBlocks": "fn(days, windowsObj, busyBlocks, defaults) => return /* bin-pack tasks into open day windows */",
+      "estimateGardenConsumables": "fn(blocks, inventory, thresholds, preserve) => return /* seeds, mix, amendments, jars, lids, salt */",
+      "suggestCompanionAdjustments": "fn(crops, beds) => return /* propose swaps for avoid pairs */",
+      "buildDays": "fn(days, skipDays, sabbathAware, sunsetTimes, window) => return /* [{date,start,end,isFriday,isSabbath}] */",
+      "chooseColor": "fn(kind) => return /* map kind → hex color */",
+      "len": "fn(x) => return x.length",
+      "count": "fn(arr, pred) => return /* count matches */",
+      "groupBy": "fn(arr, key) => return /* groups by key */",
+      "map": "fn(objOrArr, mapper) => return /* map over arrays or entries */"
+    }
+  }
+}

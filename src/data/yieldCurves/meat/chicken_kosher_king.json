@@ -1,0 +1,528 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "2025-10-31T15:12:00-05:00",
+  "description": "Meat yield curve for ‘Kosher King’ / clean hybrid meat bird – tuned for southern U.S. Israelites. Slower and hardier than Cornish Cross, more controlled than garden-pass birds, and good on pasture in heat/humidity. This profile plugs into Suka Smart Assistant to: (1) schedule flock acquisition → (2) grow-out → (3) butchery day → (4) storehouse stock planning (grocery-style sections) → (5) meal planning (roast, parts, broth) → (6) cleaning/sanitation (torah-safe) → (7) reverse generation from storehouse/meal/garden. User-owned favorites & schedules are expected to be saved in Dexie/local DB, not in this file.",
+  "__notes": [
+    "Purpose: give you a Cornish-Cross alternative that still feels ‘modern’ but fits torah-compliant, warm-climate, smallholder/co-op processing days.",
+    "Follows the same structure as chicken_ranger.json and chicken_cornish_cross.json we just built, so ImportService.jsx and ImportSettings.jsx don’t need new branching.",
+    "We assume this bird is *allowed* to forage and pasture, but we keep garden passes OPTIONAL, not default.",
+    "We also assume you want to trigger cleaning sessions across cleaning, meals, garden, and storehouse whenever this bird is processed."
+  ],
+  "animal": {
+    "species": "chicken",
+    "breed": "Kosher King",
+    "class": "poultry",
+    "warm_zone_preset": true,
+    "pasture_suitable": true,
+    "garden_pass_capable": true,
+    "typical_live_weight_lbs": [4.75, 5.25, 5.75, 6.25],
+    "default_live_weight_lbs": 5.5,
+    "live_to_dressed_yield_pct": 0.72,
+    "dressed_to_cut_yield_pct": 0.9,
+    "default_chill_hours": 0.5,
+    "butchery_style_default": "whole-bird",
+    "butchery_supported_styles": [
+      "whole-bird",
+      "parted-8pc",
+      "bone-in-breast + thighs + drumsticks",
+      "stock-pack / broth-pack",
+      "poultry-torah-compliant-no-unclean-cross-contamination"
+    ],
+    "torah_compliant_profile": {
+      "allow_unclean_animals": false,
+      "separate_tools_required": true,
+      "separate_surfaces_required": true,
+      "blood_draining_required": true,
+      "notes": "Use this profile inside USDA + Torah-compliant plants: label equipment ‘poultry-clean’ and run poultry sanitation after each batch."
+    }
+  },
+  "yield_model": {
+    "formula_hint": "dressed = live_weight * live_to_dressed_yield_pct; cut_weight = dressed * dressed_to_cut_yield_pct",
+    "example": {
+      "live_weight_lbs": 5.5,
+      "live_to_dressed_yield_pct": 0.72,
+      "dressed_to_cut_yield_pct": 0.9,
+      "calculated_dressed_weight_lbs": 3.96,
+      "calculated_cut_weight_lbs": 3.564
+    },
+    "cut_profile_defaults": [
+      {
+        "cut_id": "kk_whole",
+        "label": "Kosher King – Whole Bird",
+        "default_pct_of_dressed": 0.6,
+        "storehouse_section_hint": "Meat → Poultry → Whole Birds (Clean)",
+        "mealplanner_tags": [
+          "roast-chicken",
+          "sabbath",
+          "family-meal"
+        ],
+        "inventory_unit": "bird",
+        "preservation": ["freeze", "brine-freeze"],
+        "cleaning_profile_ref": "poultry_sanitation_torah"
+      },
+      {
+        "cut_id": "kk_parts",
+        "label": "Kosher King – Parts (thigh/drum/breast/wing)",
+        "default_pct_of_dressed": 0.32,
+        "storehouse_section_hint": "Meat → Poultry → Parts (Clean)",
+        "mealplanner_tags": [
+          "fry",
+          "grill",
+          "sheet-pan"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "vac-seal"],
+        "cleaning_profile_ref": "poultry_sanitation_torah"
+      },
+      {
+        "cut_id": "kk_stock",
+        "label": "Kosher King – Stock / Broth Pack",
+        "default_pct_of_dressed": 0.05,
+        "storehouse_section_hint": "Meat → Poultry → Stock Pack",
+        "mealplanner_tags": [
+          "broth",
+          "soup",
+          "pressure-can"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "poultry_sanitation_torah"
+      },
+      {
+        "cut_id": "kk_organs",
+        "label": "Kosher King – Giblets (liver, heart, gizzard)",
+        "default_pct_of_dressed": 0.01,
+        "storehouse_section_hint": "Meat → Poultry → Organs",
+        "mealplanner_tags": [
+          "gravy",
+          "nutrient-dense",
+          "dog-food"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "poultry_sanitation_torah"
+      }
+    ]
+  },
+  "garden_pass_profiles": {
+    "purpose": "Allow *optional* pest passes for this bird (short, supervised), because households in the South often battle slugs, grasshoppers, and dropped fruit pests.",
+    "enabled_by_default": false,
+    "passes": [
+      {
+        "id": "kk-short-pest-pass",
+        "label": "Kosher King – Short Pest Pass",
+        "duration_minutes": 20,
+        "allowed_seasons": ["spring", "summer", "early-fall"],
+        "requires_supervision": true,
+        "post_pass_cleaning_profile": "poultry_sanitation_light",
+        "emits_events": [
+          "garden.pestpass.completed",
+          "garden.log.updated"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "when_garden_detects_pest_event": "poultry.garden-pass.requested",
+      "notes": "Automation runtime should check ‘is this flock allowed garden passes?’ before assigning this bird. We set enabled_by_default=false to keep bio-safety tight."
+    }
+  },
+  "storehouse_mapping": {
+    "purpose": "Map Kosher King to storehouse sections so users see ‘clean poultry’ as an inspirational grocery-like lane.",
+    "sections": [
+      {
+        "id": "STH-POULTRY-WHOLE-KK",
+        "label": "Meat → Poultry → Whole (Kosher King)",
+        "target_inventory_unit": "bird",
+        "auto_replenish_from": [
+          "kk_whole"
+        ],
+        "grocery_inspo": [
+          "Clean/pasture poultry section",
+          "Farmer’s market chilled poultry"
+        ]
+      },
+      {
+        "id": "STH-POULTRY-PARTS-KK",
+        "label": "Meat → Poultry → Parts (Kosher King)",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "kk_parts"
+        ],
+        "grocery_inspo": [
+          "Butcher case – premium chicken parts",
+          "Halal shop – clean parts"
+        ]
+      },
+      {
+        "id": "STH-POULTRY-STOCK-KK",
+        "label": "Meat → Poultry → Stock / Broth (Kosher King)",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "kk_stock"
+        ],
+        "grocery_inspo": [
+          "Broth kits / soup packs",
+          "Shabbat soup starter"
+        ]
+      }
+    ],
+    "reverse_generation_rules": [
+      {
+        "id": "RG-KK-WHOLE",
+        "when_event": "storehouse.goal.short.kosher-king-whole",
+        "action": "calc required whole birds → map to live Kosher King → emit automation.schedule.request (poultry-butchery + cleaning + mealplan.refresh)",
+        "notes": "Used when a householder wants ‘12 clean birds in freezer’ before a feast/hot season."
+      },
+      {
+        "id": "RG-KK-PARTS",
+        "when_event": "storehouse.goal.short.kosher-king-parts",
+        "action": "calc required lb of parts → back-calc to birds → emit automation.schedule.request"
+      }
+    ]
+  },
+  "meal_planner_hooks": {
+    "default_meal_templates": [
+      {
+        "id": "mt-kk-roast",
+        "label": "Roast Kosher King + Garden Veg",
+        "uses_cuts": [
+          {
+            "cut_id": "kk_whole",
+            "qty_birds": 1
+          }
+        ],
+        "suggested_sides": [
+          "roasted carrots",
+          "onions",
+          "potatoes/sweet potatoes",
+          "mixed greens"
+        ],
+        "garden_suggestions": [
+          "carrot",
+          "onion",
+          "garlic",
+          "greens"
+        ],
+        "cleaning_profiles": [
+          "poultry_sanitation_torah",
+          "oven_tray_deep_clean"
+        ]
+      },
+      {
+        "id": "mt-kk-soup",
+        "label": "Kosher King Soup / Broth",
+        "uses_cuts": [
+          {
+            "cut_id": "kk_stock",
+            "qty_lb": 2
+          }
+        ],
+        "suggested_sides": [
+          "homemade bread",
+          "rice",
+          "flatbread"
+        ],
+        "garden_suggestions": [
+          "celery",
+          "carrot",
+          "onion",
+          "parsley"
+        ],
+        "cleaning_profiles": [
+          "poultry_sanitation_torah"
+        ]
+      },
+      {
+        "id": "mt-kk-parts",
+        "label": "Sheet Pan Kosher King Parts",
+        "uses_cuts": [
+          {
+            "cut_id": "kk_parts",
+            "qty_lb": 3
+          }
+        ],
+        "suggested_sides": [
+          "salad",
+          "fermented veg",
+          "fries"
+        ],
+        "garden_suggestions": [
+          "lettuce",
+          "tomato",
+          "cucumber"
+        ],
+        "cleaning_profiles": [
+          "poultry_sanitation_torah",
+          "sheetpan_clean"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "can_generate_animal_plan": true,
+      "handler_event": "animal.plan.requested",
+      "notes": "If user pins 4 roast birds + 2 soup weeks, emit animal.plan.requested with breed ‘Kosher King’ and grow-out date 9–11 weeks earlier for southern heat."
+    }
+  },
+  "garden_integration": {
+    "purpose": "Connect chicken meal demand to easy southern garden crops – especially the broth trio (onion/celery/carrot) and greens.",
+    "crops_to_recommend": [
+      {
+        "crop": "carrot",
+        "use_case": "roast & soup",
+        "harvest_window": "spring-fall",
+        "preservation": ["pressure can", "dehydrate"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "onion",
+        "use_case": "all chicken meals",
+        "harvest_window": "late summer",
+        "preservation": ["cure", "store dry"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "celery",
+        "use_case": "broth/soup base",
+        "harvest_window": "cool season",
+        "preservation": ["freeze", "dehydrate"],
+        "cleaning_profile_ref": "garden_light"
+      },
+      {
+        "crop": "greens",
+        "use_case": "sides",
+        "harvest_window": "cool seasons",
+        "preservation": ["blanch-freeze"],
+        "cleaning_profile_ref": "garden_light"
+      }
+    ],
+    "reverse_generation": {
+      "when_meat_menu_fixed_event": "garden.plan.adjust.requested",
+      "notes": "If Kosher King is the main poultry in the month, garden must schedule the broth trio and send harvest reminders to the calendar."
+    }
+  },
+  "animal_care_and_butchery": {
+    "pre_slaughter_care_checklist": [
+      "10–12hr feed withdrawal",
+      "clean water until 2hr before",
+      "shade/low-stress holding (heat + humidity in the South)",
+      "inspect for disease/parasites",
+      "torah_compliant_tools_ready"
+    ],
+    "butchery_session_template": {
+      "id": "butchery-session-chicken-kosher-king",
+      "label": "Kosher King – Clean Poultry Processing Day",
+      "estimated_duration_hours": 3,
+      "scales_with_bird_count": true,
+      "roles_needed": [
+        "scalder/plucker",
+        "eviscerator",
+        "chill-station",
+        "sanitation-runner"
+      ],
+      "outputs": [
+        "whole_birds",
+        "parted_birds",
+        "stock_packs",
+        "organs"
+      ],
+      "emits_events": [
+        "inventory.add.requested",
+        "storehouse.update.requested",
+        "cleaning.plan.requested",
+        "mealplan.refresh.requested",
+        "garden.plan.adjust.requested"
+      ],
+      "scheduling": {
+        "supports_user_favorites": true,
+        "supports_recurring": true,
+        "supports_coop_mode": true,
+        "coop_mode_notes": "Family fund / co-op can bring their Kosher King birds to the same processing day – sanitation must run at the end."
+      }
+    },
+    "cleaning_after_butchery": {
+      "cleaning_profile_id": "poultry_sanitation_torah",
+      "label": "Post–Kosher King Poultry Sanitation",
+      "tasks": [
+        "collect offal for compost/render/blood-meal",
+        "wash scalders, pluckers, evisceration tables",
+        "sanitize with torah-safe cleaner",
+        "mop floor / drains",
+        "launder aprons/towels"
+      ],
+      "emits_events": [
+        "cleaning.log.added",
+        "inventory.cleaning-supplies.decrement"
+      ]
+    }
+  },
+  "cleaning_integration": {
+    "profiles": [
+      {
+        "id": "poultry_sanitation_torah",
+        "label": "Poultry – Torah-Compliant Heavy Sanitation",
+        "zone": "Processing / Kitchen",
+        "supplies": [
+          "hot_water",
+          "torah-safe_disinfectant",
+          "scrub_brush",
+          "mop_bucket",
+          "laundry_detergent"
+        ]
+      },
+      {
+        "id": "poultry_sanitation_light",
+        "label": "Poultry – Light (after short garden pass)",
+        "zone": "Utility / Outdoor Sink",
+        "supplies": [
+          "hose",
+          "brush",
+          "sanitizer"
+        ]
+      },
+      {
+        "id": "garden_root",
+        "label": "Garden Root Veg Cleanup",
+        "zone": "Utility / Outdoor Sink",
+        "supplies": [
+          "hose",
+          "brush",
+          "drain_screens"
+        ]
+      },
+      {
+        "id": "garden_light",
+        "label": "Garden Light Wash",
+        "zone": "Kitchen",
+        "supplies": [
+          "sink_sanitizer",
+          "drying_rack"
+        ]
+      },
+      {
+        "id": "sheetpan_clean",
+        "label": "Sheet Pan / Roast Tray Clean",
+        "zone": "Kitchen",
+        "supplies": [
+          "degreaser",
+          "scrub_pad"
+        ]
+      },
+      {
+        "id": "oven_tray_deep_clean",
+        "label": "Oven/Tray Deep Clean (post-roast chicken)",
+        "zone": "Kitchen",
+        "supplies": [
+          "oven_cleaner",
+          "scrub_pad"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "when_butchery_scheduled_event": "cleaning.session.auto-created",
+      "when_roast_chicken_event": "cleaning.session.suggested"
+    }
+  },
+  "scheduling_and_favorites": {
+    "can_be_favorited": true,
+    "favorite_key": "yieldcurve:meat:chicken_kosher_king",
+    "suggested_schedules": [
+      {
+        "id": "sched-kosher-king-10wk",
+        "label": "Kosher King → Butchery Every 10 Weeks (Southern Heat)",
+        "rule": "FREQ=MONTHLY;INTERVAL=2;BYDAY=SA;BYSETPOS=1",
+        "creates": [
+          "butchery-session-chicken-kosher-king",
+          "cleaning:poultry_sanitation_torah",
+          "storehouse:update",
+          "mealplan:refresh",
+          "garden.plan.adjust.requested"
+        ]
+      },
+      {
+        "id": "sched-kosher-king-quarter",
+        "label": "Kosher King Poultry Day – Quarterly",
+        "rule": "FREQ=MONTHLY;INTERVAL=3;BYDAY=SA;BYSETPOS=1",
+        "creates": [
+          "butchery-session-chicken-kosher-king"
+        ]
+      }
+    ],
+    "shared_orchestration": {
+      "event_bus_path": "window.__suka.eventBus",
+      "events_emitted": [
+        "yieldcurve.loaded",
+        "yieldcurve.butchery.session.generated",
+        "storehouse.goal.derived",
+        "cleaning.session.derived",
+        "mealplan.refresh.requested",
+        "garden.plan.adjust.requested"
+      ],
+      "events_listened_for": [
+        "automation.schedule.request",
+        "mealplanner.menu.locked",
+        "storehouse.goal.short",
+        "garden.plan.adjust.requested"
+      ]
+    }
+  },
+  "reverse_generation": {
+    "enabled": true,
+    "scenarios": [
+      {
+        "id": "RG-KK-01",
+        "source": "meal-planner",
+        "input_example": {
+          "roast_chicken_meals": 4,
+          "chicken_soup_batches": 2,
+          "parts_meals": 2
+        },
+        "output_example": {
+          "required_dressed_birds": 12,
+          "required_live_birds": 12,
+          "suggested_date": "next-available-poultry-day",
+          "auto_cleaning_sessions": [
+            "poultry_sanitation_torah"
+          ]
+        }
+      },
+      {
+        "id": "RG-KK-02",
+        "source": "storehouse",
+        "input_example": {
+          "target_section": "STH-POULTRY-WHOLE-KK",
+          "target_birds": 18
+        },
+        "output_example": {
+          "required_dressed_birds": 18,
+          "required_live_birds": 18,
+          "notes": "App should offer: ‘Raise 18 Kosher King’ → ‘Schedule Poultry Day’ → ‘Create Cleaning Session’ → ‘Send Garden Adjustments’"
+        }
+      }
+    ],
+    "notes": "Reverse generation here should be tagged as ‘clean poultry’ so it won’t mix into unclean profiles in your USDA/Torah facility pipeline."
+  },
+  "user_overrides_placeholder": {
+    "explanation": "User-specific edits (more parts, fewer whole, allow garden passes by default, different cycle length) should be saved in Dexie/local DB.",
+    "keys": [
+      "yield_model.cut_profile_defaults",
+      "scheduling_and_favorites.suggested_schedules",
+      "garden_pass_profiles.enabled_by_default"
+    ]
+  },
+  "interop": {
+    "import_sources_supported": [
+      "csv-poultry-yields",
+      "google-sheets-yields",
+      "extension.capture.poultry",
+      "pinterest-board-to-planner",
+      "recipe-site-chicken-detector"
+    ],
+    "export_targets_supported": [
+      "household.storehouse",
+      "household.inventory",
+      "community.coop-planner",
+      "family-fund.hub",
+      "pdf-labels"
+    ]
+  }
+}

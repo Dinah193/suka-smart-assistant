@@ -1,0 +1,259 @@
+{
+  "$id": "src/schemas/breeds.schema.json",
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Suka Breeds",
+  "description": "Schema for central, admin/hub-managed breed profiles used across animals, meals, storehouse, garden, and cleaning (processing areas).",
+  "type": "object",
+  "required": ["version", "species"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Timestamp/version string for the breeds catalogue."
+    },
+    "description": {
+      "type": "string"
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "managedBy": { "type": "string" },
+        "editableInApp": { "type": "boolean" },
+        "sharedOrchestration": {
+          "type": "object",
+          "properties": {
+            "emitOnUpdate": { "type": "boolean" },
+            "channels": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": true
+        },
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "species": {
+      "type": "array",
+      "description": "Top-level species (sheep, goat, cattle, poultry, etc.)",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "torahClean", "breeds"],
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "torahClean": { "type": "boolean" },
+          "categories": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "defaultUses": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "zones": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "reverseGeneration": {
+            "type": "object",
+            "description": "Rules to auto-generate animal, storehouse, garden, or cleaning sessions based on demand.",
+            "properties": {
+              "enabled": { "type": "boolean" },
+              "triggers": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "ifMealProteinIn": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "ifStorehouseBelow": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "ifGardenNeeds": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "generate": { "type": "string" },
+                    "copyContext": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "emit": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            },
+            "additionalProperties": true
+          },
+          "breeds": {
+            "type": "array",
+            "description": "Actual breed profiles under this species.",
+            "items": {
+              "type": "object",
+              "required": ["id", "name", "torahClean"],
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "torahClean": { "type": "boolean" },
+                "description": { "type": "string" },
+                "zones": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "yield": {
+                  "type": "object",
+                  "description": "Estimated yield data for reverse generation into storehouse, meal planner, and butchery.",
+                  "properties": {
+                    "meatLb": { "type": "number" },
+                    "dressPct": { "type": "number" },
+                    "fatPct": { "type": "number" }
+                  },
+                  "additionalProperties": true
+                },
+                "temperament": { "type": "string" },
+                "husbandry": {
+                  "type": "object",
+                  "properties": {
+                    "feedRequirement": { "type": "string" },
+                    "waterPerDayGallons": { "type": "number" },
+                    "shelter": { "type": "string" }
+                  },
+                  "additionalProperties": true
+                },
+                "processing": {
+                  "type": "object",
+                  "description": "Cleaning + butchery info so cleaning planner can schedule sanitation.",
+                  "properties": {
+                    "butcheryComplexity": { "type": "string" },
+                    "byproducts": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "requiresCleaning": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "cleaningRoutines": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    }
+                  },
+                  "additionalProperties": true
+                },
+                "storehouse": {
+                  "type": "object",
+                  "description": "How this breed maps to storehouse stock planning (cuts, preservation).",
+                  "properties": {
+                    "defaultCuts": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "preservationOptions": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "yieldToMeals": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "mealType": { "type": "string" },
+                          "servings": { "type": "number" }
+                        },
+                        "required": ["mealType"]
+                      }
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "filters": {
+      "type": "object",
+      "properties": {
+        "torahCleanOnly": { "type": "boolean" },
+        "exclude": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "uiHints": {
+      "type": "object",
+      "properties": {
+        "groupBy": { "type": "string" },
+        "showYield": { "type": "boolean" },
+        "showZones": { "type": "boolean" },
+        "showPreservation": { "type": "boolean" },
+        "badges": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "integration": {
+      "type": "object",
+      "properties": {
+        "importService": {
+          "type": "object",
+          "properties": {
+            "acceptAnimalImports": { "type": "boolean" },
+            "acceptGardenAnimalLinks": { "type": "boolean" },
+            "expectedSchemas": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "reverseGeneration": {
+              "type": "object",
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "supportedTargets": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
+        },
+        "automationRuntime": {
+          "type": "object",
+          "properties": {
+            "listensFor": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "emits": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

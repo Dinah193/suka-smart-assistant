@@ -1,0 +1,999 @@
+{
+  "$schema": "../schemas/lexicon.schema.json",
+  "lexicon": {
+    "key": "cleaning.lexicon",
+    "version": 2,
+    "domain": "cleaning",
+    "title": "Cleaning Lexicon (Exhaustive)",
+    "description": "Synonyms, keywords, and expressive rules for mapping user text and imported notes into fixed cleaning method IDs/keys used by SSA layer spine. Includes natural methods, culture-rooted traditions, and modern practices. Safety-first (labels, surfaces, ventilation).",
+    "locale": "en-US",
+    "createdAt": "2025-12-27T16:30:00Z",
+    "updatedAt": "2025-12-27T16:30:00Z",
+
+    "normalization": {
+      "lowercase": true,
+      "stripPunctuation": true,
+      "collapseWhitespace": true,
+      "unicodeNormalize": "NFKC",
+      "stopwords": [
+        "the",
+        "a",
+        "an",
+        "and",
+        "or",
+        "to",
+        "for",
+        "with",
+        "of",
+        "in",
+        "on",
+        "at",
+        "my",
+        "our",
+        "your",
+        "their",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "doing",
+        "do",
+        "did"
+      ],
+      "spellings": {
+        "bleach": ["clorox", "chlorine bleach", "sodium hypochlorite"],
+        "vinegar": ["white vinegar", "distilled vinegar", "acetic acid"],
+        "bicarb": ["baking soda", "sodium bicarbonate", "bicarbonate of soda"],
+        "microfiber": ["microfibre", "micro-fiber", "micro fibre"],
+        "sanitize": ["sanitise"],
+        "degrease": ["de-grease", "degrea se"],
+        "vacuum": ["hoover"],
+        "mop": ["mopping", "swab", "swabbing"]
+      }
+    },
+
+    "scoring": {
+      "matchTypes": {
+        "exact_phrase": 1.0,
+        "token_phrase": 0.7,
+        "keyword": 0.45,
+        "fuzzy": 0.25,
+        "negative": -0.85
+      },
+      "minScoreToSuggest": 0.45,
+      "minScoreToAutoMap": 0.72,
+      "maxSuggestions": 7
+    },
+
+    "notes": [
+      "This lexicon maps language → methodKey. The methodKey should exist in cleaning.methods.json.",
+      "Rules allow safer/correct method selection based on surface/material/room cues and product constraints.",
+      "Do not mix chemicals. When in doubt: soap + water, or follow product label."
+    ],
+
+    "methods": [
+      {
+        "methodId": "cleaning.general.tidy",
+        "methodKey": "cleaning.general.tidy",
+        "weight": 0.7,
+        "aliases": [
+          "tidy up",
+          "pick up",
+          "put away",
+          "reset the room",
+          "quick reset",
+          "straighten up",
+          "surface reset"
+        ],
+        "keywords": [
+          "declutter",
+          "clear surfaces",
+          "fold",
+          "put back",
+          "organize",
+          "reset"
+        ],
+        "negative": ["deep clean", "sanitize", "disinfect"]
+      },
+      {
+        "methodId": "cleaning.general.dust",
+        "methodKey": "cleaning.general.dust",
+        "weight": 0.9,
+        "aliases": [
+          "dust",
+          "dusting",
+          "wipe dust",
+          "remove dust",
+          "feather dust",
+          "microfiber dust"
+        ],
+        "keywords": [
+          "dust",
+          "lint",
+          "dander",
+          "cobweb",
+          "ceiling fan",
+          "baseboards"
+        ],
+        "negative": ["wash walls", "steam clean"]
+      },
+      {
+        "methodId": "cleaning.general.vacuum",
+        "methodKey": "cleaning.general.vacuum",
+        "weight": 1.0,
+        "aliases": [
+          "vacuum",
+          "vacuuming",
+          "hoover",
+          "run the vacuum",
+          "vac the carpet",
+          "vac the rug",
+          "vacuum the floors"
+        ],
+        "keywords": [
+          "carpet",
+          "rug",
+          "crumbs",
+          "pet hair",
+          "floor",
+          "stairs",
+          "couch crumbs"
+        ],
+        "negative": ["mop", "steam mop"]
+      },
+      {
+        "methodId": "cleaning.floors.sweep",
+        "methodKey": "cleaning.floors.sweep",
+        "weight": 0.85,
+        "aliases": [
+          "sweep",
+          "sweeping",
+          "broom",
+          "sweep the kitchen",
+          "sweep floor"
+        ],
+        "keywords": ["crumbs", "debris", "dirt", "entryway", "porch"],
+        "negative": ["steam", "shampoo"]
+      },
+      {
+        "methodId": "cleaning.floors.mop",
+        "methodKey": "cleaning.floors.mop",
+        "weight": 1.0,
+        "aliases": [
+          "mop",
+          "mopping",
+          "wet mop",
+          "swab the floor",
+          "wash the floor"
+        ],
+        "keywords": [
+          "tile",
+          "vinyl",
+          "laminate",
+          "linoleum",
+          "kitchen floor",
+          "bathroom floor"
+        ],
+        "negative": ["carpet", "rug"]
+      },
+      {
+        "methodId": "cleaning.floors.steam_mop",
+        "methodKey": "cleaning.floors.steam_mop",
+        "weight": 0.95,
+        "aliases": ["steam mop", "steam the floor", "steam clean floor"],
+        "keywords": ["steam", "sanitize floor", "hard floors"],
+        "negative": ["unsealed wood", "waxed"]
+      },
+      {
+        "methodId": "cleaning.surfaces.general_wipe",
+        "methodKey": "cleaning.surfaces.general_wipe",
+        "weight": 1.0,
+        "aliases": [
+          "wipe down",
+          "wipe surfaces",
+          "wipe counters",
+          "wipe the table",
+          "wipe the stove",
+          "wipe the sink"
+        ],
+        "keywords": [
+          "counter",
+          "table",
+          "desk",
+          "nightstand",
+          "appliance exterior",
+          "handle"
+        ],
+        "negative": ["polish wood", "strip paint"]
+      },
+      {
+        "methodId": "cleaning.glass.mirror",
+        "methodKey": "cleaning.glass.mirror",
+        "weight": 0.9,
+        "aliases": [
+          "clean mirror",
+          "wipe mirror",
+          "mirror streaks",
+          "polish mirror"
+        ],
+        "keywords": ["mirror", "streaks", "glass cleaner", "spray and wipe"],
+        "negative": ["abrasive"]
+      },
+      {
+        "methodId": "cleaning.glass.windows",
+        "methodKey": "cleaning.glass.windows",
+        "weight": 0.9,
+        "aliases": [
+          "clean windows",
+          "wash windows",
+          "window glass",
+          "squeegee windows"
+        ],
+        "keywords": ["windows", "squeegee", "window tracks", "glass panes"],
+        "negative": ["bleach paste"]
+      },
+      {
+        "methodId": "cleaning.kitchen.degrease",
+        "methodKey": "cleaning.kitchen.degrease",
+        "weight": 1.15,
+        "aliases": [
+          "degrease",
+          "degrease stove",
+          "degrease backsplash",
+          "cut grease",
+          "remove grease"
+        ],
+        "keywords": [
+          "grease",
+          "oil",
+          "stove",
+          "range hood",
+          "backsplash",
+          "splatter",
+          "sticky"
+        ],
+        "negative": ["unsealed stone"]
+      },
+      {
+        "methodId": "cleaning.kitchen.dishes",
+        "methodKey": "cleaning.kitchen.dishes",
+        "weight": 0.9,
+        "aliases": [
+          "wash dishes",
+          "do dishes",
+          "hand wash dishes",
+          "dishwashing"
+        ],
+        "keywords": ["sink", "dish soap", "plates", "cups", "pots", "pans"],
+        "negative": ["oven cleaner"]
+      },
+      {
+        "methodId": "cleaning.kitchen.fridge_clean",
+        "methodKey": "cleaning.kitchen.fridge_clean",
+        "weight": 1.0,
+        "aliases": [
+          "clean fridge",
+          "refrigerator cleanout",
+          "wipe fridge shelves"
+        ],
+        "keywords": [
+          "fridge",
+          "refrigerator",
+          "shelves",
+          "drawers",
+          "food spills",
+          "odor"
+        ],
+        "negative": ["bleach on stainless"]
+      },
+      {
+        "methodId": "cleaning.kitchen.freezer_defrost",
+        "methodKey": "cleaning.kitchen.freezer_defrost",
+        "weight": 0.95,
+        "aliases": ["defrost freezer", "clean freezer", "remove ice buildup"],
+        "keywords": ["freezer", "ice", "frost", "defrost", "ice buildup"],
+        "negative": ["chip with knife"]
+      },
+      {
+        "methodId": "cleaning.kitchen.oven_clean",
+        "methodKey": "cleaning.kitchen.oven_clean",
+        "weight": 1.05,
+        "aliases": [
+          "clean oven",
+          "oven cleaning",
+          "degrease oven",
+          "oven degreaser",
+          "clean oven racks"
+        ],
+        "keywords": [
+          "oven",
+          "racks",
+          "burnt on",
+          "baked on",
+          "broiler",
+          "self-clean"
+        ],
+        "negative": ["mix chemicals"]
+      },
+      {
+        "methodId": "cleaning.kitchen.microwave_clean",
+        "methodKey": "cleaning.kitchen.microwave_clean",
+        "weight": 0.95,
+        "aliases": ["clean microwave", "steam microwave", "microwave splatter"],
+        "keywords": ["microwave", "splatter", "steam bowl", "lemon steam"],
+        "negative": ["abrasive scrub"]
+      },
+      {
+        "methodId": "cleaning.bathroom.toilet_clean",
+        "methodKey": "cleaning.bathroom.toilet_clean",
+        "weight": 1.1,
+        "aliases": [
+          "clean toilet",
+          "scrub toilet",
+          "toilet bowl",
+          "toilet ring"
+        ],
+        "keywords": ["toilet", "bowl", "ring", "urine scale", "brush"],
+        "negative": ["ammonia + bleach"]
+      },
+      {
+        "methodId": "cleaning.bathroom.shower_tub",
+        "methodKey": "cleaning.bathroom.shower_tub",
+        "weight": 1.05,
+        "aliases": [
+          "clean shower",
+          "clean tub",
+          "scrub tub",
+          "shower walls",
+          "soap scum"
+        ],
+        "keywords": [
+          "soap scum",
+          "tub",
+          "shower",
+          "tile",
+          "grout",
+          "hard water"
+        ],
+        "negative": ["scratch acrylic"]
+      },
+      {
+        "methodId": "cleaning.bathroom.descaling",
+        "methodKey": "cleaning.bathroom.descaling",
+        "weight": 1.15,
+        "aliases": [
+          "descale",
+          "remove limescale",
+          "hard water stains",
+          "mineral buildup"
+        ],
+        "keywords": [
+          "limescale",
+          "calcium",
+          "hard water",
+          "mineral deposits",
+          "faucet crust"
+        ],
+        "negative": ["acid on marble"]
+      },
+      {
+        "methodId": "cleaning.bathroom.mold_mildew",
+        "methodKey": "cleaning.bathroom.mold_mildew",
+        "weight": 1.25,
+        "aliases": [
+          "mold cleanup",
+          "mildew cleanup",
+          "remove mold",
+          "remove mildew"
+        ],
+        "keywords": [
+          "mold",
+          "mildew",
+          "black spots",
+          "musty",
+          "shower corners",
+          "caulk"
+        ],
+        "negative": ["ignore ventilation"]
+      },
+      {
+        "methodId": "cleaning.grout.clean",
+        "methodKey": "cleaning.grout.clean",
+        "weight": 1.1,
+        "aliases": [
+          "clean grout",
+          "scrub grout",
+          "grout lines",
+          "whiten grout"
+        ],
+        "keywords": ["grout", "tile grout", "grout brush", "stained grout"],
+        "negative": ["wire brush on soft tile"]
+      },
+      {
+        "methodId": "cleaning.laundry.wash",
+        "methodKey": "cleaning.laundry.wash",
+        "weight": 0.85,
+        "aliases": ["do laundry", "wash clothes", "laundry", "wash a load"],
+        "keywords": [
+          "detergent",
+          "washer",
+          "dryer",
+          "load",
+          "cycle",
+          "cold wash"
+        ],
+        "negative": ["dry clean only"]
+      },
+      {
+        "methodId": "cleaning.laundry.strip",
+        "methodKey": "cleaning.laundry.strip",
+        "weight": 1.0,
+        "aliases": [
+          "laundry strip",
+          "strip towels",
+          "strip sheets",
+          "deep clean laundry"
+        ],
+        "keywords": [
+          "towels",
+          "sheets",
+          "buildup",
+          "odor",
+          "detergent residue"
+        ],
+        "negative": ["delicates", "wool"]
+      },
+      {
+        "methodId": "cleaning.laundry.stain_treat",
+        "methodKey": "cleaning.laundry.stain_treat",
+        "weight": 1.05,
+        "aliases": [
+          "stain treat",
+          "pre treat",
+          "spot clean fabric",
+          "remove stains"
+        ],
+        "keywords": [
+          "stain",
+          "blood",
+          "oil stain",
+          "grass stain",
+          "ink",
+          "spot"
+        ],
+        "negative": ["bleach on color"]
+      },
+      {
+        "methodId": "cleaning.upholstery.spot_clean",
+        "methodKey": "cleaning.upholstery.spot_clean",
+        "weight": 1.0,
+        "aliases": [
+          "spot clean couch",
+          "spot clean upholstery",
+          "fabric spot clean"
+        ],
+        "keywords": ["couch", "sofa", "chair", "upholstery", "spot", "spill"],
+        "negative": ["soak foam"]
+      },
+      {
+        "methodId": "cleaning.upholstery.steam",
+        "methodKey": "cleaning.upholstery.steam",
+        "weight": 0.95,
+        "aliases": ["steam upholstery", "steam couch", "steam clean sofa"],
+        "keywords": ["steam", "sanitize fabric", "upholstery steamer"],
+        "negative": ["silk", "delicates"]
+      },
+      {
+        "methodId": "cleaning.carpets.shampoo_extract",
+        "methodKey": "cleaning.carpets.shampoo_extract",
+        "weight": 1.1,
+        "aliases": [
+          "shampoo carpet",
+          "carpet extractor",
+          "deep clean carpet",
+          "wash carpet"
+        ],
+        "keywords": [
+          "carpet",
+          "extract",
+          "shampoo",
+          "stains",
+          "odor",
+          "high traffic"
+        ],
+        "negative": ["soak pad"]
+      },
+      {
+        "methodId": "cleaning.sanitize.disinfect",
+        "methodKey": "cleaning.sanitize.disinfect",
+        "weight": 1.2,
+        "aliases": [
+          "disinfect",
+          "sanitize",
+          "kill germs",
+          "disinfect surfaces",
+          "sanitize surfaces",
+          "disinfect bathroom"
+        ],
+        "keywords": [
+          "germs",
+          "illness",
+          "flu",
+          "sanitize",
+          "disinfect",
+          "high touch"
+        ],
+        "negative": ["food contact without rinse"]
+      },
+      {
+        "methodId": "cleaning.deodorize",
+        "methodKey": "cleaning.deodorize",
+        "weight": 1.0,
+        "aliases": ["deodorize", "remove odor", "neutralize smell", "freshen"],
+        "keywords": ["odor", "smell", "musty", "pet odor", "trash smell"],
+        "negative": ["cover up only"]
+      },
+
+      {
+        "methodId": "cleaning.natural.vinegar_solution",
+        "methodKey": "cleaning.natural.vinegar_solution",
+        "weight": 1.05,
+        "aliases": ["vinegar solution", "vinegar spray", "vinegar cleaner"],
+        "keywords": ["vinegar", "acetic", "natural cleaner", "DIY cleaner"],
+        "negative": ["marble", "natural stone", "granite unsealed"]
+      },
+      {
+        "methodId": "cleaning.natural.baking_soda_paste",
+        "methodKey": "cleaning.natural.baking_soda_paste",
+        "weight": 1.05,
+        "aliases": ["baking soda paste", "bicarb paste", "soda paste scrub"],
+        "keywords": [
+          "baking soda",
+          "scrub",
+          "deodorize",
+          "paste",
+          "gentle abrasive"
+        ],
+        "negative": ["scratch glossy"]
+      },
+      {
+        "methodId": "cleaning.natural.castile_soap",
+        "methodKey": "cleaning.natural.castile_soap",
+        "weight": 0.95,
+        "aliases": ["castile soap", "diluted castile", "soap solution"],
+        "keywords": ["castile", "soap", "dr bronner", "gentle cleaner"],
+        "negative": ["soap scum buildup"]
+      },
+      {
+        "methodId": "cleaning.natural.hydrogen_peroxide",
+        "methodKey": "cleaning.natural.hydrogen_peroxide",
+        "weight": 1.0,
+        "aliases": ["hydrogen peroxide", "peroxide spray", "oxygen cleaner"],
+        "keywords": ["peroxide", "sanitize", "whiten", "mold", "stains"],
+        "negative": ["mix with vinegar in same bottle"]
+      },
+      {
+        "methodId": "cleaning.traditions.spring_osouji",
+        "methodKey": "cleaning.traditions.spring_osouji",
+        "weight": 0.85,
+        "aliases": [
+          "osouji",
+          "year-end deep clean",
+          "seasonal deep clean",
+          "whole house reset"
+        ],
+        "keywords": [
+          "deep clean",
+          "top to bottom",
+          "declutter",
+          "air out",
+          "seasonal",
+          "year end"
+        ],
+        "negative": ["quick wipe"]
+      },
+      {
+        "methodId": "cleaning.traditions.hammam_style_scrub",
+        "methodKey": "cleaning.traditions.hammam_style_scrub",
+        "weight": 0.8,
+        "aliases": [
+          "hammam style scrub",
+          "black soap scrub",
+          "steam room scrub"
+        ],
+        "keywords": ["black soap", "steam", "scrub", "rinse", "deep cleanse"],
+        "negative": ["chemical heavy"]
+      }
+    ],
+
+    "entityHints": {
+      "rooms": [
+        "kitchen",
+        "bathroom",
+        "bedroom",
+        "living room",
+        "laundry",
+        "garage",
+        "entryway",
+        "pantry",
+        "fridge",
+        "freezer"
+      ],
+      "surfaces": [
+        "tile",
+        "grout",
+        "glass",
+        "mirror",
+        "stainless steel",
+        "wood",
+        "laminate",
+        "vinyl",
+        "linoleum",
+        "stone",
+        "marble",
+        "granite",
+        "quartz",
+        "acrylic",
+        "porcelain",
+        "enamel",
+        "fabric",
+        "leather"
+      ],
+      "tools": [
+        "microfiber cloth",
+        "sponge",
+        "scrub brush",
+        "toilet brush",
+        "vacuum",
+        "steam mop",
+        "mop",
+        "broom",
+        "squeegee",
+        "razor scraper"
+      ],
+      "chemicals": [
+        "bleach",
+        "ammonia",
+        "vinegar",
+        "baking soda",
+        "hydrogen peroxide",
+        "dish soap",
+        "degreaser",
+        "disinfectant"
+      ]
+    },
+
+    "rules": [
+      {
+        "id": "rule.no_bleach_with_ammonia",
+        "title": "Chemical safety: never mix bleach and ammonia",
+        "severity": "block",
+        "explain": "If the user text includes both bleach and ammonia cues, block any method that suggests combining chemicals; add a warning.",
+        "when": {
+          "all": [
+            { "containsAny": ["bleach", "chlorine bleach", "clorox"] },
+            { "containsAny": ["ammonia"] }
+          ]
+        },
+        "actions": [
+          {
+            "type": "addWarning",
+            "warning": "Never mix bleach and ammonia. Use one product at a time, rinse thoroughly, ventilate, and follow labels."
+          },
+          { "type": "emitHintTag", "tag": "safety.no-mixing" }
+        ]
+      },
+      {
+        "id": "rule.no_vinegar_on_marble",
+        "title": "Surface safety: avoid acids on marble/stone",
+        "severity": "warn",
+        "explain": "Acids (vinegar) can etch marble and some natural stone.",
+        "when": {
+          "all": [
+            { "containsAny": ["vinegar", "acetic", "vinegar spray"] },
+            {
+              "containsAny": [
+                "marble",
+                "natural stone",
+                "travertine",
+                "limestone"
+              ]
+            }
+          ]
+        },
+        "actions": [
+          {
+            "type": "addWarning",
+            "warning": "Avoid vinegar/acid on marble/natural stone (etching risk). Use pH-neutral stone-safe cleaner instead."
+          },
+          {
+            "type": "downrankMethodKey",
+            "methodKey": "cleaning.natural.vinegar_solution",
+            "amount": 0.7,
+            "reason": "Acid etching risk on stone"
+          },
+          { "type": "emitHintTag", "tag": "surface.stone-safe" }
+        ]
+      },
+      {
+        "id": "rule.degrease_kitchen_context",
+        "title": "Kitchen grease cues → degrease method",
+        "severity": "hint",
+        "when": {
+          "all": [
+            { "roomAny": ["kitchen"] },
+            {
+              "containsAny": [
+                "grease",
+                "oily",
+                "sticky",
+                "splatter",
+                "range hood",
+                "stove",
+                "backsplash"
+              ]
+            }
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "cleaning.kitchen.degrease",
+            "amount": 0.6,
+            "reason": "Grease cues in kitchen context"
+          },
+          {
+            "type": "addNote",
+            "note": "Degreasing works best after a warm wipe-down (warm water + dish soap) before stronger degreasers."
+          }
+        ]
+      },
+      {
+        "id": "rule.bathroom_descaling_hard_water",
+        "title": "Hard-water cues → descaling",
+        "severity": "hint",
+        "when": {
+          "any": [
+            {
+              "containsAny": [
+                "limescale",
+                "calcium",
+                "hard water",
+                "mineral buildup",
+                "water spots"
+              ]
+            },
+            { "containsAny": ["faucet crust", "white crust", "chalky"] }
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "cleaning.bathroom.descaling",
+            "amount": 0.55,
+            "reason": "Hard-water/mineral cues"
+          },
+          {
+            "type": "addNote",
+            "note": "Test small area first; avoid acids on marble/natural stone."
+          }
+        ]
+      },
+      {
+        "id": "rule.mold_mildew_requires_ventilation",
+        "title": "Mold/mildew cues → ventilation + PPE",
+        "severity": "warn",
+        "when": {
+          "containsAny": ["mold", "mildew", "black spots", "musty", "fungus"]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "cleaning.bathroom.mold_mildew",
+            "amount": 0.65,
+            "reason": "Mold cues"
+          },
+          {
+            "type": "requireVentilation",
+            "reason": "Mold cleanup should be ventilated."
+          },
+          {
+            "type": "requirePPE",
+            "ppe": ["gloves", "mask"],
+            "reason": "Avoid skin/lung irritation."
+          },
+          {
+            "type": "addNote",
+            "note": "If area is large or recurrent, consider moisture source (leaks/humidity) and remediation."
+          }
+        ]
+      },
+      {
+        "id": "rule.disinfect_requires_dwell_time",
+        "title": "Disinfect cues → dwell time reminder",
+        "severity": "hint",
+        "when": {
+          "containsAny": [
+            "disinfect",
+            "sanitize",
+            "kill germs",
+            "after illness",
+            "flu",
+            "norovirus"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "cleaning.sanitize.disinfect",
+            "amount": 0.6,
+            "reason": "Sanitize/disinfect intent"
+          },
+          {
+            "type": "requireDwellTime",
+            "minutes": 5,
+            "reason": "Most disinfectants require wet contact time; follow label."
+          },
+          {
+            "type": "addNote",
+            "note": "Pre-clean first (remove soil), then disinfect; label contact time matters."
+          }
+        ]
+      },
+      {
+        "id": "rule.glass_streaks",
+        "title": "Streaks + glass cues → glass method",
+        "severity": "hint",
+        "when": {
+          "any": [
+            { "containsAny": ["mirror", "streaks", "streaky"] },
+            { "containsAny": ["window", "squeegee", "glass"] }
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "cleaning.glass.mirror",
+            "amount": 0.35,
+            "reason": "Mirror streak cues"
+          },
+          {
+            "type": "boostMethodKey",
+            "methodKey": "cleaning.glass.windows",
+            "amount": 0.35,
+            "reason": "Window/glass cues"
+          },
+          {
+            "type": "addNote",
+            "note": "Use microfiber, low-suds cleaner, and wipe in one direction to reduce streaks."
+          }
+        ]
+      },
+      {
+        "id": "rule.floor_wood_no_steam",
+        "title": "Wood floor cues → avoid steam on unsealed wood",
+        "severity": "warn",
+        "when": {
+          "all": [
+            {
+              "containsAny": [
+                "wood floor",
+                "hardwood",
+                "unsealed wood",
+                "waxed floor"
+              ]
+            },
+            { "containsAny": ["steam mop", "steam clean"] }
+          ]
+        },
+        "actions": [
+          {
+            "type": "downrankMethodKey",
+            "methodKey": "cleaning.floors.steam_mop",
+            "amount": 0.9,
+            "reason": "Steam can damage unsealed/waxed wood."
+          },
+          {
+            "type": "addWarning",
+            "warning": "Avoid steam on unsealed/waxed wood. Use damp mop + wood-safe cleaner; minimize moisture."
+          }
+        ]
+      },
+      {
+        "id": "rule.carpets_need_extraction",
+        "title": "Carpet deep-clean cues → shampoo/extract",
+        "severity": "hint",
+        "when": {
+          "all": [
+            { "containsAny": ["carpet", "rug"] },
+            {
+              "containsAny": [
+                "deep clean",
+                "shampoo",
+                "extract",
+                "odor",
+                "stains"
+              ]
+            }
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "cleaning.carpets.shampoo_extract",
+            "amount": 0.65,
+            "reason": "Carpet + deep clean cues"
+          },
+          {
+            "type": "addNote",
+            "note": "Avoid over-wetting; ensure airflow/fans to dry quickly and prevent musty odor."
+          }
+        ]
+      },
+      {
+        "id": "rule.laundry_strip_towels",
+        "title": "Towel odor/buildup → laundry strip",
+        "severity": "hint",
+        "when": {
+          "all": [
+            { "containsAny": ["towels", "washcloths", "bath towels"] },
+            {
+              "containsAny": [
+                "musty",
+                "odor",
+                "buildup",
+                "stiff",
+                "not absorbing"
+              ]
+            }
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "cleaning.laundry.strip",
+            "amount": 0.6,
+            "reason": "Towel buildup cues"
+          },
+          {
+            "type": "addNote",
+            "note": "Rinse well. Consider reducing fabric softener to improve absorbency."
+          }
+        ]
+      },
+      {
+        "id": "rule.tradition_seasonal_deep_clean",
+        "title": "Seasonal deep clean cues → whole-house method",
+        "severity": "info",
+        "when": {
+          "any": [
+            {
+              "containsAny": [
+                "spring cleaning",
+                "deep clean whole house",
+                "top to bottom",
+                "year end cleaning",
+                "seasonal deep clean"
+              ]
+            },
+            { "containsAny": ["osouji", "whole house reset"] }
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "cleaning.traditions.spring_osouji",
+            "amount": 0.5,
+            "reason": "Seasonal deep-clean cue"
+          },
+          {
+            "type": "addNote",
+            "note": "Work top-to-bottom: dust → wipe → floors. Batch by room to reduce backtracking."
+          }
+        ]
+      }
+    ]
+  }
+}

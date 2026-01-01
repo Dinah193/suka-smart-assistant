@@ -1,0 +1,2118 @@
+{
+  "catalog": "cleaning.methods",
+  "version": "1.0.0",
+  "generatedAt": "2025-12-27T15:24:07.785819+00:00",
+  "locale": "en-US",
+  "description": "Fixed cleaning method definitions for SSA Layer Spine. Includes natural and culture-specific methods with default steps, cues, safety notes, and variants.",
+  "defaults": {
+    "units": {
+      "temperature": "F",
+      "volume": "cups",
+      "weight": "oz"
+    },
+    "timerPresetsSec": [
+      60,
+      180,
+      300,
+      600,
+      900,
+      1200,
+      1800
+    ],
+    "safety": {
+      "neverMix": [
+        "bleach + ammonia",
+        "bleach + vinegar/acid",
+        "bleach + rubbing alcohol",
+        "hydrogen peroxide + vinegar (in same container)"
+      ],
+      "general": [
+        "Ventilate when using sprays, alcohol, peroxide, essential oils, or strong fragrances.",
+        "Label all DIY solutions and store away from children/pets.",
+        "Test any solution on an inconspicuous spot first.",
+        "Avoid saturating electrical components; unplug before cleaning."
+      ]
+    }
+  },
+  "methods": [
+    {
+      "id": "clean.tidy.reset.5min",
+      "name": "5-Minute Room Reset",
+      "area": "wholehome.tidy",
+      "tags": [
+        "reset",
+        "daily",
+        "declutter",
+        "speed",
+        "family-friendly"
+      ],
+      "supplies": {
+        "tools": [
+          "laundry basket (for pickups)",
+          "trash bag",
+          "microfiber cloth"
+        ],
+        "consumables": [],
+        "optional": [
+          "timer",
+          "music playlist"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Focus on visible surfaces and pathways. Stop at the timer."
+        ],
+        "ppe": [],
+        "chemicals": []
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Start timer",
+          "action": "Set a 5-minute timer and choose one room.",
+          "timerSec": 300,
+          "cues": [
+            "Start music; keep momentum."
+          ],
+          "checks": [
+            "Timer set"
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Trash sweep",
+          "action": "Grab obvious trash and remove to bin.",
+          "cues": [
+            "If in doubt, trash goes now."
+          ],
+          "tools": [
+            "trash bag"
+          ]
+        },
+        {
+          "i": 3,
+          "title": "Dish & cup sweep",
+          "action": "Collect dishes/cups and move to kitchen sink area.",
+          "tools": [
+            "basket"
+          ]
+        },
+        {
+          "i": 4,
+          "title": "Item roundup",
+          "action": "Pick up items that don't belong and place in a 'return basket'.",
+          "cues": [
+            "Don't leave the room."
+          ],
+          "tools": [
+            "basket"
+          ]
+        },
+        {
+          "i": 5,
+          "title": "Surface quick-wipe",
+          "action": "Quick wipe one main surface (table/counter) with dry or lightly damp microfiber.",
+          "tools": [
+            "microfiber cloth"
+          ]
+        },
+        {
+          "i": 6,
+          "title": "Floor quick-pass",
+          "action": "Quick visible crumbs/dust pick-up (hand vac or quick sweep).",
+          "tools": [
+            "hand vac or broom"
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      },
+      "variants": [
+        {
+          "id": "clean.tidy.reset.15min",
+          "name": "15-Minute Room Reset",
+          "changes": {
+            "timerSec": 900,
+            "addSteps": [
+              "Do one extra surface + quick straighten fabrics/pillows"
+            ]
+          }
+        }
+      ],
+      "kpiHints": {
+        "countsToward": [
+          "home.today.cleaning.completed",
+          "home.rooms.reset.count"
+        ],
+        "estimatedMinutes": 5
+      }
+    },
+    {
+      "id": "clean.surface.natural.allpurpose",
+      "name": "Natural All-Purpose Surface Clean (Non-Stone)",
+      "area": "general.surfaces",
+      "tags": [
+        "natural",
+        "all-purpose",
+        "everyday",
+        "low-tox"
+      ],
+      "supplies": {
+        "tools": [
+          "microfiber cloths",
+          "spray bottle",
+          "soft brush (optional)"
+        ],
+        "consumables": [
+          "water",
+          "white vinegar OR castile soap"
+        ],
+        "optional": [
+          "citrus peels (infusion)",
+          "essential oil (sparingly)"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Use vinegar solution for degreasy areas; use castile solution for gentle general wipe.",
+          "Do not use vinegar on natural stone."
+        ],
+        "ppe": [
+          "gloves (optional)"
+        ],
+        "chemicals": [
+          "vinegar (acidic)"
+        ]
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Choose solution",
+          "action": "Select vinegar spray OR castile spray based on surface and soil.",
+          "checks": [
+            "Surface is NOT natural stone if using vinegar"
+          ],
+          "notes": "Vinegar: 1:1 white vinegar + water (optional: citrus peel infusion, strain) | Castile: 1 tsp castile soap + 2 cups water (shake gently)"
+        },
+        {
+          "i": 2,
+          "title": "Dry dust first",
+          "action": "Dry dust/crumb removal before wet wiping.",
+          "cues": [
+            "Dry first = fewer streaks."
+          ],
+          "tools": [
+            "dry microfiber"
+          ]
+        },
+        {
+          "i": 3,
+          "title": "Spray & dwell",
+          "action": "Lightly mist cloth or surface; allow brief dwell.",
+          "timerSec": 60,
+          "cues": [
+            "Let it sit; don’t flood."
+          ],
+          "tools": [
+            "sprayer"
+          ]
+        },
+        {
+          "i": 4,
+          "title": "Wipe in one direction",
+          "action": "Wipe top-to-bottom or S-pattern; flip cloth often.",
+          "cues": [
+            "Fold cloth into quarters; rotate faces."
+          ]
+        },
+        {
+          "i": 5,
+          "title": "Detail edges",
+          "action": "Use brush/toothbrush for seams, grout lines, knobs.",
+          "tools": [
+            "soft brush (optional)"
+          ]
+        },
+        {
+          "i": 6,
+          "title": "Buff dry",
+          "action": "Buff with dry cloth for a clean finish.",
+          "tools": [
+            "dry microfiber"
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      },
+      "culturalNotes": [
+        {
+          "tradition": "Mediterranean citrus-vinegar infusion",
+          "note": "Citrus peel steeped in vinegar is a common traditional deodorizing cleaner; strain before use."
+        }
+      ]
+    },
+    {
+      "id": "clean.kitchen.degrease.natural",
+      "name": "Kitchen Degrease (Natural: Soap + Warm Water + Baking Soda Paste)",
+      "area": "kitchen.degrease",
+      "tags": [
+        "kitchen",
+        "grease",
+        "natural",
+        "stovetop",
+        "cabinets"
+      ],
+      "supplies": {
+        "tools": [
+          "microfiber cloths",
+          "non-scratch scrub sponge",
+          "small bowl",
+          "soft brush",
+          "putty knife (plastic)"
+        ],
+        "consumables": [
+          "castile soap or dish soap",
+          "warm water",
+          "baking soda"
+        ],
+        "optional": [
+          "steam cleaner",
+          "lemon (deodorize)"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Avoid abrasive pads on stainless/painted surfaces. Rinse residue to prevent haze."
+        ],
+        "ppe": [
+          "gloves (optional)"
+        ],
+        "chemicals": []
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Pre-wipe",
+          "action": "Remove loose crumbs and dust.",
+          "tools": [
+            "dry microfiber"
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Soap wash",
+          "action": "Wipe with warm soapy water to loosen oils.",
+          "timerSec": 180,
+          "cues": [
+            "Warmth cuts grease."
+          ],
+          "tools": [
+            "cloth",
+            "sponge"
+          ],
+          "consumables": [
+            "soapy water"
+          ]
+        },
+        {
+          "i": 3,
+          "title": "Baking soda paste (spots)",
+          "action": "Apply paste (baking soda + a little water) to sticky spots.",
+          "timerSec": 300,
+          "cues": [
+            "Let paste sit then lift."
+          ],
+          "consumables": [
+            "baking soda paste"
+          ]
+        },
+        {
+          "i": 4,
+          "title": "Gentle scrub",
+          "action": "Scrub lightly; use brush on crevices.",
+          "tools": [
+            "non-scratch sponge",
+            "soft brush"
+          ]
+        },
+        {
+          "i": 5,
+          "title": "Rinse & dry",
+          "action": "Wipe with clean water; dry to finish.",
+          "tools": [
+            "clean damp cloth",
+            "dry cloth"
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "Cabinet fronts feel non-tacky",
+          "Stovetop is free of oily sheen",
+          "No soap haze after drying"
+        ],
+        "commonMistakes": [
+          "Using abrasive pads on stainless",
+          "Leaving soap residue (causes haze)",
+          "Over-wetting cabinet seams"
+        ],
+        "qualityChecks": [
+          "Wipe with dry finger: no sticky feel",
+          "Visual: uniform matte/clean finish"
+        ]
+      }
+    },
+    {
+      "id": "clean.bath.soapscum.vinegar",
+      "name": "Bathroom Soap Scum Breaker (Vinegar + Dish Soap)",
+      "area": "bathroom.tub_shower",
+      "tags": [
+        "bathroom",
+        "soap-scum",
+        "natural",
+        "vinegar"
+      ],
+      "supplies": {
+        "tools": [
+          "spray bottle",
+          "non-scratch scrub sponge",
+          "microfiber cloth",
+          "old toothbrush"
+        ],
+        "consumables": [
+          "white vinegar",
+          "dish soap",
+          "warm water"
+        ],
+        "optional": [
+          "squeegee"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Do NOT use on natural stone tile. Ventilate. Rinse well."
+        ],
+        "ppe": [
+          "gloves"
+        ],
+        "chemicals": [
+          "vinegar (acidic)"
+        ]
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Mix solution",
+          "action": "Combine 1:1 warm vinegar + dish soap in spray bottle.",
+          "checks": [
+            "No stone surfaces"
+          ],
+          "notes": "Warm vinegar helps emulsify soap."
+        },
+        {
+          "i": 2,
+          "title": "Spray & dwell",
+          "action": "Spray soap scum areas; allow dwell.",
+          "timerSec": 600,
+          "cues": [
+            "Dwell = less scrubbing."
+          ]
+        },
+        {
+          "i": 3,
+          "title": "Scrub",
+          "action": "Scrub with non-scratch sponge; toothbrush for corners.",
+          "tools": [
+            "sponge",
+            "toothbrush"
+          ]
+        },
+        {
+          "i": 4,
+          "title": "Rinse hot",
+          "action": "Rinse with hot water until slick feel is gone.",
+          "cues": [
+            "No slippery residue."
+          ],
+          "checks": [
+            "Surface squeaks when wiped"
+          ]
+        },
+        {
+          "i": 5,
+          "title": "Squeegee & dry",
+          "action": "Squeegee glass/tile; dry fixtures to prevent spots.",
+          "tools": [
+            "squeegee (optional)",
+            "dry cloth"
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "Tile/glass feels smooth",
+          "No visible white film",
+          "Water beads and runs clean"
+        ],
+        "commonMistakes": [
+          "Using vinegar on stone",
+          "Not rinsing fully",
+          "Skipping dwell then over-scrubbing"
+        ],
+        "qualityChecks": [
+          "Run hand: smooth surface",
+          "Visual: no cloudy streaks"
+        ]
+      },
+      "culturalNotes": [
+        {
+          "tradition": "Water-squeegee daily habit (common in many households)",
+          "note": "A quick squeegee after bathing reduces soap scum buildup and deep-clean time."
+        }
+      ]
+    },
+    {
+      "id": "clean.bath.toilet.standard",
+      "name": "Toilet Clean (Routine + Disinfect Option)",
+      "area": "bathroom.toilet",
+      "tags": [
+        "bathroom",
+        "toilet",
+        "routine",
+        "sanitize"
+      ],
+      "supplies": {
+        "tools": [
+          "toilet brush",
+          "microfiber cloths (color-coded)",
+          "gloves"
+        ],
+        "consumables": [
+          "dish soap OR toilet cleaner",
+          "baking soda (optional)"
+        ],
+        "optional": [
+          "disinfectant (peroxide or bleach-based)"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Use dedicated cloths. Wash hands after. Follow product dwell times if disinfecting."
+        ],
+        "ppe": [
+          "gloves"
+        ],
+        "chemicals": [
+          "optional disinfectant"
+        ]
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Prep",
+          "action": "Put on gloves; flush once to wet bowl.",
+          "tools": [
+            "gloves"
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Apply cleaner",
+          "action": "Squirt soap/cleaner under rim; coat bowl.",
+          "timerSec": 60,
+          "cues": [
+            "Coat under rim fully."
+          ]
+        },
+        {
+          "i": 3,
+          "title": "Brush & dwell",
+          "action": "Scrub bowl thoroughly; let sit.",
+          "timerSec": 300,
+          "cues": [
+            "Let sit while wiping exterior."
+          ]
+        },
+        {
+          "i": 4,
+          "title": "Wipe exterior",
+          "action": "Wipe tank→handle→seat top/bottom→base with damp cloth.",
+          "tools": [
+            "cloth"
+          ]
+        },
+        {
+          "i": 5,
+          "title": "Disinfect touchpoints (optional)",
+          "action": "If needed, apply disinfectant to handle/seat; keep wet per label then wipe.",
+          "timerSec": 60,
+          "notes": "Use ONE disinfectant method; never mix."
+        },
+        {
+          "i": 6,
+          "title": "Final flush",
+          "action": "Flush; rinse brush; store to dry.",
+          "cues": [
+            "Brush drips stop before putting away."
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      },
+      "variants": [
+        {
+          "id": "clean.bath.toilet.natural",
+          "name": "Toilet Clean (Natural Only)",
+          "changes": {
+            "removeSteps": [
+              5
+            ],
+            "notesAdd": [
+              "Use baking soda sprinkle for extra scrub; follow with vinegar flush (separately) if desired."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "clean.glass.streakfree",
+      "name": "Glass & Mirror (Streak-Free Natural)",
+      "area": "general.glass",
+      "tags": [
+        "glass",
+        "mirrors",
+        "natural",
+        "streak-free"
+      ],
+      "supplies": {
+        "tools": [
+          "microfiber glass cloth",
+          "spray bottle",
+          "squeegee (optional)"
+        ],
+        "consumables": [
+          "vinegar",
+          "water"
+        ],
+        "optional": [
+          "cornstarch (tiny amount)"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Avoid direct sun to reduce streaking. Use minimal liquid."
+        ],
+        "ppe": [],
+        "chemicals": [
+          "vinegar (acidic)"
+        ]
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Dust first",
+          "action": "Dry dust edges and frames.",
+          "tools": [
+            "dry microfiber"
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Mist cloth",
+          "action": "Mist the cloth (not the glass) to avoid drips.",
+          "cues": [
+            "Less is more."
+          ]
+        },
+        {
+          "i": 3,
+          "title": "S-pattern wipe",
+          "action": "Wipe in S-pattern; flip cloth for final buff.",
+          "cues": [
+            "Use a clean, dry side at the end."
+          ]
+        },
+        {
+          "i": 4,
+          "title": "Squeegee (optional)",
+          "action": "For large glass, squeegee top-to-bottom; wipe blade each pass.",
+          "tools": [
+            "squeegee (optional)"
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "No streaks at multiple angles",
+          "Edges and corners clean"
+        ],
+        "commonMistakes": [
+          "Too much liquid",
+          "Cleaning in direct sun",
+          "Using linty paper towels"
+        ],
+        "qualityChecks": [
+          "Check from side angle",
+          "Edge wipe pass is clean"
+        ]
+      },
+      "culturalNotes": [
+        {
+          "tradition": "Newspaper glass cleaning",
+          "note": "Some households use newspaper for glass; modern inks can transfer. Microfiber is safer."
+        }
+      ]
+    },
+    {
+      "id": "clean.floors.sweep_mop.natural",
+      "name": "Hard Floors (Sweep/Vac + Natural Mop)",
+      "area": "general.floors.hard",
+      "tags": [
+        "floors",
+        "mop",
+        "natural",
+        "routine"
+      ],
+      "supplies": {
+        "tools": [
+          "broom or vacuum",
+          "mop",
+          "bucket",
+          "microfiber mop pads (optional)"
+        ],
+        "consumables": [
+          "warm water",
+          "castile soap (small amount)"
+        ],
+        "optional": [
+          "vinegar (ONLY for non-stone, non-waxed floors)"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Do not over-wet wood/laminate. Avoid vinegar on stone. Rinse if hazy."
+        ],
+        "ppe": [
+          "gloves (optional)"
+        ],
+        "chemicals": []
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Dry clean",
+          "action": "Sweep/vac thoroughly, especially edges.",
+          "cues": [
+            "Dry pass first prevents mud."
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Mix mop water",
+          "action": "Warm water + a small amount of castile/dish soap.",
+          "notes": "Too much soap leaves residue."
+        },
+        {
+          "i": 3,
+          "title": "Mop in sections",
+          "action": "Mop from far corner to exit; rinse/wring often.",
+          "cues": [
+            "Water should be damp, not dripping."
+          ]
+        },
+        {
+          "i": 4,
+          "title": "Spot scrub",
+          "action": "Use cloth for sticky spots; avoid scraping floors.",
+          "tools": [
+            "cloth"
+          ]
+        },
+        {
+          "i": 5,
+          "title": "Dry/air",
+          "action": "Allow to dry; open windows if possible.",
+          "checks": [
+            "No sticky residue underfoot"
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "No grit underfoot",
+          "No sticky residue",
+          "Edges visibly clean"
+        ],
+        "commonMistakes": [
+          "Mopping without sweeping first",
+          "Over-soaping",
+          "Over-wetting wood/laminate"
+        ],
+        "qualityChecks": [
+          "Sock test: no tackiness",
+          "No footprints in haze after drying"
+        ]
+      },
+      "variants": [
+        {
+          "id": "clean.floors.steam",
+          "name": "Hard Floors (Steam Mop)",
+          "changes": {
+            "notesAdd": [
+              "Check manufacturer guidance; avoid on unsealed wood/laminate if not recommended."
+            ],
+            "replaceSteps": [
+              2,
+              3
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "clean.carpet.refresh.bakingsoda",
+      "name": "Carpet Refresh (Deodorize + Vacuum)",
+      "area": "general.floors.carpet",
+      "tags": [
+        "carpet",
+        "natural",
+        "deodorize",
+        "weekly"
+      ],
+      "supplies": {
+        "tools": [
+          "vacuum",
+          "sifter (optional)"
+        ],
+        "consumables": [
+          "baking soda"
+        ],
+        "optional": [
+          "essential oil (1–2 drops per cup, optional)"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Keep powder away from long-pile if it clogs vacuum; test first."
+        ],
+        "ppe": [
+          "mask (optional if dusty)"
+        ],
+        "chemicals": []
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Pre-vac",
+          "action": "Vacuum to remove grit.",
+          "cues": [
+            "Slow passes pull more."
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Sprinkle",
+          "action": "Lightly sprinkle baking soda evenly.",
+          "cues": [
+            "Thin layer works best."
+          ],
+          "consumables": [
+            "baking soda"
+          ]
+        },
+        {
+          "i": 3,
+          "title": "Dwell",
+          "action": "Let rest to absorb odors.",
+          "timerSec": 1200,
+          "cues": [
+            "15–30 minutes ideal."
+          ]
+        },
+        {
+          "i": 4,
+          "title": "Vacuum again",
+          "action": "Vacuum thoroughly with slow passes.",
+          "checks": [
+            "No visible powder remains"
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      }
+    },
+    {
+      "id": "clean.laundry.strip",
+      "name": "Laundry Stripping (Soak to Release Buildup)",
+      "area": "laundry.strip",
+      "tags": [
+        "laundry",
+        "deep-clean",
+        "odor",
+        "buildup"
+      ],
+      "supplies": {
+        "tools": [
+          "bathtub or large tub",
+          "stir stick",
+          "gloves"
+        ],
+        "consumables": [
+          "laundry detergent",
+          "washing soda",
+          "borax (optional)"
+        ],
+        "optional": [
+          "oxygen bleach (color-safe)"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Use on towels/athletic wear. Rinse thoroughly. Avoid delicate fabrics."
+        ],
+        "ppe": [
+          "gloves"
+        ],
+        "chemicals": [
+          "washing soda/borax can irritate skin"
+        ]
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Fill hot water",
+          "action": "Fill tub with hot water suitable for fabric.",
+          "cues": [
+            "Hotter = better release (within care labels)."
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Add agents",
+          "action": "Add detergent + washing soda; optional borax/oxygen bleach.",
+          "notes": "Stir to dissolve before adding laundry."
+        },
+        {
+          "i": 3,
+          "title": "Soak",
+          "action": "Add items and soak, stirring occasionally.",
+          "timerSec": 14400,
+          "cues": [
+            "4 hours typical; water may darken."
+          ]
+        },
+        {
+          "i": 4,
+          "title": "Drain & rinse",
+          "action": "Drain; rinse items until water runs clearer.",
+          "checks": [
+            "No slick residue"
+          ]
+        },
+        {
+          "i": 5,
+          "title": "Wash cycle",
+          "action": "Run normal wash (no extra detergent) then dry.",
+          "cues": [
+            "Dry fully to prevent musty smell."
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      },
+      "culturalNotes": [
+        {
+          "tradition": "Towel/linen soaking traditions",
+          "note": "Many cultures use periodic soaking/boiling of linens for freshness; modern stripping adapts this approach."
+        }
+      ]
+    },
+    {
+      "id": "clean.laundry.boilwash",
+      "name": "Boil Wash Linens (Traditional Deep Sanitizing)",
+      "area": "laundry.boilwash",
+      "tags": [
+        "laundry",
+        "traditional",
+        "sanitize",
+        "linens"
+      ],
+      "supplies": {
+        "tools": [
+          "large pot (non-food dedicated recommended)",
+          "tongs",
+          "stove"
+        ],
+        "consumables": [
+          "water",
+          "mild detergent"
+        ],
+        "optional": [
+          "baking soda (small amount)"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Only for white cotton/linen that can handle heat. Risk of shrinkage/damage. Use dedicated pot if possible."
+        ],
+        "ppe": [
+          "heat-resistant gloves"
+        ],
+        "chemicals": []
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Check fabric",
+          "action": "Confirm fabric can tolerate boiling (cotton/linen whites).",
+          "checks": [
+            "Care label allows high heat"
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Simmer not rolling boil",
+          "action": "Heat water to simmer; add detergent.",
+          "cues": [
+            "Avoid aggressive boil to reduce wear."
+          ]
+        },
+        {
+          "i": 3,
+          "title": "Add linens carefully",
+          "action": "Submerge with tongs; stir gently.",
+          "timerSec": 1800,
+          "cues": [
+            "30 minutes typical."
+          ]
+        },
+        {
+          "i": 4,
+          "title": "Rinse & launder",
+          "action": "Rinse; launder normally; sun-dry if possible.",
+          "notes": "Sunlight adds deodorizing/brightening effect."
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      },
+      "culturalNotes": [
+        {
+          "tradition": "Boiling laundry (various regions)",
+          "note": "Historically used when machine washing was unavailable; now optional for specific needs."
+        }
+      ]
+    },
+    {
+      "id": "clean.air.reset.smoke",
+      "name": "Air Reset (Smoke/Incense + Ventilation) — Cultural Practice",
+      "area": "home.air.reset",
+      "tags": [
+        "cultural",
+        "air",
+        "reset",
+        "ventilation"
+      ],
+      "supplies": {
+        "tools": [
+          "fire-safe dish",
+          "lighter/matches"
+        ],
+        "consumables": [
+          "incense/herbs (as practiced)"
+        ],
+        "optional": [
+          "fan",
+          "open windows"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Ensure fire safety. Some households avoid smoke due to asthma—use ventilation-only variant if needed."
+        ],
+        "ppe": [],
+        "chemicals": []
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Ventilate",
+          "action": "Open a window/door slightly to create airflow.",
+          "cues": [
+            "Air needs an exit path."
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Prepare safely",
+          "action": "Use fire-safe dish; keep away from curtains.",
+          "checks": [
+            "Water nearby just in case"
+          ]
+        },
+        {
+          "i": 3,
+          "title": "Light & walk-through",
+          "action": "If used in your tradition, walk through rooms briefly.",
+          "timerSec": 300,
+          "cues": [
+            "Stay mindful; do not leave unattended."
+          ]
+        },
+        {
+          "i": 4,
+          "title": "Extinguish fully",
+          "action": "Extinguish; confirm no embers.",
+          "checks": [
+            "Cool to touch before disposal"
+          ]
+        },
+        {
+          "i": 5,
+          "title": "Fresh air finish",
+          "action": "Leave windows open a few minutes.",
+          "timerSec": 600
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      },
+      "variants": [
+        {
+          "id": "clean.air.reset.ventilation",
+          "name": "Air Reset (Ventilation Only)",
+          "changes": {
+            "removeSteps": [
+              2,
+              3,
+              4
+            ]
+          }
+        }
+      ],
+      "culturalNotes": [
+        {
+          "tradition": "Home reset rituals (various)",
+          "note": "Included for catalog completeness; SSA can treat this as an optional household preference method."
+        }
+      ]
+    },
+    {
+      "id": "clean.entry.decontam",
+      "name": "Entryway Decontamination (Shoes + High-Touch)",
+      "area": "home.entry",
+      "tags": [
+        "entry",
+        "high-touch",
+        "routine",
+        "modern"
+      ],
+      "supplies": {
+        "tools": [
+          "shoe tray",
+          "disinfecting wipes or spray+cloth",
+          "hand sanitizer (optional)"
+        ],
+        "consumables": [
+          "soap/water",
+          "disinfectant (optional)"
+        ],
+        "optional": [
+          "UV shoe dryer"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Choose ONE disinfectant. Keep chemicals away from kids/pets."
+        ],
+        "ppe": [
+          "gloves (optional)"
+        ],
+        "chemicals": [
+          "optional disinfectant"
+        ]
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Shoes off zone",
+          "action": "Set shoes on tray; keep walkway clear.",
+          "checks": [
+            "Tray present"
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Wipe high-touch",
+          "action": "Wipe handles, switches, railings near entry.",
+          "timerSec": 180,
+          "cues": [
+            "Keep surface visibly wet if disinfecting."
+          ]
+        },
+        {
+          "i": 3,
+          "title": "Floor spot clean",
+          "action": "Spot mop entry floor for grit/salt.",
+          "timerSec": 180
+        },
+        {
+          "i": 4,
+          "title": "Hand wash",
+          "action": "Wash hands 20 seconds.",
+          "timerSec": 20,
+          "cues": [
+            "Soap + friction."
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      }
+    },
+    {
+      "id": "clean.kitchen.sink.sanitize",
+      "name": "Kitchen Sink Clean + Sanitize (Scrub + Peroxide)",
+      "area": "kitchen.sink",
+      "tags": [
+        "kitchen",
+        "sink",
+        "sanitize",
+        "natural-ish"
+      ],
+      "supplies": {
+        "tools": [
+          "scrub brush",
+          "microfiber cloth",
+          "sponge"
+        ],
+        "consumables": [
+          "dish soap",
+          "baking soda",
+          "3% hydrogen peroxide"
+        ],
+        "optional": [
+          "lemon half"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Rinse well. Peroxide can lighten some surfaces—spot test."
+        ],
+        "ppe": [
+          "gloves"
+        ],
+        "chemicals": [
+          "hydrogen peroxide"
+        ]
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Clear & rinse",
+          "action": "Remove dishes and rinse sink.",
+          "cues": [
+            "Start with empty basin."
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Scrub",
+          "action": "Use dish soap + baking soda to scrub basin and drain area.",
+          "timerSec": 180
+        },
+        {
+          "i": 3,
+          "title": "Rinse",
+          "action": "Rinse thoroughly.",
+          "checks": [
+            "No gritty residue"
+          ]
+        },
+        {
+          "i": 4,
+          "title": "Sanitize dwell",
+          "action": "Spray 3% peroxide; keep wet then wipe/rinse.",
+          "timerSec": 300,
+          "cues": [
+            "Keep surface wet during dwell."
+          ]
+        },
+        {
+          "i": 5,
+          "title": "Polish",
+          "action": "Dry and polish faucet with dry cloth.",
+          "tools": [
+            "dry cloth"
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      }
+    },
+    {
+      "id": "clean.kitchen.fridge.foodsafe",
+      "name": "Refrigerator Clean (Food-Safe: Soap + Water)",
+      "area": "kitchen.fridge",
+      "tags": [
+        "kitchen",
+        "fridge",
+        "food-safe",
+        "monthly"
+      ],
+      "supplies": {
+        "tools": [
+          "microfiber cloths",
+          "small bucket",
+          "trash bag"
+        ],
+        "consumables": [
+          "warm water",
+          "mild dish soap"
+        ],
+        "optional": [
+          "baking soda paste (spots)"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Avoid strong fragrances. Do not spray cleaners directly on food."
+        ],
+        "ppe": [
+          "gloves (optional)"
+        ],
+        "chemicals": []
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Empty one shelf",
+          "action": "Remove items from one shelf/drawer at a time.",
+          "cues": [
+            "Work in sections to keep food cold."
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Wipe shelf",
+          "action": "Wipe with soapy water; then clean water.",
+          "timerSec": 180
+        },
+        {
+          "i": 3,
+          "title": "Dry",
+          "action": "Dry shelf before returning items.",
+          "checks": [
+            "No standing water"
+          ]
+        },
+        {
+          "i": 4,
+          "title": "Purge expired",
+          "action": "Check dates; discard spoiled items.",
+          "tools": [
+            "trash bag"
+          ]
+        },
+        {
+          "i": 5,
+          "title": "Door seals",
+          "action": "Wipe gaskets with damp cloth.",
+          "cues": [
+            "Crumbs hide in folds."
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      }
+    },
+    {
+      "id": "clean.kitchen.oven.natural",
+      "name": "Oven Clean (Natural: Baking Soda Paste + Vinegar Rinse)",
+      "area": "kitchen.oven",
+      "tags": [
+        "kitchen",
+        "oven",
+        "deep-clean",
+        "natural"
+      ],
+      "supplies": {
+        "tools": [
+          "gloves",
+          "spatula (plastic)",
+          "cloths",
+          "spray bottle"
+        ],
+        "consumables": [
+          "baking soda",
+          "water",
+          "vinegar"
+        ],
+        "optional": [
+          "trash bag for racks soak"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Do not use on self-clean coatings if manufacturer warns. Avoid heating vinegar fumes."
+        ],
+        "ppe": [
+          "gloves"
+        ],
+        "chemicals": [
+          "vinegar (acidic)"
+        ]
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Cool & prep",
+          "action": "Ensure oven is off and cool. Remove racks.",
+          "checks": [
+            "Cool to touch"
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Apply paste",
+          "action": "Apply thick baking soda paste to interior (avoid heating elements).",
+          "timerSec": 60
+        },
+        {
+          "i": 3,
+          "title": "Dwell overnight",
+          "action": "Let paste sit to soften grime.",
+          "timerSec": 28800,
+          "cues": [
+            "Overnight best; minimum 2–4 hours."
+          ]
+        },
+        {
+          "i": 4,
+          "title": "Scrape & wipe",
+          "action": "Gently scrape softened grime; wipe with damp cloth.",
+          "tools": [
+            "plastic spatula",
+            "cloth"
+          ]
+        },
+        {
+          "i": 5,
+          "title": "Vinegar rinse",
+          "action": "Spray vinegar lightly to dissolve remaining baking soda; wipe clean.",
+          "cues": [
+            "Fizzing is normal."
+          ]
+        },
+        {
+          "i": 6,
+          "title": "Racks",
+          "action": "Soak racks in hot soapy water; scrub and dry.",
+          "timerSec": 1800
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      }
+    },
+    {
+      "id": "clean.wood.gentle",
+      "name": "Wood Surfaces (Gentle Damp Wipe + Dry Buff)",
+      "area": "general.wood",
+      "tags": [
+        "wood",
+        "gentle",
+        "no-streak"
+      ],
+      "supplies": {
+        "tools": [
+          "microfiber cloths"
+        ],
+        "consumables": [
+          "water"
+        ],
+        "optional": [
+          "wood-safe cleaner (per label)",
+          "mineral oil (for cutting boards)"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Avoid soaking. Follow grain. Cutting boards: sanitize separately."
+        ],
+        "ppe": [],
+        "chemicals": []
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Dust",
+          "action": "Dry dust first.",
+          "tools": [
+            "dry cloth"
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Damp wipe",
+          "action": "Lightly damp cloth; wipe with the grain.",
+          "cues": [
+            "Cloth should be barely damp."
+          ]
+        },
+        {
+          "i": 3,
+          "title": "Dry buff",
+          "action": "Immediately dry buff to prevent water marks.",
+          "tools": [
+            "dry cloth"
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      }
+    },
+    {
+      "id": "clean.kitchen.board.saltlemon",
+      "name": "Cutting Board Refresh (Salt + Lemon Scrub)",
+      "area": "kitchen.cutting_board",
+      "tags": [
+        "kitchen",
+        "cutting-board",
+        "natural",
+        "deodorize"
+      ],
+      "supplies": {
+        "tools": [
+          "scrub brush"
+        ],
+        "consumables": [
+          "coarse salt",
+          "lemon"
+        ],
+        "optional": [
+          "mineral oil (finish)"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "For wood boards: avoid long soaking. Rinse and dry upright."
+        ],
+        "ppe": [],
+        "chemicals": []
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Salt scrub",
+          "action": "Sprinkle salt; scrub with half lemon.",
+          "timerSec": 180,
+          "cues": [
+            "Use lemon as scrubber."
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Rest",
+          "action": "Let sit briefly.",
+          "timerSec": 300
+        },
+        {
+          "i": 3,
+          "title": "Rinse & dry",
+          "action": "Rinse; dry upright.",
+          "checks": [
+            "No lingering odor"
+          ]
+        },
+        {
+          "i": 4,
+          "title": "Oil (optional)",
+          "action": "Apply mineral oil thinly; wipe excess.",
+          "notes": "Monthly or as needed."
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      },
+      "culturalNotes": [
+        {
+          "tradition": "Salt-citrus board cleaning",
+          "note": "Common traditional method for deodorizing cutting surfaces."
+        }
+      ]
+    },
+    {
+      "id": "clean.stainless.polish",
+      "name": "Stainless Steel (Clean + Polish with Oil)",
+      "area": "kitchen.stainless",
+      "tags": [
+        "stainless",
+        "polish",
+        "kitchen"
+      ],
+      "supplies": {
+        "tools": [
+          "microfiber cloths"
+        ],
+        "consumables": [
+          "mild soap",
+          "water"
+        ],
+        "optional": [
+          "tiny amount of olive/mineral oil"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Always follow the grain. Use minimal oil to avoid smears."
+        ],
+        "ppe": [],
+        "chemicals": []
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Clean",
+          "action": "Wipe with mild soapy water; rinse cloth and wipe again.",
+          "timerSec": 120
+        },
+        {
+          "i": 2,
+          "title": "Dry fully",
+          "action": "Dry with clean cloth.",
+          "cues": [
+            "Drying prevents spots."
+          ]
+        },
+        {
+          "i": 3,
+          "title": "Polish",
+          "action": "Add a drop of oil to cloth; buff with the grain.",
+          "cues": [
+            "Use very little oil."
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      }
+    },
+    {
+      "id": "clean.kitchen.microwave.steam",
+      "name": "Microwave Steam Clean (Water + Lemon/Vinegar)",
+      "area": "kitchen.microwave",
+      "tags": [
+        "kitchen",
+        "microwave",
+        "steam",
+        "easy"
+      ],
+      "supplies": {
+        "tools": [
+          "microwave-safe bowl",
+          "cloth"
+        ],
+        "consumables": [
+          "water"
+        ],
+        "optional": [
+          "lemon slices or vinegar"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Beware hot steam. Let stand before opening."
+        ],
+        "ppe": [
+          "oven mitt (optional)"
+        ],
+        "chemicals": [
+          "optional vinegar"
+        ]
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Prepare bowl",
+          "action": "Add water; optional lemon/vinegar.",
+          "notes": "2 cups water typical."
+        },
+        {
+          "i": 2,
+          "title": "Heat",
+          "action": "Microwave until steaming.",
+          "timerSec": 300,
+          "cues": [
+            "Steam coats walls."
+          ]
+        },
+        {
+          "i": 3,
+          "title": "Rest",
+          "action": "Let sit closed to loosen grime.",
+          "timerSec": 120
+        },
+        {
+          "i": 4,
+          "title": "Wipe",
+          "action": "Carefully remove bowl; wipe interior.",
+          "checks": [
+            "No stuck-on splatter"
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      }
+    },
+    {
+      "id": "clean.dust.baseboards_vents",
+      "name": "Baseboards & Vents (Dust + Damp Finish)",
+      "area": "general.dust.detail",
+      "tags": [
+        "dust",
+        "detail",
+        "monthly"
+      ],
+      "supplies": {
+        "tools": [
+          "vacuum with brush attachment",
+          "microfiber cloth",
+          "soft brush"
+        ],
+        "consumables": [
+          "water"
+        ],
+        "optional": [
+          "dryer sheets (optional for scent/dust reduction)"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Turn off HVAC when dusting vents if desired."
+        ],
+        "ppe": [
+          "mask (optional)"
+        ],
+        "chemicals": []
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Vacuum",
+          "action": "Vacuum baseboards/vents with brush attachment.",
+          "timerSec": 300
+        },
+        {
+          "i": 2,
+          "title": "Dry wipe",
+          "action": "Wipe with dry microfiber.",
+          "cues": [
+            "Dry first removes bulk dust."
+          ]
+        },
+        {
+          "i": 3,
+          "title": "Damp finish",
+          "action": "Lightly damp wipe for stuck grime.",
+          "cues": [
+            "Avoid drips on paint."
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      }
+    },
+    {
+      "id": "clean.windows.tracks",
+      "name": "Window Tracks (Brush + Vacuum + Wipe)",
+      "area": "general.windows.tracks",
+      "tags": [
+        "windows",
+        "detail",
+        "grit"
+      ],
+      "supplies": {
+        "tools": [
+          "stiff brush/toothbrush",
+          "vacuum crevice tool",
+          "cloth"
+        ],
+        "consumables": [
+          "warm soapy water"
+        ],
+        "optional": [
+          "baking soda paste"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Avoid soaking wood windows. Dry well."
+        ],
+        "ppe": [
+          "gloves (optional)"
+        ],
+        "chemicals": []
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Dry loosen",
+          "action": "Brush grit loose.",
+          "timerSec": 120,
+          "tools": [
+            "brush"
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Vacuum",
+          "action": "Vacuum loosened debris.",
+          "tools": [
+            "vacuum crevice tool"
+          ]
+        },
+        {
+          "i": 3,
+          "title": "Wipe",
+          "action": "Wipe with soapy cloth; then clean water; dry.",
+          "timerSec": 180
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      }
+    },
+    {
+      "id": "clean.bedroom.mattress.refresh",
+      "name": "Mattress Refresh (Vacuum + Baking Soda)",
+      "area": "bedroom.mattress",
+      "tags": [
+        "bedroom",
+        "mattress",
+        "natural",
+        "deodorize"
+      ],
+      "supplies": {
+        "tools": [
+          "vacuum upholstery tool"
+        ],
+        "consumables": [
+          "baking soda"
+        ],
+        "optional": [
+          "enzyme cleaner (spots)"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Spot clean stains separately; don't soak foam. Allow full dry."
+        ],
+        "ppe": [
+          "mask (optional)"
+        ],
+        "chemicals": []
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Strip bed",
+          "action": "Remove bedding; wash if needed.",
+          "cues": [
+            "Air out room if possible."
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Vacuum",
+          "action": "Vacuum mattress thoroughly.",
+          "timerSec": 600
+        },
+        {
+          "i": 3,
+          "title": "Deodorize",
+          "action": "Sprinkle baking soda; let rest.",
+          "timerSec": 3600
+        },
+        {
+          "i": 4,
+          "title": "Vacuum again",
+          "action": "Vacuum off powder.",
+          "checks": [
+            "No powder residue"
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      }
+    },
+    {
+      "id": "clean.upholstery.spot",
+      "name": "Upholstery Spot Clean (Blot + Mild Soap)",
+      "area": "general.upholstery",
+      "tags": [
+        "upholstery",
+        "spot-clean",
+        "gentle"
+      ],
+      "supplies": {
+        "tools": [
+          "white cloths",
+          "spray bottle",
+          "soft brush"
+        ],
+        "consumables": [
+          "water",
+          "mild soap"
+        ],
+        "optional": [
+          "enzyme cleaner (organic stains)"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Blot; don't rub. Test first. Avoid over-wetting."
+        ],
+        "ppe": [
+          "gloves (optional)"
+        ],
+        "chemicals": []
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Blot",
+          "action": "Blot excess spill immediately.",
+          "cues": [
+            "Press, lift—repeat."
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Apply solution",
+          "action": "Lightly apply soap solution to cloth; dab stain.",
+          "timerSec": 120
+        },
+        {
+          "i": 3,
+          "title": "Rinse dab",
+          "action": "Dab with clean water cloth to remove soap.",
+          "timerSec": 120
+        },
+        {
+          "i": 4,
+          "title": "Dry",
+          "action": "Blot dry; air dry.",
+          "checks": [
+            "No soap ring"
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      }
+    },
+    {
+      "id": "clean.kitchen.dishes.3basin",
+      "name": "Handwashing Dishes (Traditional 3-Basin: Wash → Rinse → Sanitize)",
+      "area": "kitchen.dishes",
+      "tags": [
+        "kitchen",
+        "dishes",
+        "traditional",
+        "workflow"
+      ],
+      "supplies": {
+        "tools": [
+          "2–3 basins or sink sections",
+          "dish rack",
+          "scrub brush"
+        ],
+        "consumables": [
+          "dish soap",
+          "hot water",
+          "optional sanitizer (per label)"
+        ],
+        "optional": [
+          "gloves"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "A 3-step system improves speed and sanitation. Air-dry when possible."
+        ],
+        "ppe": [
+          "gloves (optional)"
+        ],
+        "chemicals": [
+          "optional sanitizer"
+        ]
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Set basins",
+          "action": "Basin 1 wash (hot soapy), Basin 2 rinse, Basin 3 sanitize (optional).",
+          "cues": [
+            "Keep rinse water clean."
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Scrape & stack",
+          "action": "Scrape food; stack by type.",
+          "cues": [
+            "Glass first; greasy last."
+          ]
+        },
+        {
+          "i": 3,
+          "title": "Wash",
+          "action": "Wash in soapy basin.",
+          "timerSec": 600
+        },
+        {
+          "i": 4,
+          "title": "Rinse",
+          "action": "Quick rinse in clean water.",
+          "timerSec": 300
+        },
+        {
+          "i": 5,
+          "title": "Sanitize (optional)",
+          "action": "Dip per sanitizer label then air-dry.",
+          "timerSec": 60
+        },
+        {
+          "i": 6,
+          "title": "Air dry",
+          "action": "Rack dry; towel-dry only if needed.",
+          "checks": [
+            "No visible suds left"
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      },
+      "culturalNotes": [
+        {
+          "tradition": "3-basin dish system",
+          "note": "Common in food-service and many traditional household workflows."
+        }
+      ]
+    },
+    {
+      "id": "clean.ritual.rhythm.song",
+      "name": "Cleaning Rhythm (Song/Call-and-Response) — Cultural Motivation Method",
+      "area": "wholehome.rhythm",
+      "tags": [
+        "cultural",
+        "motivation",
+        "routine",
+        "family"
+      ],
+      "supplies": {
+        "tools": [
+          "speaker (optional)",
+          "timer (optional)"
+        ],
+        "consumables": [],
+        "optional": [
+          "playlist"
+        ]
+      },
+      "safety": {
+        "notes": [
+          "Included as a workflow enhancer; pair with any physical method above."
+        ],
+        "ppe": [],
+        "chemicals": []
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Choose rhythm",
+          "action": "Pick a 10–20 minute song set or timer.",
+          "timerSec": 900
+        },
+        {
+          "i": 2,
+          "title": "Assign roles",
+          "action": "Assign tasks by beat (trash, surfaces, floors).",
+          "cues": [
+            "Keep it light; rotate roles."
+          ]
+        },
+        {
+          "i": 3,
+          "title": "Finish together",
+          "action": "End with a 60-second 'final pass' and celebrate completion.",
+          "timerSec": 60
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [],
+        "commonMistakes": [],
+        "qualityChecks": []
+      },
+      "culturalNotes": [
+        {
+          "tradition": "Song-led cleaning (many cultures)",
+          "note": "Music-driven cleaning is widely used to keep pace and reduce fatigue."
+        }
+      ]
+    }
+  ]
+}

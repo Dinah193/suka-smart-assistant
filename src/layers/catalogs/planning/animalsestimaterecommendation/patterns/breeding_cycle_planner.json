@@ -1,0 +1,376 @@
+{
+  "id": "pat.animals.breeding_cycle_planner",
+  "domain": "animals_estimate_recommendation",
+  "kind": "planning_pattern",
+  "title": "Breeding Cycle Planner",
+  "intentTags": [
+    "intent:breeding",
+    "goal:breeding",
+    "mode:cycle"
+  ],
+  "description": "Plan breeding cycles with humane windows, labor peaks, and processing/storage alignment.",
+  "inputs": [
+    {
+      "key": "householdSize",
+      "type": "number",
+      "label": "Household size",
+      "required": true,
+      "default": 4,
+      "min": 1,
+      "max": 30
+    },
+    {
+      "key": "spaceType",
+      "type": "select",
+      "label": "Space type",
+      "required": false,
+      "default": "mixed",
+      "options": [
+        "urban_backyard",
+        "suburban",
+        "rural",
+        "mixed"
+      ]
+    },
+    {
+      "key": "landAcres",
+      "type": "number",
+      "label": "Land (acres)",
+      "required": false,
+      "default": 1,
+      "min": 0,
+      "max": 500
+    },
+    {
+      "key": "laborHoursPerWeek",
+      "type": "number",
+      "label": "Labor hours/week",
+      "required": false,
+      "default": 10,
+      "min": 1,
+      "max": 200
+    },
+    {
+      "key": "climateZone",
+      "type": "select",
+      "label": "Climate zone",
+      "required": false,
+      "default": "unknown",
+      "options": [
+        "unknown",
+        "usda:6",
+        "usda:7",
+        "usda:8",
+        "usda:9",
+        "usda:10",
+        "usda:11"
+      ]
+    },
+    {
+      "key": "dietaryLaws",
+      "type": "multiselect",
+      "label": "Dietary laws",
+      "required": false,
+      "options": [
+        "no_pork",
+        "no_shellfish",
+        "no_blood",
+        "none"
+      ],
+      "default": [
+        "no_pork"
+      ]
+    },
+    {
+      "key": "equipmentLevel",
+      "type": "select",
+      "label": "Equipment level",
+      "required": false,
+      "default": "standard",
+      "options": [
+        "limited",
+        "standard",
+        "advanced"
+      ]
+    },
+    {
+      "key": "proteinGoalPerWeek",
+      "type": "number",
+      "label": "Protein goal (meals/week)",
+      "required": false,
+      "default": 7,
+      "min": 0,
+      "max": 50
+    },
+    {
+      "key": "preferredSpecies",
+      "type": "multiselect",
+      "label": "Preferred species",
+      "required": false,
+      "options": [
+        "chicken",
+        "turkey",
+        "duck",
+        "goat",
+        "sheep",
+        "cattle",
+        "rabbit",
+        "fish",
+        "quail"
+      ]
+    },
+    {
+      "key": "processingPreference",
+      "type": "select",
+      "label": "Processing preference",
+      "required": false,
+      "default": "outsourced",
+      "options": [
+        "outsourced",
+        "on_farm",
+        "mixed"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "type": "cyclePlan",
+      "notes": "Breeding calendar + checkpoints."
+    },
+    {
+      "type": "sessions",
+      "notes": "Recurring check sessions + eventual processing sessions."
+    }
+  ],
+  "constraints": [
+    {
+      "type": "humane",
+      "tag": "constraint:humane_windows",
+      "notes": "Respect humane windows for breeding, transport, and slaughter; recommend rather than force."
+    },
+    {
+      "type": "time",
+      "tag": "constraint:time_budget",
+      "notes": "Plans must respect labor capacity."
+    },
+    {
+      "type": "neighbors",
+      "tag": "constraint:local_rules",
+      "notes": "Local ordinances vary; surface as a check, not a blocker."
+    }
+  ],
+  "requires": [
+    {
+      "type": "seasonal",
+      "tag": "seasonTags",
+      "optional": true
+    }
+  ],
+  "produces": [
+    {
+      "type": "session",
+      "domain": "animals",
+      "title": "Breeding Cycle Planner Session"
+    },
+    {
+      "type": "session",
+      "domain": "storehouse",
+      "title": "Storehouse Provisioning Follow-on",
+      "optional": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "goals",
+      "title": "Set breeding goals + constraints",
+      "kind": "template",
+      "timeboxMin": 20
+    },
+    {
+      "id": "windows",
+      "title": "Choose humane + seasonal windows",
+      "kind": "template",
+      "timeboxMin": 20,
+      "ui": {
+        "chips": [
+          "humane",
+          "seasonal"
+        ],
+        "help": "SeasonResolver tags can set default windows."
+      }
+    },
+    {
+      "id": "calendar",
+      "title": "Build cycle calendar + checkpoints",
+      "kind": "template",
+      "timeboxMin": 25
+    },
+    {
+      "id": "capacity",
+      "title": "Capacity check (housing, feed, labor)",
+      "kind": "template",
+      "timeboxMin": 15
+    },
+    {
+      "id": "sync",
+      "title": "Sync with slaughter-to-storage pipeline",
+      "kind": "template",
+      "timeboxMin": 10
+    }
+  ],
+  "kpis": [
+    {
+      "key": "cycle_adherence",
+      "label": "Cycle adherence",
+      "unit": "%",
+      "target": "≥85%"
+    },
+    {
+      "key": "health_incidents",
+      "label": "Health incidents",
+      "unit": "count",
+      "target": "Trend down"
+    }
+  ],
+  "lean": {
+    "wasteTargets": [
+      "waiting",
+      "defects"
+    ],
+    "countermeasures": [
+      {
+        "waste": "waiting",
+        "do": "Pre-stage supplies before each checkpoint."
+      }
+    ]
+  },
+  "ui": {
+    "form": {
+      "fields": [
+        {
+          "key": "householdSize",
+          "type": "number",
+          "label": "Household size",
+          "required": true,
+          "default": 4,
+          "min": 1,
+          "max": 30
+        },
+        {
+          "key": "spaceType",
+          "type": "select",
+          "label": "Space type",
+          "required": false,
+          "default": "mixed",
+          "options": [
+            "urban_backyard",
+            "suburban",
+            "rural",
+            "mixed"
+          ]
+        },
+        {
+          "key": "landAcres",
+          "type": "number",
+          "label": "Land (acres)",
+          "required": false,
+          "default": 1,
+          "min": 0,
+          "max": 500
+        },
+        {
+          "key": "laborHoursPerWeek",
+          "type": "number",
+          "label": "Labor hours/week",
+          "required": false,
+          "default": 10,
+          "min": 1,
+          "max": 200
+        },
+        {
+          "key": "climateZone",
+          "type": "select",
+          "label": "Climate zone",
+          "required": false,
+          "default": "unknown",
+          "options": [
+            "unknown",
+            "usda:6",
+            "usda:7",
+            "usda:8",
+            "usda:9",
+            "usda:10",
+            "usda:11"
+          ]
+        },
+        {
+          "key": "dietaryLaws",
+          "type": "multiselect",
+          "label": "Dietary laws",
+          "required": false,
+          "options": [
+            "no_pork",
+            "no_shellfish",
+            "no_blood",
+            "none"
+          ],
+          "default": [
+            "no_pork"
+          ]
+        },
+        {
+          "key": "equipmentLevel",
+          "type": "select",
+          "label": "Equipment level",
+          "required": false,
+          "default": "standard",
+          "options": [
+            "limited",
+            "standard",
+            "advanced"
+          ]
+        },
+        {
+          "key": "cycleType",
+          "type": "select",
+          "label": "Cycle type",
+          "default": "seasonal",
+          "options": [
+            "seasonal",
+            "continuous",
+            "trial"
+          ]
+        }
+      ]
+    },
+    "chips": [
+      {
+        "key": "goal",
+        "label": "Breeding",
+        "tag": "goal:breeding"
+      }
+    ],
+    "help": {
+      "title": "Breeding Cycle Planner",
+      "intro": "A humane, capacity-aware cycle plan.",
+      "tips": [
+        "Align labor peaks.",
+        "Plan storage before processing."
+      ]
+    }
+  },
+  "links": {
+    "valueStreams": [
+      "vs.slaughter_to_storage"
+    ],
+    "storehousePatterns": [
+      "pat.storehouse.winter_reserve",
+      "pat.storehouse.weekly_restock"
+    ],
+    "homesteadPatterns": [
+      "pat.homestead.animal_led",
+      "pat.homestead.mixed_subsistence"
+    ]
+  },
+  "variants": []
+}

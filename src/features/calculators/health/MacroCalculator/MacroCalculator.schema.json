@@ -1,0 +1,402 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka-smart-assistant.local/schemas/health/MacroCalculator.schema.json",
+  "title": "Macro Calculator Input/Output Schema",
+  "description": "Validates inputs and outputs for the SSA Macro Calculator. Inputs describe the person, goals, and macro strategy; outputs are daily and per-meal macro targets.",
+  "type": "object",
+  "required": ["input"],
+  "additionalProperties": false,
+  "properties": {
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sex",
+        "ageYears",
+        "height",
+        "weight",
+        "activityLevel",
+        "goal",
+        "calorieSource",
+        "macroStrategy",
+        "mealsPerDay",
+        "snacksPerDay",
+        "outputGranularity"
+      ],
+      "properties": {
+        "sex": {
+          "$ref": "#/$defs/sex"
+        },
+        "ageYears": {
+          "type": "integer",
+          "minimum": 12,
+          "maximum": 120,
+          "description": "Age in whole years."
+        },
+        "height": {
+          "type": "object",
+          "required": ["value", "unit"],
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 48,
+              "maximum": 90,
+              "description": "Height value in the specified unit."
+            },
+            "unit": {
+              "type": "string",
+              "enum": ["in", "cm"],
+              "description": "Unit for height, inches or centimeters."
+            }
+          }
+        },
+        "weight": {
+          "type": "object",
+          "required": ["value", "unit"],
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 60,
+              "maximum": 600,
+              "description": "Body weight in the specified unit."
+            },
+            "unit": {
+              "type": "string",
+              "enum": ["lb", "kg"],
+              "description": "Unit for weight, pounds or kilograms."
+            }
+          }
+        },
+        "bodyFatPercent": {
+          "type": ["number", "null"],
+          "minimum": 5,
+          "maximum": 70,
+          "description": "Optional estimated body fat percentage."
+        },
+        "activityLevel": {
+          "type": "string",
+          "enum": [
+            "sedentary",
+            "lightlyActive",
+            "moderatelyActive",
+            "veryActive",
+            "athlete"
+          ],
+          "description": "Activity multiplier used when calculating TDEE or target calories."
+        },
+        "goal": {
+          "type": "string",
+          "enum": [
+            "fatLoss",
+            "maintenance",
+            "recomposition",
+            "muscleGain"
+          ],
+          "description": "Primary body composition goal, used to bias calorie and macro targets."
+        },
+        "calorieSource": {
+          "type": "string",
+          "enum": ["autoFromTDEE", "manual"],
+          "description": "Whether the calculator should derive calories from a TDEE node or use manual entry."
+        },
+        "manualCalories": {
+          "type": ["number", "null"],
+          "minimum": 800,
+          "maximum": 6000,
+          "description": "Optional manual calorie target when calorieSource === 'manual'."
+        },
+        "macroStrategy": {
+          "type": "string",
+          "enum": [
+            "percentOfCalories",
+            "proteinFocused",
+            "lowCarb",
+            "custom"
+          ],
+          "description": "Macro distribution strategy; allows future extension for presets."
+        },
+        "protein": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": [
+                "gPerKg",
+                "gPerLb",
+                "percentOfCalories",
+                "fixedGrams"
+              ],
+              "description": "How to compute protein target."
+            },
+            "gPerKg": {
+              "type": "number",
+              "minimum": 0.8,
+              "maximum": 3.0,
+              "description": "Protein grams per kg bodyweight when mode === 'gPerKg'."
+            },
+            "gPerLb": {
+              "type": "number",
+              "minimum": 0.3,
+              "maximum": 1.4,
+              "description": "Protein grams per lb bodyweight when mode === 'gPerLb'."
+            },
+            "percentOfCalories": {
+              "type": "number",
+              "minimum": 5,
+              "maximum": 50,
+              "description": "Percent of calories from protein when mode === 'percentOfCalories'."
+            },
+            "fixedGrams": {
+              "type": "number",
+              "minimum": 20,
+              "maximum": 400,
+              "description": "Fixed protein target in grams when mode === 'fixedGrams'."
+            },
+            "minGPerDay": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Optional minimum protein grams per day safeguard."
+            }
+          }
+        },
+        "fat": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": [
+                "percentOfCalories",
+                "gPerKg",
+                "fixedGrams"
+              ],
+              "description": "How to compute fat target."
+            },
+            "gPerKg": {
+              "type": "number",
+              "minimum": 0.3,
+              "maximum": 1.5,
+              "description": "Fat grams per kg bodyweight when mode === 'gPerKg'."
+            },
+            "percent": {
+              "type": "number",
+              "minimum": 15,
+              "maximum": 80,
+              "description": "Percent of calories from fat when mode === 'percentOfCalories'."
+            },
+            "fixedGrams": {
+              "type": "number",
+              "minimum": 15,
+              "maximum": 250,
+              "description": "Fixed fat target in grams when mode === 'fixedGrams'."
+            },
+            "minGPerDay": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Optional minimum fat grams per day safeguard."
+            }
+          }
+        },
+        "carbs": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": [
+                "remainder",
+                "percentOfCalories",
+                "gPerKg",
+                "fixedGrams"
+              ],
+              "description": "How to compute carbohydrate target."
+            },
+            "gPerKg": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "description": "Carb grams per kg bodyweight when mode === 'gPerKg'."
+            },
+            "percent": {
+              "type": "number",
+              "minimum": 5,
+              "maximum": 80,
+              "description": "Percent of calories from carbs when mode === 'percentOfCalories'."
+            },
+            "fixedGrams": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 800,
+              "description": "Fixed carb target in grams when mode === 'fixedGrams'."
+            },
+            "minGPerDay": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Optional minimum carb grams per day safeguard."
+            }
+          }
+        },
+        "rounding": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "macroGrams": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10,
+              "description": "Step size used when rounding macro gram values."
+            },
+            "calories": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "description": "Step size used when rounding calorie values."
+            }
+          }
+        },
+        "mealsPerDay": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8,
+          "description": "Number of primary meals per day."
+        },
+        "snacksPerDay": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6,
+          "description": "Optional number of snack slots per day."
+        },
+        "outputGranularity": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["perDay", "perMeal", "perSnack"]
+          },
+          "minItems": 1,
+          "uniqueItems": true,
+          "description": "Controls which breakdowns the calculator should emit."
+        },
+        "healthFlags": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "diabetesOrPreDiabetes": {
+              "type": "boolean",
+              "description": "Hints that carb strategy may need to be more conservative."
+            },
+            "kidneyIssues": {
+              "type": "boolean",
+              "description": "Hints that protein upper bounds may need to be reduced."
+            },
+            "pregnantOrBreastfeeding": {
+              "type": "boolean",
+              "description": "Hints that additional calories and micronutrients may be required."
+            }
+          }
+        },
+        "ssaIntegration": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "allowAutoLinkToMealPlanner": {
+              "type": "boolean",
+              "description": "If true, outputs can auto-populate meal planner targets."
+            },
+            "allowAutoLinkToGroceryPlanner": {
+              "type": "boolean",
+              "description": "If true, outputs can inform grocery planning and shortages."
+            },
+            "allowAutoLinkToAnimalPlanner": {
+              "type": "boolean",
+              "description": "If true, outputs can inform animal/production planning."
+            },
+            "preferredUnitSystem": {
+              "type": "string",
+              "enum": ["imperial", "metric", "mixed"],
+              "description": "Controls default display units in the UI."
+            },
+            "autosaveProfile": {
+              "type": "boolean",
+              "description": "When true, inputs/outputs are stored as a reusable profile preset."
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "calorieSource": { "const": "manual" }
+            }
+          },
+          "then": {
+            "required": ["manualCalories"]
+          }
+        }
+      ]
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caloriesPerDay",
+        "proteinGramsPerDay",
+        "fatGramsPerDay",
+        "carbGramsPerDay"
+      ],
+      "properties": {
+        "caloriesPerDay": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Final rounded daily calorie target."
+        },
+        "proteinGramsPerDay": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Final rounded daily protein target in grams."
+        },
+        "fatGramsPerDay": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Final rounded daily fat target in grams."
+        },
+        "carbGramsPerDay": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Final rounded daily carbohydrate target in grams."
+        },
+        "perMealBreakdown": {
+          "$ref": "health.macroPerMeal.schema.json#/$defs/perMealBreakdown"
+        },
+        "profileMacroPresetId": {
+          "type": ["string", "null"],
+          "description": "Optional ID used to reference a saved macro profile in SSA."
+        },
+        "warnings": {
+          "type": "array",
+          "description": "Optional human-readable warnings (e.g., macro totals exceed calorie budget).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "array",
+          "description": "Optional extra notes or tips derived by the calculator.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sex": {
+      "type": "string",
+      "enum": ["female", "male", "other", "unspecified"],
+      "description": "Biological sex or user-selected category; used only for calculation heuristics."
+    }
+  }
+}

@@ -1,0 +1,557 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ssa.local/schemas/StorehouseRefillCalculator.schema.json",
+  "title": "Storehouse Refill Calculator Schema",
+  "description": "Schema for inputs (thresholds, par levels, planning horizon) and outputs (refill quantities, baskets, and refill timeline hints) used by the StorehouseRefillCalculator shim in Suka Smart Assistant.",
+  "type": "object",
+  "properties": {
+    "input": {
+      "$ref": "#/definitions/StorehouseRefillInput"
+    },
+    "output": {
+      "$ref": "#/definitions/StorehouseRefillOutput"
+    }
+  },
+  "required": [
+    "input"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "StorehouseRefillInput": {
+      "type": "object",
+      "description": "Inputs required to compute refill quantities and priorities.",
+      "properties": {
+        "householdId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier for the household whose storehouse is being analyzed."
+        },
+        "planningHorizonDays": {
+          "type": "number",
+          "minimum": 1,
+          "description": "Number of days ahead to consider when determining refill quantities and urgency."
+        },
+        "storehouseSnapshot": {
+          "$ref": "#/definitions/StorehouseSnapshot"
+        },
+        "minimumParLevels": {
+          "type": "object",
+          "description": "Overrides or explicit minimum par levels keyed by itemId or itemKey.",
+          "patternProperties": {
+            "^[a-zA-Z0-9_.-]+$": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false
+        },
+        "safetyStockRules": {
+          "type": "array",
+          "description": "Rules that define additional safety stock thresholds for specific items or categories.",
+          "items": {
+            "$ref": "#/definitions/SafetyStockRule"
+          }
+        },
+        "plannedMeals": {
+          "type": "array",
+          "description": "Optional set of planned meals that will consume storehouse inventory over the planning horizon.",
+          "items": {
+            "$ref": "#/definitions/PlannedMealRef"
+          }
+        },
+        "batchPlans": {
+          "type": "array",
+          "description": "Optional set of upcoming batch cooking or preservation plans that affect inventory demand.",
+          "items": {
+            "$ref": "#/definitions/BatchPlanRef"
+          }
+        },
+        "priceBookSnapshot": {
+          "type": "array",
+          "description": "Optional snapshot of price data used to form refill baskets and cost estimates.",
+          "items": {
+            "$ref": "#/definitions/PriceBookEntryRef"
+          }
+        },
+        "familyPreferences": {
+          "$ref": "#/definitions/FamilyPreferenceSet"
+        }
+      },
+      "required": [
+        "householdId",
+        "planningHorizonDays",
+        "storehouseSnapshot"
+      ],
+      "additionalProperties": false
+    },
+    "StorehouseSnapshot": {
+      "type": "array",
+      "description": "Snapshot of current storehouse inventory by item.",
+      "items": {
+        "$ref": "#/definitions/StorehouseItemLevel"
+      }
+    },
+    "StorehouseItemLevel": {
+      "type": "object",
+      "description": "Represents the inventory status for a single item in the storehouse.",
+      "properties": {
+        "itemId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable identifier for the item."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable item name."
+        },
+        "category": {
+          "type": "string",
+          "description": "Category such as grains, meats, oils, spices, hair-care, or household supplies."
+        },
+        "location": {
+          "type": "string",
+          "description": "Storage location string (e.g., pantry, rootCellar, freezerA, bathroomCabinet)."
+        },
+        "uom": {
+          "type": "string",
+          "description": "Unit of measure for quantity (e.g., kg, lb, oz, g, L, mL, count)."
+        },
+        "currentQty": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Current on-hand quantity in the given unit of measure."
+        },
+        "reservedQty": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Quantity already reserved for planned meals or sessions."
+        },
+        "parLevel": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Configured par level for this item, if any."
+        },
+        "reorderMultiple": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Preferred purchase increment (e.g., 1 case, 0.5 kg). Used to round refill quantities."
+        },
+        "leadTimeDays": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Typical lead time in days for refilling this item."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional notes on this item, including brand or usage notes (e.g., Black hair-focused oils, butters, and grains)."
+        }
+      },
+      "required": [
+        "itemId",
+        "label",
+        "uom",
+        "currentQty"
+      ],
+      "additionalProperties": false
+    },
+    "SafetyStockRule": {
+      "type": "object",
+      "description": "Rule defining extra safety stock thresholds or higher service levels for items or categories.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string"
+        },
+        "appliesTo": {
+          "type": "string",
+          "enum": [
+            "all",
+            "category",
+            "item"
+          ]
+        },
+        "category": {
+          "type": "string",
+          "description": "Category to which this rule applies when appliesTo is 'category'."
+        },
+        "itemId": {
+          "type": "string",
+          "description": "Item ID to which this rule applies when appliesTo is 'item'."
+        },
+        "minDaysOfCover": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Minimum number of days of coverage required by this rule."
+        },
+        "serviceLevel": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Target service level (0–1) used to prioritize avoiding stockouts."
+        }
+      },
+      "required": [
+        "id",
+        "appliesTo",
+        "minDaysOfCover"
+      ],
+      "additionalProperties": false
+    },
+    "PlannedMealRef": {
+      "type": "object",
+      "description": "Minimal reference to a planned meal that affects inventory demand.",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the meal is scheduled."
+        },
+        "recipeId": {
+          "type": "string",
+          "description": "Identifier of the recipe driving this meal."
+        },
+        "servings": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "id",
+        "date"
+      ],
+      "additionalProperties": false
+    },
+    "BatchPlanRef": {
+      "type": "object",
+      "description": "Minimal reference to a batch cooking or preservation plan.",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recipeId": {
+          "type": "string"
+        },
+        "batches": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "id",
+        "date"
+      ],
+      "additionalProperties": false
+    },
+    "PriceBookEntryRef": {
+      "type": "object",
+      "description": "Minimal pricebook entry used for cost estimates and store-based baskets.",
+      "properties": {
+        "storeId": {
+          "type": "string"
+        },
+        "itemId": {
+          "type": "string"
+        },
+        "unitPrice": {
+          "type": "number",
+          "minimum": 0
+        },
+        "uom": {
+          "type": "string"
+        },
+        "packSize": {
+          "type": "number",
+          "minimum": 0
+        },
+        "packUom": {
+          "type": "string"
+        },
+        "brand": {
+          "type": "string"
+        },
+        "lastSeenAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "storeId",
+        "itemId",
+        "unitPrice"
+      ],
+      "additionalProperties": false
+    },
+    "FamilyPreferenceSet": {
+      "type": "object",
+      "description": "High-level family preferences that can influence refill priorities (e.g., Black hair nutrition focus, whole-food priorities, budget rules).",
+      "properties": {
+        "budgetLevel": {
+          "type": "string",
+          "enum": [
+            "tight",
+            "moderate",
+            "abundant"
+          ]
+        },
+        "shoppingFrequencyPerMonth": {
+          "type": "number",
+          "minimum": 0
+        },
+        "prioritizeHairNutritionItems": {
+          "type": "boolean",
+          "description": "When true, items that support hair and scalp health (oils, protein sources, grains, fruits/veggies) may be bumped to higher urgency."
+        }
+      },
+      "additionalProperties": true
+    },
+    "StorehouseRefillOutput": {
+      "type": "object",
+      "description": "Results from the StorehouseRefillCalculator including per-item refill lines and summary metrics.",
+      "properties": {
+        "refillLines": {
+          "type": "array",
+          "description": "Per-item refill recommendations with quantities and urgency.",
+          "items": {
+            "$ref": "#/definitions/RefillLine"
+          }
+        },
+        "aggregatedRefillSummary": {
+          "$ref": "#/definitions/StorehouseRefillSummary"
+        },
+        "priorityBaskets": {
+          "type": "array",
+          "description": "Optional store- or category-based baskets to help structure shopping runs.",
+          "items": {
+            "$ref": "#/definitions/RefillBasket"
+          }
+        },
+        "timelineHints": {
+          "type": "array",
+          "description": "Optional timeline hints for when items should be purchased to avoid stockouts.",
+          "items": {
+            "$ref": "#/definitions/RefillTimelineHint"
+          }
+        },
+        "hubExportPayload": {
+          "description": "Optional Hub packet payload that can be sent if familyFundMode is enabled.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": true
+            }
+          ]
+        }
+      },
+      "required": [
+        "refillLines"
+      ],
+      "additionalProperties": false
+    },
+    "RefillLine": {
+      "type": "object",
+      "description": "Recommended refill for a single item.",
+      "properties": {
+        "itemId": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "uom": {
+          "type": "string"
+        },
+        "currentQty": {
+          "type": "number",
+          "minimum": 0
+        },
+        "targetQty": {
+          "type": "number",
+          "minimum": 0
+        },
+        "refillQty": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Quantity that should be refilled in the given unit of measure."
+        },
+        "urgency": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ],
+          "description": "How urgent it is to refill this item within the planning horizon."
+        },
+        "reasonCodes": {
+          "type": "array",
+          "description": "Machine-readable reasons for why this item appears in the refill plan.",
+          "items": {
+            "type": "string",
+            "enum": [
+              "belowPar",
+              "negativeForecast",
+              "batchDemand",
+              "mealPlanDemand",
+              "safetyStock",
+              "userOverride"
+            ]
+          }
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional user-facing explanation or Black hair nutrition note for this item (e.g., oils, proteins, grains that support hair health)."
+        }
+      },
+      "required": [
+        "itemId",
+        "label",
+        "uom",
+        "currentQty",
+        "targetQty",
+        "refillQty",
+        "urgency"
+      ],
+      "additionalProperties": false
+    },
+    "RefillBasket": {
+      "type": "object",
+      "description": "Logical grouping of refill lines, often by store, section, or priority.",
+      "properties": {
+        "basketId": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "storeId": {
+          "type": "string",
+          "description": "Optional store identifier for this basket if it is store-specific."
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RefillBasketLineRef"
+          }
+        },
+        "estimatedCost": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "basketId",
+        "label",
+        "priority",
+        "lines"
+      ],
+      "additionalProperties": false
+    },
+    "RefillBasketLineRef": {
+      "type": "object",
+      "description": "Minimal reference to a refill line from within a basket.",
+      "properties": {
+        "itemId": {
+          "type": "string"
+        },
+        "refillQty": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "itemId",
+        "refillQty"
+      ],
+      "additionalProperties": false
+    },
+    "RefillTimelineHint": {
+      "type": "object",
+      "description": "Hint for when a refill should be purchased to avoid stockout risks.",
+      "properties": {
+        "itemId": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "shouldBuyBy": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Latest recommended buy date."
+        },
+        "riskIfDelayed": {
+          "type": "string",
+          "description": "Short explanation of the risk if purchase is delayed past the recommended date."
+        }
+      },
+      "required": [
+        "itemId",
+        "label",
+        "shouldBuyBy"
+      ],
+      "additionalProperties": false
+    },
+    "StorehouseRefillSummary": {
+      "type": "object",
+      "description": "Summary metrics for the refill plan.",
+      "properties": {
+        "totalLines": {
+          "type": "number",
+          "minimum": 0
+        },
+        "totalRefillQty": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Sum of all refill quantities (normalized to an internal reference unit where applicable)."
+        },
+        "totalEstimatedCost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "highUrgencyCount": {
+          "type": "number",
+          "minimum": 0
+        },
+        "stockoutRiskCount": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "totalLines",
+        "totalRefillQty",
+        "totalEstimatedCost"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

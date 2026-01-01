@@ -1,0 +1,85 @@
+{
+  "nodeId": "health.hairNutritionCalculator",
+  "label": "Black Hair Nutrition Calculator",
+  "description": "Estimates daily protein, healthy fats, and key micronutrient needs to support healthy Black hair growth and retention, then feeds those requirements into meals, micronutrient, and planning flows.",
+  "category": "health",
+  "featureKind": "calculator",
+  "route": "/health/black-hair-nutrition",
+  "icon": "ri-scissors-2-line",
+  "tags": [
+    "hair",
+    "black-hair",
+    "nutrition",
+    "protein",
+    "micronutrients",
+    "beauty",
+    "planning-graph-node"
+  ],
+  "graph": {
+    "role": "source",
+    "provides": [
+      "dailyHairProteinTarget",
+      "hairAminoProfile",
+      "hairSupportFlags",
+      "hairMicronutrientTargets",
+      "hairHealthyFatTargets",
+      "blackHairRiskFlags"
+    ],
+    "consumes": [
+      "bodyWeight",
+      "macroTargets",
+      "micronutrientFocusFlags",
+      "hairTypeProfile",
+      "growthGoalFlags",
+      "protectiveStylePattern"
+    ],
+    "nextStepsNodeId": "health.hairNutritionCalculator.nextSteps"
+  },
+  "events": {
+    "onCalculate": [
+      "calculator.hairNutrition.calculated"
+    ],
+    "onError": [
+      "calculator.hairNutrition.error"
+    ]
+  },
+  "defaults": {
+    "unitSystem": "imperial",
+    "baseProteinPerKg": 1.2,
+    "hairFocusMultiplier": 1.15,
+    "minDailyProteinGrams": 50,
+    "maxDailyProteinGrams": 200,
+    "coreHairMicronutrients": [
+      "protein",
+      "iron",
+      "zinc",
+      "vitaminD",
+      "biotin",
+      "vitaminA",
+      "vitaminC",
+      "omega3"
+    ],
+    "blackHairExtraFocus": [
+      "protein",
+      "iron",
+      "vitaminD",
+      "zinc",
+      "omega3"
+    ],
+    "minOmega3Grams": 1.1,
+    "minWaterIntakeCups": 8
+  },
+  "ux": {
+    "group": "Health & Body",
+    "order": 40,
+    "showInQuickLaunch": true,
+    "quickLaunchLabel": "Black Hair Nutrition",
+    "helpText": "Use this calculator to estimate how much protein, healthy fats, and key micronutrients you should target daily to support strong, moisturized, breakage-resistant Black hair. Results can be sent directly into Meal Planner, Micronutrient, and Storehouse planning flows."
+  },
+  "integration": {
+    "macroCalculatorNodeId": "health.macroCalculator",
+    "micronutrientCalculatorNodeId": "health.micronutrientCalculator",
+    "mealPlannerNodeId": "meals.mealPlanner",
+    "storehousePlannerNodeId": "storehouse.inventoryPlanner"
+  }
+}

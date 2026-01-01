@@ -1,0 +1,329 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "HouseholdStabilityCalculatorSchema",
+  "description": "Schema for household stability calculator inputs (metrics) and outputs (stability index and bands).",
+  "type": "object",
+  "properties": {
+    "input": {
+      "type": "object",
+      "title": "Household Stability Input",
+      "description": "Metrics and flags describing current household stability for a given period.",
+      "properties": {
+        "householdId": {
+          "type": "string",
+          "description": "Optional household identifier for linking to SSA profiles."
+        },
+        "period": {
+          "type": "object",
+          "description": "Time period over which these stability metrics apply.",
+          "properties": {
+            "yearLabel": {
+              "type": "string",
+              "description": "Human-readable label for the scriptural year or planning year (e.g., 'Year of Exodus Study – 2025/26')."
+            },
+            "startDate": {
+              "type": "string",
+              "format": "date",
+              "description": "ISO date for the beginning of the evaluation period."
+            },
+            "endDate": {
+              "type": "string",
+              "format": "date",
+              "description": "ISO date for the end of the evaluation period."
+            }
+          },
+          "required": [
+            "startDate",
+            "endDate"
+          ],
+          "additionalProperties": false
+        },
+        "metrics": {
+          "type": "object",
+          "title": "Stability Metrics",
+          "description": "Core numeric metrics that roll up into the stability index. All scores are normalized to 0–100 where possible.",
+          "properties": {
+            "storehouseMonthsCovered": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Approximate number of months of staple food coverage in the storehouse."
+            },
+            "mealReadinessScore": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Score for everyday and feast meal readiness (menu plans, ingredients on hand, batch cooking)."
+            },
+            "cleaningCoverageScore": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Score for how well core cleaning routines are covered over the period."
+            },
+            "gardenSupportScore": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Score for garden support to the household (planned sowing/harvest, linked to seasons)."
+            },
+            "preservationCapacityScore": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Score for ability to preserve food (equipment, recipes, scheduled sessions)."
+            },
+            "financialMarginScore": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Score for financial breathing room and basic margin (can be computed elsewhere and passed in)."
+            },
+            "routineConsistencyScore": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Score reflecting how consistently household routines are being followed."
+            },
+            "healthBaselineScore": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Score summarizing sleep, movement, and key health habits tracked in SSA."
+            },
+            "relationshipSupportScore": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Score reflecting relational support within the household (time together, conflict load, support tasks)."
+            },
+            "crisisLoadScore": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Higher value means more crisis/chaos load; will typically be inverted inside the shim."
+            },
+            "sabbathProtectionScore": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Score measuring how well Sabbath time is protected from routine or crisis tasks."
+            }
+          },
+          "additionalProperties": {
+            "type": "number",
+            "description": "Extension slot for future metrics; any numeric value can be added and consumed by newer shims."
+          },
+          "required": [
+            "storehouseMonthsCovered",
+            "mealReadinessScore",
+            "cleaningCoverageScore",
+            "routineConsistencyScore"
+          ]
+        },
+        "flags": {
+          "type": "object",
+          "description": "Boolean flags summarizing important guard-related signals.",
+          "properties": {
+            "sabbathGuardRespected": {
+              "type": "boolean",
+              "description": "True if SabbathGuard reports that Sabbath boundaries are being respected overall."
+            },
+            "quietHoursRespected": {
+              "type": "boolean",
+              "description": "True if QuietHoursGuard reports that quiet hours are mostly being followed."
+            },
+            "feastCalendarAligned": {
+              "type": "boolean",
+              "description": "True if feast sessions are aligned with the current ScripturalYear and FeastAlignment calculators."
+            }
+          },
+          "additionalProperties": false
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional narrative notes about this evaluation period (e.g., pregnancy, moving, illness, etc.)."
+        }
+      },
+      "required": [
+        "period",
+        "metrics"
+      ],
+      "additionalProperties": false
+    },
+    "output": {
+      "type": "object",
+      "title": "Household Stability Output",
+      "description": "Calculated stability index, band, and recommended next best actions.",
+      "properties": {
+        "stabilityIndex": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Overall household stability index from 0 (critical) to 100 (thriving)."
+        },
+        "band": {
+          "type": "string",
+          "enum": [
+            "critical",
+            "fragile",
+            "developing",
+            "stable",
+            "thriving"
+          ],
+          "description": "Band label for the stability index to simplify UI pills and filters."
+        },
+        "subScores": {
+          "type": "object",
+          "description": "Breakdown of stability by dimension. All values are 0–100.",
+          "properties": {
+            "food": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Food/staples and meal stability sub-score."
+            },
+            "calendar": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Calendar/feast alignment and rhythm stability sub-score."
+            },
+            "routine": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Daily/weekly routine and cleaning stability sub-score."
+            },
+            "health": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Health habits and rest stability sub-score."
+            },
+            "finance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Financial margin and obligations stability sub-score."
+            },
+            "relationships": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Relationship and support network stability sub-score."
+            }
+          },
+          "additionalProperties": {
+            "type": "number",
+            "description": "Additional sub-score dimensions that may be added by future shims."
+          }
+        },
+        "statusSummary": {
+          "type": "string",
+          "description": "Short human-readable summary of the household stability state (1–3 sentences)."
+        },
+        "alerts": {
+          "type": "array",
+          "description": "List of high-priority warnings or alerts derived from metrics (e.g. low storehouse coverage, high crisis load).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "Short machine-friendly code (e.g., 'LOW_STOREHOUSE', 'HIGH_CRISIS_LOAD')."
+              },
+              "level": {
+                "type": "string",
+                "enum": [
+                  "info",
+                  "warning",
+                  "critical"
+                ],
+                "description": "Severity level of this alert."
+              },
+              "message": {
+                "type": "string",
+                "description": "Human-readable description of the alert."
+              }
+            },
+            "required": [
+              "code",
+              "level",
+              "message"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "recommendations": {
+          "type": "array",
+          "description": "Next best actions for stabilizing the household, suitable for generating sessions.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Stable identifier for this recommendation."
+              },
+              "label": {
+                "type": "string",
+                "description": "Short label describing the action (e.g., 'Plan 3-month staple restock')."
+              },
+              "domain": {
+                "type": "string",
+                "enum": [
+                  "cooking",
+                  "cleaning",
+                  "garden",
+                  "animals",
+                  "preservation",
+                  "storehouse",
+                  "stability"
+                ],
+                "description": "Domain that should own the follow-up session."
+              },
+              "sessionTemplateKey": {
+                "type": "string",
+                "description": "Optional key that the SessionRunner or planners can use to create a runnable session."
+              },
+              "priority": {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "medium",
+                  "high",
+                  "critical"
+                ],
+                "description": "Priority for surfacing this recommendation in UI."
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "domain"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp when this stability calculation was performed."
+        },
+        "version": {
+          "type": "string",
+          "description": "Version of the stability calculation logic used to generate this output."
+        }
+      },
+      "required": [
+        "stabilityIndex",
+        "band"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "input",
+    "output"
+  ],
+  "additionalProperties": false
+}

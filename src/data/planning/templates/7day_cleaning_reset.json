@@ -1,0 +1,365 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:suka:templates:7day_cleaning_reset",
+  "title": "7-Day Cleaning Reset",
+  "description": "One-week home reset: light daily maintenance + two deep-focus days. Quiet-hours aware, ventilation-safe, and supply-friendly.",
+  "x-domain": "cleaning",
+  "x-version": "1.0.0",
+  "template": true,
+  "id": "cleanplan:template-7day-reset",
+  "householdId": "{{HOUSEHOLD_ID}}",
+  "period": {
+    "start": "{{START_ISO}}",
+    "end": "{{END_ISO}}"
+  },
+  "settings": {
+    "timezone": "{{TIMEZONE||America/New_York}}",
+    "sabbathGuard": true,
+    "quietHours": { "startHour": 21, "endHour": 7 }
+  },
+  "notes": [
+    "Fill {{START_ISO}} as an ISO date (e.g., 2025-11-03T00:00:00Z). The plan auto-staggers daily workloads.",
+    "Ventilation-required tasks are set in daytime with re-entry buffers where applicable.",
+    "Noisy tasks (vacuum) are scheduled outside quiet hours. Sabbaths get only light, optional tasks (trash, sanitize light)."
+  ],
+  "tasks": [
+    {
+      "id": "task:d1-01",
+      "title": "Dishes & Sink Reset",
+      "kind": "dishes",
+      "scheduledAt": "{{D1}}T09:00:00Z",
+      "durationMin": 20,
+      "zoneId": "zone:kitchen",
+      "tools": ["sponge"],
+      "supplies": [{ "name": "dish_soap", "amount": "as_needed" }],
+      "flags": ["sequence_anchor"],
+      "dependencies": []
+    },
+    {
+      "id": "task:d1-02",
+      "title": "Degrease Stove & Backsplash",
+      "kind": "maintenance",
+      "scheduledAt": "{{D1}}T09:30:00Z",
+      "durationMin": 25,
+      "zoneId": "zone:kitchen",
+      "tools": ["scraper", "sponge", "microfiber"],
+      "ppe": ["gloves"],
+      "supplies": [{ "name": "degreaser", "amount": "as_needed" }],
+      "ventilation": { "required": true, "reentryOffsetMin": 10 },
+      "dependencies": ["task:d1-01"],
+      "notes": "Respect product label dwell time before wipe."
+    },
+    {
+      "id": "task:d1-03",
+      "title": "Sanitize Kitchen Touchpoints",
+      "kind": "sanitize",
+      "scheduledAt": "{{D1}}T10:00:00Z",
+      "durationMin": 15,
+      "zoneId": "zone:kitchen",
+      "tools": ["microfiber"],
+      "ppe": ["gloves"],
+      "supplies": [{ "name": "disinfectant", "amount": "as_needed" }],
+      "dwellTimeMin": 5,
+      "dependencies": ["task:d1-02"]
+    },
+    {
+      "id": "task:d1-04",
+      "title": "Vacuum + Mop Kitchen",
+      "kind": "vacuum",
+      "scheduledAt": "{{D1}}T10:20:00Z",
+      "durationMin": 10,
+      "zoneId": "zone:kitchen",
+      "tools": ["vacuum"],
+      "quietHoursSensitive": true,
+      "dependencies": ["task:d1-03"]
+    },
+    {
+      "id": "task:d1-05",
+      "title": "Mop Kitchen",
+      "kind": "mop",
+      "scheduledAt": "{{D1}}T10:35:00Z",
+      "durationMin": 15,
+      "zoneId": "zone:kitchen",
+      "tools": ["mop", "bucket"],
+      "supplies": [{ "name": "neutral_cleaner", "amount": "1 cap" }],
+      "dependencies": ["task:d1-04"]
+    },
+    {
+      "id": "task:d1-06",
+      "title": "Trash Out (Kitchen)",
+      "kind": "trash",
+      "scheduledAt": "{{D1}}T10:55:00Z",
+      "durationMin": 8,
+      "zoneId": "zone:kitchen",
+      "supplies": [{ "name": "trash_bag", "amount": "1 bag" }],
+      "dependencies": ["task:d1-05"]
+    },
+    {
+      "id": "task:d2-01",
+      "title": "Shower/Tub Clean",
+      "kind": "sanitize",
+      "scheduledAt": "{{D2}}T10:00:00Z",
+      "durationMin": 25,
+      "zoneId": "zone:bathroom",
+      "tools": ["scrub_brush", "squeegee", "microfiber"],
+      "ppe": ["gloves"],
+      "supplies": [{ "name": "bathroom_cleaner", "amount": "as_needed" }],
+      "dwellTimeMin": 7,
+      "ventilation": { "required": true, "reentryOffsetMin": 15 }
+    },
+    {
+      "id": "task:d2-02",
+      "title": "Toilet Clean (Disinfect & Dwell)",
+      "kind": "sanitize",
+      "scheduledAt": "{{D2}}T10:30:00Z",
+      "durationMin": 12,
+      "zoneId": "zone:bathroom",
+      "tools": ["scrub_brush", "microfiber"],
+      "ppe": ["gloves"],
+      "supplies": [{ "name": "disinfectant", "amount": "as_needed" }],
+      "dwellTimeMin": 5,
+      "ventilation": { "required": true, "reentryOffsetMin": 10 },
+      "dependencies": ["task:d2-01"]
+    },
+    {
+      "id": "task:d2-03",
+      "title": "Glass & Mirrors (Streak-free)",
+      "kind": "maintenance",
+      "scheduledAt": "{{D2}}T10:45:00Z",
+      "durationMin": 12,
+      "zoneId": "zone:bathroom",
+      "tools": ["squeegee", "microfiber"],
+      "supplies": [{ "name": "glass_cleaner", "amount": "as_needed" }],
+      "dependencies": ["task:d2-02"]
+    },
+    {
+      "id": "task:d2-04",
+      "title": "Vacuum + Mop Bathroom",
+      "kind": "vacuum",
+      "scheduledAt": "{{D2}}T11:05:00Z",
+      "durationMin": 8,
+      "zoneId": "zone:bathroom",
+      "tools": ["vacuum"],
+      "quietHoursSensitive": true,
+      "dependencies": ["task:d2-03"]
+    },
+    {
+      "id": "task:d2-05",
+      "title": "Mop Bathroom",
+      "kind": "mop",
+      "scheduledAt": "{{D2}}T11:15:00Z",
+      "durationMin": 10,
+      "zoneId": "zone:bathroom",
+      "tools": ["mop", "bucket"],
+      "supplies": [{ "name": "neutral_cleaner", "amount": "1 cap" }],
+      "dependencies": ["task:d2-04"]
+    },
+    {
+      "id": "task:d3-01",
+      "title": "Entry/Mudroom Sweep",
+      "kind": "sweep",
+      "scheduledAt": "{{D3}}T09:30:00Z",
+      "durationMin": 12,
+      "zoneId": "zone:entry_mudroom",
+      "tools": ["broom", "dustpan"]
+    },
+    {
+      "id": "task:d3-02",
+      "title": "Vacuum High-Traffic Areas",
+      "kind": "vacuum",
+      "scheduledAt": "{{D3}}T09:45:00Z",
+      "durationMin": 25,
+      "zoneId": "zone:living_room",
+      "tools": ["vacuum"],
+      "quietHoursSensitive": true,
+      "dependencies": ["task:d3-01"]
+    },
+    {
+      "id": "task:d3-03",
+      "title": "Mop High-Traffic Areas",
+      "kind": "mop",
+      "scheduledAt": "{{D3}}T10:15:00Z",
+      "durationMin": 20,
+      "zoneId": "zone:living_room",
+      "tools": ["mop", "bucket"],
+      "supplies": [{ "name": "neutral_cleaner", "amount": "1 cap" }],
+      "dependencies": ["task:d3-02"]
+    },
+    {
+      "id": "task:d3-04",
+      "title": "Sanitize Door Handles & Switches",
+      "kind": "sanitize",
+      "scheduledAt": "{{D3}}T10:40:00Z",
+      "durationMin": 10,
+      "zoneId": "zone:entry_mudroom",
+      "tools": ["microfiber"],
+      "ppe": ["gloves"],
+      "supplies": [{ "name": "disinfectant", "amount": "as_needed" }],
+      "dwellTimeMin": 5,
+      "dependencies": ["task:d3-03"]
+    },
+    {
+      "id": "task:d4-01",
+      "title": "Bedroom Dust (High→Low)",
+      "kind": "dust",
+      "scheduledAt": "{{D4}}T09:00:00Z",
+      "durationMin": 20,
+      "zoneId": "zone:bedroom",
+      "tools": ["microfiber"],
+      "sequence": ["dust_high", "dust_mid", "dust_low"]
+    },
+    {
+      "id": "task:d4-02",
+      "title": "Electronics Dust (Office/Bedroom)",
+      "kind": "maintenance",
+      "scheduledAt": "{{D4}}T09:25:00Z",
+      "durationMin": 10,
+      "zoneId": "zone:office",
+      "tools": ["microfiber"],
+      "dependencies": ["task:d4-01"]
+    },
+    {
+      "id": "task:d4-03",
+      "title": "Vacuum Bedrooms",
+      "kind": "vacuum",
+      "scheduledAt": "{{D4}}T09:40:00Z",
+      "durationMin": 20,
+      "zoneId": "zone:bedroom",
+      "tools": ["vacuum"],
+      "quietHoursSensitive": true,
+      "dependencies": ["task:d4-02"]
+    },
+    {
+      "id": "task:d4-04",
+      "title": "Laundry (Batch Loads)",
+      "kind": "laundry",
+      "scheduledAt": "{{D4}}T10:10:00Z",
+      "durationMin": 30,
+      "zoneId": "zone:laundry",
+      "tools": ["washer", "dryer"],
+      "supplies": [
+        { "name": "detergent", "amount": "2 caps" },
+        { "name": "stain_treater", "amount": "as_needed" }
+      ],
+      "quietHoursSensitive": true
+    },
+    {
+      "id": "task:d4-05",
+      "title": "Organize Surfaces (Bedrooms/Office)",
+      "kind": "organize",
+      "scheduledAt": "{{D4}}T10:45:00Z",
+      "durationMin": 15,
+      "zoneId": "zone:bedroom",
+      "dependencies": ["task:d4-03"]
+    },
+    {
+      "id": "task:d5-01",
+      "title": "Dust Living Room High→Low",
+      "kind": "dust",
+      "scheduledAt": "{{D5}}T09:30:00Z",
+      "durationMin": 20,
+      "zoneId": "zone:living_room",
+      "tools": ["microfiber"]
+    },
+    {
+      "id": "task:d5-02",
+      "title": "Glass & Screens (Living/Office)",
+      "kind": "maintenance",
+      "scheduledAt": "{{D5}}T10:00:00Z",
+      "durationMin": 12,
+      "zoneId": "zone:living_room",
+      "tools": ["squeegee", "microfiber"],
+      "supplies": [{ "name": "glass_cleaner", "amount": "as_needed" }],
+      "dependencies": ["task:d5-01"]
+    },
+    {
+      "id": "task:d5-03",
+      "title": "Vacuum Living/Office",
+      "kind": "vacuum",
+      "scheduledAt": "{{D5}}T10:20:00Z",
+      "durationMin": 20,
+      "zoneId": "zone:living_room",
+      "tools": ["vacuum"],
+      "quietHoursSensitive": true,
+      "dependencies": ["task:d5-02"]
+    },
+    {
+      "id": "task:d6-01",
+      "title": "Entry Sweep (Quick)",
+      "kind": "sweep",
+      "scheduledAt": "{{D6}}T11:00:00Z",
+      "durationMin": 8,
+      "zoneId": "zone:entry_mudroom",
+      "tools": ["broom", "dustpan"]
+    },
+    {
+      "id": "task:d6-02",
+      "title": "Porch/Patio Sweep",
+      "kind": "sweep",
+      "scheduledAt": "{{D6}}T11:15:00Z",
+      "durationMin": 10,
+      "zoneId": "zone:porch_patio",
+      "tools": ["broom"]
+    },
+    {
+      "id": "task:d6-03",
+      "title": "Trash Out (Whole House)",
+      "kind": "trash",
+      "scheduledAt": "{{D6}}T11:35:00Z",
+      "durationMin": 12,
+      "zoneId": "zone:entry_mudroom",
+      "supplies": [{ "name": "trash_bag", "amount": "2 bags" }]
+    },
+    {
+      "id": "task:d7-01",
+      "title": "Catch-Up Window (Choose 1–2 quick tasks)",
+      "kind": "organize",
+      "scheduledAt": "{{D7}}T15:00:00Z",
+      "durationMin": 20,
+      "zoneId": "zone:pantry",
+      "notes": "Choose: pantry organize, spot treat, wipe appliances.",
+      "optional": true
+    },
+    {
+      "id": "task:d7-02",
+      "title": "Wipe Kitchen Appliances (Quick Pass)",
+      "kind": "maintenance",
+      "scheduledAt": "{{D7}}T15:30:00Z",
+      "durationMin": 12,
+      "zoneId": "zone:kitchen",
+      "tools": ["microfiber"],
+      "supplies": [{ "name": "stainless_cleaner", "amount": "as_needed" }],
+      "optional": true
+    }
+  ],
+  "placeholders": {
+    "D1": "{{DAY_OFFSET 0 from {{START_ISO}}}}",
+    "D2": "{{DAY_OFFSET 1 from {{START_ISO}}}}",
+    "D3": "{{DAY_OFFSET 2 from {{START_ISO}}}}",
+    "D4": "{{DAY_OFFSET 3 from {{START_ISO}}}}",
+    "D5": "{{DAY_OFFSET 4 from {{START_ISO}}}}",
+    "D6": "{{DAY_OFFSET 5 from {{START_ISO}}}}",
+    "D7": "{{DAY_OFFSET 6 from {{START_ISO}}}}"
+  },
+  "supplyHints": [
+    "dish_soap",
+    "degreaser",
+    "disinfectant",
+    "glass_cleaner",
+    "neutral_cleaner",
+    "trash_bag"
+  ],
+  "ui": {
+    "suggestedBuckets": [
+      { "label": "Kitchen Reset", "taskIds": ["task:d1-01", "task:d1-02", "task:d1-03", "task:d1-04", "task:d1-05", "task:d1-06"] },
+      { "label": "Bathrooms", "taskIds": ["task:d2-01", "task:d2-02", "task:d2-03", "task:d2-04", "task:d2-05"] },
+      { "label": "Floors & Entry", "taskIds": ["task:d3-01", "task:d3-02", "task:d3-03", "task:d3-04"] },
+      { "label": "Bedrooms & Laundry", "taskIds": ["task:d4-01", "task:d4-02", "task:d4-03", "task:d4-04", "task:d4-05"] },
+      { "label": "Living Areas", "taskIds": ["task:d5-01", "task:d5-02", "task:d5-03"] },
+      { "label": "Light Reset", "taskIds": ["task:d6-01", "task:d6-02", "task:d6-03"] },
+      { "label": "Catch-Up", "taskIds": ["task:d7-01", "task:d7-02"] }
+    ],
+    "icon": "calendar-check",
+    "accent": "emerald"
+  }
+}

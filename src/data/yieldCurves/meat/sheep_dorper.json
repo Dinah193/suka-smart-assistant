@@ -1,0 +1,567 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "2025-10-31T14:05:00-05:00",
+  "description": "Meat yield curve for hair sheep – Dorper. Mirrors the multi-domain pattern in your Suka Smart Assistant so Dorper harvests can drive storehouse stock planning, meal planning, garden planning/care/harvest, and cleaning/sanitation. Includes reverse generation so feast/meal/storehouse requests can generate animal acquisition + butchery sessions. User favorites/schedules are supported via Dexie/local DB – this JSON only defines system defaults.",
+  "__notes": [
+    "Dorper is a meaty, fast-growing hair sheep, good for warm climates and fits the ‘small ruminant’ lane you already have (Katahdin).",
+    "Structure aligns with sheep_katahdin.json so your ImportService/ImportNormalizer can load both without extra branching.",
+    "This adds more ‘grill/BBQ’ defaults since Dorpers are often used that way in warm regions.",
+    "No unclean animal cross-contamination – torah-compliant profile present."
+  ],
+  "animal": {
+    "species": "sheep",
+    "breed": "Dorper",
+    "class": "lamb/mutton",
+    "hair_sheep": true,
+    "typical_live_weight_lbs": [95, 115, 135, 160],
+    "default_live_weight_lbs": 130,
+    "live_to_hanging_yield_pct": 0.52,
+    "hanging_to_carcass_yield_pct": 0.73,
+    "default_hanging_days": 3,
+    "butchery_style_default": "whole-carcass-or-halves",
+    "butchery_supported_styles": [
+      "whole-carcass-or-halves",
+      "roasts + ground",
+      "stew-heavy",
+      "bbq/smoking",
+      "halal/torah-compliant-no-unclean-cross-contamination"
+    ],
+    "torah_compliant_profile": {
+      "allow_unclean_animals": false,
+      "separate_tools_required": true,
+      "separate_surfaces_required": true,
+      "blood_draining_required": true,
+      "notes": "Use this in your USDA + Torah-compliant plant: mark equipment as ‘sheep-only’ and schedule sanitation after."
+    }
+  },
+  "yield_model": {
+    "formula_hint": "carcass = live_weight * live_to_hanging_yield_pct * hanging_to_carcass_yield_pct",
+    "example": {
+      "live_weight_lbs": 130,
+      "live_to_hanging_yield_pct": 0.52,
+      "hanging_to_carcass_yield_pct": 0.73,
+      "calculated_hanging_weight_lbs": 67.6,
+      "calculated_carcass_weight_lbs": 49.35
+    },
+    "primal_breakdown_pct": {
+      "leg": 0.29,
+      "shoulder": 0.21,
+      "loin": 0.12,
+      "breast_flap": 0.08,
+      "neck_shank_trim": 0.1,
+      "fat_bones_other": 0.2
+    },
+    "retail_cut_defaults": [
+      {
+        "cut_id": "dorper_leg_whole",
+        "label": "Dorper Lamb Leg (whole/half)",
+        "source_primals": ["leg"],
+        "default_pct_of_carcass": 0.16,
+        "storehouse_section_hint": "Meat → Lamb/Dorper → Roasts / Feast",
+        "mealplanner_tags": [
+          "feast",
+          "holy-day",
+          "sabbath",
+          "family-event"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "marinate-freeze"],
+        "cleaning_profile_ref": "sheep_meat_sanitation"
+      },
+      {
+        "cut_id": "dorper_shoulder_roast",
+        "label": "Dorper Shoulder Roast",
+        "source_primals": ["shoulder"],
+        "default_pct_of_carcass": 0.13,
+        "storehouse_section_hint": "Meat → Lamb/Dorper → Roasts",
+        "mealplanner_tags": [
+          "slow-roast",
+          "African-spice-rub",
+          "Mediterranean"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "sheep_meat_sanitation"
+      },
+      {
+        "cut_id": "dorper_chops",
+        "label": "Dorper Chops / Loin",
+        "source_primals": ["loin"],
+        "default_pct_of_carcass": 0.1,
+        "storehouse_section_hint": "Meat → Lamb/Dorper → Chops",
+        "mealplanner_tags": [
+          "grill",
+          "pan-sear",
+          "bbq"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["vac-seal", "freeze"],
+        "cleaning_profile_ref": "sheep_meat_sanitation"
+      },
+      {
+        "cut_id": "dorper_stew_cubes",
+        "label": "Dorper Stew / Curry Cubes",
+        "source_primals": ["shoulder", "neck_shank_trim"],
+        "default_pct_of_carcass": 0.12,
+        "storehouse_section_hint": "Meat → Lamb/Dorper → Stew / Curry",
+        "mealplanner_tags": [
+          "curry",
+          "okra-lamb",
+          "pepper-soup",
+          "tagine",
+          "jollof-paired"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "pressure-can"],
+        "cleaning_profile_ref": "sheep_meat_sanitation"
+      },
+      {
+        "cut_id": "dorper_ground",
+        "label": "Ground Dorper",
+        "source_primals": ["shoulder", "breast_flap", "trim"],
+        "default_pct_of_carcass": 0.14,
+        "storehouse_section_hint": "Meat → Lamb/Dorper → Ground / Kebab",
+        "mealplanner_tags": [
+          "kebab",
+          "kofta",
+          "meatballs",
+          "wraps"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "sheep_meat_sanitation"
+      },
+      {
+        "cut_id": "dorper_bones",
+        "label": "Dorper Bones (Stock / Broth)",
+        "source_primals": ["fat_bones_other"],
+        "default_pct_of_carcass": 0.06,
+        "storehouse_section_hint": "Meat → Bones / Broth Base",
+        "mealplanner_tags": [
+          "broth",
+          "bone-soup",
+          "sauce-base"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "roast-then-freeze"],
+        "cleaning_profile_ref": "sheep_meat_sanitation"
+      },
+      {
+        "cut_id": "dorper_organs",
+        "label": "Dorper Organs",
+        "source_primals": ["offal"],
+        "default_pct_of_carcass": 0.02,
+        "storehouse_section_hint": "Meat → Lamb/Dorper → Organs",
+        "mealplanner_tags": [
+          "nutrient-dense",
+          "dog-food"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "sheep_meat_sanitation"
+      }
+    ]
+  },
+  "storehouse_mapping": {
+    "purpose": "Map Dorper butchery output → storehouse goals → inventory execution → community/share.",
+    "sections": [
+      {
+        "id": "STH-DORPER-FRESH",
+        "label": "Meat → Dorper → Fresh / Chilled",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "dorper_leg_whole",
+          "dorper_shoulder_roast",
+          "dorper_chops"
+        ],
+        "grocery_inspo": [
+          "Halal butcher – fresh lamb",
+          "Mediterranean grocer – chilled lamb"
+        ]
+      },
+      {
+        "id": "STH-DORPER-FROZEN",
+        "label": "Meat → Dorper → Frozen",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "dorper_stew_cubes",
+          "dorper_ground",
+          "dorper_bones"
+        ],
+        "grocery_inspo": [
+          "Restaurant supply – frozen lamb",
+          "Costco – frozen lamb legs"
+        ]
+      },
+      {
+        "id": "STH-DORPER-PRESERVED",
+        "label": "Meat → Dorper → Preserved / Canned / Smoked",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "dorper_stew_cubes",
+          "dorper_bones"
+        ],
+        "grocery_inspo": [
+          "North African pantry",
+          "West African dried meats"
+        ]
+      }
+    ],
+    "reverse_generation_rules": [
+      {
+        "id": "RG-DORPER-FEAST",
+        "when_event": "mealplanner.requests.meat.dorper.feast",
+        "action": "estimate feast portions → map to dorper legs + shoulders → map to live sheep → emit automation.schedule.request",
+        "notes": "Use for your modern Sukkot-as-original-celebration angle; lamb/dorper feasts map well."
+      },
+      {
+        "id": "RG-DORPER-STOREHOUSE",
+        "when_event": "storehouse.goal.short.dorper-ground",
+        "action": "trigger animal.acquisition.plan('sheep-dorper') and dorper-butchery.session.generate"
+      }
+    ]
+  },
+  "meal_planner_hooks": {
+    "default_meal_templates": [
+      {
+        "id": "mt-dorper-grill-feast",
+        "label": "Dorper Grill / BBQ Feast",
+        "uses_cuts": [
+          {
+            "cut_id": "dorper_chops",
+            "qty_lb": 3
+          }
+        ],
+        "suggested_sides": [
+          "garden salad",
+          "flatbread",
+          "fermented veg",
+          "roasted peppers"
+        ],
+        "garden_suggestions": [
+          "tomato",
+          "cucumber",
+          "pepper (sweet/hot)",
+          "leafy greens",
+          "herbs (mint, cilantro)"
+        ],
+        "cleaning_profiles": [
+          "sheep_meat_sanitation",
+          "grill_clean"
+        ]
+      },
+      {
+        "id": "mt-dorper-curry",
+        "label": "Dorper Curry / Tagine",
+        "uses_cuts": [
+          {
+            "cut_id": "dorper_stew_cubes",
+            "qty_lb": 2
+          }
+        ],
+        "suggested_sides": [
+          "rice",
+          "couscous",
+          "pita"
+        ],
+        "garden_suggestions": [
+          "onion",
+          "garlic",
+          "tomato",
+          "okra"
+        ],
+        "cleaning_profiles": [
+          "sheep_meat_sanitation"
+        ]
+      },
+      {
+        "id": "mt-dorper-ground-wraps",
+        "label": "Ground Dorper Wraps / Bowls",
+        "uses_cuts": [
+          {
+            "cut_id": "dorper_ground",
+            "qty_lb": 1.5
+          }
+        ],
+        "suggested_sides": [
+          "salad",
+          "fermented veg"
+        ],
+        "garden_suggestions": [
+          "lettuce",
+          "tomato",
+          "cucumber",
+          "herbs"
+        ],
+        "cleaning_profiles": [
+          "sheep_meat_sanitation"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "can_generate_animal_plan": true,
+      "handler_event": "animal.plan.requested",
+      "notes": "When a user pins 2–3 Dorper grill nights in the same month, emit this so Animals module can propose slaughter/purchase and Cleaning can schedule sanitation."
+    }
+  },
+  "garden_integration": {
+    "purpose": "Tie Dorper meals to warm-climate garden crops and herbs that make lamb/dorper taste ‘right’.",
+    "crops_to_recommend": [
+      {
+        "crop": "tomato",
+        "use_case": "curry/tagine base; grilled salad",
+        "harvest_window": "summer",
+        "preservation": ["can", "freeze"],
+        "cleaning_profile_ref": "garden_light"
+      },
+      {
+        "crop": "onion",
+        "use_case": "every stew/curry",
+        "harvest_window": "late summer",
+        "preservation": ["cure", "store dry"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "garlic",
+        "use_case": "lamb/dorper marinade",
+        "harvest_window": "mid-summer",
+        "preservation": ["dry", "powder"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "pepper_hot",
+        "use_case": "African/Middle Eastern dorper dishes",
+        "harvest_window": "summer-fall",
+        "preservation": ["dry", "ferment", "freeze"],
+        "cleaning_profile_ref": "garden_light"
+      },
+      {
+        "crop": "leafy_greens",
+        "use_case": "salads/bowls with grilled dorper",
+        "harvest_window": "cool seasons",
+        "preservation": ["blanch-freeze"],
+        "cleaning_profile_ref": "garden_light"
+      }
+    ],
+    "reverse_generation": {
+      "when_meat_menu_fixed_event": "garden.plan.adjust.requested",
+      "notes": "If several Dorper curries are on the calendar, garden planner should ensure tomato/onion/pepper plantings and send harvest reminders to calendar."
+    }
+  },
+  "animal_care_and_butchery": {
+    "pre_slaughter_care_checklist": [
+      "fasting_window_8hr",
+      "clean_water_available",
+      "shade_or_low_stress_area",
+      "inspect_for_disease",
+      "torah_compliant_tools_ready"
+    ],
+    "butchery_session_template": {
+      "id": "butchery-session-sheep-dorper",
+      "label": "Dorper – Household Butchery",
+      "estimated_duration_hours": 2,
+      "roles_needed": [
+        "primary-butcher",
+        "assistant",
+        "sanitation-runner"
+      ],
+      "outputs": [
+        "whole_or_halves",
+        "retail_cuts",
+        "bones",
+        "offal",
+        "fat_for_rendering"
+      ],
+      "emits_events": [
+        "inventory.add.requested",
+        "storehouse.update.requested",
+        "cleaning.plan.requested",
+        "mealplan.refresh.requested",
+        "garden.plan.adjust.requested"
+      ],
+      "scheduling": {
+        "supports_user_favorites": true,
+        "supports_recurring": true,
+        "supports_coop_mode": true,
+        "coop_mode_notes": "Co-op households can each bring 1–2 Dorper; sanitation step must grow accordingly."
+      }
+    },
+    "cleaning_after_butchery": {
+      "cleaning_profile_id": "sheep_meat_sanitation",
+      "label": "Post-Dorper Butchery Sanitation",
+      "tasks": [
+        "bag offal / byproducts for compost/render/blood-meal",
+        "wash benches, tables, knives",
+        "sanitize with torah-safe cleaner",
+        "mop floor",
+        "launder aprons/towels"
+      ],
+      "emits_events": [
+        "cleaning.log.added",
+        "inventory.cleaning-supplies.decrement"
+      ]
+    }
+  },
+  "cleaning_integration": {
+    "profiles": [
+      {
+        "id": "sheep_meat_sanitation",
+        "label": "Sheep / Dorper – Meat Sanitation",
+        "zone": "Kitchen / Butchery Area",
+        "supplies": [
+          "hot_water",
+          "food_safe_disinfectant",
+          "scrub_brush",
+          "mop_bucket",
+          "laundry_detergent"
+        ]
+      },
+      {
+        "id": "meat_standard_sanitation",
+        "label": "Meat – Standard Sanitation",
+        "zone": "Kitchen",
+        "supplies": [
+          "dish_soap",
+          "surface_spray",
+          "towels"
+        ]
+      },
+      {
+        "id": "garden_root",
+        "label": "Garden Root Veg Cleanup",
+        "zone": "Utility / Outdoor Sink",
+        "supplies": [
+          "hose",
+          "brush",
+          "drain_screens"
+        ]
+      },
+      {
+        "id": "garden_light",
+        "label": "Garden Light Wash",
+        "zone": "Kitchen",
+        "supplies": [
+          "sink_sanitizer",
+          "drying_rack"
+        ]
+      },
+      {
+        "id": "grill_clean",
+        "label": "Grill / Smoker Clean (after Dorper grill)",
+        "zone": "Outdoor Cooking",
+        "supplies": [
+          "grill_brush",
+          "ash_disposal",
+          "degreaser"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "when_butchery_scheduled_event": "cleaning.session.auto-created",
+      "when_dorper_grill_event": "cleaning.session.suggested"
+    }
+  },
+  "scheduling_and_favorites": {
+    "can_be_favorited": true,
+    "favorite_key": "yieldcurve:meat:sheep_dorper",
+    "suggested_schedules": [
+      {
+        "id": "sched-dorper-spring-feast",
+        "label": "Dorper – Spring Feast Cycle",
+        "rule": "FREQ=YEARLY;BYMONTH=4;BYDAY=SU;BYSETPOS=1",
+        "creates": [
+          "butchery-session-sheep-dorper",
+          "cleaning:sheep_meat_sanitation",
+          "storehouse:update",
+          "mealplan:refresh",
+          "garden.plan.adjust.requested"
+        ]
+      },
+      {
+        "id": "sched-dorper-bi-monthly",
+        "label": "Dorper Every 2 Months",
+        "rule": "FREQ=MONTHLY;INTERVAL=2;BYDAY=SA;BYSETPOS=1",
+        "creates": [
+          "butchery-session-sheep-dorper"
+        ]
+      }
+    ],
+    "shared_orchestration": {
+      "event_bus_path": "window.__suka.eventBus",
+      "events_emitted": [
+        "yieldcurve.loaded",
+        "yieldcurve.butchery.session.generated",
+        "storehouse.goal.derived",
+        "cleaning.session.derived",
+        "mealplan.refresh.requested",
+        "garden.plan.adjust.requested"
+      ],
+      "events_listened_for": [
+        "automation.schedule.request",
+        "mealplanner.menu.locked",
+        "storehouse.goal.short",
+        "garden.plan.adjust.requested"
+      ]
+    }
+  },
+  "reverse_generation": {
+    "enabled": true,
+    "scenarios": [
+      {
+        "id": "RG-DORPER-01",
+        "source": "meal-planner",
+        "input_example": {
+          "dorper_grill_feasts": 2,
+          "dorper_curry_meals": 3
+        },
+        "output_example": {
+          "required_carcass_lb": 110,
+          "required_live_sheep": 2,
+          "suggested_date": "next-feast-window",
+          "auto_cleaning_sessions": [
+            "sheep_meat_sanitation"
+          ]
+        }
+      },
+      {
+        "id": "RG-DORPER-02",
+        "source": "storehouse",
+        "input_example": {
+          "target_section": "STH-DORPER-FROZEN",
+          "target_lb": 70
+        },
+        "output_example": {
+          "required_carcass_lb": 105,
+          "required_live_sheep": 2,
+          "notes": "2 Dorper at ~50 lb carcass ≈ 100 lb; round to 2 for simplicity."
+        }
+      }
+    ],
+    "notes": "UI should offer: ‘Generate Dorper Butchery Day’, ‘Generate Cleaning After Dorper’, and ‘Adjust Garden for Dorper Menu’."
+  },
+  "user_overrides_placeholder": {
+    "explanation": "User-specific data is persisted in Dexie/local DB, not in this JSON.",
+    "keys": [
+      "animal.live_to_hanging_yield_pct",
+      "animal.hanging_to_carcass_yield_pct",
+      "yield_model.retail_cut_defaults",
+      "scheduling_and_favorites.suggested_schedules"
+    ]
+  },
+  "interop": {
+    "import_sources_supported": [
+      "csv-butchery-yields",
+      "google-sheets-yields",
+      "extension.capture.butchery",
+      "pinterest-board-to-planner",
+      "recipe-site-lamb-detector"
+    ],
+    "export_targets_supported": [
+      "household.storehouse",
+      "household.inventory",
+      "community.coop-planner",
+      "family-fund.hub",
+      "pdf-labels"
+    ]
+  }
+}

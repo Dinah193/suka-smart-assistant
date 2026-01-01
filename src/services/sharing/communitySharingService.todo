@@ -1,0 +1,691 @@
+/* ==========================================================================
+  COMMUNITY SHARING SERVICE (.todo)
+  Purpose: Share plans, updates, and resources with selected community members
+           and collaborate on goals across modules (meals, garden, animals,
+           cleaning, projects, calendar).
+  Goals:
+    1) Clear IA (organized nav + routes)
+    2) Intuitive compose → preview → post flow
+    3) Consistent design system (btn/card/alert/states)
+    4) Event-driven glue (recipes/inventory/calendar/etc.)
+    + Empty states, undo, next-best-action after success.
+
+  Aliases assumed:
+    "@/components", "@/stores", "@/agents", "@/services", "@/pages", "@/utils"
+========================================================================== */
+
+/* --------------------------------------------------------------------------
+  0) ROUTES & NAV (Information Architecture)
+---------------------------------------------------------------------------- */
+// TODO[community]/routes: Add Community routes to your router.
+
+export const COMMUNITY_ROUTES_TODO = `
+// src/pages/community.jsx
+import React from "react";
+import { Outlet } from "react-router-dom";
+import { CommunitySidebar } from "@/components/community/CommunitySidebar.jsx";
+
+export default function CommunityLayout() {
+  return (
+    <div className="grid grid-cols-12 gap-4 p-4">
+      <aside className="col-span-3">
+        <CommunitySidebar />
+      </aside>
+      <main className="col-span-9">
+        <Outlet />
+      </main>
+    </div>
+  );
+}
+`;
+
+// src/pages/community/routes.jsx
+export const COMMUNITY_ROUTES_CONFIG_TODO = `
+// src/pages/community/routes.jsx
+import React from "react";
+import CommunityLayout from "./index.jsx";
+import { CommunityCompose } from "@/components/community/CommunityCompose.jsx";
+import { CommunityPreview } from "@/components/community/CommunityPreview.jsx";
+import { CommunityBoard } from "@/components/community/CommunityBoard.jsx";
+import { CommunityInbox } from "@/components/community/CommunityInbox.jsx";
+import { CommunityHistory } from "@/components/community/CommunityHistory.jsx";
+import { CommunitySettings } from "@/components/community/CommunitySettings.jsx";
+
+export const communityRoutes = {
+  path: "/community",
+  element: <CommunityLayout />,
+  children: [
+    { index: true, element: <CommunityCompose /> },
+    { path: "preview", element: <CommunityPreview /> },
+    { path: "board", element: <CommunityBoard /> },
+    { path: "inbox", element: <CommunityInbox /> },
+    { path: "history", element: <CommunityHistory /> },
+    { path: "settings", element: <CommunitySettings /> },
+  ],
+};
+`;
+
+// src/components/community/CommunitySidebar.jsx
+export const COMMUNITY_SIDEBAR_TODO = `
+// src/components/community/CommunitySidebar.jsx
+import React from "react";
+import { NavLink } from "react-router-dom";
+
+export function CommunitySidebar() {
+  const item = (to, label) => (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        \`block px-3 py-2 rounded-xl border mb-2 text-sm \${isActive ? "bg-base-200 border-base-300" : "border-base-200 hover:bg-base-100"}\`
+      }
+    >
+      {label}
+    </NavLink>
+  );
+  return (
+    <nav>
+      <h2 className="text-lg font-semibold mb-3">Community</h2>
+      {item("/community", "Compose")}
+      {item("/community/preview", "Preview & Confirm")}
+      {item("/community/board", "Shared Board")}
+      {item("/community/inbox", "Inbox / Mentions")}
+      {item("/community/history", "History")}
+      {item("/community/settings", "Settings")}
+    </nav>
+  );
+}
+`;
+
+/* --------------------------------------------------------------------------
+  1) REGISTRY & JOB STATE (Channels + Undo)
+---------------------------------------------------------------------------- */
+// TODO[community]/registry: Central place to register sharing channels.
+
+export const COMMUNITY_REGISTRY_TODO = `
+// src/services/sharing/community/registry.js
+const channels = new Map();
+/**
+ * registerChannel({ id, label, kind, supports, post })
+ * - id: unique string (e.g., "feed", "email", "sms", "board")
+ * - label: UI label
+ * - kind: "realtime" | "async" | "broadcast"
+ * - supports: (context) => boolean (gate by selection/policy)
+ * - post: async ({ payload, audience, options, signal }) => { id, url? }
+ */
+export function registerChannel(def) {
+  if (!def?.id || !def?.post) throw new Error("Invalid channel def");
+  channels.set(def.id, def);
+}
+export function listChannels(ctx) {
+  return Array.from(channels.values()).filter(ch =>
+    typeof ch.supports === "function" ? ch.supports(ctx) : true
+  );
+}
+export async function postToChannel(id, args) {
+  const ch = channels.get(id);
+  if (!ch) throw new Error(\`Channel "\${id}" not found\`);
+  return ch.post(args);
+}
+`;
+
+// TODO[community]/jobs: Share jobs with undo.
+
+export const COMMUNITY_JOBS_TODO = `
+// src/services/sharing/community/jobs.js
+const JOBS = new Map();
+const UNDO_STACK = [];
+
+export function createShareJob({ channelId, audience, payload, options }) {
+  const id = crypto.randomUUID();
+  const job = {
+    id, channelId, audience, payload, options,
+    status: "draft", // draft -> ready -> posting -> done | error | cancelled
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    history: [],
+    result: null,
+    error: null,
+  };
+  JOBS.set(id, job);
+  return job;
+}
+export function updateShareJob(id, patch) {
+  const job = JOBS.get(id);
+  if (!job) throw new Error("Share job not found");
+  const prev = structuredClone(job);
+  Object.assign(job, patch, { updatedAt: Date.now() });
+  job.history.push({ ts: Date.now(), patch });
+  UNDO_STACK.push(() => JOBS.set(id, prev));
+  return job;
+}
+export function getShareJob(id){ return JOBS.get(id); }
+export function listShareJobs(){ return Array.from(JOBS.values()).sort((a,b)=>b.createdAt-a.createdAt); }
+export function undoLastShare(){ const fn = UNDO_STACK.pop(); if (fn) fn(); }
+export function clearShareJobs(){ JOBS.clear(); }
+`;
+
+/* --------------------------------------------------------------------------
+  2) DEFAULT CHANNELS (Feed, Board, Email, SMS, Link)
+---------------------------------------------------------------------------- */
+// TODO[community]/channels: Plug channels your platform supports. Placeholders included.
+
+export const COMMUNITY_CHANNELS_INDEX_TODO = `
+// src/services/sharing/community/channels/index.js
+import { registerChannel } from "@/services/sharing/community/registry.js";
+import { feedChannel } from "./feedChannel.js";
+import { boardChannel } from "./boardChannel.js";
+import { emailChannel } from "./emailChannel.js";
+import { smsChannel } from "./smsChannel.js";
+import { linkChannel } from "./linkChannel.js";
+
+export function registerDefaultCommunityChannels(){
+  registerChannel(feedChannel);
+  registerChannel(boardChannel);
+  registerChannel(emailChannel);
+  registerChannel(smsChannel);
+  registerChannel(linkChannel);
+}
+`;
+
+// src/services/sharing/community/channels/feedChannel.js
+export const FEED_CHANNEL_TODO = `
+// src/services/sharing/community/channels/feedChannel.js
+export const feedChannel = {
+  id: "feed",
+  label: "Community Feed",
+  kind: "broadcast",
+  supports: () => true,
+  async post({ payload, audience, options }) {
+    // Integrate your real feed/post API
+    return { id: crypto.randomUUID(), url: "/community/board#post-"+Date.now() };
+  },
+};
+`;
+
+// src/services/sharing/community/channels/boardChannel.js
+export const BOARD_CHANNEL_TODO = `
+// src/services/sharing/community/channels/boardChannel.js
+export const boardChannel = {
+  id: "board",
+  label: "Shared Board (Kanban)",
+  kind: "realtime",
+  supports: () => true,
+  async post({ payload, audience, options }) {
+    // Create a board card/task; attach checklists & deadlines
+    return { id: crypto.randomUUID(), url: "/community/board" };
+  },
+};
+`;
+
+// src/services/sharing/community/channels/emailChannel.js
+export const EMAIL_CHANNEL_TODO = `
+// src/services/sharing/community/channels/emailChannel.js
+export const emailChannel = {
+  id: "email",
+  label: "Email Selected Members",
+  kind: "async",
+  supports: (ctx) => Array.isArray(ctx?.audience?.emails) && ctx.audience.emails.length>0,
+  async post({ payload, audience, options }) {
+    // Hook to your mailer service
+    return { id: crypto.randomUUID() };
+  },
+};
+`;
+
+// src/services/sharing/community/channels/smsChannel.js
+export const SMS_CHANNEL_TODO = `
+// src/services/sharing/community/channels/smsChannel.js
+export const smsChannel = {
+  id: "sms",
+  label: "SMS (Urgent)",
+  kind: "async",
+  supports: (ctx) => Array.isArray(ctx?.audience?.phones) && ctx.audience.phones.length>0,
+  async post({ payload, audience, options }) {
+    // Hook to your SMS gateway
+    return { id: crypto.randomUUID() };
+  },
+};
+`;
+
+// src/services/sharing/community/channels/linkChannel.js
+export const LINK_CHANNEL_TODO = `
+// src/services/sharing/community/channels/linkChannel.js
+export const linkChannel = {
+  id: "link",
+  label: "Shareable Link",
+  kind: "broadcast",
+  supports: () => true,
+  async post({ payload }) {
+    // Persist payload and return link for copy
+    const url = "/share/" + crypto.randomUUID();
+    return { id: crypto.randomUUID(), url };
+  },
+};
+`;
+
+/* --------------------------------------------------------------------------
+  3) POLICY & AUDIENCE (Scopes, Roles, Safety)
+---------------------------------------------------------------------------- */
+// TODO[community]/policy: Visibility scopes and role checks.
+
+export const COMMUNITY_POLICY_TODO = `
+// src/services/sharing/community/policy.js
+export const SCOPES = ["public", "circle", "neighborhood", "households", "invited"];
+export function canShare(user, scope){
+  if (!user) return false;
+  if (scope === "public") return true;
+  if (scope === "circle") return user.roles?.includes("circle_member");
+  if (scope === "neighborhood") return user.roles?.includes("neighbor");
+  if (scope === "households") return user.roles?.includes("household_admin");
+  if (scope === "invited") return true; // invite list validated in server
+  return false;
+}
+export function normalizeAudience({ scope, invited = [], emails = [], phones = [] }){
+  return { scope, invited, emails, phones };
+}
+`;
+
+/* --------------------------------------------------------------------------
+  4) UI: Compose → Preview → Post (Flow + Empty states + Undo)
+---------------------------------------------------------------------------- */
+// TODO[community]/ui: Compose screen with smart presets and module pickers.
+
+export const COMMUNITY_COMPOSE_TODO = `
+// src/components/community/CommunityCompose.jsx
+import React, { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { listChannels } from "@/services/sharing/community/registry.js";
+import { createShareJob, updateShareJob } from "@/services/sharing/community/jobs.js";
+import { useSelectionContext } from "@/stores/selectionStore.js";
+import { SCOPES, normalizeAudience } from "@/services/sharing/community/policy.js";
+
+export function CommunityCompose(){
+  const navigate = useNavigate();
+  const selection = useSelectionContext(); // { mealPlan, batch, rows, calendarEvents, garden, animals, chores, projects }
+  const [scope, setScope] = useState("circle");
+  const [invited, setInvited] = useState([]);
+  const [channelId, setChannelId] = useState(null);
+  const [note, setNote] = useState("");
+  const [title, setTitle] = useState("");
+
+  const context = useMemo(() => ({ selection, audience: { scope, invited } }), [selection, scope, invited]);
+  const channels = useMemo(() => listChannels(context), [context]);
+
+  const empty = !selection || Object.values(selection).every(v => !v || (Array.isArray(v) && v.length===0));
+  if (empty){
+    return (
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">Nothing to share yet</h3>
+        <p className="mb-4 text-sm opacity-80">Build something to share: a weekly meal plan, a batch session, a garden plan, or project tasks.</p>
+        <div className="flex flex-wrap gap-2">
+          <a className="btn" href="/tier2/household/meals">Open Meal Planner</a>
+          <a className="btn" href="/tier2/household/meals#batch">Batch Session</a>
+          <a className="btn" href="/tier2/garden">Garden Plan</a>
+          <a className="btn" href="/tier2/animals">Animal Tasks</a>
+          <a className="btn" href="/calendar">Calendar</a>
+        </div>
+      </div>
+    );
+  }
+
+  const smartTitle =
+    title || selection?.mealPlan?.title ||
+    selection?.projects?.[0]?.title ||
+    "Community Update";
+
+  return (
+    <div className="space-y-4">
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">Audience & Channel</h3>
+        <div className="grid md:grid-cols-3 gap-3">
+          <select className="select select-bordered" value={scope} onChange={(e)=>setScope(e.target.value)}>
+            {["public","circle","neighborhood","households","invited"].map(s=><option key={s} value={s}>{s}</option>)}
+          </select>
+          <input className="input input-bordered" placeholder="Add invited user emails (comma)" onBlur={(e)=>setInvited(e.target.value.split(",").map(x=>x.trim()).filter(Boolean))}/>
+          <div className="flex gap-2 flex-wrap">
+            {channels.map(ch=>(
+              <button key={ch.id} className={\`btn \${channelId===ch.id?"btn-primary":"btn-outline"}\`} onClick={()=>setChannelId(ch.id)}>{ch.label}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">Message</h3>
+        <input className="input input-bordered w-full mb-2" placeholder="Title" value={title} onChange={(e)=>setTitle(e.target.value)} />
+        <textarea className="textarea textarea-bordered w-full" rows={5} placeholder="Context, asks, due dates…" value={note} onChange={(e)=>setNote(e.target.value)} />
+        <div className="text-xs opacity-70 mt-2">Tip: Be specific: who, what, where, when. Add deliverables and due dates.</div>
+      </div>
+
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">What you're sharing</h3>
+        <pre className="bg-base-200 p-3 rounded max-h-64 overflow-auto text-xs">
+{JSON.stringify(selection, null, 2)}
+        </pre>
+      </div>
+
+      <div className="flex gap-2">
+        <a className="btn btn-outline" href="/community/history">View History</a>
+        <button
+          className="btn btn-primary"
+          disabled={!channelId}
+          onClick={()=>{
+            const audience = normalizeAudience({ scope, invited });
+            const payload = { title: smartTitle, note, selection };
+            const job = createShareJob({ channelId, audience, payload, options: {} });
+            updateShareJob(job.id, { status: "ready" });
+            sessionStorage.setItem("currentShareJob", job.id);
+            // Move to preview
+            location.href="/community/preview";
+          }}
+        >
+          Continue
+        </button>
+      </div>
+    </div>
+  );
+}
+`;
+
+// TODO[community]/ui: Preview with Undo + Post + Next Best Action.
+
+export const COMMUNITY_PREVIEW_TODO = `
+// src/components/community/CommunityPreview.jsx
+import React, { useEffect, useState } from "react";
+import { getShareJob, updateShareJob, undoLastShare } from "@/services/sharing/community/jobs.js";
+import { postToChannel } from "@/services/sharing/community/registry.js";
+
+export function CommunityPreview(){
+  const [job, setJob] = useState(null);
+  useEffect(()=>{
+    const id = sessionStorage.getItem("currentShareJob");
+    if (!id) return;
+    setJob(getShareJob(id));
+  },[]);
+
+  if (!job){
+    return (
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">No share in progress</h3>
+        <p className="mb-4 text-sm opacity-80">Start in the Community composer.</p>
+        <a className="btn" href="/community">Go to Community</a>
+      </div>
+    );
+  }
+
+  const posting = job.status === "posting";
+  return (
+    <div className="space-y-4">
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">Preview</h3>
+        <pre className="bg-base-200 p-3 rounded max-h-64 overflow-auto text-xs">
+{JSON.stringify({ channel: job.channelId, audience: job.audience, payload: job.payload }, null, 2)}
+        </pre>
+        {job.error && <div className="alert alert-error mt-3 text-sm">Error: {job.error}</div>}
+        <div className="flex gap-2 mt-3">
+          <button className="btn btn-outline" onClick={()=>undoLastShare()}>Undo Last Change</button>
+          <button
+            className="btn btn-primary"
+            disabled={posting}
+            onClick={async ()=>{
+              try{
+                updateShareJob(job.id, { status: "posting" });
+                const result = await postToChannel(job.channelId, {
+                  payload: job.payload,
+                  audience: job.audience,
+                  options: job.options,
+                });
+                updateShareJob(job.id, { status: "done", result, error: null });
+                // Next best actions:
+                sessionStorage.setItem("lastCommunitySuggestion", JSON.stringify({
+                  message: job.channelId==="board"
+                    ? "Assign tasks and due dates on the Shared Board?"
+                    : job.channelId==="email"
+                      ? "Follow up with a Board post for task tracking?"
+                      : "Pin to Board and create subtasks?",
+                  actions: [
+                    { label: "Open Shared Board", href: "/community/board" },
+                    { label: "Create Calendar Tasks", href: "/calendar" },
+                    { label: "Share More", href: "/community" },
+                  ],
+                }));
+              }catch(e){
+                updateShareJob(job.id, { status: "error", error: e?.message || String(e) });
+              }
+              setTimeout(()=>{ location.href="/community/history"; }, 150);
+            }}
+          >
+            {posting ? "Posting…" : "Post to Community"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+`;
+
+// TODO[community]/ui: Board, Inbox, History, Settings.
+
+export const COMMUNITY_BOARD_TODO = `
+// src/components/community/CommunityBoard.jsx
+import React from "react";
+export function CommunityBoard(){
+  // Replace with your realtime board (columns: Plan, In Progress, Done)
+  return (
+    <div className="card p-6 border">
+      <h3 className="text-lg font-semibold mb-2">Shared Board</h3>
+      <p className="text-sm opacity-80">Collaborate on community goals. Convert shared updates into tasks with owners & due dates.</p>
+      <div className="mt-3 grid md:grid-cols-3 gap-3">
+        <div className="card p-4 border"><div className="font-semibold mb-2">Plan</div><div className="text-xs opacity-70">Drop items here</div></div>
+        <div className="card p-4 border"><div className="font-semibold mb-2">In Progress</div></div>
+        <div className="card p-4 border"><div className="font-semibold mb-2">Done</div></div>
+      </div>
+    </div>
+  );
+}
+`;
+
+export const COMMUNITY_INBOX_TODO = `
+// src/components/community/CommunityInbox.jsx
+import React from "react";
+export function CommunityInbox(){
+  // Show mentions/assigned tasks/requests to your user
+  return (
+    <div className="card p-6 border">
+      <h3 className="text-lg font-semibold mb-2">Inbox & Mentions</h3>
+      <p className="text-sm opacity-80">New mentions, assignments, and replies will appear here.</p>
+    </div>
+  );
+}
+`;
+
+export const COMMUNITY_HISTORY_TODO = `
+// src/components/community/CommunityHistory.jsx
+import React, { useEffect, useState } from "react";
+import { listShareJobs } from "@/services/sharing/community/jobs.js";
+
+export function CommunityHistory(){
+  const [items, setItems] = useState([]);
+  const [tip, setTip] = useState(null);
+  useEffect(()=>{
+    setItems(listShareJobs());
+    const t = sessionStorage.getItem("lastCommunitySuggestion");
+    if (t) setTip(JSON.parse(t));
+  },[]);
+  if (!items.length){
+    return (
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">No community shares yet</h3>
+        <p className="mb-4 text-sm opacity-80">You’ll see your shared posts and tasks here.</p>
+        <a className="btn" href="/community">Compose a Share</a>
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-4">
+      {tip && (
+        <div className="alert">
+          <div>
+            <h4 className="font-semibold">Next best action</h4>
+            <p className="text-sm opacity-80">{tip.message}</p>
+          </div>
+          <div className="ml-auto flex gap-2">
+            {tip.actions?.map((a,i)=><a key={i} className="btn btn-sm" href={a.href}>{a.label}</a>)}
+          </div>
+        </div>
+      )}
+      <div className="grid gap-3">
+        {items.map(j=>(
+          <div key={j.id} className="card p-4 border">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="font-semibold">{j.payload?.title || j.channelId}</div>
+                <div className="text-xs opacity-70">{new Date(j.createdAt).toLocaleString()} • {j.status}</div>
+              </div>
+              <div className="text-xs opacity-70">#{j.id.slice(0,8)}</div>
+            </div>
+            {j.error && <div className="text-error text-sm mt-2">Error: {j.error}</div>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+`;
+
+export const COMMUNITY_SETTINGS_TODO = `
+// src/components/community/CommunitySettings.jsx
+import React, { useState } from "react";
+export function CommunitySettings(){
+  const [autoSummaries, setAutoSummaries] = useState(true);
+  const [defaultScope, setDefaultScope] = useState("circle");
+  const [defaultChannel, setDefaultChannel] = useState("board");
+  return (
+    <div className="card p-6 border space-y-4">
+      <h3 className="text-lg font-semibold">Community Settings</h3>
+      <div className="grid md:grid-cols-3 gap-3">
+        <label className="label cursor-pointer">
+          <span className="label-text mr-3">Auto-summarize shares</span>
+          <input type="checkbox" className="toggle" checked={autoSummaries} onChange={()=>setAutoSummaries(!autoSummaries)} />
+        </label>
+        <select className="select select-bordered" value={defaultScope} onChange={(e)=>setDefaultScope(e.target.value)}>
+          {["public","circle","neighborhood","households","invited"].map(s=><option key={s} value={s}>{s}</option>)}
+        </select>
+        <select className="select select-bordered" value={defaultChannel} onChange={(e)=>setDefaultChannel(e.target.value)}>
+          {["board","feed","email","sms","link"].map(c=><option key={c} value={c}>{c}</option>)}
+        </select>
+      </div>
+    </div>
+  );
+}
+`;
+
+/* --------------------------------------------------------------------------
+  5) EVENT-DRIVEN GLUE (Recipes/Inventory/Calendar/Garden/Animals)
+---------------------------------------------------------------------------- */
+// TODO[community]/hooks: Recompute selection & create smart prompts on events.
+
+export const COMMUNITY_HOOKS_TODO = `
+// src/services/sharing/community/hooks.js
+import { on, emit } from "@/services/automation/runtime";
+import { refreshSelection } from "@/stores/selectionStore.js";
+
+/**
+ * Registers listeners so Community composer stays in sync
+ * and can produce timely suggestions (nudges).
+ */
+export function registerCommunityEventGlue(){
+  // Core data sources
+  on("mealplan.created", handleNudge);
+  on("recipes.updated", handleNudge);
+  on("batch.completed", handleNudge);
+  on("inventory.updated", handleNudge);
+  on("calendar.events.updated", handleNudge);
+  on("garden.plan.updated", handleNudge);
+  on("animals.tasks.updated", handleNudge);
+  on("chores.routines.updated", handleNudge);
+
+  function handleNudge(evt){
+    refreshSelection(); // Make latest selection available to composer
+    // Emit a subtle suggestion for community planning
+    emit("community.nudge", {
+      at: Date.now(),
+      message: "Share updates with your circle to align tasks and schedules?",
+      actions: [
+        { label: "Open Community Composer", href: "/community" },
+        { label: "Open Shared Board", href: "/community/board" },
+      ],
+      source: evt?.type || "data.change",
+    });
+  }
+}
+`;
+
+/* --------------------------------------------------------------------------
+  6) TELEMETRY
+---------------------------------------------------------------------------- */
+// TODO[community]/telemetry: Track completions to measure value.
+
+export const COMMUNITY_TELEMETRY_TODO = `
+// src/services/sharing/community/telemetry.js
+import { emit } from "@/services/automation/runtime";
+export function trackCommunityShareCompleted({ channelId, audienceScope, sizeBytes }){
+  emit("community.share.completed", {
+    channelId, audienceScope, sizeBytes, at: Date.now()
+  });
+}
+`;
+
+/* --------------------------------------------------------------------------
+  7) BOOTSTRAP
+---------------------------------------------------------------------------- */
+// TODO[community]/bootstrap: Register default channels + hooks at startup.
+
+export const COMMUNITY_BOOTSTRAP_TODO = `
+// src/services/sharing/community/bootstrap.js
+import { registerDefaultCommunityChannels } from "@/services/sharing/community/channels/index.js";
+import { registerCommunityEventGlue } from "@/services/sharing/community/hooks.js";
+
+export function bootstrapCommunitySharingService(){
+  registerDefaultCommunityChannels();
+  registerCommunityEventGlue();
+}
+`;
+
+/* --------------------------------------------------------------------------
+  8) SELECTION STORE CONTRACT (reference)
+---------------------------------------------------------------------------- */
+// TODO[community]/selection: Ensure selection store exposes relevant payloads.
+
+export const COMMUNITY_SELECTION_CONTRACT = `
+// src/stores/selectionStore.js (reference)
+let state = {
+  mealPlan: null,
+  batch: null,
+  rows: null, // inventory rows
+  calendarEvents: null,
+  garden: null,
+  animals: null,
+  chores: null,
+  projects: null,
+};
+export function useSelectionContext(){ return state; }
+export function refreshSelection(){ /* derive from modules */ }
+`;
+
+/* --------------------------------------------------------------------------
+  9) QA CHECKLIST
+---------------------------------------------------------------------------- */
+// TODO[community]/qa:
+// [ ] /community shows empty-state with quick links when nothing selected
+// [ ] Channels list reflects supports(context) gating
+// [ ] Compose → Preview → Post flow works; Undo last change on preview
+// [ ] Next-best-action banner appears in History after posting
+// [ ] Board shows lanes and hints (Plan/In Progress/Done)
+// [ ] Inbox surfaces mentions/assignments
+// [ ] Event glue emits community.nudge and refreshes selection on data changes
+// [ ] Policies enforce scope/role gates
+// [ ] Settings persist defaults for scope/channel
+// [ ] Design uses consistent btn/card/alert patterns
+
+/***** END OF FILE ********************************************************** */

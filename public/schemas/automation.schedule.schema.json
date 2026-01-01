@@ -1,0 +1,365 @@
+{
+  "$id": "https://suka.local/schemas/automation.schedule.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Suka Automation Schedule",
+  "description": "Schema for Automation Runtime schedule files (RRULE-driven, guard-aware, fan-out capable).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "version", "kind", "enabled", "when", "trigger"],
+  "properties": {
+    "$schema": { "type": "string" },
+
+    "id": { "type": "string", "minLength": 1 },
+    "version": { "type": "integer", "minimum": 1 },
+    "kind": { "type": "string", "enum": ["schedule"] },
+
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+
+    "owner": {
+      "$ref": "#/definitions/Owner"
+    },
+
+    "enabled": { "type": "boolean" },
+    "timezone": { "type": "string", "minLength": 1 },
+
+    "when": {
+      "$ref": "#/definitions/When"
+    },
+
+    "guards": {
+      "$ref": "#/definitions/Guards"
+    },
+
+    "concurrency": {
+      "$ref": "#/definitions/Concurrency"
+    },
+
+    "retry": {
+      "$ref": "#/definitions/Retry"
+    },
+
+    "inputs": {
+      "type": "object",
+      "description": "User- or system-provided inputs used by payloadTemplate interpolation.",
+      "additionalProperties": true
+    },
+
+    "trigger": {
+      "$ref": "#/definitions/Trigger"
+    },
+
+    "pipeline": {
+      "type": "array",
+      "description": "Optional post-trigger pipeline steps (await → fanout, emit, condition).",
+      "items": { "$ref": "#/definitions/PipelineStep" }
+    },
+
+    "postActions": {
+      "$ref": "#/definitions/PostActions"
+    },
+
+    "favorites": {
+      "$ref": "#/definitions/Favorites"
+    },
+
+    "observability": {
+      "$ref": "#/definitions/Observability"
+    },
+
+    "security": {
+      "$ref": "#/definitions/Security"
+    }
+  },
+
+  "definitions": {
+    "TemplateString": {
+      "type": "string",
+      "description": "Plain string OR template with ${...} placeholders.",
+      "pattern": ".*"
+    },
+
+    "Owner": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "type": { "type": "string" },
+        "userId": { "type": ["string", "null"] },
+        "householdId": { "type": ["string", "null"] }
+      }
+    },
+
+    "When": {
+      "type": "object",
+      "required": ["rrules"],
+      "additionalProperties": false,
+      "properties": {
+        "rrules": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "description": "RFC 5545 RRULE string",
+            "pattern": "^(FREQ=)(SECONDLY|MINUTELY|HOURLY|DAILY|WEEKLY|MONTHLY|YEARLY)(;.*)?$"
+          }
+        },
+        "dtstartISO": { "$ref": "#/definitions/TemplateString" },
+        "window": {
+          "$ref": "#/definitions/Window"
+        },
+        "catchUpMode": {
+          "type": "string",
+          "enum": ["skip", "run_once", "replay"]
+        }
+      }
+    },
+
+    "Window": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "maxStartSkewMs": { "type": "integer", "minimum": 0 },
+        "maxDurationMs": { "type": "integer", "minimum": 0 }
+      }
+    },
+
+    "Guards": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "respectSabbath": { "type": "boolean" },
+        "respectQuietHours": { "type": "boolean" },
+        "quietHours": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "start": { "$ref": "#/definitions/TemplateString" },
+            "end": { "$ref": "#/definitions/TemplateString" }
+          }
+        },
+        "doNotDisturb": { "$ref": "#/definitions/TemplateString" },
+        "network": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "skipOnMetered": { "type": "boolean" },
+            "minBandwidthKbps": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "battery": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "minPercent": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "requireNotLowPowerMode": { "type": "boolean" }
+          }
+        },
+        "onGuarded": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "action": { "type": "string", "enum": ["defer", "skip", "run_silently"] },
+            "emit": { "type": "string" },
+            "inboxItem": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "type": { "type": "string" },
+                "title": { "type": "string" },
+                "body": { "type": "string" },
+                "cta": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "properties": {
+                      "id": { "type": "string" },
+                      "label": { "type": "string" }
+                    },
+                    "required": ["id", "label"]
+                  }
+                }
+              },
+              "required": ["type", "title", "body"]
+            }
+          }
+        }
+      }
+    },
+
+    "Concurrency": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "key": { "$ref": "#/definitions/TemplateString" },
+        "limit": { "type": "integer", "minimum": 1 },
+        "queuePolicy": { "type": "string", "enum": ["drop_latest", "drop_oldest", "fifo"] }
+      }
+    },
+
+    "Retry": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "maxAttempts": { "type": "integer", "minimum": 0 },
+        "strategy": { "type": "string", "enum": ["none", "fixed", "exponential"] },
+        "baseDelayMs": { "type": "integer", "minimum": 0 },
+        "maxDelayMs": { "type": "integer", "minimum": 0 },
+        "jitter": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "Trigger": {
+      "type": "object",
+      "required": ["emit", "payloadTemplate"],
+      "additionalProperties": false,
+      "properties": {
+        "emit": { "type": "string", "minLength": 1 },
+        "payloadTemplate": {
+          "type": "object",
+          "description": "Arbitrary payload template. Values may include ${...} placeholders.",
+          "additionalProperties": true
+        }
+      }
+    },
+
+    "FanoutAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "emit": { "type": "string" },
+        "condition": { "type": ["string", "boolean"] },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "required": ["emit"]
+    },
+
+    "PipelineStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "await": { "type": "string" },
+        "timeoutMs": { "type": "integer", "minimum": 0 },
+        "emit": { "type": "string" },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "fanout": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/FanoutAction" }
+        },
+        "condition": { "type": ["string", "boolean"] }
+      },
+      "anyOf": [
+        { "required": ["await"] },
+        { "required": ["emit"] },
+        { "required": ["fanout"] }
+      ]
+    },
+
+    "PostActions": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "emit": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "event": { "type": "string" },
+              "payload": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": ["event"]
+          }
+        },
+        "rememberLastRun": { "type": "boolean" },
+        "persist": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "dexie": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "table": { "type": "string" },
+                "row": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              "required": ["table", "row"]
+            }
+          }
+        }
+      }
+    },
+
+    "Favorites": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "allowUserSaveAsTemplate": { "type": "boolean" },
+        "templateKind": { "type": "string" },
+        "defaultName": { "type": "string" },
+        "exposeIn": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["TemplatePicker", "Scheduler", "Anywhere"] }
+        }
+      }
+    },
+
+    "Observability": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "logLevel": { "type": "string", "enum": ["trace", "debug", "info", "warn", "error"] },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "emit": { "type": "string" },
+            "fields": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "trace": { "type": "boolean" }
+      }
+    },
+
+    "Security": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "scopes": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "allowHouseholdMembers": { "type": "boolean" }
+      }
+    }
+  },
+
+  "examples": [
+    {
+      "id": "schedule.example",
+      "version": 1,
+      "kind": "schedule",
+      "enabled": true,
+      "when": { "rrules": ["FREQ=DAILY;BYHOUR=08;BYMINUTE=00;BYSECOND=00"] },
+      "trigger": {
+        "emit": "example:requested",
+        "payloadTemplate": { "requestId": "${uid.rid()}" }
+      }
+    }
+  ]
+}

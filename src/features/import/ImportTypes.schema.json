@@ -1,0 +1,606 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "/schemas/import/ImportTypes.schema.json",
+  "title": "Suka Smart Assistant - Import Types",
+  "description": "Canonical schema for all importable payloads before/after normalization. Supports user-owned favorites, schedules, reverse generation metadata, and shared orchestration hooks for cooking, cleaning, gardening, animals, storehouse, and inventory.",
+  "type": "object",
+  "oneOf": [
+    { "$ref": "#/definitions/RecipeImport" },
+    { "$ref": "#/definitions/MealPlanImport" },
+    { "$ref": "#/definitions/GardenPlanImport" },
+    { "$ref": "#/definitions/GardenCareImport" },
+    { "$ref": "#/definitions/HarvestPlanImport" },
+    { "$ref": "#/definitions/CleaningPlanImport" },
+    { "$ref": "#/definitions/StorehouseGoalImport" },
+    { "$ref": "#/definitions/StorehouseStockImport" },
+    { "$ref": "#/definitions/AnimalAcquisitionImport" },
+    { "$ref": "#/definitions/AnimalPlanImport" },
+    { "$ref": "#/definitions/ButcherySessionImport" },
+    { "$ref": "#/definitions/InventoryUpdateImport" },
+    { "$ref": "#/definitions/GenericImport" }
+  ],
+  "definitions": {
+    "BaseImport": {
+      "type": "object",
+      "properties": {
+        "__importType": {
+          "type": "string",
+          "description": "Explicit hint for ImportNormalizer. If absent, the normalizer guesses the type."
+        },
+        "id": {
+          "type": ["string", "null"],
+          "description": "Client-provided id; ImportNormalizer will generate one if missing."
+        },
+        "title": {
+          "type": ["string", "null"],
+          "description": "Human friendly title for the import."
+        },
+        "source": {
+          "type": ["object", "null"],
+          "description": "Source metadata: bookmarklet, file, pinterest, scan-compare-trust, social-recipe, etc.",
+          "properties": {
+            "kind": { "type": ["string", "null"] },
+            "url": { "type": ["string", "null"] },
+            "boardTitle": { "type": ["string", "null"] },
+            "boardUrl": { "type": ["string", "null"] },
+            "store": { "type": ["string", "null"] },
+            "device": { "type": ["string", "null"], "description": "desktop, mobile, extension, in-app" }
+          },
+          "additionalProperties": true
+        },
+        "meta": {
+          "type": ["object", "null"],
+          "description": "Raw / passthrough metadata from upstream scrapers, bookmarklets, OCR, etc.",
+          "additionalProperties": true
+        },
+        "schedule": {
+          "type": ["object", "null"],
+          "description": "Optional schedule that will be forwarded to the local automation runtime (automation.schedule.request)."
+        },
+        "session": {
+          "type": ["object", "null"],
+          "description": "Optional session payload for domain engines (cooking, cleaning, gardening, animal care, butchery, inventory).",
+          "properties": {
+            "kind": {
+              "type": ["string", "null"],
+              "enum": [
+                "cooking",
+                "batch-cooking",
+                "cleaning",
+                "garden-care",
+                "garden-harvest",
+                "storehouse-restock",
+                "animal-care",
+                "butchery",
+                "inventory-sync",
+                null
+              ]
+            },
+            "date": { "type": ["string", "null"] },
+            "recurring": { "type": ["string", "null"], "description": "iCal/rrule-ish string or simplified cadence" },
+            "tasks": {
+              "type": "array",
+              "items": { "type": ["string", "object"] }
+            }
+          },
+          "additionalProperties": true
+        },
+        "saveAsFavorite": {
+          "type": "boolean",
+          "description": "If true, ImportService/ImportNormalizer will persist this import as a user-owned favorite (not just system sessions/schedules).",
+          "default": false
+        },
+        "reverseMeta": {
+          "type": ["object", "null"],
+          "description": "Hints for reverse generation: share target, include share block, export format.",
+          "properties": {
+            "shareTarget": {
+              "type": ["string", "null"],
+              "enum": ["family-fund-hub", "sacred-village", "local-coop", "marketplace", null],
+              "default": "family-fund-hub"
+            },
+            "includeShare": {
+              "type": "boolean",
+              "default": true
+            },
+            "format": {
+              "type": ["string", "null"],
+              "enum": ["json", "yaml", "csv", null],
+              "default": "json"
+            },
+            "reverseFromId": {
+              "type": ["string", "null"],
+              "description": "When this payload was generated from another import (e.g. recipe → animalPlan, gardenPlan → harvestPlan)."
+            }
+          },
+          "additionalProperties": true
+        },
+        "orchestration": {
+          "type": ["object", "null"],
+          "description": "Shared orchestration hints to the in-app bus: who should pick this up, which queue, and how to fan out.",
+          "properties": {
+            "emit": { "type": "array", "items": { "type": "string" } },
+            "bus": { "type": ["string", "null"], "description": "default: window.__suka.eventBus" },
+            "priority": { "type": ["number", "null"] },
+            "fanout": { "type": ["boolean", "null"], "default": true }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "RecipeImport": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseImport" },
+        {
+          "type": "object",
+          "properties": {
+            "__importType": { "const": "recipe" },
+            "ingredients": {
+              "type": "array",
+              "description": "List of ingredients. Strings or {name, qty, unit}.",
+              "items": {
+                "anyOf": [
+                  { "type": "string" },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string" },
+                      "qty": { "type": ["string", "number", "null"] },
+                      "unit": { "type": ["string", "null"] },
+                      "tags": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      }
+                    },
+                    "required": ["name"],
+                    "additionalProperties": true
+                  }
+                ]
+              }
+            },
+            "steps": {
+              "type": "array",
+              "description": "Recipe steps / directions.",
+              "items": { "type": ["string", "object"] }
+            },
+            "tags": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "usesAnimalProduct": {
+              "type": "boolean",
+              "description": "If true, animal planner can be reverse generated from this recipe."
+            }
+          },
+          "required": ["ingredients"]
+        }
+      ]
+    },
+
+    "MealPlanImport": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseImport" },
+        {
+          "type": "object",
+          "properties": {
+            "__importType": { "const": "mealPlan" },
+            "days": {
+              "type": "array",
+              "description": "Array of planned days and meals.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "date": { "type": ["string", "null"] },
+                  "meals": {
+                    "type": "array",
+                    "items": {
+                      "type": ["string", "object"]
+                    }
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "collaborative": {
+              "type": "boolean",
+              "description": "If true, meal plan was made to be shared / co-op'ed with other households.",
+              "default": true
+            }
+          },
+          "required": ["days"]
+        }
+      ]
+    },
+
+    "GardenPlanImport": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseImport" },
+        {
+          "type": "object",
+          "properties": {
+            "__importType": { "const": "gardenPlan" },
+            "seeds": {
+              "type": "array",
+              "description": "Seed and other garden planning information (your SEED import note).",
+              "items": {
+                "type": ["string", "object"],
+                "additionalProperties": true
+              }
+            },
+            "rows": {
+              "type": "array",
+              "description": "Garden rows / beds specification.",
+              "items": { "type": ["object", "string"] }
+            },
+            "zone": {
+              "type": ["string", "null"],
+              "description": "Growing zone or regional hint for coop planning."
+            },
+            "coop": {
+              "type": "boolean",
+              "description": "If true, this garden plan is meant for 'many hands make light work' multi-household goal.",
+              "default": true
+            },
+            "careProfile": {
+              "type": ["object", "null"],
+              "description": "Default care template to generate GardenCareImport (watering cadence, fertilizing, pest control).",
+              "additionalProperties": true
+            },
+            "sharesWithHouseholds": {
+              "type": "array",
+              "description": "Other households that should see this garden plan to plan around it.",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      ]
+    },
+
+    "GardenCareImport": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseImport" },
+        {
+          "type": "object",
+          "properties": {
+            "__importType": { "const": "gardenCare" },
+            "zones": {
+              "type": "array",
+              "description": "Garden zones/beds that need care.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": ["string", "null"] },
+                  "name": { "type": ["string", "null"] },
+                  "tasks": {
+                    "type": "array",
+                    "items": { "type": ["string", "object"] }
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "cadence": {
+              "type": ["string", "null"],
+              "description": "daily, 2x/week, weekly, monthly — or iCal string"
+            }
+          }
+        }
+      ]
+    },
+
+    "HarvestPlanImport": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseImport" },
+        {
+          "type": "object",
+          "properties": {
+            "__importType": { "const": "harvestPlan" },
+            "crops": {
+              "type": "array",
+              "description": "What gets harvested, when, and where it should go.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "crop": { "type": "string" },
+                  "expectedDate": { "type": ["string", "null"] },
+                  "quantity": { "type": ["number", "string", "null"] },
+                  "unit": { "type": ["string", "null"] },
+                  "toStorehouse": { "type": "boolean", "default": true },
+                  "preserveMethod": { "type": ["string", "null"] }
+                },
+                "required": ["crop"],
+                "additionalProperties": true
+              }
+            }
+          },
+          "required": ["crops"]
+        }
+      ]
+    },
+
+    "CleaningPlanImport": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseImport" },
+        {
+          "type": "object",
+          "properties": {
+            "__importType": { "const": "cleaningPlan" },
+            "rooms": {
+              "type": "array",
+              "description": "Rooms/zones/surfaces to clean.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "tasks": {
+                    "type": "array",
+                    "items": { "type": ["string", "object"] }
+                  },
+                  "supplies": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  }
+                },
+                "required": ["name"],
+                "additionalProperties": true
+              }
+            },
+            "cadence": {
+              "type": ["string", "null"],
+              "description": "daily, weekly, monthly, sabbath-prep, deep-clean, or iCal."
+            },
+            "batchable": {
+              "type": "boolean",
+              "description": "If true, can be bundled into a cleaning session with timers like cooking.",
+              "default": true
+            }
+          },
+          "required": ["rooms"]
+        }
+      ]
+    },
+
+    "StorehouseGoalImport": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseImport" },
+        {
+          "type": "object",
+          "properties": {
+            "__importType": { "const": "storehouseGoal" },
+            "items": {
+              "type": "array",
+              "description": "Items to stock / preserve / acquire for storehouse goals.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "item": { "type": "string" },
+                  "quantity": { "type": ["number", "string", "null"] },
+                  "unit": { "type": ["string", "null"] },
+                  "preserve": { "type": ["string", "null"] },
+                  "targetDate": { "type": ["string", "null"] }
+                },
+                "required": ["item"],
+                "additionalProperties": true
+              }
+            }
+          },
+          "required": ["items"]
+        }
+      ]
+    },
+
+    "StorehouseStockImport": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseImport" },
+        {
+          "type": "object",
+          "description": "Storehouse stock planning using grocery sections for inspiration (produce, dry, bulk, meat, dairy, preservation).",
+          "properties": {
+            "__importType": { "const": "storehouseStock" },
+            "sections": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "section": {
+                    "type": "string",
+                    "description": "e.g. produce, dairy, meat, frozen, pantry, bulk, long-term, canning, fermenting"
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "item": { "type": "string" },
+                        "targetQty": { "type": ["number", "string", "null"] },
+                        "unit": { "type": ["string", "null"] },
+                        "preserveMethod": { "type": ["string", "null"] },
+                        "rotationsPerYear": { "type": ["number", "null"] }
+                      },
+                      "required": ["item"],
+                      "additionalProperties": true
+                    }
+                  }
+                },
+                "required": ["section"],
+                "additionalProperties": true
+              }
+            }
+          },
+          "required": ["sections"]
+        }
+      ]
+    },
+
+    "AnimalAcquisitionImport": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseImport" },
+        {
+          "type": "object",
+          "properties": {
+            "__importType": { "const": "animalAcquisition" },
+            "needs": {
+              "type": "array",
+              "description": "Animals we need to purchase/acquire to satisfy meal/storehouse/butchery plans.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "species": { "type": "string" },
+                  "breed": { "type": ["string", "null"] },
+                  "qty": { "type": ["number", "null"] },
+                  "reason": { "type": ["string", "null"] },
+                  "targetDate": { "type": ["string", "null"] }
+                },
+                "required": ["species"],
+                "additionalProperties": true
+              }
+            },
+            "reverseFromPlan": {
+              "type": ["string", "null"],
+              "description": "ID of meal/storehouse/recipe import that triggered this acquisition."
+            }
+          },
+          "required": ["needs"]
+        }
+      ]
+    },
+
+    "AnimalPlanImport": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseImport" },
+        {
+          "type": "object",
+          "properties": {
+            "__importType": { "const": "animalPlan" },
+            "animals": {
+              "type": "array",
+              "description": "List of animals to maintain/breed/butcher.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": ["string", "null"] },
+                  "species": { "type": ["string", "null"] },
+                  "breed": { "type": ["string", "null"] },
+                  "qty": { "type": ["number", "null"] },
+                  "tasks": {
+                    "type": "array",
+                    "items": { "type": ["string", "object"] }
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "reverseFrom": {
+              "type": ["string", "null"],
+              "description": "ID of the recipe/meal/import this animal plan was reverse-generated from (per your 'generate animal plan from recipes' requirement)."
+            },
+            "breedsByGeo": {
+              "type": "array",
+              "description": "Meat animal estimates and breeds that work well for the geographical location.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "geo": { "type": "string" },
+                  "breed": { "type": "string" },
+                  "notes": { "type": ["string", "null"] }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      ]
+    },
+
+    "ButcherySessionImport": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseImport" },
+        {
+          "type": "object",
+          "description": "Butchery / meat processing day. Meant to tie to recipes, meal plans, storehouse and inventory.",
+          "properties": {
+            "__importType": { "const": "butcherySession" },
+            "animals": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "species": { "type": "string" },
+                  "qty": { "type": ["number", "null"] },
+                  "cuts": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  }
+                },
+                "required": ["species"],
+                "additionalProperties": true
+              }
+            },
+            "processingTasks": {
+              "type": "array",
+              "description": "slaughter, skin, eviscerate, quarter, grind, sausage, cure, freeze, can",
+              "items": { "type": ["string", "object"] }
+            },
+            "links": {
+              "type": "object",
+              "description": "Link this butchery session to other imports so they update too.",
+              "properties": {
+                "recipes": { "type": "array", "items": { "type": "string" } },
+                "mealPlans": { "type": "array", "items": { "type": "string" } },
+                "storehouseGoals": { "type": "array", "items": { "type": "string" } },
+                "inventoryUpdates": { "type": "array", "items": { "type": "string" } }
+              },
+              "additionalProperties": true
+            }
+          }
+        }
+      ]
+    },
+
+    "InventoryUpdateImport": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseImport" },
+        {
+          "type": "object",
+          "properties": {
+            "__importType": { "const": "inventoryUpdate" },
+            "updates": {
+              "type": "array",
+              "description": "List of inventory deltas from scan-compare-trust CSV/PDF or manual upload.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "sku": { "type": ["string", "null"] },
+                  "name": { "type": ["string", "null"] },
+                  "qty": { "type": ["number", "string", "null"] },
+                  "quantity": { "type": ["number", "string", "null"] },
+                  "delta": { "type": ["number", "string", "null"] },
+                  "location": { "type": ["string", "null"] },
+                  "tags": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  }
+                },
+                "additionalProperties": true
+              }
+            }
+          },
+          "required": ["updates"]
+        }
+      ]
+    },
+
+    "GenericImport": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseImport" },
+        {
+          "description": "Fallback for unknown import shapes. ImportNormalizer will coerce to 'recipe' or 'storehouseGoal' where possible.",
+          "type": "object"
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

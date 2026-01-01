@@ -1,0 +1,343 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:suka:templates:garden_7day_tasks",
+  "title": "Garden — 7-Day Tasks",
+  "description": "One-week garden plan that batches bed prep, planting, irrigation, support, scouting, and harvest. Daypart-aware and PHI-safe.",
+  "x-domain": "garden",
+  "x-version": "1.0.0",
+  "template": true,
+  "id": "gardenplan:template-7day",
+  "householdId": "{{HOUSEHOLD_ID}}",
+  "gardenId": "{{GARDEN_ID}}",
+
+  "period": {
+    "start": "{{START_ISO}}",
+    "end": "{{END_ISO}}"
+  },
+
+  "settings": {
+    "timezone": "{{TIMEZONE||America/New_York}}",
+    "quietHours": { "startHour": 21, "endHour": 7 },
+    "phiGuard": true,
+    "beeSafe": true
+  },
+
+  "notes": [
+    "Clustered by bed to minimize context switching. Morning bias for watering; evening bias for spray safety.",
+    "Template targets two warm beds (tomato, cucumber) and one cool bed (lettuce/spinach). Swap {{BED_*}} placeholders as needed.",
+    "PHI and re-entry guards will auto-hold harvest after pesticide tasks."
+  ],
+
+  "tasks": [
+    {
+      "id": "task:d1-01",
+      "title": "Soil Prep — Warm Bed A (Tomatoes)",
+      "kind": "soil_prep",
+      "vocabActionId": "action:soil_prep",
+      "scheduledAt": "{{D1}}T13:00:00Z",
+      "durationMin": 30,
+      "bedId": "{{BED_TOMATO}}",
+      "cropSpecies": ["tomato"],
+      "supplies": [{ "name": "compost", "amount": "as_needed" }],
+      "flags": ["batchable_by_bed"]
+    },
+    {
+      "id": "task:d1-02",
+      "title": "Transplant — Tomatoes",
+      "kind": "transplant",
+      "vocabActionId": "action:transplant",
+      "scheduledAt": "{{D1}}T13:40:00Z",
+      "durationMin": 20,
+      "bedId": "{{BED_TOMATO}}",
+      "cropSpecies": ["tomato"],
+      "dependencies": ["task:d1-01"]
+    },
+    {
+      "id": "task:d1-03",
+      "title": "Water In — Tomatoes",
+      "kind": "water",
+      "vocabActionId": "action:water",
+      "scheduledAt": "{{D1}}T14:05:00Z",
+      "durationMin": 10,
+      "bedId": "{{BED_TOMATO}}",
+      "cropSpecies": ["tomato"],
+      "dependencies": ["task:d1-02"]
+    },
+    {
+      "id": "task:d1-04",
+      "title": "Trellis/Stake — Tomatoes",
+      "kind": "trellis",
+      "vocabActionId": "action:trellis",
+      "scheduledAt": "{{D1}}T14:20:00Z",
+      "durationMin": 20,
+      "bedId": "{{BED_TOMATO}}",
+      "cropSpecies": ["tomato"],
+      "dependencies": ["task:d1-03"],
+      "supplies": [
+        { "name": "stakes", "amount": "as_needed" },
+        { "name": "twine", "amount": "as_needed" }
+      ]
+    },
+
+    {
+      "id": "task:d2-01",
+      "title": "Soil Prep — Warm Bed B (Cucumbers)",
+      "kind": "soil_prep",
+      "vocabActionId": "action:soil_prep",
+      "scheduledAt": "{{D2}}T13:00:00Z",
+      "durationMin": 25,
+      "bedId": "{{BED_CUCUMBER}}",
+      "cropSpecies": ["cucumber"],
+      "supplies": [{ "name": "compost", "amount": "as_needed" }]
+    },
+    {
+      "id": "task:d2-02",
+      "title": "Sow — Cucumbers",
+      "kind": "sow",
+      "vocabActionId": "action:sow",
+      "scheduledAt": "{{D2}}T13:30:00Z",
+      "durationMin": 15,
+      "bedId": "{{BED_CUCUMBER}}",
+      "cropSpecies": ["cucumber"],
+      "dependencies": ["task:d2-01"],
+      "supplies": [{ "name": "seed_packet", "amount": "as_needed" }]
+    },
+    {
+      "id": "task:d2-03",
+      "title": "Water — Cucumbers (Germination)",
+      "kind": "water",
+      "vocabActionId": "action:water",
+      "scheduledAt": "{{D2}}T13:50:00Z",
+      "durationMin": 10,
+      "bedId": "{{BED_CUCUMBER}}",
+      "cropSpecies": ["cucumber"],
+      "dependencies": ["task:d2-02"]
+    },
+    {
+      "id": "task:d2-04",
+      "title": "Trellis Net — Cucumbers",
+      "kind": "trellis",
+      "vocabActionId": "action:trellis",
+      "scheduledAt": "{{D2}}T14:10:00Z",
+      "durationMin": 20,
+      "bedId": "{{BED_CUCUMBER}}",
+      "cropSpecies": ["cucumber"],
+      "supplies": [
+        { "name": "trellis_net", "amount": "as_needed" },
+        { "name": "stakes", "amount": "as_needed" },
+        { "name": "twine", "amount": "as_needed" }
+      ]
+    },
+
+    {
+      "id": "task:d3-01",
+      "title": "Soil Prep — Cool Bed (Lettuce + Spinach)",
+      "kind": "soil_prep",
+      "vocabActionId": "action:soil_prep",
+      "scheduledAt": "{{D3}}T13:00:00Z",
+      "durationMin": 25,
+      "bedId": "{{BED_COOL}}",
+      "cropSpecies": ["lettuce", "spinach"],
+      "supplies": [{ "name": "compost", "amount": "as_needed" }]
+    },
+    {
+      "id": "task:d3-02",
+      "title": "Sow — Lettuce",
+      "kind": "sow",
+      "vocabActionId": "action:sow",
+      "scheduledAt": "{{D3}}T13:30:00Z",
+      "durationMin": 12,
+      "bedId": "{{BED_COOL}}",
+      "cropSpecies": ["lettuce"],
+      "dependencies": ["task:d3-01"],
+      "supplies": [{ "name": "seed_packet", "amount": "as_needed" }]
+    },
+    {
+      "id": "task:d3-03",
+      "title": "Sow — Spinach",
+      "kind": "sow",
+      "vocabActionId": "action:sow",
+      "scheduledAt": "{{D3}}T13:45:00Z",
+      "durationMin": 10,
+      "bedId": "{{BED_COOL}}",
+      "cropSpecies": ["spinach"],
+      "dependencies": ["task:d3-01"],
+      "supplies": [{ "name": "seed_packet", "amount": "as_needed" }]
+    },
+    {
+      "id": "task:d3-04",
+      "title": "Water — Cool Bed",
+      "kind": "water",
+      "vocabActionId": "action:water",
+      "scheduledAt": "{{D3}}T14:00:00Z",
+      "durationMin": 10,
+      "bedId": "{{BED_COOL}}",
+      "cropSpecies": ["lettuce", "spinach"],
+      "dependencies": ["task:d3-02", "task:d3-03"]
+    },
+    {
+      "id": "task:d3-05",
+      "title": "Mulch — Cool Bed (Light)",
+      "kind": "mulch",
+      "vocabActionId": "action:mulch",
+      "scheduledAt": "{{D3}}T14:15:00Z",
+      "durationMin": 10,
+      "bedId": "{{BED_COOL}}",
+      "cropSpecies": ["lettuce", "spinach"],
+      "dependencies": ["task:d3-04"],
+      "supplies": [{ "name": "mulch_straw", "amount": "as_needed" }]
+    },
+
+    {
+      "id": "task:d4-01",
+      "title": "Weed — All Beds (Quick Pass)",
+      "kind": "weed",
+      "vocabActionId": "action:weed",
+      "scheduledAt": "{{D4}}T13:00:00Z",
+      "durationMin": 20,
+      "bedIds": ["{{BED_TOMATO}}", "{{BED_CUCUMBER}}", "{{BED_COOL}}"],
+      "flags": ["batchable_by_bed"]
+    },
+    {
+      "id": "task:d4-02",
+      "title": "Fertilize — Warm Beds (Light Dose)",
+      "kind": "fertilize",
+      "vocabActionId": "action:fertilize",
+      "scheduledAt": "{{D4}}T13:25:00Z",
+      "durationMin": 15,
+      "bedIds": ["{{BED_TOMATO}}", "{{BED_CUCUMBER}}"],
+      "supplies": [{ "name": "balanced_fertilizer_5_5_5", "amount": "as_label" }]
+    },
+    {
+      "id": "task:d4-03",
+      "title": "Water — Warm Beds",
+      "kind": "water",
+      "vocabActionId": "action:water",
+      "scheduledAt": "{{D4}}T13:45:00Z",
+      "durationMin": 12,
+      "bedIds": ["{{BED_TOMATO}}", "{{BED_CUCUMBER}}"],
+      "dependencies": ["task:d4-02"]
+    },
+
+    {
+      "id": "task:d5-01",
+      "title": "Pest Scout — All Beds",
+      "kind": "pest_scout",
+      "vocabActionId": "action:pest_scout",
+      "scheduledAt": "{{D5}}T13:00:00Z",
+      "durationMin": 15,
+      "bedIds": ["{{BED_TOMATO}}", "{{BED_CUCUMBER}}", "{{BED_COOL}}"],
+      "flags": ["repeat_weekly"]
+    },
+    {
+      "id": "task:d5-02",
+      "title": "Apply Pesticide (If Threshold Exceeded)",
+      "kind": "pesticide",
+      "vocabActionId": "action:pesticide",
+      "scheduledAt": "{{D5}}T22:00:00Z",
+      "durationMin": 12,
+      "bedIds": ["{{BED_TOMATO}}", "{{BED_CUCUMBER}}"],
+      "optional": true,
+      "phiDays": 3,
+      "dependencies": ["task:d5-01"]
+    },
+
+    {
+      "id": "task:d6-01",
+      "title": "Prune/Train — Tomatoes",
+      "kind": "prune",
+      "vocabActionId": "action:prune",
+      "scheduledAt": "{{D6}}T13:00:00Z",
+      "durationMin": 12,
+      "bedId": "{{BED_TOMATO}}",
+      "cropSpecies": ["tomato"]
+    },
+    {
+      "id": "task:d6-02",
+      "title": "Trellis Touch-up — Cucumbers",
+      "kind": "trellis",
+      "vocabActionId": "action:trellis",
+      "scheduledAt": "{{D6}}T13:15:00Z",
+      "durationMin": 10,
+      "bedId": "{{BED_CUCUMBER}}",
+      "cropSpecies": ["cucumber"]
+    },
+    {
+      "id": "task:d6-03",
+      "title": "Water — All Beds",
+      "kind": "water",
+      "vocabActionId": "action:water",
+      "scheduledAt": "{{D6}}T13:30:00Z",
+      "durationMin": 15,
+      "bedIds": ["{{BED_TOMATO}}", "{{BED_CUCUMBER}}", "{{BED_COOL}}"]
+    },
+
+    {
+      "id": "task:d7-01",
+      "title": "Harvest — Lettuce/Spinach (AM)",
+      "kind": "harvest",
+      "vocabActionId": "action:harvest",
+      "scheduledAt": "{{D7}}T12:30:00Z",
+      "durationMin": 15,
+      "bedId": "{{BED_COOL}}",
+      "cropSpecies": ["lettuce", "spinach"],
+      "flags": ["respect_phi"]
+    },
+    {
+      "id": "task:d7-02",
+      "title": "Harvest — Early Tomatoes (If Ready)",
+      "kind": "harvest",
+      "vocabActionId": "action:harvest",
+      "scheduledAt": "{{D7}}T12:50:00Z",
+      "durationMin": 10,
+      "bedId": "{{BED_TOMATO}}",
+      "cropSpecies": ["tomato"],
+      "optional": true,
+      "flags": ["respect_phi"]
+    },
+    {
+      "id": "task:d7-03",
+      "title": "Preserve/Store — Weekly Batch",
+      "kind": "preserve",
+      "vocabActionId": "action:preserve",
+      "scheduledAt": "{{D7}}T17:00:00Z",
+      "durationMin": 45,
+      "planWide": true,
+      "dependencies": ["task:d7-01"]
+    }
+  ],
+
+  "placeholders": {
+    "D1": "{{DAY_OFFSET 0 from {{START_ISO}}}}",
+    "D2": "{{DAY_OFFSET 1 from {{START_ISO}}}}",
+    "D3": "{{DAY_OFFSET 2 from {{START_ISO}}}}",
+    "D4": "{{DAY_OFFSET 3 from {{START_ISO}}}}",
+    "D5": "{{DAY_OFFSET 4 from {{START_ISO}}}}",
+    "D6": "{{DAY_OFFSET 5 from {{START_ISO}}}}",
+    "D7": "{{DAY_OFFSET 6 from {{START_ISO}}}}"
+  },
+
+  "supplyHints": [
+    "seed_packet",
+    "compost",
+    "balanced_fertilizer_5_5_5",
+    "mulch_straw",
+    "trellis_net",
+    "stakes",
+    "twine"
+  ],
+
+  "ui": {
+    "suggestedBuckets": [
+      { "label": "Mon — Tomatoes (Prep→Plant→Support)", "taskIds": ["task:d1-01","task:d1-02","task:d1-03","task:d1-04"] },
+      { "label": "Tue — Cucumbers (Prep→Sow→Water→Trellis)", "taskIds": ["task:d2-01","task:d2-02","task:d2-03","task:d2-04"] },
+      { "label": "Wed — Cool Bed (Prep→Sow→Water→Mulch)", "taskIds": ["task:d3-01","task:d3-02","task:d3-03","task:d3-04","task:d3-05"] },
+      { "label": "Thu — Weeds + Feed", "taskIds": ["task:d4-01","task:d4-02","task:d4-03"] },
+      { "label": "Fri — Scout (→ Optional Treat)", "taskIds": ["task:d5-01","task:d5-02"] },
+      { "label": "Sat — Train + Water", "taskIds": ["task:d6-01","task:d6-02","task:d6-03"] },
+      { "label": "Sun — Harvest + Preserve", "taskIds": ["task:d7-01","task:d7-02","task:d7-03"] }
+    ],
+    "icon": "sprout",
+    "accent": "green"
+  }
+}

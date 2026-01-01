@@ -1,0 +1,336 @@
+{
+  "$schema": "../../schemas/byproduct.schema.json",
+  "version": "2025-10-31T15:50:00-05:00",
+  "meta": {
+    "id": "blood_meal_small_ruminant",
+    "title": "Blood Meal – Small Ruminant (Sheep/Goat) – Torah-Compliant Line",
+    "description": "Byproduct profile for producing, drying, and storing blood meal from small ruminant slaughter/butchery sessions. Feeds garden/fertilizer planning, storehouse stock planning (garden inputs), cleaning/sanitation schedules, and reverse-generation (how much blood meal you need → how many animals must be processed).",
+    "source": "suka-smart-assistant",
+    "tags": [
+      "byproduct",
+      "blood-meal",
+      "small-ruminant",
+      "sheep",
+      "goat",
+      "garden",
+      "fertilizer",
+      "storehouse",
+      "butchery",
+      "torah-compliant"
+    ],
+    "torahCompliance": {
+      "uncleanSpeciesExcluded": true,
+      "notes": "Use only from clean animals (sheep, goat, cattle). Do not mix with unclean species. Run separate lines when needed."
+    }
+  },
+  "ui": {
+    "layout": "cards/timeline",
+    "hints": {
+      "primaryCTA": "Generate Blood Meal Session",
+      "secondaryCTA": "Save as Favorite",
+      "tertiaryCTA": "Reverse-generate from Garden Needs",
+      "showSeasonalityBadge": false,
+      "groupBy": [
+        "butcheryBatchId",
+        "processingStep"
+      ]
+    },
+    "badges": [
+      { "text": "Byproduct", "color": "rose" },
+      { "text": "Garden Input", "color": "emerald" },
+      { "text": "Torah-compliant", "color": "indigo" }
+    ]
+  },
+  "orchestration": {
+    "bus": "window.__suka?.eventBus",
+    "emitOnLoad": [
+      "byproduct.curve.loaded",
+      "byproduct.bloodmeal.loaded"
+    ],
+    "listen": [
+      "butchery.session.completed",
+      "butchery.session.request",
+      "garden.session.request",
+      "storehouse.goal.request",
+      "automation.schedule.request",
+      "inventory.restock.request"
+    ],
+    "sharedScopes": [
+      "animals",
+      "butchery",
+      "garden",
+      "storehouse",
+      "cleaning"
+    ]
+  },
+  "engines": {
+    "primary": "byproductEngine",
+    "supports": [
+      "gardenQueueEngine",
+      "storehouseGoalEngine",
+      "cleaningSessionEngine",
+      "animalSessionEngine",
+      "mealPlanEngine"
+    ],
+    "notes": "Byproduct engine should listen for butchery completions and suggest blood capture → drying → storage. It should also reverse from garden nitrogen targets."
+  },
+  "reverse": {
+    "generateFrom": [
+      "garden.targets.nitrogen",
+      "garden.crop.plan",
+      "coop-pool.garden",
+      "community.garden-input-pool",
+      "storehouse.targets.garden-inputs",
+      "butchery.plan.batch"
+    ],
+    "strategies": [
+      {
+        "id": "from-garden-nitrogen-target",
+        "title": "Back into blood meal from garden nitrogen target",
+        "input": {
+          "kgNitrogenNeeded": 12,
+          "applicationRateKgPer100sqft": 0.25
+        },
+        "output": {
+          "bloodMealKgRequired": 42,
+          "suggestedButcherySessions": 6,
+          "emit": [
+            "butchery.session.request",
+            "garden.session.request",
+            "storehouse.plan.generated"
+          ]
+        }
+      },
+      {
+        "id": "from-butchery-batch",
+        "title": "Back into blood meal from planned butchery batch",
+        "input": {
+          "headCount": 8,
+          "avgLiveWeightKg": 45
+        },
+        "output": {
+          "estimatedRawBloodKg": 32,
+          "estimatedDriedBloodMealKg": 9.5,
+          "emit": [
+            "cleaning.session.request",
+            "storehouse.plan.generated"
+          ]
+        }
+      }
+    ]
+  },
+  "byproduct": {
+    "category": "fertilizer",
+    "subCategory": "blood-meal",
+    "excludeFromMealPlanner": true,
+    "yieldModel": {
+      "type": "small-ruminant-blood",
+      "formula": "liveWeightKg * 0.04 * dryingRetention",
+      "dryingRetention": 0.3,
+      "notes": "Typical sheep/goat blood ≈ 4% of live weight; after drying ≈ 30% retained as blood meal."
+    },
+    "examples": [
+      {
+        "label": "Single sheep, 60 kg live weight",
+        "rawBloodKg": 2.4,
+        "driedBloodMealKg": 0.72
+      },
+      {
+        "label": "Single goat, 45 kg live weight",
+        "rawBloodKg": 1.8,
+        "driedBloodMealKg": 0.54
+      }
+    ]
+  },
+  "storehouse": {
+    "targets": {
+      "blood_meal_garden_reserve_kg": 25,
+      "blood_meal_seedlings_kg": 3,
+      "blood_meal_field_application_kg": 10,
+      "blood_meal_sales_bucket_kg": 5
+    },
+    "grocerySectionsInspiration": [
+      "Garden & Outdoor",
+      "Soil Amendments & Fertilizers",
+      "Homestead Inputs",
+      "Animal Byproducts (Clean Line Only)"
+    ],
+    "autoPlan": {
+      "enabled": true,
+      "emit": [
+        "storehouse.plan.generated",
+        "inventory.restock.request"
+      ]
+    }
+  },
+  "garden": {
+    "applications": [
+      {
+        "id": "spring-bed-prep",
+        "title": "Spring Bed Prep – High N Boost",
+        "rateKgPer100sqft": 0.25,
+        "emit": "garden.session.request"
+      },
+      {
+        "id": "heavy-feeders",
+        "title": "Heavy Feeders (corn, brassicas)",
+        "rateKgPer100sqft": 0.3,
+        "emit": "garden.session.request"
+      }
+    ],
+    "careAndHarvestLink": {
+      "notes": "When a garden bed is scheduled for heavy-feeder planting, request a blood meal pull.",
+      "emitOnGardenPlan": [
+        "byproduct.session.request",
+        "inventory.restock.request"
+      ]
+    }
+  },
+  "cleaning": {
+    "routines": [
+      {
+        "id": "blood-room-post-processing",
+        "title": "Blood Processing Area – Post Run Sanitization",
+        "frequency": "PER_RUN",
+        "emit": "cleaning.session.request",
+        "tools": [
+          "sanitizer",
+          "floor-squeegee",
+          "ppe",
+          "drain-flush"
+        ]
+      },
+      {
+        "id": "drying-rack-weekly",
+        "title": "Drying Racks / Dehydrator Deep Clean",
+        "frequency": "WEEKLY",
+        "emit": "cleaning.session.request"
+      }
+    ],
+    "sabbathGuard": true
+  },
+  "animals": {
+    "acquisition": {
+      "allowedSpecies": [
+        "sheep",
+        "goat"
+      ],
+      "disallowedSpecies": [
+        "pig",
+        "swine"
+      ],
+      "notes": "Torah-compliant: keep blood meal line clean from unclean species. If mixed-species day is required, schedule on separate runs and do full sanitization."
+    },
+    "care": {
+      "emit": [
+        "animal.care.session.request"
+      ]
+    },
+    "butchery": {
+      "notes": "Blood capture must be added as a step to your standard small-ruminant butchery pipeline.",
+      "emit": [
+        "butchery.session.request"
+      ]
+    }
+  },
+  "processing": {
+    "steps": [
+      {
+        "step": 1,
+        "id": "capture",
+        "title": "Capture Blood in Clean Vessel",
+        "requires": [
+          "ppe",
+          "food-grade-bucket"
+        ],
+        "emit": [
+          "cleaning.session.request"
+        ]
+      },
+      {
+        "step": 2,
+        "id": "filter",
+        "title": "Filter / Defoam",
+        "emit": []
+      },
+      {
+        "step": 3,
+        "id": "dehydrate",
+        "title": "Dehydrate / Dry to Blood Meal",
+        "emit": [
+          "automation.schedule.request"
+        ]
+      },
+      {
+        "step": 4,
+        "id": "bag-and-store",
+        "title": "Bag, Label, and Store in Garden Inputs",
+        "emit": [
+          "inventory.restock.request",
+          "storehouse.plan.generated"
+        ]
+      }
+    ]
+  },
+  "inventory": {
+    "productId": "byproduct-blood-meal-small-ruminant",
+    "unit": "kg",
+    "trackLots": true,
+    "shelfLifeDays": 365
+  },
+  "favoriteSessions": [
+    {
+      "id": "fav-blood-meal-after-butchery",
+      "title": "Blood Meal Run After Small-Ruminant Butchery",
+      "domain": "butchery/byproduct",
+      "schedule": "RRULE:FREQ=DAILY;BYHOUR=15;BYMINUTE=0;BYSECOND=0",
+      "sabbathGuard": true
+    },
+    {
+      "id": "fav-weekly-blood-meal-to-garden",
+      "title": "Weekly Deliver Blood Meal to Garden Inputs",
+      "domain": "garden/byproduct",
+      "schedule": "RRULE:FREQ=WEEKLY;BYDAY=MO;BYHOUR=10;BYMINUTE=0;BYSECOND=0"
+    }
+  ],
+  "scheduleTemplates": [
+    {
+      "id": "blood-meal-after-each-butchery",
+      "title": "After Each Butchery → Blood Meal + Cleaning",
+      "rrules": [
+        "RRULE:FREQ=DAILY"
+      ],
+      "options": {
+        "triggerEvents": [
+          "butchery.session.completed"
+        ],
+        "sabbathGuard": true
+      }
+    }
+  ],
+  "userProfiles": {
+    "allowUserOwnedSchedules": true,
+    "allowUserOwnedFavorites": true,
+    "allowExportShare": true,
+    "shareFormats": [
+      "json",
+      "suka-plan",
+      "calendar-rrule"
+    ]
+  },
+  "events": {
+    "emits": [
+      "byproduct.session.request",
+      "automation.schedule.request",
+      "storehouse.plan.generated",
+      "garden.session.request",
+      "cleaning.session.request",
+      "inventory.restock.request"
+    ],
+    "consumes": [
+      "butchery.session.completed",
+      "garden.plan.changed",
+      "storehouse.targets.changed"
+    ]
+  }
+}

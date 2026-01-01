@@ -1,0 +1,151 @@
+version: "3.9"
+
+# ────────────────────────────────────────────────────────────────────────────────
+# Suka Smart Assistant – n8n stack
+# - Default: n8n + Postgres
+# - Optional profiles:
+#     queue → adds Redis + n8n worker (EXECUTIONS_MODE=queue)
+#     mail  → adds MailHog SMTP test server
+# Place this file in: C:\Users\larho\suka-smart-assistant\Infrastructure\
+# Create a .env in the same folder with the secrets listed below.
+# ────────────────────────────────────────────────────────────────────────────────
+
+name: suka-n8n
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: suka-n8n-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-n8n}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-n8n}
+      TZ: America/Chicago
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-n8n} -d ${POSTGRES_DB:-n8n}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      # Use named volume (Windows-friendly). Back up with: docker run --rm -v suka-n8n_db_data:/var/lib/postgresql/data busybox ls /var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
+    profiles: ["default","queue"]  # always up when default or queue profiles are used
+
+  # ── n8n main (web + worker in 'regular' mode) ────────────────────────────────
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: suka-n8n-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+        required: false
+    environment:
+      # Core app URL (used for webhook URLs in emails, etc.)
+      # If behind a reverse proxy with HTTPS, set to https://your-domain
+      N8N_HOST: ${N8N_HOST:-localhost}
+      N8N_PORT: ${N8N_PORT:-5678}
+      N8N_PROTOCOL: ${N8N_PROTOCOL:-http}
+
+      # Security: REQUIRED. Keep 32+ chars. Rotating this will invalidate secrets.
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?set in .env}
+
+      # Timezone
+      GENERIC_TIMEZONE: ${GENERIC_TIMEZONE:-America/Chicago}
+
+      # Database (Postgres)
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: db
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB:-n8n}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER:-n8n}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+
+      # Webhook URL base your app will POST to (use this inside your app's .env too)
+      # Example: http://localhost:5678/webhook
+      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL:-http://localhost:${N8N_PORT:-5678}}
+
+      # Optional: JWT auth for n8n UI
+      # N8N_USER_MANAGEMENT_DISABLED: "true"
+
+      # Switch to queue mode automatically when 'queue' profile is used
+      EXECUTIONS_MODE: ${EXECUTIONS_MODE:-regular}
+
+      # SMTP (for emails). If using MailHog profile, point to it; else set your real SMTP.
+      N8N_EMAIL_MODE: ${N8N_EMAIL_MODE:-smtp}
+      N8N_SMTP_HOST: ${N8N_SMTP_HOST:-mailhog}
+      N8N_SMTP_PORT: ${N8N_SMTP_PORT:-1025}
+      N8N_SMTP_USER: ${N8N_SMTP_USER:-}
+      N8N_SMTP_PASS: ${N8N_SMTP_PASS:-}
+      N8N_SMTP_SENDER: ${N8N_SMTP_SENDER:-no-reply@suka.local}
+
+      # Optional telemetry settings
+      N8N_DIAGNOSTICS_ENABLED: "false"
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+    volumes:
+      # Windows-friendly named volume for n8n data (credentials, workflows, logs)
+      - n8n_data:/home/node/.n8n
+
+  # ── Redis (only used in queue mode) ───────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: suka-n8n-redis
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    profiles: ["queue"]
+
+  # ── n8n worker (queue mode) ──────────────────────────────────────────────────
+  n8n-worker:
+    image: n8nio/n8n:latest
+    container_name: suka-n8n-worker
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      # Same DB + encryption + timezone as main n8n
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      GENERIC_TIMEZONE: ${GENERIC_TIMEZONE:-America/Chicago}
+
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: db
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB:-n8n}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER:-n8n}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+
+      EXECUTIONS_MODE: queue
+      QUEUE_BULL_REDIS_HOST: redis
+      QUEUE_BULL_REDIS_PORT: 6379
+      QUEUE_BULL_REDIS_DB: 0
+
+      # Worker doesn't need to expose HTTP
+      N8N_HOST: worker
+      N8N_PORT: 5679
+      N8N_PROTOCOL: http
+
+      N8N_DIAGNOSTICS_ENABLED: "false"
+    command: ["n8n", "worker"]
+    profiles: ["queue"]
+
+  # ── MailHog (dev/test email sink) ────────────────────────────────────────────
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: suka-mailhog
+    restart: unless-stopped
+    ports:
+      - "8025:8025"   # Web UI at http://localhost:8025
+    profiles: ["mail"]
+
+# ────────────────────────────────────────────────────────────────────────────────
+# Volumes
+# ────────────────────────────────────────────────────────────────────────────────
+volumes:
+  db_data:
+  n8n_data:

@@ -1,0 +1,355 @@
+{
+  "$id": "https://schemas.suka.smart/resource.device.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SSA Resource — Device",
+  "description": "Canonical device resource contract for Suka Smart Assistant (SSA). Devices participate in session execution (Play/Remote/Overlay) and scheduling (imports → intelligence → automation). Schema focuses on availability, capacity, cooldowns, quiet hours, and a usage calendar.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "class", "name", "createdAt", "capacity", "availability"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable device id (ULID/UUID or household-scoped key).",
+      "pattern": "^[A-Za-z0-9_.:-]{4,}$"
+    },
+    "class": {
+      "type": "string",
+      "description": "Device class taxonomy for routing & capability matching.",
+      "enum": [
+        "phone",
+        "tablet",
+        "laptop",
+        "desktop",
+        "display",
+        "tv",
+        "speaker",
+        "camera",
+        "hub",
+        "sensor",
+        "robot",
+        "oven",
+        "cooktop",
+        "stove",
+        "microwave",
+        "fridge",
+        "freezer",
+        "dishwasher",
+        "washer",
+        "dryer",
+        "dehydrator",
+        "smoker",
+        "pressure_cooker",
+        "air_fryer",
+        "custom"
+      ]
+    },
+    "name": {
+      "type": "string",
+      "description": "Human label (e.g., 'Kitchen Display', 'Oven Main').",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "room": {
+      "type": "string",
+      "description": "Named household location/zone.",
+      "maxLength": 64
+    },
+    "ownerUserId": {
+      "type": "string",
+      "description": "Optional owner/primary user id.",
+      "pattern": "^[A-Za-z0-9_.:-]{2,}$"
+    },
+
+    "roles": {
+      "type": "array",
+      "description": "How automation can assign this device (e.g., overlay, remote, timer, sear, bake).",
+      "items": { "type": "string", "minLength": 1, "maxLength": 48, "pattern": "^[a-z0-9._-]+$" }
+    },
+
+    "capabilities": {
+      "type": "object",
+      "description": "Feature flags used by runtime (transport, media, sensors, domain-specific).",
+      "additionalProperties": false,
+      "properties": {
+        "transport": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["webrtc", "websocket", "local"] }
+        },
+        "media": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "tts": { "type": "boolean" },
+            "audioOut": { "type": "boolean" },
+            "haptics": { "type": "boolean" },
+            "display": { "type": "boolean" }
+          }
+        },
+        "sensors": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["thermometer", "scale", "camera", "humidity", "power", "custom"] }
+        }
+      }
+    },
+
+    "capacity": {
+      "type": "object",
+      "description": "Throughput & concurrency shaping for the scheduler.",
+      "additionalProperties": false,
+      "properties": {
+        "maxParallel": { "type": "integer", "minimum": 1, "default": 1 },
+        "channels": {
+          "type": "array",
+          "description": "Named sub-capacities (e.g., burners on cooktop, racks in oven).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,}$" },
+              "label": { "type": "string", "maxLength": 64 },
+              "maxParallel": { "type": "integer", "minimum": 1, "default": 1 },
+              "tags": { "type": "array", "items": { "type": "string", "pattern": "^[a-z0-9._-]+$" } }
+            },
+            "required": ["id", "maxParallel"]
+          }
+        },
+        "limits": {
+          "type": "object",
+          "description": "Optional quantitative limits (units are domain-specific).",
+          "additionalProperties": false,
+          "properties": {
+            "powerW": { "type": "number", "minimum": 0 },
+            "tempMinC": { "type": "number" },
+            "tempMaxC": { "type": "number" },
+            "volumeL": { "type": "number", "minimum": 0 }
+          }
+        }
+      },
+      "required": ["maxParallel"]
+    },
+
+    "cooldowns": {
+      "type": "object",
+      "description": "Warmup/cooldown envelopes and per-tag cooldowns used to place buffers between uses.",
+      "additionalProperties": false,
+      "properties": {
+        "warmupMs": { "$ref": "#/definitions/durationMs" },
+        "cooldownMs": { "$ref": "#/definitions/durationMs" },
+        "perTag": {
+          "type": "array",
+          "description": "Overrides per workload tag (e.g., 'bake', 'sear', 'sanitize').",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "tag": { "type": "string", "pattern": "^[a-z0-9._-]{2,}$" },
+              "warmupMs": { "$ref": "#/definitions/durationMs" },
+              "cooldownMs": { "$ref": "#/definitions/durationMs" }
+            },
+            "required": ["tag"]
+          }
+        }
+      }
+    },
+
+    "availability": {
+      "type": "object",
+      "description": "Operational availability windows (quiet hours, blackout, exceptions).",
+      "additionalProperties": false,
+      "properties": {
+        "timezone": { "type": "string", "maxLength": 64 },
+        "quietHours": {
+          "type": "array",
+          "description": "Recurring quiet windows where automation should de-prioritize or mute media.",
+          "items": { "$ref": "#/definitions/timeWindow" }
+        },
+        "blackout": {
+          "type": "array",
+          "description": "Hard disallow windows (maintenance, sleep-only zones, HOA rules).",
+          "items": { "$ref": "#/definitions/timeWindow" }
+        },
+        "exceptions": {
+          "type": "array",
+          "description": "One-off overrides (e.g., holiday party). If overlaps, exceptions win.",
+          "items": { "$ref": "#/definitions/timeWindow" }
+        }
+      }
+    },
+
+    "usageCalendar": {
+      "type": "array",
+      "description": "Busy/held intervals used by the planner (similar to ICS).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{4,}$" },
+          "title": { "type": "string", "maxLength": 160 },
+          "start": { "type": "string", "format": "date-time" },
+          "end": { "type": "string", "format": "date-time" },
+          "source": { "type": "string", "enum": ["session", "manual", "import", "maintenance", "external"] },
+          "sessionId": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{8,}$" },
+          "rrule": { "type": "string", "maxLength": 512 },
+          "tags": { "type": "array", "items": { "type": "string", "pattern": "^[a-z0-9._-]+$" } }
+        },
+        "required": ["start", "end", "source"]
+      }
+    },
+
+    "health": {
+      "type": "object",
+      "description": "Optional health and lifecycle telemetry.",
+      "additionalProperties": false,
+      "properties": {
+        "status": { "type": "string", "enum": ["ok", "degraded", "offline", "maintenance"] },
+        "lastSeenAt": { "type": "string", "format": "date-time" },
+        "batteryPct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "firmware": { "type": "string", "maxLength": 64 }
+      }
+    },
+
+    "network": {
+      "type": "object",
+      "description": "Connectivity details for transport selection.",
+      "additionalProperties": false,
+      "properties": {
+        "host": { "type": "string", "maxLength": 128 },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "protocol": { "type": "string", "enum": ["https", "http", "ws", "wss", "local"] },
+        "rtcPreferred": { "type": "boolean", "default": true }
+      }
+    },
+
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+
+    "tags": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "maxLength": 48, "pattern": "^[a-z0-9._-]+$" }
+    },
+
+    "meta": {
+      "type": "object",
+      "description": "Forward-compatible extension bucket.",
+      "additionalProperties": true
+    }
+  },
+
+  "definitions": {
+    "durationMs": { "type": "integer", "minimum": 0 },
+    "timeWindow": {
+      "type": "object",
+      "description": "Recurring or one-off time window.",
+      "additionalProperties": false,
+      "properties": {
+        "label": { "type": "string", "maxLength": 120 },
+        "start": { "type": "string", "format": "date-time", "description": "Use for one-off windows." },
+        "end": { "type": "string", "format": "date-time" },
+        "rrule": { "type": "string", "maxLength": 512, "description": "RFC 5545 RRULE string for recurring windows." },
+        "byDay": {
+          "type": "array",
+          "description": "Simple weekly recurrence helper (0=Sun … 6=Sat). Use RRULE for complex cases.",
+          "items": { "type": "integer", "minimum": 0, "maximum": 6 }
+        },
+        "timeOfDay": {
+          "type": "object",
+          "description": "Daily local-time window, ignoring date.",
+          "additionalProperties": false,
+          "properties": {
+            "start": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" },
+            "end": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" }
+          }
+        },
+        "hard": {
+          "type": "boolean",
+          "description": "If true, planner must not schedule here (blackout). If false, it's a soft window (quiet hours).",
+          "default": false
+        }
+      },
+      "anyOf": [
+        { "required": ["rrule"] },
+        { "required": ["start", "end"] },
+        { "required": ["byDay", "timeOfDay"] }
+      ]
+    }
+  },
+
+  "examples": [
+    {
+      "id": "device.kitchen.display",
+      "class": "display",
+      "name": "Kitchen Display",
+      "room": "kitchen",
+      "roles": ["overlay", "remote"],
+      "capabilities": { "transport": ["webrtc", "websocket", "local"], "media": { "tts": true, "audioOut": true, "haptics": false, "display": true } },
+      "capacity": {
+        "maxParallel": 2,
+        "channels": [
+          { "id": "pane.left", "label": "Left Pane", "maxParallel": 1, "tags": ["overlay"] },
+          { "id": "pane.right", "label": "Right Pane", "maxParallel": 1, "tags": ["overlay"] }
+        ]
+      },
+      "cooldowns": {
+        "warmupMs": 2000,
+        "cooldownMs": 0,
+        "perTag": [{ "tag": "tts", "warmupMs": 200, "cooldownMs": 50 }]
+      },
+      "availability": {
+        "timezone": "America/Chicago",
+        "quietHours": [
+          { "label": "Night", "byDay": [0,1,2,3,4,5,6], "timeOfDay": { "start": "21:30", "end": "06:30" } }
+        ],
+        "blackout": [
+          { "label": "Kids Sleep", "byDay": [0,1,2,3,4,5,6], "timeOfDay": { "start": "20:00", "end": "05:30" }, "hard": true }
+        ],
+        "exceptions": [
+          { "label": "Holiday Party", "start": "2025-12-24T22:00:00.000Z", "end": "2025-12-25T04:00:00.000Z" }
+        ]
+      },
+      "usageCalendar": [
+        {
+          "id": "hold-1",
+          "title": "Family Movie",
+          "start": "2025-11-09T01:00:00.000Z",
+          "end": "2025-11-09T03:00:00.000Z",
+          "source": "manual",
+          "tags": ["quiet"]
+        },
+        {
+          "id": "sess-xyz",
+          "title": "Overlay for Cooking",
+          "start": "2025-11-08T23:00:00.000Z",
+          "end": "2025-11-09T00:30:00.000Z",
+          "source": "session",
+          "sessionId": "sess_01JABCXYZ"
+        }
+      ],
+      "network": { "host": "kitchen-display.local", "protocol": "local", "rtcPreferred": true },
+      "health": { "status": "ok", "lastSeenAt": "2025-11-08T13:15:00.000Z" },
+      "tags": ["overlay", "lan"],
+      "createdAt": "2025-11-01T12:00:00.000Z",
+      "updatedAt": "2025-11-08T13:15:00.000Z",
+      "meta": { "vendor": "Suka", "model": "SV-Display-1" }
+    },
+    {
+      "id": "oven.main",
+      "class": "oven",
+      "name": "Main Oven",
+      "room": "kitchen",
+      "roles": ["bake", "roast", "dehydrate"],
+      "capacity": {
+        "maxParallel": 1,
+        "channels": [{ "id": "rack-1", "label": "Rack 1", "maxParallel": 1 }],
+        "limits": { "tempMinC": 40, "tempMaxC": 280, "volumeL": 70 }
+      },
+      "cooldowns": { "warmupMs": 900000, "cooldownMs": 600000 },
+      "availability": {
+        "timezone": "America/Chicago",
+        "quietHours": [{ "label": "Night Quiet", "byDay": [0,1,2,3,4,5,6], "timeOfDay": { "start": "22:00", "end": "06:00" } }]
+      },
+      "usageCalendar": [],
+      "createdAt": "2025-09-10T15:00:00.000Z",
+      "updatedAt": "2025-11-08T13:15:00.000Z"
+    }
+  ]
+}

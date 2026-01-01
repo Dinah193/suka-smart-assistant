@@ -1,0 +1,257 @@
+{
+  "name": "Label Maker + Preservation Ticket",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "label-maker",
+        "responseMode": "responseNode",
+        "options": {
+          "binaryData": false
+        }
+      },
+      "id": "Webhook_LabelMaker",
+      "name": "Webhook (Label Maker)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1080,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/*\nExpected body examples:\n{\n  \"userId\": \"user_123\",\n  \"method\": \"can\" | \"pickle\" | \"freeze\" | \"dehydrate\" | \"ferment\",\n  \"productName\": \"Tomato Sauce\",\n  \"items\": [\n    { \"variety\": \"Roma\", \"netWeight\": 16, \"unit\": \"oz\", \"jarSize\": \"pint\", \"count\": 7, \"ingredients\": [\"Tomato\",\"Salt\",\"Basil\"] }\n  ],\n  \"shelfLifeDays\": 365,              // optional global override\n  \"templateId\": \"jar_label_v1\",     // optional\n  \"makeTicket\": true                  // default true\n}\n*/\nconst body = items[0]?.json || {};\nconst apiBase = $env.SUKA_API_BASE || 'http://localhost:4000';\n\nfunction normArr(x){ return Array.isArray(x) ? x : (x ? [x] : []); }\nfunction iso(x){ try { return x ? new Date(x).toISOString() : new Date().toISOString(); } catch { return new Date().toISOString(); } }\nfunction addDays(dateISO, days){ const d = new Date(dateISO); d.setDate(d.getDate() + Number(days || 0)); return d.toISOString().slice(0,10); }\nfunction today(){ return new Date().toISOString().slice(0,10); }\nfunction pad(n){ return String(n).padStart(2,'0'); }\nfunction batchCode(method){ const d = new Date(); const y=d.getFullYear(); const m=pad(d.getMonth()+1); const dd=pad(d.getDate()); const tag=String(method||'BATCH').toUpperCase().replace(/[^A-Z0-9]/g,''); const rand=String(Math.floor(Math.random()*1000)).padStart(3,'0'); return `${tag}-${y}${m}${dd}-${rand}`; }\n\nconst DEFAULT_SHELF = { can: 365, pickle: 365, freeze: 180, dehydrate: 365, ferment: 180 };\n\nconst userId = body.userId || null;\nconst method = String(body.method || 'freeze').toLowerCase();\nconst productName = body.productName || null; // optional; we can build one\nconst itemsIn = normArr(body.items).map(x => ({\n  variety: x.variety || null,\n  netWeight: (x.netWeight != null) ? Number(x.netWeight) : null,\n  unit: x.unit || null,\n  jarSize: x.jarSize || null,\n  count: Math.max(1, Number(x.count || 1)),\n  ingredients: normArr(x.ingredients)\n}));\n\n// derive humane product name if not provided\nfunction defaultName(m, v){\n  if (productName) return productName;\n  const base = { can: 'Canned', pickle: 'Pickled', freeze: 'Frozen', dehydrate: 'Dehydrated', ferment: 'Fermented' }[m] || 'Preserved';\n  const noun = v ? `${v}` : 'Produce';\n  return `${base} ${noun}`;\n}\n\nconst packedOn = today();\nconst shelfLifeDays = Number(body.shelfLifeDays || DEFAULT_SHELF[method] || 180);\nconst bestBy = addDays(`${packedOn}T00:00:00.000Z`, shelfLifeDays);\nconst code = batchCode(method);\n\n// Expand into label items (one per physical unit)\nconst labelItems = [];\nfor (const it of itemsIn) {\n  const per = Math.max(1, it.count || 1);\n  for (let i=0; i<per; i++) {\n    labelItems.push({\n      productName: defaultName(method, it.variety),\n      batchCode: code,\n      packedOn,\n      bestBy,\n      method,\n      variety: it.variety || undefined,\n      netWeight: it.netWeight || undefined,\n      unit: it.unit || undefined,\n      jarSize: it.jarSize || undefined,\n      ingredients: it.ingredients.length ? it.ingredients : undefined\n    });\n  }\n}\n\n// Ticket suggestion\nconst makeTicket = (body.makeTicket === undefined) ? true : !!body.makeTicket;\nconst totalUnits = labelItems.length;\nconst ticket = !makeTicket ? null : {\n  title: `Preserve: ${defaultName(method, itemsIn[0]?.variety)} (${totalUnits} unit${totalUnits===1?'':'s'})`,\n  category: 'preservation',\n  labels: ['preservation', method, packedOn],\n  priority: 2,\n  due: iso(),\n  meta: { method, batchCode: code, bestBy, items: itemsIn },\n  userId\n};\n\nreturn [{ json: { apiBase, userId, method, productName: productName || defaultName(method, itemsIn[0]?.variety), templateId: body.templateId || null, labelItems, ticket } }];"
+      },
+      "id": "Fn_Normalize",
+      "name": "Function: Normalize & Build Labels",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -860,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{($json.labelItems || []).length}}",
+              "operation": "larger"
+            }
+          ]
+        }
+      },
+      "id": "IF_HasLabels",
+      "name": "IF labels > 0",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{$json.apiBase}}/labels/print",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={\n  \"userId\": $json.userId,\n  \"items\": $json.labelItems,\n  \"templateId\": $json.templateId\n}"
+      },
+      "id": "HTTP_PrintLabels",
+      "name": "HTTP: Print Labels",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -420,
+        -140
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{!!$json.ticket}}",
+              "operation": "isTrue"
+            }
+          ]
+        }
+      },
+      "id": "IF_MakeTicket",
+      "name": "IF make ticket",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{$json.apiBase}}/automations/tasks",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={{$json.ticket}}"
+      },
+      "id": "HTTP_CreateTicket",
+      "name": "HTTP: Create Preservation Ticket",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -200,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const printed = ($items('HTTP: Print Labels', 0, 0)?.length) ? true : false;\nconst ticketMade = ($items('HTTP: Create Preservation Ticket', 0, 0)?.length) ? true : false;\nconst ctx = items[0].json;\nreturn [{ json: { ok: true, productName: ctx.productName, method: ctx.method, labelsRequested: (ctx.labelItems||[]).length, printed, ticketMade } }];"
+      },
+      "id": "Fn_Summarize",
+      "name": "Function: Summarize",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        40,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "responseBody": "={{$json}}",
+        "responseCode": 200
+      },
+      "id": "Respond_Webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        260,
+        -40
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "Error_Trigger",
+      "name": "On Error (Label Maker)",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1080,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const e = items[0].json;\nreturn [{ json: { ok: false, message: e.message || 'Workflow error', node: e.node?.name, timestamp: new Date().toISOString() } }];"
+      },
+      "id": "Fn_ErrorFormat",
+      "name": "Function: Format Error",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -860,
+        260
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook (Label Maker)": {
+      "main": [
+        [
+          {
+            "node": "Function: Normalize & Build Labels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Normalize & Build Labels": {
+      "main": [
+        [
+          {
+            "node": "IF labels > 0",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF make ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Function: Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF labels > 0": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Print Labels",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "IF make ticket": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Create Preservation Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Function: Summarize": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On Error (Label Maker)": {
+      "main": [
+        [
+          {
+            "node": "Function: Format Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "timezone": "America/Chicago",
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

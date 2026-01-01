@@ -1,0 +1,222 @@
+{
+  "name": "Animal Care Planner",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "animal-care-planner",
+        "responseMode": "responseNode",
+        "options": {
+          "binaryData": false
+        }
+      },
+      "id": "Webhook_Trigger",
+      "name": "Webhook (plan via POST)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -680,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const body = items[0]?.json || {};\n\nfunction addDays(dateISO, days) {\n  const d = new Date(dateISO);\n  d.setDate(d.getDate() + days);\n  return d.toISOString();\n}\nfunction atTime(dateISO, hh = 7, mm = 30, tzOffsetMin = null) {\n  const d = new Date(dateISO);\n  d.setUTCHours(hh, mm, 0, 0);\n  return d.toISOString();\n}\nfunction rangeDays(startISO, days) {\n  const out = [];\n  for (let i = 0; i < days; i++) out.push(addDays(startISO, i));\n  return out;\n}\n\nconst tz = body.tz || 'America/Chicago';\nconst startDate = body.startDate || new Date().toISOString().slice(0,10);\nconst days = Math.max(1, Math.min(60, Number(body.days || 14)));\n\nconst animals = body.animals || [\n  { species: 'chicken', purpose: 'layer', count: 10 },\n  { species: 'goat', purpose: 'dairy', count: 2 },\n  { species: 'bee', purpose: 'honey', hives: 1 }\n];\n\nconst callbackUrl = body.callbackUrl || `${$env.SUKA_API_BASE || 'http://localhost:4000'}/automations/tasks`;\nconst userId = body.userId || null;\n\nconst tasks = [];\n\n// Chickens (layers): daily feed AM/PM, collect eggs AM, coop clean weekly\nconst layers = animals.find(a => String(a.species).toLowerCase() === 'chicken' && String(a.purpose).toLowerCase() === 'layer');\nif (layers && layers.count > 0) {\n  rangeDays(startDate, days).forEach((dISO, idx) => {\n    tasks.push({ title: 'Feed chickens (AM)', category: 'animal-care', labels: ['animal:chicken','feed'], due: atTime(dISO, 7, 30), meta: { species: 'chicken', count: layers.count, slot: 'am' }, priority: 2, callbackUrl, userId });\n    tasks.push({ title: 'Collect eggs', category: 'animal-care', labels: ['animal:chicken','eggs'], due: atTime(dISO, 8, 0), meta: { species: 'chicken', count: layers.count }, priority: 2, callbackUrl, userId });\n    tasks.push({ title: 'Feed chickens (PM)', category: 'animal-care', labels: ['animal:chicken','feed'], due: atTime(dISO, 17, 30), meta: { species: 'chicken', count: layers.count, slot: 'pm' }, priority: 2, callbackUrl, userId });\n    if (idx % 7 === 0) {\n      tasks.push({ title: 'Clean coop & refresh bedding', category: 'sanitation', labels: ['animal:chicken','cleaning'], due: atTime(dISO, 10, 0), priority: 3, callbackUrl, userId });\n    }\n  });\n}\n\n// Goats (dairy): milk AM/PM, hoof check biweekly\nconst goats = animals.find(a => String(a.species).toLowerCase() === 'goat' && String(a.purpose).toLowerCase() === 'dairy');\nif (goats && goats.count > 0) {\n  rangeDays(startDate, days).forEach((dISO, idx) => {\n    tasks.push({ title: 'Milk goats (AM)', category: 'animal-care', labels: ['animal:goat','milk'], due: atTime(dISO, 6, 30), meta: { species: 'goat', count: goats.count, slot: 'am' }, priority: 1, callbackUrl, userId });\n    tasks.push({ title: 'Milk goats (PM)', category: 'animal-care', labels: ['animal:goat','milk'], due: atTime(dISO, 18, 30), meta: { species: 'goat', count: goats.count, slot: 'pm' }, priority: 1, callbackUrl, userId });\n    if (idx % 14 === 0) {\n      tasks.push({ title: 'Goat hoof check', category: 'health', labels: ['animal:goat','health'], due: atTime(dISO, 11, 0), priority: 3, callbackUrl, userId });\n    }\n  });\n}\n\n// Bees: inspections every 2 weeks; honey super check monthly\nconst bees = animals.find(a => /bee|bees|honey/i.test(a.species));\nif (bees && (bees.hives || bees.count || 0) > 0) {\n  rangeDays(startDate, days).forEach((dISO, idx) => {\n    if (idx % 14 === 0) tasks.push({ title: 'Hive inspection', category: 'inspection', labels: ['animal:bee','hive'], due: atTime(dISO, 9, 30), meta: { hives: bees.hives || bees.count }, priority: 3, callbackUrl, userId });\n    if (idx % 28 === 0) tasks.push({ title: 'Honey super check', category: 'production', labels: ['animal:bee','honey'], due: atTime(dISO, 13, 0), meta: { hives: bees.hives || bees.count }, priority: 3, callbackUrl, userId });\n  });\n}\n\n// Optional: feed procurement reminder if given remaining days\nif (typeof body.feedInventoryDaysRemaining === 'number') {\n  const thresh = Number(body.procureThresholdDays || 5);\n  if (body.feedInventoryDaysRemaining < thresh) {\n    tasks.push({ title: 'Buy animal feed', category: 'procurement', labels: ['feed','inventory'], due: atTime(addDays(startDate, 1), 12, 0), priority: 1, meta: { reason: 'low_feed', daysRemaining: body.feedInventoryDaysRemaining }, callbackUrl, userId });\n  }\n}\n\n// Output: one item per task for downstream nodes; also attach summary on the first item for convenience\nconst itemsOut = tasks.map(t => ({ json: t }));\nif (itemsOut.length === 0) {\n  return [{ json: { info: 'No animals provided; nothing to schedule.' } }];\n}\nreturn itemsOut;"
+      },
+      "id": "Function_BuildPlan",
+      "name": "Function: Build Plan",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{$json.callbackUrl}}",
+        "jsonParameters": true,
+        "options": {
+          "redirect": {
+            "followRedirects": true
+          },
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={\n  \"title\": $json.title,\n  \"due\": $json.due,\n  \"category\": $json.category,\n  \"labels\": $json.labels,\n  \"priority\": $json.priority,\n  \"meta\": $json.meta,\n  \"userId\": $json.userId\n}"
+      },
+      "id": "HTTP_CreateTasks",
+      "name": "HTTP: Create Suka Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -80,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const stats = items.reduce((acc, it) => {\n  const c = (it.json && it.json.category) || 'other';\n  acc.total++;\n  acc.byCategory[c] = (acc.byCategory[c] || 0) + 1;\n  return acc;\n}, { total: 0, byCategory: {} });\n\nreturn [{ json: { ok: true, message: `Planned ${stats.total} tasks`, stats } }];"
+      },
+      "id": "Function_Summarize",
+      "name": "Function: Summarize (for webhook)",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "responseBody": "={{$json}}",
+        "responseCode": 200
+      },
+      "id": "Respond_Webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        140
+      ]
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyWeek",
+              "hour": 6,
+              "minute": 0,
+              "weeksInterval": 1,
+              "weekly": {
+                "days": [
+                  "sunday"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "id": "Cron_Weekly",
+      "name": "Cron (Weekly refresh)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -680,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "startDate",
+              "value": "={{new Date().toISOString().slice(0,10)}}"
+            },
+            {
+              "name": "days",
+              "value": "14"
+            },
+            {
+              "name": "tz",
+              "value": "America/Chicago"
+            },
+            {
+              "name": "callbackUrl",
+              "value": "={{`${$env.SUKA_API_BASE || 'http://localhost:4000'}/automations/tasks`}}"
+            }
+          ],
+          "boolean": [
+            {
+              "name": "auto",
+              "value": true
+            }
+          ]
+        }
+      },
+      "id": "Set_Defaults",
+      "name": "Set Defaults (for Cron)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        -520,
+        260
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook (plan via POST)": {
+      "main": [
+        [
+          {
+            "node": "Function: Build Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Build Plan": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Create Suka Task",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Function: Summarize (for webhook)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Summarize (for webhook)": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron (Weekly refresh)": {
+      "main": [
+        [
+          {
+            "node": "Set Defaults (for Cron)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Defaults (for Cron)": {
+      "main": [
+        [
+          {
+            "node": "Function: Build Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "timezone": "America/Chicago",
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

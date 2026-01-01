@@ -1,0 +1,415 @@
+{
+  "version": "2025.11.01",
+  "updatedAt": "2025-11-09T00:00:00Z",
+  "description": "Service Level Objectives (SLOs) and operational SLAs for SSA domains. Evaluated by analytics/ops and enforced via automation where applicable.",
+  "timeBase": {
+    "rollingWindowDays": 28,
+    "evaluationCadenceMinutes": 15,
+    "timezone": "America/Chicago",
+    "quietHours": [22, 7],
+    "sabbathGuard": {
+      "enabled": true,
+      "startHint": "Fri 18:00",
+      "endHint": "Sat 21:00"
+    }
+  },
+  "errorBudget": {
+    "windowDays": 28,
+    "burnAlertRatios": {
+      "fast2h": 14,
+      "slow24h": 6
+    },
+    "consumptionActions": {
+      "warnAt": 0.5,
+      "limitAt": 0.8,
+      "freezeAt": 1.0
+    }
+  },
+  "globalObjectives": {
+    "scheduleAdherencePct": 0.9,
+    "overrunRatePct": 0.15,
+    "completionSuccessPct": 0.98,
+    "dataFreshnessMinutes": 5
+  },
+  "alerting": {
+    "channels": [
+      "ui.banner",
+      "eventBus",
+      "ops.log"
+    ],
+    "events": {
+      "warning": "slo.alert.warning",
+      "critical": "slo.alert.critical",
+      "recovered": "slo.alert.recovered"
+    },
+    "rateLimits": {
+      "perTypePerHour": 6
+    }
+  },
+  "profiles": [
+    {
+      "key": "meals.cooking.session",
+      "label": "Cooking Session",
+      "sla": {
+        "p50StartToCompleteMinutes": 45,
+        "p90StartToCompleteMinutes": 75
+      },
+      "slo": {
+        "scheduleAdherencePct": 0.92,
+        "overrunRatePct": 0.18,
+        "completionSuccessPct": 0.985,
+        "inventoryMatchPct": 0.97
+      },
+      "gates": {
+        "blockDuringQuietHours": false,
+        "respectSabbath": true
+      },
+      "alertThresholds": {
+        "overrunRatePct": {
+          "warning": 0.22,
+          "critical": 0.30
+        },
+        "scheduleAdherencePct": {
+          "warning": 0.88,
+          "critical": 0.80
+        }
+      },
+      "correctiveActions": [
+        {
+          "when": "overrunRatePct>critical",
+          "emit": "schedule.autofit",
+          "data": {
+            "strategy": "compress_neighbors|defer_low_priority",
+            "reason": "slo_guard.cooking_overruns"
+          }
+        },
+        {
+          "when": "scheduleAdherencePct<warning",
+          "emit": "eta.policy.adjust",
+          "data": {
+            "domain": "cooking",
+            "biasFactor": 0.10
+          }
+        }
+      ]
+    },
+    {
+      "key": "cleaning.session",
+      "label": "Cleaning Session",
+      "sla": {
+        "p50StartToCompleteMinutes": 30,
+        "p90StartToCompleteMinutes": 60
+      },
+      "slo": {
+        "scheduleAdherencePct": 0.9,
+        "overrunRatePct": 0.2,
+        "completionSuccessPct": 0.98
+      },
+      "gates": {
+        "blockDuringQuietHours": true,
+        "respectSabbath": true
+      },
+      "alertThresholds": {
+        "overrunRatePct": {
+          "warning": 0.25,
+          "critical": 0.35
+        }
+      },
+      "correctiveActions": [
+        {
+          "when": "overrunRatePct>warning",
+          "emit": "schedule.autofit",
+          "data": {
+            "strategy": "defer_low_priority",
+            "reason": "slo_guard.cleaning_overruns"
+          }
+        }
+      ]
+    },
+    {
+      "key": "garden.care",
+      "label": "Garden Care Window",
+      "sla": {
+        "taskLatencyMinutes": 120
+      },
+      "slo": {
+        "scheduleAdherencePct": 0.88,
+        "completionSuccessPct": 0.975
+      },
+      "gates": {
+        "blockDuringQuietHours": false,
+        "respectSabbath": true
+      },
+      "alertThresholds": {
+        "scheduleAdherencePct": {
+          "warning": 0.85,
+          "critical": 0.75
+        }
+      },
+      "correctiveActions": [
+        {
+          "when": "scheduleAdherencePct<critical",
+          "emit": "garden.care.schedule.requested",
+          "data": {
+            "priority": "high",
+            "reason": "slo_guard.garden_backlog"
+          }
+        }
+      ]
+    },
+    {
+      "key": "preservation.session",
+      "label": "Preservation Session",
+      "sla": {
+        "p50StartToCompleteMinutes": 90,
+        "p90StartToCompleteMinutes": 150
+      },
+      "slo": {
+        "scheduleAdherencePct": 0.9,
+        "overrunRatePct": 0.25,
+        "completionSuccessPct": 0.98
+      },
+      "gates": {
+        "blockDuringQuietHours": true,
+        "respectSabbath": true
+      },
+      "alertThresholds": {
+        "overrunRatePct": {
+          "warning": 0.3,
+          "critical": 0.4
+        }
+      },
+      "correctiveActions": [
+        {
+          "when": "overrunRatePct>warning",
+          "emit": "schedule.autofit",
+          "data": {
+            "strategy": "expand_buffers|defer_non_perishable",
+            "reason": "slo_guard.preservation_overruns"
+          }
+        }
+      ]
+    },
+    {
+      "key": "animals.butchery",
+      "label": "Butchery Session",
+      "sla": {
+        "p50StartToCompleteMinutes": 120,
+        "p90StartToCompleteMinutes": 210
+      },
+      "slo": {
+        "scheduleAdherencePct": 0.88,
+        "overrunRatePct": 0.22,
+        "completionSuccessPct": 0.975,
+        "safetyIncidentRatePct": 0.0
+      },
+      "gates": {
+        "blockDuringQuietHours": true,
+        "respectSabbath": true
+      },
+      "alertThresholds": {
+        "overrunRatePct": {
+          "warning": 0.28,
+          "critical": 0.38
+        }
+      },
+      "correctiveActions": [
+        {
+          "when": "overrunRatePct>critical",
+          "emit": "session.pause.request",
+          "data": {
+            "domain": "animals",
+            "reason": "slo_guard.butchery_overruns"
+          }
+        }
+      ]
+    },
+    {
+      "key": "storehouse.stockPlan",
+      "label": "Storehouse Stock Planning",
+      "sla": {
+        "planningLatencyMinutes": 10
+      },
+      "slo": {
+        "inventoryMatchPct": 0.98,
+        "planGenerationSuccessPct": 0.995
+      },
+      "gates": {
+        "blockDuringQuietHours": false,
+        "respectSabbath": true
+      },
+      "alertThresholds": {
+        "inventoryMatchPct": {
+          "warning": 0.96,
+          "critical": 0.92
+        }
+      },
+      "correctiveActions": [
+        {
+          "when": "inventoryMatchPct<warning",
+          "emit": "inventory.audit.requested",
+          "data": {
+            "reason": "slo_guard.inventory_mismatch"
+          }
+        }
+      ]
+    },
+    {
+      "key": "import.pipeline",
+      "label": "Import Normalization",
+      "sla": {
+        "p95NormalizeLatencySeconds": 3
+      },
+      "slo": {
+        "normalizeSuccessPct": 0.995,
+        "endToEndLatencySeconds": 10
+      },
+      "gates": {
+        "blockDuringQuietHours": false,
+        "respectSabbath": false
+      },
+      "alertThresholds": {
+        "normalizeSuccessPct": {
+          "warning": 0.99,
+          "critical": 0.97
+        },
+        "endToEndLatencySeconds": {
+          "warning": 15,
+          "critical": 30
+        }
+      },
+      "correctiveActions": [
+        {
+          "when": "normalizeSuccessPct<critical",
+          "emit": "import.pipeline.scale_out",
+          "data": {
+            "reason": "slo_guard.import_failures"
+          }
+        }
+      ]
+    },
+    {
+      "key": "workers.eta",
+      "label": "ETA Minute-Tick Worker",
+      "sla": {
+        "tickJitterSeconds": 5
+      },
+      "slo": {
+        "tickOnTimePct": 0.98,
+        "queueDelaySeconds": 2
+      },
+      "gates": {
+        "blockDuringQuietHours": false,
+        "respectSabbath": false
+      },
+      "alertThresholds": {
+        "tickOnTimePct": {
+          "warning": 0.95,
+          "critical": 0.9
+        }
+      },
+      "correctiveActions": [
+        {
+          "when": "tickOnTimePct<warning",
+          "emit": "worker.restart.request",
+          "data": {
+            "worker": "eta",
+            "reason": "slo_guard.eta_delay"
+          }
+        }
+      ]
+    },
+    {
+      "key": "workers.calibration",
+      "label": "Nightly Calibration Worker",
+      "sla": {
+        "startWindowLocalHour": 2,
+        "completeWithinMinutes": 30
+      },
+      "slo": {
+        "successPct": 0.99
+      },
+      "gates": {
+        "blockDuringQuietHours": false,
+        "respectSabbath": false
+      },
+      "alertThresholds": {
+        "successPct": {
+          "warning": 0.97,
+          "critical": 0.9
+        }
+      },
+      "correctiveActions": [
+        {
+          "when": "successPct<warning",
+          "emit": "calibration.nightly.run",
+          "data": {
+            "reason": "slo_guard.retry",
+            "domains": [
+              "cooking",
+              "cleaning",
+              "garden",
+              "animals",
+              "storehouse",
+              "preservation"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "automation.bridge",
+      "label": "Automation Runtime Bridge",
+      "sla": {
+        "medianCommandLatencyMs": 80,
+        "p99CommandLatencyMs": 250
+      },
+      "slo": {
+        "commandSuccessPct": 0.999
+      },
+      "gates": {
+        "blockDuringQuietHours": false,
+        "respectSabbath": false
+      },
+      "alertThresholds": {
+        "commandSuccessPct": {
+          "warning": 0.995,
+          "critical": 0.98
+        }
+      },
+      "correctiveActions": [
+        {
+          "when": "commandSuccessPct<critical",
+          "emit": "automation.bridge.failover",
+          "data": {
+            "reason": "slo_guard.bridge_failures"
+          }
+        }
+      ]
+    }
+  ],
+  "evaluationMapping": {
+    "metrics": {
+      "scheduleAdherencePct": ["schedule.plan.recomputed", "session.started", "session.completed"],
+      "overrunRatePct": ["schedule.overrun.detected", "timer.overrun", "session.completed"],
+      "completionSuccessPct": ["session.completed"],
+      "inventoryMatchPct": ["inventory.updated", "inventory.audit.result"],
+      "normalizeSuccessPct": ["import.parsed", "import.error"],
+      "tickOnTimePct": ["eta.batch.updated"],
+      "commandSuccessPct": ["schedule.plan.recomputed", "automation.command.failed"]
+    },
+    "dimensions": [
+      "domain",
+      "sessionType"
+    ]
+  },
+  "actionsBus": {
+    "source": "config.slo.sla",
+    "payloadShape": {
+      "type": "string",
+      "ts": "ISO-8601",
+      "source": "string",
+      "data": "object"
+    }
+  }
+}

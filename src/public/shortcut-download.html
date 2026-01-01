@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en" class="h-full bg-slate-50">
+  <head>
+    <meta charset="utf-8" />
+    <title>Suka Smart Assistant – Shortcuts & Bookmarklets</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="Install import/plan shortcuts for Cleaning, Garden, Storehouse, Meals, and Animal Care/Butchery into your browser."
+    />
+    <style>
+      :root {
+        --suka-brand: 222 84% 56%;
+        --suka-brand-600: 222 84% 46%;
+        --panel: 0 0% 100%;
+        --panel-2: 210 40% 98%;
+        --line: 210 20% 90%;
+        --text: 222 20% 18%;
+        --text-subtle: 222 15% 42%;
+        --radius-lg: 18px;
+        --shadow-1: 0 18px 30px rgba(15, 23, 42, 0.12);
+      }
+      body {
+        min-height: 100%;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: hsl(var(--text));
+      }
+      .page-shell {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 32px 16px 56px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      .hero {
+        background: radial-gradient(circle at 0 0, rgba(59, 130, 246, 0.18), rgba(255, 255, 255, 0));
+        border-radius: 26px;
+        padding: 28px 28px 30px;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        box-shadow: var(--shadow-1);
+      }
+      h1 {
+        font-size: clamp(1.6rem, 3vw, 2.1rem);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+      .muted {
+        color: hsl(var(--text-subtle));
+        max-width: 50rem;
+        line-height: 1.4;
+      }
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+      }
+      .card {
+        background: hsl(var(--panel));
+        border: 1px solid hsl(var(--line));
+        border-radius: 18px;
+        padding: 16px 16px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.03);
+      }
+      .card h2 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .badge {
+        display: inline-flex;
+        padding: 2px 10px 3px;
+        background: hsla(var(--suka-brand)/0.08);
+        border: 1px solid hsla(var(--suka-brand)/0.4);
+        border-radius: 999px;
+        font-size: 0.68rem;
+        color: hsl(var(--suka-brand));
+        gap: 4px;
+        align-items: center;
+      }
+      .btn {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        border: 1px solid hsl(var(--suka-brand-600));
+        background: hsl(var(--suka-brand));
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.78rem;
+        height: 38px;
+        padding: 0 16px;
+        cursor: pointer;
+        transition: transform 120ms ease, box-shadow 120ms ease;
+      }
+      .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 24px rgba(59, 130, 246, 0.18);
+      }
+      .btn.secondary {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(148, 163, 184, 0.5);
+        color: hsl(var(--text));
+      }
+      .pill-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .pill {
+        background: hsl(var(--panel-2));
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 999px;
+        padding: 3px 10px 4px;
+        font-size: 0.65rem;
+        color: hsl(var(--text-subtle));
+      }
+      .tiny {
+        font-size: 0.67rem;
+        color: hsl(var(--text-subtle));
+      }
+      pre.code {
+        background: #0f172a;
+        color: #e2e8f0;
+        border-radius: 14px;
+        padding: 12px 14px;
+        font-size: 0.7rem;
+        overflow-x: auto;
+        line-height: 1.35;
+      }
+      .section-title {
+        font-size: 0.82rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 18px;
+      }
+      @media (max-width: 880px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body class="h-full">
+    <div class="page-shell" id="root-shell">
+      <header class="hero">
+        <h1>Install Suka Household Shortcuts</h1>
+        <p class="muted">
+          Drag these to your bookmarks bar or click to install into your browser/app. Each shortcut sends a structured
+          event into your Suka Smart Assistant so it can auto-plan <strong>Cleaning</strong>, <strong>Garden</strong>,
+          <strong>Storehouse</strong>, <strong>Meals</strong>, and <strong>Animal / Butchery</strong> tasks — and save
+          them as <em>your</em> favorites, not just system templates.
+        </p>
+        <p class="tiny" id="env-msg">Detecting automation runtime…</p>
+      </header>
+
+      <!-- MAIN GRID OF SHORTCUTS -->
+      <section class="card-grid" aria-label="Suka household shortcut library">
+        <!-- CLEANING -->
+        <article class="card" data-domain="cleaning">
+          <h2>
+            🧹 Cleaning: Zone / Declutter / Deep
+            <span class="badge">new</span>
+          </h2>
+          <p class="tiny">
+            Sends <code>cleaning/session/schedule</code> to the automation runtime. Your runtime maps this to
+            <code>automation.schedule.request</code> and persists it.
+          </p>
+          <div class="pill-list">
+            <span class="pill">zones</span>
+            <span class="pill">5-bin declutter</span>
+            <span class="pill">laundry</span>
+            <span class="pill">weekly reset</span>
+          </div>
+          <div class="row">
+            <button class="btn" data-action="install-cleaning">Install Cleaning Shortcut</button>
+            <button class="btn secondary" data-action="favorite-cleaning">Save as Favorite</button>
+          </div>
+          <p class="tiny">
+            Tip: system will also offer reverse generation — e.g. “make a storehouse cleanout session from current
+            inventory”.
+          </p>
+        </article>
+
+        <!-- GARDEN -->
+        <article class="card" data-domain="garden">
+          <h2>🌱 Garden: Plan, Care & Harvest</h2>
+          <p class="tiny">
+            For seed packet OCR, bed prep, watering cadence, succession schedule. Imports from Pinterest → Planner too.
+          </p>
+          <div class="pill-list">
+            <span class="pill">seed inbox</span>
+            <span class="pill">care/irrigation</span>
+            <span class="pill">harvest → storehouse</span>
+          </div>
+          <div class="row">
+            <button class="btn" data-action="install-garden">Install Garden Shortcut</button>
+            <button class="btn secondary" data-action="favorite-garden">Save Garden Session</button>
+          </div>
+          <p class="tiny">
+            Uses <code>garden/session/schedule</code> → runtime → <code>garden.session.generate</code>.
+          </p>
+        </article>
+
+        <!-- STOREHOUSE -->
+        <article class="card" data-domain="storehouse">
+          <h2>🏛️ Storehouse Stock Planner</h2>
+          <p class="tiny">
+            Build stock goals by grocery section (produce, dry, frozen, bulk, F&B processing). Compare to inventory →
+            emit cycle insights.
+          </p>
+          <div class="pill-list">
+            <span class="pill">grocery sections</span>
+            <span class="pill">pricebook sync</span>
+            <span class="pill">batch cooking feeder</span>
+          </div>
+          <div class="row">
+            <button class="btn" data-action="install-storehouse">Install Storehouse Shortcut</button>
+            <button class="btn secondary" data-action="favorite-storehouse">Save Storehouse Schedule</button>
+          </div>
+          <p class="tiny">
+            Reverse generation: “make cleaning session from storehouse shelves” and “generate grocery list from
+            storehouse gap”.
+          </p>
+        </article>
+
+        <!-- MEALS -->
+        <article class="card" data-domain="meals">
+          <h2>🍽️ Meal Planning & Cooking Sessions</h2>
+          <p class="tiny">
+            Consolidates recipes → batch sessions → schedules to calendar. Integrates with Scan • Compare • Trust.
+          </p>
+          <div class="pill-list">
+            <span class="pill">batch cooking</span>
+            <span class="pill">shopping list</span>
+            <span class="pill">inventory sync</span>
+          </div>
+          <div class="row">
+            <button class="btn" data-action="install-meals">Install Meal Planner Shortcut</button>
+            <button class="btn secondary" data-action="favorite-meals">Save Cooking Session</button>
+          </div>
+          <p class="tiny">Runtime template: <code>cooking.session.generate</code> or <code>mealplan.session.generate</code>.</p>
+        </article>
+
+        <!-- ANIMALS / BUTCHERY -->
+        <article class="card" data-domain="animals">
+          <h2>🐑 Animals: Acquire, Care, Butchery</h2>
+          <p class="tiny">
+            For flock/herd targets, breed suggestions, butchery queue, and reverse from Recipes → “what animal(s) do I
+            need”.
+          </p>
+          <div class="pill-list">
+            <span class="pill">region-aware breeds</span>
+            <span class="pill">butchery</span>
+            <span class="pill">feed schedule</span>
+          </div>
+          <div class="row">
+            <button class="btn" data-action="install-animals">Install Animal Planner Shortcut</button>
+            <button class="btn secondary" data-action="favorite-animals">Save Animal Session</button>
+          </div>
+          <p class="tiny">
+            Emits <code>animals/session/schedule</code> → runtime stores → UI toast.
+          </p>
+        </article>
+
+        <!-- REVERSE GENERATION -->
+        <article class="card" data-domain="reverse">
+          <h2>↩️ Reverse Generation Bridge</h2>
+          <p class="tiny">
+            Turn “I have recipes / orders / events” into “I need animals / garden / cleaning / storehouse”. This is the
+            glue you keep asking for.
+          </p>
+          <div class="pill-list">
+            <span class="pill">recipes → animals</span>
+            <span class="pill">harvest → storehouse</span>
+            <span class="pill">storehouse → cleaning</span>
+          </div>
+          <div class="row">
+            <button class="btn" data-action="install-reverse">Install Reverse Shortcut</button>
+          </div>
+          <p class="tiny">Internally fires <code>automation.intent</code> + <code>automation.schedule.request</code>.</p>
+        </article>
+      </section>
+
+      <!-- POWER USER JSON -->
+      <section>
+        <h2 class="section-title">Power users: copy/paste payload</h2>
+        <p class="tiny">
+          Paste this into your browser console on any page where Suka is loaded. It creates a daily cleaning plan
+          <em>and</em> a weekly garden plan and stores them as user schedules (not system).
+        </p>
+        <pre class="code" id="payload-snippet">
+window.__suka?.eventBus?.emit?.("automation.schedule.request", {
+  title: "Daily Cleaning – Landing Zones",
+  templateId: "cleaning.session.generate",
+  rule: { at: "09:00" },
+  meta: { domain: "cleaning", source: "shortcut-download" },
+  ctx: { focus: "entry,mudroom,5-bin" }
+});
+
+window.__suka?.eventBus?.emit?.("automation.schedule.request", {
+  title: "Weekly Garden Care – Beds A/B",
+  templateId: "garden.session.generate",
+  rule: { at: "08:00", days: [6] }, // Saturday
+  meta: { domain: "garden", source: "shortcut-download" },
+  ctx: { beds: ["A","B"], harvestTo: "storehouse" }
+});
+        </pre>
+      </section>
+    </div>
+
+    <script>
+      (function () {
+        const bus = window.__suka?.eventBus || null;
+        const hasAutomation =
+          typeof window.automation !== "undefined" &&
+          window.automation &&
+          typeof window.automation.emitEvent === "function";
+
+        const envMsg = document.getElementById("env-msg");
+        if (envMsg) {
+          if (hasAutomation) {
+            envMsg.textContent = "Automation runtime detected. Shortcuts will be saved to user schedules.";
+          } else if (bus) {
+            envMsg.textContent =
+              "Event bus detected. Shortcuts will dispatch through window.__suka.eventBus (runtime will pick them up).";
+          } else {
+            envMsg.textContent =
+              "No runtime detected yet. You can still drag these to your bookmarks; they will work when the app is open.";
+          }
+        }
+
+        // tiny helper: emit canonical schedule request
+        function emitSchedule(payload) {
+          // 1. try automation singleton
+          if (hasAutomation) {
+            try {
+              window.automation.emitEvent("automation.schedule.request", payload);
+              return;
+            } catch (e) {
+              console.warn("automation emit failed, falling back to bus", e);
+            }
+          }
+          // 2. try event bus
+          if (bus?.emit) {
+            bus.emit("automation.schedule.request", payload);
+            return;
+          }
+          // 3. fallback DOM event
+          window.dispatchEvent(new CustomEvent("automation.schedule.request", { detail: payload }));
+        }
+
+        // tiny helper: save favorite to automation's favorites
+        function saveFavoriteSessionLike(obj) {
+          if (hasAutomation && typeof window.automation.saveFavoriteSession === "function") {
+            try {
+              window.automation.saveFavoriteSession(obj);
+              return true;
+            } catch (e) {
+              console.warn("saveFavoriteSession failed", e);
+            }
+          }
+          // localStorage fallback
+          try {
+            const key = "suka.favorites.sessions";
+            const cur = JSON.parse(localStorage.getItem(key) || "[]");
+            cur.push({ ...obj, savedAt: Date.now() });
+            localStorage.setItem(key, JSON.stringify(cur));
+            return true;
+          } catch (e) {
+            console.warn("local favorites failed", e);
+          }
+          return false;
+        }
+
+        // build bookmarklet code per domain
+        function buildBookmarklet(domain) {
+          // one bookmarklet that always posts the canonical event
+          const payload = encodeURIComponent(
+            JSON.stringify({
+              title: "Quick " + domain + " session",
+              templateId: domain + ".session.generate",
+              rule: { at: "09:00" },
+              meta: { domain, source: "bookmarklet" },
+              ctx: { from: "bookmarklet", domain }
+            })
+          );
+          // it tries automation first, then eventBus, then DOM
+          return (
+            "javascript:(function(){var p=" +
+            JSON.stringify(payload) +
+            ";var o=JSON.parse(decodeURIComponent(p));try{if(window.automation&&window.automation.emitEvent){window.automation.emitEvent('automation.schedule.request',o);return;}}catch(e){}try{if(window.__suka&&window.__suka.eventBus&&window.__suka.eventBus.emit){window.__suka.eventBus.emit('automation.schedule.request',o);return;}}catch(e){}window.dispatchEvent(new CustomEvent('automation.schedule.request',{detail:o}));})();"
+          );
+        }
+
+        // DOM bindings
+        const btns = document.querySelectorAll("[data-action]");
+        btns.forEach((btn) => {
+          btn.addEventListener("click", (ev) => {
+            const action = ev.currentTarget.getAttribute("data-action");
+            switch (action) {
+              /* CLEANING -------------------------------------------------- */
+              case "install-cleaning": {
+                const link = document.createElement("a");
+                link.href = buildBookmarklet("cleaning");
+                link.textContent = "Cleaning";
+                link.click();
+                emitSchedule({
+                  title: "Daily Cleaning – from shortcut",
+                  templateId: "cleaning.session.generate",
+                  rule: { at: "09:00" },
+                  meta: { domain: "cleaning", source: "shortcut-download" },
+                  ctx: { focus: "zones" }
+                });
+                break;
+              }
+              case "favorite-cleaning": {
+                saveFavoriteSessionLike({
+                  id: "fav-cleaning-" + Date.now(),
+                  title: "Cleaning – Landing Zones",
+                  domain: "cleaning",
+                  source: "shortcut-download"
+                });
+                break;
+              }
+
+              /* GARDEN ---------------------------------------------------- */
+              case "install-garden": {
+                const link = document.createElement("a");
+                link.href = buildBookmarklet("garden");
+                link.click();
+                emitSchedule({
+                  title: "Garden Care – from shortcut",
+                  templateId: "garden.session.generate",
+                  rule: { at: "08:00" },
+                  meta: { domain: "garden", source: "shortcut-download" },
+                  ctx: { applySeedInbox: true, harvestTo: "storehouse" }
+                });
+                break;
+              }
+              case "favorite-garden": {
+                saveFavoriteSessionLike({
+                  id: "fav-garden-" + Date.now(),
+                  title: "Garden – Seed Inbox → Plan",
+                  domain: "garden",
+                  source: "shortcut-download"
+                });
+                break;
+              }
+
+              /* STOREHOUSE ------------------------------------------------ */
+              case "install-storehouse": {
+                const link = document.createElement("a");
+                link.href = buildBookmarklet("storehouse");
+                link.click();
+                // schedule storehouse goal recalculation
+                emitSchedule({
+                  title: "Storehouse Stock Planning",
+                  templateId: "storehouse.session.generate",
+                  rule: { at: "11:00" },
+                  meta: { domain: "storehouse", source: "shortcut-download" },
+                  ctx: {
+                    grocerySections: ["produce", "dry", "frozen", "fermenting", "butchery"],
+                    reverse: ["generate-cleaning-from-storehouse"]
+                  }
+                });
+                break;
+              }
+              case "favorite-storehouse": {
+                saveFavoriteSessionLike({
+                  id: "fav-storehouse-" + Date.now(),
+                  title: "Storehouse – Grocery Gap → List",
+                  domain: "storehouse",
+                  source: "shortcut-download"
+                });
+                break;
+              }
+
+              /* MEALS ----------------------------------------------------- */
+              case "install-meals": {
+                const link = document.createElement("a");
+                link.href = buildBookmarklet("cooking");
+                link.click();
+                emitSchedule({
+                  title: "Meals / Cooking – from shortcut",
+                  templateId: "cooking.session.generate",
+                  rule: { at: "15:00", days: [0] }, // Sunday batch by default
+                  meta: { domain: "cooking", source: "shortcut-download" },
+                  ctx: { fromImports: true, inventoryAware: true }
+                });
+                break;
+              }
+              case "favorite-meals": {
+                saveFavoriteSessionLike({
+                  id: "fav-meals-" + Date.now(),
+                  title: "Cooking Session – current recipes",
+                  domain: "cooking",
+                  source: "shortcut-download"
+                });
+                break;
+              }
+
+              /* ANIMALS --------------------------------------------------- */
+              case "install-animals": {
+                const link = document.createElement("a");
+                link.href = buildBookmarklet("animals");
+                link.click();
+                emitSchedule({
+                  title: "Animals – Care / Butchery",
+                  templateId: "animals.session.generate",
+                  rule: { at: "07:00" },
+                  meta: { domain: "animals", source: "shortcut-download" },
+                  ctx: { includeBreeds: true, includeMeatEstimates: true, reverseFromMeals: true }
+                });
+                break;
+              }
+              case "favorite-animals": {
+                saveFavoriteSessionLike({
+                  id: "fav-animals-" + Date.now(),
+                  title: "Animals – Reverse from Recipes",
+                  domain: "animals",
+                  source: "shortcut-download"
+                });
+                break;
+              }
+
+              /* REVERSE --------------------------------------------------- */
+              case "install-reverse": {
+                const link = document.createElement("a");
+                link.href = buildBookmarklet("reverse");
+                link.click();
+                // reverse orchestration
+                emitSchedule({
+                  title: "Reverse Generate – recipe → animals/garden/storehouse/cleaning",
+                  templateId: "reverse.session.generate",
+                  rule: { everyMinutes: 180 },
+                  meta: { domain: "reverse", source: "shortcut-download" },
+                  ctx: {
+                    steps: [
+                      "recipes → animals",
+                      "recipes → garden produce",
+                      "harvest → storehouse",
+                      "storehouse → cleaning"
+                    ]
+                  }
+                });
+                break;
+              }
+            }
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>

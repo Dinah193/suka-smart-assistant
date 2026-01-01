@@ -1,0 +1,238 @@
+{
+  "nodeId": "health.movementIntensityCalculator.nextSteps",
+  "label": "Movement Intensity – Next Steps",
+  "description": "Maps movement intensity results into concrete follow-up actions, including household sessions (cleaning, garden, animal care) and structured workout-style movement blocks that can be turned into SessionRunner sessions.",
+  "version": "1.0.0",
+  "sourceNodeId": "health.movementIntensityCalculator",
+  "status": "active",
+  "priority": 50,
+  "goalStatusRouting": {
+    "below": {
+      "label": "Below Movement Target",
+      "description": "User is well below guideline-equivalent minutes. Focus on simple, approachable movement wins that can be layered into household tasks and short walks.",
+      "recommendedFlows": [
+        {
+          "id": "flow.below.lightHouseholdMovement",
+          "label": "Light Household Movement Stack",
+          "description": "Promote light-intensity movement through short, easy household tasks and walk blocks.",
+          "targetDomains": [
+            "cleaning",
+            "garden",
+            "movement"
+          ],
+          "nextNodes": [
+            "health.macroCalculator",
+            "health.micronutrientCalculator",
+            "health.movementGoals",
+            "sessions.sessionPlanner"
+          ]
+        },
+        {
+          "id": "flow.below.walkBlocks",
+          "label": "Short Walk Blocks",
+          "description": "Suggest multiple 10–15 minute walks per day as the primary strategy to close the movement gap.",
+          "targetDomains": [
+            "movement"
+          ],
+          "nextNodes": [
+            "sessions.sessionPlanner",
+            "calendar.activityPlanner"
+          ]
+        }
+      ]
+    },
+    "on-track": {
+      "label": "On-Track Movement",
+      "description": "User is near guideline-equivalent minutes. Focus on maintaining a sustainable pattern using household movement and a few moderate sessions.",
+      "recommendedFlows": [
+        {
+          "id": "flow.onTrack.householdPlusModerate",
+          "label": "Balanced Household + Moderate Sessions",
+          "description": "Blend household chores, walks, and a few moderate-intensity blocks to maintain current progress.",
+          "targetDomains": [
+            "cleaning",
+            "garden",
+            "animals",
+            "movement"
+          ],
+          "nextNodes": [
+            "health.movementGoals",
+            "sessions.sessionPlanner"
+          ]
+        }
+      ]
+    },
+    "above": {
+      "label": "Above Movement Target",
+      "description": "User is significantly above guideline-equivalent minutes. Emphasize recovery, deload weeks, and technique-focused or mobility sessions.",
+      "recommendedFlows": [
+        {
+          "id": "flow.above.recoveryFocus",
+          "label": "Recovery & Mobility Focus",
+          "description": "Shift emphasis toward mobility, stretching, and low-intensity household tasks while monitoring energy and sleep.",
+          "targetDomains": [
+            "movement",
+            "cleaning"
+          ],
+          "nextNodes": [
+            "health.movementGoals",
+            "health.sleepQualityReview",
+            "sessions.sessionPlanner"
+          ]
+        }
+      ]
+    }
+  },
+  "intensityToDomainMappings": {
+    "light": {
+      "label": "Light Movement",
+      "description": "Activities that keep the user moving without major breathlessness. Ideal for warm-ups, active recovery, and gentle ramp-up from sedentary patterns.",
+      "suggestedSessionDomains": [
+        "cleaning",
+        "garden",
+        "storehouse",
+        "movement"
+      ],
+      "suggestedSessionExamples": [
+        {
+          "id": "example.cleaning.roomReset20",
+          "title": "20-min Room Reset & Tidy",
+          "domain": "cleaning",
+          "notes": "Surface wipe-down, light decluttering, and a quick sweep or vacuum of a single room."
+        },
+        {
+          "id": "example.garden.lightWalkBedCheck",
+          "title": "Garden Walk & Bed Check",
+          "domain": "garden",
+          "notes": "Stroll the garden, check moisture, pull a few easy weeds, and observe plant health."
+        },
+        {
+          "id": "example.storehouse.inventoryWalkthrough",
+          "title": "Pantry & Freezer Walkthrough",
+          "domain": "storehouse",
+          "notes": "Walk your storehouse, scan for items to rotate, and note what needs to be used soon."
+        },
+        {
+          "id": "example.movement.easyWalkBlock",
+          "title": "10–20 min Easy Walk",
+          "domain": "movement",
+          "notes": "Gentle walk where the user can carry a full conversation without gasping."
+        }
+      ]
+    },
+    "moderate": {
+      "label": "Moderate Movement",
+      "description": "Movement that raises heart rate and breathing but still allows short sentences. Great for strengthening the heart and supporting weight management.",
+      "suggestedSessionDomains": [
+        "cleaning",
+        "garden",
+        "animals",
+        "movement"
+      ],
+      "suggestedSessionExamples": [
+        {
+          "id": "example.cleaning.wholeFloorSweepMop",
+          "title": "Whole-Floor Sweep & Mop",
+          "domain": "cleaning",
+          "notes": "Continuous sweeping and mopping at a brisk but safe pace for 20–30 minutes."
+        },
+        {
+          "id": "example.garden.bedPrepAndMulch",
+          "title": "Garden Bed Prep & Mulching",
+          "domain": "garden",
+          "notes": "Raking, lifting light bags, and spreading mulch steadily for 20–30 minutes."
+        },
+        {
+          "id": "example.animals.careCircuit",
+          "title": "Animal Care Circuit",
+          "domain": "animals",
+          "notes": "Feeding, water bucket carries, pen cleaning, and short pasture checks."
+        },
+        {
+          "id": "example.movement.mixedModerateBlock",
+          "title": "30-min Mixed Moderate Block",
+          "domain": "movement",
+          "notes": "Intervals of brisk walking, step-ups, or low-impact aerobics."
+        }
+      ]
+    },
+    "vigorous": {
+      "label": "Vigorous Movement",
+      "description": "Hard breathing while still under control. Should be used carefully and adjusted if recovery flags or risk indicators are present.",
+      "suggestedSessionDomains": [
+        "movement"
+      ],
+      "suggestedSessionExamples": [
+        {
+          "id": "example.movement.interval20",
+          "title": "20-min Vigorous Intervals",
+          "domain": "movement",
+          "notes": "Short bursts of vigorous effort (stairs, high-step marches, fast walking up hills) with equal or longer recovery periods."
+        },
+        {
+          "id": "example.movement.cardioCircuit",
+          "title": "Home Cardio Circuit",
+          "domain": "movement",
+          "notes": "Rotating exercises like marching in place, step-ups, and shadow boxing tailored to the user’s joints and space."
+        }
+      ]
+    }
+  },
+  "sessionBuilderMappings": {
+    "light": {
+      "sessionDraftPreset": "movement.lightHouseholdStack",
+      "sessionDraftDomain": "movement",
+      "sessionDraftTitle": "Light Movement & Household Reset",
+      "preferredPlannerNodes": [
+        "sessions.sessionPlanner",
+        "calendar.activityPlanner"
+      ]
+    },
+    "moderate": {
+      "sessionDraftPreset": "movement.moderateChoresPlusWalk",
+      "sessionDraftDomain": "movement",
+      "sessionDraftTitle": "Moderate Movement: Chores + Walk",
+      "preferredPlannerNodes": [
+        "sessions.sessionPlanner",
+        "calendar.activityPlanner"
+      ]
+    },
+    "vigorous": {
+      "sessionDraftPreset": "movement.vigorousIntervals",
+      "sessionDraftDomain": "movement",
+      "sessionDraftTitle": "Vigorous Interval Session",
+      "preferredPlannerNodes": [
+        "sessions.sessionPlanner",
+        "calendar.activityPlanner"
+      ]
+    }
+  },
+  "plannerIntegration": {
+    "supportsSessionRunner": true,
+    "sessionRunnerHints": {
+      "domain": "movement",
+      "sourceType": "movementPlan",
+      "preferredSessionLengthMinutesRange": [
+        10,
+        40
+      ],
+      "quietHourSensitive": false,
+      "weatherSensitive": true
+    },
+    "plannerNodes": [
+      "sessions.sessionPlanner",
+      "calendar.activityPlanner",
+      "health.movementGoals"
+    ],
+    "exports": [
+      "movementSessionTemplates",
+      "movementMinutesTargets",
+      "recoveryLoadFlags"
+    ],
+    "imports": [
+      "quietHours.settings",
+      "weather.currentConditions",
+      "calendar.sabbathBlocks"
+    ]
+  }
+}

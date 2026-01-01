@@ -1,0 +1,436 @@
+===============================================================================
+DEPENDENCY MAP – DESIGN SPEC
+File: src/intelligence/dependencies/dependencyMap.txt
+Role: Contract for cross-domain dependency graph in SSA
+===============================================================================
+
+0. CONCEPTUAL PURPOSE
+---------------------
+The dependency map describes how **everything in the household web of meaning
+relates to everything else**:
+
+- garden cycles feed preservation and storehouse;
+- animals feed preservation, storehouse, and feasts;
+- storehouse feeds cooking, feasts, mutual-aid, and enterprise;
+- cooking and feasts drive cleaning, textiles, and preservation;
+- cleaning and compost flows loop back to garden and animals;
+- seasons and feast cycles bend all of these relationships.
+
+This is **not** an algorithmic engine. It is the **shared contract** that
+lets SSA say:
+
+> “If this rhythm changes here, what does it affect there?”
+
+It must:
+
+- Represent cross-domain dependencies as a **graph** (nodes + edges).
+- Work in TOOL MODE to let a single planner reason about dependency chains.
+- Plug into STEWARDSHIP MODE so householdCycles.engine, seasonalIntelligence,
+  SessionRunner, and dashboards can understand ripple effects.
+- Emit eventBus events when graphs are loaded, recomputed, or reveal
+  bottlenecks and yield opportunities.
+
+Language: cycle, season, storehouse, provision, yield, rhythm, feast, householder.
+Avoid productivity-app language.
+
+
+1. STRUCTURE – CONFIG SHAPE & DOMAINS
+-------------------------------------
+Meta-domain:
+- dependencies / web-of-meaning graph
+
+Connected domains:
+- cooking, storehouse/provisioning, garden, animals, preservation,
+  cleaning/hygiene, textiles, home maintenance, feasts/events, enterprise,
+  plus meta: seasons, cycles engine, session flows.
+
+Conceptual config shape (JSON-like):
+
+dependencyMapConfig = {
+  version: "1.0.0",
+  lastUpdatedAt: string,
+  modeHint?: "TOOL" | "STEWARDSHIP",
+
+  // Nodes: important “places” in the web of meaning
+  nodes: DependencyNode[],
+
+  // Edges: directional relationships between nodes
+  edges: DependencyEdge[],
+
+  // Named patterns: canonical chains like
+  // garden → preservation → storehouse → meals → cleaning → compost → garden
+  patterns: DependencyPattern[],
+
+  // Signaling preferences
+  signals: {
+    sendGraphComputedAlerts: boolean,
+    sendBottleneckAlerts: boolean,
+    sendYieldOpportunityAlerts: boolean,
+  },
+
+  metadata?: {
+    householdName?: string,
+    regionProfile?: string,
+  },
+};
+
+
+2. PROPS – DETAILED COMPONENTS
+------------------------------
+
+2.1 DependencyNode
+Represents a meaningful point in the household web (not just a low-level item).
+
+DependencyNode = {
+  id: string,                        // e.g. "garden.beds", "storehouse.grains",
+                                     //      "cooking.daily-meals", "feasts.appointed",
+                                     //      "animals.egg-yield", "preservation.canning",
+                                     //      "cleaning.kitchen-reset", "compost.system"
+
+  label: string,                     // display label
+  domain: "garden" | "animals" | "storehouse" | "cooking" |
+          "preservation" | "cleaning" | "textiles" |
+          "homeMaintenance" | "feasts" | "enterprise" |
+          "seasonality" | "cycles",
+
+  // Optional fine-grained categorization
+  subType?: string,                  // e.g. "grain-bed", "root-cellar", "daily-rhythm"
+
+  // Conceptual role in the web
+  role: "source" | "sink" | "transform" | "balancer" | "meta",
+
+  // How this node interacts with provisions/yields
+  provisionProfile?: {
+    drawsFromStorehouse: boolean,
+    fillsStorehouse: boolean,
+    yieldType?: "fresh" | "preserved" | "service" | "hospitality" | "rest",
+  },
+
+  // Seasonal sensitivity
+  seasonSensitivity?: {
+    highSeasons?: string[],          // SeasonDefinition ids
+    lowSeasons?: string[],
+  },
+
+  // Optional weight for influence in graph analysis
+  weight?: number,                   // 0..1
+
+  notes?: string,
+};
+
+
+2.2 DependencyEdge
+Represents a directional dependency or flow between two nodes.
+
+DependencyEdge = {
+  id: string,
+  fromNodeId: string,                // source, e.g. "garden.beds"
+  toNodeId: string,                  // target, e.g. "preservation.canning"
+
+  // Type of relationship
+  relation:
+    "feeds" |                        // A → B: A produces yields B depends on
+    "requires" |                     // A → B: A must be present for B to function
+    "balances" |                     // A ↔ B: they mutually balance rhythms
+    "amplifies" |                    // A amplifies B’s load/rhythm
+    "softens",                       // A softens B’s load/rhythm
+
+  // Relative strength and importance
+  strength: number,                  // 0..1 (how strong the link)
+  priority: "core" | "supporting",
+
+  // Seasonal filters
+  seasonFilter?: {
+    seasonIds?: string[],
+    categories?: ("agricultural" | "festal" | "rest" | "custom")[],
+  },
+
+  // Storehouse & yield impact summary
+  storehouseImpact?: {
+    inflowCategories?: {
+      [categoryKey: string]: { magnitude: "low" | "medium" | "high" };
+    },
+    outflowCategories?: {
+      [categoryKey: string]: { magnitude: "low" | "medium" | "high" };
+    },
+  },
+
+  // Notes on expected rhythm behavior
+  rhythmNotes?: string,
+
+  // TODO[seasonal-logic]:
+  // - Use seasonFilter + strength to vary importance of this edge as
+  //   seasons change (e.g. garden → preservation is strong in harvest, softer in winter).
+
+  notes?: string,
+};
+
+
+2.3 DependencyPattern
+Named patterns that describe canonical dependency chains.
+
+DependencyPattern = {
+  id: string,                        // e.g. "garden-core-cycle",
+                                     // "animals-protein-cycle",
+                                     // "feast-season-cycle"
+
+  label: string,
+  description?: string,
+
+  // Ordered list of node ids representing the canonical chain
+  nodeChain: string[],               // e.g. ["garden.beds", "preservation.canning",
+                                     //       "storehouse.jars", "cooking.daily-meals",
+                                     //       "cleaning.kitchen-reset", "compost.system",
+                                     //       "garden.beds"]
+
+  // Conceptual yield of this pattern
+  yields?: {
+    storehouseSecurityScore?: number,  // 0..1
+    nutritionContinuityScore?: number, // 0..1
+    feastReadinessScore?: number,      // 0..1
+  },
+
+  // Which seasons this pattern is most relevant to
+  seasonFocus?: string[],             // SeasonDefinition ids
+
+  // TODO[cycles-engine]:
+  // - Patterns can be used by householdCycles.engine to quickly recognize
+  //   which parts of the web are “active” or “drifting”.
+
+  notes?: string,
+};
+
+
+
+3. DATA FLOW – HOW THE DEPENDENCY MAP IS USED
+---------------------------------------------
+
+3.1 TOOL MODE
+In TOOL MODE, a “Household Dependency Explorer” or planner can:
+
+1) Load dependencyMapConfig in memory (static JS/JSON).
+2) Display nodes and edges in an interactive diagram or list format.
+3) Allow the householder to:
+   - See the canonical patterns (e.g., garden → preservation → storehouse → meals),
+   - Inspect what happens if one node’s rhythm is quiet or stressed,
+   - Explore “if this, then where” ripple effects.
+
+Simple TOOL MODE analysis examples:
+
+- If “garden.beds” is quiet in a planting season:
+  - highlight that “preservation.canning”, “storehouse.jars”, and “meals”
+    chain will rely more heavily on provisioning streams instead of fresh yields.
+
+- If “feasts.appointed” is active:
+  - highlight increased dependencies on storehouse, garden, animals, textiles,
+    and cleaning nodes along feast patterns.
+
+Implementation:
+
+- No Dexie required.
+- EventBus is optional; can use a stub emitter.
+- Tool emits graph-computation events to allow other tools to listen.
+
+Typical TOOL MODE flow:
+
+- Tool loads dependencyMapConfig.
+- User selects a node or pattern to explore.
+- Tool runs a simple graph traversal and emits:
+  - "dependencies.graph.computed" and "dependencies.impact.derived"
+    with the results for that exploration.
+
+
+3.2 STEWARDSHIP MODE
+In STEWARDSHIP MODE, the dependency map supports the **entire SSA backbone**.
+
+Flow:
+
+1) App boot:
+   - Dexie loads dependencyMapConfig from e.g. "dependencyMapConfig".
+   - The dependency analyzer (a separate JS module) wraps this config.
+
+2) When domain snapshots are updated:
+   - garden, animals, storehouse, cooking, preservation, cleaning, textiles,
+     feasts, and enterprise domains emit their own events (e.g. “session.complete”,
+     “harvest.logged”, “storehouse.level.changed”).
+
+3) The dependency analyzer:
+   - Listens on eventBus.
+   - Uses dependencyMapConfig (nodes, edges, patterns) to:
+     - determine affected nodes,
+     - traverse outgoing edges to estimate impacted nodes and patterns,
+     - compute a **dependency impact summary**.
+
+4) householdCycles.engine:
+   - Receives these summaries as part of the meta context:
+     - e.g., “garden.beds rhythm is low during peak planting season; the
+       garden-core-cycle pattern is drifting; storehouse will lean more heavily
+       on purchased provisions if this persists.”
+
+5) Dashboards and SessionRunner:
+   - Use dependency impact summaries to:
+     - surface cross-domain rhythm bundles,
+     - suggest where a householder’s effort will produce the largest yield
+       (e.g., “small move in garden yields big storehouse shift later”).
+
+6) When the householder or system updates dependencyMapConfig:
+   - Changes are persisted in Dexie.
+   - A reload event is emitted.
+   - Subsequent analyses use the revised map.
+
+
+4. EVENT TRIGGERS – EVENTBUS CONTRACT
+-------------------------------------
+The dependency map is data; the **dependency analyzer** and related
+intelligence emit events.
+
+All events follow SSA’s eventBus structure:
+
+  { type, ts, source, data }
+
+Where:
+- type: string
+- ts: ISO 8601 timestamp
+- source: "dependencies.map" or "dependencies.analyzer"
+- data: object
+
+Recommended event types:
+
+1) Config lifecycle
+   - "dependencies.map.config.loaded"
+     data: {
+       version,
+       nodeCount,
+       edgeCount,
+       patternCount,
+     }
+
+   - "dependencies.map.config.updated"
+     data: {
+       version,
+       changedBy,               // "householder" | "system" | "migration"
+       changesSummary,          // e.g. { nodesAdded, edgesModified, patternsAdded }
+     }
+
+
+2) Graph computation
+   - "dependencies.graph.computed"
+     // When a graph traversal is done in response to an event or tool action
+     data: {
+       rootNodeId,              // node that triggered the computation
+       seasonId?: string,
+       affectedNodeIds: string[],
+       affectedPatternIds: string[],
+     }
+
+   - "dependencies.impact.derived"
+     // Summarized dependency impact, suitable for householdCycles.engine
+     data: {
+       rootNodeId,
+       seasonId?: string,
+       impactScore: number,     // 0..1 aggregated impact
+       upstreamNodes: string[], // nodes that feed into root
+       downstreamNodes: string[], // nodes influenced by root
+       storehouseImpactSummary?: {
+         inflowCategories?: string[],
+         outflowCategories?: string[],
+       },
+     }
+
+
+3) Bottlenecks & opportunities
+   - "dependencies.bottleneck.detected"
+     data: {
+       nodeId,
+       seasonId?: string,
+       patternIds?: string[],
+       message,
+       severity: "gentle" | "important",
+     }
+
+   - "dependencies.yield.opportunity"
+     data: {
+       nodeId,
+       seasonId?: string,
+       patternIds?: string[],
+       message,
+       potentialYieldScore: number, // 0..1
+     }
+
+
+4) Insight hook
+   - "dependencies.insight"
+     data: {
+       insightId,
+       kind: "storehouse" | "garden" | "animals" | "preservation" |
+             "feast" | "cleaning" | "textiles" | "enterprise",
+       seasonId?: string,
+       rootNodeId,
+       patternIds?: string[],
+       severity: "info" | "gentle" | "important",
+       message,
+     }
+
+These events allow:
+
+- householdCycles.engine to incorporate dependencies into its posture.
+- Dashboards to show where the web is tight and where it’s fraying.
+- SessionRunner to propose high-leverage rhythms that honor dependencies.
+
+
+5. CONCEPTUAL PURPOSE – HOW THE DEPENDENCY MAP FITS THE WEB OF MEANING
+----------------------------------------------------------------------
+The dependency map is the **visible skeleton** of SSA’s web of meaning:
+
+- It makes cycles **mutually aware**:
+  - garden cycles know they are feeding preservation and storehouse;
+  - storehouse cycles know they are fed by garden, animals, provisions;
+  - feast cycles know they will pull on storehouse, cooking, cleaning, textiles.
+
+- It respects **seasons**:
+  - Edges can be stronger or softer based on active seasons.
+  - Patterns highlight which relationships matter most in planting,
+    harvest, feast, and rest seasons.
+
+- It honors the **storehouse and provisions**:
+  - Every edge can describe how provisions flow:
+    - inflow from garden/animals/provisions,
+    - outflow to meals, feasts, mutual-aid, enterprise.
+
+- It makes **yields** explicit:
+  - Patterns describe household yields: food security, hospitality, rest,
+    preserved abundance, and a steady rhythm instead of chaos.
+
+- It supports **TOOL MODE and STEWARDSHIP MODE**:
+  - TOOL MODE:
+    - A single explorer or planner can show the dependency graph and help the
+      householder reason about “if this, then what”.
+  - STEWARDSHIP MODE:
+    - The full SSA stack (React pages, Dexie-backed stores, eventBus, SessionRunner)
+      uses the dependency map to keep all domains in step with each other.
+
+Explicit TODO HOOKS:
+- TODO[seasonal-logic]:
+  - Integrate SeasonDefinition and SeasonDomainAdjustment so that edge strengths
+    and pattern relevance shift as seasons change.
+
+- TODO[cycles-engine]:
+  - Define how dependency-derived impact summaries feed into
+    householdCycles.engine to influence posture, rhythm suggestions, and alerts.
+
+- TODO[dependencies]:
+  - Add domain-specific sub-maps (e.g. detailed animal → butchery → preservation
+    chains, detailed textile → cleaning → feast hospitality chains) as the
+    system grows.
+
+- TODO[insights]:
+  - Standardize insight patterns such as:
+    - “Garden rhythm is quiet in peak planting season; downstream storehouse
+       and preservation yields will be reduced.”
+    - “Preservation rhythm is emerging while harvest is strong; storehouse
+       security yield is increasing.”
+    - “Feast load is high while storehouse inflows are low; consider
+       strengthening provisioning rhythm or inviting mutual-aid support.”
+
+END OF SPEC
+===============================================================================

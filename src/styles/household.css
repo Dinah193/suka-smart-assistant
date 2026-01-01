@@ -1,0 +1,29 @@
+/* C:\Users\larho\suka-smart-assistant\src\styles\household.css
+   ------------------------------------------------------------------
+   Shared "household" styling for Cooking, Cleaning, Garden, Animal Care, etc.
+
+   This file simply reuses the same design system as the Cooking page
+   by importing its CSS tokens and utility classes.
+
+   Usage in a page:
+     import "@/styles/household.css";
+
+   Your Cooking page can keep using its own:
+     import "./cooking.css";
+   and other household pages can use this shared one.
+   ------------------------------------------------------------------ */
+
+@import "../pages/cooking/cooking.css";
+
+/* Optional: Add global/shared household tweaks below.
+   (Leave empty for now if you just want to reuse cooking.css styles.) */
+
+/*
+:root {
+  --household-accent: #c58b5b;
+}
+
+.household-page {
+  min-height: 100vh;
+}
+*/

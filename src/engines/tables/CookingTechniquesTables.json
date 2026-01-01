@@ -1,0 +1,487 @@
+{
+  "metadata": {
+    "name": "CookingTechniquesTables",
+    "version": "1.0.0",
+    "updatedAt": "2025-11-10T00:00:00.000Z",
+    "units": "metric",
+    "notes": "Canonical technique baselines used by SynthesisEngine, LeadTimeCalculator, PreferenceAdapter, and SynthesisValidator. Values are conservative; prefer local food-safety guidance when available."
+  },
+
+  "schemaHints": {
+    "_comment": "Shape guidance for consumers; not enforced by loader.",
+    "technique": {
+      "id": "string (snake_case)",
+      "label": "human-readable",
+      "domains": ["cooking|preservation|beverage|baking"],
+      "heatMedium": "dry|moist|fat|mixed|acid|fermentation|pressure",
+      "appliances": ["ids (e.g., OVEN, STOVETOP, INSTANT_POT, WOK)"],
+      "sharedResources": ["ids from SharedResources.json (e.g., HEAT_OVEN, WATER_HEAT, WORKSPACE)"],
+      "baseline": {
+        "tempC": "number|null (core or medium as noted)",
+        "surfaceTempC": "number|null",
+        "bathTempC": "number|null",
+        "pressureKPa": "number|null",
+        "timeMin": { "min": "number", "max": "number" }
+      },
+      "doneness": {
+        "probeTargetC": { "rare": "number|null", "medium": "number|null", "well": "number|null" },
+        "textureCues": ["strings"],
+        "visualCues": ["strings"]
+      },
+      "safety": {
+        "minCoreC": "number|null",
+        "holdTimeMin": "number|null",
+        "notes": "string"
+      },
+      "preheat": {
+        "appliance": "id",
+        "tempC": "number|null",
+        "timeMin": "number|null",
+        "profile": "fast|standard|stone|fan|none"
+      },
+      "resting": { "required": "bool", "timeMin": "number|null" },
+      "rangesByIngredient": [
+        {
+          "ingredientClass": "string (e.g., poultry_white, beef_steak, dal_lentils)",
+          "cutOrForm": "string",
+          "thicknessCm": { "min": "number", "max": "number" },
+          "tempC": "number|null",
+          "timeMin": { "min": "number", "max": "number" }
+        }
+      ],
+      "humidityControl": { "enabled": "bool", "steamPct": "number|null", "venting": "closed|open|pulse|null" },
+      "oil": { "type": "string|null", "smokePointC": "number|null", "amountTbspPerKg": "number|null" },
+      "stirFreq": "none|low|medium|high|toss",
+      "notes": "string",
+      "cuisineTags": ["regional tags for menu planning (e.g., Chinese, Indian, WestAfrican, Mexican, Levantine)"],
+      "source": "manual:curated|scraped:<origin>"
+    }
+  },
+
+  "plannerDefaults": {
+    "probeInsertDepthCm": 2,
+    "ovenFanAdjustmentC": -10,
+    "panCrowdingMaxPct": 70,
+    "saltPerKgLeanMeatPct": 1.5,
+    "restingFloorMin": 5
+  },
+
+  "appliances": [
+    { "id": "OVEN", "label": "Conventional Oven" },
+    { "id": "CONVECT_OVEN", "label": "Convection/Fan Oven" },
+    { "id": "STOVETOP", "label": "Stovetop Burner" },
+    { "id": "WOK", "label": "Wok Burner/Station" },
+    { "id": "PRESSURE_COOKER", "label": "Stovetop Pressure Cooker" },
+    { "id": "INSTANT_POT", "label": "Electric Pressure/Multi-Cooker" },
+    { "id": "GRILL", "label": "Grill/BBQ" },
+    { "id": "PLANCHA", "label": "Plancha/Griddle" },
+    { "id": "TANDOOR", "label": "Tandoor" },
+    { "id": "TAGINE", "label": "Tagine" },
+    { "id": "STEAMER", "label": "Steamer" },
+    { "id": "RICE_COOKER", "label": "Rice Cooker" },
+    { "id": "COMBI_STEAM", "label": "Combi Steam Oven" }
+  ],
+
+  "techniques": [
+    {
+      "id": "boil_simmer",
+      "label": "Boil/Simmer",
+      "domains": ["cooking"],
+      "heatMedium": "moist",
+      "appliances": ["STOVETOP"],
+      "sharedResources": ["WATER_HEAT", "WORKSPACE"],
+      "baseline": { "tempC": 100, "surfaceTempC": null, "bathTempC": 100, "pressureKPa": null, "timeMin": { "min": 5, "max": 90 } },
+      "doneness": {
+        "probeTargetC": { "rare": null, "medium": null, "well": null },
+        "textureCues": ["tender to bite", "starch gelatinized for grains/pasta"],
+        "visualCues": ["bubbles (vigorous=boil, gentle=sim)"
+        ]
+      },
+      "safety": { "minCoreC": null, "holdTimeMin": null, "notes": "For legumes, boil vigorously first 10 min if lectin risk (e.g., red kidney beans)." },
+      "preheat": { "appliance": "STOVETOP", "tempC": null, "timeMin": 5, "profile": "none" },
+      "resting": { "required": false, "timeMin": null },
+      "rangesByIngredient": [
+        { "ingredientClass": "pasta_durum", "cutOrForm": "dried", "thicknessCm": { "min": 0.1, "max": 0.3 }, "tempC": 100, "timeMin": { "min": 8, "max": 12 } },
+        { "ingredientClass": "rice_long_grain", "cutOrForm": "raw", "thicknessCm": { "min": 0.2, "max": 0.3 }, "tempC": 98, "timeMin": { "min": 12, "max": 15 } },
+        { "ingredientClass": "dal_lentils", "cutOrForm": "split", "thicknessCm": { "min": 0.2, "max": 0.3 }, "tempC": 98, "timeMin": { "min": 18, "max": 30 } }
+      ],
+      "humidityControl": { "enabled": true, "steamPct": 100, "venting": "open" },
+      "oil": { "type": null, "smokePointC": null, "amountTbspPerKg": null },
+      "stirFreq": "medium",
+      "notes": "Use salted water for pasta (1–2% salinity).",
+      "cuisineTags": ["Global"],
+      "source": "manual:curated"
+    },
+    {
+      "id": "sous_vide",
+      "label": "Sous Vide (Bag in Water Bath)",
+      "domains": ["cooking"],
+      "heatMedium": "moist",
+      "appliances": ["COMBI_STEAM", "STOVETOP"],
+      "sharedResources": ["HEAT_PRECISION", "WATER_HEAT", "WORKSPACE"],
+      "baseline": { "tempC": 55, "surfaceTempC": null, "bathTempC": 55, "pressureKPa": null, "timeMin": { "min": 60, "max": 1440 } },
+      "doneness": {
+        "probeTargetC": { "rare": 52, "medium": 57, "well": 70 },
+        "textureCues": ["uniform doneness edge-to-edge"],
+        "visualCues": ["no gray banding after sear"]
+      },
+      "safety": { "minCoreC": 54.4, "holdTimeMin": 112, "notes": "Time-at-temp pasteurization tables; chill fast if storing." },
+      "preheat": { "appliance": "COMBI_STEAM", "tempC": 55, "timeMin": 10, "profile": "standard" },
+      "resting": { "required": true, "timeMin": 5 },
+      "rangesByIngredient": [
+        { "ingredientClass": "beef_steak", "cutOrForm": "2.5–4 cm", "thicknessCm": { "min": 2.5, "max": 4.0 }, "tempC": 55, "timeMin": { "min": 90, "max": 180 } },
+        { "ingredientClass": "chicken_breast", "cutOrForm": "boneless", "thicknessCm": { "min": 2, "max": 3 }, "tempC": 60, "timeMin": { "min": 90, "max": 120 } },
+        { "ingredientClass": "salmon", "cutOrForm": "portion", "thicknessCm": { "min": 2, "max": 3 }, "tempC": 50, "timeMin": { "min": 30, "max": 45 } }
+      ],
+      "humidityControl": { "enabled": true, "steamPct": 100, "venting": "closed" },
+      "oil": { "type": "neutral", "smokePointC": 220, "amountTbspPerKg": 1 },
+      "stirFreq": "none",
+      "notes": "Finish by searing in hot pan/grill for crust.",
+      "cuisineTags": ["Modern"],
+      "source": "manual:curated"
+    },
+    {
+      "id": "stir_fry_wok_hei",
+      "label": "Stir-Fry (Wok Hei)",
+      "domains": ["cooking"],
+      "heatMedium": "fat",
+      "appliances": ["WOK"],
+      "sharedResources": ["HEAT_STOVETOP_HIGH", "WORKSPACE"],
+      "baseline": { "tempC": null, "surfaceTempC": 260, "bathTempC": null, "pressureKPa": null, "timeMin": { "min": 4, "max": 10 } },
+      "doneness": {
+        "probeTargetC": { "rare": null, "medium": null, "well": null },
+        "textureCues": ["crisp-tender veg", "seared protein exterior"],
+        "visualCues": ["light char edges; glossy sauce cling"]
+      },
+      "safety": { "minCoreC": 74, "holdTimeMin": 0, "notes": "Ensure poultry reaches ≥74°C core." },
+      "preheat": { "appliance": "WOK", "tempC": null, "timeMin": 5, "profile": "fast" },
+      "resting": { "required": false, "timeMin": null },
+      "rangesByIngredient": [
+        { "ingredientClass": "beef_stir", "cutOrForm": "thin-sliced", "thicknessCm": { "min": 0.3, "max": 0.7 }, "tempC": null, "timeMin": { "min": 1.5, "max": 3 } },
+        { "ingredientClass": "veg_brassica", "cutOrForm": "bite", "thicknessCm": { "min": 0.5, "max": 1.5 }, "tempC": null, "timeMin": { "min": 2, "max": 4 } },
+        { "ingredientClass": "noodle_wheat", "cutOrForm": "parcooked", "thicknessCm": { "min": 0.2, "max": 0.4 }, "tempC": null, "timeMin": { "min": 1, "max": 2 } }
+      ],
+      "humidityControl": { "enabled": false, "steamPct": null, "venting": "open" },
+      "oil": { "type": "peanut_or_canola", "smokePointC": 230, "amountTbspPerKg": 1.5 },
+      "stirFreq": "high",
+      "notes": "Cook in batches; avoid crowding.",
+      "cuisineTags": ["Chinese", "SEAsian"],
+      "source": "manual:curated"
+    },
+    {
+      "id": "pressure_cook",
+      "label": "Pressure Cook (Broth/Beans/Curries)",
+      "domains": ["cooking"],
+      "heatMedium": "pressure",
+      "appliances": ["PRESSURE_COOKER", "INSTANT_POT"],
+      "sharedResources": ["HEAT_STOVETOP", "HEAT_ELECTRIC", "WATER_HEAT"],
+      "baseline": { "tempC": 121, "surfaceTempC": null, "bathTempC": null, "pressureKPa": 100, "timeMin": { "min": 10, "max": 90 } },
+      "doneness": {
+        "probeTargetC": { "rare": null, "medium": null, "well": null },
+        "textureCues": ["beans creamy, meat fork-tender"],
+        "visualCues": ["reduction level adequate"]
+      },
+      "safety": { "minCoreC": null, "holdTimeMin": null, "notes": "Use natural release for legumes/stews to reduce sputter." },
+      "preheat": { "appliance": "INSTANT_POT", "tempC": null, "timeMin": 10, "profile": "standard" },
+      "resting": { "required": false, "timeMin": null },
+      "rangesByIngredient": [
+        { "ingredientClass": "beans_kidney_soaked", "cutOrForm": "whole", "thicknessCm": { "min": 0.5, "max": 1.0 }, "tempC": 121, "timeMin": { "min": 12, "max": 18 } },
+        { "ingredientClass": "dal_split", "cutOrForm": "split", "thicknessCm": { "min": 0.2, "max": 0.3 }, "tempC": 121, "timeMin": { "min": 6, "max": 10 } },
+        { "ingredientClass": "beef_shank", "cutOrForm": "cube", "thicknessCm": { "min": 3, "max": 5 }, "tempC": 121, "timeMin": { "min": 25, "max": 35 } }
+      ],
+      "humidityControl": { "enabled": true, "steamPct": 100, "venting": "closed" },
+      "oil": { "type": "neutral", "smokePointC": 220, "amountTbspPerKg": 1 },
+      "stirFreq": "low",
+      "notes": "For curries, sauté aromatics first on high-heat mode.",
+      "cuisineTags": ["Indian", "LatinAmerican", "Global"],
+      "source": "manual:curated"
+    },
+    {
+      "id": "tandoor_roast",
+      "label": "Tandoor Roast (High Heat Clay Oven)",
+      "domains": ["cooking"],
+      "heatMedium": "dry",
+      "appliances": ["TANDOOR"],
+      "sharedResources": ["HEAT_OVEN_HIGH", "WORKSPACE"],
+      "baseline": { "tempC": 400, "surfaceTempC": null, "bathTempC": null, "pressureKPa": null, "timeMin": { "min": 6, "max": 20 } },
+      "doneness": {
+        "probeTargetC": { "rare": null, "medium": null, "well": null },
+        "textureCues": ["charred edges, juicy center"],
+        "visualCues": ["speckled char, quick blistering"]
+      },
+      "safety": { "minCoreC": 74, "holdTimeMin": 0, "notes": "Marinated poultry must hit ≥74°C." },
+      "preheat": { "appliance": "TANDOOR", "tempC": 400, "timeMin": 25, "profile": "stone" },
+      "resting": { "required": true, "timeMin": 3 },
+      "rangesByIngredient": [
+        { "ingredientClass": "chicken_thigh_boneless", "cutOrForm": "chunks", "thicknessCm": { "min": 3, "max": 4 }, "tempC": 400, "timeMin": { "min": 8, "max": 14 } },
+        { "ingredientClass": "flatbread_naan", "cutOrForm": "dough", "thicknessCm": { "min": 0.5, "max": 1 }, "tempC": 400, "timeMin": { "min": 2, "max": 4 } }
+      ],
+      "humidityControl": { "enabled": false, "steamPct": null, "venting": "open" },
+      "oil": { "type": "ghee", "smokePointC": 250, "amountTbspPerKg": 1 },
+      "stirFreq": "none",
+      "notes": "Use skewers or slap breads to wall.",
+      "cuisineTags": ["Indian", "Pakistani", "Afghan"],
+      "source": "manual:curated"
+    },
+    {
+      "id": "tagine_braise",
+      "label": "Tagine (Cone-Lid Braise)",
+      "domains": ["cooking"],
+      "heatMedium": "mixed",
+      "appliances": ["STOVETOP", "OVEN", "TAGINE"],
+      "sharedResources": ["HEAT_STOVETOP", "WORKSPACE", "WATER_HEAT"],
+      "baseline": { "tempC": 95, "surfaceTempC": null, "bathTempC": null, "pressureKPa": null, "timeMin": { "min": 60, "max": 150 } },
+      "doneness": {
+        "probeTargetC": { "rare": null, "medium": null, "well": null },
+        "textureCues": ["collagen converted; fork-tender"],
+        "visualCues": ["glossy reduced sauce, intact veg"]
+      },
+      "safety": { "minCoreC": 74, "holdTimeMin": 0, "notes": "Maintain gentle simmer; avoid dry-out." },
+      "preheat": { "appliance": "STOVETOP", "tempC": null, "timeMin": 5, "profile": "standard" },
+      "resting": { "required": true, "timeMin": 5 },
+      "rangesByIngredient": [
+        { "ingredientClass": "lamb_shoulder", "cutOrForm": "chunks", "thicknessCm": { "min": 3, "max": 5 }, "tempC": 95, "timeMin": { "min": 90, "max": 150 } },
+        { "ingredientClass": "chickpeas_cooked", "cutOrForm": "whole", "thicknessCm": { "min": 0.5, "max": 1 }, "tempC": 95, "timeMin": { "min": 20, "max": 30 } }
+      ],
+      "humidityControl": { "enabled": true, "steamPct": 100, "venting": "closed" },
+      "oil": { "type": "olive", "smokePointC": 207, "amountTbspPerKg": 2 },
+      "stirFreq": "low",
+      "notes": "Cone lid condenses aromatics back to dish.",
+      "cuisineTags": ["Moroccan", "Maghreb"],
+      "source": "manual:curated"
+    },
+    {
+      "id": "grill_direct_indirect",
+      "label": "Grill (Direct/Indirect)",
+      "domains": ["cooking"],
+      "heatMedium": "dry",
+      "appliances": ["GRILL"],
+      "sharedResources": ["HEAT_GRILL", "WORKSPACE"],
+      "baseline": { "tempC": 230, "surfaceTempC": 260, "bathTempC": null, "pressureKPa": null, "timeMin": { "min": 6, "max": 45 } },
+      "doneness": {
+        "probeTargetC": { "rare": 50, "medium": 57, "well": 70 },
+        "textureCues": ["bouncy (steak medium-rare)"],
+        "visualCues": ["crosshatch sear, juices clear for poultry"]
+      },
+      "safety": { "minCoreC": 63, "holdTimeMin": 3, "notes": "USDA poultry ≥74°C instant; ground meats ≥71°C." },
+      "preheat": { "appliance": "GRILL", "tempC": 260, "timeMin": 12, "profile": "standard" },
+      "resting": { "required": true, "timeMin": 5 },
+      "rangesByIngredient": [
+        { "ingredientClass": "beef_steak", "cutOrForm": "2.5–3 cm", "thicknessCm": { "min": 2.5, "max": 3.5 }, "tempC": 260, "timeMin": { "min": 6, "max": 10 } },
+        { "ingredientClass": "chicken_leg_quarter", "cutOrForm": "bone-in", "thicknessCm": { "min": 3, "max": 6 }, "tempC": 230, "timeMin": { "min": 30, "max": 45 } },
+        { "ingredientClass": "corn_on_cob", "cutOrForm": "husk-on", "thicknessCm": { "min": 4, "max": 5 }, "tempC": 230, "timeMin": { "min": 12, "max": 18 } }
+      ],
+      "humidityControl": { "enabled": false, "steamPct": null, "venting": "open" },
+      "oil": { "type": "neutral", "smokePointC": 220, "amountTbspPerKg": 1 },
+      "stirFreq": "toss",
+      "notes": "Use indirect zone for thicker cuts; lid closed for roast effect.",
+      "cuisineTags": ["American", "Brazilian", "Korean"],
+      "source": "manual:curated"
+    },
+    {
+      "id": "steam_standard",
+      "label": "Steam (Basket/Combi)",
+      "domains": ["cooking"],
+      "heatMedium": "moist",
+      "appliances": ["STEAMER", "COMBI_STEAM"],
+      "sharedResources": ["WATER_HEAT", "WORKSPACE"],
+      "baseline": { "tempC": 100, "surfaceTempC": null, "bathTempC": 100, "pressureKPa": null, "timeMin": { "min": 4, "max": 25 } },
+      "doneness": {
+        "probeTargetC": { "rare": null, "medium": null, "well": null },
+        "textureCues": ["just-cooked fish flakes", "veg crisp-tender"],
+        "visualCues": ["bright vegetables, opaque fish"]
+      },
+      "safety": { "minCoreC": 63, "holdTimeMin": 0, "notes": "Fish safe at ≥63°C; shellfish until opaque and firm." },
+      "preheat": { "appliance": "STEAMER", "tempC": 100, "timeMin": 5, "profile": "standard" },
+      "resting": { "required": false, "timeMin": null },
+      "rangesByIngredient": [
+        { "ingredientClass": "broccoli", "cutOrForm": "florets", "thicknessCm": { "min": 2, "max": 4 }, "tempC": 100, "timeMin": { "min": 5, "max": 7 } },
+        { "ingredientClass": "fish_white", "cutOrForm": "fillet 2 cm", "thicknessCm": { "min": 1.5, "max": 2.5 }, "tempC": 100, "timeMin": { "min": 6, "max": 9 } },
+        { "ingredientClass": "bao_buns", "cutOrForm": "proofed", "thicknessCm": { "min": 2, "max": 4 }, "tempC": 100, "timeMin": { "min": 8, "max": 12 } }
+      ],
+      "humidityControl": { "enabled": true, "steamPct": 100, "venting": "closed" },
+      "oil": { "type": null, "smokePointC": null, "amountTbspPerKg": null },
+      "stirFreq": "none",
+      "notes": "Line basket to prevent sticking (lettuce/banana leaf).",
+      "cuisineTags": ["Chinese", "Vietnamese", "Global"],
+      "source": "manual:curated"
+    },
+    {
+      "id": "pan_roast",
+      "label": "Pan-Roast (Stovetop + Oven Finish)",
+      "domains": ["cooking"],
+      "heatMedium": "mixed",
+      "appliances": ["STOVETOP", "OVEN"],
+      "sharedResources": ["HEAT_STOVETOP", "HEAT_OVEN", "WORKSPACE"],
+      "baseline": { "tempC": null, "surfaceTempC": 200, "bathTempC": null, "pressureKPa": null, "timeMin": { "min": 8, "max": 20 } },
+      "doneness": {
+        "probeTargetC": { "rare": 50, "medium": 57, "well": 70 },
+        "textureCues": ["crisp crust + juicy center"],
+        "visualCues": ["deep golden sear, even color"]
+      },
+      "safety": { "minCoreC": 63, "holdTimeMin": 3, "notes": "Poultry ≥74°C instant." },
+      "preheat": { "appliance": "OVEN", "tempC": 200, "timeMin": 10, "profile": "standard" },
+      "resting": { "required": true, "timeMin": 5 },
+      "rangesByIngredient": [
+        { "ingredientClass": "chicken_breast", "cutOrForm": "boneless", "thicknessCm": { "min": 2, "max": 3 }, "tempC": 200, "timeMin": { "min": 10, "max": 14 } },
+        { "ingredientClass": "pork_chop", "cutOrForm": "bone-in 2.5 cm", "thicknessCm": { "min": 2, "max": 3 }, "tempC": 200, "timeMin": { "min": 12, "max": 16 } }
+      ],
+      "humidityControl": { "enabled": false, "steamPct": null, "venting": "open" },
+      "oil": { "type": "high_smoke_point (ghee/avocado)", "smokePointC": 240, "amountTbspPerKg": 1.5 },
+      "stirFreq": "low",
+      "notes": "Butter baste at finish for flavor; watch smoke point.",
+      "cuisineTags": ["Global"],
+      "source": "manual:curated"
+    },
+    {
+      "id": "braise_west_african_peanut",
+      "label": "Braise (West African Peanut Stew Baseline)",
+      "domains": ["cooking"],
+      "heatMedium": "mixed",
+      "appliances": ["STOVETOP"],
+      "sharedResources": ["HEAT_STOVETOP", "WORKSPACE", "WATER_HEAT"],
+      "baseline": { "tempC": 96, "surfaceTempC": null, "bathTempC": null, "pressureKPa": null, "timeMin": { "min": 45, "max": 90 } },
+      "doneness": {
+        "probeTargetC": { "rare": null, "medium": null, "well": null },
+        "textureCues": ["thick emulsified sauce", "meat tender"],
+        "visualCues": ["oil sheens to surface when done"]
+      },
+      "safety": { "minCoreC": 74, "holdTimeMin": 0, "notes": "Simmer covered to maintain gentle convection." },
+      "preheat": { "appliance": "STOVETOP", "tempC": null, "timeMin": 5, "profile": "standard" },
+      "resting": { "required": true, "timeMin": 5 },
+      "rangesByIngredient": [
+        { "ingredientClass": "chicken_thigh", "cutOrForm": "bone-in", "thicknessCm": { "min": 3, "max": 5 }, "tempC": 96, "timeMin": { "min": 45, "max": 70 } },
+        { "ingredientClass": "veg_root", "cutOrForm": "chunks", "thicknessCm": { "min": 2, "max": 4 }, "tempC": 96, "timeMin": { "min": 25, "max": 35 } }
+      ],
+      "humidityControl": { "enabled": true, "steamPct": 100, "venting": "closed" },
+      "oil": { "type": "groundnut_or_canola", "smokePointC": 230, "amountTbspPerKg": 1.5 },
+      "stirFreq": "medium",
+      "notes": "Add peanut paste gradually to avoid scorching.",
+      "cuisineTags": ["WestAfrican"],
+      "source": "manual:curated"
+    },
+    {
+      "id": "ceviche_cure",
+      "label": "Ceviche (Acid Cure; No Heat)",
+      "domains": ["cooking"],
+      "heatMedium": "acid",
+      "appliances": [],
+      "sharedResources": ["WORKSPACE", "REFRIGERATOR_COOL"],
+      "baseline": { "tempC": 4, "surfaceTempC": null, "bathTempC": null, "pressureKPa": null, "timeMin": { "min": 15, "max": 60 } },
+      "doneness": {
+        "probeTargetC": { "rare": null, "medium": null, "well": null },
+        "textureCues": ["firmed exterior", "still tender center"],
+        "visualCues": ["opaque edges"]
+      },
+      "safety": { "minCoreC": null, "holdTimeMin": null, "notes": "Use sashimi-grade fish; acid does not kill all pathogens. Keep ≤4°C and consume promptly." },
+      "preheat": { "appliance": "REFRIGERATOR", "tempC": 4, "timeMin": null, "profile": "none" },
+      "resting": { "required": false, "timeMin": null },
+      "rangesByIngredient": [
+        { "ingredientClass": "fish_white_raw", "cutOrForm": "1.5 cm dice", "thicknessCm": { "min": 1, "max": 2 }, "tempC": 4, "timeMin": { "min": 15, "max": 30 } }
+      ],
+      "humidityControl": { "enabled": false, "steamPct": null, "venting": null },
+      "oil": { "type": null, "smokePointC": null, "amountTbspPerKg": null },
+      "stirFreq": "low",
+      "notes": "Add salt after initial cure; drain excess lime to avoid bitterness.",
+      "cuisineTags": ["Peruvian", "Mexican"],
+      "source": "manual:curated"
+    },
+    {
+      "id": "bake_bread_basic",
+      "label": "Bake — Lean Bread (Hearth/Steam)",
+      "domains": ["baking"],
+      "heatMedium": "dry",
+      "appliances": ["OVEN", "CONVECT_OVEN", "COMBI_STEAM"],
+      "sharedResources": ["HEAT_OVEN", "WORKSPACE", "WATER_HEAT"],
+      "baseline": { "tempC": 240, "surfaceTempC": null, "bathTempC": null, "pressureKPa": null, "timeMin": { "min": 25, "max": 40 } },
+      "doneness": {
+        "probeTargetC": { "rare": null, "medium": null, "well": null },
+        "textureCues": ["hollow sound on tap"],
+        "visualCues": ["deep golden crust, ear opened"]
+      },
+      "safety": { "minCoreC": 93, "holdTimeMin": 0, "notes": "Internal crumb ≥93°C for lean loaves." },
+      "preheat": { "appliance": "OVEN", "tempC": 250, "timeMin": 30, "profile": "stone" },
+      "resting": { "required": true, "timeMin": 45 },
+      "rangesByIngredient": [
+        { "ingredientClass": "dough_hydration_65", "cutOrForm": "750 g loaf", "thicknessCm": { "min": 8, "max": 12 }, "tempC": 240, "timeMin": { "min": 28, "max": 35 } }
+      ],
+      "humidityControl": { "enabled": true, "steamPct": 60, "venting": "pulse" },
+      "oil": { "type": null, "smokePointC": null, "amountTbspPerKg": null },
+      "stirFreq": "none",
+      "notes": "Steam first 10–15 min; vent to finish.",
+      "cuisineTags": ["Global"],
+      "source": "manual:curated"
+    },
+    {
+      "id": "plancha_tacos_al_pastor_style",
+      "label": "Plancha/Griddle — Taco/Al Pastor Style (skillet variant)",
+      "domains": ["cooking"],
+      "heatMedium": "dry",
+      "appliances": ["PLANCHA", "STOVETOP"],
+      "sharedResources": ["HEAT_STOVETOP_HIGH", "WORKSPACE"],
+      "baseline": { "tempC": null, "surfaceTempC": 230, "bathTempC": null, "pressureKPa": null, "timeMin": { "min": 6, "max": 12 } },
+      "doneness": {
+        "probeTargetC": { "rare": null, "medium": null, "well": null },
+        "textureCues": ["edges crisp, interior juicy"],
+        "visualCues": ["caramelized adobo paste spots"]
+      },
+      "safety": { "minCoreC": 71, "holdTimeMin": 0, "notes": "Pork slices to ≥71°C." },
+      "preheat": { "appliance": "PLANCHA", "tempC": 230, "timeMin": 8, "profile": "fast" },
+      "resting": { "required": true, "timeMin": 2 },
+      "rangesByIngredient": [
+        { "ingredientClass": "pork_shoulder_sliced", "cutOrForm": "2–3 mm", "thicknessCm": { "min": 0.2, "max": 0.4 }, "tempC": null, "timeMin": { "min": 4, "max": 6 } },
+        { "ingredientClass": "tortillas_corn", "cutOrForm": "120 mm", "thicknessCm": { "min": 0.2, "max": 0.3 }, "tempC": null, "timeMin": { "min": 0.5, "max": 1 } }
+      ],
+      "humidityControl": { "enabled": false, "steamPct": null, "venting": "open" },
+      "oil": { "type": "lard_or_canola", "smokePointC": 200, "amountTbspPerKg": 1 },
+      "stirFreq": "toss",
+      "notes": "Marinate pork ahead (achiote+pineapple).",
+      "cuisineTags": ["Mexican"],
+      "source": "manual:curated"
+    },
+    {
+      "id": "pilaf_absorption_rice_cooker",
+      "label": "Pilaf/Absorption — Rice Cooker",
+      "domains": ["cooking"],
+      "heatMedium": "moist",
+      "appliances": ["RICE_COOKER"],
+      "sharedResources": ["HEAT_ELECTRIC", "WATER_HEAT", "WORKSPACE"],
+      "baseline": { "tempC": 98, "surfaceTempC": null, "bathTempC": null, "pressureKPa": null, "timeMin": { "min": 25, "max": 40 } },
+      "doneness": {
+        "probeTargetC": { "rare": null, "medium": null, "well": null },
+        "textureCues": ["grains separate yet tender"],
+        "visualCues": ["steam vents, no surface water"]
+      },
+      "safety": { "minCoreC": null, "holdTimeMin": null, "notes": "Hold on 'warm' ≤2h to avoid Bacillus cereus risks." },
+      "preheat": { "appliance": "RICE_COOKER", "tempC": null, "timeMin": 1, "profile": "none" },
+      "resting": { "required": true, "timeMin": 10 },
+      "rangesByIngredient": [
+        { "ingredientClass": "basmati", "cutOrForm": "rinsed", "thicknessCm": { "min": 0.2, "max": 0.3 }, "tempC": 98, "timeMin": { "min": 25, "max": 30 } },
+        { "ingredientClass": "jasmine", "cutOrForm": "rinsed", "thicknessCm": { "min": 0.2, "max": 0.3 }, "tempC": 98, "timeMin": { "min": 22, "max": 28 } }
+      ],
+      "humidityControl": { "enabled": true, "steamPct": 100, "venting": "closed" },
+      "oil": { "type": "ghee_or_oil", "smokePointC": 220, "amountTbspPerKg": 1 },
+      "stirFreq": "none",
+      "notes": "Toast spices/aromatics in pot before adding water for pilaf.",
+      "cuisineTags": ["Indian", "MiddleEastern", "CentralAsian"],
+      "source": "manual:curated"
+    }
+  ],
+
+  "validatorFloors": {
+    "noCrowdingForSearPctMax": 75,
+    "minPreheatForStoneBakeC": 230,
+    "poultryMinCoreC": 74,
+    "groundMeatMinCoreC": 71,
+    "reheatLeftoversCoreC": 74,
+    "seafoodSafeCoreC": 63
+  },
+
+  "eventTemplates": {
+    "_comment": "Canonical events the synthesis runtime may emit for observability.",
+    "prep.synthesized": { "type": "prep.synthesized", "ts": "<ISO>", "source": "cooking.synthesis", "data": { "techniqueId": "", "appliance": "", "startISO": "", "endISO": "" } },
+    "session.validation.failed": { "type": "session.validation.failed", "ts": "<ISO>", "source": "cooking.validator", "data": { "techniqueId": "", "reasons": [] } },
+    "cook.step.started": { "type": "cook.step.started", "ts": "<ISO>", "source": "cooking.runtime", "data": { "techniqueId": "", "ingredientClass": "", "targetTempC": null, "targetTimeMin": null } },
+    "cook.step.completed": { "type": "cook.step.completed", "ts": "<ISO>", "source": "cooking.runtime", "data": { "techniqueId": "", "actualCoreC": null, "actualTimeMin": null } }
+  }
+}

@@ -1,0 +1,505 @@
+{
+  "$schema": "../../schemas/torah-substitutions.schema.json",
+  "version": "2025-10-31T21:05:00-05:00",
+  "description": "Feast-aware substitutions for Suka Smart Assistant. Triggered from calendar.feast.upcoming → offer feast-appropriate clean meats/breads.",
+  "meta": {
+    "sourceFile": "src/data/yieldCurves/substitutions/substitutions.feast.json",
+    "schemaSource": "src/data/schemas/torah-substitutions.schema{.json",
+    "feastAware": true,
+    "compatibleEngines": [
+      "mealPlanEngine",
+      "cookingSessionEngine",
+      "storehouseGoalEngine",
+      "gardenQueueEngine",
+      "cleaningPlanEngine",
+      "animalSessionEngine",
+      "calendarFeastEngine"
+    ],
+    "supportsReverseGeneration": true,
+    "supportsUserFavorites": true,
+    "uiHints": {
+      "groupOrder": [
+        "feast-core",
+        "feast-bread",
+        "feast-side",
+        "feast-dessert",
+        "storehouse-grocery",
+        "garden-feast",
+        "animal-feast",
+        "cleaning-prep"
+      ],
+      "badgeMap": {
+        "feast": "bg-amber-100 text-amber-950",
+        "unleavened": "bg-sky-100 text-sky-950",
+        "torah-clean": "bg-emerald-100 text-emerald-950",
+        "system": "bg-slate-100 text-slate-950",
+        "user-favorite": "bg-violet-100 text-violet-950"
+      }
+    }
+  },
+  "defaults": {
+    "targetCulture": "torah",
+    "preferredCleanMeat": "lamb",
+    "preferredCleanFat": "beef-tallow",
+    "notes": "Feast mode selects items that align with scriptural patterns only. No references to later traditions."
+  },
+  "scopes": [
+    "meals",
+    "storehouse",
+    "garden",
+    "animals",
+    "cleaning",
+    "preservation"
+  ],
+  "profiles": {
+    "passover-unleavened": {
+      "id": "feast:passover-unleavened",
+      "label": "Passover / Unleavened Bread period",
+      "allowedBreads": [
+        "matzah-style-unleavened",
+        "flatbread-unleavened",
+        "cassava-unleavened"
+      ],
+      "disallowLeaven": true,
+      "preferredMeats": [
+        "lamb",
+        "goat"
+      ],
+      "disallow": [
+        "pork",
+        "ham",
+        "bacon",
+        "shellfish",
+        "leavened-bread",
+        "yeast-rolls",
+        "sourdough"
+      ]
+    },
+    "firstfruits": {
+      "id": "feast:firstfruits",
+      "label": "Firstfruits / early produce sharing",
+      "allowedBreads": [
+        "unleavened",
+        "simple-grain-cakes"
+      ],
+      "preferredProduceSources": [
+        "garden",
+        "storehouse-fresh"
+      ]
+    },
+    "shavuot-weeks": {
+      "id": "feast:shavuot-weeks",
+      "label": "Feast of Weeks / Shavuot (no extra-traditions)",
+      "preferredMeats": [
+        "lamb",
+        "beef",
+        "goat"
+      ],
+      "preferredBreads": [
+        "festival-loaf-clean-ingredients"
+      ]
+    },
+    "sukkot-ingathering": {
+      "id": "feast:sukkot-ingathering",
+      "label": "Sukkot / Ingathering",
+      "preferredMeats": [
+        "lamb",
+        "goat",
+        "beef",
+        "venison"
+      ],
+      "preferredPreservation": [
+        "smoke",
+        "cure",
+        "pressure-can"
+      ],
+      "includeOutdoorKitchens": true
+    }
+  },
+  "substitutions": [
+    {
+      "id": "feast:unclean-meat-to-lamb-goat",
+      "domain": "meals",
+      "category": "feast-core",
+      "from": [
+        "pork",
+        "ham",
+        "bacon",
+        "pork-roast"
+      ],
+      "to": [
+        {
+          "item": "lamb",
+          "ratio": 1.0,
+          "yieldCurveRef": "src/data/yieldCurves/meat/sheep_katahdin.json"
+        },
+        {
+          "item": "goat",
+          "ratio": 1.0,
+          "yieldCurveRef": "src/data/yieldCurves/meat/goat_kiko.json"
+        },
+        {
+          "item": "beef-brangus",
+          "ratio": 1.1,
+          "yieldCurveRef": "src/data/yieldCurves/meat/beef_brangus.json"
+        }
+      ],
+      "ui": {
+        "label": "Unclean meat → Feast lamb/goat",
+        "badge": "feast"
+      },
+      "reverseGeneration": {
+        "allowReverse": true,
+        "originals": [
+          "pork"
+        ],
+        "note": "For export to non-Torah households only; calendar.feast.upcoming should still display the clean version."
+      }
+    },
+    {
+      "id": "feast:leavened-bread-to-unleavened",
+      "domain": "meals",
+      "category": "feast-bread",
+      "from": [
+        "bread",
+        "sandwich-bread",
+        "dinner-rolls",
+        "yeast-rolls",
+        "sourdough",
+        "leavened-flatbread"
+      ],
+      "to": [
+        {
+          "item": "unleavened-flatbread",
+          "ratio": 1.0
+        },
+        {
+          "item": "matzah-style-unleavened",
+          "ratio": 1.0
+        },
+        {
+          "item": "cassava-unleavened",
+          "ratio": 1.0
+        }
+      ],
+      "cuisineAdjustments": {
+        "afro-diaspora": {
+          "spiceProfile": "salt-oil-honey-optional",
+          "note": "Honey only if feast and household allows sweetened unleavened cakes."
+        }
+      },
+      "ui": {
+        "label": "Leavened bread → Feast unleavened (Passover/UB)",
+        "badge": "unleavened"
+      },
+      "reverseGeneration": {
+        "allowReverse": true,
+        "originals": [
+          "bread",
+          "yeast-rolls"
+        ],
+        "note": "Reverse only valid outside unleavened windows."
+      }
+    },
+    {
+      "id": "feast:smoked-ham-to-smoked-lamb-shoulder",
+      "domain": "meals",
+      "category": "feast-core",
+      "from": [
+        "smoked-ham",
+        "honey-baked-ham",
+        "ham-hock"
+      ],
+      "to": [
+        {
+          "item": "smoked-lamb-shoulder",
+          "ratio": 1.0
+        },
+        {
+          "item": "smoked-beef-shank",
+          "ratio": 1.05
+        }
+      ],
+      "processing": {
+        "required": true,
+        "queues": [
+          "cookingSessionEngine:smoke",
+          "storehouseGoalEngine:preserve"
+        ]
+      },
+      "ui": {
+        "label": "Feast: ham → smoked lamb shoulder",
+        "badge": "feast"
+      }
+    },
+    {
+      "id": "feast:shellfish-to-fins-scales-fish",
+      "domain": "meals",
+      "category": "feast-side",
+      "from": [
+        "shrimp",
+        "crab",
+        "lobster",
+        "oyster",
+        "scallop"
+      ],
+      "to": [
+        {
+          "item": "cod",
+          "ratio": 1.0
+        },
+        {
+          "item": "pollock",
+          "ratio": 1.0
+        },
+        {
+          "item": "tilapia",
+          "ratio": 1.0
+        }
+      ],
+      "ui": {
+        "label": "Shellfish → fish with fins & scales (feast-safe)",
+        "badge": "torah-clean"
+      }
+    },
+    {
+      "id": "feast:dessert-with-lard-to-olive-oil-ghee",
+      "domain": "meals",
+      "category": "feast-dessert",
+      "from": [
+        "pie-crust-with-lard",
+        "cookie-dough-with-lard",
+        "fry-bread-with-lard"
+      ],
+      "to": [
+        {
+          "item": "olive-oil",
+          "ratio": 0.9
+        },
+        {
+          "item": "ghee",
+          "ratio": 1.0
+        },
+        {
+          "item": "beef-tallow",
+          "ratio": 1.0
+        }
+      ],
+      "ui": {
+        "label": "Feast dessert fat swap → olive oil / ghee / tallow",
+        "badge": "feast"
+      }
+    },
+    {
+      "id": "feast:storehouse-stock-seasonal-to-feast-bundle",
+      "domain": "storehouse",
+      "category": "storehouse-grocery",
+      "from": [
+        "general-meal-plan-stockup"
+      ],
+      "to": [
+        {
+          "item": "lamb-roast-feast",
+          "ratio": 1.0
+        },
+        {
+          "item": "unleavened-flour-mix",
+          "ratio": 1.0
+        },
+        {
+          "item": "bitter-herbs-mix",
+          "ratio": 1.0
+        },
+        {
+          "item": "pomegranate-or-feast-fruit",
+          "ratio": 1.0
+        }
+      ],
+      "storehouseMapping": {
+        "grocerySection": "Feast & Holy Day",
+        "aisle": "Seasonal / Feast Prep",
+        "preserveOptions": [
+          "dehydrate",
+          "vac-seal",
+          "pressure-can"
+        ]
+      },
+      "ui": {
+        "label": "Storehouse: turn regular stock-up → Feast prep bundle",
+        "badge": "feast"
+      }
+    },
+    {
+      "id": "feast:garden-regular-to-firstfruits-priority",
+      "domain": "garden",
+      "category": "garden-feast",
+      "from": [
+        "garden-plan-regular",
+        "succession-planting"
+      ],
+      "to": [
+        {
+          "item": "firstfruits-basket",
+          "ratio": 1.0
+        },
+        {
+          "item": "early-greens",
+          "ratio": 1.0
+        },
+        {
+          "item": "barley-or-wheat-early",
+          "ratio": 1.0
+        }
+      ],
+      "ui": {
+        "label": "Garden: regular plan → Firstfruits priority harvest",
+        "badge": "feast"
+      }
+    },
+    {
+      "id": "feast:animal-unclean-to-clean-slaughter-schedule",
+      "domain": "animals",
+      "category": "animal-feast",
+      "from": [
+        "swine",
+        "boar",
+        "wild-pig",
+        "non-torah-livestock"
+      ],
+      "to": [
+        {
+          "item": "sheep",
+          "ratio": 1.0,
+          "yieldCurveRef": "src/data/yieldCurves/meat/sheep_katahdin.json"
+        },
+        {
+          "item": "goat",
+          "ratio": 1.0,
+          "yieldCurveRef": "src/data/yieldCurves/meat/goat_kiko.json"
+        },
+        {
+          "item": "cattle",
+          "ratio": 1.0,
+          "yieldCurveRef": "src/data/yieldCurves/meat/beef_brangus.json"
+        }
+      ],
+      "butchery": {
+        "usdaFacility": true,
+        "torahCompliant": true,
+        "note": "Calendar-triggered feast slaughter should only schedule clean species."
+      },
+      "ui": {
+        "label": "Animal: unclean → feast-appropriate clean slaughter",
+        "badge": "feast"
+      }
+    },
+    {
+      "id": "feast:cleaning-regular-to-feast-prep",
+      "domain": "cleaning",
+      "category": "cleaning-prep",
+      "from": [
+        "standard-weekly-cleaning",
+        "light-tidy"
+      ],
+      "to": [
+        {
+          "item": "feast-deep-clean-kitchen",
+          "ratio": 1.0
+        },
+        {
+          "item": "feast-dishware-polish",
+          "ratio": 1.0
+        },
+        {
+          "item": "feast-dining-area-prep",
+          "ratio": 1.0
+        }
+      ],
+      "ui": {
+        "label": "Cleaning: standard → Feast prep",
+        "badge": "system"
+      }
+    }
+  ],
+  "reverseGeneration": {
+    "enabled": true,
+    "strategy": "per-item",
+    "blockedOriginals": [
+      "pork",
+      "ham",
+      "bacon",
+      "shellfish"
+    ],
+    "notes": "We only reverse for sharing/export to non-Torah households. For actual feast execution, keep the clean/feast substitutions in place."
+  },
+  "userOverrides": {
+    "description": "Households can pin THEIR feast patterns here. This is how we let them save their favorites – not just system feast sessions.",
+    "favorites": [
+      {
+        "substitutionId": "feast:leavened-bread-to-unleavened",
+        "label": "Always swap to unleavened during Passover/UB",
+        "householdId": "HOUSEHOLD_DEFAULT"
+      },
+      {
+        "substitutionId": "feast:storehouse-stock-seasonal-to-feast-bundle",
+        "label": "Always build feast bundle in storehouse 10 days before feast",
+        "householdId": "HOUSEHOLD_DEFAULT"
+      }
+    ],
+    "blocked": [],
+    "custom": [
+      {
+        "id": "feast:custom-fish-to-lamb-for-passover",
+        "domain": "meals",
+        "category": "feast-core",
+        "from": [
+          "fish-main"
+        ],
+        "to": [
+          {
+            "item": "lamb",
+            "ratio": 1.0,
+            "yieldCurveRef": "src/data/yieldCurves/meat/sheep_katahdin.json"
+          }
+        ],
+        "ui": {
+          "label": "User: fish main → lamb (Passover)",
+          "badge": "user-favorite"
+        }
+      }
+    ]
+  },
+  "integration": {
+    "importRouter": {
+      "listenFor": [
+        "import.recipe.detected",
+        "import.storehouseGoal.detected",
+        "import.gardenPlan.detected",
+        "import.animalCarePlan.detected",
+        "import.cleaningPlan.detected",
+        "calendar.feast.upcoming"
+      ],
+      "applySubstitutionsOn": [
+        "recipe.ingredients",
+        "storehouse.goals.items",
+        "garden.plan.seedList",
+        "animal.care.scheduledFeeds",
+        "cleaning.plan.supplies"
+      ]
+    },
+    "automationRuntime": {
+      "onEvent": "calendar.feast.upcoming",
+      "actions": [
+        "apply-feast-substitutions",
+        "apply-household-overrides",
+        "emit-feast-sessions"
+      ],
+      "emit": [
+        "session.created.feast.meals",
+        "session.created.feast.cleaning",
+        "session.created.feast.storehouse",
+        "session.created.feast.animal"
+      ]
+    }
+  }
+}

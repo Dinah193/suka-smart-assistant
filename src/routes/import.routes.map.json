@@ -1,0 +1,406 @@
+{
+  "version": "1.1.0",
+  "updatedAt": "2025-10-30T18:25:00-05:00",
+  "description": "Central map of all import-related routes, sources, and orchestrations for Suka Smart Assistant. This unifies bookmarklet, PWA share target, iOS/Android shortcuts, Pinterest→planner, cleaning, garden (plan/care/harvest), storehouse-by-grocery, meal planning, animal (acquisition/care/butchery), Scan • Compare • Trust CSV/PDF imports, and user-owned favorites/schedules. Every route MUST preserve reverse-generation metadata.",
+  "base": "/import",
+  "routes": [
+    {
+      "path": "/import",
+      "name": "Import Landing",
+      "component": "@/features/import/ImportLanding.jsx",
+      "layout": "app",
+      "methods": ["GET"],
+      "description": "Main import hub. Shows recent imports, offline bookmarklet/PWA queue, and saved user favorites. Entry for recipe, cleaning, garden, storehouse, animal, and scan imports.",
+      "emits": [
+        "import.queue.enqueue",
+        "import.preview.open",
+        "import.settings.changed"
+      ],
+      "listen": [
+        "import.queue.updated",
+        "import.service.completed"
+      ],
+      "features": {
+        "allowUserFavorites": true,
+        "allowSchedules": true,
+        "allowReverseGeneration": true,
+        "showOfflineBadge": true
+      }
+    },
+    {
+      "path": "/import/auto",
+      "name": "Auto Import (unknown → detect)",
+      "component": "@/features/import/AutoImport.jsx",
+      "layout": "blank",
+      "methods": ["GET", "POST"],
+      "description": "Takes an 'auto' or unknown import payload (common from iOS/Android/share target) and runs ImportNormalizer to detect: recipe, cleaningPlan, gardenPlan, gardenCare, harvestPlan, storehouseGoal/stock, mealPlan, animalAcquisition/animalPlan/butcherySession.",
+      "emits": [
+        "import.queue.enqueue",
+        "import.preview.open",
+        "automation.schedule.request"
+      ],
+      "listen": [
+        "import.settings.changed"
+      ],
+      "features": {
+        "allowUserFavorites": true,
+        "allowSchedules": true,
+        "allowReverseGeneration": true
+      },
+      "sources": [
+        "pwa-share-target",
+        "ios-shortcut",
+        "android-share",
+        "desktop-shortcut",
+        "bookmarklet"
+      ],
+      "defaults": {
+        "autoOpenPreview": true,
+        "autoSaveFavorite": false,
+        "autoSchedule": false,
+        "autoScheduleRule": "once+5min",
+        "reverseMeta": {
+          "shareTarget": "family-fund-hub",
+          "includeShare": true,
+          "format": "json"
+        }
+      }
+    },
+    {
+      "path": "/import/share-capture",
+      "name": "Share Capture",
+      "component": "@/features/pwa/ShareReceiver.jsx",
+      "layout": "blank",
+      "methods": ["GET", "POST"],
+      "description": "Entry point for PWA share target, iOS shortcut, Android share, and desktop quick import. The service worker or the client posts here and then dispatches to the import queue. Should forward 'auto' imports to /import/auto.",
+      "emits": [
+        "import.queue.enqueue",
+        "import.preview.open",
+        "automation.schedule.request"
+      ],
+      "listen": [
+        "import.settings.changed"
+      ],
+      "defaults": {
+        "autoOpenPreview": true,
+        "autoSaveFavorite": false,
+        "autoSchedule": false,
+        "autoScheduleRule": "once+5min",
+        "reverseMeta": {
+          "shareTarget": "family-fund-hub",
+          "includeShare": true,
+          "format": "json"
+        }
+      },
+      "sources": [
+        "pwa-share-target",
+        "ios-shortcut",
+        "android-share",
+        "desktop-shortcut"
+      ]
+    },
+    {
+      "path": "/import/bookmarklet",
+      "name": "Bookmarklet Receiver",
+      "component": "@/features/bookmarklet/BookmarkletReceiver.jsx",
+      "layout": "blank",
+      "methods": ["GET"],
+      "description": "Lightweight view to receive bookmarklet payloads (for desktop browsers that can't talk to the main tab). Usually not shown to user.",
+      "emits": [
+        "import.queue.enqueue",
+        "import.preview.open"
+      ],
+      "features": {
+        "allowUserFavorites": true,
+        "allowSchedules": true,
+        "allowReverseGeneration": true
+      },
+      "sources": [
+        "bookmarklet",
+        "pinterest",
+        "garden-site",
+        "cleaning-blog",
+        "grocery-circular",
+        "livestock-listing"
+      ]
+    },
+    {
+      "path": "/import/favorites",
+      "name": "Import Favorites",
+      "component": "@/features/import/ImportFavorites.jsx",
+      "layout": "app",
+      "methods": ["GET"],
+      "description": "User-owned favorite imports, sessions, and schedules. System sessions can be cloned but not overwritten.",
+      "emits": [
+        "import.preview.open",
+        "import.queue.enqueue"
+      ],
+      "listen": [
+        "import.favorite.deleted",
+        "import.favorite.saved"
+      ],
+      "features": {
+        "allowUserFavorites": true,
+        "allowSchedules": true,
+        "allowReverseGeneration": true
+      }
+    },
+    {
+      "path": "/import/offline",
+      "name": "Offline Import Queue",
+      "component": "@/features/pwa/OfflineQueueBadge.jsx",
+      "layout": "blank",
+      "methods": ["GET"],
+      "description": "Exposes current offline imports (from PWA + bookmarklet + iOS/Android) and lets user replay them to ImportQueueManager.",
+      "emits": [
+        "import.queue.enqueue",
+        "import.preview.open",
+        "automation.schedule.request"
+      ],
+      "features": {
+        "allowUserFavorites": true,
+        "allowReverseGeneration": true
+      }
+    },
+    {
+      "path": "/import/pinterest",
+      "name": "Pinterest → Planner",
+      "component": "@/features/import/sources/PinterestImport.jsx",
+      "layout": "app",
+      "methods": ["GET", "POST"],
+      "description": "Converts a Pinterest board or pin into a meal, garden, or cleaning plan. Respects ImportSettings 'pinterestDefault' and can mark as collaborative.",
+      "emits": [
+        "import.queue.enqueue",
+        "import.preview.open"
+      ],
+      "features": {
+        "allowUserFavorites": true,
+        "allowSchedules": true,
+        "allowReverseGeneration": true
+      },
+      "sources": [
+        "pinterest"
+      ]
+    },
+    {
+      "path": "/import/file",
+      "name": "File Import (CSV/PDF/Image)",
+      "component": "@/features/import/sources/FileImport.jsx",
+      "layout": "app",
+      "methods": ["GET", "POST"],
+      "description": "Handles CSV pricebooks, PDF circulars, cleaning CSVs, garden CSVs, and image-based inputs to be OCRed. Maps to inventoryUpdate, storehouseStock, or domain-specific plans.",
+      "emits": [
+        "import.queue.enqueue",
+        "import.preview.open"
+      ],
+      "features": {
+        "allowUserFavorites": true,
+        "allowSchedules": true,
+        "allowReverseGeneration": true
+      },
+      "sources": [
+        "file",
+        "scan-compare-trust",
+        "cleaning-csv",
+        "garden-csv",
+        "storehouse-csv"
+      ]
+    },
+    {
+      "path": "/import/garden",
+      "name": "Garden / Seed Import",
+      "component": "@/features/import/sources/GardenImport.jsx",
+      "layout": "app",
+      "methods": ["GET", "POST"],
+      "description": "Imports seed and other garden planning information (beds, rows, zone). Can mark as coop for 'many hands make light work'.",
+      "emits": [
+        "import.queue.enqueue",
+        "import.preview.open"
+      ],
+      "features": {
+        "allowUserFavorites": true,
+        "allowSchedules": true,
+        "allowReverseGeneration": true
+      },
+      "sources": [
+        "garden",
+        "seed",
+        "pinterest",
+        "pwa-share-target"
+      ]
+    },
+    {
+      "path": "/import/garden-care",
+      "name": "Garden Care & Harvest Import",
+      "component": "@/features/import/sources/GardenCareImport.jsx",
+      "layout": "app",
+      "methods": ["GET", "POST"],
+      "description": "Takes garden care notes or harvest notes shared from mobile or web and turns them into scheduled tasks: water, weed, prune, spray, harvest.",
+      "emits": [
+        "import.queue.enqueue",
+        "import.preview.open",
+        "automation.schedule.request"
+      ],
+      "features": {
+        "allowUserFavorites": true,
+        "allowSchedules": true,
+        "allowReverseGeneration": true
+      },
+      "sources": [
+        "garden-care",
+        "harvest",
+        "pwa-share-target",
+        "ios-shortcut",
+        "android-share"
+      ]
+    },
+    {
+      "path": "/import/cleaning",
+      "name": "Cleaning / Zone Import",
+      "component": "@/features/import/sources/CleaningImport.jsx",
+      "layout": "app",
+      "methods": ["GET", "POST"],
+      "description": "Imports cleaning checklists, zone-cleaning guides, or batch cleaning sessions from blogs, social posts, or shared notes, and schedules them (weekly/daily/Sabbath-guarded).",
+      "emits": [
+        "import.queue.enqueue",
+        "import.preview.open",
+        "automation.schedule.request"
+      ],
+      "features": {
+        "allowUserFavorites": true,
+        "allowSchedules": true,
+        "allowReverseGeneration": true
+      },
+      "sources": [
+        "cleaning-blog",
+        "pwa-share-target",
+        "ios-shortcut",
+        "android-share"
+      ]
+    },
+    {
+      "path": "/import/storehouse",
+      "name": "Storehouse / Grocery-section Import",
+      "component": "@/features/import/sources/StorehouseImport.jsx",
+      "layout": "app",
+      "methods": ["GET", "POST"],
+      "description": "Imports storehouse goals and stock plans from grocery circulars, PDF ads, mobile shares, or CSV. Groups by grocery sections (dry, produce, meat/butchery, dairy, oils/fats, preserves).",
+      "emits": [
+        "import.queue.enqueue",
+        "import.preview.open",
+        "automation.schedule.request"
+      ],
+      "features": {
+        "allowUserFavorites": true,
+        "allowSchedules": true,
+        "allowReverseGeneration": true
+      },
+      "sources": [
+        "grocery-circular",
+        "store-weekly-ad",
+        "scan-compare-trust",
+        "pwa-share-target",
+        "ios-shortcut",
+        "android-share"
+      ]
+    },
+    {
+      "path": "/import/animal",
+      "name": "Animal / Butchery Import",
+      "component": "@/features/import/sources/AnimalImport.jsx",
+      "layout": "app",
+      "methods": ["GET", "POST"],
+      "description": "Imports animal acquisition lists, care plans, breed-by-geo notes, and butchery sessions (cut sheets). Can be reverse-generated from recipes that used animal products.",
+      "emits": [
+        "import.queue.enqueue",
+        "import.preview.open",
+        "automation.schedule.request"
+      ],
+      "features": {
+        "allowUserFavorites": true,
+        "allowSchedules": true,
+        "allowReverseGeneration": true
+      },
+      "sources": [
+        "livestock-listing",
+        "butchery-post",
+        "pwa-share-target",
+        "ios-shortcut",
+        "android-share"
+      ]
+    },
+    {
+      "path": "/import/scan",
+      "name": "Scan • Compare • Trust Import",
+      "component": "@/features/scan-compare-trust/ImportScan.jsx",
+      "layout": "app",
+      "methods": ["GET", "POST"],
+      "description": "Routes scanned circulars, receipts, store ads, and price sheets into the shared import pipeline. Connects to pricebook, coupon, and cycle-learning automations.",
+      "emits": [
+        "import.queue.enqueue",
+        "import.preview.open",
+        "automation.schedule.request"
+      ],
+      "features": {
+        "allowUserFavorites": true,
+        "allowSchedules": true,
+        "allowReverseGeneration": true
+      },
+      "sources": [
+        "scan-compare-trust",
+        "usda-facility-price-sheets",
+        "store-weekly-ad"
+      ]
+    },
+    {
+      "path": "/import/reverse",
+      "name": "Reverse Generation",
+      "component": "@/features/import/ReverseGenerator.jsx",
+      "layout": "app",
+      "methods": ["GET", "POST"],
+      "description": "Takes any normalized import and emits a reversible/shareable format (JSON/YAML/CSV) pre-labeled for Family Fund Hub or coop planning.",
+      "emits": [
+        "import.preview.reverse",
+        "import.preview.open"
+      ],
+      "listen": [
+        "import.service.completed"
+      ],
+      "features": {
+        "allowUserFavorites": true,
+        "allowSchedules": false,
+        "allowReverseGeneration": true
+      }
+    }
+  ],
+  "sharedOrchestration": {
+    "events": {
+      "emit": [
+        "import.queue.enqueue",
+        "import.service.completed",
+        "import.preview.open",
+        "import.preview.favorite",
+        "import.preview.reverse",
+        "import.settings.changed",
+        "automation.schedule.request"
+      ],
+      "listen": [
+        "import.queue.done",
+        "import.queue.updated",
+        "import.settings.changed"
+      ]
+    },
+    "sinks": [
+      "@/services/automation/runtime.js",
+      "@/features/import/ImportQueueManager.js",
+      "@/features/pwa/ShareReceiver.jsx",
+      "@/features/pwa/OfflineQueueBadge.jsx"
+    ]
+  },
+  "ui": {
+    "navGroup": "Import",
+    "icon": "InboxArrowDown",
+    "showInSidebar": true,
+    "order": 8
+  }
+}

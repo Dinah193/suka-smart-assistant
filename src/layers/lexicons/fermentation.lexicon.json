@@ -1,0 +1,1284 @@
+{
+  "domain": "fermentation",
+  "lexiconVersion": 1,
+  "updatedAt": "2025-12-27",
+  "description": "SSA Lexicon: fermentation parsing synonyms/keywords -> method IDs (methodKey). Uses strict actions: boostMethodKey, downrankMethodKey, blockMethodKey, addNote, addWarning, emitHintTag.",
+  "defaults": {
+    "minimumTokenLength": 2,
+    "maxMatchesPerEntry": 25
+  },
+  "methodKeys": {
+    "FERMENT_GENERAL": "ferment.general",
+    "FERMENT_LACTO": "ferment.lacto",
+    "FERMENT_LACTO_BRINE": "ferment.lacto.brine",
+    "FERMENT_LACTO_DRY_SALT": "ferment.lacto.dry_salt",
+    "FERMENT_KIMCHI": "ferment.kimchi",
+    "FERMENT_SAURKRAUT": "ferment.sauerkraut",
+    "FERMENT_PICKLES": "ferment.pickles",
+    "FERMENT_HOT_SAUCE": "ferment.hot_sauce",
+    "FERMENT_SALSA": "ferment.salsa",
+    "FERMENT_RElish": "ferment.relish",
+    "FERMENT_KOMBUCHA": "ferment.kombucha",
+    "FERMENT_WATER_KEFIR": "ferment.water_kefir",
+    "FERMENT_MILK_KEFIR": "ferment.milk_kefir",
+    "FERMENT_YOGURT": "ferment.yogurt",
+    "FERMENT_CHEESE": "ferment.cheese",
+    "FERMENT_SOURDOUGH": "ferment.sourdough",
+    "FERMENT_VINEGAR": "ferment.vinegar",
+    "FERMENT_MEAD": "ferment.mead",
+    "FERMENT_WINE": "ferment.wine",
+    "FERMENT_BEER": "ferment.beer",
+    "FERMENT_CIDER": "ferment.cider",
+    "FERMENT_GINGER_BUG": "ferment.ginger_bug",
+    "FERMENT_KVASS": "ferment.kvass",
+    "FERMENT_MISO": "ferment.miso",
+    "FERMENT_TEMPEH": "ferment.tempeh",
+    "FERMENT_NATTO": "ferment.natto",
+    "FERMENT_SOY_SAUCE": "ferment.soy_sauce",
+    "FERMENT_FISH_SAUCE": "ferment.fish_sauce",
+    "FERMENT_GARUM": "ferment.garum",
+    "FERMENT_KOJI": "ferment.koji",
+    "FERMENT_PRIMARY": "ferment.stage.primary",
+    "FERMENT_SECONDARY": "ferment.stage.secondary",
+    "FERMENT_BOTTLE_CONDITION": "ferment.stage.bottle_condition",
+    "FERMENT_F2": "ferment.stage.f2",
+    "FERMENT_AIRLOCK": "ferment.vessel.airlock",
+    "FERMENT_CROCK": "ferment.vessel.crock",
+    "FERMENT_JAR": "ferment.vessel.jar",
+    "FERMENT_ONE_WAY_VALVE": "ferment.vessel.one_way_valve",
+    "FERMENT_BURP_JAR": "ferment.vessel.burp",
+    "FERMENT_WEIGHT": "ferment.tools.weight",
+    "FERMENT_BRINE": "ferment.tools.brine",
+    "FERMENT_PH_TEST": "ferment.tools.ph_test",
+    "FERMENT_SALT_RATIO": "ferment.tools.salt_ratio",
+    "FERMENT_TEMP_CONTROL": "ferment.tools.temp_control",
+    "FERMENT_CLEAN_SANITIZE": "ferment.safety.clean_sanitize",
+    "FERMENT_ISSUE_KAHM": "ferment.issue.kahm_yeast",
+    "FERMENT_ISSUE_MOLD": "ferment.issue.mold",
+    "FERMENT_ISSUE_OFF_ODOR": "ferment.issue.off_odor",
+    "FERMENT_ISSUE_SLIME": "ferment.issue.slime",
+    "FERMENT_ISSUE_MUSHY": "ferment.issue.mushy",
+    "FERMENT_ISSUE_UNDERFERMENTED": "ferment.issue.underfermented",
+    "FERMENT_ISSUE_OVERFERMENTED": "ferment.issue.overfermented",
+    "FERMENT_ISSUE_NO_ACTIVITY": "ferment.issue.no_activity",
+    "FERMENT_ISSUE_TOO_ACTIVE": "ferment.issue.too_active",
+    "FERMENT_ISSUE_OVERFLOW": "ferment.issue.overflow",
+    "FERMENT_ISSUE_EXPLOSION_RISK": "ferment.issue.explosion_risk",
+    "FERMENT_ISSUE_CONTAMINATION": "ferment.issue.contamination",
+    "FERMENT_ISSUE_BOTULISM_RISK": "ferment.issue.botulism_risk"
+  },
+  "entries": [
+    {
+      "id": "ferment_general_terms",
+      "priority": 10,
+      "when": {
+        "any": [
+          "ferment",
+          "fermented",
+          "fermentation",
+          "cultured",
+          "culture",
+          "culturing",
+          "probiotic",
+          "wild ferment",
+          "wild fermentation",
+          "live culture",
+          "live cultures",
+          "active culture",
+          "active cultures",
+          "lacto ferment",
+          "lacto-ferment",
+          "lacto fermentation",
+          "anaerobic ferment",
+          "anaerobic fermentation"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.general" },
+        { "action": "emitHintTag", "tag": "fermentation" },
+        {
+          "action": "addNote",
+          "note": "Fermentation detected. Prefer matching a specific method (lacto, kombucha, kefir, sourdough, vinegar, wine/beer/cider) if additional keywords are present."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_clean_sanitize",
+      "priority": 15,
+      "when": {
+        "any": [
+          "sanitize",
+          "sanitise",
+          "sanitizer",
+          "sanitiser",
+          "sterilize",
+          "sterilise",
+          "clean and sanitize",
+          "clean & sanitize",
+          "no-rinse sanitizer",
+          "starsan",
+          "star san",
+          "iodophor",
+          "campden",
+          "campden tablet",
+          "potassium metabisulfite",
+          "k-meta",
+          "k metabisulfite",
+          "metabisulfite",
+          "sulfite",
+          "sulphite"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "ferment.safety.clean_sanitize"
+        },
+        { "action": "emitHintTag", "tag": "sanitize" },
+        {
+          "action": "addNote",
+          "note": "Sanitation keyword detected. This usually indicates beverage fermentation (wine/beer/cider/mead/kombucha) or any process requiring low contamination risk."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_lacto_core",
+      "priority": 20,
+      "when": {
+        "any": [
+          "lacto",
+          "lactic",
+          "lactic acid",
+          "salt brine",
+          "brine ferment",
+          "brined ferment",
+          "vegetable ferment",
+          "fermented vegetables",
+          "fermented veg",
+          "salted cabbage",
+          "shredded cabbage and salt"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.lacto" },
+        { "action": "emitHintTag", "tag": "lacto-fermentation" }
+      ]
+    },
+
+    {
+      "id": "ferment_lacto_brine",
+      "priority": 25,
+      "when": {
+        "any": [
+          "brine",
+          "saltwater brine",
+          "salt water brine",
+          "2% brine",
+          "2 percent brine",
+          "3% brine",
+          "3 percent brine",
+          "5% brine",
+          "5 percent brine",
+          "cover with brine",
+          "submerged in brine",
+          "top off with brine",
+          "make a brine",
+          "brine solution"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.lacto.brine" },
+        { "action": "boostMethodKey", "methodKey": "ferment.tools.brine" },
+        { "action": "emitHintTag", "tag": "brine" },
+        {
+          "action": "addNote",
+          "note": "Brine-based lacto fermentation detected. Ensure solids stay fully submerged to reduce mold risk."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_lacto_dry_salt",
+      "priority": 25,
+      "when": {
+        "any": [
+          "dry salt",
+          "dry-salt",
+          "salt pack",
+          "salted and massaged",
+          "massage the salt",
+          "salt and massage",
+          "salt it and squeeze",
+          "salt and squeeze",
+          "draw out liquid",
+          "pull water out",
+          "creates its own brine"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.lacto.dry_salt" },
+        { "action": "boostMethodKey", "methodKey": "ferment.tools.salt_ratio" },
+        { "action": "emitHintTag", "tag": "dry-salt" },
+        {
+          "action": "addNote",
+          "note": "Dry-salt lacto fermentation detected (self-brining). Track salt % by weight for repeatable results."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_sauerkraut",
+      "priority": 30,
+      "when": {
+        "any": [
+          "sauerkraut",
+          "kraut",
+          "fermented cabbage",
+          "cabbage ferment",
+          "salted cabbage ferment"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.sauerkraut" },
+        { "action": "boostMethodKey", "methodKey": "ferment.lacto.dry_salt" },
+        { "action": "emitHintTag", "tag": "sauerkraut" }
+      ]
+    },
+
+    {
+      "id": "ferment_kimchi",
+      "priority": 30,
+      "when": {
+        "any": [
+          "kimchi",
+          "kim chee",
+          "kimchee",
+          "gochugaru",
+          "gochujang",
+          "napa cabbage kimchi",
+          "radish kimchi",
+          "kkakdugi",
+          "baechu"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.kimchi" },
+        { "action": "boostMethodKey", "methodKey": "ferment.lacto" },
+        { "action": "emitHintTag", "tag": "kimchi" }
+      ]
+    },
+
+    {
+      "id": "ferment_pickles",
+      "priority": 30,
+      "when": {
+        "any": [
+          "fermented pickle",
+          "fermented pickles",
+          "dill ferment",
+          "dill pickles ferment",
+          "salt pickles",
+          "brined pickles",
+          "cucumber ferment",
+          "cucumber fermentation",
+          "half sour",
+          "full sour"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.pickles" },
+        { "action": "boostMethodKey", "methodKey": "ferment.lacto.brine" },
+        { "action": "emitHintTag", "tag": "pickles" }
+      ]
+    },
+
+    {
+      "id": "ferment_hot_sauce",
+      "priority": 30,
+      "when": {
+        "any": [
+          "fermented hot sauce",
+          "hot sauce ferment",
+          "pepper mash",
+          "chili mash",
+          "chilli mash",
+          "pepper ferment",
+          "fermented peppers",
+          "tabasco style",
+          "capsicum ferment"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.hot_sauce" },
+        { "action": "boostMethodKey", "methodKey": "ferment.lacto" },
+        { "action": "emitHintTag", "tag": "hot-sauce" }
+      ]
+    },
+
+    {
+      "id": "ferment_relish_salsa",
+      "priority": 28,
+      "when": {
+        "any": [
+          "fermented salsa",
+          "salsa ferment",
+          "fermented relish",
+          "relish ferment",
+          "chow chow ferment",
+          "fermented chow chow"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.salsa" },
+        { "action": "boostMethodKey", "methodKey": "ferment.relish" },
+        { "action": "boostMethodKey", "methodKey": "ferment.lacto" },
+        { "action": "emitHintTag", "tag": "relish-salsa" }
+      ]
+    },
+
+    {
+      "id": "ferment_kombucha",
+      "priority": 40,
+      "when": {
+        "any": [
+          "kombucha",
+          "scoby",
+          "scooby",
+          "symbiotic culture of bacteria and yeast",
+          "continuous brew",
+          "cb system",
+          "starter tea",
+          "sweet tea ferment",
+          "tea ferment",
+          "f1 kombucha",
+          "f2 kombucha",
+          "second ferment kombucha",
+          "bottle kombucha",
+          "kombucha pellicle"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.kombucha" },
+        { "action": "boostMethodKey", "methodKey": "ferment.stage.f2" },
+        { "action": "emitHintTag", "tag": "kombucha" },
+        {
+          "action": "addWarning",
+          "warning": "Kombucha F2 in sealed bottles can build pressure. Use burp/pressure-safe bottles and chill to slow fermentation before long storage."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_kefir_milk",
+      "priority": 40,
+      "when": {
+        "any": [
+          "milk kefir",
+          "kefir milk",
+          "kefir grains (milk)",
+          "milk grains",
+          "tibicos (milk)",
+          "culture milk",
+          "cultured milk",
+          "kefir"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.milk_kefir" },
+        { "action": "emitHintTag", "tag": "milk-kefir" },
+        {
+          "action": "addNote",
+          "note": "Milk kefir detected. Distinguish from water kefir via sugar-water/tibicos keywords."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_kefir_water",
+      "priority": 40,
+      "when": {
+        "any": [
+          "water kefir",
+          "kefir water",
+          "tibicos",
+          "tibicos grains",
+          "sugar water kefir",
+          "ginger water kefir",
+          "fruit water kefir",
+          "second ferment water kefir",
+          "f2 water kefir",
+          "kefir soda"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.water_kefir" },
+        { "action": "boostMethodKey", "methodKey": "ferment.stage.f2" },
+        { "action": "emitHintTag", "tag": "water-kefir" },
+        {
+          "action": "addWarning",
+          "warning": "Sealed water kefir F2 can carbonate quickly. Use pressure-safe bottles and chill once desired fizz is reached."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_yogurt",
+      "priority": 38,
+      "when": {
+        "any": [
+          "yogurt",
+          "yoghurt",
+          "cultured yogurt",
+          "incubate yogurt",
+          "yogurt starter",
+          "thermophilic culture",
+          "mesophilic culture",
+          "hold at 110",
+          "hold at 105",
+          "incubate at"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.yogurt" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "ferment.tools.temp_control"
+        },
+        { "action": "emitHintTag", "tag": "yogurt" }
+      ]
+    },
+
+    {
+      "id": "ferment_sourdough",
+      "priority": 40,
+      "when": {
+        "any": [
+          "sourdough",
+          "starter",
+          "sourdough starter",
+          "levain",
+          "poolish",
+          "biga",
+          "preferment",
+          "pre-ferment",
+          "wild yeast",
+          "bulk ferment",
+          "bulk fermentation",
+          "proof",
+          "final proof",
+          "retard",
+          "cold retard",
+          "stretch and fold",
+          "coil fold",
+          "autolyse",
+          "hydration"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.sourdough" },
+        { "action": "emitHintTag", "tag": "sourdough" }
+      ]
+    },
+
+    {
+      "id": "ferment_vinegar",
+      "priority": 40,
+      "when": {
+        "any": [
+          "vinegar",
+          "mother of vinegar",
+          "vinegar mother",
+          "acetic acid bacteria",
+          "acetobacter",
+          "wine vinegar",
+          "apple cider vinegar",
+          "acv",
+          "kombucha vinegar",
+          "convert to vinegar",
+          "acetification"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.vinegar" },
+        { "action": "emitHintTag", "tag": "vinegar" },
+        {
+          "action": "addNote",
+          "note": "Vinegar detected. Often follows an alcoholic ferment; look for wine/beer/cider keywords for upstream stages."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_beverage_wine",
+      "priority": 35,
+      "when": {
+        "any": [
+          "wine",
+          "must",
+          "primary fermentation",
+          "secondary fermentation",
+          "racking",
+          "rack off",
+          "airlock",
+          "hydrometer",
+          "specific gravity",
+          "sg",
+          "yeast nutrient",
+          "yeast energizer",
+          "degass",
+          "degassing",
+          "sorbate",
+          "potassium sorbate",
+          "bentonite",
+          "clearing agent",
+          "fining",
+          "stabilize",
+          "stabilise",
+          "carboy"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.wine" },
+        { "action": "boostMethodKey", "methodKey": "ferment.vessel.airlock" },
+        { "action": "emitHintTag", "tag": "wine" }
+      ]
+    },
+
+    {
+      "id": "ferment_beverage_beer",
+      "priority": 35,
+      "when": {
+        "any": [
+          "beer",
+          "wort",
+          "mash",
+          "sparge",
+          "grain bill",
+          "dry hop",
+          "hops",
+          "pitch yeast",
+          "yeast pitch",
+          "fermenter",
+          "krausen",
+          "blowoff",
+          "blow off tube",
+          "ibc",
+          "ibu",
+          "abv",
+          "keg",
+          "kegging",
+          "bottle condition",
+          "priming sugar"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.beer" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "ferment.stage.bottle_condition"
+        },
+        { "action": "emitHintTag", "tag": "beer" },
+        {
+          "action": "addWarning",
+          "warning": "Priming/bottle conditioning can overcarbonate if bottled too early or over-primed. Track gravity and use pressure-safe bottles."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_beverage_cider",
+      "priority": 35,
+      "when": {
+        "any": [
+          "cider",
+          "hard cider",
+          "apple juice ferment",
+          "ferment apple juice",
+          "cider must",
+          "cider yeast",
+          "backsweeten",
+          "back sweeten",
+          "apple wine",
+          "scrumpy"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.cider" },
+        { "action": "emitHintTag", "tag": "cider" }
+      ]
+    },
+
+    {
+      "id": "ferment_beverage_mead",
+      "priority": 35,
+      "when": {
+        "any": [
+          "mead",
+          "honey wine",
+          "must (mead)",
+          "honey must",
+          "nourishment",
+          "tosna",
+          "staggered nutrient addition",
+          "sna",
+          "degassing mead",
+          "traditional mead",
+          "melomel",
+          "metheglin",
+          "cyser",
+          "bochet"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.mead" },
+        { "action": "emitHintTag", "tag": "mead" }
+      ]
+    },
+
+    {
+      "id": "ferment_ginger_bug",
+      "priority": 35,
+      "when": {
+        "any": [
+          "ginger bug",
+          "ginger starter",
+          "ginger soda starter",
+          "wild ginger ferment",
+          "ginger culture",
+          "bug starter"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.ginger_bug" },
+        { "action": "emitHintTag", "tag": "ginger-bug" }
+      ]
+    },
+
+    {
+      "id": "ferment_kvass",
+      "priority": 35,
+      "when": {
+        "any": ["kvass", "beet kvass", "bread kvass", "rye kvass"]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.kvass" },
+        { "action": "emitHintTag", "tag": "kvass" }
+      ]
+    },
+
+    {
+      "id": "ferment_miso_koji",
+      "priority": 45,
+      "when": {
+        "any": [
+          "miso",
+          "koji",
+          "aspergillus oryzae",
+          "koji rice",
+          "koji spores",
+          "shio koji",
+          "miso paste",
+          "ferment miso",
+          "inoculate koji",
+          "koji starter"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.miso" },
+        { "action": "boostMethodKey", "methodKey": "ferment.koji" },
+        { "action": "emitHintTag", "tag": "koji-miso" },
+        {
+          "action": "addNote",
+          "note": "Koji/miso detected. This is a mold-based fermentation with different handling needs than lacto or yeast ferments."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_tempeh",
+      "priority": 45,
+      "when": {
+        "any": [
+          "tempeh",
+          "rhizopus",
+          "rhizopus oligosporus",
+          "tempe starter",
+          "inoculate tempeh",
+          "tempeh incubation"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.tempeh" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "ferment.tools.temp_control"
+        },
+        { "action": "emitHintTag", "tag": "tempeh" }
+      ]
+    },
+
+    {
+      "id": "ferment_natto",
+      "priority": 45,
+      "when": {
+        "any": [
+          "natto",
+          "bacillus subtilis",
+          "natto starter",
+          "sticky soybeans",
+          "stringy natto"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.natto" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "ferment.tools.temp_control"
+        },
+        { "action": "emitHintTag", "tag": "natto" }
+      ]
+    },
+
+    {
+      "id": "ferment_soy_sauce",
+      "priority": 45,
+      "when": {
+        "any": [
+          "soy sauce",
+          "shoyu",
+          "tamari",
+          "moromi",
+          "shoyu koji",
+          "brine moromi",
+          "soy sauce ferment"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.soy_sauce" },
+        { "action": "boostMethodKey", "methodKey": "ferment.koji" },
+        { "action": "emitHintTag", "tag": "soy-sauce" }
+      ]
+    },
+
+    {
+      "id": "ferment_fish_sauce_garum",
+      "priority": 45,
+      "when": {
+        "any": [
+          "fish sauce",
+          "garum",
+          "anchovy sauce",
+          "fermented fish",
+          "fermented seafood",
+          "shrimp paste",
+          "fermented shrimp",
+          "nuoc mam",
+          "nam pla"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.fish_sauce" },
+        { "action": "boostMethodKey", "methodKey": "ferment.garum" },
+        { "action": "emitHintTag", "tag": "fish-sauce" },
+        {
+          "action": "addWarning",
+          "warning": "Seafood ferments are high-salt and time-based. Validate salt ratios and keep anaerobic handling consistent to reduce spoilage risk."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_vessels_airlock",
+      "priority": 22,
+      "when": {
+        "any": [
+          "airlock",
+          "air lock",
+          "s-lock",
+          "s airlock",
+          "3-piece airlock",
+          "three-piece airlock",
+          "bung",
+          "stopper",
+          "carboy",
+          "fermentation lock"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.vessel.airlock" },
+        { "action": "emitHintTag", "tag": "airlock" },
+        {
+          "action": "addNote",
+          "note": "Airlock vessel detected. Typical for beverages or any anaerobic ferment requiring one-way gas release."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_vessels_crock",
+      "priority": 22,
+      "when": {
+        "any": [
+          "crock",
+          "fermentation crock",
+          "water seal crock",
+          "stoneware crock",
+          "fermenting crock",
+          "pickling crock"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.vessel.crock" },
+        { "action": "emitHintTag", "tag": "crock" }
+      ]
+    },
+
+    {
+      "id": "ferment_vessels_jars",
+      "priority": 18,
+      "when": {
+        "any": [
+          "mason jar",
+          "jar ferment",
+          "quart jar",
+          "half gallon jar",
+          "kilner jar",
+          "fido jar",
+          "bail lid jar",
+          "flip top jar",
+          "burp the jar",
+          "burping",
+          "burp daily"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.vessel.jar" },
+        { "action": "boostMethodKey", "methodKey": "ferment.vessel.burp" },
+        { "action": "emitHintTag", "tag": "jar-ferment" }
+      ]
+    },
+
+    {
+      "id": "ferment_tools_weights",
+      "priority": 18,
+      "when": {
+        "any": [
+          "fermentation weight",
+          "glass weight",
+          "weights",
+          "weight it down",
+          "keep submerged",
+          "submerge",
+          "submerged",
+          "brine cover",
+          "use a follower",
+          "cabbage leaf cover",
+          "ziplock water bag"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.tools.weight" },
+        { "action": "emitHintTag", "tag": "keep-submerged" },
+        {
+          "action": "addNote",
+          "note": "Submersion/weighting detected. This is a key control for brined lacto ferments to reduce mold growth."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_tools_ph_test",
+      "priority": 18,
+      "when": {
+        "any": [
+          "ph",
+          "pH",
+          "ph test",
+          "pH test",
+          "ph strips",
+          "pH strips",
+          "ph meter",
+          "pH meter",
+          "acidity",
+          "measure acidity"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.tools.ph_test" },
+        { "action": "emitHintTag", "tag": "ph-check" }
+      ]
+    },
+
+    {
+      "id": "ferment_tools_salt_ratio",
+      "priority": 20,
+      "when": {
+        "any": [
+          "salt %",
+          "salt percent",
+          "percent salt",
+          "% salt",
+          "2% salt",
+          "2 percent salt",
+          "2.5% salt",
+          "3% salt",
+          "3.5% salt",
+          "4% salt",
+          "by weight",
+          "weigh the salt",
+          "grams of salt",
+          "salt ratio",
+          "salinity"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.tools.salt_ratio" },
+        { "action": "emitHintTag", "tag": "salt-ratio" }
+      ]
+    },
+
+    {
+      "id": "ferment_stage_primary_secondary",
+      "priority": 16,
+      "when": {
+        "any": [
+          "primary",
+          "primary ferment",
+          "primary fermentation",
+          "secondary",
+          "secondary ferment",
+          "secondary fermentation",
+          "rack",
+          "racking",
+          "transfer to secondary",
+          "move to secondary",
+          "bulk ferment",
+          "bulk fermentation"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.stage.primary" },
+        { "action": "boostMethodKey", "methodKey": "ferment.stage.secondary" },
+        { "action": "emitHintTag", "tag": "stages" }
+      ]
+    },
+
+    {
+      "id": "ferment_stage_f2_bottle_condition",
+      "priority": 18,
+      "when": {
+        "any": [
+          "f2",
+          "F2",
+          "second ferment",
+          "second fermentation",
+          "bottle condition",
+          "bottle conditioning",
+          "prime",
+          "priming",
+          "priming sugar",
+          "carbonate",
+          "carbonation",
+          "build fizz",
+          "build pressure",
+          "flip-top bottle",
+          "swing top bottle",
+          "gt bottle",
+          "grolsch bottle"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.stage.f2" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "ferment.stage.bottle_condition"
+        },
+        { "action": "emitHintTag", "tag": "carbonation" },
+        {
+          "action": "addWarning",
+          "warning": "Sealed bottle fermentation can create high pressure. Monitor temperature/time, use pressure-safe bottles, and chill to slow activity."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_issue_kahm",
+      "priority": 50,
+      "when": {
+        "any": [
+          "kahm",
+          "kahm yeast",
+          "white film",
+          "white layer",
+          "thin white film",
+          "wrinkly white film",
+          "chalky film",
+          "yeasty film"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.issue.kahm_yeast" },
+        { "action": "emitHintTag", "tag": "kahm-yeast" },
+        {
+          "action": "addNote",
+          "note": "Kahm yeast keywords detected. Often linked to oxygen exposure; ensure submersion, reduce headspace exposure, and keep tools/vessels clean."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_issue_mold",
+      "priority": 60,
+      "when": {
+        "any": [
+          "mold",
+          "mould",
+          "fuzzy",
+          "hairy growth",
+          "blue mold",
+          "green mold",
+          "black mold",
+          "pink mold",
+          "orange mold",
+          "spots on top",
+          "growth on top"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.issue.mold" },
+        { "action": "emitHintTag", "tag": "mold" },
+        {
+          "action": "addWarning",
+          "warning": "Mold keywords detected. Treat as contamination risk: verify submersion/airlock integrity, evaluate severity, and use safety-first discard rules for unsafe growth."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_issue_off_odor",
+      "priority": 55,
+      "when": {
+        "any": [
+          "smells bad",
+          "bad smell",
+          "rotten smell",
+          "putrid",
+          "vomit smell",
+          "fecal smell",
+          "poop smell",
+          "garbage smell",
+          "nail polish",
+          "solvent smell",
+          "acetone smell",
+          "sulfur smell",
+          "burnt match smell",
+          "stinky"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.issue.off_odor" },
+        { "action": "emitHintTag", "tag": "off-odor" },
+        {
+          "action": "addWarning",
+          "warning": "Off-odor keywords detected. Prompt safety check: contamination, temperature control, oxygen exposure, or stalled fermentation may be involved."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_issue_slime_ropy",
+      "priority": 55,
+      "when": {
+        "any": [
+          "slimy",
+          "slime",
+          "ropy",
+          "stringy brine",
+          "snotty",
+          "viscous brine",
+          "thick brine"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.issue.slime" },
+        { "action": "emitHintTag", "tag": "slimy" },
+        {
+          "action": "addNote",
+          "note": "Slimy/ropy texture detected. Often linked to temperature, salt ratio, or specific bacteria/yeast activity; evaluate salt %, submersion, and time."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_issue_mushy",
+      "priority": 45,
+      "when": {
+        "any": [
+          "mushy",
+          "soft pickles",
+          "soggy",
+          "lost crunch",
+          "not crunchy",
+          "too soft"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.issue.mushy" },
+        { "action": "emitHintTag", "tag": "texture" },
+        {
+          "action": "addNote",
+          "note": "Mushy/soft texture detected. Consider salt %, temperature, tannin sources, fresh produce quality, and fermentation duration."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_issue_no_activity",
+      "priority": 50,
+      "when": {
+        "any": [
+          "no bubbles",
+          "not bubbling",
+          "no activity",
+          "stalled",
+          "stuck fermentation",
+          "nothing happening",
+          "no fizz",
+          "no krausen",
+          "airlock not bubbling"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "ferment.issue.no_activity"
+        },
+        { "action": "emitHintTag", "tag": "stalled" },
+        {
+          "action": "addNote",
+          "note": "No-activity keywords detected. Likely diagnostics: temperature too low/high, salt % too high (lacto), old starter/yeast, low sugar, or oxygen/airlock leak."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_issue_too_active_overflow",
+      "priority": 50,
+      "when": {
+        "any": [
+          "overflow",
+          "blew out",
+          "blew off",
+          "eruption",
+          "foaming over",
+          "krausen overflow",
+          "blowoff tube",
+          "blow off tube",
+          "exploded",
+          "bottle bomb",
+          "bottle bombed",
+          "burst bottle",
+          "glass shards"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "ferment.issue.too_active" },
+        { "action": "boostMethodKey", "methodKey": "ferment.issue.overflow" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "ferment.issue.explosion_risk"
+        },
+        { "action": "emitHintTag", "tag": "pressure-risk" },
+        {
+          "action": "addWarning",
+          "warning": "Overflow/explosion keywords detected. Treat as pressure hazard: reduce ferment temp, increase headspace, use blowoff/pressure-safe bottles, and chill to slow activity."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_issue_botulism_risk_terms",
+      "priority": 70,
+      "when": {
+        "any": [
+          "botulism",
+          "botulinum",
+          "anaerobic",
+          "low acid",
+          "garlic in oil",
+          "herb oil",
+          "infused oil",
+          "oil infusion",
+          "room temp oil",
+          "sealed oil jar"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "ferment.issue.botulism_risk"
+        },
+        { "action": "emitHintTag", "tag": "safety-critical" },
+        {
+          "action": "addWarning",
+          "warning": "Safety-critical keywords detected (botulism/low-acid anaerobic contexts). Route to strict safety guidance and avoid unsafe room-temp sealed oil/low-acid anaerobic storage patterns."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_downrank_nonferment_pickling_terms",
+      "priority": 5,
+      "when": {
+        "any": [
+          "quick pickle",
+          "quick-pickle",
+          "quick pickled",
+          "refrigerator pickles",
+          "fridge pickles",
+          "vinegar pickle",
+          "vinegar brine",
+          "pickling vinegar",
+          "canning",
+          "water bath",
+          "pressure canner",
+          "pressure canning"
+        ]
+      },
+      "then": [
+        { "action": "downrankMethodKey", "methodKey": "ferment.lacto" },
+        { "action": "emitHintTag", "tag": "not-lacto-by-default" },
+        {
+          "action": "addNote",
+          "note": "Detected quick-pickle/canning terms. These are not fermentation by default. Prefer pickling/canning workflows unless explicit fermentation keywords are also present."
+        }
+      ]
+    },
+
+    {
+      "id": "ferment_block_unsafe_roomtemp_sealed_carbonation",
+      "priority": 80,
+      "when": {
+        "any": [
+          "leave sealed at room temp for weeks",
+          "sealed at room temp for weeks",
+          "tighten lid and forget",
+          "never burp",
+          "never vent",
+          "plastic soda bottle swollen",
+          "bottle is bulging"
+        ]
+      },
+      "then": [
+        { "action": "blockMethodKey", "methodKey": "ferment.stage.f2" },
+        { "action": "emitHintTag", "tag": "unsafe-pattern" },
+        {
+          "action": "addWarning",
+          "warning": "Unsafe pattern detected: prolonged sealed room-temp fermentation without pressure management. Use pressure-safe process controls (timing, burping/valves, refrigeration)."
+        }
+      ]
+    }
+  ]
+}

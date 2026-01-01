@@ -1,0 +1,796 @@
+{
+  "_meta": {
+    "table": "storage.layout",
+    "description": "Storehouse layout reference for SSA. Maps household physical zones (pantry shelves, root cellar, freezers, garden shed, animal feed room, cleaning cabinet, etc.) to domains, grocery sections, and session templates. Supports forward planning (where to put things) and reverse generation (infer likely storage zone from text like “top pantry shelf”, “deep freezer”, or “root cellar”).",
+    "version": 1,
+    "updatedAt": "2025-11-18T00:00:00.000Z",
+    "domains": [
+      "cooking",
+      "cleaning",
+      "garden",
+      "animals",
+      "preservation",
+      "storehouse"
+    ]
+  },
+  "schema": {
+    "id": "string",
+    "label": "string",
+    "householdArea": "string",
+    "zoneType": "string",
+    "temperature": {
+      "minC": "number|null",
+      "maxC": "number|null"
+    },
+    "humidity": {
+      "minPct": "number|null",
+      "maxPct": "number|null"
+    },
+    "lighting": "string",
+    "accessLevel": "public|adult_only|animals_only|outdoor",
+    "supportedDomains": [
+      "cooking|cleaning|garden|animals|preservation|storehouse"
+    ],
+    "grocerySections": [
+      "string"
+    ],
+    "storageHints": {
+      "primaryUses": [
+        "string"
+      ],
+      "doNotStore": [
+        "string"
+      ],
+      "rotationNotes": "string",
+      "capacityHint": "string"
+    },
+    "layoutHints": {
+      "shelfPattern": "string",
+      "binLabels": [
+        "string"
+      ],
+      "sessionTemplates": {
+        "inventorySessions": [
+          "string"
+        ],
+        "cleaningSessions": [
+          "string"
+        ],
+        "mealPlanningSessions": [
+          "string"
+        ],
+        "gardenSessions": [
+          "string"
+        ],
+        "animalSessions": [
+          "string"
+        ],
+        "preservationSessions": [
+          "string"
+        ]
+      }
+    },
+    "favorites": {
+      "allowFavoriteSessions": "boolean",
+      "defaultSessionTags": [
+        "string"
+      ]
+    },
+    "reverseGeneration": {
+      "keywords": [
+        "string"
+      ],
+      "phrases": [
+        "string"
+      ],
+      "commonNotesPatterns": [
+        "string"
+      ]
+    },
+    "links": {
+      "defaultInventoryTags": [
+        "string"
+      ],
+      "defaultPricebookSections": [
+        "string"
+      ]
+    },
+    "tags": [
+      "string"
+    ]
+  },
+  "rows": [
+    {
+      "id": "pantry_dry_goods_main",
+      "label": "Pantry – Dry Goods (Main Shelves)",
+      "householdArea": "kitchen_adjacent",
+      "zoneType": "pantry_shelves",
+      "temperature": {
+        "minC": 15,
+        "maxC": 25
+      },
+      "humidity": {
+        "minPct": 30,
+        "maxPct": 60
+      },
+      "lighting": "indirect",
+      "accessLevel": "public",
+      "supportedDomains": [
+        "cooking",
+        "storehouse"
+      ],
+      "grocerySections": [
+        "pantry:dry_goods",
+        "pantry:canned_jars",
+        "pantry:spices_sauces",
+        "baking"
+      ],
+      "storageHints": {
+        "primaryUses": [
+          "Whole grains and flours in sealed buckets or bins",
+          "Rice, beans, lentils, and pasta",
+          "Baking staples (salt, sugar, leavening, cocoa)",
+          "Canned goods and shelf-stable jars for quick meals"
+        ],
+        "doNotStore": [
+          "Fresh produce that prefers root cellar",
+          "High-fat nuts/seeds for very long storage (move to cooler zone if possible)"
+        ],
+        "rotationNotes": "Use front-to-back rotation by date; keep most-used staples at eye level and ‘deep storage’ on upper/lower shelves.",
+        "capacityHint": "Design at least 3–5 shelf levels with labeled zones for grains, beans, baking, quick meals, and overflow."
+      },
+      "layoutHints": {
+        "shelfPattern": "Eye-level: everyday meal kits; above: light items (chips, crackers); below: heavy buckets (grain, beans).",
+        "binLabels": [
+          "Grain & Flour",
+          "Beans & Lentils",
+          "Pasta & Rice",
+          "Canned Meals & Soups",
+          "Baking Staples",
+          "Spices & Sauces"
+        ],
+        "sessionTemplates": {
+          "inventorySessions": [
+            "Quick pantry scan: check grains, beans, and baking levels vs storehouse target.",
+            "Deep rotation session: pull older stock forward, mark anything nearing end of life."
+          ],
+          "cleaningSessions": [
+            "Quarterly pantry reset: wipe shelves, remove crumbs, check for bugs, update labels."
+          ],
+          "mealPlanningSessions": [
+            "Weekly ‘shop your pantry first’ session: choose meals around what is abundant.",
+            "Reverse generation: build batch-cooking sessions from overstocked grains and beans."
+          ],
+          "gardenSessions": [],
+          "animalSessions": [],
+          "preservationSessions": [
+            "Identify canned goods to replace this season; schedule new canning sessions."
+          ]
+        }
+      },
+      "favorites": {
+        "allowFavoriteSessions": true,
+        "defaultSessionTags": [
+          "pantry",
+          "storehouse",
+          "meal_planning",
+          "inventory"
+        ]
+      },
+      "reverseGeneration": {
+        "keywords": [
+          "pantry",
+          "dry goods",
+          "baking shelf",
+          "grain shelf"
+        ],
+        "phrases": [
+          "top pantry shelf",
+          "back of the pantry",
+          "baking section",
+          "grain buckets by the pantry"
+        ],
+        "commonNotesPatterns": [
+          "in pantry near flour",
+          "back pantry, second shelf",
+          "pantry – baking zone"
+        ]
+      },
+      "links": {
+        "defaultInventoryTags": [
+          "location:pantry",
+          "zone:dry_goods_main"
+        ],
+        "defaultPricebookSections": [
+          "pantry:dry_goods",
+          "baking",
+          "pantry:canned_jars",
+          "pantry:spices_sauces"
+        ]
+      },
+      "tags": [
+        "indoor",
+        "cooking",
+        "storehouse",
+        "high_frequency_access"
+      ]
+    },
+    {
+      "id": "root_cellar_cool_storage",
+      "label": "Root Cellar – Cool/Dark Storage",
+      "householdArea": "basement_or_earth_berm",
+      "zoneType": "root_cellar",
+      "temperature": {
+        "minC": 1,
+        "maxC": 10
+      },
+      "humidity": {
+        "minPct": 60,
+        "maxPct": 95
+      },
+      "lighting": "dim",
+      "accessLevel": "adult_only",
+      "supportedDomains": [
+        "cooking",
+        "garden",
+        "preservation",
+        "storehouse"
+      ],
+      "grocerySections": [
+        "produce",
+        "pantry:canned_jars",
+        "preservation:jars_lids"
+      ],
+      "storageHints": {
+        "primaryUses": [
+          "Cured root crops (potatoes, carrots, beets, turnips)",
+          "Winter squash and pumpkins (depending on humidity corner)",
+          "Ferments and canned goods needing cooler storage",
+          "Apples and other long-keeping fruits (in segregated zones, away from potatoes)"
+        ],
+        "doNotStore": [
+          "Cleaning chemicals",
+          "Strong-smelling items near fruit",
+          "Animal feed (to avoid pests and cross-odors)"
+        ],
+        "rotationNotes": "Use seasonal rotation; log harvests in garden module and link to root cellar entries. Check regularly for spoilage and remove bad items promptly.",
+        "capacityHint": "Design shelving plus open floor/crib space for crates; dedicate separate corners for potatoes vs fruit to minimize off-flavors."
+      },
+      "layoutHints": {
+        "shelfPattern": "Upper shelves for jars and ferments, mid shelves for small crates, floor or low bins for large root crops.",
+        "binLabels": [
+          "Potatoes",
+          "Carrots & Beets",
+          "Winter Squash",
+          "Apples & Fruits",
+          "Ferments & Crocks",
+          "Canned Jars"
+        ],
+        "sessionTemplates": {
+          "inventorySessions": [
+            "Post-harvest intake: weigh and log root crops, assign bins, and sync to inventory & savings.",
+            "Monthly root cellar check: cull bad items, update remaining counts, and adjust meal planning to use up older crops."
+          ],
+          "cleaningSessions": [
+            "Seasonal deep clean: sweep, mop, scrub shelves, sanitize bins before new harvest.",
+            "Off-season airing session: open vents/doors, check for moisture issues."
+          ],
+          "mealPlanningSessions": [
+            "Winter menu planning: prioritize root-cellar items to minimize store spending.",
+            "Soup/stew batch-cooking sessions keyed to root cellar surpluses."
+          ],
+          "gardenSessions": [
+            "Harvest logging sessions: auto-generate cellar placement tasks when harvests are recorded.",
+            "Planting review sessions: use last season’s cellar logs to adjust planting amounts."
+          ],
+          "animalSessions": [],
+          "preservationSessions": [
+            "Ferment & pickle sessions based on surplus produce flagged in root cellar intake.",
+            "Canning sessions to convert near-end-of-life cellar crops into shelf-stable goods."
+          ]
+        }
+      },
+      "favorites": {
+        "allowFavoriteSessions": true,
+        "defaultSessionTags": [
+          "root_cellar",
+          "harvest",
+          "preservation",
+          "winter_menu"
+        ]
+      },
+      "reverseGeneration": {
+        "keywords": [
+          "root cellar",
+          "cellar",
+          "cold room",
+          "cool storage"
+        ],
+        "phrases": [
+          "store in the root cellar",
+          "back cellar bin",
+          "kept in crates downstairs",
+          "cool dark room with bins"
+        ],
+        "commonNotesPatterns": [
+          "in root cellar crate",
+          "cellar shelf near jars",
+          "bottom corner of cellar"
+        ]
+      },
+      "links": {
+        "defaultInventoryTags": [
+          "location:root_cellar",
+          "zone:cool_storage"
+        ],
+        "defaultPricebookSections": [
+          "produce",
+          "pantry:canned_jars",
+          "preservation:jars_lids"
+        ]
+      },
+      "tags": [
+        "cool",
+        "dark",
+        "garden",
+        "preservation",
+        "storehouse"
+      ]
+    },
+    {
+      "id": "freezer_deep_bulk_meats",
+      "label": "Deep Freezer – Bulk Meats & Prepared Foods",
+      "householdArea": "garage_or_utility_room",
+      "zoneType": "deep_freezer",
+      "temperature": {
+        "minC": -25,
+        "maxC": -15
+      },
+      "humidity": {
+        "minPct": null,
+        "maxPct": null
+      },
+      "lighting": "nearby_room_light",
+      "accessLevel": "adult_only",
+      "supportedDomains": [
+        "cooking",
+        "animals",
+        "preservation",
+        "storehouse"
+      ],
+      "grocerySections": [
+        "meat+freezer",
+        "pantry:canned_jars",
+        "preservation:smoking_curing"
+      ],
+      "storageHints": {
+        "primaryUses": [
+          "Packaged lamb, goat, and chicken cuts from butchery sessions",
+          "Ground meat and sausage (including training/offal blends)",
+          "Batch-cooked meals and meal components",
+          "Stock bones and broth bricks"
+        ],
+        "doNotStore": [
+          "Short-term everyday items (keep those in the kitchen freezer)",
+          "Open or poorly sealed containers"
+        ],
+        "rotationNotes": "Group by species and cut. Use color-coded bins or labels. Always log large batches from butchery and batch cooking. Run periodic ‘eat from freezer’ campaigns.",
+        "capacityHint": "Design bins or dividers for: lamb/goat, poultry, sausage, batch meals, stock bones, misc."
+      },
+      "layoutHints": {
+        "shelfPattern": "Chest freezers: bottom = bones and least-used; middle = bulk cuts; top = frequently used batch meals and sausage.",
+        "binLabels": [
+          "Lamb & Goat Cuts",
+          "Chicken Cuts",
+          "Sausage & Ground Meat",
+          "Batch Meals",
+          "Stock Bones & Broth",
+          "Misc. Freezer Extras"
+        ],
+        "sessionTemplates": {
+          "inventorySessions": [
+            "Post-butchery intake: tag each package, weigh, and log into inventory with freezer zone.",
+            "Quarterly freezer audit: list what’s older than X months and auto-generate ‘use it up’ meal sessions."
+          ],
+          "cleaningSessions": [
+            "Annual defrost and deep clean session scheduled when stocks are low.",
+            "Quick spill clean session when leaks or broken packages are detected."
+          ],
+          "mealPlanningSessions": [
+            "Freezer-first weekly planning: pick meals from older packs first.",
+            "Reverse generation: build sausage/batch-cooking sessions based on overstocked items."
+          ],
+          "gardenSessions": [],
+          "animalSessions": [
+            "Bone sorting and allocation sessions for pet treats vs stock.",
+            "Offal training sausage sessions linked to freezer inventory."
+          ],
+          "preservationSessions": [
+            "Smoke & cure day: select freezer meats to move into smoking/canning workflows.",
+            "Freezer-to-canning session: convert frozen fruit or meat into shelf-stable jars."
+          ]
+        }
+      },
+      "favorites": {
+        "allowFavoriteSessions": true,
+        "defaultSessionTags": [
+          "freezer",
+          "butchery",
+          "batch_cooking",
+          "inventory"
+        ]
+      },
+      "reverseGeneration": {
+        "keywords": [
+          "deep freezer",
+          "chest freezer",
+          "garage freezer"
+        ],
+        "phrases": [
+          "in the big freezer",
+          "deep freezer in garage",
+          "bottom of the chest freezer",
+          "freezer bin with lamb"
+        ],
+        "commonNotesPatterns": [
+          "deep freezer – row",
+          "chest freezer left bin",
+          "garage freezer shelf"
+        ]
+      },
+      "links": {
+        "defaultInventoryTags": [
+          "location:freezer",
+          "zone:deep_bulk_meats"
+        ],
+        "defaultPricebookSections": [
+          "meat+freezer",
+          "preservation:smoking_curing"
+        ]
+      },
+      "tags": [
+        "cold",
+        "animals",
+        "cooking",
+        "preservation",
+        "storehouse"
+      ]
+    },
+    {
+      "id": "garden_shed_inputs",
+      "label": "Garden Shed – Seeds, Tools & Amendments",
+      "householdArea": "outdoor_or_outbuilding",
+      "zoneType": "garden_shed",
+      "temperature": {
+        "minC": -5,
+        "maxC": 40
+      },
+      "humidity": {
+        "minPct": 20,
+        "maxPct": 90
+      },
+      "lighting": "variable",
+      "accessLevel": "outdoor",
+      "supportedDomains": [
+        "garden",
+        "preservation",
+        "storehouse"
+      ],
+      "grocerySections": [
+        "garden:seeds",
+        "garden:soil_amendments",
+        "garden:tools_supplies"
+      ],
+      "storageHints": {
+        "primaryUses": [
+          "Seed packets and labeled seed boxes (when climate allows)",
+          "Soil amendments (lime, compost, fertilizer) in sealed containers",
+          "Hand tools, irrigation parts, hoses, stakes, trellis components",
+          "Empty pots, trays, and garden-related preservation gear (like dehydrator accessories if stored here)"
+        ],
+        "doNotStore": [
+          "Food items that attract pests",
+          "Delicate seeds in very hot climates (move to cooler indoor zone if necessary)"
+        ],
+        "rotationNotes": "Track seed viability by year; link with planting plans and companion tables. Rotate older seeds into test beds or dense sowing first.",
+        "capacityHint": "Use vertical wall storage for tools, sealed bins for amendments, labeled boxes or binders for seeds."
+      },
+      "layoutHints": {
+        "shelfPattern": "Eye-level for seeds and small tools; lower shelves or floor bins for heavy amendments.",
+        "binLabels": [
+          "Seeds – Current Year",
+          "Seeds – Older Stock",
+          "Soil Amendments",
+          "Irrigation & Hoses",
+          "Small Tools",
+          "Pots & Trays"
+        ],
+        "sessionTemplates": {
+          "inventorySessions": [
+            "Pre-season garden inventory: count seed packets, amendments, and tools; sync to garden planner.",
+            "Post-season clean-up: log leftover seeds and supplies."
+          ],
+          "cleaningSessions": [
+            "Spring shed tidy: sweep, dust, check for rust and damage.",
+            "End-of-season tool care: clean, sharpen, oil, and hang tools."
+          ],
+          "mealPlanningSessions": [],
+          "gardenSessions": [
+            "Seed-starting sessions: pull required seeds and trays, log use against seed inventory.",
+            "Bed-prep sessions: match amendments and tools to planned beds."
+          ],
+          "animalSessions": [],
+          "preservationSessions": [
+            "Drying herb sessions when using shed as herb-drying space (if climate allows)."
+          ]
+        }
+      },
+      "favorites": {
+        "allowFavoriteSessions": true,
+        "defaultSessionTags": [
+          "garden",
+          "seed_planning",
+          "bed_prep",
+          "shed_cleanup"
+        ]
+      },
+      "reverseGeneration": {
+        "keywords": [
+          "garden shed",
+          "shed",
+          "tool shed",
+          "seed storage"
+        ],
+        "phrases": [
+          "back shed with tools",
+          "seed box in the shed",
+          "fertilizer stored in shed",
+          "soil amendments in garden shed"
+        ],
+        "commonNotesPatterns": [
+          "in shed next to tools",
+          "garden shed shelf",
+          "seed bin in shed"
+        ]
+      },
+      "links": {
+        "defaultInventoryTags": [
+          "location:garden_shed",
+          "zone:inputs"
+        ],
+        "defaultPricebookSections": [
+          "garden:seeds",
+          "garden:soil_amendments",
+          "garden:tools_supplies"
+        ]
+      },
+      "tags": [
+        "outdoor",
+        "garden",
+        "storehouse"
+      ]
+    },
+    {
+      "id": "animal_feed_room",
+      "label": "Animal Feed & Bedding Room",
+      "householdArea": "barn_or_outbuilding",
+      "zoneType": "feed_room",
+      "temperature": {
+        "minC": -5,
+        "maxC": 35
+      },
+      "humidity": {
+        "minPct": 20,
+        "maxPct": 75
+      },
+      "lighting": "functional",
+      "accessLevel": "animals_only",
+      "supportedDomains": [
+        "animals",
+        "storehouse"
+      ],
+      "grocerySections": [
+        "animals:feed",
+        "animals:healthcare",
+        "animals:bedding"
+      ],
+      "storageHints": {
+        "primaryUses": [
+          "Bagged feed (goat, sheep, poultry, etc.) on pallets/shelves",
+          "Loose minerals, salt blocks, supplements",
+          "Bedding (straw, shavings) in bales or compressed bags",
+          "Basic animal care supplies (buckets, halters, grooming tools) in sealed bins"
+        ],
+        "doNotStore": [
+          "Human food or kitchen staples",
+          "Strong chemicals not related to animal care"
+        ],
+        "rotationNotes": "First-in, first-out for feed; keep feed off the floor to avoid moisture and rodents. Log feed use to adjust future buying cycles.",
+        "capacityHint": "Plan for 1–3 months of feed based on herd/flock size; separate species by labeled zones."
+      },
+      "layoutHints": {
+        "shelfPattern": "Heavier bagged feed on lower shelves/pallets; minerals and supplements at reachable height; bedding stacked against a dry wall.",
+        "binLabels": [
+          "Goat Feed",
+          "Sheep Feed",
+          "Poultry Feed",
+          "Minerals & Salt",
+          "Bedding",
+          "Care Supplies"
+        ],
+        "sessionTemplates": {
+          "inventorySessions": [
+            "Weekly feed check: count opened and unopened bags, log remaining days of feed.",
+            "Mineral/salt check: assess loose minerals and salt blocks; generate shopping sessions if running low."
+          ],
+          "cleaningSessions": [
+            "Monthly sweep and cobweb removal; check for rodent sign and seal feed.",
+            "Spill clean-up session: shovel, sweep, and discard contaminated feed."
+          ],
+          "mealPlanningSessions": [],
+          "gardenSessions": [
+            "Manure-to-compost sessions if stored near feed room (link to garden module)."
+          ],
+          "animalSessions": [
+            "Routine animal feed scheduling sessions (SSA syncs feed usage to herd/flock tasks).",
+            "Health check sessions that ensure minerals and supplements are available."
+          ],
+          "preservationSessions": []
+        }
+      },
+      "favorites": {
+        "allowFavoriteSessions": true,
+        "defaultSessionTags": [
+          "animals",
+          "feed",
+          "bedding",
+          "barn_cleanup"
+        ]
+      },
+      "reverseGeneration": {
+        "keywords": [
+          "feed room",
+          "feed shed",
+          "barn feed",
+          "bedding storage"
+        ],
+        "phrases": [
+          "stored in feed room",
+          "in the barn by the feed",
+          "bedding stacked by the door",
+          "salt blocks in feed shed"
+        ],
+        "commonNotesPatterns": [
+          "feed room corner",
+          "barn feed bin",
+          "bedding rack in barn"
+        ]
+      },
+      "links": {
+        "defaultInventoryTags": [
+          "location:feed_room",
+          "zone:animals_feed"
+        ],
+        "defaultPricebookSections": [
+          "animals:feed",
+          "animals:bedding",
+          "animals:healthcare"
+        ]
+      },
+      "tags": [
+        "animals",
+        "storehouse",
+        "outbuilding"
+      ]
+    },
+    {
+      "id": "cleaning_cabinet_household",
+      "label": "Household Cleaning Cabinet",
+      "householdArea": "hallway_or_laundry",
+      "zoneType": "cleaning_cabinet",
+      "temperature": {
+        "minC": 15,
+        "maxC": 30
+      },
+      "humidity": {
+        "minPct": 20,
+        "maxPct": 70
+      },
+      "lighting": "ambient",
+      "accessLevel": "adult_only",
+      "supportedDomains": [
+        "cleaning",
+        "storehouse"
+      ],
+      "grocerySections": [
+        "cleaning:laundry",
+        "cleaning:surfaces",
+        "cleaning:disinfectants",
+        "cleaning:dishes"
+      ],
+      "storageHints": {
+        "primaryUses": [
+          "Homemade cleaning concentrates (vinegar-based, soap blends, etc.)",
+          "Commercial cleaners (surface, bathroom, floor, dish)",
+          "Laundry supplies (detergent, boosters, stain removers)",
+          "Cleaning tools (sponges, cloths, brushes) in separate bins"
+        ],
+        "doNotStore": [
+          "Food or food-contact items directly beside harsh chemicals",
+          "Garden or animal-only chemicals (keep separate zone)"
+        ],
+        "rotationNotes": "Group by hazard level and domain (kitchen, bathroom, floors). Track concentrates separately from ready-to-use sprays. Link stock levels to cleaning schedules.",
+        "capacityHint": "Use child-safe locks. Keep regularly used items front and center; bulk refills higher or lower."
+      },
+      "layoutHints": {
+        "shelfPattern": "Top shelf for harsh/rarely used chemicals (adult reach only); middle shelves for daily-use cleaners; bottom for tools and bulk refills.",
+        "binLabels": [
+          "Kitchen Surfaces",
+          "Bathroom & Toilets",
+          "Floors",
+          "Laundry",
+          "Bulk Refills",
+          "Tools & Cloths"
+        ],
+        "sessionTemplates": {
+          "inventorySessions": [
+            "Monthly cleaning stock check: count concentrates, daily-use sprays, and laundry detergent vs cleaning calendar.",
+            "Reverse generation: suggest making homemade cleaners when vinegar, castile soap, and essential oils are abundant."
+          ],
+          "cleaningSessions": [
+            "Whole-house cleaning day: auto-generate caddy packing list by room.",
+            "Laundry marathon day: ensure detergent and boosters are staged."
+          ],
+          "mealPlanningSessions": [],
+          "gardenSessions": [],
+          "animalSessions": [],
+          "preservationSessions": []
+        }
+      },
+      "favorites": {
+        "allowFavoriteSessions": true,
+        "defaultSessionTags": [
+          "cleaning",
+          "laundry",
+          "homemade_cleaners"
+        ]
+      },
+      "reverseGeneration": {
+        "keywords": [
+          "cleaning cabinet",
+          "cleaning closet",
+          "under sink",
+          "hall closet"
+        ],
+        "phrases": [
+          "under the kitchen sink",
+          "cleaning supplies closet",
+          "hallway cleaning cabinet",
+          "laundry room cleaners"
+        ],
+        "commonNotesPatterns": [
+          "kept under sink",
+          "in cleaning cabinet",
+          "hall closet shelf"
+        ]
+      },
+      "links": {
+        "defaultInventoryTags": [
+          "location:cleaning_cabinet",
+          "zone:household_cleaning"
+        ],
+        "defaultPricebookSections": [
+          "cleaning:laundry",
+          "cleaning:surfaces",
+          "cleaning:disinfectants",
+          "cleaning:dishes"
+        ]
+      },
+      "tags": [
+        "cleaning",
+        "storehouse",
+        "indoor"
+      ]
+    }
+  ]
+}

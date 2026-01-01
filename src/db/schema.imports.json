@@ -1,0 +1,272 @@
+{
+  "version": "2025-11-02T16:15:00-06:00",
+  "description": "SSA Import Schema — defines how ALL inbound imports (recipe, cleaning, garden/seed, animal/butchery, storehouse, video/how-to, future domains) are stored, normalized, enriched into context intelligence, and linked to automation. This schema is the bridge for: imports → intelligence → automation → (optional) hub export.",
+  "notes": [
+    "This file is intended to be read by src/db/index.js OR by src/features/import/ImportService.js to know what shapes to persist.",
+    "Imports *do not* own the household — they are inputs. But every import should be storable and replayable.",
+    "Every import should produce or update a record in the main household DB (see schema.household.json → 'imports'). This file gives a more detailed, domain-aware schema specifically for imports.",
+    "Keep timestamps as ISO strings so the eventBus payload shape { type, ts, source, data } can be mirrored here.",
+    "When an import is successfully parsed/normalized, emit event: { type: 'import.parsed', ts: <ISO>, source: 'import.service', data: { id, householdId, domain, source, normalizedPayload } }.",
+    "If familyFundMode=true (see featureFlags in household schema), the import service may format and enqueue this import for Hub export."
+  ],
+  "tables": {
+    "importSources": {
+      "description": "Registry of known import sources (domains and hosts). Used to check the siteAllowList and map to the right normalizer.",
+      "primaryKey": "id",
+      "indexes": [
+        "host",
+        "domain",
+        "[host+domain]"
+      ],
+      "schema": {
+        "id": "string",
+        "host": "string",
+        "domain": "string",
+        "label": "string?",
+        "parser": "string?", 
+        "enabled": "boolean",
+        "lastSuccessAt": "string?",
+        "lastFailureAt": "string?",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    },
+
+    "importQueue": {
+      "description": "Staging area for imported payloads BEFORE full normalization. This is where bookmarklet, share target, iOS Shortcut POST, file upload, or Scan • Compare • Trust dumps its data. ImportService drains this queue.",
+      "primaryKey": "id",
+      "indexes": [
+        "status",
+        "source",
+        "domain",
+        "createdAt"
+      ],
+      "schema": {
+        "id": "string",
+        "status": "string", 
+        "source": "string", 
+        "domain": "string?", 
+        "householdId": "string?",
+        "rawContentType": "string?",
+        "rawPayload": "object?",
+        "headers": "object?",
+        "meta": {
+          "originalUrl": "string?",
+          "userAgent": "string?",
+          "referrer": "string?",
+          "importNotes": "string?"
+        },
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    },
+
+    "imports": {
+      "description": "Canonical import records AFTER normalization. Every domain (recipe, cleaning, garden/seed, animal/butchery, storehouse, video/how-to, future preservation) ends up here.",
+      "primaryKey": "id",
+      "indexes": [
+        "householdId",
+        "domain",
+        "source",
+        "status",
+        "[householdId+domain]",
+        "createdAt"
+      ],
+      "schema": {
+        "id": "string",
+        "householdId": "string",
+        "domain": "string",
+        "source": "string",
+        "status": "string", 
+        "originalUrl": "string?",
+        "originalPayload": "object?",
+        "normalizedPayload": "object?",
+        "contextIntelligence": {
+          "ingredients": "array?",
+          "methods": "array?",
+          "equipment": "array?",
+          "seasonality": "array?",
+          "locations": "array?",
+          "taskGraph": "object?",
+          "people": "array?",
+          "yieldCurves": "array?"
+        },
+        "links": {
+          "inventory": "array?",
+          "storehouse": "array?",
+          "garden": "array?",
+          "animal": "array?",
+          "preservation": "array?",
+          "sessions": "array?"
+        },
+        "runtimeHints": {
+          "suggestSession": "boolean?",
+          "preferredSessionType": "string?",
+          "preferredTimeWindow": "string?",
+          "respectSabbathGuard": "boolean?",
+          "respectQuietHours": "boolean?"
+        },
+        "reverseGeneration": {
+          "enabled": "boolean?",
+          "targetHouseholds": "array?",
+          "shareToken": "string?",
+          "note": "string?"
+        },
+        "isFavorite": "boolean?",
+        "scheduledSessionId": "string?",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    },
+
+    "importErrors": {
+      "description": "Any failed import parsing/normalization attempts. Helps tune the siteAllowList and mappers.",
+      "primaryKey": "id",
+      "indexes": [
+        "source",
+        "domain",
+        "createdAt"
+      ],
+      "schema": {
+        "id": "string",
+        "source": "string",
+        "domain": "string?",
+        "payloadSnapshot": "object?",
+        "errorMessage": "string?",
+        "stack": "string?",
+        "createdAt": "string"
+      }
+    },
+
+    "importMappings": {
+      "description": "Mapper definitions for how to turn an import domain → SSA internal shape. Think: recipe JSON → mealPlanEngine, cleaning blog → CleaningSessionEngine, seed packet → GardenSessionEngine.",
+      "primaryKey": "id",
+      "indexes": [
+        "domain",
+        "engine",
+        "[domain+engine]"
+      ],
+      "schema": {
+        "id": "string",
+        "domain": "string",
+        "engine": "string", 
+        "version": "string?",
+        "mapping": "object", 
+        "postProcess": "object?", 
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    },
+
+    "importToSessionRequests": {
+      "description": "Requests created by the ImportService or the user saying: 'turn this import into an actionable session'. Automation/runtime consumes this and writes to household.sessions (see schema.household.json).",
+      "primaryKey": "id",
+      "indexes": [
+        "householdId",
+        "importId",
+        "status",
+        "requestedSessionType"
+      ],
+      "schema": {
+        "id": "string",
+        "householdId": "string",
+        "importId": "string",
+        "requestedSessionType": "string",
+        "priority": "string?",
+        "status": "string", 
+        "requestedBy": "string?",
+        "notes": "string?",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    },
+
+    "importExports": {
+      "description": "Records of what imports were exported to the Hub (only if familyFundMode=true). This lets us avoid re-sending unchanged imports.",
+      "primaryKey": "id",
+      "indexes": [
+        "householdId",
+        "importId",
+        "target",
+        "exportedAt"
+      ],
+      "schema": {
+        "id": "string",
+        "householdId": "string",
+        "importId": "string",
+        "target": "string",
+        "exportedAt": "string",
+        "status": "string?",
+        "error": "string?",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    }
+  },
+  "domainProfiles": {
+    "recipe": {
+      "description": "Recipe/meal-related imports. Should produce ingredients, methods, equipment, seasonality → link to inventory/storehouse → suggest cooking session.",
+      "requiredFields": [
+        "title",
+        "ingredients"
+      ],
+      "normalizedShape": {
+        "title": "string",
+        "ingredients": "array",
+        "steps": "array?",
+        "equipment": "array?",
+        "yield": "string?",
+        "cuisine": "string?",
+        "notes": "string?"
+      }
+    },
+    "cleaning": {
+      "description": "Cleaning/decluttering/zone routine imports. Should produce taskGraph and room/zone metadata → suggest cleaning session.",
+      "normalizedShape": {
+        "title": "string?",
+        "zones": "array?",
+        "tasks": "array",
+        "frequency": "string?",
+        "durationEstimate": "number?",
+        "notes": "string?"
+      }
+    },
+    "garden": {
+      "description": "Garden/seed imports. Should produce crops, zones, care schedule, and harvest targets → suggest garden session and link to storehouse goals.",
+      "normalizedShape": {
+        "title": "string?",
+        "crops": "array",
+        "zones": "array?",
+        "careSchedule": "object?",
+        "harvestTargets": "array?"
+      }
+    },
+    "animal": {
+      "description": "Animal acquisition, care, and butchery imports. Should produce careSchedule, species, yieldCurveRef → suggest animal session.",
+      "normalizedShape": {
+        "species": "string",
+        "breed": "string?",
+        "careSchedule": "object?",
+        "butcheryPlan": "object?",
+        "yieldCurveRef": "string?"
+      }
+    },
+    "storehouse": {
+      "description": "Storehouse planning imports. Should produce target stock levels → link to inventory + automation for resupply and production.",
+      "normalizedShape": {
+        "title": "string?",
+        "goals": "array"
+      }
+    },
+    "video": {
+      "description": "Video/how-to imports. Should extract taskGraph/equipment if possible, and allow user to request a session based on the video.",
+      "normalizedShape": {
+        "title": "string?",
+        "videoUrl": "string",
+        "description": "string?",
+        "extractedTasks": "array?",
+        "equipment": "array?"
+      }
+    }
+  }
+}

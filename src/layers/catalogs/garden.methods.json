@@ -1,0 +1,3588 @@
+{
+  "schemaVersion": "1.0.0",
+  "domain": "garden",
+  "catalogId": "garden.methods",
+  "generatedAt": "2025-12-27T15:31:46Z",
+  "description": "Fixed garden method definitions for SSA (planning + sessions). Includes indigenous/culture-specific, natural, and modern methods. Each method provides default steps, cues, timers, safety notes, and variants.",
+  "conventions": {
+    "methodIdFormat": "garden.<category>.<slug>",
+    "stepIdFormat": "s<nn>",
+    "units": [
+      "min",
+      "hr",
+      "day",
+      "week",
+      "month"
+    ],
+    "notes": [
+      "Steps are designed to be runnable by SSA SessionRunner.",
+      "Where seasonal timing matters, methods include seasonHints and climateNotes; users/households can override via layer_overrides."
+    ]
+  },
+  "methods": [
+    {
+      "id": "garden.soil.soil-test-basic",
+      "name": "Basic Soil Test + Amendment Plan",
+      "summary": "Collect representative soil samples, run a basic pH/NPK test, and create a simple amendment plan for the bed/plot.",
+      "tags": [
+        "soil",
+        "planning",
+        "modern",
+        "baseline"
+      ],
+      "difficulty": "beginner",
+      "typicalDuration": {
+        "value": 60,
+        "unit": "min"
+      },
+      "seasonHints": [
+        "late-winter",
+        "early-spring",
+        "late-fall"
+      ],
+      "climateNotes": [
+        "If soil is frozen or saturated, delay sampling until workable."
+      ],
+      "supplies": [
+        {
+          "name": "Soil probe or trowel"
+        },
+        {
+          "name": "Clean bucket"
+        },
+        {
+          "name": "Soil test kit or lab submission bag"
+        },
+        {
+          "name": "Marker + labels"
+        },
+        {
+          "name": "Notebook / SSA notes"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "soilTestRecord"
+        },
+        {
+          "name": "amendmentPlan"
+        }
+      ],
+      "safety": [
+        "Wear gloves; wash hands after handling soil."
+      ],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Choose sampling zones",
+          "body": "Divide the garden into zones (beds/plots). Avoid atypical spots (compost pile edge, pet areas). Mark each zone name in SSA.",
+          "cues": [
+            "You have a list of zones/beds you want to improve."
+          ],
+          "checks": [
+            {
+              "type": "confirm",
+              "label": "Zones identified"
+            }
+          ],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Collect subsamples",
+          "body": "From each zone, take 8–12 small subsamples (4–6 inches deep). Combine in the bucket for that zone.",
+          "cues": [
+            "Soil depth is consistent; debris removed."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 20,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s03",
+          "title": "Prepare the sample",
+          "body": "Remove rocks/roots. Mix well. Air-dry if needed (no heat).",
+          "cues": [
+            "Sample looks uniform and crumbly."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 10,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s04",
+          "title": "Test / submit",
+          "body": "Run the kit or package for lab submission. Record results per zone in SSA.",
+          "cues": [
+            "pH and nutrients recorded for each zone."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 15,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s05",
+          "title": "Create an amendment plan",
+          "body": "Based on results, list amendments (lime/sulfur/compost/minerals) with rates per area. Save as a plan linked to the zone.",
+          "cues": [
+            "Plan includes what, how much, and when to apply."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 15,
+            "unit": "min"
+          }
+        }
+      ],
+      "variants": [
+        {
+          "id": "lab-test",
+          "name": "Lab Soil Test",
+          "notes": [
+            "Use a local extension/lab for more complete results (CEC, micros). Add the report PDF as an artifact."
+          ]
+        }
+      ],
+      "references": []
+    },
+    {
+      "id": "garden.soil.compost-hot",
+      "name": "Hot Compost (Fast, High-Heat)",
+      "summary": "Build and manage a hot compost pile to rapidly convert greens/browns into finished compost.",
+      "tags": [
+        "soil",
+        "compost",
+        "natural",
+        "waste-to-resource"
+      ],
+      "difficulty": "intermediate",
+      "typicalDuration": {
+        "value": 21,
+        "unit": "day"
+      },
+      "seasonHints": [
+        "spring",
+        "summer",
+        "fall"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Greens (kitchen scraps, grass clippings)"
+        },
+        {
+          "name": "Browns (dry leaves, straw, shredded cardboard)"
+        },
+        {
+          "name": "Pitchfork"
+        },
+        {
+          "name": "Compost thermometer (optional)"
+        },
+        {
+          "name": "Water source"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "finishedCompost"
+        }
+      ],
+      "safety": [
+        "Avoid meat/dairy in open piles (pests).",
+        "Wash hands after handling compost."
+      ],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Choose location and base",
+          "body": "Pick a well-drained spot. Start on bare soil if possible for drainage and microbes.",
+          "cues": [],
+          "checks": [
+            {
+              "type": "confirm",
+              "label": "Location chosen"
+            }
+          ],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Layer to target ratio",
+          "body": "Aim for ~2–3 parts browns to 1 part greens by volume. Build at least 3x3x3 ft for heat.",
+          "cues": [
+            "Pile reaches at least 1 meter wide/tall for heat retention."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s03",
+          "title": "Moisten to 'wrung sponge'",
+          "body": "Water as you build. Material should feel like a wrung-out sponge—moist but not dripping.",
+          "cues": [
+            "No puddles; handful squeezed releases only a few drops."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s04",
+          "title": "Monitor heat",
+          "body": "Check temperature daily if using a thermometer. Turn when it peaks then begins dropping.",
+          "cues": [
+            "Center is warm/hot; steam may appear when turned."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 3,
+            "unit": "day"
+          }
+        },
+        {
+          "id": "s05",
+          "title": "Turn the pile",
+          "body": "Turn thoroughly, moving outer material to the center. Add water if dry.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 20,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s06",
+          "title": "Cure and screen",
+          "body": "When pile no longer heats and materials are crumbly/dark, let cure 2–4 weeks. Screen if desired.",
+          "cues": [
+            "Finished compost smells earthy; no recognizable food scraps."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 14,
+            "unit": "day"
+          }
+        }
+      ],
+      "variants": [
+        {
+          "id": "berkeley-18day",
+          "name": "18-Day Hot Compost (Berkeley)",
+          "notes": [
+            "Turn every 2 days after initial 3–4 days of heating; keep moisture consistent."
+          ]
+        }
+      ],
+      "references": []
+    },
+    {
+      "id": "garden.soil.compost-cold",
+      "name": "Cold Compost (Low Effort)",
+      "summary": "Slow composting method: add materials over time and let them break down with minimal turning.",
+      "tags": [
+        "soil",
+        "compost",
+        "natural",
+        "low-effort"
+      ],
+      "difficulty": "beginner",
+      "typicalDuration": {
+        "value": 6,
+        "unit": "month"
+      },
+      "seasonHints": [
+        "year-round"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Compost bin or pile area"
+        },
+        {
+          "name": "Browns and greens"
+        },
+        {
+          "name": "Garden fork (optional)"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "finishedCompost"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Set up the bin/pile",
+          "body": "Use a bin, pallet enclosure, or simple pile. Ensure airflow and drainage.",
+          "cues": [],
+          "checks": [
+            {
+              "type": "confirm",
+              "label": "Bin/pile set"
+            }
+          ],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Add materials as available",
+          "body": "Alternate greens and browns. Cover fresh scraps with browns to reduce odor and pests.",
+          "cues": [
+            "No exposed food scraps on top."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s03",
+          "title": "Moisture check monthly",
+          "body": "If dry, water lightly. If soggy, add browns and fluff.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 4,
+            "unit": "week"
+          }
+        },
+        {
+          "id": "s04",
+          "title": "Optional turn",
+          "body": "Turn 1–3 times per season if you want faster breakdown.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 15,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s05",
+          "title": "Harvest finished compost",
+          "body": "When crumbly and earthy-smelling, harvest from the bottom/oldest section.",
+          "cues": [
+            "Dark, uniform, no slime, no strong odor."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.soil.vermicompost",
+      "name": "Vermicomposting (Worm Bin)",
+      "summary": "Use composting worms to convert kitchen scraps into worm castings for seed starting and beds.",
+      "tags": [
+        "soil",
+        "compost",
+        "worms",
+        "natural",
+        "indoor-friendly"
+      ],
+      "difficulty": "beginner",
+      "typicalDuration": {
+        "value": 45,
+        "unit": "day"
+      },
+      "seasonHints": [
+        "year-round"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Worm bin with ventilation"
+        },
+        {
+          "name": "Bedding (shredded paper/coco coir)"
+        },
+        {
+          "name": "Red wigglers"
+        },
+        {
+          "name": "Kitchen scraps"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "wormCastings"
+        },
+        {
+          "name": "wormTea"
+        }
+      ],
+      "safety": [
+        "Avoid adding oily foods; keep bin aerated to prevent smells."
+      ],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Prepare bedding",
+          "body": "Moisten bedding to wrung-sponge texture. Fill bin 2/3 full.",
+          "cues": [
+            "Bedding is damp, not dripping."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Add worms and settle",
+          "body": "Add worms, cover with bedding. Let them settle 24 hours before feeding heavily.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 1,
+            "unit": "day"
+          }
+        },
+        {
+          "id": "s03",
+          "title": "Feed lightly and consistently",
+          "body": "Bury scraps in rotating corners. Add crushed eggshells for grit if desired.",
+          "cues": [
+            "Food mostly disappears within a week."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 7,
+            "unit": "day"
+          }
+        },
+        {
+          "id": "s04",
+          "title": "Maintain conditions",
+          "body": "Keep bin 55–80°F, avoid flooding. Add bedding as volume decreases.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 7,
+            "unit": "day"
+          }
+        },
+        {
+          "id": "s05",
+          "title": "Harvest castings",
+          "body": "When bin contents are dark and fine, harvest castings using light-separation or side-feeding method.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 20,
+            "unit": "min"
+          }
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.soil.bokashi-ferment",
+      "name": "Bokashi Fermentation (Kitchen-to-Soil)",
+      "summary": "Ferment food scraps (including some meats/dairy if tightly sealed) using bokashi bran, then bury to finish.",
+      "tags": [
+        "soil",
+        "compost",
+        "fermentation",
+        "natural",
+        "asian-tradition"
+      ],
+      "difficulty": "intermediate",
+      "typicalDuration": {
+        "value": 21,
+        "unit": "day"
+      },
+      "seasonHints": [
+        "year-round"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Airtight bokashi bucket"
+        },
+        {
+          "name": "Bokashi bran"
+        },
+        {
+          "name": "Food scraps"
+        },
+        {
+          "name": "Soil/trench area"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "bokashiPrecompost"
+        },
+        {
+          "name": "bokashiLeachate"
+        }
+      ],
+      "safety": [
+        "Keep bucket sealed; bury pre-compost to avoid attracting pests."
+      ],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Load scraps + bran",
+          "body": "Add a layer of scraps, sprinkle bokashi bran, press down to remove air. Repeat.",
+          "cues": [
+            "Contents compacted; minimal air pockets."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Drain leachate (optional)",
+          "body": "Drain every 2–3 days. Dilute before using as a soil drench.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 3,
+            "unit": "day"
+          }
+        },
+        {
+          "id": "s03",
+          "title": "Ferment sealed",
+          "body": "Keep sealed 2–3 weeks. It should smell tangy/pickled, not rotten.",
+          "cues": [
+            "White yeast-like growth is normal; black/green mold is not."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 14,
+            "unit": "day"
+          }
+        },
+        {
+          "id": "s04",
+          "title": "Bury to finish",
+          "body": "Bury in soil/trench or add to compost. Cover well; wait 2+ weeks before planting in that spot.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 14,
+            "unit": "day"
+          }
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.inputs.knf-fermented-plant-juice",
+      "name": "KNF Fermented Plant Juice (FPJ)",
+      "summary": "Make a plant-based ferment (traditionally Korean Natural Farming) to feed plants with gentle, living inputs.",
+      "tags": [
+        "inputs",
+        "natural",
+        "culture-specific",
+        "knf",
+        "fermentation"
+      ],
+      "difficulty": "intermediate",
+      "typicalDuration": {
+        "value": 7,
+        "unit": "day"
+      },
+      "seasonHints": [
+        "spring",
+        "summer"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Fresh vigorous plant material"
+        },
+        {
+          "name": "Brown sugar/jaggery"
+        },
+        {
+          "name": "Jar + breathable cover"
+        },
+        {
+          "name": "Strainer"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "fpjConcentrate"
+        }
+      ],
+      "safety": [
+        "Use clean jars; label; keep away from kids/pets."
+      ],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Harvest plant material",
+          "body": "Choose fast-growing plants (comfrey, nettle, grasses). Chop loosely.",
+          "cues": [
+            "Material is fresh and not diseased."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Mix with sugar",
+          "body": "Mix 1:1 by weight with brown sugar. Pack into jar leaving headspace.",
+          "cues": [
+            "Sugar coats plant material thoroughly."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s03",
+          "title": "Ferment",
+          "body": "Cover with cloth/paper and band. Store cool and shaded 5–7 days.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 7,
+            "unit": "day"
+          }
+        },
+        {
+          "id": "s04",
+          "title": "Strain and store",
+          "body": "Strain liquid, bottle and label. Dilute before use (e.g., 1:500–1:1000).",
+          "cues": [
+            "Liquid smells sweet/fermented, not putrid."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.inputs.jadam-wettable-sulfur-soap",
+      "name": "JADAM-Style Natural Soap Spray (Mild Insect Pressure)",
+      "summary": "Prepare a mild, low-cost natural soap solution for leaf-surface pests (test on small area first).",
+      "tags": [
+        "inputs",
+        "natural",
+        "culture-specific",
+        "jadam",
+        "ipm"
+      ],
+      "difficulty": "intermediate",
+      "typicalDuration": {
+        "value": 30,
+        "unit": "min"
+      },
+      "seasonHints": [
+        "spring",
+        "summer"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Potassium soap or mild castile soap"
+        },
+        {
+          "name": "Sprayer"
+        },
+        {
+          "name": "Water"
+        },
+        {
+          "name": "Measuring spoon"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "sprayReadySolution"
+        }
+      ],
+      "safety": [
+        "Always test on a few leaves first; avoid spraying in full sun or high heat."
+      ],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Mix test batch",
+          "body": "Mix a small batch at low concentration. Label the sprayer.",
+          "cues": [
+            "Solution is well mixed; no clumps."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Spot test",
+          "body": "Spray a small section of the plant. Wait 24 hours and check for burn.",
+          "cues": [],
+          "checks": [
+            {
+              "type": "confirm",
+              "label": "No leaf burn observed"
+            }
+          ],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 1,
+            "unit": "day"
+          }
+        },
+        {
+          "id": "s03",
+          "title": "Apply at dusk/dawn",
+          "body": "Spray leaf undersides and suspected pest areas. Repeat as needed after rain.",
+          "cues": [
+            "Coverage is even; beneficial insects avoided."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.soil.biochar-charge",
+      "name": "Biochar: Make + Charge + Apply",
+      "summary": "Create biochar safely, then 'charge' it with nutrients/microbes before adding to soil.",
+      "tags": [
+        "soil",
+        "biochar",
+        "natural",
+        "modern"
+      ],
+      "difficulty": "advanced",
+      "typicalDuration": {
+        "value": 4,
+        "unit": "hr"
+      },
+      "seasonHints": [
+        "fall",
+        "winter"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Clean woody biomass"
+        },
+        {
+          "name": "Metal burn barrel/retort (optional)"
+        },
+        {
+          "name": "Water"
+        },
+        {
+          "name": "Compost/urine/tea for charging"
+        },
+        {
+          "name": "PPE (gloves, eye protection)"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "chargedBiochar"
+        }
+      ],
+      "safety": [
+        "Fire hazard: follow local burn rules; keep water nearby; wear PPE."
+      ],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Select a safe burn setup",
+          "body": "Choose a safe, permitted location. Prepare water and tools.",
+          "cues": [],
+          "checks": [
+            {
+              "type": "confirm",
+              "label": "Burn is permitted and safe setup is ready"
+            }
+          ],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Pyrolyze to charcoal",
+          "body": "Burn with limited oxygen (top-lit or retort) to make charcoal, not ash.",
+          "cues": [
+            "Pieces are charred black but not crumbling to white ash."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 2,
+            "unit": "hr"
+          }
+        },
+        {
+          "id": "s03",
+          "title": "Quench and cool",
+          "body": "Stop the burn and quench with water. Allow to cool fully.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 30,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s04",
+          "title": "Crush to size",
+          "body": "Crush to pea-size or smaller for best soil integration.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 20,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s05",
+          "title": "Charge biochar",
+          "body": "Soak in compost tea, diluted urine, or mix into compost for 1–2 weeks before applying.",
+          "cues": [
+            "Biochar is moist and smells earthy (not smoky)."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 14,
+            "unit": "day"
+          }
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.beds.no-till-bed-prep",
+      "name": "No-Till Bed Prep (Sheet Mulch)",
+      "summary": "Establish a new bed without digging by layering organic materials to suppress weeds and feed soil.",
+      "tags": [
+        "beds",
+        "no-till",
+        "natural",
+        "modern"
+      ],
+      "difficulty": "beginner",
+      "typicalDuration": {
+        "value": 90,
+        "unit": "min"
+      },
+      "seasonHints": [
+        "fall",
+        "early-spring"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Cardboard/newspaper"
+        },
+        {
+          "name": "Compost"
+        },
+        {
+          "name": "Mulch (straw/leaves)"
+        },
+        {
+          "name": "Water"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "preparedBed"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Define bed and mow/flatten",
+          "body": "Mark bed edges. Mow low or flatten existing vegetation.",
+          "cues": [
+            "Bed outline is marked."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Lay weed barrier",
+          "body": "Overlap cardboard/newspaper. Wet it thoroughly to conform to soil.",
+          "cues": [
+            "No gaps; edges overlap."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s03",
+          "title": "Add compost layer",
+          "body": "Add 1–3 inches compost on top.",
+          "cues": [
+            "Compost layer is even."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s04",
+          "title": "Mulch heavily",
+          "body": "Add 3–6 inches of mulch. Water lightly if dry.",
+          "cues": [
+            "Soil surface fully covered."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s05",
+          "title": "Planting approach",
+          "body": "For transplants, pull mulch aside and plant into compost. For seeds, add a narrow strip of compost and sow there.",
+          "cues": [],
+          "checks": [
+            {
+              "type": "confirm",
+              "label": "Ready to plant or rest the bed"
+            }
+          ],
+          "inputs": [],
+          "outputs": []
+        }
+      ],
+      "variants": [
+        {
+          "id": "lasagna-garden",
+          "name": "Lasagna Garden",
+          "notes": [
+            "Alternate compostable layers (greens/browns) for deeper build; allow time to settle."
+          ]
+        }
+      ],
+      "references": []
+    },
+    {
+      "id": "garden.beds.raised-bed-basic",
+      "name": "Raised Bed Setup (Basic)",
+      "summary": "Assemble a raised bed, fill with soil mix, and prepare for planting.",
+      "tags": [
+        "beds",
+        "raised-bed",
+        "modern",
+        "accessibility"
+      ],
+      "difficulty": "beginner",
+      "typicalDuration": {
+        "value": 2,
+        "unit": "hr"
+      },
+      "seasonHints": [
+        "spring",
+        "fall"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Bed frame material"
+        },
+        {
+          "name": "Hardware/tools"
+        },
+        {
+          "name": "Soil mix (topsoil + compost)"
+        },
+        {
+          "name": "Mulch"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "raisedBedReady"
+        }
+      ],
+      "safety": [
+        "Use gloves and eye protection when cutting/drilling."
+      ],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Choose location and orientation",
+          "body": "Pick a level spot with adequate sun. Orient long edge east-west when possible for even light.",
+          "cues": [],
+          "checks": [
+            {
+              "type": "confirm",
+              "label": "Location chosen"
+            }
+          ],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Assemble frame",
+          "body": "Build/assemble frame and square corners.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 40,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s03",
+          "title": "Prep base",
+          "body": "Remove sod if needed or lay cardboard. Ensure drainage.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 15,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s04",
+          "title": "Fill bed",
+          "body": "Fill with soil mix. Water to settle and top off.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 20,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s05",
+          "title": "Mulch and mark zones",
+          "body": "Add light mulch and mark planting zones in SSA.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 10,
+            "unit": "min"
+          }
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.beds.hugelkultur",
+      "name": "Hugelkultur Mound Bed",
+      "summary": "Build a mound bed with buried wood to retain water and slowly feed soil over time (Central/Eastern European tradition).",
+      "tags": [
+        "beds",
+        "hugelkultur",
+        "culture-specific",
+        "water-saving",
+        "natural"
+      ],
+      "difficulty": "intermediate",
+      "typicalDuration": {
+        "value": 4,
+        "unit": "hr"
+      },
+      "seasonHints": [
+        "fall",
+        "winter",
+        "early-spring"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Logs/branches (untreated)"
+        },
+        {
+          "name": "Compost/manure"
+        },
+        {
+          "name": "Topsoil"
+        },
+        {
+          "name": "Mulch"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "hugelkulturBed"
+        }
+      ],
+      "safety": [
+        "Avoid treated lumber; watch for sharp branches and lifting injuries."
+      ],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Lay the wood core",
+          "body": "Place logs/branches along the bed footprint. Soak if very dry.",
+          "cues": [
+            "Wood layer is stable and stacked."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Add nitrogen-rich layer",
+          "body": "Add greens/compost/manure to help decomposition.",
+          "cues": [
+            "Wood is covered by nitrogen layer."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s03",
+          "title": "Cover with soil",
+          "body": "Add topsoil and compost to form a mound. Shape with gentle slopes.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 45,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s04",
+          "title": "Mulch and plant",
+          "body": "Mulch well. Plant drought-tolerant on top, moisture lovers near base.",
+          "cues": [
+            "Mound is covered and stable."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.beds.keyhole-garden",
+      "name": "Keyhole Garden (Compost Basket Bed)",
+      "summary": "Build a circular raised bed with a central compost basket for efficient watering and fertility (Southern African popularization).",
+      "tags": [
+        "beds",
+        "keyhole",
+        "culture-specific",
+        "water-saving",
+        "natural"
+      ],
+      "difficulty": "intermediate",
+      "typicalDuration": {
+        "value": 6,
+        "unit": "hr"
+      },
+      "seasonHints": [
+        "spring",
+        "fall"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Stones/bricks"
+        },
+        {
+          "name": "Compost basket materials"
+        },
+        {
+          "name": "Soil/compost"
+        },
+        {
+          "name": "Mulch"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "keyholeBed"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Mark circle + keyhole access",
+          "body": "Mark a circle (6–8 ft) and a wedge path to the center.",
+          "cues": [],
+          "checks": [
+            {
+              "type": "confirm",
+              "label": "Layout marked"
+            }
+          ],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Build outer wall",
+          "body": "Stack stones/bricks to desired height. Ensure stability.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 2,
+            "unit": "hr"
+          }
+        },
+        {
+          "id": "s03",
+          "title": "Install compost basket",
+          "body": "Place perforated basket in the center for kitchen scraps and water infiltration.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 20,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s04",
+          "title": "Fill and layer",
+          "body": "Fill bed with soil/compost. Optionally add drainage layer at bottom for wet climates.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 40,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s05",
+          "title": "Plant and mulch",
+          "body": "Plant intensively; mulch. Feed/water through basket regularly.",
+          "cues": [
+            "Central basket is accessible from the keyhole path."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.planning.square-foot",
+      "name": "Square Foot Gardening Layout",
+      "summary": "Plan intensive spacing using a 1-foot grid to maximize harvest in small areas.",
+      "tags": [
+        "planning",
+        "spacing",
+        "modern",
+        "raised-bed"
+      ],
+      "difficulty": "beginner",
+      "typicalDuration": {
+        "value": 45,
+        "unit": "min"
+      },
+      "seasonHints": [
+        "early-spring",
+        "late-summer"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "String/grid markers"
+        },
+        {
+          "name": "Planting chart"
+        },
+        {
+          "name": "Notebook/SSA grid"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "bedLayoutPlan"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Measure bed and create grid",
+          "body": "Divide bed into 1-foot squares using string or slats.",
+          "cues": [
+            "Grid is visible and labeled."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Assign crops per square",
+          "body": "Use spacing rules (e.g., 1 tomato, 4 lettuce, 9 beets). Account for trellises.",
+          "cues": [
+            "Each square has a crop assignment."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s03",
+          "title": "Schedule successions",
+          "body": "Plan follow-on plantings for each square after harvest windows.",
+          "cues": [
+            "Successions recorded with dates/temperature cues."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.indigenous.three-sisters",
+      "name": "Three Sisters Polyculture (Corn • Beans • Squash)",
+      "summary": "Indigenous polyculture system where corn supports beans and squash shades soil and suppresses weeds.",
+      "tags": [
+        "indigenous",
+        "polyculture",
+        "companions",
+        "soil-health",
+        "culture-specific"
+      ],
+      "difficulty": "intermediate",
+      "typicalDuration": {
+        "value": 2,
+        "unit": "hr"
+      },
+      "seasonHints": [
+        "late-spring"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Corn seed"
+        },
+        {
+          "name": "Pole bean seed"
+        },
+        {
+          "name": "Squash seed"
+        },
+        {
+          "name": "Compost"
+        },
+        {
+          "name": "Mulch"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "polycultureBed"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Prepare mounds or blocks",
+          "body": "Create mounds or block rows. Amend with compost in planting spots.",
+          "cues": [
+            "Mounds are formed and enriched."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Plant corn first",
+          "body": "Plant corn in clusters/blocks for pollination. Wait until it is ~6 inches tall.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 14,
+            "unit": "day"
+          }
+        },
+        {
+          "id": "s03",
+          "title": "Plant beans",
+          "body": "Plant beans around corn stalks once corn is established.",
+          "cues": [
+            "Beans placed 3–4 inches from stalks."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s04",
+          "title": "Plant squash",
+          "body": "Plant squash around the mound edges to sprawl and shade soil.",
+          "cues": [
+            "Squash has room to spread."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s05",
+          "title": "Maintain",
+          "body": "Weed lightly early; then let squash canopy suppress. Monitor pests and water during dry spells.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 7,
+            "unit": "day"
+          }
+        }
+      ],
+      "variants": [
+        {
+          "id": "milpa",
+          "name": "Milpa Variant",
+          "notes": [
+            "Add additional companion crops (chilies, amaranth, tomatillo) based on climate and tradition."
+          ]
+        }
+      ],
+      "references": []
+    },
+    {
+      "id": "garden.indigenous.milpa-system",
+      "name": "Milpa System (Diverse Maize Field Garden)",
+      "summary": "A diverse field-garden polyculture combining maize, legumes, squash, and supportive crops for resilience.",
+      "tags": [
+        "indigenous",
+        "culture-specific",
+        "polyculture",
+        "resilience"
+      ],
+      "difficulty": "advanced",
+      "typicalDuration": {
+        "value": 1,
+        "unit": "day"
+      },
+      "seasonHints": [
+        "late-spring"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Mixed seed set (maize/beans/squash + companions)"
+        },
+        {
+          "name": "Compost/manure"
+        },
+        {
+          "name": "Mulch"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "milpaPlot"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Select crop mix for your climate",
+          "body": "Choose 3–8 crops that mature well in your season length. Record the mix in SSA.",
+          "cues": [],
+          "checks": [
+            {
+              "type": "confirm",
+              "label": "Crop mix selected"
+            }
+          ],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Prepare plot with organic matter",
+          "body": "Add compost/manure in bands or mounds; avoid over-tilling if possible.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 2,
+            "unit": "hr"
+          }
+        },
+        {
+          "id": "s03",
+          "title": "Stagger planting windows",
+          "body": "Plant tall support crops first, then climbers, then ground covers. Adjust to frost and rains.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 30,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s04",
+          "title": "Observe and adapt",
+          "body": "Weekly scouting: light weeding, pest checks, moisture checks, and re-seeding gaps.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 7,
+            "unit": "day"
+          }
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.indigenous.zai-pits",
+      "name": "Zai Pits (Water Harvesting Planting Pits)",
+      "summary": "Dig small pits to capture water and concentrate compost/manure—used in Sahel restoration farming.",
+      "tags": [
+        "indigenous",
+        "water-harvesting",
+        "dryland",
+        "culture-specific",
+        "soil-restoration"
+      ],
+      "difficulty": "advanced",
+      "typicalDuration": {
+        "value": 6,
+        "unit": "hr"
+      },
+      "seasonHints": [
+        "dry-season-prep",
+        "early-rains"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Hoe/shovel"
+        },
+        {
+          "name": "Compost/manure"
+        },
+        {
+          "name": "Mulch"
+        },
+        {
+          "name": "Seeds/transplants"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "zaiFieldPrepared"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Mark pit grid",
+          "body": "Mark pits spaced based on crop (commonly 2–3 ft apart).",
+          "cues": [
+            "Grid is marked and consistent."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Dig pits and berm",
+          "body": "Dig pits and mound soil downhill as a micro-berm to slow runoff.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 4,
+            "unit": "hr"
+          }
+        },
+        {
+          "id": "s03",
+          "title": "Add organic matter",
+          "body": "Add compost/manure into pits; cover lightly with soil.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 45,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s04",
+          "title": "Plant with first rains/irrigation",
+          "body": "Plant seeds/transplants when moisture is available. Mulch around pits.",
+          "cues": [
+            "Moisture collected in pits; mulch in place."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.indigenous.waffle-gardens",
+      "name": "Waffle Gardens (Sunken Grid Beds)",
+      "summary": "Create sunken square cells that capture water and protect plants from wind—used by Indigenous peoples in arid regions.",
+      "tags": [
+        "indigenous",
+        "water-harvesting",
+        "wind-protection",
+        "culture-specific"
+      ],
+      "difficulty": "intermediate",
+      "typicalDuration": {
+        "value": 5,
+        "unit": "hr"
+      },
+      "seasonHints": [
+        "spring"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Shovel/hoe"
+        },
+        {
+          "name": "Compost"
+        },
+        {
+          "name": "Mulch"
+        },
+        {
+          "name": "Seeds/transplants"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "waffleBed"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Lay out grid",
+          "body": "Mark a grid of squares (e.g., 12–18 inches).",
+          "cues": [
+            "Grid lines are marked."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Excavate cells",
+          "body": "Dig down each square and pile soil into raised berms between cells.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 3,
+            "unit": "hr"
+          }
+        },
+        {
+          "id": "s03",
+          "title": "Amend and plant",
+          "body": "Add compost to each cell and plant. Water fills cells and infiltrates slowly.",
+          "cues": [
+            "Cells hold water briefly without washing out."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s04",
+          "title": "Mulch berms",
+          "body": "Mulch berms to reduce erosion and evaporation.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 20,
+            "unit": "min"
+          }
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.land.terracing-basic",
+      "name": "Slope Terracing (Erosion Control)",
+      "summary": "Create simple terraces or swales on slopes to slow water, reduce erosion, and increase infiltration.",
+      "tags": [
+        "land",
+        "erosion-control",
+        "water",
+        "indigenous",
+        "modern"
+      ],
+      "difficulty": "advanced",
+      "typicalDuration": {
+        "value": 1,
+        "unit": "day"
+      },
+      "seasonHints": [
+        "dry-season-prep",
+        "fall"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Level/A-frame level"
+        },
+        {
+          "name": "Shovel/mattock"
+        },
+        {
+          "name": "Stakes/string"
+        },
+        {
+          "name": "Mulch/groundcover seed"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "terraceLines"
+        }
+      ],
+      "safety": [
+        "Avoid working on unstable slopes after heavy rains."
+      ],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Map contour lines",
+          "body": "Use an A-frame level or laser to mark true contour lines across the slope.",
+          "cues": [
+            "Contour lines are level end-to-end."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Cut and shape terrace/swale",
+          "body": "Excavate along contour; place soil on downhill side to form a berm.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 6,
+            "unit": "hr"
+          }
+        },
+        {
+          "id": "s03",
+          "title": "Stabilize",
+          "body": "Plant groundcovers, add mulch, and use rocks/logs where needed to prevent slumping.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 60,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s04",
+          "title": "Overflow strategy",
+          "body": "Plan safe overflow routes for extreme rain events (spillways). Record in SSA notes.",
+          "cues": [],
+          "checks": [
+            {
+              "type": "confirm",
+              "label": "Overflow route identified"
+            }
+          ],
+          "inputs": [],
+          "outputs": []
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.water.drip-irrigation-setup",
+      "name": "Drip Irrigation Setup + Seasonal Tune",
+      "summary": "Install drip lines, test flow, and tune schedule based on crop stage and weather.",
+      "tags": [
+        "water",
+        "irrigation",
+        "modern",
+        "efficiency"
+      ],
+      "difficulty": "intermediate",
+      "typicalDuration": {
+        "value": 3,
+        "unit": "hr"
+      },
+      "seasonHints": [
+        "spring-setup",
+        "summer-adjust"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Drip tubing/emitter line"
+        },
+        {
+          "name": "Filter + pressure regulator"
+        },
+        {
+          "name": "Timer/controller"
+        },
+        {
+          "name": "Hole punch + fittings"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "dripSystemConfigured"
+        }
+      ],
+      "safety": [
+        "Check local backflow requirements when connecting to potable water."
+      ],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Plan zones",
+          "body": "Group beds by water needs. Measure run lengths and emitter spacing.",
+          "cues": [
+            "Zones match crop water needs."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Install header + filter/regulator",
+          "body": "Install mainline with filter and pressure regulator. Flush line before adding emitters.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 45,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s03",
+          "title": "Lay drip lines",
+          "body": "Lay emitter lines along rows, anchor with staples. Add end caps.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 45,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s04",
+          "title": "Test and fix leaks",
+          "body": "Run system. Check for leaks, clogs, uneven output. Adjust as needed.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 20,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s05",
+          "title": "Set baseline schedule",
+          "body": "Set a starting schedule; adjust weekly based on soil moisture and plant cues.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 7,
+            "unit": "day"
+          }
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.water.rainwater-harvesting-basic",
+      "name": "Rainwater Harvesting (Barrels + Overflow)",
+      "summary": "Collect roof runoff into barrels/cisterns and safely route overflow away from foundations.",
+      "tags": [
+        "water",
+        "rainwater",
+        "natural",
+        "modern"
+      ],
+      "difficulty": "intermediate",
+      "typicalDuration": {
+        "value": 4,
+        "unit": "hr"
+      },
+      "seasonHints": [
+        "spring",
+        "fall"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Rain barrel(s)"
+        },
+        {
+          "name": "Downspout diverter"
+        },
+        {
+          "name": "Screen/first-flush (optional)"
+        },
+        {
+          "name": "Overflow hose"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "rainCaptureReady"
+        }
+      ],
+      "safety": [
+        "Use screens to reduce mosquitoes; do not drink without proper treatment."
+      ],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Choose stable platform",
+          "body": "Place barrel on level, strong platform near downspout. Ensure easy access.",
+          "cues": [],
+          "checks": [
+            {
+              "type": "confirm",
+              "label": "Platform stable"
+            }
+          ],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Install diverter and screen",
+          "body": "Cut/fit diverter. Add inlet screen.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 45,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s03",
+          "title": "Set overflow",
+          "body": "Route overflow away from house; connect to garden swale or drainage path.",
+          "cues": [
+            "Overflow won’t undermine foundation."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s04",
+          "title": "Test in light rain or hose",
+          "body": "Verify flow into barrel and through overflow.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 10,
+            "unit": "min"
+          }
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.propagation.seed-starting-indoors",
+      "name": "Seed Starting Indoors (Tray Method)",
+      "summary": "Start seedlings indoors with consistent moisture/light, then harden off for transplant.",
+      "tags": [
+        "propagation",
+        "seed-starting",
+        "modern",
+        "baseline"
+      ],
+      "difficulty": "beginner",
+      "typicalDuration": {
+        "value": 60,
+        "unit": "min"
+      },
+      "seasonHints": [
+        "late-winter",
+        "early-spring"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Seed trays/cells"
+        },
+        {
+          "name": "Seed-start mix"
+        },
+        {
+          "name": "Labels"
+        },
+        {
+          "name": "Grow light/sunny window"
+        },
+        {
+          "name": "Sprayer"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "seedlingBatch"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Prep trays and labels",
+          "body": "Fill trays with moistened seed-start mix. Label variety and date.",
+          "cues": [
+            "Mix is evenly moist; labels placed."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Sow seeds",
+          "body": "Sow at recommended depth. Gently press and mist.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 15,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s03",
+          "title": "Maintain humidity and warmth",
+          "body": "Cover until germination. Bottom-water if possible to prevent damping-off.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 7,
+            "unit": "day"
+          }
+        },
+        {
+          "id": "s04",
+          "title": "Provide strong light",
+          "body": "Once sprouted, provide 14–16 hrs light. Keep lights close to prevent legginess.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 14,
+            "unit": "day"
+          }
+        },
+        {
+          "id": "s05",
+          "title": "Pot up and harden off",
+          "body": "Pot up if rootbound. Harden off outdoors for 7–10 days before transplant.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 10,
+            "unit": "day"
+          }
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.propagation.direct-seeding",
+      "name": "Direct Seeding (Row/Block)",
+      "summary": "Sow seeds directly into prepared soil with good seed-to-soil contact and moisture management.",
+      "tags": [
+        "propagation",
+        "seed-starting",
+        "natural",
+        "baseline"
+      ],
+      "difficulty": "beginner",
+      "typicalDuration": {
+        "value": 45,
+        "unit": "min"
+      },
+      "seasonHints": [
+        "spring",
+        "late-summer"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Seeds"
+        },
+        {
+          "name": "Rake/hoe"
+        },
+        {
+          "name": "Watering can"
+        },
+        {
+          "name": "Row cover (optional)"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "seededBed"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Prepare seedbed",
+          "body": "Rake smooth, remove clods, lightly firm. Create furrows or block marks.",
+          "cues": [
+            "Surface is fine-textured and level."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Sow and cover",
+          "body": "Sow at proper depth and spacing. Cover lightly and firm for contact.",
+          "cues": [
+            "Seeds are covered evenly."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s03",
+          "title": "Water gently",
+          "body": "Water with a fine spray to avoid washing seeds away. Keep evenly moist until germination.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 7,
+            "unit": "day"
+          }
+        },
+        {
+          "id": "s04",
+          "title": "Thin and weed",
+          "body": "Thin to final spacing. Weed while small to reduce competition.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 14,
+            "unit": "day"
+          }
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.propagation.transplanting",
+      "name": "Transplanting (Low-Stress Technique)",
+      "summary": "Transplant seedlings with minimal root shock and proper watering.",
+      "tags": [
+        "propagation",
+        "transplant",
+        "baseline"
+      ],
+      "difficulty": "beginner",
+      "typicalDuration": {
+        "value": 45,
+        "unit": "min"
+      },
+      "seasonHints": [
+        "spring",
+        "early-summer"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Seedlings"
+        },
+        {
+          "name": "Trowel"
+        },
+        {
+          "name": "Water"
+        },
+        {
+          "name": "Mulch"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "transplantedRow"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Water seedlings",
+          "body": "Water seedlings 1–2 hours before transplanting.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 2,
+            "unit": "hr"
+          }
+        },
+        {
+          "id": "s02",
+          "title": "Prepare holes",
+          "body": "Dig holes slightly larger than root ball. Add compost if needed.",
+          "cues": [
+            "Holes spaced and ready."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s03",
+          "title": "Plant at correct depth",
+          "body": "Handle by leaves, not stems. Plant at same depth (or deeper for tomatoes). Firm gently.",
+          "cues": [
+            "Plants upright; root ball fully covered."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s04",
+          "title": "Water in",
+          "body": "Water thoroughly to remove air pockets. Mulch once soil is warm.",
+          "cues": [
+            "Soil settled; no dry pockets."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.maintenance.mulching",
+      "name": "Mulching (Moisture + Weed Control)",
+      "summary": "Apply mulch to reduce evaporation, suppress weeds, and moderate soil temperatures.",
+      "tags": [
+        "maintenance",
+        "mulch",
+        "natural",
+        "baseline"
+      ],
+      "difficulty": "beginner",
+      "typicalDuration": {
+        "value": 30,
+        "unit": "min"
+      },
+      "seasonHints": [
+        "spring",
+        "summer"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Straw/leaves/wood chips"
+        },
+        {
+          "name": "Gloves"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "mulchedBeds"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Weed and water",
+          "body": "Weed lightly and water the bed before mulching.",
+          "cues": [
+            "Bed is weeded; soil moist."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Apply mulch depth",
+          "body": "Apply 2–4 inches around plants (keep mulch off stems).",
+          "cues": [
+            "Mulch is even; stems not buried."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s03",
+          "title": "Maintain",
+          "body": "Top up mulch as it decomposes or thins.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 4,
+            "unit": "week"
+          }
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.soil.cover-cropping",
+      "name": "Cover Cropping (Soil Building)",
+      "summary": "Plant cover crops to protect soil, add biomass, fix nitrogen (legumes), and suppress weeds.",
+      "tags": [
+        "soil",
+        "cover-crop",
+        "modern",
+        "natural"
+      ],
+      "difficulty": "intermediate",
+      "typicalDuration": {
+        "value": 2,
+        "unit": "hr"
+      },
+      "seasonHints": [
+        "late-summer",
+        "fall",
+        "early-spring"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Cover crop seed"
+        },
+        {
+          "name": "Rake"
+        },
+        {
+          "name": "Water"
+        },
+        {
+          "name": "Mower/scythe (termination)"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "coverCropStand"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Select mix",
+          "body": "Choose species for goals (nitrogen, biomass, erosion control) and season window.",
+          "cues": [],
+          "checks": [
+            {
+              "type": "confirm",
+              "label": "Cover crop selected"
+            }
+          ],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Prepare and seed",
+          "body": "Lightly rake soil, broadcast seed, rake in, and water.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 30,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s03",
+          "title": "Manage growth",
+          "body": "Monitor establishment. Spot reseed thin areas if needed.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 14,
+            "unit": "day"
+          }
+        },
+        {
+          "id": "s04",
+          "title": "Terminate and mulch-in-place",
+          "body": "Cut/roll at appropriate stage. Leave residues as mulch or incorporate lightly if needed.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 60,
+            "unit": "min"
+          }
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.planning.crop-rotation",
+      "name": "Crop Rotation Plan (3–4 Year)",
+      "summary": "Create a rotation plan to reduce pest/disease pressure and balance soil nutrients.",
+      "tags": [
+        "planning",
+        "rotation",
+        "modern",
+        "baseline"
+      ],
+      "difficulty": "beginner",
+      "typicalDuration": {
+        "value": 60,
+        "unit": "min"
+      },
+      "seasonHints": [
+        "winter",
+        "early-spring"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Bed map"
+        },
+        {
+          "name": "Prior-year records"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "rotationPlan"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Group crops by family",
+          "body": "Group plants by botanical family (solanaceae, brassicas, legumes, cucurbits, etc.).",
+          "cues": [
+            "Crop families listed in SSA."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Assign families to beds by year",
+          "body": "Rotate families so the same family doesn’t return to a bed for 3+ years where possible.",
+          "cues": [
+            "Each bed has a family assignment for next season."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s03",
+          "title": "Add notes for heavy feeders",
+          "body": "Note heavy feeders and add compost accordingly; plan legumes ahead of heavy feeders.",
+          "cues": [
+            "Amendment needs are recorded per bed."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.planning.companion-planting",
+      "name": "Companion Planting Layout",
+      "summary": "Plan supportive plant pairings for pest confusion, pollinator support, and space efficiency.",
+      "tags": [
+        "planning",
+        "companions",
+        "natural",
+        "culture-specific"
+      ],
+      "difficulty": "beginner",
+      "typicalDuration": {
+        "value": 45,
+        "unit": "min"
+      },
+      "seasonHints": [
+        "spring"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Bed map"
+        },
+        {
+          "name": "Seed list"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "companionPlan"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Pick your target crops",
+          "body": "List main crops and known issues (aphids, squash vine borer, etc.).",
+          "cues": [
+            "Main crops and pressures listed."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Choose companions",
+          "body": "Add flowers/herbs (marigold, basil, dill, nasturtium) and trap crops where appropriate.",
+          "cues": [
+            "Companions selected with purpose notes."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s03",
+          "title": "Lay out spacing and timing",
+          "body": "Ensure companions don’t shade or crowd. Stagger sowing if needed.",
+          "cues": [
+            "Layout respects mature size and access paths."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.pests.ipm-scout-and-respond",
+      "name": "Integrated Pest Management: Scout → Identify → Respond",
+      "summary": "Weekly garden scouting with a tiered response plan: cultural controls, physical removal, biological support, then low-toxicity sprays if needed.",
+      "tags": [
+        "pests",
+        "ipm",
+        "modern",
+        "natural"
+      ],
+      "difficulty": "intermediate",
+      "typicalDuration": {
+        "value": 30,
+        "unit": "min"
+      },
+      "seasonHints": [
+        "spring",
+        "summer"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Hand lens (optional)"
+        },
+        {
+          "name": "Notebook/SSA checklist"
+        },
+        {
+          "name": "Sticky traps (optional)"
+        },
+        {
+          "name": "Row cover (optional)"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "scoutingLog"
+        },
+        {
+          "name": "actionList"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Walk each bed systematically",
+          "body": "Check undersides of leaves, stems, and soil surface. Note damage patterns.",
+          "cues": [
+            "You’ve inspected at least 5 plants per bed."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Identify likely cause",
+          "body": "Match symptoms to pests/disease/nutrient issues using your reference notes.",
+          "cues": [
+            "A likely cause is recorded (or marked 'unknown')."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s03",
+          "title": "Apply least-invasive control",
+          "body": "Start with hand removal, pruning, improved airflow, watering changes, or row cover. Escalate only if needed.",
+          "cues": [
+            "Chosen control logged with date."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s04",
+          "title": "Follow-up check",
+          "body": "Recheck in 3–7 days and note improvement or escalation.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 7,
+            "unit": "day"
+          }
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.protection.row-cover-low-tunnel",
+      "name": "Row Cover / Low Tunnel Setup",
+      "summary": "Install row cover to protect from pests, wind, and light frost.",
+      "tags": [
+        "protection",
+        "row-cover",
+        "modern",
+        "natural"
+      ],
+      "difficulty": "beginner",
+      "typicalDuration": {
+        "value": 45,
+        "unit": "min"
+      },
+      "seasonHints": [
+        "spring",
+        "fall"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Floating row cover fabric"
+        },
+        {
+          "name": "Hoops (PVC/wire)"
+        },
+        {
+          "name": "Clips/weights"
+        },
+        {
+          "name": "Stakes"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "lowTunnelInstalled"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Measure and place hoops",
+          "body": "Space hoops 3–4 ft apart for stability.",
+          "cues": [
+            "Hoops are secure and evenly spaced."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Drape and secure fabric",
+          "body": "Drape fabric over hoops. Secure edges with weights/soil to seal gaps.",
+          "cues": [
+            "Edges are sealed; fabric not shredding in wind."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s03",
+          "title": "Vent as needed",
+          "body": "Open ends on warm days to prevent overheating.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 1,
+            "unit": "day"
+          }
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.protection.cold-frame-management",
+      "name": "Cold Frame / Mini Greenhouse Management",
+      "summary": "Use a cold frame for season extension: venting, watering, and hardening off.",
+      "tags": [
+        "protection",
+        "season-extension",
+        "modern"
+      ],
+      "difficulty": "intermediate",
+      "typicalDuration": {
+        "value": 30,
+        "unit": "min"
+      },
+      "seasonHints": [
+        "late-winter",
+        "spring",
+        "fall"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Cold frame or mini greenhouse"
+        },
+        {
+          "name": "Thermometer"
+        },
+        {
+          "name": "Watering can"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "protectedStarts"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Set up temperature monitoring",
+          "body": "Place a thermometer inside. Note daily high/low trends.",
+          "cues": [
+            "You can see or record inside temperature."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Vent daily",
+          "body": "Vent on sunny days to prevent overheating. Close before evening chill.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 1,
+            "unit": "day"
+          }
+        },
+        {
+          "id": "s03",
+          "title": "Water lightly",
+          "body": "Water when top layer dries; avoid waterlogging.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 2,
+            "unit": "day"
+          }
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.planning.succession-planting",
+      "name": "Succession Planting Schedule",
+      "summary": "Plan staggered plantings for continuous harvest and steady kitchen supply.",
+      "tags": [
+        "planning",
+        "succession",
+        "modern",
+        "baseline"
+      ],
+      "difficulty": "beginner",
+      "typicalDuration": {
+        "value": 45,
+        "unit": "min"
+      },
+      "seasonHints": [
+        "spring",
+        "summer"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Seed inventory"
+        },
+        {
+          "name": "Calendar"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "successionSchedule"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Choose crops that benefit",
+          "body": "Select crops like lettuce, radish, beans, carrots, cilantro.",
+          "cues": [
+            "You have a list of succession crops."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Set intervals",
+          "body": "Choose intervals (7–21 days depending on crop and heat). Record reminders in SSA.",
+          "cues": [
+            "Intervals assigned per crop."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s03",
+          "title": "Track and adjust",
+          "body": "Note germination and harvest windows; adjust future sowings for heat/frost.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 14,
+            "unit": "day"
+          }
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.maintenance.pruning-training",
+      "name": "Pruning & Training (Tomatoes/Vines/Fruit)",
+      "summary": "Improve airflow and productivity with appropriate pruning and training.",
+      "tags": [
+        "maintenance",
+        "pruning",
+        "training",
+        "modern",
+        "baseline"
+      ],
+      "difficulty": "intermediate",
+      "typicalDuration": {
+        "value": 40,
+        "unit": "min"
+      },
+      "seasonHints": [
+        "spring",
+        "summer"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Clean pruners"
+        },
+        {
+          "name": "Trellis/ties"
+        },
+        {
+          "name": "Disinfectant wipe (optional)"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "trainedPlants"
+        }
+      ],
+      "safety": [
+        "Sanitize tools between diseased plants to reduce spread."
+      ],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Identify what to prune",
+          "body": "Remove dead/diseased foliage first. For tomatoes, decide single/double leader and remove suckers accordingly.",
+          "cues": [
+            "You know your training goal per plant."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Prune in dry weather",
+          "body": "Prune when foliage is dry to reduce disease spread. Avoid heavy pruning in extreme heat.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 20,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s03",
+          "title": "Tie and support",
+          "body": "Tie stems gently. Check ties monthly for girdling.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 10,
+            "unit": "min"
+          }
+        },
+        {
+          "id": "s04",
+          "title": "Dispose of diseased material",
+          "body": "Bag and remove diseased material (do not compost if severe).",
+          "cues": [],
+          "checks": [
+            {
+              "type": "confirm",
+              "label": "Diseased material handled appropriately"
+            }
+          ],
+          "inputs": [],
+          "outputs": []
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.harvest.harvest-log",
+      "name": "Harvest + Weigh + Log",
+      "summary": "Standard harvest flow: pick, clean, weigh, and log yields for planning and inventory sync.",
+      "tags": [
+        "harvest",
+        "inventory-sync",
+        "baseline",
+        "modern"
+      ],
+      "difficulty": "beginner",
+      "typicalDuration": {
+        "value": 30,
+        "unit": "min"
+      },
+      "seasonHints": [
+        "summer",
+        "fall"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Harvest basket"
+        },
+        {
+          "name": "Scale"
+        },
+        {
+          "name": "Labels/containers"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "harvestEntry"
+        },
+        {
+          "name": "inventoryUpdateCandidate"
+        }
+      ],
+      "safety": [],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Harvest at peak",
+          "body": "Harvest during cool parts of day when possible. Handle gently to prevent bruising.",
+          "cues": [
+            "Produce looks firm and undamaged."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Clean and sort",
+          "body": "Brush dirt, rinse if needed, and sort by quality (fresh use vs processing).",
+          "cues": [
+            "Sorted into 'eat now' vs 'process/preserve'."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s03",
+          "title": "Weigh and record",
+          "body": "Weigh each crop batch and log to SSA harvest tracker (crop, bed, date, weight).",
+          "cues": [
+            "Weights recorded with units."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s04",
+          "title": "Route to next step",
+          "body": "If preserving, create a preservation task. If storing, add inventory/storehouse entries with location.",
+          "cues": [],
+          "checks": [
+            {
+              "type": "confirm",
+              "label": "Routed to inventory or preservation"
+            }
+          ],
+          "inputs": [],
+          "outputs": []
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.seeds.seed-saving-basic",
+      "name": "Seed Saving (Basic)",
+      "summary": "Save viable seeds from healthy plants; dry, label, and store for next season.",
+      "tags": [
+        "seeds",
+        "resilience",
+        "natural",
+        "culture-specific"
+      ],
+      "difficulty": "intermediate",
+      "typicalDuration": {
+        "value": 2,
+        "unit": "hr"
+      },
+      "seasonHints": [
+        "late-summer",
+        "fall"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Paper bags/envelopes"
+        },
+        {
+          "name": "Labels"
+        },
+        {
+          "name": "Screen/tray for drying"
+        },
+        {
+          "name": "Jar with desiccant (optional)"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "savedSeeds"
+        }
+      ],
+      "safety": [
+        "Avoid saving seed from diseased plants; ensure complete drying to prevent mold."
+      ],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Select healthy parent plants",
+          "body": "Choose vigorous, disease-free plants. Note variety and traits.",
+          "cues": [
+            "Parent plants selected and recorded."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Collect mature seed",
+          "body": "Wait for full maturity (dry pods or fully ripe fruit depending on crop).",
+          "cues": [
+            "Seed is fully developed; pods/fruits mature."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s03",
+          "title": "Clean and dry",
+          "body": "Separate seed from chaff/pulp. Dry thoroughly in shade with airflow.",
+          "cues": [
+            "Seed snaps (not bends) and shows no moisture."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 7,
+            "unit": "day"
+          }
+        },
+        {
+          "id": "s04",
+          "title": "Label and store",
+          "body": "Label variety, date, and source. Store cool/dry/dark. Log batch in SSA.",
+          "cues": [
+            "Seed packets labeled and stored."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        }
+      ],
+      "variants": [],
+      "references": []
+    },
+    {
+      "id": "garden.modern.hydroponics-kratky",
+      "name": "Hydroponics: Kratky (No-Pump)",
+      "summary": "Simple passive hydroponics method for greens using a nutrient reservoir and net cups.",
+      "tags": [
+        "modern",
+        "hydroponics",
+        "indoor",
+        "efficiency"
+      ],
+      "difficulty": "intermediate",
+      "typicalDuration": {
+        "value": 2,
+        "unit": "hr"
+      },
+      "seasonHints": [
+        "year-round"
+      ],
+      "climateNotes": [],
+      "supplies": [
+        {
+          "name": "Opaque tote/bucket"
+        },
+        {
+          "name": "Net cups"
+        },
+        {
+          "name": "Hydro nutrients"
+        },
+        {
+          "name": "Air gap management"
+        },
+        {
+          "name": "pH test (optional)"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "kratkySystem"
+        }
+      ],
+      "safety": [
+        "Keep nutrients out of reach of children/pets; avoid light leaks to prevent algae."
+      ],
+      "defaults": {
+        "quietHoursSafe": true,
+        "requiresOutdoor": true
+      },
+      "steps": [
+        {
+          "id": "s01",
+          "title": "Prepare reservoir",
+          "body": "Fill with mixed nutrient solution. Ensure container is opaque or covered.",
+          "cues": [
+            "No light leaks; solution mixed."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s02",
+          "title": "Set seedlings in net cups",
+          "body": "Place seedlings in inert medium. Roots should reach solution or wick moisture until they do.",
+          "cues": [
+            "Seedlings stable; roots oriented downward."
+          ],
+          "checks": [],
+          "inputs": [],
+          "outputs": []
+        },
+        {
+          "id": "s03",
+          "title": "Maintain air gap",
+          "body": "As water level drops, an air gap forms for roots. Do not keep fully topped off.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 7,
+            "unit": "day"
+          }
+        },
+        {
+          "id": "s04",
+          "title": "Monitor growth and nutrients",
+          "body": "Check for algae, odor, and nutrient depletion. Refresh solution as needed.",
+          "cues": [],
+          "checks": [],
+          "inputs": [],
+          "outputs": [],
+          "timer": {
+            "value": 14,
+            "unit": "day"
+          }
+        }
+      ],
+      "variants": [],
+      "references": []
+    }
+  ]
+}

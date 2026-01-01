@@ -1,0 +1,483 @@
+{
+  "$id": "https://schemas.suka.smart/session.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SSA Session",
+  "description": "Canonical contract for an executable household session in Suka Smart Assistant (SSA). Sessions are generated after imports→intelligence and orchestrated by automation. They may be exported to the Hub when familyFundMode=true.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "version", "domain", "title", "status", "createdAt", "steps"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable session identifier (uuid/ulid/snowflake).",
+      "pattern": "^[A-Za-z0-9_.:-]{8,}$"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Monotonic session document version for optimistic concurrency."
+    },
+    "domain": {
+      "type": "string",
+      "description": "Owning domain for this session.",
+      "enum": ["cooking", "cleaning", "garden", "animals", "preservation", "inventory", "storehouse", "other"]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "subtitle": { "type": "string", "maxLength": 240 },
+    "status": {
+      "type": "string",
+      "enum": ["planned", "queued", "running", "paused", "completed", "canceled", "failed"]
+    },
+
+    "priority": {
+      "$ref": "#/definitions/priority"
+    },
+
+    "deadline": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Hard desired completion deadline in ISO 8601 (UTC recommended)."
+    },
+    "flex": {
+      "type": "object",
+      "description": "Time flexibility window around schedule/deadline.",
+      "additionalProperties": false,
+      "properties": {
+        "earliestStart": { "type": "string", "format": "date-time" },
+        "latestStart": { "type": "string", "format": "date-time" },
+        "earliestEnd": { "type": "string", "format": "date-time" },
+        "latestEnd": { "type": "string", "format": "date-time" },
+        "slackMs": { "$ref": "#/definitions/durationMs" }
+      }
+    },
+
+    "plan": {
+      "type": "object",
+      "description": "Scheduling plan decided by the automation runtime or user.",
+      "additionalProperties": false,
+      "properties": {
+        "scheduleType": { "type": "string", "enum": ["auto", "manual", "suggested"] },
+        "scheduledStart": { "type": "string", "format": "date-time" },
+        "scheduledEnd": { "type": "string", "format": "date-time" },
+        "timezone": { "type": "string", "maxLength": 64 },
+        "location": { "type": "string", "maxLength": 160 },
+        "calendarId": { "type": "string", "maxLength": 120 },
+        "recurrence": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "rrule": { "type": "string", "maxLength": 512 },
+            "count": { "type": "integer", "minimum": 1 },
+            "until": { "type": "string", "format": "date-time" }
+          }
+        }
+      }
+    },
+
+    "prereqs": {
+      "type": "array",
+      "description": "Preconditions that must be satisfied before execution.",
+      "items": { "$ref": "#/definitions/prereq" }
+    },
+
+    "buffers": {
+      "type": "object",
+      "description": "Session-level protective buffers.",
+      "additionalProperties": false,
+      "properties": {
+        "preBufferMs": { "$ref": "#/definitions/durationMs" },
+        "postBufferMs": { "$ref": "#/definitions/durationMs" },
+        "cleanupMs": { "$ref": "#/definitions/durationMs" }
+      }
+    },
+
+    "degradePolicy": {
+      "type": "array",
+      "description": "Ordered fallback strategies when constraints hit (time, inventory, device, RTC, etc.).",
+      "items": { "$ref": "#/definitions/degradeRule" }
+    },
+
+    "assignments": {
+      "type": "array",
+      "description": "Planned human/role/device assignments.",
+      "items": { "$ref": "#/definitions/assignment" }
+    },
+
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Linearized (with dependencies) list of steps to execute.",
+      "items": { "$ref": "#/definitions/step" }
+    },
+
+    "concurrency": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "maxParallel": { "type": "integer", "minimum": 1, "default": 1 },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{2,}$" },
+              "maxParallel": { "type": "integer", "minimum": 1 }
+            },
+            "required": ["id", "maxParallel"]
+          }
+        }
+      }
+    },
+
+    "telemetry": {
+      "type": "object",
+      "description": "Runtime metrics captured during execution.",
+      "additionalProperties": false,
+      "properties": {
+        "createdFrom": { "type": "string", "enum": ["import", "manual", "automation", "template", "api"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "queuedAt": { "type": "string", "format": "date-time" },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "pausedAt": { "type": "string", "format": "date-time" },
+        "resumedAt": { "type": "string", "format": "date-time" },
+        "completedAt": { "type": "string", "format": "date-time" },
+        "canceledAt": { "type": "string", "format": "date-time" },
+        "failedAt": { "type": "string", "format": "date-time" },
+
+        "durationMs": { "$ref": "#/definitions/durationMs" },
+        "activeWorkMs": { "$ref": "#/definitions/durationMs" },
+        "waitMs": { "$ref": "#/definitions/durationMs" },
+
+        "eventsEmitted": { "type": "integer", "minimum": 0 },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "ts": { "type": "string", "format": "date-time" },
+              "code": { "type": "string", "pattern": "^[A-Z0-9_]{3,}$" },
+              "message": { "type": "string", "maxLength": 400 },
+              "details": { "type": "object", "additionalProperties": true }
+            },
+            "required": ["ts", "code", "message"]
+          }
+        }
+      }
+    },
+
+    "source": {
+      "type": "object",
+      "description": "Provenance and normalization metadata.",
+      "additionalProperties": false,
+      "properties": {
+        "importId": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{8,}$" },
+        "url": { "type": "string", "format": "uri" },
+        "origin": { "type": "string", "maxLength": 120 },
+        "parser": { "type": "string", "maxLength": 120 },
+        "checksum": { "type": "string", "maxLength": 128 }
+      }
+    },
+
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+
+    "tags": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "maxLength": 48, "pattern": "^[a-z0-9._-]+$" }
+    },
+
+    "notes": { "type": "string", "maxLength": 4000 },
+
+    "meta": {
+      "type": "object",
+      "description": "Forward-compatible extension bucket.",
+      "additionalProperties": true
+    }
+  },
+
+  "definitions": {
+    "durationMs": { "type": "integer", "minimum": 0 },
+    "priority": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "1=lowest … 5=highest"
+    },
+
+    "prereq": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{2,}$" },
+        "kind": { "type": "string", "enum": ["session", "inventory", "device", "time", "weather", "custom"] },
+        "operator": { "type": "string", "enum": ["exists", "gte", "lte", "eq", "ne", "ready", "online", "window"] },
+        "value": { "type": ["string", "number", "boolean", "object", "array", "null"] },
+        "message": { "type": "string", "maxLength": 200 }
+      },
+      "required": ["kind", "operator"]
+    },
+
+    "degradeRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "when": {
+          "type": "string",
+          "description": "Constraint predicate key.",
+          "enum": [
+            "behind_schedule",
+            "inventory_short",
+            "device_unavailable",
+            "rtc_unavailable",
+            "network_poor",
+            "energy_saving",
+            "quiet_hours"
+          ]
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "skip_noncritical_steps",
+            "shorten_timers_pct",
+            "reduce_concurrency_to",
+            "substitute_ingredient_tag",
+            "fallback_transport_ws",
+            "suppress_media",
+            "defer_to_next_window"
+          ]
+        },
+        "params": { "type": "object", "additionalProperties": true }
+      },
+      "required": ["when", "action"]
+    },
+
+    "assignment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{2,}$" },
+        "role": { "type": "string", "maxLength": 64, "description": "e.g., cook, cleaner, gardener, butcher" },
+        "assigneeUserId": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{2,}$" },
+        "householdUnit": { "type": "string", "maxLength": 64 },
+        "deviceId": { "type": "string", "maxLength": 128 },
+        "room": { "type": "string", "maxLength": 64 },
+        "required": { "type": "boolean", "default": false }
+      }
+    },
+
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "label"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{2,}$" },
+        "kind": {
+          "type": "string",
+          "description": "Primitive step type used by Play/Remote/Overlay.",
+          "enum": [
+            "prep",
+            "cook",
+            "clean",
+            "garden",
+            "animal",
+            "preserve",
+            "wait",
+            "timer",
+            "io",
+            "transport",
+            "check",
+            "note"
+          ]
+        },
+        "label": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "description": { "type": "string", "maxLength": 2000 },
+
+        "durationMs": { "$ref": "#/definitions/durationMs" },
+        "softDurationMs": { "$ref": "#/definitions/durationMs", "description": "Flexible time the engine may compress/expand." },
+        "offsetMs": { "$ref": "#/definitions/durationMs", "description": "Start offset relative to session start OR to dependsOn completion." },
+
+        "dependsOn": {
+          "type": "array",
+          "description": "IDs of prerequisite step(s). Allows DAG within the session.",
+          "items": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{2,}$" }
+        },
+
+        "group": { "type": "string", "maxLength": 40, "description": "Concurrency group id for parallelism control." },
+
+        "buffers": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "preMs": { "$ref": "#/definitions/durationMs" },
+            "postMs": { "$ref": "#/definitions/durationMs" }
+          }
+        },
+
+        "safety": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ppe": { "type": "array", "items": { "type": "string" } },
+            "warnings": { "type": "array", "items": { "type": "string", "maxLength": 200 } },
+            "hazards": { "type": "array", "items": { "type": "string", "maxLength": 200 } }
+          }
+        },
+
+        "preferences": {
+          "type": "object",
+          "description": "User/household preferences relevant to this step (e.g., doneness).",
+          "additionalProperties": false,
+          "properties": {
+            "doneness": { "type": "string", "enum": ["rare", "medium-rare", "medium", "medium-well", "well", "n/a"] },
+            "spiceLevel": { "type": "string", "enum": ["mild", "medium", "hot", "x-hot"] },
+            "units": { "type": "string", "enum": ["imperial", "metric"] },
+            "muteMedia": { "type": "boolean" }
+          }
+        },
+
+        "cues": {
+          "type": "object",
+          "description": "What the user should see/hear/feel to verify progress/doneness.",
+          "additionalProperties": false,
+          "properties": {
+            "visual": { "type": "array", "items": { "type": "string", "maxLength": 200 } },
+            "auditory": { "type": "array", "items": { "type": "string", "maxLength": 200 } },
+            "tangible": { "type": "array", "items": { "type": "string", "maxLength": 200 } },
+            "targetTempC": { "type": "number", "minimum": -50, "maximum": 400 },
+            "targetTempF": { "type": "number", "minimum": -58, "maximum": 752 }
+          }
+        },
+
+        "resources": {
+          "type": "object",
+          "description": "Inputs/outputs and equipment needed.",
+          "additionalProperties": false,
+          "properties": {
+            "equipment": {
+              "type": "array",
+              "items": { "type": "string", "maxLength": 80 }
+            },
+            "inputs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "ref": { "type": "string", "maxLength": 120 },
+                  "quantity": { "type": "number", "minimum": 0 },
+                  "unit": { "type": "string", "maxLength": 24 },
+                  "optional": { "type": "boolean", "default": false }
+                },
+                "required": ["ref"]
+              }
+            },
+            "outputs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "ref": { "type": "string", "maxLength": 120 },
+                  "estimatedQty": { "type": "number", "minimum": 0 },
+                  "unit": { "type": "string", "maxLength": 24 }
+                },
+                "required": ["ref"]
+              }
+            }
+          }
+        },
+
+        "io": {
+          "type": "object",
+          "description": "Transport/overlay/RTC needs for this step.",
+          "additionalProperties": false,
+          "properties": {
+            "overlay": { "type": "boolean" },
+            "remoteControl": { "type": "boolean" },
+            "transport": { "type": "string", "enum": ["webrtc", "websocket", "auto"] },
+            "room": { "type": "string", "maxLength": 64 }
+          }
+        },
+
+        "checks": {
+          "type": "array",
+          "description": "Runtime validations to gate progression (temperature, visual state, sensor, manual confirm).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "type": { "type": "string", "enum": ["tempC", "tempF", "manual", "weight", "volume", "custom"] },
+              "operator": { "type": "string", "enum": ["gte", "lte", "eq", "ne", "approx", "pass"] },
+              "value": { "type": ["number", "string", "boolean"] },
+              "message": { "type": "string", "maxLength": 160 }
+            },
+            "required": ["type", "operator"]
+          }
+        },
+
+        "telemetry": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "startedAt": { "type": "string", "format": "date-time" },
+            "completedAt": { "type": "string", "format": "date-time" },
+            "durationMs": { "$ref": "#/definitions/durationMs" },
+            "alarms": { "type": "integer", "minimum": 0 },
+            "notes": { "type": "string", "maxLength": 500 }
+          }
+        },
+
+        "critical": { "type": "boolean", "default": false },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1, "maxLength": 48, "pattern": "^[a-z0-9._-]+$" }
+        },
+        "meta": { "type": "object", "additionalProperties": true }
+      }
+    }
+  },
+
+  "examples": [
+    {
+      "id": "sess_01JABCXYZ",
+      "version": 3,
+      "domain": "cooking",
+      "title": "Braised Lamb Shanks — Family Dinner",
+      "status": "queued",
+      "priority": 4,
+      "deadline": "2025-11-09T00:00:00.000Z",
+      "flex": { "earliestStart": "2025-11-08T16:00:00.000Z", "latestEnd": "2025-11-09T01:00:00.000Z", "slackMs": 900000 },
+      "plan": { "scheduleType": "auto", "scheduledStart": "2025-11-08T17:00:00.000Z", "timezone": "America/Chicago" },
+      "prereqs": [
+        { "kind": "inventory", "operator": "gte", "value": { "item": "lamb.shank", "qty": 4 } },
+        { "kind": "device", "operator": "online", "value": "oven.main" }
+      ],
+      "buffers": { "preBufferMs": 300000, "postBufferMs": 600000 },
+      "degradePolicy": [
+        { "when": "behind_schedule", "action": "shorten_timers_pct", "params": { "pct": 0.1 } },
+        { "when": "inventory_short", "action": "substitute_ingredient_tag", "params": { "tag": "aromatics" } }
+      ],
+      "assignments": [
+        { "id": "a1", "role": "cook", "assigneeUserId": "u_42", "deviceId": "phone.rhonda", "room": "kitchen", "required": true }
+      ],
+      "steps": [
+        { "id": "s1", "kind": "prep", "label": "Preheat oven to 325°F", "durationMs": 300000, "cues": { "visual": ["Oven indicator shows preheated"], "targetTempF": 325 } },
+        { "id": "s2", "kind": "prep", "label": "Put pot of water to boil (for aromatics)", "durationMs": 0, "offsetMs": 0 },
+        { "id": "s3", "kind": "cook", "label": "Sear shanks", "dependsOn": ["s1"], "durationMs": 600000, "preferences": { "doneness": "medium" }, "cues": { "visual": ["Brown crust on all sides"] }, "resources": { "equipment": ["dutch_oven"], "inputs": [{ "ref": "lamb.shank", "quantity": 4 }] } },
+        { "id": "s4", "kind": "cook", "label": "Braise covered", "dependsOn": ["s3"], "durationMs": 7200000, "softDurationMs": 600000, "cues": { "visual": ["Meat pulls back from bone"], "tangible": ["Fork-tender"] } },
+        { "id": "s5", "kind": "clean", "label": "Quick cleanup", "durationMs": 600000, "buffers": { "postMs": 120000 } }
+      ],
+      "telemetry": { "createdFrom": "automation", "createdAt": "2025-11-08T13:00:00.000Z" },
+      "createdAt": "2025-11-08T13:00:00.000Z",
+      "updatedAt": "2025-11-08T13:05:00.000Z",
+      "tags": ["dinner", "lamb"],
+      "meta": { "templateId": "tmpl_braise_basic_v1" }
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "meta": {
+    "id": "catalog.planning.preservation.index",
+    "domain": "preservation",
+    "kind": "index",
+    "title": "Preservation Planning Patterns",
+    "version": "1.0.0",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial finite preservation planning patterns (batch, seasonal, surplus triage, shelf-stable buffer, fermentation-first)."
+      }
+    ]
+  },
+  "patterns": [
+    {
+      "id": "pat.preservation.batch_day",
+      "path": "./patterns/batch_day.json",
+      "tags": [
+        "time:half_day",
+        "difficulty:medium",
+        "equipment:standard",
+        "mode:batch"
+      ]
+    },
+    {
+      "id": "pat.preservation.seasonal_push",
+      "path": "./patterns/seasonal_push.json",
+      "tags": [
+        "time:full_day",
+        "difficulty:high",
+        "equipment:advanced",
+        "mode:seasonal"
+      ]
+    },
+    {
+      "id": "pat.preservation.surplus_triage",
+      "path": "./patterns/surplus_triage.json",
+      "tags": [
+        "time:60-120",
+        "difficulty:low",
+        "equipment:limited",
+        "mode:triage"
+      ]
+    },
+    {
+      "id": "pat.preservation.shelf_stable_buffer",
+      "path": "./patterns/shelf_stable_buffer.json",
+      "tags": [
+        "time:90-180",
+        "difficulty:medium",
+        "equipment:standard",
+        "mode:buffer"
+      ]
+    },
+    {
+      "id": "pat.preservation.fermentation_first",
+      "path": "./patterns/fermentation_first.json",
+      "tags": [
+        "time:60-150",
+        "difficulty:medium",
+        "equipment:fermentation",
+        "mode:ferment"
+      ]
+    }
+  ],
+  "ui": {
+    "defaultFilters": [
+      "time",
+      "difficulty",
+      "equipment",
+      "mode"
+    ],
+    "chips": [
+      {
+        "key": "time",
+        "label": "Time"
+      },
+      {
+        "key": "difficulty",
+        "label": "Difficulty"
+      },
+      {
+        "key": "equipment",
+        "label": "Equipment"
+      },
+      {
+        "key": "mode",
+        "label": "Mode"
+      }
+    ]
+  }
+}

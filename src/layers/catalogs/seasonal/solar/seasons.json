@@ -1,0 +1,186 @@
+{
+  "id": "seasonal.solar.seasons",
+  "domain": "seasonal",
+  "kind": "season_windows",
+  "title": "Normalized Solar Seasons (Northern Hemisphere default)",
+  "intentTags": [
+    "seasonal:solar",
+    "rhythm:seasons"
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "notes": [
+      "This catalog provides normalized windows and planning triggers without relying on live astronomy APIs.",
+      "Default is Northern Hemisphere; SeasonResolver can flip for Southern Hemisphere if user sets hemisphere:south."
+    ]
+  },
+  "defaults": {
+    "hemisphere": "north",
+    "timezone": "local",
+    "boundaryMode": "approx_fixed_dates"
+  },
+  "boundaries": [
+    {
+      "id": "spring_equinox",
+      "approxMonthDay": "03-20",
+      "tag": "solar:spring_equinox"
+    },
+    {
+      "id": "summer_solstice",
+      "approxMonthDay": "06-21",
+      "tag": "solar:summer_solstice"
+    },
+    {
+      "id": "fall_equinox",
+      "approxMonthDay": "09-22",
+      "tag": "solar:fall_equinox"
+    },
+    {
+      "id": "winter_solstice",
+      "approxMonthDay": "12-21",
+      "tag": "solar:winter_solstice"
+    }
+  ],
+  "seasons": [
+    {
+      "id": "winter",
+      "tag": "season:winter",
+      "startBoundary": "winter_solstice",
+      "endBoundary": "spring_equinox",
+      "planningTriggers": [
+        {
+          "tag": "mode:winterize",
+          "when": "seasonStart",
+          "hints": [
+            "focus:storehouse",
+            "focus:rootCellar",
+            "focus:freezer"
+          ]
+        },
+        {
+          "tag": "trigger:winter_reserve_review",
+          "when": "seasonStartPlusDays:7",
+          "hints": [
+            "pattern:pat.storehouse.winter_reserve"
+          ]
+        },
+        {
+          "tag": "trigger:humidity_check",
+          "when": "monthly",
+          "hints": [
+            "storage:rootCellar",
+            "storage:fermentationRoom"
+          ]
+        }
+      ],
+      "typicalConstraints": [
+        "weather:freeze_risk",
+        "daylight:short"
+      ]
+    },
+    {
+      "id": "spring",
+      "tag": "season:spring",
+      "startBoundary": "spring_equinox",
+      "endBoundary": "summer_solstice",
+      "planningTriggers": [
+        {
+          "tag": "mode:spring_start",
+          "when": "seasonStart",
+          "hints": [
+            "focus:garden",
+            "focus:seedling",
+            "focus:inventory_refresh"
+          ]
+        },
+        {
+          "tag": "trigger:planting_window",
+          "when": "seasonStartPlusDays:10",
+          "hints": [
+            "pattern:pat.homestead.garden_led"
+          ]
+        },
+        {
+          "tag": "trigger:deep_clean_storehouse_optional",
+          "when": "seasonStartPlusDays:21",
+          "hints": [
+            "pattern:pat.storehouse.monthly_cycle_count"
+          ]
+        }
+      ],
+      "typicalConstraints": [
+        "weather:variable",
+        "labor:busy"
+      ]
+    },
+    {
+      "id": "summer",
+      "tag": "season:summer",
+      "startBoundary": "summer_solstice",
+      "endBoundary": "fall_equinox",
+      "planningTriggers": [
+        {
+          "tag": "mode:harvest_push",
+          "when": "seasonStartPlusDays:30",
+          "hints": [
+            "focus:harvest",
+            "focus:preservation"
+          ]
+        },
+        {
+          "tag": "trigger:preservation_capacity_check",
+          "when": "biweekly",
+          "hints": [
+            "pattern:pat.meals.preservation_first"
+          ]
+        },
+        {
+          "tag": "trigger:water_management",
+          "when": "weekly",
+          "hints": [
+            "garden:irrigation"
+          ]
+        }
+      ],
+      "typicalConstraints": [
+        "weather:heat_risk",
+        "food:shelf_life_short"
+      ]
+    },
+    {
+      "id": "fall",
+      "tag": "season:fall",
+      "startBoundary": "fall_equinox",
+      "endBoundary": "winter_solstice",
+      "planningTriggers": [
+        {
+          "tag": "mode:harvest_finish",
+          "when": "seasonStart",
+          "hints": [
+            "focus:preservation",
+            "focus:rootCellar"
+          ]
+        },
+        {
+          "tag": "trigger:winter_reserve_build",
+          "when": "seasonStartPlusDays:14",
+          "hints": [
+            "pattern:pat.storehouse.winter_reserve"
+          ]
+        },
+        {
+          "tag": "trigger:storage_rotation",
+          "when": "monthly",
+          "hints": [
+            "pattern:pat.storehouse.monthly_cycle_count"
+          ]
+        }
+      ],
+      "typicalConstraints": [
+        "weather:frost_risk",
+        "garden:final_harvest"
+      ]
+    }
+  ]
+}

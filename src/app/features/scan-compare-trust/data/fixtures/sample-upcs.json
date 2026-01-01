@@ -1,0 +1,256 @@
+{
+  "version": "1.0.0",
+  "generatedAtISO": "2025-10-27T00:00:00Z",
+  "schedules": [
+    { "id": "sched-grocery-wed", "name": "Wednesday Grocery Run", "type": "schedule" },
+    { "id": "sess-batch-freezer-1", "name": "Batch • Freezer Fill #1", "type": "session" }
+  ],
+  "stores": [
+    { "storeId": "aldi-0123", "name": "ALDI #123" },
+    { "storeId": "sams-0456", "name": "Sam's Club #456" },
+    { "storeId": "costco-0791", "name": "Costco #791" }
+  ],
+  "items": [
+    {
+      "upc": "012345678905",
+      "canonicalKey": "00012345678905",
+      "title": "Whole Milk 1 Gallon",
+      "brand": "Friendly Farms",
+      "categoryPath": ["Grocery", "Dairy", "Milk"],
+      "package": { "quantity": 1, "unit": "gal", "normalized": { "quantity": 3785.41, "unit": "ml" } },
+      "productId": "p-9f52a1b0",
+      "samplePrices": [
+        {
+          "provider": "aldi",
+          "storeId": "aldi-0123",
+          "channel": "in_store",
+          "observedAtISO": "2025-10-27T16:31:00Z",
+          "amount": 3.29,
+          "currency": "USD",
+          "unitPrice": { "unit": "per_l", "amount": 0.87 },
+          "pricebookId": "pb-6e21f41a31"
+        }
+      ],
+      "coupons": [
+        { "couponId": "cpn-abc123", "group": "mfg", "hint": "$1/2 Gallons" }
+      ],
+      "cycleInsightId": "cycle-milk-aldi-weekly",
+      "userContext": {
+        "isFavorite": true,
+        "pinnedSchedules": [
+          { "type": "schedule", "id": "sched-grocery-wed", "name": "Wednesday Grocery Run" }
+        ],
+        "notes": "Buy when <= $3.00/gal"
+      }
+    },
+
+    {
+      "upc": "036000291452",
+      "canonicalKey": "0036000291452",
+      "title": "Large Eggs — 18 Count",
+      "brand": "Member's Mark",
+      "categoryPath": ["Grocery", "Dairy", "Eggs"],
+      "package": { "quantity": 18, "unit": "ct", "normalized": { "quantity": 18, "unit": "ct" } },
+      "productId": "p-eggs18-7df2",
+      "samplePrices": [
+        {
+          "provider": "sams",
+          "storeId": "sams-0456",
+          "channel": "pickup",
+          "observedAtISO": "2025-10-26T14:05:00Z",
+          "amount": 4.98,
+          "currency": "USD",
+          "unitPrice": { "unit": "per_ct", "amount": 0.276 },
+          "pricebookId": "pb-eggs18-0456-a1"
+        }
+      ],
+      "coupons": [],
+      "cycleInsightId": "cycle-eggs-sams-monthly",
+      "userContext": {
+        "isFavorite": true,
+        "pinnedSchedules": [
+          { "type": "session", "id": "sess-batch-freezer-1", "name": "Batch • Freezer Fill #1" }
+        ]
+      }
+    },
+
+    {
+      "upc": "041693000868",
+      "canonicalKey": "0041693000868",
+      "title": "Beefsteak Tomato Seeds",
+      "brand": "Garden Classics",
+      "categoryPath": ["Garden", "Seeds", "Vegetables"],
+      "package": { "quantity": 1, "unit": "pk", "normalized": { "quantity": 1, "unit": "ct" } },
+      "productId": "p-seed-tom-01",
+      "samplePrices": [
+        {
+          "provider": "aldi",
+          "storeId": "aldi-0123",
+          "channel": "in_store",
+          "observedAtISO": "2025-03-15T18:12:00Z",
+          "amount": 1.29,
+          "currency": "USD",
+          "unitPrice": { "unit": "per_ct", "amount": 1.29 },
+          "pricebookId": "pb-seed-tom-a1"
+        }
+      ],
+      "coupons": [],
+      "cycleInsightId": "cycle-seeds-spring-seasonal",
+      "userContext": {
+        "isFavorite": true,
+        "pinnedSchedules": [
+          { "type": "schedule", "id": "sched-grocery-wed", "name": "Wednesday Grocery Run" }
+        ],
+        "notes": "Trigger Garden Planner on scan"
+      }
+    },
+
+    {
+      "upc": "085239000715",
+      "canonicalKey": "0085239000715",
+      "title": "Lamb Breakfast Sausage — 16 oz",
+      "brand": "Butcher’s Table",
+      "categoryPath": ["Grocery", "Meat", "Lamb"],
+      "package": { "quantity": 16, "unit": "oz", "normalized": { "quantity": 453.59, "unit": "g" } },
+      "productId": "p-lamb-saus-16oz",
+      "samplePrices": [
+        {
+          "provider": "costco",
+          "storeId": "costco-0791",
+          "channel": "in_store",
+          "observedAtISO": "2025-10-21T19:44:00Z",
+          "amount": 8.49,
+          "currency": "USD",
+          "unitPrice": { "unit": "per_g", "amount": 0.0187 },
+          "pricebookId": "pb-lambsaus-0791-a1"
+        }
+      ],
+      "coupons": [
+        { "couponId": "cpn-lamb-2off", "group": "store", "hint": "$2 off Meat — rotating" }
+      ],
+      "cycleInsightId": "cycle-lamb-costco-monthly",
+      "userContext": { "isFavorite": true }
+    },
+
+    {
+      "upc": "004300002456",
+      "canonicalKey": "0004300002456",
+      "title": "Frozen Waffles — 24 ct",
+      "brand": "Homestead",
+      "categoryPath": ["Grocery", "Frozen", "Breakfast"],
+      "package": { "quantity": 24, "unit": "ct", "normalized": { "quantity": 24, "unit": "ct" } },
+      "productId": "p-waffles-24ct",
+      "samplePrices": [
+        {
+          "provider": "sams",
+          "storeId": "sams-0456",
+          "channel": "delivery",
+          "observedAtISO": "2025-10-25T10:10:00Z",
+          "amount": 9.98,
+          "currency": "USD",
+          "unitPrice": { "unit": "per_ct", "amount": 0.4158 },
+          "pricebookId": "pb-waff-0456-a1"
+        }
+      ],
+      "coupons": [
+        { "couponId": "cpn-waff-20pct", "group": "store", "hint": "20% off Frozen Breakfast (app)" }
+      ],
+      "cycleInsightId": "cycle-frozen-breakfast-biwk",
+      "userContext": {
+        "pinnedSchedules": [
+          { "type": "schedule", "id": "sched-grocery-wed", "name": "Wednesday Grocery Run" }
+        ]
+      }
+    },
+
+    {
+      "upc": "009999000001",
+      "canonicalKey": "0009999000001",
+      "title": "Goat Stew Meat — 2 lb",
+      "brand": "Local Butchery",
+      "categoryPath": ["Grocery", "Meat", "Goat"],
+      "package": { "quantity": 2, "unit": "lb", "normalized": { "quantity": 907.18, "unit": "g" } },
+      "productId": "p-goat-stew-2lb",
+      "samplePrices": [
+        {
+          "provider": "costco",
+          "storeId": "costco-0791",
+          "channel": "in_store",
+          "observedAtISO": "2025-10-20T12:00:00Z",
+          "amount": 19.98,
+          "currency": "USD",
+          "unitPrice": { "unit": "per_g", "amount": 0.0220 },
+          "pricebookId": "pb-goat-0791-a1"
+        }
+      ],
+      "coupons": [],
+      "cycleInsightId": "cycle-goat-irregular",
+      "userContext": { "notes": "For stew + feast days" }
+    },
+
+    {
+      "upc": "001111222233",
+      "canonicalKey": "0001111222233",
+      "title": "Household Dish Soap — 24 oz",
+      "brand": "SparkleClean",
+      "categoryPath": ["Household", "Cleaning", "Dish Soap"],
+      "package": { "quantity": 24, "unit": "oz", "normalized": { "quantity": 709.76, "unit": "ml" } },
+      "productId": "p-dishsoap-24oz",
+      "samplePrices": [
+        {
+          "provider": "aldi",
+          "storeId": "aldi-0123",
+          "channel": "in_store",
+          "observedAtISO": "2025-10-19T09:00:00Z",
+          "amount": 2.49,
+          "currency": "USD",
+          "unitPrice": { "unit": "per_ml", "amount": 0.0035 },
+          "pricebookId": "pb-dish-0123-a1"
+        }
+      ],
+      "coupons": [
+        { "couponId": "cpn-house-1off5", "group": "basket", "hint": "$1 off $5 Household Cleaners" }
+      ],
+      "cycleInsightId": "cycle-household-monthly",
+      "trustFlags": ["contains_sls", "fragrance"],
+      "userContext": {
+        "notes": "Prefer fragrance-free alternative",
+        "pinnedSchedules": [
+          { "type": "session", "id": "sess-batch-freezer-1", "name": "Batch • Freezer Fill #1" }
+        ]
+      }
+    },
+
+    {
+      "upc": "003800035827",
+      "canonicalKey": "0003800035827",
+      "title": "Toasted Oat Cereal — 18 oz",
+      "brand": "Morning Harvest",
+      "categoryPath": ["Grocery", "Breakfast & Cereal", "Cereal"],
+      "package": { "quantity": 18, "unit": "oz", "normalized": { "quantity": 510.29, "unit": "g" } },
+      "productId": "p-cereal-18oz",
+      "samplePrices": [
+        {
+          "provider": "sams",
+          "storeId": "sams-0456",
+          "channel": "in_store",
+          "observedAtISO": "2025-10-24T11:30:00Z",
+          "amount": 4.49,
+          "currency": "USD",
+          "unitPrice": { "unit": "per_g", "amount": 0.0088 },
+          "pricebookId": "pb-cereal-0456-a1"
+        }
+      ],
+      "coupons": [
+        { "couponId": "cpn-store-bogo-001", "group": "store", "hint": "BOGO 50% Cereal" }
+      ],
+      "cycleInsightId": "cycle-cereal-bogo-weekend",
+      "userContext": {
+        "isFavorite": false,
+        "pinnedSchedules": [
+          { "type": "schedule", "id": "sched-grocery-wed", "name": "Wednesday Grocery Run" }
+        ]
+      }
+    }
+  ]
+}

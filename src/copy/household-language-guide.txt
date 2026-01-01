@@ -1,0 +1,411 @@
+===============================================================================
+HOUSEHOLD LANGUAGE GUIDE – SSA “WEB OF MEANING”
+File: src/copy/household-language-guide.txt
+Role: Practical cheat-sheet for writing SSA UI in stewardship language
+===============================================================================
+
+0. PURPOSE
+----------
+This guide is a **practical language map** for SSA:
+
+- How to talk about actions, lists, time, priorities, and collaboration
+  in **householding terms**, not corporate productivity terms.
+- How to keep language:
+  - rooted in cycles, seasons, storehouse, yields, provisions, feasts, rhythms,
+  - friendly and clear,
+  - usable in TOOL MODE (single tool) and STEWARDSHIP MODE (connected web).
+
+Use this when naming:
+- buttons
+- labels and headings
+- empty states
+- notifications
+- onboarding / helper text
+
+
+1. CORE STYLE SNAPSHOT
+----------------------
+
+1.1 We emphasize
+- cycle, season, rhythm, flow
+- storehouse, provision, yield
+- feast, gathering
+- householder, household
+- care, tending, watching
+
+1.2 We avoid
+- task, todo, checklist, generic module
+- productivity, optimize, workload, KPI
+- project in the corporate sense
+
+1.3 Tone anchors
+- Calm, steady, practical.
+- Encouraging but honest.
+- Agrarian / Israelite flavor without quoting scripture:
+  - storehouse, grain, oil, harvest, lean season, feast season.
+
+
+2. COMMON REPLACEMENTS
+----------------------
+
+2.1 Generic → Household language
+
+- “task”
+  - → “rhythm”, “small flow”, “step in this cycle”
+
+- “todo list”
+  - → “rhythm list”, “today’s flows”, “household flows for this moment”
+
+- “project”
+  - → “household plan”, “longer cycle”, “seasonal flow”
+
+- “module”
+  - → “area”, “domain”, “household area”
+
+- “resource”
+  - → “provision”, “item in the storehouse”, “yield”
+
+- “schedule”
+  - → “rhythm”, “pattern”, “time window”
+
+- “priority”
+  - → “what needs the householder’s hands first”, “what this season is pressing”
+
+- “deadline”
+  - → “season window”, “feast day”, “before the lean season”, “before this gathering”
+
+- “optimize”
+  - → “steady”, “lighten strain”, “simplify”, “protect the householder”
+
+- “workload”
+  - → “load of rhythms”, “how heavy this cycle feels right now”
+
+
+3. ACTION VERBS & BUTTON LABELS
+-------------------------------
+
+3.1 We like
+- Start / Begin
+- Shape / Adjust
+- Steady / Lighten
+- Mark / Note
+- Log / Record
+- Welcome (yields, guests)
+- Share / Set aside
+- Carry (storehouse, rhythms across seasons)
+
+3.2 Examples
+
+OLD → NEW
+
+- “Add task”
+  → “Add a small rhythm”
+  → “Add a new flow for this area”
+
+- “Create event”
+  → “Mark a feast or gathering”
+  → “Mark this day in your household calendar”
+
+- “Create project”
+  → “Shape a household plan for this season”
+
+- “View tasks”
+  → “View rhythms in this area”
+  → “See flows for this week”
+
+- “Edit module”
+  → “Adjust this household area”
+  → “Adjust this flow”
+
+- “Delete task”
+  → “Let this rhythm rest”
+  → “Remove this flow from your map”
+
+
+4. TIME & PRIORITY LANGUAGE
+---------------------------
+
+4.1 Time
+
+Prefer:
+- “this morning / today / this evening”
+- “this week / this month”
+- “this planting season / harvest season / lean season”
+- “before the feast / after the feast”
+
+Examples:
+- “A feast is approaching in a few days.”
+- “This is a planting window for cool-weather crops.”
+- “Your storehouse is leaning; consider a small provisioning cycle this week.”
+
+Avoid:
+- “Due date”
+- “Deadline”
+- “Time slot” (unless absolutely necessary; prefer “time window”)
+
+4.2 Priority
+
+Prefer:
+- “Most pressing for the household”
+- “Needs the householder’s hands soon”
+- “Can wait for a quieter moment”
+- “Gentle first step”
+
+Examples:
+- “This storehouse category looks most pressing for the coming week.”
+- “A gentle first step is to shape one small cleaning rhythm.”
+- “This flow can wait for a calmer season.”
+
+Avoid:
+- “High priority / low priority” without context.
+- “Critical issue” unless safety is actually at risk.
+
+
+5. PROGRESS & COMPLETION
+------------------------
+
+5.1 Progress
+
+Prefer:
+- “A steady rhythm is forming here.”
+- “This cycle has been carried through several weeks.”
+- “This rhythm has been quiet for a while.”
+- “You may be ready to deepen this flow.”
+
+Avoid:
+- “Level up”
+- “Streak”
+- “Achievement unlocked”
+- “You completed 7 tasks!”
+
+5.2 Completion
+
+Prefer:
+- “This flow is complete for now.”
+- “You carried this rhythm through to the end.”
+- “This session is finished; the rhythm remains available.”
+
+Examples:
+- Notification:
+  - “This cooking session is complete. The rhythm is saved for next time.”
+  - “You finished this cleaning cycle; rest is appropriate now.”
+
+Avoid:
+- “All tasks completed”
+- “Inbox zero style language”
+
+
+6. LISTS, QUEUES, & BOARDS
+--------------------------
+
+6.1 Lists
+
+Prefer:
+- “Rhythms in this area”
+- “Flows planned for today”
+- “Sessions ready to run”
+- “Storehouse entries”
+
+Examples:
+- “Household flows for this week”
+- “Preservation sessions waiting on yields”
+
+6.2 Queues
+
+Prefer:
+- “Queue” → “line of rhythms”, “line of sessions”, “upcoming flows”
+
+Examples:
+- “Upcoming cooking flows”
+- “Preservation flows waiting for this harvest”
+
+Avoid:
+- “Backlog”
+- “Ticket queue”
+
+6.3 Boards/Kanban
+
+If you need a board-style metaphor, use:
+- “Stages in this rhythm”
+- “States of this flow”
+- “From ‘waiting’ to ‘in motion’ to ‘resting’”
+
+Example column labels:
+- “Not yet started” → “Not yet in motion”
+- “In progress” → “In motion”
+- “Done” → “Completed for now” or “At rest”
+
+
+7. COLLABORATION & ROLES
+------------------------
+
+7.1 People
+
+Use:
+- “householder” for the primary responsible person.
+- “helpers” or “family members” for others.
+- “household” for the group.
+
+Examples:
+- “The householder can adjust this rhythm at any time.”
+- “Helpers can see and join flows assigned to this room.”
+
+Avoid:
+- “Owner” in UI (keep that notion internal if needed).
+- “Assignee” – use “who tends this rhythm” or “who is watching this flow”.
+
+7.2 Assigning & Sharing
+
+Prefer:
+- “Invite someone to share this rhythm.”
+- “Mark who tends this flow.”
+- “Share this session with another household.”
+
+Examples:
+- “Mark who tends this rhythm”
+- “Share this provisioning plan with your mutual-aid circle”
+
+Avoid:
+- “Assign task to user”
+- “Reassign ticket”
+
+
+8. ERROR & ALERT LANGUAGE
+-------------------------
+
+8.1 Errors
+
+Patterns:
+- State what went wrong, then how to recover.
+- Keep the tone calm and practical.
+
+Examples:
+- “Something interrupted this flow. Please try again.”
+- “SSA couldn’t save this rhythm right now. Check your connection, then try again.”
+- “A required field is missing. Fill in the highlighted sections so this flow can be recorded.”
+
+Avoid:
+- “Fatal error”
+- “Operation failed” without explanation.
+
+8.2 Alerts & Warnings
+
+Tie to season, storehouse, or rhythm, not guilt.
+
+Examples:
+- “This pattern may be drawing too heavily from the storehouse.”
+- “A season has shifted; this rhythm may need a lighter expression.”
+- “A feast is approaching; provisions in this category look tight.”
+
+Avoid:
+- “You’re behind”
+- “You failed to complete your tasks”
+
+
+9. EMPTY STATES & ONBOARDING
+----------------------------
+
+9.1 Empty State Patterns
+
+Patterns:
+- Acknowledge emptiness.
+- Offer a gentle first step.
+- Optional second step for more advanced.
+
+Generic template:
+- Title: “Begin with one simple rhythm.”
+- Body: “This area is empty. Start with one small flow you already do.”
+- CTA primary: “Name your first rhythm”
+- CTA secondary: “Browse example flows”
+
+Examples:
+- “No storehouse records yet. Begin by logging what you already have on hand.”
+- “No garden beds recorded yet. Start by naming one bed or planting space.”
+- “No preservation flows are active. When a harvest or bulk purchase arrives, this panel will help you choose a preservation rhythm.”
+
+Avoid:
+- “No data yet. Add some tasks to get started.”
+- “You haven’t set up anything. Click here to configure.”
+
+
+10. TOOL MODE VS STEWARDSHIP MODE LANGUAGE
+------------------------------------------
+
+10.1 TOOL MODE
+
+Goals:
+- Make the user feel safe to work locally.
+- Gently hint at future integration.
+
+Patterns:
+- “This page works on its own.”
+- “You’re shaping one household rhythm.”
+- “SSA can link this flow with your seasons and storehouse when you’re ready.”
+
+Examples:
+- “Today’s view focuses on a single flow. You can still see how it fits your seasons and storehouse.”
+- “This tool is a focused flow. As you get comfortable, SSA can link it with your other rhythms.”
+
+10.2 STEWARDSHIP MODE
+
+Goals:
+- Emphasize connection and overview.
+- Show cross-domain relationships.
+
+Patterns:
+- “This dashboard weaves your cooking, storehouse, garden, preservation, cleaning, and feasts into one stewardship view.”
+- “These panels show how your cycles, seasons, and yields are working together.”
+
+Examples:
+- “Connected stewardship is active. This overview shows how your rhythms and provisions align with this season.”
+- “These panels reveal which areas are steady, which are quiet, and which may need the householder’s attention.”
+
+
+11. SHORT TEMPLATE LIBRARY
+--------------------------
+
+Use these as seeds when writing new copy.
+
+11.1 Rhythm / Flow Templates
+- “Shape a [domain] rhythm that fits this season and your storehouse.”
+- “This flow helps you carry [provision or area] across the coming weeks.”
+- “A gentle way to begin is to start with one [daily/weekly/seasonal] rhythm.”
+
+11.2 Storehouse Templates
+- “Your storehouse is leaning in [category]. A small provisioning cycle may help.”
+- “This preservation run will help your storehouse carry you through the next season.”
+- “At your current rhythm, this storehouse category holds about [X] weeks of meals.”
+
+11.3 Season & Feast Templates
+- “A season has shifted; some rhythms may need adjusting.”
+- “A feast is approaching; review your storehouse and meal rhythms to welcome it without strain.”
+- “This is a rich season; preserved yields now will steady the lean period ahead.”
+
+11.4 Insight Templates
+- “A steady rhythm is forming here; you may be ready to deepen it.”
+- “This rhythm has been quiet for a while; if it’s no longer needed, you can let it rest.”
+- “Garden and storehouse patterns suggest this is a good time for a small preservation flow.”
+
+
+12. TODO HOOKS FOR FUTURE EXPANSION
+-----------------------------------
+
+// TODO[seasonal-logic]:
+// - Add season-specific language snippets (planting, harvest, lean, feast-heavy)
+//   for each domain, to keep copy in harmony with time.
+
+// TODO[cycles-engine]:
+// - Define standard phrases for “heavy cycle load” vs “light cycle load”
+//   so alerts can say “this rhythm looks heavy for this season” consistently.
+
+// TODO[dependencies]:
+// - Build a small dictionary of standard cross-domain phrases like
+//   “garden → preservation → storehouse → meals → cleaning → compost → garden”
+//   for use in help text and overviews.
+
+// TODO[insights]:
+// - Connect this guide to a structured insights template file so all automatically
+//   generated messages follow these patterns by default.
+
+END OF HOUSEHOLD LANGUAGE GUIDE
+===============================================================================

@@ -1,0 +1,568 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "2025-10-31T14:15:00-05:00",
+  "description": "Meat yield curve for meat goat – Kiko. Aligned with Suka Smart Assistant’s cross-domain flow so you can: (1) plan/purchase goats, (2) butcher, (3) push to storehouse/inventory with grocery-section inspiration, (4) auto-suggest meal plans that match African/Middle Eastern/Caribbean goat dishes, (5) nudge the garden planner for peppers, tomatoes, okra, greens, (6) auto-generate cleaning/sanitation sessions, and (7) reverse-generate goating/butchery days from feast/storehouse/meal demands. User favorites/schedules are expected to be saved in Dexie/local DB; this file provides system defaults only.",
+  "__notes": [
+    "Kiko is a hardy meat goat, good fit for warm/wet climates — this ties back to your relocation/business plans (Northwestern Nigeria/Burkina Faso), so this profile should be available in the same yieldCurves folder as your sheep and cattle.",
+    "This structure matches your other meat JSONs (Brangus, Senepol, Dexter, Katahdin, Dorper) so ImportService.js and ImportSettings.jsx can treat all yield curves uniformly.",
+    "Reverse generation is especially powerful with goat because goat is often cooked in batches (pepper soup, curry, jollof meat, stew) → we can go from ‘I want 3 goat stews for next month’ to ‘You need 1 Kiko at 80–90 lb live, butcher on this date, clean with this profile, and tell the garden to grow or harvest peppers/onions.’"
+  ],
+  "animal": {
+    "species": "goat",
+    "breed": "Kiko",
+    "class": "chevon/goat",
+    "meat_goat": true,
+    "typical_live_weight_lbs": [70, 85, 100, 120],
+    "default_live_weight_lbs": 90,
+    "live_to_hanging_yield_pct": 0.48,
+    "hanging_to_carcass_yield_pct": 0.70,
+    "default_hanging_days": 2,
+    "butchery_style_default": "whole-or-primal-goat",
+    "butchery_supported_styles": [
+      "whole-or-primal-goat",
+      "stew-heavy",
+      "roast/BBQ",
+      "halal/torah-compliant-no-unclean-cross-contamination"
+    ],
+    "torah_compliant_profile": {
+      "allow_unclean_animals": false,
+      "separate_tools_required": true,
+      "separate_surfaces_required": true,
+      "blood_draining_required": true,
+      "notes": "Use goat-only knives/tables if the facility is processing other species; schedule goat-cleaning immediately after butchery."
+    }
+  },
+  "yield_model": {
+    "formula_hint": "carcass = live_weight * live_to_hanging_yield_pct * hanging_to_carcass_yield_pct",
+    "example": {
+      "live_weight_lbs": 90,
+      "live_to_hanging_yield_pct": 0.48,
+      "hanging_to_carcass_yield_pct": 0.7,
+      "calculated_hanging_weight_lbs": 43.2,
+      "calculated_carcass_weight_lbs": 30.24
+    },
+    "primal_breakdown_pct": {
+      "leg": 0.23,
+      "shoulder": 0.2,
+      "loin": 0.12,
+      "rib_breast": 0.08,
+      "neck_shank_trim": 0.12,
+      "fat_bones_other": 0.25
+    },
+    "retail_cut_defaults": [
+      {
+        "cut_id": "goat_leg",
+        "label": "Goat Leg (whole/half)",
+        "source_primals": ["leg"],
+        "default_pct_of_carcass": 0.14,
+        "storehouse_section_hint": "Meat → Goat → Roasts / Pepper Soup",
+        "mealplanner_tags": [
+          "feast",
+          "holiday",
+          "sabbath",
+          "pepper-soup",
+          "roast-goat"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "marinate-freeze"],
+        "cleaning_profile_ref": "goat_meat_sanitation"
+      },
+      {
+        "cut_id": "goat_shoulder",
+        "label": "Goat Shoulder (roast or cube)",
+        "source_primals": ["shoulder"],
+        "default_pct_of_carcass": 0.12,
+        "storehouse_section_hint": "Meat → Goat → Roasts / Stew",
+        "mealplanner_tags": [
+          "goat-stew",
+          "jollof-meat",
+          "curry-goat",
+          "tagine"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "pressure-can"],
+        "cleaning_profile_ref": "goat_meat_sanitation"
+      },
+      {
+        "cut_id": "goat_curry_cubes",
+        "label": "Goat Curry / Stew Cubes",
+        "source_primals": ["shoulder", "neck_shank_trim"],
+        "default_pct_of_carcass": 0.14,
+        "storehouse_section_hint": "Meat → Goat → Stew / Curry",
+        "mealplanner_tags": [
+          "curry-goat",
+          "pepper-soup",
+          "stew",
+          "goat-and-okra"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "pressure-can"],
+        "cleaning_profile_ref": "goat_meat_sanitation"
+      },
+      {
+        "cut_id": "goat_ribs_breast",
+        "label": "Goat Ribs / Breast (grill/smoke)",
+        "source_primals": ["rib_breast"],
+        "default_pct_of_carcass": 0.08,
+        "storehouse_section_hint": "Meat → Goat → Grill/Smoke",
+        "mealplanner_tags": [
+          "grill",
+          "bbq",
+          "smoker",
+          "braai"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "goat_meat_sanitation"
+      },
+      {
+        "cut_id": "goat_ground",
+        "label": "Ground Goat (for sausages/mixed dishes)",
+        "source_primals": ["trim", "neck_shank_trim"],
+        "default_pct_of_carcass": 0.09,
+        "storehouse_section_hint": "Meat → Goat → Ground / Sausage",
+        "mealplanner_tags": [
+          "sausages",
+          "meatballs",
+          "mixed-mince"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "goat_meat_sanitation"
+      },
+      {
+        "cut_id": "goat_bones",
+        "label": "Goat Bones (stock / pepper-soup base)",
+        "source_primals": ["fat_bones_other"],
+        "default_pct_of_carcass": 0.07,
+        "storehouse_section_hint": "Meat → Bones / Broth Base",
+        "mealplanner_tags": [
+          "pepper-soup",
+          "ramen-stock",
+          "broth"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "roast-then-freeze"],
+        "cleaning_profile_ref": "goat_meat_sanitation"
+      },
+      {
+        "cut_id": "goat_organs",
+        "label": "Goat Organs (liver, heart, kidney)",
+        "source_primals": ["offal"],
+        "default_pct_of_carcass": 0.03,
+        "storehouse_section_hint": "Meat → Goat → Organs",
+        "mealplanner_tags": [
+          "nutrient-dense",
+          "traditional"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "goat_meat_sanitation"
+      }
+    ]
+  },
+  "storehouse_mapping": {
+    "purpose": "Map Kiko goat output → storehouse goals & inventory execution, with grocery-section inspiration.",
+    "sections": [
+      {
+        "id": "STH-GOAT-FRESH",
+        "label": "Meat → Goat → Fresh / Chilled",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "goat_leg",
+          "goat_shoulder"
+        ],
+        "grocery_inspo": [
+          "African/Caribbean grocer – fresh goat",
+          "Halal butcher – goat"
+        ]
+      },
+      {
+        "id": "STH-GOAT-FROZEN",
+        "label": "Meat → Goat → Frozen",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "goat_curry_cubes",
+          "goat_ground",
+          "goat_ribs_breast",
+          "goat_bones"
+        ],
+        "grocery_inspo": [
+          "Restaurant supply – frozen goat chunks",
+          "Ethnic markets – frozen goat"
+        ]
+      },
+      {
+        "id": "STH-GOAT-PRESERVED",
+        "label": "Meat → Goat → Preserved / Canned / Smoked",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "goat_curry_cubes",
+          "goat_bones"
+        ],
+        "grocery_inspo": [
+          "West African pantry – smoked meats",
+          "Caribbean – stewed/canned goat"
+        ]
+      }
+    ],
+    "reverse_generation_rules": [
+      {
+        "id": "RG-GOAT-FEAST",
+        "when_event": "mealplanner.requests.meat.goat.feast",
+        "action": "estimate feast portions → map to goat legs + shoulders → map to live goats → emit automation.schedule.request (butchery, cleaning, storehouse)",
+        "notes": "Use for big family/community meals – ‘many hands make light work’ co-op planning."
+      },
+      {
+        "id": "RG-GOAT-STOREHOUSE",
+        "when_event": "storehouse.goal.short.goat-curry",
+        "action": "trigger animal.acquisition.plan('goat-kiko') and goat-butchery.session.generate"
+      }
+    ]
+  },
+  "meal_planner_hooks": {
+    "default_meal_templates": [
+      {
+        "id": "mt-goat-pepper-soup",
+        "label": "Goat Pepper Soup (West African)",
+        "uses_cuts": [
+          {
+            "cut_id": "goat_curry_cubes",
+            "qty_lb": 2
+          },
+          {
+            "cut_id": "goat_bones",
+            "qty_lb": 1
+          }
+        ],
+        "suggested_sides": [
+          "rice",
+          "yam",
+          "plantain"
+        ],
+        "garden_suggestions": [
+          "hot_pepper",
+          "tomato",
+          "onion",
+          "garlic"
+        ],
+        "cleaning_profiles": [
+          "goat_meat_sanitation"
+        ]
+      },
+      {
+        "id": "mt-goat-curry",
+        "label": "Curry Goat (Caribbean style)",
+        "uses_cuts": [
+          {
+            "cut_id": "goat_curry_cubes",
+            "qty_lb": 2.5
+          }
+        ],
+        "suggested_sides": [
+          "rice and peas",
+          "roti",
+          "salad"
+        ],
+        "garden_suggestions": [
+          "scotch_bonnet_or_hot_pepper",
+          "onion",
+          "garlic",
+          "thyme"
+        ],
+        "cleaning_profiles": [
+          "goat_meat_sanitation"
+        ]
+      },
+      {
+        "id": "mt-goat-grill",
+        "label": "Grilled/Smoked Goat (Event)",
+        "uses_cuts": [
+          {
+            "cut_id": "goat_ribs_breast",
+            "qty_lb": 3
+          }
+        ],
+        "suggested_sides": [
+          "fermented veg",
+          "salad",
+          "flatbread"
+        ],
+        "garden_suggestions": [
+          "pepper (sweet/hot)",
+          "leafy_greens",
+          "cucumber"
+        ],
+        "cleaning_profiles": [
+          "goat_meat_sanitation",
+          "grill_clean"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "can_generate_animal_plan": true,
+      "handler_event": "animal.plan.requested",
+      "notes": "If user pins 2–3 goat curries & 1 pepper soup in same month, emit this so Animals module can propose 1 Kiko at 90 lb live, plus cleaning."
+    }
+  },
+  "garden_integration": {
+    "purpose": "Tie goat dishes to warm-climate crops: tomatoes, peppers, onion, garlic, okra, greens.",
+    "crops_to_recommend": [
+      {
+        "crop": "hot_pepper",
+        "use_case": "pepper soup, curry goat",
+        "harvest_window": "summer-fall",
+        "preservation": ["dry", "ferment", "freeze"],
+        "cleaning_profile_ref": "garden_light"
+      },
+      {
+        "crop": "tomato",
+        "use_case": "stew/curry base",
+        "harvest_window": "summer",
+        "preservation": ["can", "freeze"],
+        "cleaning_profile_ref": "garden_light"
+      },
+      {
+        "crop": "onion",
+        "use_case": "base aromatics",
+        "harvest_window": "late summer",
+        "preservation": ["cure", "store dry"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "garlic",
+        "use_case": "curry, marinade",
+        "harvest_window": "mid-summer",
+        "preservation": ["dry", "powder"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "okra",
+        "use_case": "goat & okra stew",
+        "harvest_window": "summer-long",
+        "preservation": ["freeze", "dry"],
+        "cleaning_profile_ref": "garden_light"
+      }
+    ],
+    "reverse_generation": {
+      "when_meat_menu_fixed_event": "garden.plan.adjust.requested",
+      "notes": "If goat is heavy in menu for hot months, garden should schedule peppers, okra, tomatoes; send harvest to calendar."
+    }
+  },
+  "animal_care_and_butchery": {
+    "pre_slaughter_care_checklist": [
+      "fasting_window_6hr",
+      "clean_water_available",
+      "shade/low_stress_handling",
+      "inspect_for_disease_parasites",
+      "torah_compliant_tools_ready"
+    ],
+    "butchery_session_template": {
+      "id": "butchery-session-goat-kiko",
+      "label": "Kiko Goat – Household Butchery",
+      "estimated_duration_hours": 1.5,
+      "roles_needed": [
+        "primary-butcher",
+        "assistant",
+        "sanitation-runner"
+      ],
+      "outputs": [
+        "whole_or_halves",
+        "retail_cuts",
+        "bones",
+        "offal",
+        "fat_for_rendering"
+      ],
+      "emits_events": [
+        "inventory.add.requested",
+        "storehouse.update.requested",
+        "cleaning.plan.requested",
+        "mealplan.refresh.requested",
+        "garden.plan.adjust.requested"
+      ],
+      "scheduling": {
+        "supports_user_favorites": true,
+        "supports_recurring": true,
+        "supports_coop_mode": true,
+        "coop_mode_notes": "Multiple households can each bring 1–2 Kikos; sanitation task must scale."
+      }
+    },
+    "cleaning_after_butchery": {
+      "cleaning_profile_id": "goat_meat_sanitation",
+      "label": "Post-Goat Butchery Sanitation",
+      "tasks": [
+        "bag offal / byproducts for compost/render/blood-meal line",
+        "wash all tables, knives, tubs",
+        "sanitize with torah-safe cleaner",
+        "mop floor",
+        "launder aprons/towels"
+      ],
+      "emits_events": [
+        "cleaning.log.added",
+        "inventory.cleaning-supplies.decrement"
+      ]
+    }
+  },
+  "cleaning_integration": {
+    "profiles": [
+      {
+        "id": "goat_meat_sanitation",
+        "label": "Goat – Meat Sanitation",
+        "zone": "Kitchen / Butchery Area",
+        "supplies": [
+          "hot_water",
+          "food_safe_disinfectant",
+          "scrub_brush",
+          "mop_bucket",
+          "laundry_detergent"
+        ]
+      },
+      {
+        "id": "meat_standard_sanitation",
+        "label": "Meat – Standard Sanitation",
+        "zone": "Kitchen",
+        "supplies": [
+          "dish_soap",
+          "surface_spray",
+          "towels"
+        ]
+      },
+      {
+        "id": "garden_root",
+        "label": "Garden Root Veg Cleanup",
+        "zone": "Utility / Outdoor Sink",
+        "supplies": [
+          "hose",
+          "brush",
+          "drain_screens"
+        ]
+      },
+      {
+        "id": "garden_light",
+        "label": "Garden Light Wash",
+        "zone": "Kitchen",
+        "supplies": [
+          "sink_sanitizer",
+          "drying_rack"
+        ]
+      },
+      {
+        "id": "grill_clean",
+        "label": "Grill / Smoker Clean (after goat grill)",
+        "zone": "Outdoor Cooking",
+        "supplies": [
+          "grill_brush",
+          "ash_disposal",
+          "degreaser"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "when_butchery_scheduled_event": "cleaning.session.auto-created",
+      "when_goat_grill_event": "cleaning.session.suggested"
+    }
+  },
+  "scheduling_and_favorites": {
+    "can_be_favorited": true,
+    "favorite_key": "yieldcurve:meat:goat_kiko",
+    "suggested_schedules": [
+      {
+        "id": "sched-goat-feast-season",
+        "label": "Goat – Feast / Holiday Season",
+        "rule": "FREQ=YEARLY;BYMONTH=9;BYDAY=SA;BYSETPOS=2",
+        "creates": [
+          "butchery-session-goat-kiko",
+          "cleaning:goat_meat_sanitation",
+          "storehouse:update",
+          "mealplan:refresh",
+          "garden.plan.adjust.requested"
+        ]
+      },
+      {
+        "id": "sched-goat-bi-monthly",
+        "label": "Goat Every 2 Months",
+        "rule": "FREQ=MONTHLY;INTERVAL=2;BYDAY=SA;BYSETPOS=2",
+        "creates": [
+          "butchery-session-goat-kiko"
+        ]
+      }
+    ],
+    "shared_orchestration": {
+      "event_bus_path": "window.__suka.eventBus",
+      "events_emitted": [
+        "yieldcurve.loaded",
+        "yieldcurve.butchery.session.generated",
+        "storehouse.goal.derived",
+        "cleaning.session.derived",
+        "mealplan.refresh.requested",
+        "garden.plan.adjust.requested"
+      ],
+      "events_listened_for": [
+        "automation.schedule.request",
+        "mealplanner.menu.locked",
+        "storehouse.goal.short",
+        "garden.plan.adjust.requested"
+      ]
+    }
+  },
+  "reverse_generation": {
+    "enabled": true,
+    "scenarios": [
+      {
+        "id": "RG-GOAT-01",
+        "source": "meal-planner",
+        "input_example": {
+          "goat_curry_meals": 3,
+          "goat_pepper_soup_events": 1
+        },
+        "output_example": {
+          "required_carcass_lb": 75,
+          "required_live_goats": 2,
+          "suggested_date": "next-available-weekend-slot",
+          "auto_cleaning_sessions": [
+            "goat_meat_sanitation"
+          ]
+        }
+      },
+      {
+        "id": "RG-GOAT-02",
+        "source": "storehouse",
+        "input_example": {
+          "target_section": "STH-GOAT-FROZEN",
+          "target_lb": 50
+        },
+        "output_example": {
+          "required_carcass_lb": 75,
+          "required_live_goats": 2,
+          "notes": "2 Kikos at ~30–35 lb carcass each is adequate; app should recalc from actual yield."
+        }
+      }
+    ],
+    "notes": "UI should surface: ‘Generate Goat Butchery Day’, ‘Generate Cleaning After Goat’, and ‘Adjust Garden for Goat Menus’."
+  },
+  "user_overrides_placeholder": {
+    "explanation": "User-specific edits (e.g. more curry cubes, less ribs) belong in Dexie/local DB, not in this JSON.",
+    "keys": [
+      "animal.live_to_hanging_yield_pct",
+      "animal.hanging_to_carcass_yield_pct",
+      "yield_model.retail_cut_defaults",
+      "scheduling_and_favorites.suggested_schedules"
+    ]
+  },
+  "interop": {
+    "import_sources_supported": [
+      "csv-butchery-yields",
+      "google-sheets-yields",
+      "extension.capture.butchery",
+      "pinterest-board-to-planner",
+      "recipe-site-goat-detector"
+    ],
+    "export_targets_supported": [
+      "household.storehouse",
+      "household.inventory",
+      "community.coop-planner",
+      "family-fund.hub",
+      "pdf-labels"
+    ]
+  }
+}

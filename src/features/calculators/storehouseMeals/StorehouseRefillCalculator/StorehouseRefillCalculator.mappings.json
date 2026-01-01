@@ -1,0 +1,128 @@
+{
+  "nodeId": "storehouseMeals.storehouseRefill",
+  "calculatorId": "StorehouseRefillCalculator",
+  "version": 1,
+  "description": "Next-step mappings for storehouse refill results into shopping, garden, and Black hair nutrition flows.",
+  "ui": {
+    "defaultPrimaryNextStepId": "createShoppingList",
+    "secondaryNextStepIds": [
+      "startShoppingSession",
+      "planGardenForStaples",
+      "openHairNutritionView"
+    ]
+  },
+  "nextSteps": [
+    {
+      "id": "createShoppingList",
+      "label": "Create Shopping List",
+      "description": "Turn refill suggestions into a household shopping list.",
+      "targetNodeId": "shopping.listBuilder",
+      "actionType": "shopping.listFromRefill",
+      "recommendedWhen": [
+        {
+          "field": "aggregatedRefillSummary.totalRefillQty",
+          "op": "gt",
+          "value": 0
+        }
+      ],
+      "payloadMapping": {
+        "source": "refill.refillLines",
+        "target": "shopping.lines",
+        "fields": {
+          "itemId": "itemId",
+          "label": "label",
+          "category": "category",
+          "refillQty": "plannedQty",
+          "uom": "uom",
+          "urgency": "urgency",
+          "notes": "notes"
+        }
+      }
+    },
+    {
+      "id": "startShoppingSession",
+      "label": "Start Shopping Session Now",
+      "description": "Create and run a Storehouse Shopping Session in SessionRunner.",
+      "targetNodeId": "sessions.storehouseShopping",
+      "actionType": "session.createAndRun",
+      "recommendedWhen": [
+        {
+          "field": "ui.context.intent",
+          "op": "eq",
+          "value": "shopNow"
+        },
+        {
+          "field": "aggregatedRefillSummary.totalRefillQty",
+          "op": "gt",
+          "value": 0
+        }
+      ],
+      "sessionTemplateRef": "shopping.fromStorehouseRefill",
+      "payloadMapping": {
+        "source": "refill",
+        "target": "session",
+        "fields": {
+          "runContext.householdId": "meta.householdId",
+          "refillLines": "lines",
+          "aggregatedRefillSummary": "meta.aggregatedRefillSummary"
+        }
+      }
+    },
+    {
+      "id": "planGardenForStaples",
+      "label": "Plan Garden for Staples",
+      "description": "Suggest crops or perennials to grow for frequently refilled staples.",
+      "targetNodeId": "garden.planner",
+      "actionType": "planning.gardenFromRefill",
+      "recommendedWhen": [
+        {
+          "field": "runContext.planningHorizonDays",
+          "op": "gte",
+          "value": 90
+        },
+        {
+          "field": "aggregatedRefillSummary.highFrequencyCount",
+          "op": "gt",
+          "value": 0
+        }
+      ],
+      "payloadMapping": {
+        "source": "refill.refillLines",
+        "target": "garden.candidateCrops",
+        "fields": {
+          "itemId": "itemId",
+          "label": "label",
+          "category": "category",
+          "refillQty": "annualDemandApprox",
+          "uom": "uom"
+        }
+      }
+    },
+    {
+      "id": "openHairNutritionView",
+      "label": "Review Black Hair Nutrition Items",
+      "description": "Open the Black Hair Nutrition view for items tagged as hair and scalp support.",
+      "targetNodeId": "health.blackHairNutrition",
+      "actionType": "health.viewHairNutritionFromStorehouse",
+      "recommendedWhen": [
+        {
+          "field": "hairNutritionSubset.length",
+          "op": "gt",
+          "value": 0
+        }
+      ],
+      "payloadMapping": {
+        "source": "hairNutritionSubset",
+        "target": "health.hairNutrition.items",
+        "fields": {
+          "itemId": "itemId",
+          "label": "label",
+          "category": "category",
+          "refillQty": "suggestedQty",
+          "uom": "uom",
+          "notes": "notes"
+        }
+      }
+    }
+  ]
+}

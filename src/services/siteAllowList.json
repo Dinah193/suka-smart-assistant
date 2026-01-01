@@ -1,0 +1,688 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "2025-10-30T17:25:00-05:00",
+  "description": "Allowlist for Suka Smart Assistant multi-domain imports: cooking, cleaning, garden, animal care/butchery, storehouse, collab.",
+  "globals": {
+    "defaultEngines": [
+      "mealPlanEngine",
+      "cookingSessionEngine",
+      "storehouseGoalEngine",
+      "storehouseStockEngine",
+      "gardenQueueEngine",
+      "gardenCareEngine",
+      "harvestPlannerEngine",
+      "animalPlanEngine",
+      "animalAcquisitionEngine",
+      "butcheryPlannerEngine",
+      "cleaningSessionEngine",
+      "scanCompareTrustBridge"
+    ],
+    "defaultActions": [
+      "saveAsUserFavoriteSession",
+      "saveAsUserFavoriteSchedule",
+      "emitPlanUpdated",
+      "emitSessionDraftCreated"
+    ],
+    "contentTypes": [
+      "recipe",
+      "meal-plan",
+      "cuisine-technique",
+      "cooking-method",
+      "preserving",
+      "cleaning-routine",
+      "homekeeping",
+      "declutter-plan",
+      "garden-planning",
+      "garden-care",
+      "harvest-plan",
+      "permaculture",
+      "seed",
+      "orchard",
+      "animal-care",
+      "animal-husbandry",
+      "animal-acquisition",
+      "butchery",
+      "meat-processing",
+      "storehouse-goal",
+      "storehouse-stock",
+      "community/collab",
+      "scan-compare-trust",
+      "video",
+      "article",
+      "food-science",
+      "inventoryUpdate"
+    ],
+    "reverseGeneration": {
+      "enabled": true,
+      "strategies": [
+        "recipe→animalPlan",
+        "recipe→gardenPlan",
+        "cuisine-technique→cookingSession",
+        "cleaning-routine→zoneSession",
+        "garden-plan→coopGardenPlan",
+        "garden-care→gardenTaskQueue",
+        "harvest-plan→storehouseStock",
+        "animal-care→butcheryPlan",
+        "butchery→storehouseCuts",
+        "storehouse-goal→shoppingList",
+        "storehouse-stock→shoppingList",
+        "pinterestBoard→multi-domain-plan"
+      ]
+    },
+    "sharedOrchestration": {
+      "events": {
+        "plan.updated": "automation.plan.updated",
+        "session.created": "automation.session.created",
+        "import.completed": "import.pipeline.completed",
+        "import.failed": "import.pipeline.failed",
+        "collab.invite": "planner.collab.invite",
+        "collab.sharePlan": "planner.collab.sharePlan",
+        "import.queue.enqueue": "import.queue.enqueue",
+        "import.preview.open": "import.preview.open",
+        "automation.schedule.request": "automation.schedule.request"
+      },
+      "buses": [
+        "window.__suka?.eventBus",
+        "window.__suka?.automationBus"
+      ]
+    },
+    "bookmarklet": {
+      "paramKey": "ssa-import",
+      "supportsMobile": true,
+      "supportsShareTarget": true
+    },
+    "pwa": {
+      "shareTargetRoute": "/import/share-capture",
+      "emitOnReceive": [
+        "import.queue.enqueue",
+        "import.preview.open",
+        "automation.schedule.request"
+      ]
+    }
+  },
+  "allow": [
+    {
+      "id": "recipes-allrecipes",
+      "label": "Allrecipes",
+      "domains": [
+        "allrecipes.com"
+      ],
+      "types": [
+        "recipe",
+        "meal-plan",
+        "cuisine-technique"
+      ],
+      "engines": [
+        "mealPlanEngine",
+        "cookingSessionEngine",
+        "storehouseGoalEngine",
+        "animalPlanEngine"
+      ],
+      "extractors": {
+        "prefer": [
+          "jsonLd.recipe",
+          "schemaOrg.Recipe"
+        ],
+        "fallback": [
+          "og:title",
+          "main#main-content"
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "rules": [
+          {
+            "name": "recipe→gardenPlan",
+            "generate": [
+              "gardenQueueEngine.seedFromRecipeIngredients"
+            ]
+          },
+          {
+            "name": "recipe→animalPlan",
+            "whenIngredientsMatch": [
+              "lamb",
+              "beef",
+              "goat",
+              "mutton"
+            ],
+            "generate": [
+              "animalPlanEngine.estimateFromRecipe",
+              "butcheryPlannerEngine.deriveCuts"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cleaning-the-spruce",
+      "label": "The Spruce / Cleaning & Homekeeping",
+      "domains": [
+        "thespruce.com"
+      ],
+      "types": [
+        "cleaning-routine",
+        "homekeeping",
+        "declutter-plan"
+      ],
+      "engines": [
+        "cleaningSessionEngine",
+        "storehouseGoalEngine"
+      ],
+      "extractors": {
+        "prefer": [
+          "articleBody",
+          "jsonLd.Article"
+        ],
+        "fallback": [
+          ".comp.article-body",
+          "article"
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "rules": [
+          {
+            "name": "cleaning-routine→zoneSession",
+            "generate": [
+              "cleaningSessionEngine.generateZoneSession",
+              "cleaningSessionEngine.scheduleRecurring"
+            ]
+          }
+        ]
+      },
+      "collab": {
+        "planWithOthers": true,
+        "familyCleanDay": true
+      }
+    },
+    {
+      "id": "cleaning-apartment-therapy",
+      "label": "Apartment Therapy / Cleaning",
+      "domains": [
+        "apartmenttherapy.com"
+      ],
+      "types": [
+        "cleaning-routine",
+        "homekeeping"
+      ],
+      "engines": [
+        "cleaningSessionEngine"
+      ],
+      "extractors": {
+        "prefer": [
+          "jsonLd.Article"
+        ],
+        "fallback": [
+          "article",
+          "main"
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "rules": [
+          {
+            "name": "routine→session",
+            "generate": [
+              "cleaningSessionEngine.generateFromArticle",
+              "cleaningSessionEngine.saveAsUserFavoriteSession"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "garden-epic-gardening",
+      "label": "Epic Gardening",
+      "domains": [
+        "epicgardening.com"
+      ],
+      "types": [
+        "garden-planning",
+        "garden-care",
+        "permaculture"
+      ],
+      "engines": [
+        "gardenQueueEngine",
+        "gardenCareEngine",
+        "harvestPlannerEngine",
+        "storehouseGoalEngine"
+      ],
+      "extractors": {
+        "prefer": [
+          "jsonLd.Article"
+        ],
+        "fallback": [
+          "article",
+          "main"
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "rules": [
+          {
+            "name": "garden-plan→tasks",
+            "generate": [
+              "gardenQueueEngine.addPlantingTasks",
+              "gardenQueueEngine.writeToCalendar"
+            ]
+          },
+          {
+            "name": "garden-care→queue",
+            "generate": [
+              "gardenCareEngine.addCareTasks",
+              "gardenCareEngine.writeToCalendar"
+            ]
+          },
+          {
+            "name": "garden-plan→coop",
+            "generate": [
+              "gardenQueueEngine.addToCoop",
+              "planner.collab.sharePlan"
+            ]
+          }
+        ]
+      },
+      "collab": {
+        "planWithOthers": true,
+        "coopPlanning": true
+      }
+    },
+    {
+      "id": "garden-seed-suppliers",
+      "label": "Seed / Garden Planning Sites",
+      "domains": [
+        "rareseeds.com",
+        "seedsavers.org",
+        "johnnyseeds.com",
+        "territorialseed.com",
+        "burpee.com"
+      ],
+      "types": [
+        "seed",
+        "garden-planning",
+        "storehouse-goal"
+      ],
+      "engines": [
+        "gardenQueueEngine",
+        "storehouseGoalEngine",
+        "harvestPlannerEngine"
+      ],
+      "extractors": {
+        "prefer": [
+          "jsonLd.product"
+        ],
+        "fallback": [
+          "main",
+          ".product-details"
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "rules": [
+          {
+            "name": "seed→gardenPlan",
+            "generate": [
+              "gardenQueueEngine.addPlantingTasks",
+              "gardenQueueEngine.writeToCalendar",
+              "storehouseGoalEngine.addAfterHarvest"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cooking-serious-eats",
+      "label": "Serious Eats (cooking techniques)",
+      "domains": [
+        "seriouseats.com"
+      ],
+      "types": [
+        "cuisine-technique",
+        "cooking-method",
+        "food-science"
+      ],
+      "engines": [
+        "cookingSessionEngine",
+        "mealPlanEngine",
+        "storehouseGoalEngine"
+      ],
+      "extractors": {
+        "prefer": [
+          "jsonLd.Article",
+          "jsonLd.Recipe"
+        ],
+        "fallback": [
+          "article",
+          "main"
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "rules": [
+          {
+            "name": "technique→cookingSession",
+            "generate": [
+              "cookingSessionEngine.buildStepwiseSession",
+              "cookingSessionEngine.saveAsUserFavoriteSession"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "cooking-kitchn",
+      "label": "The Kitchn",
+      "domains": [
+        "thekitchn.com"
+      ],
+      "types": [
+        "recipe",
+        "cuisine-technique",
+        "homekeeping"
+      ],
+      "engines": [
+        "mealPlanEngine",
+        "cookingSessionEngine",
+        "cleaningSessionEngine",
+        "storehouseGoalEngine"
+      ],
+      "extractors": {
+        "prefer": [
+          "jsonLd.Article",
+          "jsonLd.Recipe"
+        ],
+        "fallback": [
+          "article",
+          "main"
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "rules": [
+          {
+            "name": "article→sessionOrPlan",
+            "generate": [
+              "cookingSessionEngine.ifRecipeThenCook",
+              "cleaningSessionEngine.ifCleaningThenSession"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "animal-homesteading",
+      "label": "Homesteading / Animal Care Blogs",
+      "domains": [
+        "morningchores.com",
+        "thesprucepets.com",
+        "backyardherds.com",
+        "backyardchickens.com"
+      ],
+      "types": [
+        "animal-care",
+        "animal-husbandry",
+        "animal-acquisition",
+        "butchery",
+        "meat-processing"
+      ],
+      "engines": [
+        "animalPlanEngine",
+        "animalAcquisitionEngine",
+        "butcheryPlannerEngine",
+        "storehouseGoalEngine"
+      ],
+      "extractors": {
+        "prefer": [
+          "jsonLd.Article"
+        ],
+        "fallback": [
+          "article",
+          "main"
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "rules": [
+          {
+            "name": "animal-care→tasklist",
+            "generate": [
+              "animalPlanEngine.generateCareSchedule",
+              "animalPlanEngine.writeToCalendar"
+            ]
+          },
+          {
+            "name": "butchery→storehouse",
+            "whenArticleIncludes": [
+              "cut sheet",
+              "yield",
+              "processing"
+            ],
+            "generate": [
+              "butcheryPlannerEngine.deriveCuts",
+              "storehouseGoalEngine.addCutsToInventory",
+              "mealPlanEngine.suggestMealsFromCuts"
+            ]
+          }
+        ]
+      },
+      "collab": {
+        "planWithOthers": true,
+        "shareCarcass": true
+      }
+    },
+    {
+      "id": "storehouse-grocery-blogs",
+      "label": "Grocery / Pantry / Storehouse Planning Blogs",
+      "domains": [
+        "thepioneerwoman.com",
+        "gimmesomeoven.com",
+        "budgetbytes.com",
+        "southernplate.com"
+      ],
+      "types": [
+        "storehouse-goal",
+        "storehouse-stock",
+        "meal-plan"
+      ],
+      "engines": [
+        "storehouseGoalEngine",
+        "storehouseStockEngine",
+        "mealPlanEngine"
+      ],
+      "extractors": {
+        "prefer": [
+          "jsonLd.Article"
+        ],
+        "fallback": [
+          "article",
+          "main"
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "rules": [
+          {
+            "name": "storehouse-goal→shoppingList",
+            "generate": [
+              "storehouseGoalEngine.buildShoppingListByGrocerySections",
+              "storehouseGoalEngine.saveAsUserFavoriteSchedule"
+            ]
+          },
+          {
+            "name": "storehouse-stock→inventory",
+            "generate": [
+              "storehouseStockEngine.syncToInventory",
+              "storehouseStockEngine.writeToCalendar"
+            ]
+          }
+        ]
+      },
+      "collab": {
+        "planWithOthers": true,
+        "coopStocking": true
+      }
+    },
+    {
+      "id": "youtube-video",
+      "label": "YouTube (multi-domain)",
+      "domains": [
+        "youtube.com",
+        "youtu.be",
+        "m.youtube.com"
+      ],
+      "types": [
+        "video",
+        "cuisine-technique",
+        "cleaning-routine",
+        "garden-care",
+        "animal-care",
+        "butchery"
+      ],
+      "engines": [
+        "cookingSessionEngine",
+        "cleaningSessionEngine",
+        "gardenQueueEngine",
+        "animalPlanEngine",
+        "butcheryPlannerEngine"
+      ],
+      "extractors": {
+        "prefer": [
+          "oembed",
+          "jsonLd.video"
+        ],
+        "fallback": [
+          "#description"
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "rules": [
+          {
+            "name": "video→domain-session",
+            "generate": [
+              "cookingSessionEngine.createIfRecipe",
+              "cleaningSessionEngine.createIfCleaning",
+              "gardenQueueEngine.createIfGarden",
+              "animalPlanEngine.createIfAnimal",
+              "butcheryPlannerEngine.createIfButchery"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "scan-compare-trust-stores",
+      "label": "Store circulars / ads / receipts",
+      "domains": [
+        "walmart.com",
+        "kroger.com",
+        "publix.com",
+        "costco.com",
+        "samsclub.com",
+        "aldi.us"
+      ],
+      "types": [
+        "scan-compare-trust",
+        "storehouse-stock",
+        "inventoryUpdate"
+      ],
+      "engines": [
+        "scanCompareTrustBridge",
+        "storehouseStockEngine",
+        "storehouseGoalEngine"
+      ],
+      "extractors": {
+        "prefer": [
+          "pdf.text",
+          "json.ad"
+        ],
+        "fallback": [
+          "article",
+          "main"
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "rules": [
+          {
+            "name": "ad→storehouseGoal",
+            "generate": [
+              "storehouseGoalEngine.buildFromCircular",
+              "storehouseStockEngine.syncSaleItems"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "userProfiles": {
+    "enabled": true,
+    "schema": {
+      "id": "string",
+      "favoriteSites": [
+        "string"
+      ],
+      "customExtractors": [
+        {
+          "match": "string",
+          "types": [
+            "string"
+          ],
+          "engines": [
+            "string"
+          ]
+        }
+      ],
+      "preferredEnginesOrder": [
+        "string"
+      ]
+    }
+  },
+  "favorites": {
+    "enabled": true,
+    "saveEvent": "import.favorite.saved",
+    "storage": "dexie:siteAllowListFavorites",
+    "fields": [
+      "siteId",
+      "title",
+      "url",
+      "importType",
+      "enginesUsed",
+      "createdAt"
+    ]
+  },
+  "fallback": {
+    "id": "generic-html",
+    "label": "Generic HTML / Unknown site",
+    "types": [
+      "article",
+      "recipe",
+      "cleaning-routine",
+      "garden-planning",
+      "garden-care",
+      "animal-care",
+      "storehouse-goal"
+    ],
+    "engines": [
+      "mealPlanEngine",
+      "cleaningSessionEngine",
+      "gardenQueueEngine",
+      "gardenCareEngine",
+      "animalPlanEngine",
+      "storehouseGoalEngine"
+    ],
+    "extractors": {
+      "prefer": [
+        "jsonLd.any"
+      ],
+      "fallback": [
+        "article",
+        "main",
+        "body"
+      ]
+    },
+    "reverseGeneration": {
+      "enabled": true
+    }
+  }
+}

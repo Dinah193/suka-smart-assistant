@@ -1,0 +1,157 @@
+{
+  "id": "animal-care-week",
+  "title": "Animal Care • Weekly Tasks",
+  "version": "1.1.0",
+  "tone": "calm, humane, checklist-oriented",
+  "targets": ["Animal Care", "Inventory", "Roles & Tasks"],
+  "placeholders": [
+    "profile",
+    "goals",
+    "constraints",
+    "dietary",
+    "unitSystem",
+    "animals",
+    "inventory",
+    "weeklyHrs",
+    "budget",
+    "jobs"
+  ],
+  "vars": {
+    "defaults": {
+      "unitSystem": "Standard (US)",
+      "speciesFallback": ["Chickens"],
+      "feedUnits": {
+        "Standard (US)": { "weight": "lb", "volume": "cup" },
+        "Metric": { "weight": "g", "volume": "ml" }
+      },
+      "sanitizeCadenceDays": 7,
+      "deepCleanCadenceDays": 28
+    },
+    "format": {
+      "date": "YYYY-MM-DD"
+    }
+  },
+  "sectionHints": {
+    "checklistStyle": "Use short, actionable bullets with leading hyphen dashes ('- ').",
+    "timeboxing": "Add a trailing timebox in parentheses like (5–10 min).",
+    "quantities": "Include friendly numbers and consistent units based on unitSystem.",
+    "roles": "When roles are referenced, prefer '@Person' or 'Role: Caretaker' notation."
+  },
+  "sections": [
+    {
+      "id": "overview",
+      "goal": "Species/breeds, counts, housing, feed types, bedding, constraints, and time budget.",
+      "narrative": true,
+      "expects": ["speciesSummary", "timeBudgetNotes", "constraintsNotes"],
+      "example": [
+        "- Species: Chickens (12 layers), Quail (6), Rabbits (2 does, 1 buck).",
+        "- Housing: Coop + run; quail hutch; rabbit tractors.",
+        "- Constraints: School nights; 5 hrs/wk total; minimal bleach use."
+      ]
+    },
+    {
+      "id": "daily",
+      "goal": "Daily checks: feed/water, health glance, bedding spot-clean, egg/production, enrichment.",
+      "checklist": true,
+      "expects": ["dailyChecklist", "observations"],
+      "example": [
+        "- Check waterers; top off to line; scrub if biofilm (3–5 min).",
+        "- Feed ration: ~0.25 lb/bird/day layers; adjust for heat/cold.",
+        "- Health glance: eyes, combs, gait; note any limping.",
+        "- Spot clean high-soil spots; add dry bedding as needed.",
+        "- Collect eggs; record count in logbook/app."
+      ]
+    },
+    {
+      "id": "weekly",
+      "goal": "Weekly chores: sanitize waterers/feeders, bedding refresh, coop/hutch checks, enrichment rotation.",
+      "checklist": true,
+      "expects": ["weeklyChecklist", "sanitizePlan", "enrichmentPlan"],
+      "example": [
+        "- Sanitize waterers/feeders (unscented soap + rinse) (15–20 min).",
+        "- Replace 1/3 bedding; top with dry carbon.",
+        "- Inspect hardware cloth & latches; tighten/replace as needed.",
+        "- Rotate enrichment: hang cabbage/greens; add dust bath sand.",
+        "- Quarantine/observation pen readiness check."
+      ]
+    },
+    {
+      "id": "health",
+      "goal": "Health notes: weights/BCS, parasite and vaccination schedule, observation log placeholders.",
+      "table": true,
+      "expects": ["healthTable", "parasiteSchedule", "vaccinationSchedule"],
+      "example": [
+        "| Group | Weight/BCS | Notes |",
+        "|---|---|---|",
+        "| Layers | target 4–5 lb | Check keel bone, feathering |"
+      ]
+    },
+    {
+      "id": "inventory",
+      "goal": "Feed/bedding/med kits with restock thresholds & storage locations; convert units consistently.",
+      "checklist": true,
+      "expects": ["inventoryList", "restockThresholds", "storageMap"],
+      "example": [
+        "- Layer feed: 50 lb bags; threshold: 1 bag; storage: bin A.",
+        "- Grit/oyster shell: 5 lb; threshold: 1 lb; storage: bin B.",
+        "- Pine shavings: 8 cu ft; threshold: 1 bale; storage: shed."
+      ]
+    },
+    {
+      "id": "breeding_cycle",
+      "goal": "If applicable: breeding/lay/gestation windows; hatchery or breeding notes; calendar reminders.",
+      "narrative": true,
+      "optional": true,
+      "expects": ["cycleNotes", "calendarWindows"],
+      "example": [
+        "- Quail: peak lay Apr–Sep; supplement light to 14h in winter.",
+        "- Rabbits: 31-day gestation; nest box day 28; palpate day 10–12."
+      ]
+    },
+    {
+      "id": "roles",
+      "goal": "Assign tasks by day/role; on-call fallback; include timeboxes.",
+      "checklist": true,
+      "expects": ["roleAssignments", "handoffPlan"],
+      "example": [
+        "- @Ami: Daily AM check (10 min), egg collection Mon/Wed/Fri.",
+        "- @Ben: Weekly sanitize Saturday (20 min).",
+        "- Fallback: 'On-call' handles missed daily by 6pm."
+      ]
+    }
+  ],
+  "sidecar": {
+    "extract": {
+      "roles": {
+        "fromSections": ["daily", "weekly", "roles"],
+        "patternHint": "Bullets starting with '-' and containing '@Name' or 'Role:' are role tasks."
+      },
+      "inventory": {
+        "fromSections": ["inventory"],
+        "patternHint": "Lines with 'threshold' and 'storage' should be parsed as {name, quantity, unit, threshold, storage}."
+      },
+      "reminders": {
+        "fromSections": ["weekly", "breeding_cycle"],
+        "patternHint": "Look for timeboxes in parentheses and cadence words like 'weekly', 'every', 'day X'."
+      }
+    },
+    "suggestedSchemas": {
+      "roleTask": ["title", "who", "cadence", "durationMin", "notes"],
+      "inventoryItem": ["name", "quantity", "unit", "threshold", "storage"],
+      "reminder": ["title", "dueAt", "cadence", "notes"]
+    }
+  },
+  "output": {
+    "format": "spd-markdown",
+    "titleSuffix": " — Auto",
+    "tags": ["auto", "animal-care"],
+    "postProcessors": [
+      "unitNormalize",
+      "timeboxNormalize"
+    ],
+    "publish": {
+      "enabled": false,
+      "targets": []
+    }
+  }
+}

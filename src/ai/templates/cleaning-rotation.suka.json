@@ -1,0 +1,259 @@
+{
+  "id": "cleaning-rotation",
+  "kind": "AI_AUTOMATION_TEMPLATE",
+  "version": "1.0.0",
+  "name": "Cleaning Rotation Planner",
+  "purpose": "Create a rolling cleaning rotation with daily light tasks and periodic deep-clean sessions per room/zone. Respect sunset/Sabbath constraints and keep consumables stocked.",
+  "tags": ["cleaning", "household", "rotation", "calendar", "inventory", "reminders"],
+
+  "triggers": [
+    { "type": "manual", "label": "Build/Update Rotation" },
+    { "type": "schedule", "rrule": "FREQ=WEEKLY;BYDAY=MO;BYHOUR=6;BYMINUTE=0;BYSECOND=0", "label": "Rebuild Weekly Plan (Mon 06:00)" },
+    { "type": "event", "source": "calendar", "match": "move-in, new-room, renovation-complete" }
+  ],
+
+  "inputs": {
+    "house": {
+      "members": "{{user.household.members || 2}}",
+      "rooms": "{{user.household.rooms || [{\"id\":\"living\",\"name\":\"Living Room\",\"type\":\"living\",\"sizeSqft\":220,\"priority\":2},{\"id\":\"kitchen\",\"name\":\"Kitchen\",\"type\":\"kitchen\",\"sizeSqft\":140,\"priority\":1},{\"id\":\"bath-main\",\"name\":\"Bathroom\",\"type\":\"bathroom\",\"sizeSqft\":70,\"priority\":1},{\"id\":\"bed-1\",\"name\":\"Bedroom 1\",\"type\":\"bedroom\",\"sizeSqft\":120,\"priority\":2}]}}"
+    },
+    "preferences": {
+      "sabbathAware": "{{user.prefs.sabbathAware || true}}",
+      "fridayCutoffSource": "{{user.prefs.fridayCutoffSource || \"calendar.sunset\"}}",
+      "dailyWindow": "{{user.prefs.cleaningWindow || {\"start\":\"06:30\",\"end\":\"20:30\"}}}",
+      "maxDailyEffortMins": "{{user.prefs.maxDailyEffortMins || 60}}",
+      "deepCleanEffortMins": "{{user.prefs.deepCleanEffortMins || 120}}",
+      "rotateBy": "{{user.prefs.rotateBy || \"rooms\"}}",
+      "skipDays": "{{user.prefs.skipDays || [\"SAT\"]}}",
+      "startMondayFocus": "{{user.prefs.startMondayFocus || \"kitchen\"}}"
+    },
+    "inventory": {
+      "consumables": "{{inventoryAgent.listConsumables() || []}}"
+    },
+    "calendar": {
+      "sunsetTimes": "{{calendarService.getSunsetTimes(6) || []}}",
+      "busyBlocks": "{{calendarService.getBusyBlocks(14) || []}}"
+    }
+  },
+
+  "params": {
+    "rotation": {
+      "weeks": 4,
+      "roomsPerDay": 1,
+      "deepCleanEveryWeeks": 4
+    },
+    "taskSets": {
+      "light": {
+        "common": [
+          { "task": "Declutter surfaces", "mins": 5 },
+          { "task": "Empty trash/recycling", "mins": 5 }
+        ],
+        "byType": {
+          "kitchen": [
+            { "task": "Wipe counters & stove", "mins": 7 },
+            { "task": "Load/Run dishwasher or wash dishes", "mins": 10 },
+            { "task": "Sweep floor", "mins": 8 }
+          ],
+          "bathroom": [
+            { "task": "Quick wipe sink & toilet seat", "mins": 6 },
+            { "task": "Change towels if damp", "mins": 2 },
+            { "task": "Spot clean mirror", "mins": 3 }
+          ],
+          "living": [
+            { "task": "Quick dust high-touch areas", "mins": 6 },
+            { "task": "Vacuum traffic lanes", "mins": 10 }
+          ],
+          "bedroom": [
+            { "task": "Make bed & tidy nightstands", "mins": 6 },
+            { "task": "Laundry: stage or start load (if needed)", "mins": 8 }
+          ]
+        }
+      },
+      "deep": {
+        "byType": {
+          "kitchen": [
+            { "task": "Detail clean sink & faucet", "mins": 12 },
+            { "task": "Degrease fronts & handles", "mins": 15 },
+            { "task": "Clean microwave/oven interior", "mins": 25 },
+            { "task": "Mop and baseboards", "mins": 20 }
+          ],
+          "bathroom": [
+            { "task": "Scrub toilet bowl & base", "mins": 12 },
+            { "task": "Descale shower/tub & fixtures", "mins": 25 },
+            { "task": "Mop and baseboards", "mins": 15 }
+          ],
+          "living": [
+            { "task": "Dust blinds/vents/fans", "mins": 15 },
+            { "task": "Cushion lift & vacuum crevices", "mins": 20 },
+            { "task": "Mop/Vacuum under furniture (as able)", "mins": 20 }
+          ],
+          "bedroom": [
+            { "task": "Rotate mattress (if applicable)", "mins": 12 },
+            { "task": "Detail dust all surfaces", "mins": 15 },
+            { "task": "Vacuum/mop thoroughly incl. under bed", "mins": 20 }
+          ]
+        }
+      }
+    },
+    "consumables": [
+      { "sku": "cleaner_all_purpose", "name": "All-Purpose Cleaner", "min": 1, "unit": "bottle" },
+      { "sku": "glass_cleaner", "name": "Glass Cleaner", "min": 1, "unit": "bottle" },
+      { "sku": "disinfectant", "name": "Disinfectant", "min": 1, "unit": "bottle" },
+      { "sku": "trash_bags", "name": "Trash Bags", "min": 10, "unit": "bags" },
+      { "sku": "paper_towels", "name": "Paper Towels", "min": 2, "unit": "rolls" },
+      { "sku": "mop_pads", "name": "Mop Pads", "min": 4, "unit": "pads" },
+      { "sku": "laundry_detergent", "name": "Laundry Detergent", "min": 1, "unit": "bottle" }
+    ]
+  },
+
+  "derived": {
+    "roomsSorted": {
+      "expr": "sortBy(inputs.house.rooms, ['priority','-sizeSqft'])"
+    },
+    "daysPlan": {
+      "expr": "buildDays(14, inputs.preferences.skipDays, inputs.preferences.sabbathAware, inputs.calendar.sunsetTimes, inputs.preferences.dailyWindow)"
+    },
+    "roomsPerDay": {
+      "expr": "params.rotation.roomsPerDay"
+    },
+    "deepWeekIndex": {
+      "expr": "mod(weekIndex(now()), params.rotation.deepCleanEveryWeeks) === 0"
+    }
+  },
+
+  "logic": [
+    {
+      "id": "assign-rooms",
+      "description": "Distribute rooms across available days, honoring maxDailyEffort and sabbath cutoff.",
+      "expr": "assignRooms(derived.daysPlan, derived.roomsSorted, derived.roomsPerDay, inputs.preferences.maxDailyEffortMins, params.taskSets)"
+    },
+    {
+      "id": "inject-deep-cleans",
+      "description": "If deep-clean week, replace one light task block per room with deep tasks.",
+      "when": "{{derived.deepWeekIndex}}",
+      "expr": "applyDeepCleans(context.assignments, params.taskSets.deep)"
+    },
+    {
+      "id": "compute-consumables",
+      "description": "Estimate consumables for the next 2 weeks based on tasks.",
+      "expr": "estimateConsumables(context.assignments, params.consumables)"
+    }
+  ],
+
+  "actions": [
+    {
+      "type": "calendar.create_events",
+      "title": "Cleaning: {{room.name}} — {{block.kind}}",
+      "date": "{{block.date}}",
+      "start": "{{block.start}}",
+      "end": "{{block.end}}",
+      "color": "{{block.kind === 'deep' ? '#f59e0b' : '#60a5fa'}}",
+      "metadata": {
+        "roomId": "{{room.id}}",
+        "tasks": "{{block.tasks}}",
+        "effortMins": "{{block.effortMins}}",
+        "sabbathAware": "{{inputs.preferences.sabbathAware}}"
+      },
+      "forEach": "{{context.assignments}}"
+    },
+    {
+      "type": "reminders.schedule",
+      "message": "Start {{block.kind}} clean: {{room.name}}",
+      "offsetMinutes": -15,
+      "date": "{{block.date}}",
+      "time": "{{block.start}}",
+      "forEach": "{{context.assignments}}"
+    },
+    {
+      "type": "inventory.reserve_or_restock",
+      "items": "{{context.consumablesNeeded}}",
+      "policy": "min_threshold",
+      "notes": "Auto-generated by cleaning-rotation"
+    }
+  ],
+
+  "outputs": {
+    "rotation": {
+      "summary": {
+        "rooms": "{{inputs.house.rooms.length}}",
+        "daysPlanned": "{{derived.daysPlan.length}}",
+        "totalBlocks": "{{len(context.assignments)}}",
+        "deepBlocks": "{{count(context.assignments, b => b.kind === 'deep')}}",
+        "effortMinsTotal": "{{sum(context.assignments, 'effortMins')}}"
+      },
+      "assignments": "{{context.assignments}}",
+      "consumablesNeeded": "{{context.consumablesNeeded}}"
+    },
+    "printables": [
+      {
+        "type": "checklist",
+        "name": "Weekly Cleaning Checklist",
+        "data": "{{map(groupBy(context.assignments,'date'), (date, blocks) => ({ date, items: map(blocks, b => ({ room: b.room.name, kind: b.kind, tasks: b.tasks })) }))}}"
+      }
+    ]
+  },
+
+  "fallbacks": [
+    {
+      "condition": "no_available_day",
+      "action": {
+        "type": "calendar.suggest_slots",
+        "window": "next 10 days",
+        "rules": { "after": "06:30", "before": "20:30", "excludeDays": "{{inputs.preferences.skipDays}}" }
+      }
+    },
+    {
+      "condition": "inventory_shortage",
+      "action": {
+        "type": "inventory.create_shopping_list",
+        "items": "{{context.consumablesNeeded}}",
+        "groupBy": "store_section"
+      }
+    },
+    {
+      "condition": "approaching_sunset",
+      "when": "{{inputs.preferences.sabbathAware}}",
+      "action": {
+        "type": "calendar.move_or_shorten",
+        "policy": "finish_30m_before_sunset"
+      }
+    }
+  ],
+
+  "integrations": {
+    "agents": [
+      { "id": "cleaningAgent", "mode": "planner" },
+      { "id": "inventoryAgent", "mode": "consumables" },
+      { "id": "mealPlanningAgent", "mode": "conflict-check", "optional": true }
+    ],
+    "services": [
+      { "id": "calendarService", "routes": ["/api/calendar/create", "/api/calendar/suggest"] },
+      { "id": "inventoryService", "routes": ["/api/inventory/reserve", "/api/inventory/restock", "/api/inventory/shopping-list"] }
+    ],
+    "ui": {
+      "panel": "AutomationPanel",
+      "widgets": [
+        { "type": "summary", "source": "outputs.rotation.summary" },
+        { "type": "table", "title": "Assignments", "source": "outputs.rotation.assignments" },
+        { "type": "list", "title": "Consumables Needed", "source": "outputs.rotation.consumablesNeeded" }
+      ]
+    }
+  },
+
+  "engine": {
+    "helpers": {
+      "sortBy": "fn(array, keys) => /* runtime helper provided in automation engine */",
+      "buildDays": "fn(days, skipDays, sabbathAware, sunsetTimes, window) => /* returns [{date,start,end,isFriday,isSabbath}] */",
+      "assignRooms": "fn(days, rooms, roomsPerDay, maxEffort, taskSets) => /* packs light tasks into blocks within day windows */",
+      "applyDeepCleans": "fn(assignments, deepSets) => /* swaps one block per room to deep tasks for the cycle */",
+      "estimateConsumables": "fn(assignments, minList) => /* maps tasks → consumables usage; returns items to reserve/restock */",
+      "weekIndex": "fn(date) => /* ISO week index */",
+      "mod": "fn(a,b) => a % b",
+      "len": "fn(x) => x.length",
+      "sum": "fn(arr, keyOrLambda) => /* numeric sum */",
+      "count": "fn(arr, pred) => /* count items matching pred */",
+      "groupBy": "fn(arr, key) => /* groups array by key value */",
+      "map": "fn(objOrArr, mapper) => /* map over arrays or object entries */"
+    }
+  }
+}

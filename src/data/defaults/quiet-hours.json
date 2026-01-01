@@ -1,0 +1,197 @@
+{
+  "version": 1,
+  "generatedAt": "2025-11-08T00:00:00.000Z",
+  "timezone": "America/Chicago",
+  "household": {
+    "quietHours": [
+      {
+        "label": "House Quiet (Daily)",
+        "byDay": [0, 1, 2, 3, 4, 5, 6],
+        "timeOfDay": { "start": "21:30", "end": "06:30" },
+        "hard": false,
+        "tags": ["noise-limit", "notifications-muted"]
+      }
+    ],
+    "blackout": [
+      {
+        "label": "Weekly Deep Sleep",
+        "byDay": [0, 1, 2, 3, 4, 5, 6],
+        "timeOfDay": { "start": "00:30", "end": "05:30" },
+        "hard": true,
+        "tags": ["no-appliance-cycles", "no-vacuum"]
+      }
+    ],
+    "exceptions": [
+      {
+        "label": "Holiday Eve Relaxed",
+        "rrule": "FREQ=YEARLY;BYMONTH=12;BYMONTHDAY=24",
+        "timeOfDay": { "start": "21:30", "end": "23:59" },
+        "hard": false,
+        "tags": ["family-event"]
+      },
+      {
+        "label": "New Year’s Eve Party",
+        "rrule": "FREQ=YEARLY;BYMONTH=12;BYMONTHDAY=31",
+        "timeOfDay": { "start": "21:30", "end": "02:00" },
+        "hard": false,
+        "tags": ["party"]
+      }
+    ],
+    "policies": {
+      "audio": { "maxDb": 35, "allowTTS": false },
+      "notifications": { "mode": "silent", "allowHighPriority": true },
+      "appliances": { "disallow": ["vacuum", "washer", "dryer"], "allow": ["fridge"] }
+    }
+  },
+  "rooms": {
+    "room.kids_bedroom": {
+      "quietHours": [
+        {
+          "label": "Kids Early Quiet",
+          "byDay": [0, 1, 2, 3, 4, 5, 6],
+          "timeOfDay": { "start": "20:00", "end": "06:30" },
+          "hard": true,
+          "tags": ["no-tts", "no-media"]
+        }
+      ],
+      "blackout": [],
+      "exceptions": []
+    },
+    "room.kitchen": {
+      "quietHours": [
+        {
+          "label": "Kitchen Late Quiet",
+          "byDay": [0, 1, 2, 3, 4, 5, 6],
+          "timeOfDay": { "start": "22:00", "end": "06:00" },
+          "hard": false,
+          "tags": ["prefer-silent-timers"]
+        }
+      ],
+      "blackout": [],
+      "exceptions": [
+        {
+          "label": "Holiday Cooking",
+          "start": "2025-12-24T18:00:00.000Z",
+          "end": "2025-12-25T04:00:00.000Z",
+          "hard": false,
+          "tags": ["cooking", "family"]
+        }
+      ]
+    }
+  },
+  "devices": {
+    "kitchen-display": {
+      "quietHours": [
+        {
+          "label": "Display Dim & Mute",
+          "byDay": [0, 1, 2, 3, 4, 5, 6],
+          "timeOfDay": { "start": "21:30", "end": "06:30" },
+          "hard": false,
+          "tags": ["dim-screen", "mute-audio"]
+        }
+      ],
+      "blackout": [],
+      "exceptions": []
+    },
+    "livingroom-tv": {
+      "quietHours": [
+        {
+          "label": "TV Off Overnight",
+          "byDay": [0, 1, 2, 3, 4, 5, 6],
+          "timeOfDay": { "start": "22:00", "end": "06:30" },
+          "hard": true,
+          "tags": ["no-playback"]
+        }
+      ],
+      "blackout": [],
+      "exceptions": [
+        {
+          "label": "Movie Night",
+          "rrule": "FREQ=WEEKLY;BYDAY=FR,SA",
+          "timeOfDay": { "start": "22:00", "end": "23:59" },
+          "hard": false,
+          "tags": ["family", "media"]
+        }
+      ]
+    },
+    "bedroom-speaker": {
+      "quietHours": [
+        {
+          "label": "Speaker Silent",
+          "byDay": [0, 1, 2, 3, 4, 5, 6],
+          "timeOfDay": { "start": "20:30", "end": "07:00" },
+          "hard": true,
+          "tags": ["no-tts", "no-alarms-except-critical"]
+        }
+      ],
+      "blackout": [],
+      "exceptions": [
+        {
+          "label": "Gentle Alarm",
+          "rrule": "FREQ=WEEKDAYS",
+          "timeOfDay": { "start": "06:30", "end": "06:45" },
+          "hard": false,
+          "tags": ["alarm-allowed"]
+        }
+      ]
+    },
+    "robot-vacuum": {
+      "quietHours": [
+        {
+          "label": "No Vacuum Night",
+          "byDay": [0, 1, 2, 3, 4, 5, 6],
+          "timeOfDay": { "start": "20:00", "end": "08:00" },
+          "hard": true,
+          "tags": ["noisy"]
+        }
+      ],
+      "blackout": [],
+      "exceptions": [
+        {
+          "label": "Pre-Guests Sweep",
+          "rrule": "FREQ=WEEKLY;BYDAY=FR",
+          "timeOfDay": { "start": "18:00", "end": "19:00" },
+          "hard": false,
+          "tags": ["prep"]
+        }
+      ]
+    },
+    "oven.main": {
+      "quietHours": [
+        {
+          "label": "Overnight Oven Quiet",
+          "byDay": [0, 1, 2, 3, 4, 5, 6],
+          "timeOfDay": { "start": "22:30", "end": "05:30" },
+          "hard": false,
+          "tags": ["prefer-no-preheat"]
+        }
+      ],
+      "blackout": [
+        {
+          "label": "Self-Clean Prohibited Overnight",
+          "byDay": [0, 1, 2, 3, 4, 5, 6],
+          "timeOfDay": { "start": "21:00", "end": "07:00" },
+          "hard": true,
+          "tags": ["fumes", "heat"]
+        }
+      ],
+      "exceptions": []
+    }
+  },
+  "policyHints": {
+    "scheduler": {
+      "deferNonEssentialDuringQuiet": true,
+      "suppressMediaDuringQuiet": true,
+      "preferTextOverAudio": true
+    },
+    "overlay": {
+      "dimDisplayDuringQuiet": true,
+      "requireTapToWake": true
+    },
+    "alerts": {
+      "allowCritical": true,
+      "criticalChannels": ["safety", "security", "appliance-fault"],
+      "maxRepeatEveryMin": 15
+    }
+  }
+}

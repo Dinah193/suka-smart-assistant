@@ -1,0 +1,253 @@
+{
+  "id": "pat.meals.fast_day_light",
+  "domain": "meals",
+  "kind": "planning_pattern",
+  "title": "Fast Day / Light Meals",
+  "description": "Plan for fasting days and light meals while respecting household rules.",
+  "intentTags": [
+    "plan:meals",
+    "moed:fast",
+    "mode:light"
+  ],
+  "inputs": [
+    {
+      "key": "householdSize",
+      "label": "Household size",
+      "type": "number",
+      "required": true,
+      "default": 4
+    },
+    {
+      "key": "dietaryLaws",
+      "label": "Dietary laws / household rules",
+      "type": "object",
+      "default": {},
+      "notes": "Use household preferences and Torah-based constraints as configured."
+    },
+    {
+      "key": "inventorySnapshot",
+      "label": "Inventory snapshot",
+      "type": "object",
+      "required": true,
+      "notes": "Include pantry/cold/frozen/root cellar/leftovers."
+    },
+    {
+      "key": "timeBudgetMinutes",
+      "label": "Time budget (minutes)",
+      "type": "number",
+      "required": true,
+      "default": 180
+    },
+    {
+      "key": "equipment",
+      "label": "Available equipment",
+      "type": "array",
+      "default": [
+        "stove",
+        "oven"
+      ],
+      "notes": "Examples: stove, oven, slowcooker, pressurecooker, grill, dehydrator, freezer."
+    },
+    {
+      "key": "budgetCap",
+      "label": "Budget cap (optional)",
+      "type": "number"
+    },
+    {
+      "key": "allergies",
+      "label": "Allergies / avoid list (optional)",
+      "type": "array",
+      "default": []
+    },
+    {
+      "key": "quietHours",
+      "label": "Quiet hours / Sabbath guard",
+      "type": "object",
+      "default": {
+        "enabled": false
+      },
+      "notes": "Use to avoid noisy tasks or disallowed work windows."
+    }
+  ],
+  "outputs": [
+    {
+      "key": "mealPlan",
+      "label": "Meal plan structure",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "sessions",
+      "label": "Session blueprints requested",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "shoppingNeeds",
+      "label": "Shopping list needs",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "storehouseTriggers",
+      "label": "Storehouse patterns triggered",
+      "type": "array",
+      "default": []
+    }
+  ],
+  "constraints": [
+    "quietHours/sabbathGuard",
+    "fastingRules",
+    "budgetCap",
+    "allergiesAvoidList",
+    "dietaryLaws"
+  ],
+  "requires": [
+    "artifact:inventorySnapshot"
+  ],
+  "produces": [
+    "artifact:mealPlan",
+    "blueprint:cookingSessions",
+    "artifact:shoppingListDraft"
+  ],
+  "lean": {
+    "wasteTargets": [
+      "overprocessing",
+      "motion"
+    ],
+    "standardWorkRefs": [
+      "stdwork.kitchen.staging",
+      "stdwork.batch.prep",
+      "stdwork.fifo.labels"
+    ],
+    "taktModelRef": "takt.household.meals",
+    "kpiTargets": {
+      "tripsPerMeal": "reduce",
+      "spoilageRate": "reduce",
+      "timeToFirstPlate": "reduce",
+      "leftoverUtilization": "increase"
+    },
+    "notes": "Advisory only; propose countermeasures via LeanOptimizer hooks."
+  },
+  "ui": {
+    "icon": "utensils",
+    "chips": [
+      "time:low",
+      "difficulty:low",
+      "fast-day"
+    ],
+    "defaultFilters": {
+      "domain": "meals"
+    },
+    "form": [
+      {
+        "key": "fastType",
+        "type": "select",
+        "label": "Fast type",
+        "options": [
+          "water_only",
+          "partial",
+          "sunrise_to_sunset",
+          "custom"
+        ],
+        "default": "sunrise_to_sunset"
+      },
+      {
+        "key": "breakFastMeal",
+        "type": "toggle",
+        "label": "Include break-fast meal",
+        "default": true
+      },
+      {
+        "key": "hydrationPlan",
+        "type": "toggle",
+        "label": "Include hydration plan",
+        "default": true
+      }
+    ],
+    "help": [
+      "Patterns create session blueprints (prep/cook/storehouse pulls), not raw UI task lists.",
+      "Inventory snapshot enables smarter shopping + fewer duplicates."
+    ]
+  },
+  "steps": [
+    {
+      "id": "fast.rules",
+      "title": "Apply fasting constraints",
+      "template": "tpl.meals.fast.applyRules",
+      "domain": "meals",
+      "params": {
+        "fastTypeKey": "fastType",
+        "breakFastMealKey": "breakFastMeal"
+      }
+    },
+    {
+      "id": "inv.quick",
+      "title": "Quick inventory scan (light)",
+      "template": "tpl.inventory.snapshot.quick",
+      "domain": "storehouse",
+      "params": {
+        "zones": [
+          "cold",
+          "pantry"
+        ],
+        "depth": "quick"
+      },
+      "hints": [
+        "needsInventorySnapshot"
+      ]
+    },
+    {
+      "id": "plan.light",
+      "title": "Build light meal plan structure",
+      "template": "tpl.meals.plan.light",
+      "domain": "meals",
+      "params": {
+        "breakFastMealKey": "breakFastMeal"
+      }
+    },
+    {
+      "id": "session.minimal",
+      "title": "Generate minimal cooking blueprint",
+      "template": "tpl.blueprint.build.sessions",
+      "domain": "meals",
+      "params": {
+        "sessionStyles": [
+          "single"
+        ],
+        "minimal": true,
+        "emitEvent": "session.blueprints.created"
+      }
+    },
+    {
+      "id": "shopping.optional",
+      "title": "Optional micro list",
+      "template": "tpl.shopping.microList",
+      "domain": "storehouse",
+      "params": {
+        "threshold": "fastDayOnly"
+      },
+      "optional": true
+    }
+  ],
+  "kpis": [
+    {
+      "key": "effortScore",
+      "label": "Effort score",
+      "direction": "down",
+      "unit": "pts",
+      "notes": "Proxy: steps + time + dishes."
+    }
+  ],
+  "variants": [],
+  "links": {
+    "storehouseSuggested": [
+      "pat.storehouse.weekly_restock"
+    ]
+  },
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "tags": []
+  }
+}

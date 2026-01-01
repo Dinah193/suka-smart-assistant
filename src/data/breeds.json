@@ -1,0 +1,488 @@
+{
+  "version": "2025-10-31T10:30:00-05:00",
+  "description": "CENTRAL: breed profiles; yields, temperament, Torah-clean. Auto-fed by scrapers/ingestors, with hub override for Torah/culture-specific rules. Used by Animal Planner, MealPlanEngine (reverse → animal), Garden/Storehouse intake estimation, Cleaning (butchery sanitation), and ImportService when user imports animal data.",
+  "meta": {
+    "sourceOfTruth": "scraper",
+    "lastIngestedAt": "2025-10-31T10:30:00-05:00",
+    "ingestionPipelines": [
+      "scraperService",
+      "importService",
+      "bookmarklet",
+      "linked-accounts"
+    ],
+    "mergeStrategy": "scraper-wins",
+    "allowHubOverrides": true,
+    "overrideFields": [
+      "torahClean",
+      "processing",
+      "storehouse",
+      "zones"
+    ],
+    "sharedOrchestration": {
+      "emitOnUpdate": true,
+      "reason": "scraper-update",
+      "channels": [
+        "animals",
+        "meals",
+        "storehouse",
+        "garden",
+        "cleaning"
+      ]
+    },
+    "notes": [
+      "This file is the canonical reference for animal-related reverse generation.",
+      "ONLY Torah-clean animals should be marked \"torahClean\": true.",
+      "Use this as the lookup table when meal plans request specific meats.",
+      "Suka Village Family Fund Hub can still publish locked/curated updates to this file to all households.",
+      "Scraper is primary, hub is authoritative for Torah + local processing safety."
+    ]
+  },
+  "species": [
+    {
+      "id": "sheep",
+      "label": "Sheep",
+      "torahClean": true,
+      "categories": [
+        "meat",
+        "milk",
+        "fiber",
+        "byproduct"
+      ],
+      "defaultUses": [
+        "meat",
+        "milk",
+        "blood-meal",
+        "tallow"
+      ],
+      "zones": [
+        "7a",
+        "7b",
+        "8a",
+        "8b",
+        "9a"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "triggers": [
+          {
+            "id": "meal-lamb-demand",
+            "ifMealProteinIn": [
+              "lamb",
+              "mutton"
+            ],
+            "generate": "animal-provisioning-plan",
+            "copyContext": [
+              "householdId",
+              "timezone"
+            ],
+            "emit": [
+              "animals.plan.fromMeals.generated",
+              "storehouse.intake.expected"
+            ]
+          },
+          {
+            "id": "storehouse-low-lamb",
+            "ifStorehouseBelow": [
+              "frozen-lamb",
+              "cured-lamb"
+            ],
+            "generate": "purchase-or-butchery-session"
+          }
+        ]
+      },
+      "breeds": [
+        {
+          "id": "katahdin",
+          "name": "Katahdin",
+          "torahClean": true,
+          "description": "Hair sheep suitable for hot/humid climates; low-maintenance; good parasite resistance.",
+          "zones": [
+            "7b",
+            "8a",
+            "8b",
+            "9a"
+          ],
+          "yield": {
+            "meatLb": 50,
+            "dressPct": 0.55,
+            "fatPct": 0.12
+          },
+          "temperament": "docile",
+          "husbandry": {
+            "feedRequirement": "pasture-plus-supplement",
+            "waterPerDayGallons": 1.0,
+            "shelter": "3-sided or tree shade ok in 8b"
+          },
+          "processing": {
+            "butcheryComplexity": "low",
+            "byproducts": [
+              "blood-meal",
+              "tallow",
+              "bones"
+            ],
+            "cleaningRoutines": [
+              "outdoor-processing-area-weekly",
+              "butchery-table-sanitize-after-use"
+            ]
+          },
+          "storehouse": {
+            "defaultCuts": [
+              "leg",
+              "shoulder",
+              "ground",
+              "rib"
+            ],
+            "preservationOptions": [
+              "freeze",
+              "pressure-can",
+              "cure",
+              "ferment-mediterranean"
+            ],
+            "yieldToMeals": [
+              {
+                "mealType": "stew",
+                "servings": 6
+              },
+              {
+                "mealType": "roast",
+                "servings": 4
+              }
+            ]
+          }
+        },
+        {
+          "id": "dorper",
+          "name": "Dorper",
+          "torahClean": true,
+          "description": "Fast-growing hair sheep, good carcass quality.",
+          "zones": [
+            "7a",
+            "7b",
+            "8a",
+            "8b"
+          ],
+          "yield": {
+            "meatLb": 60,
+            "dressPct": 0.58
+          },
+          "temperament": "calm",
+          "processing": {
+            "butcheryComplexity": "low",
+            "byproducts": [
+              "blood-meal",
+              "tallow"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "goat",
+      "label": "Goat",
+      "torahClean": true,
+      "categories": [
+        "meat",
+        "milk",
+        "brush-control",
+        "byproduct"
+      ],
+      "defaultUses": [
+        "meat",
+        "milk",
+        "blood-meal"
+      ],
+      "zones": [
+        "7a",
+        "7b",
+        "8a",
+        "8b",
+        "9a"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "triggers": [
+          {
+            "id": "meal-goat-demand",
+            "ifMealProteinIn": [
+              "goat"
+            ],
+            "generate": "animal-provisioning-plan",
+            "emit": [
+              "animals.plan.fromMeals.generated",
+              "storehouse.intake.expected"
+            ]
+          },
+          {
+            "id": "garden-brush-control",
+            "ifGardenNeeds": [
+              "brush-control",
+              "fenceline-clear"
+            ],
+            "generate": "goat-grazing-session",
+            "emit": [
+              "garden.care-session.generated",
+              "cleaning.outdoor-zone.expected"
+            ]
+          }
+        ]
+      },
+      "breeds": [
+        {
+          "id": "boer",
+          "name": "Boer",
+          "torahClean": true,
+          "description": "Meat goat with good growth rates, popular in warm climates.",
+          "zones": [
+            "8a",
+            "8b",
+            "9a"
+          ],
+          "yield": {
+            "meatLb": 55,
+            "dressPct": 0.5
+          },
+          "temperament": "moderate",
+          "processing": {
+            "butcheryComplexity": "medium",
+            "byproducts": [
+              "blood-meal",
+              "bone-broth-stock"
+            ],
+            "requiresCleaning": [
+              "butchery-area-disinfect",
+              "offal-composting-or-rendering"
+            ]
+          },
+          "storehouse": {
+            "defaultCuts": [
+              "shoulder",
+              "leg",
+              "rib-chops",
+              "stew-cubes"
+            ],
+            "preservationOptions": [
+              "freeze",
+              "pressure-can"
+            ]
+          }
+        },
+        {
+          "id": "kiko",
+          "name": "Kiko",
+          "torahClean": true,
+          "description": "Hardy, parasite-resistant goat; good for low-input systems.",
+          "zones": [
+            "7b",
+            "8a",
+            "8b"
+          ],
+          "yield": {
+            "meatLb": 45
+          },
+          "temperament": "active"
+        }
+      ]
+    },
+    {
+      "id": "cattle",
+      "label": "Cattle (Torah-clean)",
+      "torahClean": true,
+      "categories": [
+        "meat",
+        "milk",
+        "draft"
+      ],
+      "defaultUses": [
+        "meat",
+        "milk"
+      ],
+      "zones": [
+        "7a",
+        "7b",
+        "8a",
+        "8b"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "triggers": [
+          {
+            "id": "meal-beef-demand",
+            "ifMealProteinIn": [
+              "beef"
+            ],
+            "generate": "large-animal-butchery-plan",
+            "emit": [
+              "animals.large-butchery.generated",
+              "storehouse.beef-intake.expected",
+              "cleaning.heavy-duty-requested"
+            ]
+          }
+        ]
+      },
+      "breeds": [
+        {
+          "id": "dexter",
+          "name": "Dexter",
+          "torahClean": true,
+          "description": "Small-framed heritage cattle, suitable for smaller acreages.",
+          "zones": [
+            "7b",
+            "8a",
+            "8b"
+          ],
+          "yield": {
+            "meatLb": 250,
+            "dressPct": 0.55
+          },
+          "temperament": "docile",
+          "processing": {
+            "butcheryComplexity": "high",
+            "byproducts": [
+              "blood-meal",
+              "tallow",
+              "bone-broth-stock"
+            ],
+            "requiresCleaning": [
+              "processing-bay-deep-clean",
+              "tool-sanitization",
+              "drainage-check"
+            ]
+          },
+          "storehouse": {
+            "defaultCuts": [
+              "roasts",
+              "stew-meat",
+              "ground-beef",
+              "bones-for-stock"
+            ],
+            "preservationOptions": [
+              "freeze",
+              "pressure-can",
+              "cure-smoke"
+            ]
+          }
+        },
+        {
+          "id": "senepol",
+          "name": "Senepol",
+          "torahClean": true,
+          "description": "Heat-tolerant beef cattle; good for southern US (inc. FL panhandle, zone 8b).",
+          "zones": [
+            "8a",
+            "8b",
+            "9a"
+          ],
+          "yield": {
+            "meatLb": 350,
+            "dressPct": 0.56
+          },
+          "temperament": "calm"
+        }
+      ]
+    },
+    {
+      "id": "poultry",
+      "label": "Poultry (Torah-clean, non-swine adjunct)",
+      "torahClean": true,
+      "categories": [
+        "meat",
+        "eggs"
+      ],
+      "defaultUses": [
+        "meat",
+        "eggs"
+      ],
+      "zones": [
+        "7a",
+        "7b",
+        "8a",
+        "8b",
+        "9a"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "triggers": [
+          {
+            "id": "meal-poultry-demand",
+            "ifMealProteinIn": [
+              "chicken",
+              "turkey",
+              "duck"
+            ],
+            "generate": "poultry-processing-session",
+            "emit": [
+              "animals.poultry-processing.generated"
+            ]
+          },
+          {
+            "id": "garden-pest-pressure",
+            "ifGardenNeeds": [
+              "pest-cleanup"
+            ],
+            "generate": "poultry-mobile-tractor-session"
+          }
+        ]
+      },
+      "breeds": [
+        {
+          "id": "cornish-cross",
+          "name": "Cornish Cross (meat)",
+          "torahClean": true,
+          "description": "Fast-growing meat bird; requires strict feed/water/cleaning.",
+          "zones": [
+            "7b",
+            "8a",
+            "8b",
+            "9a"
+          ],
+          "yield": {
+            "meatLb": 5.5,
+            "dressPct": 0.7
+          },
+          "processing": {
+            "butcheryComplexity": "low",
+            "requiresCleaning": [
+              "scalder-clean-after-batch",
+              "cone-and-table-sanitize"
+            ]
+          },
+          "storehouse": {
+            "defaultCuts": [
+              "whole",
+              "quarters",
+              "wings",
+              "stock"
+            ],
+            "preservationOptions": [
+              "freeze",
+              "pressure-can",
+              "dehydrate-parts"
+            ]
+          }
+        },
+        {
+          "id": "rhode-island-red",
+          "name": "Rhode Island Red (dual purpose)",
+          "torahClean": true,
+          "description": "Good layers, decent meat. Hardy.",
+          "zones": [
+            "7a",
+            "7b",
+            "8a",
+            "8b"
+          ],
+          "yield": {
+            "meatLb": 4.2
+          },
+          "temperament": "moderate"
+        }
+      ]
+    }
+  ],
+  "userCanSaveFavorites": true,
+  "favoritePolicy": {
+    "maxPerHousehold": 40,
+    "allowCustomButcheryProfiles": true,
+    "allowCustomStorehouseLinks": true
+  }
+}

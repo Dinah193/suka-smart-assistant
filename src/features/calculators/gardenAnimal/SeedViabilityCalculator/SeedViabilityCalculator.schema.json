@@ -1,0 +1,406 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "src/features/calculators/gardenAnimal/SeedViabilityCalculator/SeedViabilityCalculator.schema.json",
+  "title": "Seed Viability Calculator Payload",
+  "description": "Payload schema for the Seed Viability Calculator node. Describes seed lot metadata, storage conditions, and optional germination test data.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "seedLots": {
+      "type": "array",
+      "description": "Collection of seed lot records to evaluate.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Local identifier for this seed lot (UUID or slug)."
+          },
+          "crop": {
+            "type": "string",
+            "description": "Crop name (e.g., 'tomato', 'collards', 'carrot')."
+          },
+          "variety": {
+            "type": "string",
+            "description": "Variety or cultivar (e.g., 'Brandywine', 'Georgia Southern')."
+          },
+          "source": {
+            "type": "string",
+            "description": "Where the seed came from (e.g., seed company, saved, swap)."
+          },
+          "lotCode": {
+            "type": "string",
+            "description": "Printed lot code or packet identifier, if available."
+          },
+          "seedCountEstimated": {
+            "type": "number",
+            "description": "Estimated number of seeds remaining in the lot.",
+            "minimum": 0
+          },
+          "packetWeightGrams": {
+            "type": "number",
+            "description": "Weight of remaining seeds in grams, if tracked.",
+            "minimum": 0
+          },
+          "harvestedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Date the seeds were harvested (if home-saved)."
+          },
+          "packedForYear": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Year printed on the packet as 'packed for' date."
+          },
+          "purchasedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Date the packet was purchased, if known."
+          },
+          "openedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Date the packet was first opened."
+          },
+          "ageCategory": {
+            "type": "string",
+            "description": "Simple age bucket for quick rules.",
+            "enum": [
+              "fresh",
+              "1-2-years",
+              "3-4-years",
+              "5+-years"
+            ]
+          },
+          "storageProfile": {
+            "type": "object",
+            "description": "How and where seeds have been stored.",
+            "additionalProperties": false,
+            "properties": {
+              "containerType": {
+                "type": "string",
+                "description": "Envelope, jar, mylar, etc."
+              },
+              "sealed": {
+                "type": "boolean",
+                "description": "Whether the container is sealed/airtight."
+              },
+              "cool": {
+                "type": "boolean",
+                "description": "Stored in a cool environment."
+              },
+              "dark": {
+                "type": "boolean",
+                "description": "Stored out of direct light."
+              },
+              "dry": {
+                "type": "boolean",
+                "description": "Stored in a low-humidity environment."
+              },
+              "avgTempC": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Approximate average storage temperature in °C."
+              },
+              "avgHumidityPct": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Approximate average relative humidity (0–100).",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "freezerStored": {
+                "type": "boolean",
+                "description": "True if stored in a freezer."
+              },
+              "notes": {
+                "type": "string",
+                "description": "Free-form notes about storage history."
+              }
+            }
+          },
+          "germinationTest": {
+            "type": "object",
+            "description": "Optional quick germination test results.",
+            "additionalProperties": false,
+            "properties": {
+              "performed": {
+                "type": "boolean",
+                "description": "Whether any germination test has been run."
+              },
+              "method": {
+                "type": "string",
+                "description": "Paper towel, soil block, tray, etc."
+              },
+              "testDate": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "When the test was started."
+              },
+              "seedsTested": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0,
+                "description": "Number of seeds used in the test."
+              },
+              "seedsGerminated": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0,
+                "description": "Number of seeds that successfully germinated."
+              },
+              "daysToFirstGermination": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0,
+                "description": "Days until first sprout appeared."
+              },
+              "daysToMajorityGermination": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0,
+                "description": "Days until most viable seeds had germinated."
+              },
+              "observedIssues": {
+                "type": "array",
+                "description": "Qualitative issues noticed during the test.",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "mold",
+                    "slow-germination",
+                    "weak-seedlings",
+                    "uneven-germination",
+                    "no-issues-noted"
+                  ]
+                }
+              }
+            }
+          },
+          "environmentSensitivity": {
+            "type": "object",
+            "description": "Optional notes about crop sensitivity.",
+            "additionalProperties": false,
+            "properties": {
+              "heatSensitive": {
+                "type": "boolean",
+                "description": "Germinates poorly in high heat."
+              },
+              "coldSensitive": {
+                "type": "boolean",
+                "description": "Fails or rots in very cold soil."
+              },
+              "needsLightToGerminate": {
+                "type": "boolean",
+                "description": "Some seeds need light to germinate (surface sown)."
+              },
+              "needsStratification": {
+                "type": "boolean",
+                "description": "Requires a chill period before germinating."
+              },
+              "notes": {
+                "type": "string",
+                "description": "Extra notes on crop-specific quirks."
+              }
+            }
+          },
+          "planning": {
+            "type": "object",
+            "description": "Optional planning hints linking to garden and storehouse goals.",
+            "additionalProperties": false,
+            "properties": {
+              "priority": {
+                "type": "string",
+                "enum": [
+                  "staple",
+                  "important",
+                  "experimental"
+                ],
+                "description": "How important this crop is to household goals."
+              },
+              "targetBeds": {
+                "type": "array",
+                "description": "IDs or labels of garden beds where this lot is planned.",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "targetAreaSqFt": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "description": "Approximate bed area planned for this crop."
+              },
+              "targetHarvestWindowStart": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "Desired start of the main harvest window."
+              },
+              "targetHarvestWindowEnd": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "Desired end of the main harvest window."
+              },
+              "storehouseGoalUnits": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "description": "Desired stored units (jars, lbs, etc.) tied to storehouse plans."
+              }
+            }
+          },
+          "computed": {
+            "type": "object",
+            "description": "Optional pre-computed hints; may be overwritten by the calculator.",
+            "additionalProperties": false,
+            "properties": {
+              "ageYearsApprox": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Approximate age of the seed lot in years."
+              },
+              "storageQualityScore": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "0–100 summary score for storage conditions."
+              },
+              "lastEvaluatedAt": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "When this lot was last evaluated."
+              }
+            }
+          }
+        },
+        "required": [
+          "id",
+          "crop"
+        ]
+      }
+    },
+    "environment": {
+      "type": "object",
+      "description": "Optional simple environment profile used to refine germination expectations.",
+      "additionalProperties": false,
+      "properties": {
+        "locationLabel": {
+          "type": "string",
+          "description": "Simple label such as 'backyard beds' or 'low tunnel'."
+        },
+        "expectedSoilTempStartC": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Expected soil temperature at planting in °C."
+        },
+        "expectedAirTempRangeC": {
+          "type": "array",
+          "description": "Approximate min and max air temps in °C during germination window.",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "regionClimate": {
+          "type": "string",
+          "description": "Optional broad climate descriptor (e.g., 'humid-subtropical')."
+        },
+        "frostRisk": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "description": "Frost risk around expected sowing dates."
+        }
+      }
+    },
+    "planningHints": {
+      "type": "object",
+      "description": "Higher-level planning context for the calculator.",
+      "additionalProperties": false,
+      "properties": {
+        "storehouseGoalProfile": {
+          "type": "object",
+          "description": "Overall storehouse and staple priorities.",
+          "additionalProperties": false,
+          "properties": {
+            "staplePriorityFactor": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Multiplier to treat staple crops more strictly when viability is low."
+            },
+            "minimumViabilityForStaples": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Recommended minimum viability score for staple crops before replacement.",
+              "minimum": 0,
+              "maximum": 100
+            }
+          }
+        },
+        "allowHighRiskLots": {
+          "type": "boolean",
+          "description": "If true, still include very low viability lots as experimental plantings."
+        }
+      }
+    }
+  },
+  "required": [
+    "seedLots"
+  ]
+}

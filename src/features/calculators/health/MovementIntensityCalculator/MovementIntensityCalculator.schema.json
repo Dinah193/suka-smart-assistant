@@ -1,0 +1,572 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka-smart-assistant.local/schemas/MovementIntensityCalculator.schema.json",
+  "title": "MovementIntensityCalculatorPayload",
+  "description": "Schema for the Movement Intensity & Load Calculator shim. Defines the input signals (steps, heart rate, movement history) and the resulting intensity, calorie burn, and recovery guidance outputs used by SSA planning and SessionRunner-powered movement sessions.",
+  "type": "object",
+  "properties": {
+    "nodeId": {
+      "type": "string",
+      "const": "health.movementIntensityCalculator",
+      "description": "Identifier of this calculator node in the Planning Graph."
+    },
+    "meta": {
+      "type": "object",
+      "description": "Metadata about this calculation run.",
+      "properties": {
+        "calculationVersion": {
+          "type": "string",
+          "description": "Semantic version of the movement intensity calculation logic."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO-8601 timestamp when the calculation was performed."
+        },
+        "source": {
+          "type": "string",
+          "description": "Optional description of where the input was sourced from (e.g., 'manual', 'wearable-sync', 'session-history')."
+        }
+      },
+      "required": [
+        "calculationVersion",
+        "timestamp"
+      ],
+      "additionalProperties": false
+    },
+    "input": {
+      "type": "object",
+      "description": "All inputs required to compute movement intensity, load, and calorie-related outputs.",
+      "properties": {
+        "unitSystem": {
+          "type": "string",
+          "enum": [
+            "imperial",
+            "metric"
+          ],
+          "default": "imperial",
+          "description": "Measurement system used for body weight and distances."
+        },
+        "bodyWeight": {
+          "type": "number",
+          "minimum": 20,
+          "maximum": 400,
+          "description": "Body weight in pounds (imperial) or kilograms (metric), used to approximate energy cost of movement."
+        },
+        "age": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 100,
+          "description": "Age in years, used to estimate max heart rate and risk flags."
+        },
+        "sex": {
+          "type": "string",
+          "enum": [
+            "female",
+            "male",
+            "intersex",
+            "unspecified"
+          ],
+          "default": "unspecified",
+          "description": "Optional sex marker used for some heart-rate and intensity heuristics."
+        },
+        "restingHeartRate": {
+          "type": "integer",
+          "minimum": 30,
+          "maximum": 110,
+          "description": "Average resting heart rate in beats per minute."
+        },
+        "maxHeartRateEstimate": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 220,
+          "description": "Optional measured or estimated maximum heart rate (bpm). If omitted, calculator may estimate from age."
+        },
+        "baselineStepGoalPerDay": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 30000,
+          "description": "Configured daily step goal used as a reference for intensity scoring."
+        },
+        "movementPreferences": {
+          "type": "object",
+          "description": "User-specific preferences for movement sessions.",
+          "properties": {
+            "preferredSessionBlockMinutes": {
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 120,
+              "description": "Typical movement block length the user prefers (e.g., 20-minute walk, 30-minute class)."
+            },
+            "maxSessionsPerDay": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8,
+              "description": "Maximum number of planned sessions per day before marking overload risk."
+            },
+            "indoorOnly": {
+              "type": "boolean",
+              "description": "If true, prefer indoor movement sessions (useful when weather guard is blocking outdoor sessions)."
+            }
+          },
+          "additionalProperties": false
+        },
+        "stepHistory": {
+          "type": "array",
+          "description": "Recent step and movement metrics by day, used to compute current movement load and trend.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "type": "string",
+                "format": "date",
+                "description": "Calendar date for this record (YYYY-MM-DD)."
+              },
+              "steps": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Total steps recorded for the day."
+              },
+              "distance": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Approximate distance covered that day (miles or kilometers, depending on unitSystem)."
+              },
+              "activeMinutesLight": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Minutes of light activity (easy walking, light chores)."
+              },
+              "activeMinutesModerate": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Minutes of moderate activity (brisk walking, moderate chores, light cardio)."
+              },
+              "activeMinutesVigorous": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Minutes of vigorous activity (running, intense cardio, heavy labor)."
+              },
+              "avgHeartRate": {
+                "type": "integer",
+                "minimum": 30,
+                "maximum": 220,
+                "description": "Average heart rate for the day (bpm), if available."
+              }
+            },
+            "required": [
+              "date",
+              "steps"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "sessionHistory": {
+          "type": "array",
+          "description": "History of structured movement sessions (walks, workouts, chores-as-sessions) used to derive load and recovery needs.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique identifier of the session, often matching an SSA SessionRunner session id."
+              },
+              "dateTime": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Start time of the session."
+              },
+              "domain": {
+                "type": "string",
+                "enum": [
+                  "movement",
+                  "cooking",
+                  "cleaning",
+                  "garden",
+                  "animals",
+                  "preservation",
+                  "storehouse"
+                ],
+                "description": "Domain the session belongs to; movement intensity primarily uses 'movement' but may factor in physical load from other domains."
+              },
+              "label": {
+                "type": "string",
+                "description": "Human-readable label for the session (e.g., 'Evening Walk', 'Yard Work', 'Leg Day')."
+              },
+              "durationMinutes": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 600,
+                "description": "Total duration of the session in minutes."
+              },
+              "intensityTag": {
+                "type": "string",
+                "enum": [
+                  "very-light",
+                  "light",
+                  "moderate",
+                  "vigorous",
+                  "maximal"
+                ],
+                "description": "Approximate intensity tag either from user, wearable, or prior calculation."
+              },
+              "avgHeartRate": {
+                "type": "integer",
+                "minimum": 30,
+                "maximum": 220,
+                "description": "Average heart rate during the session, if available."
+              },
+              "caloriesEstimated": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Estimated calories burned in this session, if available from a device."
+              }
+            },
+            "required": [
+              "id",
+              "dateTime",
+              "durationMinutes"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "healthRiskFlags": {
+          "type": "object",
+          "description": "High-level health risk flags that may adjust intensity recommendations and targets.",
+          "properties": {
+            "cardioRisk": {
+              "type": "boolean",
+              "description": "If true, suggest more conservative intensity progression and more frequent rest checks."
+            },
+            "jointPainRisk": {
+              "type": "boolean",
+              "description": "If true, favor lower-impact movement templates (walking, water-based movement, gentle strength)."
+            },
+            "fatigueRisk": {
+              "type": "boolean",
+              "description": "If true, adjust overall weekly targets downward and emphasize recovery."
+            }
+          },
+          "additionalProperties": false
+        },
+        "sleepQualityFlags": {
+          "type": "object",
+          "description": "Flags describing sleep quality, used to tune recovery and intensity recommendations.",
+          "properties": {
+            "sleepDebtHigh": {
+              "type": "boolean",
+              "description": "If true, user is carrying significant sleep debt."
+            },
+            "sleepFragmented": {
+              "type": "boolean",
+              "description": "If true, recent sleep has been fragmented or low quality."
+            },
+            "restedFeeling": {
+              "type": "boolean",
+              "description": "If true, user reports feeling generally rested."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "unitSystem",
+        "bodyWeight",
+        "age",
+        "baselineStepGoalPerDay",
+        "stepHistory"
+      ],
+      "additionalProperties": false
+    },
+    "output": {
+      "type": "object",
+      "description": "Calculated movement intensity, calorie burn estimates, zone breakdowns, and recovery flags.",
+      "properties": {
+        "movementIntensityScore": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Composite movement intensity/load score (0–100) computed from steps, heart rate, and session history."
+        },
+        "movementIntensityCategory": {
+          "type": "string",
+          "enum": [
+            "very-low",
+            "low",
+            "moderate",
+            "high",
+            "athlete"
+          ],
+          "description": "Human-friendly intensity category derived from the score and guidelines."
+        },
+        "movementMinutesTargets": {
+          "type": "object",
+          "description": "Recommended weekly movement targets in minutes, aligned with guidelines and user risk flags.",
+          "properties": {
+            "lightMinutesPerWeek": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Recommended weekly minutes of light activity."
+            },
+            "moderateMinutesPerWeek": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Recommended weekly minutes of moderate activity."
+            },
+            "vigorousMinutesPerWeek": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Recommended weekly minutes of vigorous activity."
+            },
+            "combinedGuidelineEquivalentMinutesPerWeek": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Converted guideline-equivalent minutes (e.g., vigorous minutes counted as 2x) to compare against standard recommendations."
+            },
+            "deficitToGuidelineMinutes": {
+              "type": "integer",
+              "description": "Positive value if user is below guideline-equivalent minutes, negative if above."
+            }
+          },
+          "required": [
+            "lightMinutesPerWeek",
+            "moderateMinutesPerWeek",
+            "vigorousMinutesPerWeek",
+            "combinedGuidelineEquivalentMinutesPerWeek",
+            "deficitToGuidelineMinutes"
+          ],
+          "additionalProperties": false
+        },
+        "movementZoneBreakdown": {
+          "type": "object",
+          "description": "Breakdown of time spent in heart-rate or effort zones used for planning intensity mixing.",
+          "properties": {
+            "zoneModel": {
+              "type": "string",
+              "enum": [
+                "hr-reserve-5z",
+                "percent-max-hr-5z",
+                "rpe-5z"
+              ],
+              "description": "Model used to define zones (heart-rate reserve, percent max HR, or RPE)."
+            },
+            "weeklyMinutesByZone": {
+              "type": "object",
+              "description": "Weekly minutes spent in each zone.",
+              "properties": {
+                "zone1": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Very light / recovery zone minutes."
+                },
+                "zone2": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Easy / base-building zone minutes."
+                },
+                "zone3": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Moderate / tempo zone minutes."
+                },
+                "zone4": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Hard / threshold zone minutes."
+                },
+                "zone5": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Very hard / sprint zone minutes."
+                }
+              },
+              "required": [
+                "zone1",
+                "zone2",
+                "zone3",
+                "zone4",
+                "zone5"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "zoneModel",
+            "weeklyMinutesByZone"
+          ],
+          "additionalProperties": false
+        },
+        "calorieAndLoadEstimates": {
+          "type": "object",
+          "description": "Estimated energy expenditure and training load metrics for planning and recovery.",
+          "properties": {
+            "estimatedDailyActivityCalories": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Average daily calories burned from non-rest activity based on recent step and session history."
+            },
+            "estimatedWeeklyActivityCalories": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Total estimated activity calories burned in the recent 7-day period."
+            },
+            "nonExerciseActivityCaloriesPerDay": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Estimated calories from non-exercise activity (NEAT) such as housework, walking around the home, etc."
+            },
+            "trainingLoadScore7d": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Aggregate 7-day training load score calculated from intensity and duration of sessions."
+            },
+            "trainingLoadTrend": {
+              "type": "string",
+              "enum": [
+                "decreasing",
+                "stable",
+                "increasing",
+                "spiking"
+              ],
+              "description": "Trend of training load relative to previous weeks."
+            }
+          },
+          "required": [
+            "estimatedDailyActivityCalories",
+            "estimatedWeeklyActivityCalories",
+            "nonExerciseActivityCaloriesPerDay",
+            "trainingLoadScore7d",
+            "trainingLoadTrend"
+          ],
+          "additionalProperties": false
+        },
+        "recoveryLoadFlags": {
+          "type": "object",
+          "description": "Flags indicating whether the current load suggests more rest or more movement.",
+          "properties": {
+            "overreachingRisk": {
+              "type": "boolean",
+              "description": "True if recent load is high relative to history and sleep/health risk flags."
+            },
+            "undertrainingRisk": {
+              "type": "boolean",
+              "description": "True if movement is far below guideline-equivalent minutes for multiple weeks."
+            },
+            "recoveryDayRecommended": {
+              "type": "boolean",
+              "description": "True if a dedicated low-intensity or rest day is recommended."
+            },
+            "notes": {
+              "type": "string",
+              "description": "Short human-readable explanation of the current recovery/load status."
+            }
+          },
+          "required": [
+            "overreachingRisk",
+            "undertrainingRisk",
+            "recoveryDayRecommended"
+          ],
+          "additionalProperties": false
+        },
+        "movementSessionTemplates": {
+          "type": "array",
+          "description": "Pre-built session templates (suitable for SessionRunner) reflecting the recommended intensity mix for the coming week.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "templateId": {
+                "type": "string",
+                "description": "Unique identifier for this movement session template."
+              },
+              "title": {
+                "type": "string",
+                "description": "Human-readable title for the session (e.g., '20-min Easy Walk', '30-min Mixed Zones')."
+              },
+              "recommendedPerWeek": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Suggested number of times per week to run this session."
+              },
+              "durationMinutes": {
+                "type": "integer",
+                "minimum": 5,
+                "maximum": 180,
+                "description": "Estimated duration of the session in minutes."
+              },
+              "intensityCategory": {
+                "type": "string",
+                "enum": [
+                  "very-light",
+                  "light",
+                  "moderate",
+                  "vigorous"
+                ],
+                "description": "Intensity category for this template."
+              },
+              "domain": {
+                "type": "string",
+                "enum": [
+                  "movement"
+                ],
+                "description": "Domain of the resulting SessionRunner session (movement)."
+              },
+              "source": {
+                "type": "object",
+                "description": "Source metadata for this template, compatible with Session object contracts.",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "manual",
+                      "import",
+                      "movementPlan"
+                    ],
+                    "description": "How this template was generated."
+                  },
+                  "refId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Optional reference to a plan or external source."
+                  }
+                },
+                "required": [
+                  "type"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "templateId",
+              "title",
+              "recommendedPerWeek",
+              "durationMinutes",
+              "intensityCategory",
+              "domain",
+              "source"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "movementIntensityScore",
+        "movementIntensityCategory",
+        "movementMinutesTargets",
+        "movementZoneBreakdown",
+        "calorieAndLoadEstimates",
+        "recoveryLoadFlags",
+        "movementSessionTemplates"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "nodeId",
+    "meta",
+    "input",
+    "output"
+  ],
+  "additionalProperties": false
+}

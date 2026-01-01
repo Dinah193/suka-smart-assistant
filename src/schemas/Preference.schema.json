@@ -1,0 +1,432 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka-smart-assistant/schemas/Preference.schema.json",
+  "title": "SSA User & Household Preferences",
+  "description": "Declarative preferences for users and households across SSA domains (cooking, cleaning, garden, animal, preservation, storehouse). Preferences inform normalization, automation schedules, notifications, safety thresholds, units, and export policy.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "scope", "units", "notifications", "automation"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Payload version for forward-compat migrations.",
+      "default": "1.0.0"
+    },
+
+    "scope": {
+      "type": "object",
+      "description": "Which subject these preferences apply to.",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["household", "user"], "default": "household" },
+        "householdId": { "type": "string" },
+        "userId": { "type": "string" },
+        "displayName": { "type": "string" },
+        "timezone": { "type": "string", "description": "IANA timezone (e.g., America/Chicago)." },
+        "locale": { "type": "string", "description": "BCP 47 language tag (e.g., en-US)." },
+        "region": { "type": "string", "description": "ISO-3166 region code (e.g., US)." }
+      }
+    },
+
+    "units": {
+      "type": "object",
+      "description": "Preferred measurement systems for display and planning.",
+      "additionalProperties": false,
+      "properties": {
+        "system": { "type": "string", "enum": ["metric", "imperial", "mixed"], "default": "mixed" },
+        "temperature": { "type": "string", "enum": ["F", "C"], "default": "F" },
+        "volume": { "type": "string", "enum": ["L", "mL", "cup", "fl_oz", "qt", "gal"], "default": "cup" },
+        "mass": { "type": "string", "enum": ["g", "kg", "oz", "lb"], "default": "g" },
+        "length": { "type": "string", "enum": ["mm", "cm", "m", "inch", "ft"], "default": "inch" }
+      }
+    },
+
+    "dietary": {
+      "type": "object",
+      "description": "Dietary preferences and restrictions for meal planning and recipe normalization.",
+      "additionalProperties": false,
+      "properties": {
+        "servingsDefault": { "type": "integer", "minimum": 1, "default": 4 },
+        "allergens": { "type": "array", "items": { "type": "string" } },
+        "avoidIngredients": { "type": "array", "items": { "type": "string" } },
+        "preferredIngredients": { "type": "array", "items": { "type": "string" } },
+        "styles": { "type": "array", "items": { "type": "string" }, "description": "e.g., keto, vegetarian, halal, kosher." },
+        "sodiumMaxMgPerDay": { "type": "integer", "minimum": 0 },
+        "sugarsMaxGPerDay": { "type": "integer", "minimum": 0 }
+      }
+    },
+
+    "kitchen": {
+      "type": "object",
+      "description": "Kitchen & cooking preferences.",
+      "additionalProperties": false,
+      "properties": {
+        "equipmentAvailable": { "type": "array", "items": { "type": "string" }, "description": "Canonical equipment ids or names." },
+        "substitutions": {
+          "type": "array",
+          "description": "Preferred substitutions (name → alternatives).",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "alternatives"],
+            "properties": {
+              "name": { "type": "string" },
+              "alternatives": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+            }
+          }
+        },
+        "temperatureTargets": {
+          "type": "object",
+          "description": "Custom doneness/safety targets by protein or dish.",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "targetTempF": { "type": "number" },
+              "restMinutes": { "type": "number", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+
+    "cleaning": {
+      "type": "object",
+      "description": "Cleaning and sanitation preferences.",
+      "additionalProperties": false,
+      "properties": {
+        "preferredAgents": { "type": "array", "items": { "type": "string" }, "description": "e.g., bleach, peroxide, quaternary." },
+        "agentConcentrationPPM": {
+          "type": "object",
+          "description": "Default concentration targets by agent key.",
+          "additionalProperties": { "type": "number", "minimum": 0 }
+        },
+        "contactTimeSecDefault": { "type": "integer", "minimum": 0, "default": 60 },
+        "fragranceFree": { "type": "boolean", "default": false }
+      }
+    },
+
+    "garden": {
+      "type": "object",
+      "description": "Gardening preferences and site characteristics.",
+      "additionalProperties": false,
+      "properties": {
+        "usdaZone": { "type": "string", "description": "USDA Hardiness Zone (or regional equivalent)." },
+        "beds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "name"],
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "areaSqFt": { "type": "number", "minimum": 0 },
+              "sunExposure": { "type": "string", "enum": ["full", "partial", "shade"] }
+            }
+          }
+        },
+        "preferredVendors": { "type": "array", "items": { "type": "string" } },
+        "soilTargets": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "pH": { "type": "number", "minimum": 0, "maximum": 14 },
+            "moisturePctMin": { "type": "number", "minimum": 0, "maximum": 100 },
+            "moisturePctMax": { "type": "number", "minimum": 0, "maximum": 100 }
+          }
+        }
+      }
+    },
+
+    "animal": {
+      "type": "object",
+      "description": "Livestock/pet preferences.",
+      "additionalProperties": false,
+      "properties": {
+        "species": { "type": "array", "items": { "type": "string" } },
+        "vetContacts": { "type": "array", "items": { "type": "string" } },
+        "feedVendors": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "storehouse": {
+      "type": "object",
+      "description": "Inventory & pantry management preferences.",
+      "additionalProperties": false,
+      "properties": {
+        "lowStockThresholds": {
+          "type": "array",
+          "description": "Named items with minimum levels that should trigger shortage events.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "min"],
+            "properties": {
+              "name": { "type": "string" },
+              "sku": { "type": "string" },
+              "location": { "type": "string" },
+              "min": { "$ref": "#/definitions/quantity" },
+              "tag": { "type": "string" }
+            }
+          }
+        },
+        "firstExpireFirstOut": { "type": "boolean", "default": true },
+        "shoppingBudget": { "$ref": "#/definitions/money" },
+        "preferredRetailers": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "notifications": {
+      "type": "object",
+      "description": "Notification channels and quiet hours.",
+      "additionalProperties": false,
+      "required": ["channels"],
+      "properties": {
+        "channels": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/channelPreference" },
+          "minItems": 1
+        },
+        "quietHours": {
+          "type": "array",
+          "description": "Times when non-critical notifications should be suppressed.",
+          "items": { "$ref": "#/definitions/timeWindow" }
+        },
+        "criticalBypassQuietHours": { "type": "boolean", "default": true }
+      }
+    },
+
+    "automation": {
+      "type": "object",
+      "description": "Automation scheduler preferences (when to suggest or run sessions).",
+      "additionalProperties": false,
+      "properties": {
+        "suggestionWindows": {
+          "type": "array",
+          "description": "Preferred time windows to schedule tasks.",
+          "items": { "$ref": "#/definitions/timeWindow" }
+        },
+        "maxConcurrentTasks": { "type": "integer", "minimum": 1, "default": 3 },
+        "defaultDurations": {
+          "type": "object",
+          "description": "Fallback durations by domain for planning.",
+          "additionalProperties": false,
+          "properties": {
+            "cooking": { "$ref": "#/definitions/isoDuration" },
+            "cleaning": { "$ref": "#/definitions/isoDuration" },
+            "garden": { "$ref": "#/definitions/isoDuration" },
+            "animal": { "$ref": "#/definitions/isoDuration" },
+            "preservation": { "$ref": "#/definitions/isoDuration" },
+            "storehouse": { "$ref": "#/definitions/isoDuration" }
+          }
+        }
+      }
+    },
+
+    "safety": {
+      "type": "object",
+      "description": "Safety thresholds and preferences.",
+      "additionalProperties": false,
+      "properties": {
+        "ppePreferred": { "type": "array", "items": { "type": "string" } },
+        "tempTargetsF": {
+          "type": "object",
+          "description": "Map of item/protein → minimum safe internal temperature (°F).",
+          "additionalProperties": { "type": "number" }
+        },
+        "sanitizer": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "contactTimeSecMin": { "type": "integer", "minimum": 0, "default": 60 },
+            "concentrationPPMMin": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "allergenStrictMode": { "type": "boolean", "default": true }
+      }
+    },
+
+    "privacy": {
+      "type": "object",
+      "description": "Privacy and data retention preferences.",
+      "additionalProperties": false,
+      "properties": {
+        "retainProvenanceDays": { "type": "integer", "minimum": 0, "default": 90 },
+        "shareAnonymizedMetrics": { "type": "boolean", "default": false }
+      }
+    },
+
+    "exportPolicy": {
+      "type": "object",
+      "description": "Hub export policy (SSA owns data first; export is optional).",
+      "additionalProperties": false,
+      "properties": {
+        "familyFundModeDefault": { "type": "boolean", "default": false },
+        "shareLevelDefault": { "type": "string", "enum": ["none", "summary", "full"], "default": "summary" },
+        "allowDomains": { "type": "array", "items": { "type": "string" }, "description": "Domains allowed for export (e.g., 'inventory', 'garden')." }
+      }
+    },
+
+    "scraping": {
+      "type": "object",
+      "description": "User/household preferences for imports/scraping.",
+      "additionalProperties": false,
+      "properties": {
+        "allowExternalImports": { "type": "boolean", "default": true },
+        "siteAllowList": { "type": "array", "items": { "type": "string" }, "description": "Optional override list of trusted hostnames." },
+        "siteDenyList": { "type": "array", "items": { "type": "string" } },
+        "maxRequestsPerMinutePerHost": { "type": "integer", "minimum": 1, "default": 12 }
+      }
+    }
+  },
+
+  "definitions": {
+    "isoDuration": {
+      "type": "string",
+      "pattern": "^P(?!$)(\\d+Y)?(\\d+M)?(\\d+D)?(T(\\d+H)?(\\d+M)?(\\d+S)?)?$",
+      "description": "ISO-8601 duration, e.g., PT45M, P1DT2H."
+    },
+    "money": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "currency"],
+      "properties": {
+        "value": { "type": "number" },
+        "currency": { "type": "string", "minLength": 3, "maxLength": 3 }
+      }
+    },
+    "quantity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amount"],
+      "properties": {
+        "amount": { "type": "number" },
+        "unit": { "type": "string" }
+      }
+    },
+    "timeWindow": {
+      "type": "object",
+      "description": "Daily or weekly recurring window in local time.",
+      "additionalProperties": false,
+      "required": ["days", "startLocal", "endLocal"],
+      "properties": {
+        "days": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["MO", "TU", "WE", "TH", "FR", "SA", "SU"] },
+          "minItems": 1
+        },
+        "startLocal": { "type": "string", "pattern": "^[0-2]\\d:[0-5]\\d$", "description": "HH:mm" },
+        "endLocal": { "type": "string", "pattern": "^[0-2]\\d:[0-5]\\d$", "description": "HH:mm" }
+      }
+    },
+    "channelPreference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["channel", "enabled"],
+      "properties": {
+        "channel": { "type": "string", "enum": ["inbox", "push", "sms", "email", "webhook", "log"] },
+        "enabled": { "type": "boolean", "default": true },
+        "address": { "type": "string", "description": "Email, phone, URL or device id depending on channel." },
+        "severity": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["info", "warning", "critical"] },
+          "description": "Severities routed to this channel."
+        }
+      }
+    }
+  },
+
+  "examples": [
+    {
+      "version": "1.0.0",
+      "scope": {
+        "kind": "household",
+        "householdId": "hh_123",
+        "displayName": "Suka Village",
+        "timezone": "America/Chicago",
+        "locale": "en-US",
+        "region": "US"
+      },
+      "units": { "system": "mixed", "temperature": "F", "volume": "cup", "mass": "g", "length": "inch" },
+      "dietary": {
+        "servingsDefault": 4,
+        "allergens": ["peanut", "shellfish"],
+        "avoidIngredients": ["cilantro"],
+        "styles": ["balanced"]
+      },
+      "kitchen": {
+        "equipmentAvailable": ["oven", "pressure_cooker", "sheet_pan", "probe_thermometer"],
+        "substitutions": [
+          { "name": "buttermilk", "alternatives": ["milk+vinegar", "yogurt+water"] }
+        ],
+        "temperatureTargets": {
+          "chicken": { "targetTempF": 165, "restMinutes": 3 }
+        }
+      },
+      "cleaning": {
+        "preferredAgents": ["bleach", "peroxide"],
+        "agentConcentrationPPM": { "bleach": 200 },
+        "contactTimeSecDefault": 60,
+        "fragranceFree": true
+      },
+      "garden": {
+        "usdaZone": "6b",
+        "beds": [
+          { "id": "bed_A", "name": "Bed A", "areaSqFt": 32, "sunExposure": "full" }
+        ],
+        "soilTargets": { "pH": 6.5, "moisturePctMin": 20, "moisturePctMax": 40 }
+      },
+      "animal": {
+        "species": ["chicken"],
+        "vetContacts": ["Cornell Vet Clinic"],
+        "feedVendors": ["Local Ag Coop"]
+      },
+      "storehouse": {
+        "lowStockThresholds": [
+          { "name": "All-purpose flour", "min": { "amount": 1, "unit": "bag" }, "location": "Pantry", "tag": "staple" }
+        ],
+        "firstExpireFirstOut": true,
+        "shoppingBudget": { "value": 400, "currency": "USD" },
+        "preferredRetailers": ["Kroger", "Walmart"]
+      },
+      "notifications": {
+        "channels": [
+          { "channel": "inbox", "enabled": true, "severity": ["info", "warning", "critical"] },
+          { "channel": "email", "enabled": true, "address": "household@example.com", "severity": ["warning", "critical"] }
+        ],
+        "quietHours": [
+          { "days": ["MO", "TU", "WE", "TH", "FR", "SA", "SU"], "startLocal": "21:30", "endLocal": "07:00" }
+        ],
+        "criticalBypassQuietHours": true
+      },
+      "automation": {
+        "suggestionWindows": [
+          { "days": ["MO", "TU", "WE", "TH", "FR"], "startLocal": "17:00", "endLocal": "20:30" },
+          { "days": ["SA", "SU"], "startLocal": "10:00", "endLocal": "18:00" }
+        ],
+        "maxConcurrentTasks": 3,
+        "defaultDurations": {
+          "cooking": "PT90M",
+          "cleaning": "PT45M",
+          "garden": "PT60M"
+        }
+      },
+      "safety": {
+        "ppePreferred": ["gloves"],
+        "tempTargetsF": { "poultry": 165 },
+        "sanitizer": { "contactTimeSecMin": 60, "concentrationPPMMin": 150 },
+        "allergenStrictMode": true
+      },
+      "privacy": { "retainProvenanceDays": 90, "shareAnonymizedMetrics": false },
+      "exportPolicy": { "familyFundModeDefault": false, "shareLevelDefault": "summary", "allowDomains": ["inventory", "garden"] },
+      "scraping": {
+        "allowExternalImports": true,
+        "siteAllowList": ["usda.gov", "nchfp.uga.edu", "seriouseats.com"],
+        "siteDenyList": ["example-bad-site.com"],
+        "maxRequestsPerMinutePerHost": 12
+      }
+    }
+  ]
+}

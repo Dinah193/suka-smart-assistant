@@ -1,0 +1,507 @@
+{
+  "_meta": {
+    "table": "companions",
+    "description": "Companion planting reference table for SSA garden planning, care, harvest, animal integration, storehouse planning, and meal ideas.",
+    "version": 1,
+    "updatedAt": "2025-11-18T00:00:00.000Z",
+    "domains": ["garden", "animals", "storehouse", "cooking", "preservation", "cleaning"]
+  },
+  "schema": {
+    "id": "string",
+    "commonName": "string",
+    "latinName": "string|null",
+    "family": "string|null",
+    "companions": ["string"],
+    "antagonists": ["string"],
+    "supports": {
+      "pestControl": ["string"],
+      "pollinators": "boolean",
+      "soil": ["string"]
+    },
+    "notes": "string",
+    "tags": ["string"],
+    "seasons": ["string"],
+    "storehouseHints": {
+      "preservationMethods": ["string"],
+      "grocerySections": ["string"]
+    },
+    "animalHints": {
+      "safeFor": ["string"],
+      "toxicTo": ["string"],
+      "grazingNotes": "string"
+    },
+    "sessionHints": {
+      "gardenCare": ["string"],
+      "harvest": ["string"],
+      "mealIdeas": ["string"],
+      "cleaning": ["string"]
+    }
+  },
+  "rows": [
+    {
+      "id": "tomato",
+      "commonName": "Tomato",
+      "latinName": "Solanum lycopersicum",
+      "family": "Solanaceae",
+      "companions": ["basil", "marigold", "onion", "garlic", "carrot", "nasturtium"],
+      "antagonists": ["cabbage", "corn", "dill", "potato", "fennel"],
+      "supports": {
+        "pestControl": ["repels_nematodes_with_marigold", "repels_whiteflies_with_basil", "trap_aphids_with_nasturtium"],
+        "pollinators": true,
+        "soil": ["heavy_feeder", "likes_compost_rich_soil"]
+      },
+      "notes": "Classic warm-season crop. Loves full sun and deep, even watering. Companions like basil and marigold help with flavor and pest reduction.",
+      "tags": ["garden:fruiting", "meal:sauce-base", "meal:salad", "storehouse:summer-glut"],
+      "seasons": ["summer"],
+      "storehouseHints": {
+        "preservationMethods": ["canning", "freezing", "dehydrating", "fermenting", "sauce", "paste"],
+        "grocerySections": ["produce", "canned-goods", "pantry+baking"]
+      },
+      "animalHints": {
+        "safeFor": [],
+        "toxicTo": ["chickens", "rabbits", "goats", "sheep"],
+        "grazingNotes": "Leaves and green fruits are toxic to most livestock; fence off tomato beds from animals."
+      },
+      "sessionHints": {
+        "gardenCare": ["stake_or_cage", "deep_watering_schedule", "prune_suckers_as_desired"],
+        "harvest": ["pick_when_full_color_and_slightly_soft", "plan_batch_sauce_session_for_big_harvests"],
+        "mealIdeas": ["batch_pasta_sauce", "sheet_pan_roasted_tomatoes", "fresh_salsa", "tomato_basil_salad"],
+        "cleaning": []
+      }
+    },
+    {
+      "id": "basil",
+      "commonName": "Basil",
+      "latinName": "Ocimum basilicum",
+      "family": "Lamiaceae",
+      "companions": ["tomato", "pepper", "oregano", "marigold"],
+      "antagonists": ["rue", "sage"],
+      "supports": {
+        "pestControl": ["repels_flies", "repels_mosquitoes", "repels_whiteflies_near_tomatoes"],
+        "pollinators": true,
+        "soil": ["moderate_feeder"]
+      },
+      "notes": "Fragrant herb that improves tomato growth and repels some flying insects. Frequent harvesting encourages bushy growth.",
+      "tags": ["garden:herb", "meal:seasoning", "cleaning:herbal-scent", "storehouse:small-batch-pesto"],
+      "seasons": ["summer"],
+      "storehouseHints": {
+        "preservationMethods": ["pesto_freeze", "herb_oil", "dehydrating"],
+        "grocerySections": ["produce", "spices"]
+      },
+      "animalHints": {
+        "safeFor": ["chickens"],
+        "toxicTo": [],
+        "grazingNotes": "Can be offered in small amounts as a treat or for enrichment, especially for chickens and rabbits."
+      },
+      "sessionHints": {
+        "gardenCare": ["pinch_tips_regularly", "avoid_flowering_for_leaf_production"],
+        "harvest": ["harvest_lightly_all_season", "bulk_harvest_before_first_frost"],
+        "mealIdeas": ["pesto_batch_session", "herb_butter_making", "fresh_caprese_salad"],
+        "cleaning": ["use_in_home_made_surface_sprays_for_fragrance"]
+      }
+    },
+    {
+      "id": "carrot",
+      "commonName": "Carrot",
+      "latinName": "Daucus carota",
+      "family": "Apiaceae",
+      "companions": ["onion", "leek", "lettuce", "radish", "rosemary"],
+      "antagonists": ["dill", "parsnip"],
+      "supports": {
+        "pestControl": ["onions_repel_carrot_fly", "rosemary_repels_carrot_fly"],
+        "pollinators": false,
+        "soil": ["loosen_soil_with_roots", "likes_loose_sandy_soil"]
+      },
+      "notes": "Root crop that benefits from allium neighbors for pest control. Likes cool weather and consistent moisture.",
+      "tags": ["garden:root", "storehouse:root-cellar", "meal:soup-stew"],
+      "seasons": ["spring", "fall"],
+      "storehouseHints": {
+        "preservationMethods": ["root_cellar", "canning", "freezing", "fermenting"],
+        "grocerySections": ["produce", "frozen"]
+      },
+      "animalHints": {
+        "safeFor": ["chickens", "goats", "sheep", "rabbits"],
+        "toxicTo": [],
+        "grazingNotes": "Roots and tops can be fed in moderation; tops are high in calcium."
+      },
+      "sessionHints": {
+        "gardenCare": ["thin_seedlings_to_proper_spacing", "keep_bed_evenly_moist"],
+        "harvest": ["staggered_pull_for_fresh_use", "single_large_pull_for_root_cellar_session"],
+        "mealIdeas": ["roasted_root_vegetable_batch", "soup_base_mirepoix_prep"],
+        "cleaning": []
+      }
+    },
+    {
+      "id": "onion",
+      "commonName": "Onion",
+      "latinName": "Allium cepa",
+      "family": "Amaryllidaceae",
+      "companions": ["carrot", "lettuce", "beet", "cabbage"],
+      "antagonists": ["pea", "bean", "sage"],
+      "supports": {
+        "pestControl": ["repels_carrot_fly", "repels_aphids", "repels_cabbage_maggot"],
+        "pollinators": true,
+        "soil": ["moderate_feeder"]
+      },
+      "notes": "Allium with strong scent, used to deter many pests. Works well on bed edges.",
+      "tags": ["garden:allium", "meal:base-flavor", "storehouse:staple"],
+      "seasons": ["spring", "summer"],
+      "storehouseHints": {
+        "preservationMethods": ["curing", "dry_storage", "dehydrating", "freezing"],
+        "grocerySections": ["produce", "spices", "pantry+baking"]
+      },
+      "animalHints": {
+        "safeFor": [],
+        "toxicTo": ["dogs", "cats", "some_livestock"],
+        "grazingNotes": "Avoid feeding onions to most animals; can cause anemia."
+      },
+      "sessionHints": {
+        "gardenCare": ["weed_regularly", "ensure_full_sun", "avoid_waterlogging"],
+        "harvest": ["cure_in_warm_dry_place_before_storage"],
+        "mealIdeas": ["caramelized_onion_batch", "soup_stock_base_prep"],
+        "cleaning": []
+      }
+    },
+    {
+      "id": "lettuce",
+      "commonName": "Lettuce",
+      "latinName": "Lactuca sativa",
+      "family": "Asteraceae",
+      "companions": ["carrot", "radish", "onion", "cabbage"],
+      "antagonists": ["parsley"],
+      "supports": {
+        "pestControl": [],
+        "pollinators": false,
+        "soil": ["shallow_rooted", "good_intercrop_under_tall_plants"]
+      },
+      "notes": "Fast-growing leafy crop for cool seasons. Useful as a living mulch under taller crops.",
+      "tags": ["garden:leafy", "meal:salad", "meal:sandwich"],
+      "seasons": ["spring", "fall"],
+      "storehouseHints": {
+        "preservationMethods": ["fresh_use_only"],
+        "grocerySections": ["produce"]
+      },
+      "animalHints": {
+        "safeFor": ["chickens", "rabbits"],
+        "toxicTo": [],
+        "grazingNotes": "Can be fed freely in moderate amounts; watch for nitrate buildup in heavily fertilized beds."
+      },
+      "sessionHints": {
+        "gardenCare": ["succession_plant_every_1to2_weeks", "shade_in_warm_weather"],
+        "harvest": ["cut_and_come_again", "whole_head_harvest_for_salad_sessions"],
+        "mealIdeas": ["salad_bar_prep_session", "lettuce_wraps"],
+        "cleaning": []
+      }
+    },
+    {
+      "id": "cabbage",
+      "commonName": "Cabbage",
+      "latinName": "Brassica oleracea var. capitata",
+      "family": "Brassicaceae",
+      "companions": ["onion", "garlic", "dill", "marigold"],
+      "antagonists": ["tomato", "strawberry"],
+      "supports": {
+        "pestControl": ["dill_attracts_beneficial_insects", "onions_repels_cabbage_maggot"],
+        "pollinators": false,
+        "soil": ["heavy_feeder", "benefits_from_compost"]
+      },
+      "notes": "Heavy-feeding brassica that needs rich soil and steady moisture. Protect from cabbage moths.",
+      "tags": ["garden:brassica", "meal:ferment", "storehouse:cool-storage"],
+      "seasons": ["spring", "fall"],
+      "storehouseHints": {
+        "preservationMethods": ["fermenting", "cold_storage", "freezing"],
+        "grocerySections": ["produce", "fermented-foods"]
+      },
+      "animalHints": {
+        "safeFor": ["chickens", "goats", "sheep", "rabbits"],
+        "toxicTo": [],
+        "grazingNotes": "Feed in moderation; brassicas can cause gas if overfed."
+      },
+      "sessionHints": {
+        "gardenCare": ["use_row_cover_for_moth_control", "mulch_heavily"],
+        "harvest": ["cut_heads_when_firm", "schedule_sauerkraut_or_kimchi_batch"],
+        "mealIdeas": ["sauerkraut_batch_fermentation", "slaw_prep_session"],
+        "cleaning": []
+      }
+    },
+    {
+      "id": "bean",
+      "commonName": "Bean (Bush or Pole)",
+      "latinName": "Phaseolus spp.",
+      "family": "Fabaceae",
+      "companions": ["corn", "squash", "carrot", "cucumber"],
+      "antagonists": ["onion", "garlic", "leek"],
+      "supports": {
+        "pestControl": ["dense_growth_can_shade_out_weeds"],
+        "pollinators": true,
+        "soil": ["fixes_nitrogen", "improves_soil_for_following_crops"]
+      },
+      "notes": "Legume that fixes nitrogen. Classic part of Three Sisters planting (corn, beans, squash).",
+      "tags": ["garden:legume", "soil:nitrogen-fixer", "meal:protein"],
+      "seasons": ["summer"],
+      "storehouseHints": {
+        "preservationMethods": ["drying", "canning", "freezing"],
+        "grocerySections": ["produce", "canned-goods", "dry-goods"]
+      },
+      "animalHints": {
+        "safeFor": ["chickens", "goats", "sheep"],
+        "toxicTo": [],
+        "grazingNotes": "Dried beans raw can be problematic; cook before feeding or use fresh green beans in moderation."
+      },
+      "sessionHints": {
+        "gardenCare": ["provide_trellis_for_pole_beans", "successive_sowing_for_long_harvest"],
+        "harvest": ["pick_green_beans_regularly", "allow_some_to_dry_on_vine_for_storage_session"],
+        "mealIdeas": ["bean_stew_batch", "salad_beans_blanch_and_freeze"],
+        "cleaning": []
+      }
+    },
+    {
+      "id": "corn",
+      "commonName": "Sweet Corn",
+      "latinName": "Zea mays",
+      "family": "Poaceae",
+      "companions": ["bean", "squash", "cucumber", "sunflower"],
+      "antagonists": ["tomato", "cabbage"],
+      "supports": {
+        "pestControl": ["creates_windbreak_for_more_delicate_crops"],
+        "pollinators": false,
+        "soil": ["heavy_feeder", "provides_living_trellis_for_beans"]
+      },
+      "notes": "Tall heavy-feeding grass. Often interplanted with beans and squash as a Three Sisters guild.",
+      "tags": ["garden:grain", "guild:three-sisters", "meal:starch"],
+      "seasons": ["summer"],
+      "storehouseHints": {
+        "preservationMethods": ["freezing", "drying", "grinding"],
+        "grocerySections": ["produce", "frozen", "grain"]
+      },
+      "animalHints": {
+        "safeFor": ["chickens", "goats", "sheep"],
+        "toxicTo": [],
+        "grazingNotes": "Dried corn is a common scratch feed; use in balance with other nutrients."
+      },
+      "sessionHints": {
+        "gardenCare": ["plant_in_blocks_for_pollination", "side_dress_with_compost"],
+        "harvest": ["harvest_sweet_corn_at_milk_stage", "later_harvest_for_dry_corn_and_grinding_session"],
+        "mealIdeas": ["corn_freezing_batch", "cornmeal_grinding_session"],
+        "cleaning": []
+      }
+    },
+    {
+      "id": "squash",
+      "commonName": "Squash (Winter or Summer)",
+      "latinName": "Cucurbita spp.",
+      "family": "Cucurbitaceae",
+      "companions": ["corn", "bean", "nasturtium", "marigold"],
+      "antagonists": ["potato"],
+      "supports": {
+        "pestControl": ["dense_foliage_shades_weeds", "nasturtium_traps_squash_bugs"],
+        "pollinators": true,
+        "soil": ["heavy_feeder", "likes_rich_soil_and_mulch"]
+      },
+      "notes": "Sprawling vine with big leaves; ideal ground cover in Three Sisters guild.",
+      "tags": ["garden:vining", "meal:roast", "storehouse:winter-keeper"],
+      "seasons": ["summer", "fall"],
+      "storehouseHints": {
+        "preservationMethods": ["cellar_storage", "puree_freezing", "dehydrating"],
+        "grocerySections": ["produce", "frozen"]
+      },
+      "animalHints": {
+        "safeFor": ["chickens", "goats", "sheep", "pigs"],
+        "toxicTo": [],
+        "grazingNotes": "Whole overripe squashes can be cracked and fed to livestock in winter for vitamins."
+      },
+      "sessionHints": {
+        "gardenCare": ["mulch_heavily", "monitor_for_squash_vine_borers"],
+        "harvest": ["cure_winter_squash_before_storage", "schedule_roasting_and_freezing_session"],
+        "mealIdeas": ["roasted_squash_puree_batch", "soup_base_freezer_blocks"],
+        "cleaning": []
+      }
+    },
+    {
+      "id": "marigold",
+      "commonName": "Marigold (Tagetes)",
+      "latinName": "Tagetes spp.",
+      "family": "Asteraceae",
+      "companions": ["tomato", "pepper", "cabbage", "squash", "bean"],
+      "antagonists": [],
+      "supports": {
+        "pestControl": ["repels_nematodes", "repels_whiteflies", "repels_beetles"],
+        "pollinators": true,
+        "soil": ["allelopathic_to_some_pests"]
+      },
+      "notes": "Tagetes marigolds are classic companions used around vegetable beds and pathways for color and pest control.",
+      "tags": ["garden:flower", "pest:biological-barrier"],
+      "seasons": ["summer", "fall"],
+      "storehouseHints": {
+        "preservationMethods": ["drying_for_decor", "herbal_use_limited"],
+        "grocerySections": []
+      },
+      "animalHints": {
+        "safeFor": ["chickens"],
+        "toxicTo": [],
+        "grazingNotes": "Petals can be sprinkled for enrichment and to deepen egg yolk color."
+      },
+      "sessionHints": {
+        "gardenCare": ["edge_beds_with_marigolds_for_pest_line", "deadhead_to_extend_bloom"],
+        "harvest": ["collect_seeds_for_next_year", "dry_petals_if_desired"],
+        "mealIdeas": [],
+        "cleaning": []
+      }
+    },
+    {
+      "id": "garlic",
+      "commonName": "Garlic",
+      "latinName": "Allium sativum",
+      "family": "Amaryllidaceae",
+      "companions": ["tomato", "cabbage", "carrot", "fruit_trees"],
+      "antagonists": ["pea", "bean"],
+      "supports": {
+        "pestControl": ["repels_borers", "repels_aphids", "repels_mites"],
+        "pollinators": true,
+        "soil": ["moderate_feeder"]
+      },
+      "notes": "Planted in fall in many climates for summer harvest. Strong-smelling allium for pest lines.",
+      "tags": ["garden:allium", "meal:flavor-base", "cleaning:antimicrobial"],
+      "seasons": ["fall", "summer"],
+      "storehouseHints": {
+        "preservationMethods": ["curing", "dry_storage", "fermenting", "oil_infusions"],
+        "grocerySections": ["produce", "spices"]
+      },
+      "animalHints": {
+        "safeFor": [],
+        "toxicTo": ["dogs", "cats", "some_livestock"],
+        "grazingNotes": "Avoid as regular feed; small medicinal doses should be used with knowledge and care."
+      },
+      "sessionHints": {
+        "gardenCare": ["plant_cloves_in_fall", "keep_bed_weed_free"],
+        "harvest": ["cure_bulbs_in_shade", "schedule_garlic_preservation_session"],
+        "mealIdeas": ["roasted_garlic_batch", "flavored_salt_making"],
+        "cleaning": ["garlic_vinegar_cleaner_for_disinfection"]
+      }
+    },
+    {
+      "id": "cucumber",
+      "commonName": "Cucumber",
+      "latinName": "Cucumis sativus",
+      "family": "Cucurbitaceae",
+      "companions": ["bean", "dill", "radish", "sunflower"],
+      "antagonists": ["potato", "aromatic_herbs_excessive"],
+      "supports": {
+        "pestControl": ["radish_can_help_with_cucumber_beetles"],
+        "pollinators": true,
+        "soil": ["moderate_feeder", "likes_even_moisture"]
+      },
+      "notes": "Vining crop that likes trellises to keep fruit clean and straight.",
+      "tags": ["garden:vining", "meal:salad", "meal:pickles", "storehouse:ferments"],
+      "seasons": ["summer"],
+      "storehouseHints": {
+        "preservationMethods": ["fermenting", "pickling_canning"],
+        "grocerySections": ["produce", "pickles"]
+      },
+      "animalHints": {
+        "safeFor": ["chickens", "goats", "sheep"],
+        "toxicTo": [],
+        "grazingNotes": "Fruits and peels can be fed as treats; avoid bitter fruits."
+      },
+      "sessionHints": {
+        "gardenCare": ["trellis_for_airflow", "mulch_to_keep_moisture"],
+        "harvest": ["pick_regularly_to_keep_vines_producing", "schedule_pickle_ferment_session"],
+        "mealIdeas": ["pickle_batch_day", "cold_cucumber_soup_batch"],
+        "cleaning": []
+      }
+    },
+    {
+      "id": "dill",
+      "commonName": "Dill",
+      "latinName": "Anethum graveolens",
+      "family": "Apiaceae",
+      "companions": ["cabbage", "cucumber", "lettuce"],
+      "antagonists": ["carrot", "tomato"],
+      "supports": {
+        "pestControl": ["attracts_lacewings", "attracts_ladybugs"],
+        "pollinators": true,
+        "soil": ["light_feeder"]
+      },
+      "notes": "Umbellifer that attracts beneficial insects. Often planted near cabbage and cucumbers.",
+      "tags": ["garden:herb", "pest:beneficial-attractor", "meal:pickling"],
+      "seasons": ["spring", "summer"],
+      "storehouseHints": {
+        "preservationMethods": ["drying", "freezing", "herb_butter"],
+        "grocerySections": ["produce", "spices"]
+      },
+      "animalHints": {
+        "safeFor": ["chickens"],
+        "toxicTo": [],
+        "grazingNotes": "Offer sparingly as a treat; strong flavor."
+      },
+      "sessionHints": {
+        "gardenCare": ["let_some_plants_bolt_for_beneficial_insects"],
+        "harvest": ["harvest_leaves_young", "save_seed_heads_for_pickling"],
+        "mealIdeas": ["pickle_spice_blend_session", "herbed_butter_freezer_batch"],
+        "cleaning": []
+      }
+    },
+    {
+      "id": "nasturtium",
+      "commonName": "Nasturtium",
+      "latinName": "Tropaeolum majus",
+      "family": "Tropaeolaceae",
+      "companions": ["tomato", "squash", "cucumber", "bean"],
+      "antagonists": [],
+      "supports": {
+        "pestControl": ["trap_aphids", "trap_squash_bugs"],
+        "pollinators": true,
+        "soil": ["light_feeder", "prefers_poorer_soils"]
+      },
+      "notes": "Edible flower used as a trap crop for pests. Leaves and flowers have peppery flavor.",
+      "tags": ["garden:flower", "pest:trap-crop", "meal:edible-flower"],
+      "seasons": ["summer", "fall"],
+      "storehouseHints": {
+        "preservationMethods": ["fresh_use", "herb_butter", "vinegar_infusions"],
+        "grocerySections": ["produce"]
+      },
+      "animalHints": {
+        "safeFor": ["chickens"],
+        "toxicTo": [],
+        "grazingNotes": "Offer moderately as a treat; bright petals enrich yolk color."
+      },
+      "sessionHints": {
+        "gardenCare": ["plant_under_vines_to_lure_pests_away", "minimal_fertilizer_needed"],
+        "harvest": ["regular_petals_harvest_for_salads_and_garnish"],
+        "mealIdeas": ["salad_garnish_prep", "flower_infused_vinegar_batch"],
+        "cleaning": []
+      }
+    },
+    {
+      "id": "calendula",
+      "commonName": "Calendula (Pot Marigold)",
+      "latinName": "Calendula officinalis",
+      "family": "Asteraceae",
+      "companions": ["lettuce", "brassicas", "herbs"],
+      "antagonists": [],
+      "supports": {
+        "pestControl": ["repels_some_pests", "attracts_beneficial_insects"],
+        "pollinators": true,
+        "soil": ["light_feeder"]
+      },
+      "notes": "Medicinal flower with sticky resinous petals. Good for salves and skin-soothing preparations.",
+      "tags": ["garden:flower", "cleaning:salve-base", "meal:edible-flower"],
+      "seasons": ["spring", "summer", "fall"],
+      "storehouseHints": {
+        "preservationMethods": ["drying", "oil_infusions"],
+        "grocerySections": []
+      },
+      "animalHints": {
+        "safeFor": ["chickens"],
+        "toxicTo": [],
+        "grazingNotes": "Petals can be sprinkled over feed as a tonic."
+      },
+      "sessionHints": {
+        "gardenCare": ["deadhead_for_continuous_bloom", "self_seeds_easily"],
+        "harvest": ["dry_petals_for_tea_or_salve", "schedule_salve_making_session_with_oil_infusions"],
+        "mealIdeas": ["tea_blend_batch", "garnish_for_baked_goods"],
+        "cleaning": ["herbal_salve_batch_for_homestead_first_aid"]
+      }
+    }
+  ]
+}

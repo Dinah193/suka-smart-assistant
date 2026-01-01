@@ -1,0 +1,115 @@
+{
+  "id": "catalog.meals.planning",
+  "domain": "meals",
+  "kind": "catalog_index",
+  "title": "Meal Planning Catalog",
+  "intentTags": [
+    "catalog:index"
+  ],
+  "inputs": [],
+  "outputs": [],
+  "constraints": [],
+  "steps": [],
+  "kpis": [],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial fixed-layer planning catalog release (MVP)."
+      }
+    ]
+  },
+  "patterns": [
+    {
+      "id": "pat.meals.weekly_batch",
+      "path": "src/layers/catalogs/planning/meals/patterns/weekly_batch.json",
+      "title": "Weekly Batch Meal Plan",
+      "tags": [
+        "time:medium",
+        "difficulty:medium",
+        "equipment:stove",
+        "equipment:oven",
+        "household:2-8"
+      ]
+    },
+    {
+      "id": "pat.meals.daily_fresh",
+      "path": "src/layers/catalogs/planning/meals/patterns/daily_fresh.json",
+      "title": "Daily Fresh Meal Plan",
+      "tags": [
+        "time:low",
+        "difficulty:low",
+        "equipment:stove",
+        "household:1-6"
+      ]
+    },
+    {
+      "id": "pat.meals.feast_anchored",
+      "path": "src/layers/catalogs/planning/meals/patterns/feast_anchored.json",
+      "title": "Feast-Anchored Meal Planning",
+      "tags": [
+        "time:high",
+        "difficulty:high",
+        "equipment:oven",
+        "household:4-20",
+        "Sabbath-safe"
+      ]
+    },
+    {
+      "id": "pat.meals.fast_day_light",
+      "path": "src/layers/catalogs/planning/meals/patterns/fast_day_light.json",
+      "title": "Fast Day / Light Meals",
+      "tags": [
+        "time:low",
+        "difficulty:low",
+        "fast-day",
+        "equipment:minimal"
+      ]
+    },
+    {
+      "id": "pat.meals.preservation_first",
+      "path": "src/layers/catalogs/planning/meals/patterns/preservation_first.json",
+      "title": "Preservation-First Meal Planning",
+      "tags": [
+        "time:medium",
+        "difficulty:medium",
+        "equipment:freezer",
+        "equipment:dehydrator",
+        "inventory:risk"
+      ]
+    }
+  ],
+  "filters": {
+    "time": [
+      "time:low",
+      "time:medium",
+      "time:high"
+    ],
+    "difficulty": [
+      "difficulty:low",
+      "difficulty:medium",
+      "difficulty:high"
+    ],
+    "equipment": [
+      "equipment:minimal",
+      "equipment:stove",
+      "equipment:oven",
+      "equipment:freezer",
+      "equipment:dehydrator",
+      "equipment:pressurecooker"
+    ],
+    "householdSize": [
+      "household:1-2",
+      "household:2-4",
+      "household:4-8",
+      "household:8-20"
+    ],
+    "modes": [
+      "Sabbath-safe",
+      "fast-day",
+      "inventory:risk"
+    ]
+  }
+}

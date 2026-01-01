@@ -1,0 +1,243 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka-smart-assistant.local/schemas/calculators/calendar/HebrewMonthStartCalendar.schema.json",
+  "title": "Hebrew Month Start Calendar Calculator",
+  "description": "Schema for astronomical rule inputs and calculated Hebrew month start date outputs used by the HebrewMonthStartCalendar calculator node.",
+  "type": "object",
+  "properties": {
+    "calculatorId": {
+      "type": "string",
+      "const": "calendar.hebrewMonthStart"
+    },
+    "domain": {
+      "type": "string",
+      "enum": ["storehouse"],
+      "description": "Primary SSA domain this calculator belongs to. Calendar and feast planning are treated as storehouse-level planning."
+    },
+    "inputs": {
+      "type": "object",
+      "description": "Inputs required to compute Hebrew month start dates from astronomical data.",
+      "properties": {
+        "rulePresetId": {
+          "type": "string",
+          "enum": [
+            "fullMoon",
+            "newMoonAstronomical",
+            "firstVisibleCrescent",
+            "noMeridianCrossing"
+          ],
+          "description": "Which month-start rule preset to apply when computing the Hebrew month starts."
+        },
+        "location": {
+          "type": "object",
+          "description": "Geographic location and timezone context for astronomy calculations.",
+          "properties": {
+            "lat": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90,
+              "description": "Latitude in decimal degrees."
+            },
+            "lon": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180,
+              "description": "Longitude in decimal degrees."
+            },
+            "tz": {
+              "type": "string",
+              "description": "IANA timezone identifier (e.g. America/Chicago)."
+            }
+          },
+          "required": ["lat", "lon", "tz"],
+          "additionalProperties": false
+        },
+        "gregorianYear": {
+          "type": "integer",
+          "minimum": 1900,
+          "maximum": 2500,
+          "description": "Gregorian year used as the primary planning window for which to compute Hebrew month starts."
+        },
+        "epochStartDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Optional explicit start date for the planning epoch. If provided, the calculator may span across gregorianYear as needed."
+        },
+        "epochEndDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Optional explicit end date for the planning epoch. If omitted, a default window based on gregorianYear is used."
+        },
+        "timeDataRef": {
+          "type": "string",
+          "description": "Optional reference ID to a pre-imported timeanddate.com (or similar) dataset containing sun/moon/star events for the location and time range."
+        },
+        "options": {
+          "type": "object",
+          "description": "Advanced options for fine-tuning the astronomical calculations.",
+          "properties": {
+            "allowThirteenthMonth": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether to allow a leap month (13th month) to be calculated for leap years in the Hebrew cycle."
+            },
+            "includeStarCheck": {
+              "type": "boolean",
+              "default": false,
+              "description": "If true, star/constellation data will be used when available to confirm start-of-season boundaries."
+            },
+            "maxMonthCount": {
+              "type": "integer",
+              "minimum": 12,
+              "maximum": 13,
+              "default": 13,
+              "description": "Safety guard to limit the number of Hebrew months calculated in a single run."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["rulePresetId", "location", "gregorianYear"],
+      "additionalProperties": false
+    },
+    "outputs": {
+      "type": "object",
+      "description": "Calculated Hebrew month starts and related metadata used by downstream planners (calendar grid, feasts, meals, storehouse).",
+      "properties": {
+        "months": {
+          "type": "array",
+          "description": "List of Hebrew months with their corresponding Gregorian start dates.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "monthIndex": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 13,
+                "description": "Hebrew month index (1–12 normally, 13 for leap years if enabled)."
+              },
+              "gregorianStartDate": {
+                "type": "string",
+                "format": "date",
+                "description": "Gregorian calendar date that marks the observable start of this Hebrew month at the given location."
+              },
+              "rulePresetId": {
+                "type": "string",
+                "enum": [
+                  "fullMoon",
+                  "newMoonAstronomical",
+                  "firstVisibleCrescent",
+                  "noMeridianCrossing"
+                ],
+                "description": "Rule preset actually used for this month. May differ from inputs.rulePresetId if a fallback or override was applied."
+              },
+              "location": {
+                "type": "object",
+                "description": "Location snapshot used when computing this month.",
+                "properties": {
+                  "lat": {
+                    "type": "number"
+                  },
+                  "lon": {
+                    "type": "number"
+                  },
+                  "tz": {
+                    "type": "string"
+                  }
+                },
+                "required": ["lat", "lon", "tz"],
+                "additionalProperties": false
+              },
+              "flags": {
+                "type": "array",
+                "description": "Signals about the calculation for this month: boundary conditions, ambiguous events, or data-quality notes.",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "approximate",
+                    "interpolated",
+                    "missingStarData",
+                    "missingMoonData",
+                    "fallBackRuleApplied"
+                  ]
+                }
+              },
+              "notes": {
+                "type": "string",
+                "description": "Human-readable notes for this month’s calculation (e.g., describing special cases or overrides)."
+              }
+            },
+            "required": ["monthIndex", "gregorianStartDate", "rulePresetId", "location"],
+            "additionalProperties": false
+          }
+        },
+        "summary": {
+          "type": "object",
+          "description": "Helpful aggregate values for UI and downstream planners.",
+          "properties": {
+            "firstMonthIndex": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 13,
+              "description": "Index of the first month in the calculated planning window."
+            },
+            "lastMonthIndex": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 13,
+              "description": "Index of the last month in the calculated planning window."
+            },
+            "firstGregorianDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Gregorian date of the first calculated month start in the window."
+            },
+            "lastGregorianDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Gregorian date of the last calculated month start in the window."
+            },
+            "rulePresetId": {
+              "type": "string",
+              "enum": [
+                "fullMoon",
+                "newMoonAstronomical",
+                "firstVisibleCrescent",
+                "noMeridianCrossing"
+              ],
+              "description": "Rule preset used for this run at the summary level."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["months"],
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Optional metadata about the calculation run for logging, analytics, and debugging.",
+      "properties": {
+        "calculatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp when the calculator produced this output."
+        },
+        "source": {
+          "type": "string",
+          "description": "Identifier for the upstream source, e.g., 'timeanddate.com:import-2025-01' or 'localCSV:my-moon-data.csv'."
+        },
+        "warnings": {
+          "type": "array",
+          "description": "Non-fatal warnings emitted while calculating month starts (e.g., missing data days, partial imports).",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["calculatorId", "domain", "inputs", "outputs"],
+  "additionalProperties": false
+}

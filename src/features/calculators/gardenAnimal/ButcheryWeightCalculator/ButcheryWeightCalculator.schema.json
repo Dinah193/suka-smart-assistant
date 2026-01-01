@@ -1,0 +1,476 @@
+{
+  "$id": "https://suka-smart-assistant.local/schemas/ButcheryWeightCalculator.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ButcheryWeightCalculator",
+  "description": "Schema for animal butchery weight calculations: live weight inputs, species/class yield curves, and carcass / retail cut / by-product outputs.",
+
+  "type": "object",
+  "additionalProperties": false,
+
+  "properties": {
+    "context": {
+      "type": "object",
+      "description": "Optional planning context for the butchery run.",
+      "additionalProperties": false,
+      "properties": {
+        "plannedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when this butchery plan was generated."
+        },
+        "processingDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Target processing date for this batch."
+        },
+        "unitSystem": {
+          "type": "string",
+          "enum": ["metric", "imperial"],
+          "default": "metric",
+          "description": "Primary unit system used for user-facing values."
+        },
+        "location": {
+          "type": "string",
+          "description": "Processing location or facility."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Free-form notes that might affect yields (season, condition, etc.)."
+        },
+        "exportToHub": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, shim may create a Hub export payload when familyFundMode is enabled."
+        }
+      }
+    },
+
+    "animals": {
+      "type": "array",
+      "description": "Animals or animal lots to be processed in this run.",
+      "items": {
+        "$ref": "#/$defs/animalInput"
+      }
+    },
+
+    "yieldCurves": {
+      "type": "array",
+      "description": "Optional species/class-specific dressing and retail yield curves. If omitted, the calculator falls back to defaults.",
+      "items": {
+        "$ref": "#/$defs/yieldCurve"
+      }
+    },
+
+    "storehouseInventory": {
+      "type": "array",
+      "description": "Optional storehouse meat inventory snapshot used for planning targets.",
+      "items": {
+        "$ref": "#/$defs/storehouseMeatInventoryItem"
+      }
+    },
+
+    "result": {
+      "type": "object",
+      "description": "Butchery weight calculation result. May be omitted in a pure request payload and filled in by the shim.",
+      "additionalProperties": false,
+      "properties": {
+        "carcassBreakdown": {
+          "type": "array",
+          "description": "Per-animal or per-lot carcass breakdown, including dressing percentage and primal weights.",
+          "items": {
+            "$ref": "#/$defs/carcassBreakdownEntry"
+          }
+        },
+        "retailCutPlan": {
+          "type": "array",
+          "description": "Planned retail cut outputs by animal/lot and cut type.",
+          "items": {
+            "$ref": "#/$defs/retailCutPlanEntry"
+          }
+        },
+        "offalAndByproducts": {
+          "type": "array",
+          "description": "Estimated by-product outputs (organs, bones, fat trim, etc.).",
+          "items": {
+            "$ref": "#/$defs/byproductEntry"
+          }
+        },
+        "analytics": {
+          "type": "object",
+          "description": "Summary metrics for the entire batch.",
+          "additionalProperties": false,
+          "properties": {
+            "totalLiveWeightKg": {
+              "type": "number",
+              "description": "Total live weight of all animals in kilograms."
+            },
+            "totalCarcassWeightKg": {
+              "type": "number",
+              "description": "Total chilled carcass weight in kilograms."
+            },
+            "totalRetailWeightKg": {
+              "type": "number",
+              "description": "Total planned saleable/usable meat weight in kilograms."
+            },
+            "totalByproductWeightKg": {
+              "type": "number",
+              "description": "Total weight of by-products (bones, fat, offal, etc.) in kilograms."
+            },
+            "averageDressingPercent": {
+              "type": "number",
+              "description": "Average dressing percentage for the batch (0–100)."
+            },
+            "averageRetailYieldPercent": {
+              "type": "number",
+              "description": "Average retail yield percentage for the batch (0–100)."
+            },
+            "headCount": {
+              "type": "integer",
+              "description": "Total number of head represented in this plan."
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "required": ["animals"],
+
+  "$defs": {
+    "animalInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Single animal or lot entry for butchery planning.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique id for this animal or lot within the calculator context."
+        },
+        "lotId": {
+          "type": "string",
+          "description": "Optional lot id if animals are grouped and treated as a single processing batch."
+        },
+        "species": {
+          "type": "string",
+          "description": "Species (e.g. cattle, sheep, goat, pig, poultry)."
+        },
+        "class": {
+          "type": "string",
+          "description": "Class or type (e.g. steer, heifer, lamb, kid, sow, broiler)."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Friendly name for UI display (e.g. 'Steer #12', 'Lamb Lot A')."
+        },
+        "liveWeightKg": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Measured or estimated live weight per head in kilograms."
+        },
+        "liveWeightLb": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Measured or estimated live weight per head in pounds. If both kg and lb are provided, kg should be considered canonical."
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "description": "Number of head in this record (1 for individual animals, >1 for a lot)."
+        },
+        "sex": {
+          "type": "string",
+          "description": "Optional sex (e.g. M, F, castrated)."
+        },
+        "ageMonths": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Approximate age in months."
+        },
+        "role": {
+          "type": "string",
+          "description": "Role for planning (e.g. meat, breeder, cull). Typically 'meat' for butchery runs."
+        },
+        "location": {
+          "type": "string",
+          "description": "Barn, pen, or pasture location for reference."
+        },
+        "scheduledProcessingDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Target date this animal or lot will be harvested."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Free-form notes that might affect yields (body condition, health, season, etc.)."
+        }
+      },
+      "required": ["id", "species", "liveWeightKg"]
+    },
+
+    "yieldCurve": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Yield curve for a species/class combination, including dressing percentage, retail yield, and per-cut distributions.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique id for this yield curve."
+        },
+        "species": {
+          "type": "string",
+          "description": "Species this curve applies to."
+        },
+        "class": {
+          "type": "string",
+          "description": "Class or type this curve applies to (may be empty for broad species-level defaults)."
+        },
+        "dressingPercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Expected dressing percentage (live to hot carcass)."
+        },
+        "retailYieldPercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Expected retail yield percentage (carcass to saleable retail cuts)."
+        },
+        "cutDistributions": {
+          "type": "array",
+          "description": "Optional per-cut yield distribution as a percent of total retail yield.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cutKey": {
+                "type": "string",
+                "description": "Stable key for the cut (e.g. 'ribeye', 'chuckRoast', 'groundBeef')."
+              },
+              "cutName": {
+                "type": "string",
+                "description": "Human-readable name of the cut."
+              },
+              "percentOfRetail": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Percent of the retail yield weight that this cut represents."
+              }
+            },
+            "required": ["cutKey", "cutName", "percentOfRetail"]
+          }
+        }
+      },
+      "required": ["id", "species", "dressingPercent", "retailYieldPercent"]
+    },
+
+    "storehouseMeatInventoryItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Storehouse meat inventory snapshot used to align butchery outputs with inventory needs.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Inventory item id."
+        },
+        "cutKey": {
+          "type": "string",
+          "description": "Cut key used to match with retailCutPlan entries."
+        },
+        "cutName": {
+          "type": "string",
+          "description": "User-facing cut name."
+        },
+        "onHandKg": {
+          "type": "number",
+          "minimum": 0,
+          "description": "On-hand quantity in kilograms."
+        },
+        "onHandUnits": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Number of packages or units on hand."
+        },
+        "unitSizeKg": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Weight per package in kilograms if applicable."
+        },
+        "location": {
+          "type": "string",
+          "description": "Storage location (e.g. freezer A, chest freezer, pantry)."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional notes (older stock, special labels, etc.)."
+        }
+      },
+      "required": ["id", "cutKey", "cutName"]
+    },
+
+    "carcassBreakdownEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Carcass-level yield information for a single animal or lot.",
+      "properties": {
+        "animalId": {
+          "type": "string",
+          "description": "Id of the animal this breakdown relates to."
+        },
+        "lotId": {
+          "type": "string",
+          "description": "Lot id, if applicable."
+        },
+        "species": {
+          "type": "string",
+          "description": "Species name for convenience."
+        },
+        "class": {
+          "type": "string",
+          "description": "Class/type name for convenience."
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of head represented in this breakdown entry."
+        },
+        "liveWeightKg": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Total live weight (per head or aggregated depending on count)."
+        },
+        "dressingPercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Effective dressing percentage used."
+        },
+        "carcassHotKg": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Estimated hot carcass weight in kilograms."
+        },
+        "carcassChilledKg": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Estimated chilled carcass weight in kilograms."
+        },
+        "shrinkPercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Percent shrink from hot to chilled carcass."
+        },
+        "primals": {
+          "type": "array",
+          "description": "Optional list of primal/sub-primal weights.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the primal."
+              },
+              "weightKg": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Weight of this primal in kilograms."
+              }
+            },
+            "required": ["name", "weightKg"]
+          }
+        }
+      },
+      "required": ["animalId", "liveWeightKg", "dressingPercent", "carcassHotKg", "carcassChilledKg"]
+    },
+
+    "retailCutPlanEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Planned retail cut output for a specific cut and animal/lot.",
+      "properties": {
+        "animalId": {
+          "type": "string",
+          "description": "Id of the animal related to this cut plan."
+        },
+        "lotId": {
+          "type": "string",
+          "description": "Lot id, if applicable."
+        },
+        "cutKey": {
+          "type": "string",
+          "description": "Stable key of the cut (e.g. 'ribeye', 'groundBeef')."
+        },
+        "cutName": {
+          "type": "string",
+          "description": "User-facing cut name."
+        },
+        "weightKg": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Planned total weight of this cut in kilograms."
+        },
+        "units": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Number of packages for this cut."
+        },
+        "unitSizeKg": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Weight per package in kilograms."
+        },
+        "packageLabel": {
+          "type": "string",
+          "description": "Suggested package label text (for label printer integration)."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional notes (e.g. grind leftovers, stew vs roast preference)."
+        }
+      },
+      "required": ["cutKey", "cutName", "weightKg"]
+    },
+
+    "byproductEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "By-product output (organs, bones, fat, etc.) for an animal/lot.",
+      "properties": {
+        "animalId": {
+          "type": "string",
+          "description": "Id of the animal related to this by-product entry."
+        },
+        "lotId": {
+          "type": "string",
+          "description": "Lot id, if applicable."
+        },
+        "category": {
+          "type": "string",
+          "description": "Category of by-product (e.g. 'organs', 'bones', 'fat', 'blood', 'hide')."
+        },
+        "name": {
+          "type": "string",
+          "description": "Specific by-product name (e.g. 'liver', 'tallowTrim', 'soupBones')."
+        },
+        "weightKg": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Estimated weight for this by-product in kilograms."
+        },
+        "intendedUse": {
+          "type": "string",
+          "description": "Intended use (e.g. 'edible', 'petFood', 'soap', 'render', 'discard')."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional notes about handling or storage."
+        }
+      },
+      "required": ["category", "name", "weightKg"]
+    }
+  }
+}

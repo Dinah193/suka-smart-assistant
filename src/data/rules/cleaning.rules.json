@@ -1,0 +1,252 @@
+{
+  "version": "1.0.0",
+  "domain": "cleaning",
+  "generatedAt": "2025-11-11T00:00:00.000Z",
+  "source": "SSA builtin",
+  "rules": [
+    {
+      "id": "ppe-before-harsh-chemicals",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 200,
+      "tags": ["safety", "ppe"],
+      "match": {
+        "byIngredient": {
+          "names": ["bleach", "sodium hypochlorite", "ammonia", "lye", "drain cleaner", "acid cleaner", "muriatic acid", "hydrochloric acid", "phosphoric acid", "oven cleaner"]
+        }
+      },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "don-ppe",
+            "title": "Put on PPE",
+            "description": "Wear chemical-resistant gloves, eye protection, and ensure skin coverage before handling harsh chemicals.",
+            "duration": "PT30S",
+            "equipment": ["gloves-nitrile", "goggles", "long-sleeves"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ensure-ventilation-for-volatile-chemicals",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 210,
+      "tags": ["safety", "ventilation"],
+      "match": {
+        "byIngredient": {
+          "names": ["bleach", "ammonia", "isopropyl alcohol", "solvent cleaner", "aerosol disinfectant"]
+        }
+      },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "open-windows-or-exhaust",
+            "title": "Ventilate the area",
+            "description": "Open windows/doors or run an exhaust fan to ensure adequate airflow while using volatile cleaners.",
+            "duration": "PT30S",
+            "equipment": ["exhaust-fan", "open-window"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "forbid-bleach-ammonia-mixture",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 100,
+      "tags": ["safety", "compatibility"],
+      "match": {
+        "byStepText": { "regex": "(?i)(bleach).*(ammonia)|(ammonia).*(bleach)", "flags": "i" }
+      },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "do-not-mix-bleach-ammonia",
+            "title": "Do NOT mix bleach and ammonia",
+            "description": "Never combine bleach with ammonia or acid cleaners. Use one product at a time, rinse thoroughly between different products.",
+            "duration": "PT0S"
+          }
+        }
+      ]
+    },
+    {
+      "id": "contact-time-bleach-disinfect",
+      "ruleType": "timing",
+      "enabled": true,
+      "priority": 320,
+      "tags": ["disinfect", "contact-time"],
+      "applyTo": { "byIngredient": { "names": ["bleach", "sodium hypochlorite"] } },
+      "actions": [
+        {
+          "action": "setTimer",
+          "duration": "PT5M",
+          "label": "Disinfectant contact time (bleach)"
+        },
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "keep-surface-wet-bleach",
+            "title": "Keep surface wet for contact time",
+            "description": "Ensure the surface remains visibly wet with solution for the full contact time before wiping.",
+            "duration": "PT0S"
+          }
+        }
+      ]
+    },
+    {
+      "id": "contact-time-quats",
+      "ruleType": "timing",
+      "enabled": true,
+      "priority": 325,
+      "tags": ["disinfect", "contact-time"],
+      "applyTo": { "byIngredient": { "names": ["benzalkonium chloride", "quat disinfectant", "quaternary ammonium disinfectant"] } },
+      "actions": [
+        {
+          "action": "setTimer",
+          "duration": "PT10M",
+          "label": "Disinfectant contact time (quats)"
+        },
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "keep-surface-wet-quats",
+            "title": "Keep surface wet for contact time",
+            "description": "Maintain a wet film for the full 10 minutes or per product label.",
+            "duration": "PT0S"
+          }
+        }
+      ]
+    },
+    {
+      "id": "contact-time-hydrogen-peroxide",
+      "ruleType": "timing",
+      "enabled": true,
+      "priority": 330,
+      "tags": ["disinfect", "contact-time"],
+      "applyTo": { "byIngredient": { "names": ["hydrogen peroxide", "accelerated hydrogen peroxide"] } },
+      "actions": [
+        {
+          "action": "setTimer",
+          "duration": "PT3M",
+          "label": "Disinfectant contact time (peroxide)"
+        }
+      ]
+    },
+    {
+      "id": "deodorize-baking-soda-fabric",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 500,
+      "tags": ["deodorize", "fabric", "soft-surfaces"],
+      "match": { "byMethod": { "methodsAny": ["deodorize"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "apply-baking-soda",
+            "title": "Apply baking soda",
+            "description": "Sprinkle baking soda on soft surfaces (carpet, upholstery). Let sit 15–30 minutes, then vacuum thoroughly.",
+            "duration": "PT20M",
+            "setTimer": true,
+            "equipment": ["vacuum"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "deodorize-vinegar-hard-surfaces",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 510,
+      "tags": ["deodorize", "hard-surfaces"],
+      "match": { "byMethod": { "methodsAny": ["deodorize"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "wipe-with-dilute-vinegar",
+            "title": "Wipe with diluted white vinegar",
+            "description": "Use a 1:4 vinegar:water solution on non-stone, sealed hard surfaces to neutralize odors. Test a small area first.",
+            "duration": "PT2M",
+            "equipment": ["spray-bottle", "microfiber-cloth"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "scent-optional-aromatics",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 520,
+      "tags": ["aromatics", "optional"],
+      "match": { "byMethod": { "methodsAny": ["deodorize", "final-finish"] } },
+      "guards": { "householdPrefs": { "aromaticsAllowed": true } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "optional-fragrance",
+            "title": "Optional: add a light scent",
+            "description": "If desired, add a few drops of essential oil to a cloth or diffuser away from food prep areas. Avoid direct contact with surfaces that touch food or pets.",
+            "duration": "PT0S",
+            "equipment": ["diffuser(optional)"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "rinse-between-different-chemistries",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 220,
+      "tags": ["safety", "compatibility"],
+      "match": {
+        "byStepText": { "regex": "(?i)(then apply .*cleaner)|(switch .*product)", "flags": "i" }
+      },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "rinse-and-dry-between-products",
+            "title": "Rinse and dry between different products",
+            "description": "After using one chemical, rinse the surface thoroughly with water and dry before applying a different chemistry.",
+            "duration": "PT1M"
+          }
+        }
+      ]
+    },
+    {
+      "id": "post-disinfect-rinse-food-contact",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 340,
+      "tags": ["disinfect", "food-contact"],
+      "match": { "byMethod": { "methodsAny": ["disinfect"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "rinse-food-contact-surfaces",
+            "title": "Rinse food-contact surfaces after disinfection",
+            "description": "After contact time, rinse food-contact surfaces with potable water unless the product label says no-rinse.",
+            "duration": "PT1M"
+          }
+        }
+      ]
+    }
+  ]
+}

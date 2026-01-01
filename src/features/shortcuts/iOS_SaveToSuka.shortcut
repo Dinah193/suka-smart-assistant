@@ -1,0 +1,119 @@
+{
+  "WFWorkflowClientVersion": "1100.17",
+  "WFWorkflowClientRelease": "iOS",
+  "WFWorkflowIcon": {
+    "WFWorkflowIconGlyphNumber": 59738,
+    "WFWorkflowIconImageData": null,
+    "WFWorkflowIconStartColor": 4282557945
+  },
+  "WFWorkflowImportQuestions": [],
+  "WFWorkflowTypes": [
+    "NCWidget",
+    "WatchKit",
+    "ActionExtension",
+    "Parallel",
+    "Shortcuts"
+  ],
+  "WFWorkflowName": "Save to Suka",
+  "WFWorkflowActions": [
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.getclipboard",
+      "WFWorkflowActionParameters": {}
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.getdetails",
+      "WFWorkflowActionParameters": {
+        "WFGetDetailsItem": "WFContentItemName"
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.url",
+      "WFWorkflowActionParameters": {
+        "WFURLActionURL": "https://your-suka-app-domain.tld/import/share-capture?src=ios-shortcut"
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.getvariable",
+      "WFWorkflowActionParameters": {
+        "WFVariable": {
+          "Value": "Clipboard",
+          "WFSerializationType": "WFTextTokenAttachment"
+        }
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.text",
+      "WFWorkflowActionParameters": {
+        "WFTextActionText": "{\n  \"title\": \"[[Shortcut Input]]\",\n  \"text\": \"[[Clipboard]]\",\n  \"url\": \"[[Shortcut Input]]\",\n  \"__importType\": \"auto\",\n  \"source\": {\n    \"kind\": \"ios-shortcut\",\n    \"title\": \"[[Shortcut Input]]\",\n    \"device\": \"iOS\"\n  },\n  \"meta\": {\n    \"triggeredFrom\": \"iOS Save to Suka\",\n    \"timestamp\": \"[[Current Date]]\",\n    \"hint\": \"try-cleaning-garden-storehouse-animal\"\n  },\n  \"saveAsFavorite\": false,\n  \"reverseMeta\": {\n    \"shareTarget\": \"family-fund-hub\",\n    \"includeShare\": true,\n    \"format\": \"json\"\n  },\n  \"candidates\": {\n    \"cleaningPlan\": {\n      \"ifContains\": [\"clean\", \"bathroom\", \"kitchen\", \"declutter\", \"zone\", \"laundry\"],\n      \"session\": {\n        \"domain\": \"cleaningPlan\",\n        \"action\": \"run-imported\"\n      }\n    },\n    \"gardenPlan\": {\n      \"ifContains\": [\"seed\", \"garden\", \"burpee\", \"johnny\", \"planting\"],\n      \"coop\": true\n    },\n    \"gardenCare\": {\n      \"ifContains\": [\"water\", \"weed\", \"prune\", \"trellis\"],\n      \"tasks\": [\n        { \"title\": \"Water beds\", \"cadence\": \"2x/week\" },\n        { \"title\": \"Weed beds\", \"cadence\": \"weekly\" }\n      ]\n    },\n    \"harvestPlan\": {\n      \"ifContains\": [\"harvest\", \"picking\", \"processing\"],\n      \"harvest\": [\n        { \"crop\": \"Tomatoes\", \"method\": \"fresh/can\" },\n        { \"crop\": \"Greens\", \"method\": \"dehydrate\" }\n      ]\n    },\n    \"storehouseStock\": {\n      \"ifContains\": [\"pantry\", \"storehouse\", \"grocery\", \"restock\", \"weekly ad\", \"circular\"],\n      \"items\": [\n        { \"item\": \"Grains → flour, cornmeal, oats\", \"section\": \"Dry goods\" },\n        { \"item\": \"Proteins → lamb, beef, goat\", \"section\": \"Frozen/Butchery\" },\n        { \"item\": \"Oils & Fats\", \"section\": \"Pantry\" }\n      ],\n      \"schedule\": { \"rule\": \"weekly-restock\" }\n    },\n    \"mealPlan\": {\n      \"ifContains\": [\"pinterest.com\", \"meal plan\", \"menu\", \"what's for dinner\"],\n      \"collaborative\": true\n    },\n    \"animalPlan\": {\n      \"ifContains\": [\"goat\", \"sheep\", \"lamb\", \"cattle\", \"poultry\", \"butcher\", \"butchery\"],\n      \"animals\": [\n        { \"name\": \"Lamb\", \"species\": \"sheep\", \"qty\": 1, \"tasks\": [\"Feed\", \"Water\"] }\n      ]\n    },\n    \"butcherySession\": {\n      \"ifContains\": [\"cut sheet\", \"slaughter\", \"processing\"],\n      \"animals\": [\n        { \"name\": \"Lamb\", \"species\": \"sheep\", \"qty\": 1, \"tasks\": [\"Slaughter\", \"Bleed\", \"Quarter\", \"Package\"] }\n      ]\n    },\n    \"inventoryUpdate\": {\n      \"ifContains\": [\"csv\", \"pdf\", \"inventory\", \"pricebook\"],\n      \"updates\": []\n    }\n  }\n}"
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.base64encode",
+      "WFWorkflowActionParameters": {
+        "WFBase64EncodingMode": 0
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.getcontentssofurl",
+      "WFWorkflowActionParameters": {
+        "WFGetContentsOfURLMethod": "POST",
+        "WFGetContentsOfURLHeaders": {
+          "Content-Type": "application/json"
+        },
+        "WFGetContentsOfURLRequestBody": {
+          "Value": {
+            "type": "Base64",
+            "string": "Provided Input"
+          },
+          "WFSerializationType": "WFTextTokenAttachment"
+        },
+        "WFGetContentsOfURLURL": "https://your-suka-app-domain.tld/import/share-capture"
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.showresult",
+      "WFWorkflowActionParameters": {
+        "WFShowResultActionText": "Sent to Suka ✅"
+      }
+    }
+  ],
+  "WFWorkflowOutputContentItemClasses": [
+    "WFAppStoreAppContentItem",
+    "WFArticleContentItem",
+    "WFContactContentItem",
+    "WFDateContentItem",
+    "WFEmailAddressContentItem",
+    "WFFolderContentItem",
+    "WFImageContentItem",
+    "WFiTunesProductContentItem",
+    "WFLocationContentItem",
+    "WFDCMapsLinkContentItem",
+    "WFAVAssetContentItem",
+    "WFPDFContentItem",
+    "WFPhoneNumberContentItem",
+    "WFRichTextContentItem",
+    "WFSafariWebPageContentItem",
+    "WFStringContentItem",
+    "WFURLContentItem"
+  ],
+  "suka": {
+    "integration": "ios-shortcut",
+    "features": {
+      "saveUserFavorites": true,
+      "attachSchedule": true,
+      "reverseGeneration": true,
+      "sharedOrchestration": true
+    },
+    "defaults": {
+      "autoSaveFavorite": false,
+      "autoSchedule": false,
+      "autoScheduleRule": "once+5min",
+      "reverseMeta": {
+        "shareTarget": "family-fund-hub",
+        "includeShare": true,
+        "format": "json"
+      }
+    },
+    "notes": "This shortcut now sends an 'auto' import payload that your /import/share-capture route can normalize the same way the PWA and bookmarklet do. The 'candidates' block gives the server/app hints to coerce to cleaningPlan, gardenPlan, gardenCare, harvestPlan, storehouseStock, mealPlan, animalPlan, butcherySession, or inventoryUpdate based on the mobile content text (and user can still mark it favorite + schedule)."
+  }
+}

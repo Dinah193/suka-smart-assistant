@@ -1,0 +1,529 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/gardenAnimal/IrrigationCalculator.schema.json",
+  "title": "IrrigationCalculator",
+  "description": "Schema for calculating irrigation needs and schedules based on crops, soil, and climate context.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "calculatorKey": {
+      "type": "string",
+      "const": "IrrigationCalculator",
+      "description": "Stable key used by the Planning Graph and calculator runtime."
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of this schema/logic (e.g., 1.0.0)."
+    },
+    "inputs": {
+      "type": "object",
+      "description": "All input context for computing irrigation needs.",
+      "additionalProperties": false,
+      "properties": {
+        "householdId": {
+          "type": "string",
+          "description": "SSA household or profile identifier."
+        },
+        "gardenId": {
+          "type": "string",
+          "description": "Logical garden identifier within the household."
+        },
+        "location": {
+          "type": "object",
+          "description": "Basic location metadata to correlate with weather and climate.",
+          "additionalProperties": false,
+          "properties": {
+            "lat": {
+              "type": "number",
+              "description": "Latitude in decimal degrees."
+            },
+            "lon": {
+              "type": "number",
+              "description": "Longitude in decimal degrees."
+            },
+            "usdaZone": {
+              "type": "string",
+              "description": "USDA hardiness zone or local climate zone label."
+            }
+          },
+          "required": ["lat", "lon"]
+        },
+        "beds": {
+          "type": "array",
+          "description": "Per-bed context including crops, soil, and layout details.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "bedId": {
+                "type": "string",
+                "description": "Stable identifier for the bed or container."
+              },
+              "zoneId": {
+                "type": "string",
+                "description": "Irrigation zone identifier (used for grouping beds that share lines/valves)."
+              },
+              "label": {
+                "type": "string",
+                "description": "Human-readable label for the bed."
+              },
+              "surfaceAreaSqFt": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Approximate surface area of the bed in square feet."
+              },
+              "rootZoneDepthIn": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Typical effective root depth for the dominant crops in inches."
+              },
+              "crops": {
+                "type": "array",
+                "description": "Crops currently in this bed with water requirement context.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "cropId": {
+                      "type": "string",
+                      "description": "Internal crop identifier or reference to crop library."
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Display name of the crop."
+                    },
+                    "variety": {
+                      "type": "string",
+                      "description": "Variety name (optional)."
+                    },
+                    "plantingDate": {
+                      "type": "string",
+                      "format": "date",
+                      "description": "Date the crop was planted or transplanted."
+                    },
+                    "growthStage": {
+                      "type": "string",
+                      "description": "Current growth stage (e.g., seedling, vegetative, flowering, fruiting)."
+                    },
+                    "waterDemandLevel": {
+                      "type": "string",
+                      "enum": ["low", "medium", "high"],
+                      "description": "Relative water demand for this crop in the current stage."
+                    },
+                    "spacingIn": {
+                      "type": "number",
+                      "minimum": 0,
+                      "description": "In-row plant spacing in inches."
+                    },
+                    "rowSpacingIn": {
+                      "type": "number",
+                      "minimum": 0,
+                      "description": "Row spacing in inches."
+                    },
+                    "targetYieldPerSqFt": {
+                      "type": "number",
+                      "minimum": 0,
+                      "description": "Target yield for this crop in the bed, per square foot."
+                    }
+                  },
+                  "required": ["name", "waterDemandLevel"]
+                }
+              },
+              "soil": {
+                "type": "object",
+                "description": "Soil characteristics influencing water holding capacity.",
+                "additionalProperties": false,
+                "properties": {
+                  "textureClass": {
+                    "type": "string",
+                    "enum": ["sand", "loamy_sand", "sandy_loam", "loam", "silt_loam", "clay_loam", "silty_clay", "sandy_clay", "clay", "unknown"],
+                    "description": "USDA texture class or closest approximation."
+                  },
+                  "organicMatterPct": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "description": "Estimated soil organic matter percentage."
+                  },
+                  "currentMoisturePct": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "description": "Estimated current volumetric soil moisture percentage."
+                  },
+                  "fieldCapacityPct": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "description": "Estimated field capacity for soil moisture percentage (optional override)."
+                  },
+                  "wiltingPointPct": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "description": "Estimated wilting point for soil moisture percentage (optional override)."
+                  },
+                  "drainageClass": {
+                    "type": "string",
+                    "enum": ["poor", "moderate", "well", "unknown"],
+                    "description": "Drainage characteristics of the bed."
+                  },
+                  "mulchDepthIn": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Mulch depth in inches, if present."
+                  }
+                }
+              },
+              "slopeClass": {
+                "type": "string",
+                "enum": ["flat", "gentle", "moderate", "steep"],
+                "description": "Slope classification for runoff risk."
+              },
+              "shadePattern": {
+                "type": "string",
+                "enum": ["full_sun", "partial_shade", "full_shade"],
+                "description": "Typical sun/shade exposure pattern."
+              }
+            },
+            "required": ["bedId", "surfaceAreaSqFt"]
+          }
+        },
+        "irrigationSystem": {
+          "type": "object",
+          "description": "Current irrigation hardware and configuration.",
+          "additionalProperties": false,
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": ["drip", "soaker", "sprinkler", "flood", "hand", "other"],
+              "description": "Primary irrigation method used in this garden."
+            },
+            "defaultFlowRateGphPerEmitter": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Approximate flow rate per emitter in gallons per hour for drip/soaker systems."
+            },
+            "defaultApplicationRateInPerHour": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Approximate application rate in inches of water per hour (useful for sprinklers)."
+            },
+            "zoneFlowRatesGph": {
+              "type": "object",
+              "description": "Flow rates per irrigation zone for more precise scheduling.",
+              "additionalProperties": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "waterSource": {
+              "type": "string",
+              "enum": ["municipal", "well", "rainwater", "surface", "other"],
+              "description": "Primary water source."
+            }
+          }
+        },
+        "climate": {
+          "type": "object",
+          "description": "Weather and climate context used for evapotranspiration and risk checks.",
+          "additionalProperties": false,
+          "properties": {
+            "referenceEToMmPerDay": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Reference evapotranspiration rate for the location (mm/day)."
+            },
+            "recentRainfallIn": {
+              "type": "array",
+              "description": "Recent rainfall history in inches (e.g., last 7–14 days).",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "amountIn": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                },
+                "required": ["date", "amountIn"]
+              }
+            },
+            "forecastDaily": {
+              "type": "array",
+              "description": "Short-term daily forecast relevant to irrigation decisions.",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "expectedRainIn": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Expected rainfall in inches."
+                  },
+                  "highTempF": {
+                    "type": "number",
+                    "description": "Forecasted high temperature in Fahrenheit."
+                  },
+                  "lowTempF": {
+                    "type": "number",
+                    "description": "Forecasted low temperature in Fahrenheit."
+                  },
+                  "windSpeedMph": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Average daily wind speed in mph."
+                  }
+                },
+                "required": ["date"]
+              }
+            },
+            "alerts": {
+              "type": "array",
+              "description": "Weather alerts that may affect irrigation (heatwaves, storms, water restrictions).",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "severity": {
+                    "type": "string",
+                    "enum": ["info", "watch", "warning", "emergency"]
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                },
+                "required": ["message"]
+              }
+            }
+          }
+        },
+        "userPreferences": {
+          "type": "object",
+          "description": "User-specific constraints and preferences for irrigation scheduling.",
+          "additionalProperties": false,
+          "properties": {
+            "preferredTimeOfDay": {
+              "type": "string",
+              "enum": ["early_morning", "late_evening", "night", "no_preference"],
+              "description": "Preferred window for irrigation to reduce evaporation and disease risk."
+            },
+            "maxIrrigationEventsPerWeek": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Hard cap on irrigation events per week (per bed/zone)."
+            },
+            "skipIfRainAboveIn": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Skip irrigation if forecast rainfall for the day exceeds this threshold in inches."
+            },
+            "waterRestrictions": {
+              "type": "object",
+              "description": "Local water restriction rules.",
+              "additionalProperties": false,
+              "properties": {
+                "oddEvenAddressRule": {
+                  "type": "boolean",
+                  "description": "Whether odd/even day address rules apply."
+                },
+                "allowedWeekdays": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+                  },
+                  "description": "Weekdays on which irrigation is allowed."
+                },
+                "timeWindowStartLocal": {
+                  "type": "string",
+                  "pattern": "^[0-2][0-9]:[0-5][0-9]$",
+                  "description": "Earliest allowed irrigation time (HH:MM, 24h)."
+                },
+                "timeWindowEndLocal": {
+                  "type": "string",
+                  "pattern": "^[0-2][0-9]:[0-5][0-9]$",
+                  "description": "Latest allowed irrigation time (HH:MM, 24h)."
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": ["beds"]
+    },
+    "outputs": {
+      "type": "object",
+      "description": "Computed irrigation schedule and water requirements.",
+      "additionalProperties": false,
+      "properties": {
+        "waterRequirements": {
+          "type": "object",
+          "description": "Summaries of weekly water needs.",
+          "additionalProperties": false,
+          "properties": {
+            "perBedInchesPerWeek": {
+              "type": "object",
+              "description": "Target inches of water per week per bedId.",
+              "additionalProperties": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "perZoneGallonsPerWeek": {
+              "type": "object",
+              "description": "Total gallons of water per week per irrigation zone.",
+              "additionalProperties": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "totalGallonsPerWeek": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Total water volume per week for the entire garden."
+            }
+          }
+        },
+        "schedule": {
+          "type": "array",
+          "description": "Concrete irrigation events the SSA can turn into sessions.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "eventId": {
+                "type": "string",
+                "description": "Stable identifier for the irrigation event."
+              },
+              "zoneId": {
+                "type": "string",
+                "description": "Irrigation zone this event targets."
+              },
+              "bedIds": {
+                "type": "array",
+                "description": "Bed identifiers included in this event.",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "startDateTimeLocal": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Planned local start date/time of irrigation event."
+              },
+              "durationMinutes": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Expected run time in minutes."
+              },
+              "expectedDepthIn": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Expected water depth applied in inches for the bed root zone."
+              },
+              "expectedVolumeGallons": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Expected water volume applied in gallons."
+              },
+              "priority": {
+                "type": "string",
+                "enum": ["low", "normal", "high", "critical"],
+                "description": "Priority indicator for the scheduling/automation runtime."
+              },
+              "notes": {
+                "type": "string",
+                "description": "Optional human-readable notes (e.g., 'Check emitters for clogging')."
+              },
+              "sessionTemplate": {
+                "type": "object",
+                "description": "Optional SessionRunner-ready template for an irrigation session.",
+                "additionalProperties": false,
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Title for the irrigation session."
+                  },
+                  "domain": {
+                    "type": "string",
+                    "enum": ["garden"],
+                    "description": "Domain for SessionRunner integration."
+                  },
+                  "estimatedDurationSec": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Estimated session duration in seconds."
+                  },
+                  "stepHints": {
+                    "type": "array",
+                    "description": "Optional step labels that SessionBuilder can expand into full steps.",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "required": [
+              "eventId",
+              "startDateTimeLocal",
+              "durationMinutes"
+            ]
+          }
+        },
+        "alerts": {
+          "type": "array",
+          "description": "Warnings and notices related to irrigation planning.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "level": {
+                "type": "string",
+                "enum": ["info", "warning", "critical"],
+                "description": "Severity level for the alert."
+              },
+              "code": {
+                "type": "string",
+                "description": "Short code for programmatic handling (e.g., WATER_RESTRICTION_CONFLICT)."
+              },
+              "message": {
+                "type": "string",
+                "description": "Human-readable description of the alert."
+              },
+              "relatedBedIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Beds that are particularly impacted by this alert."
+              },
+              "relatedZoneIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Irrigation zones impacted by this alert."
+              }
+            },
+            "required": ["level", "message"]
+          }
+        }
+      },
+      "required": ["schedule"]
+    }
+  },
+  "required": ["calculatorKey", "version", "inputs", "outputs"]
+}

@@ -1,0 +1,422 @@
+{
+  "version": "2025-10-31T11:20:00-05:00",
+  "description": "CENTRAL: season+zone garden layouts, care & harvest profiles for Suka Smart Assistant. Auto-fed by scrapers/ingestors, with hub override for Torah/culture-specific rules. Feeds Garden Planner, GardenQueueManager, Storehouse/Inventory intake, Meal Planner (from harvest), Cleaning (tool+area sanitation), and Animal (grazing/pest) integrations.",
+  "meta": {
+    "sourceOfTruth": "scraper",
+    "lastIngestedAt": "2025-10-31T11:20:00-05:00",
+    "ingestionPipelines": [
+      "importService",
+      "scraperService",
+      "bookmarklet",
+      "linked-accounts"
+    ],
+    "mergeStrategy": "scraper-wins",
+    "allowHubOverrides": true,
+    "overrideFields": [
+      "storehouseMapping",
+      "collaboration",
+      "sabbathGuard",
+      "zones"
+    ],
+    "sharedOrchestration": {
+      "emitOnUpdate": true,
+      "reason": "scraper-update",
+      "channels": [
+        "garden",
+        "storehouse",
+        "meals",
+        "cleaning",
+        "animals"
+      ]
+    },
+    "notes": [
+      "This file is intended to be UPDATED BY SCRAPERS, not hand-edited every time.",
+      "Hub/admin can still lock some fields the scraper cannot infer (Torah, co-op capacity, local zone nuances).",
+      "On update, emit events so GardenQueueManager and dashboards re-hydrate."
+    ]
+  },
+  "defaults": {
+    "timezone": "America/Chicago",
+    "growZone": "8b",
+    "irrigation": {
+      "preferMorning": true,
+      "skipIfRainForecast": true,
+      "integrateWeatherGuard": true
+    },
+    "harvestLogging": {
+      "syncToInventory": true,
+      "syncToStorehouse": true,
+      "syncToCalendar": true
+    }
+  },
+  "templates": [
+    {
+      "id": "garden-spring-8b-intensive",
+      "label": "Spring – Zone 8b Intensive Beds",
+      "zone": "8b",
+      "season": "spring",
+      "layout": {
+        "type": "raised-beds",
+        "beds": [
+          {
+            "id": "bed-1",
+            "crop": "tomato",
+            "variety": "roma",
+            "count": 12,
+            "spacingInches": 18,
+            "purpose": "sauce/canning"
+          },
+          {
+            "id": "bed-2",
+            "crop": "pepper",
+            "variety": "jalapeno",
+            "count": 10,
+            "purpose": "ferments, pickling"
+          },
+          {
+            "id": "bed-3",
+            "crop": "greens",
+            "variety": "collard",
+            "count": 16,
+            "purpose": "fresh + blanch/freeze"
+          }
+        ]
+      },
+      "careProfile": {
+        "water": {
+          "freqPerWeek": 3,
+          "skipIfRainForecast": true
+        },
+        "weed": {
+          "freqPerWeek": 2
+        },
+        "fertilize": {
+          "freqPerSeason": 2,
+          "notes": "use compost tea; integrate livestock compost if available"
+        },
+        "pest": {
+          "monitorEveryDays": 3,
+          "emitOnPressure": "garden.pest-pressure.detected"
+        },
+        "cleaning": {
+          "afterCareEmit": [
+            "cleaning.garden-bin-sanitize",
+            "cleaning.tool-sanitize"
+          ]
+        }
+      },
+      "harvestProfile": {
+        "expectedStart": "2025-04-15",
+        "expectedEnd": "2025-06-30",
+        "cadence": "2x-week",
+        "logAs": "garden.harvest.logged",
+        "storehouseMapping": [
+          {
+            "crop": "tomato",
+            "toStorehouse": "preservedTomato",
+            "method": "pressure-can",
+            "batchSizeLbs": 10,
+            "emit": [
+              "storehouse.intake.expected",
+              "meals.refresh.requested"
+            ]
+          },
+          {
+            "crop": "pepper",
+            "toStorehouse": "ferments",
+            "method": "brine-ferment"
+          },
+          {
+            "crop": "greens",
+            "toStorehouse": "frozenGreens",
+            "method": "blanch-freeze"
+          }
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "rules": [
+          {
+            "id": "garden-to-meals",
+            "ifHarvestIn": ["tomato", "greens", "pepper"],
+            "generate": "meal-plan-from-harvest",
+            "emit": [
+              "meals.plan.fromHarvest.requested"
+            ]
+          },
+          {
+            "id": "storehouse-goal-to-garden",
+            "ifStorehouseNeeds": ["preservedTomato", "frozenGreens"],
+            "generate": "garden-planting-plan-from-storehouse-goal",
+            "copyContext": ["zone", "season"]
+          },
+          {
+            "id": "pest-pressure-to-animals",
+            "ifGardenEvent": "garden.pest-pressure.detected",
+            "generate": "animal-mobile-tractor-session",
+            "emit": [
+              "animals.garden-assist.requested",
+              "cleaning.garden-area.expected"
+            ]
+          }
+        ]
+      },
+      "collaboration": {
+        "enabled": true,
+        "mode": "co-op",
+        "capacityHouseholds": 5,
+        "sharedOutputs": [
+          "preservedTomato",
+          "ferments",
+          "frozenGreens"
+        ],
+        "notes": "Use when multiple households agree: one grows heavy tomatoes, another peppers, etc. This template is 1/3 of that plan."
+      },
+      "uiHints": {
+        "icon": "sprout",
+        "group": "spring",
+        "color": "green"
+      }
+    },
+    {
+      "id": "garden-summer-8b-tomato-max",
+      "label": "Summer – Zone 8b Tomato Max for Community Sauce",
+      "zone": "8b",
+      "season": "summer",
+      "layout": {
+        "type": "in-ground",
+        "rows": [
+          {
+            "id": "row-1",
+            "crop": "tomato",
+            "variety": "roma",
+            "lengthFt": 25,
+            "purpose": "community sauce"
+          },
+          {
+            "id": "row-2",
+            "crop": "basil",
+            "lengthFt": 12
+          }
+        ]
+      },
+      "careProfile": {
+        "water": {
+          "freqPerWeek": 4,
+          "skipIfRainForecast": true
+        },
+        "trellis": {
+          "required": true,
+          "schedule": "weekly"
+        },
+        "cleaning": {
+          "afterCareEmit": [
+            "cleaning.garden-bin-sanitize"
+          ]
+        }
+      },
+      "harvestProfile": {
+        "expectedStart": "2025-07-01",
+        "expectedEnd": "2025-09-15",
+        "cadence": "3x-week",
+        "storehouseMapping": [
+          {
+            "crop": "tomato",
+            "toStorehouse": "tomato-sauce",
+            "method": "can-or-freeze",
+            "emit": [
+              "storehouse.intake.expected"
+            ]
+          }
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "rules": [
+          {
+            "id": "harvest-to-cleaning",
+            "ifHarvestLogged": true,
+            "generate": "cleaning.garden-processing-area",
+            "emit": [
+              "cleaning.session.created"
+            ]
+          },
+          {
+            "id": "harvest-to-meals-summer",
+            "ifHarvestIn": ["tomato"],
+            "generate": "meal-plan-from-harvest-summer",
+            "emit": [
+              "meals.plan.fromHarvest.requested"
+            ]
+          }
+        ]
+      },
+      "collaboration": {
+        "enabled": true,
+        "mode": "plan-with-others",
+        "capacityHouseholds": 12,
+        "shareable": true,
+        "tradeable": true,
+        "notes": "One household can grow enough tomatoes for several households; others may grow peppers/onions/garlic."
+      },
+      "uiHints": {
+        "icon": "sun",
+        "group": "summer",
+        "color": "red"
+      }
+    },
+    {
+      "id": "garden-fall-8b-root-cellar",
+      "label": "Fall – Zone 8b Roots for Storehouse",
+      "zone": "8b",
+      "season": "fall",
+      "layout": {
+        "type": "raised-beds",
+        "beds": [
+          {
+            "id": "bed-1",
+            "crop": "carrot",
+            "count": 80
+          },
+          {
+            "id": "bed-2",
+            "crop": "beet",
+            "count": 50
+          },
+          {
+            "id": "bed-3",
+            "crop": "turnip",
+            "count": 40
+          }
+        ]
+      },
+      "careProfile": {
+        "water": {
+          "freqPerWeek": 2
+        },
+        "weed": {
+          "freqPerWeek": 1
+        },
+        "cleaning": {
+          "afterCareEmit": [
+            "cleaning.tool-sanitize"
+          ]
+        }
+      },
+      "harvestProfile": {
+        "expectedStart": "2025-10-15",
+        "expectedEnd": "2025-12-01",
+        "cadence": "weekly",
+        "storehouseMapping": [
+          {
+            "crop": "carrot",
+            "toStorehouse": "root-cellar-carrot",
+            "method": "root-cellar"
+          },
+          {
+            "crop": "beet",
+            "toStorehouse": "ferments",
+            "method": "lacto-ferment"
+          },
+          {
+            "crop": "turnip",
+            "toStorehouse": "root-cellar-turnip",
+            "method": "root-cellar"
+          }
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "rules": [
+          {
+            "id": "storehouse-root-needs",
+            "ifStorehouseNeeds": [
+              "root-cellar-carrot",
+              "root-cellar-turnip"
+            ],
+            "generate": "garden-root-planting",
+            "copyContext": ["zone", "season"]
+          }
+        ]
+      },
+      "collaboration": {
+        "enabled": true,
+        "mode": "co-op",
+        "capacityHouseholds": 6,
+        "shareable": true
+      },
+      "uiHints": {
+        "icon": "box",
+        "group": "fall",
+        "color": "orange"
+      }
+    },
+    {
+      "id": "garden-winter-8b-cover-and-care",
+      "label": "Winter – Zone 8b Cover Crops + Tool Care",
+      "zone": "8b",
+      "season": "winter",
+      "layout": {
+        "type": "cover-crop",
+        "beds": [
+          {
+            "id": "bed-1",
+            "crop": "clover",
+            "purpose": "nitrogen-fix"
+          },
+          {
+            "id": "bed-2",
+            "crop": "rye",
+            "purpose": "soil-structure"
+          }
+        ]
+      },
+      "careProfile": {
+        "water": {
+          "freqPerWeek": 1
+        },
+        "cleaning": {
+          "afterCareEmit": [
+            "cleaning.tool-sanitize",
+            "cleaning.garden-bin-sanitize"
+          ]
+        }
+      },
+      "harvestProfile": {
+        "expectedStart": null,
+        "expectedEnd": null,
+        "cadence": null,
+        "storehouseMapping": []
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "rules": [
+          {
+            "id": "animals-to-garden",
+            "ifAnimalEvent": "animals.garden-assist.requested",
+            "generate": "garden-cover-maintenance",
+            "emit": [
+              "garden.care-session.generated",
+              "cleaning.garden-area.expected"
+            ]
+          }
+        ]
+      },
+      "collaboration": {
+        "enabled": false
+      },
+      "uiHints": {
+        "icon": "snowflake",
+        "group": "winter",
+        "color": "blue"
+      }
+    }
+  ],
+  "userCanSaveFavorites": true,
+  "favoritePolicy": {
+    "maxPerHousehold": 30,
+    "allowCustomSchedule": true,
+    "allowCustomIrrigation": true,
+    "allowCustomStorehouseLinks": true
+  }
+}

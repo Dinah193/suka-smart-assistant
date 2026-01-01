@@ -1,0 +1,104 @@
+{
+  "$schema": "../../../../schemas/planningGraph/nodes.schema.json",
+  "nodeKey": "animals.feedCalculator",
+  "id": "animals.feedCalculator",
+  "kind": "calculator-node",
+  "domain": "animals",
+  "label": "Animal Feed Calculator",
+  "description": "Calculates daily and batch feed requirements for each animal (by species, weight, and production goal), maps them to available feeds in the storehouse, and surfaces next actions for feed prep sessions and feed procurement.",
+  "version": "1.0.0",
+  "status": "active",
+  "priority": 30,
+  "tags": [
+    "animals",
+    "nutrition",
+    "storehouse",
+    "planningGraph",
+    "sessions"
+  ],
+
+  "inputs": {},
+
+  "outputs": {},
+
+  "events": {
+    "emits": [
+      "animals.feed.plan.calculated",
+      "inventory.shortage.detected",
+      "planningGraph.node.updated"
+    ],
+    "description": "AnimalFeedCalculator emits calculation events, including optional shortage flags and node update events for the Planning Graph."
+  },
+
+  "feedsInto": [
+    "animals.dailyCarePlanner",
+    "animals.weightGainPlanner",
+    "animals.healthCheckPlanner",
+    "storehouse.feedProcurement",
+    "storehouse.feedInventory",
+    "storehouseMeals.meatBreakdown",
+    "planningGraph.alerts",
+    "planningGraph.costs"
+  ],
+
+  "dependsOn": [
+    "animals.registry",
+    "storehouse.feedInventory",
+    "storehouse.pricebook",
+    "animals.nutritionTargets"
+  ],
+
+  "sessionConfig": {
+    "defaultDomain": "animals",
+    "defaultReason": "animals.feed.plan.now",
+    "defaultKind": "care-session",
+    "blockers": [
+      "inventory",
+      "weather",
+      "quietHours",
+      "sabbath",
+      "equipment"
+    ],
+    "prefs": {
+      "voiceGuidance": true,
+      "haptic": true,
+      "autoAdvance": false
+    }
+  },
+
+  "nowCta": {
+    "label": "Feed Session Now",
+    "tooltip": "Open a guided session to prepare and deliver today’s feed plan.",
+    "sessionReason": "animals.feed.plan.now",
+    "sessionKind": "care-session",
+    "preferredLauncher": "useAnimalFeedSessionLaunchers.launchFeedSessionNow"
+  },
+
+  "ui": {
+    "icon": "mdi:food-drumstick",
+    "colorToken": "animals.feed",
+    "route": "/tier2/animals/calculators/feed",
+    "group": "Animals & Feed",
+    "layoutHints": {
+      "showOnAnimalsDashboard": true,
+      "showOnStorehouseDashboard": true,
+      "order": 5
+    }
+  },
+
+  "analytics": {
+    "enabled": true,
+    "dimensions": [
+      "species",
+      "feedItem",
+      "season",
+      "farmLocation"
+    ],
+    "metrics": [
+      "dailyFeedKg",
+      "feedCostPerDay",
+      "feedCostPerKgGain",
+      "projectedShortageDays"
+    ]
+  }
+}

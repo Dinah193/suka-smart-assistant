@@ -1,0 +1,389 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:suka:vocab:garden.actions",
+  "title": "Suka Garden Actions Vocabulary",
+  "description": "Canonical action templates for garden plans: defaults, tools/supplies, safety (PHI/re-entry), irrigation hints, sequencing, and NBA labels.",
+  "type": "object",
+  "x-version": "1.0.0",
+  "x-domain": "garden",
+  "meta": {
+    "generatedAt": "2025-10-24T00:00:00.000Z",
+    "notes": [
+      "Fields align with gardenplan.validate.js kinds and scheduleHelpers pre-steps (seed soak/stratify, harden-off).",
+      "Supply names are normalized to match garden.crops.json supplyCatalog for listBuilder consolidation.",
+      "Use sequenceBefore/After and flags to power workPrepConsolidation and NBA nudges."
+    ]
+  },
+  "units": {
+    "time": "minutes"
+  },
+  "globals": {
+    "taskKinds": [
+      "soil_prep",
+      "sow",
+      "transplant",
+      "water",
+      "fertilize",
+      "trellis",
+      "prune",
+      "pest_scout",
+      "pesticide",
+      "weed",
+      "mulch",
+      "harvest",
+      "preserve",
+      "closeout"
+    ],
+    "toolNoiseRatings": {
+      "string_trimmer": 2,
+      "tiller": 3,
+      "hand_tools": 0,
+      "pruners": 0,
+      "hose": 0
+    },
+    "incompatiblePairs": [
+      { "a": "pesticide_contact", "b": "pesticide_oil", "reason": "Oil + some chemistries may burn foliage. Respect label intervals." }
+    ]
+  },
+  "actions": [
+    {
+      "id": "action:soil_prep",
+      "name": "Soil Prep",
+      "icon": "shovel",
+      "kind": "soil_prep",
+      "appliesTo": "bed",
+      "defaultDurationMin": 30,
+      "tools": ["hand_tools", "tiller"],
+      "supplies": [
+        { "name": "compost", "amount": "as_needed" }
+      ],
+      "ppe": [],
+      "dwellTimeMin": 0,
+      "phiDays": 0,
+      "irrigation": { "allowed": false, "defaultMinutes": 0 },
+      "sequenceBefore": [],
+      "sequenceAfter": ["sow", "transplant", "mulch"],
+      "flags": ["batchable_by_bed", "dirty_job"],
+      "scheduleHints": {
+        "relativeTo": "period.start",
+        "offsetDays": -3
+      },
+      "nbaHints": [
+        { "code": "amend_all_beds", "label": "Prep & amend multiple beds together" }
+      ]
+    },
+    {
+      "id": "action:sow",
+      "name": "Sow (Seed)",
+      "icon": "sprout",
+      "kind": "sow",
+      "appliesTo": "crop",
+      "defaultDurationMin": 15,
+      "tools": ["hand_tools"],
+      "supplies": [
+        { "name": "seed_packet", "amount": "as_needed" },
+        { "name": "starter_mix", "amount": "optional" }
+      ],
+      "ppe": [],
+      "dwellTimeMin": 0,
+      "phiDays": 0,
+      "irrigation": { "allowed": true, "defaultMinutes": 8 },
+      "sequenceBefore": ["soil_prep"],
+      "sequenceAfter": ["water", "mulch"],
+      "flags": ["requires_spacing_awareness"],
+      "scheduleHints": {
+        "presteps": [
+          { "code": "seed_soak", "when": "optional", "offsetHours": -8 },
+          { "code": "cold_stratify", "when": "species_specific", "offsetDays": -14 }
+        ]
+      },
+      "nbaHints": [
+        { "code": "row_cover_for_germ", "label": "Use row cover to hold moisture during germination" }
+      ]
+    },
+    {
+      "id": "action:transplant",
+      "name": "Transplant",
+      "icon": "plant",
+      "kind": "transplant",
+      "appliesTo": "crop",
+      "defaultDurationMin": 20,
+      "tools": ["hand_tools"],
+      "supplies": [
+        { "name": "starter_mix", "amount": "optional" },
+        { "name": "compost", "amount": "as_needed" }
+      ],
+      "ppe": [],
+      "dwellTimeMin": 0,
+      "phiDays": 0,
+      "irrigation": { "allowed": true, "defaultMinutes": 10 },
+      "sequenceBefore": ["soil_prep"],
+      "sequenceAfter": ["water", "trellis", "mulch"],
+      "flags": ["check_frost_date"],
+      "scheduleHints": {
+        "presteps": [
+          { "code": "harden_off", "when": "required", "offsetDays": -7 }
+        ]
+      },
+      "nbaHints": [
+        { "code": "cloudy_transplant", "label": "Prefer cloudy day or late afternoon" }
+      ]
+    },
+    {
+      "id": "action:water",
+      "name": "Irrigate",
+      "icon": "droplets",
+      "kind": "water",
+      "appliesTo": "bed",
+      "defaultDurationMin": 10,
+      "tools": ["hose"],
+      "supplies": [],
+      "ppe": [],
+      "dwellTimeMin": 0,
+      "phiDays": 0,
+      "irrigation": { "allowed": true, "defaultMinutes": 10 },
+      "sequenceBefore": [],
+      "sequenceAfter": [],
+      "flags": ["batchable_by_waterline"],
+      "scheduleHints": {
+        "daypart": "morning"
+      },
+      "nbaHints": [
+        { "code": "soil_probe", "label": "Water when top 1–2\" is dry" }
+      ]
+    },
+    {
+      "id": "action:fertilize",
+      "name": "Fertilize",
+      "icon": "beaker",
+      "kind": "fertilize",
+      "appliesTo": "crop",
+      "defaultDurationMin": 12,
+      "tools": ["hand_tools"],
+      "supplies": [
+        { "name": "balanced_fertilizer_5_5_5", "amount": "as_label" }
+      ],
+      "ppe": ["gloves"],
+      "dwellTimeMin": 0,
+      "phiDays": 0,
+      "irrigation": { "allowed": true, "defaultMinutes": 5 },
+      "sequenceBefore": [],
+      "sequenceAfter": ["water", "mulch"],
+      "flags": ["avoid_leaf_contact"],
+      "scheduleHints": {
+        "daypart": "morning",
+        "avoid": ["windy", "rain_imminent"]
+      },
+      "nbaHints": [
+        { "code": "avoid_overfeed", "label": "Light, frequent feedings beat heavy dumps" }
+      ]
+    },
+    {
+      "id": "action:trellis",
+      "name": "Trellis/Support",
+      "icon": "grid",
+      "kind": "trellis",
+      "appliesTo": "bed",
+      "defaultDurationMin": 25,
+      "tools": ["hand_tools"],
+      "supplies": [
+        { "name": "trellis_net", "amount": "as_needed" },
+        { "name": "stakes", "amount": "as_needed" },
+        { "name": "twine", "amount": "as_needed" }
+      ],
+      "ppe": [],
+      "dwellTimeMin": 0,
+      "phiDays": 0,
+      "irrigation": { "allowed": false, "defaultMinutes": 0 },
+      "sequenceBefore": ["prune"],
+      "sequenceAfter": [],
+      "flags": ["batchable_by_bed"],
+      "scheduleHints": { "relativeTo": "crop.stage", "stage": "pre_vining" },
+      "nbaHints": [
+        { "code": "one_build_session", "label": "Build trellis for all vining beds together" }
+      ]
+    },
+    {
+      "id": "action:prune",
+      "name": "Prune/Train",
+      "icon": "scissors",
+      "kind": "prune",
+      "appliesTo": "crop",
+      "defaultDurationMin": 10,
+      "tools": ["pruners"],
+      "supplies": [],
+      "ppe": [],
+      "dwellTimeMin": 0,
+      "phiDays": 0,
+      "irrigation": { "allowed": false, "defaultMinutes": 0 },
+      "sequenceBefore": [],
+      "sequenceAfter": ["trellis"],
+      "flags": ["clean_tools_between_plants"],
+      "scheduleHints": { "daypart": "morning" },
+      "nbaHints": [
+        { "code": "sanitize_pruners", "label": "Dip pruners between plants to limit disease" }
+      ]
+    },
+    {
+      "id": "action:pest_scout",
+      "name": "Scout for Pests",
+      "icon": "binoculars",
+      "kind": "pest_scout",
+      "appliesTo": "bed",
+      "defaultDurationMin": 8,
+      "tools": [],
+      "supplies": [],
+      "ppe": [],
+      "dwellTimeMin": 0,
+      "phiDays": 0,
+      "irrigation": { "allowed": false, "defaultMinutes": 0 },
+      "sequenceBefore": [],
+      "sequenceAfter": ["pesticide"],
+      "flags": ["repeat_weekly"],
+      "scheduleHints": { "cadenceDays": 7 },
+      "nbaHints": [
+        { "code": "thresholds", "label": "Treat only if thresholds exceeded" }
+      ]
+    },
+    {
+      "id": "action:pesticide",
+      "name": "Apply Pesticide",
+      "icon": "spray-bottle",
+      "kind": "pesticide",
+      "appliesTo": "crop",
+      "defaultDurationMin": 12,
+      "tools": [],
+      "supplies": [
+        { "name": "pesticide_contact", "amount": "as_label" }
+      ],
+      "ppe": ["gloves", "mask", "eye_protection"],
+      "dwellTimeMin": 0,
+      "phiDays": 3,
+      "irrigation": { "allowed": false, "defaultMinutes": 0 },
+      "sequenceBefore": ["pest_scout"],
+      "sequenceAfter": [],
+      "flags": ["respect_phi", "reentry_hold"],
+      "scheduleHints": {
+        "daypart": "evening",
+        "beeSafe": true,
+        "windMaxMph": 10,
+        "reentryOffsetMin": 60
+      },
+      "safety": {
+        "incompatiblePairs": [
+          { "a": "pesticide_contact", "b": "pesticide_oil" }
+        ]
+      },
+      "nbaHints": [
+        { "code": "phi_guard", "label": "PHI set to 3 days. Adjust per label." }
+      ]
+    },
+    {
+      "id": "action:weed",
+      "name": "Weed",
+      "icon": "leaf",
+      "kind": "weed",
+      "appliesTo": "bed",
+      "defaultDurationMin": 15,
+      "tools": ["hand_tools"],
+      "supplies": [],
+      "ppe": [],
+      "dwellTimeMin": 0,
+      "phiDays": 0,
+      "irrigation": { "allowed": false, "defaultMinutes": 0 },
+      "sequenceBefore": [],
+      "sequenceAfter": ["mulch"],
+      "flags": ["batchable_by_bed"],
+      "scheduleHints": { "cadenceDays": 10 },
+      "nbaHints": [
+        { "code": "early_weed", "label": "Early weeding is faster—hit seedlings" }
+      ]
+    },
+    {
+      "id": "action:mulch",
+      "name": "Mulch",
+      "icon": "layers",
+      "kind": "mulch",
+      "appliesTo": "bed",
+      "defaultDurationMin": 15,
+      "tools": ["hand_tools"],
+      "supplies": [
+        { "name": "mulch_straw", "amount": "as_needed" }
+      ],
+      "ppe": [],
+      "dwellTimeMin": 0,
+      "phiDays": 0,
+      "irrigation": { "allowed": false, "defaultMinutes": 0 },
+      "sequenceBefore": ["weed", "sow", "transplant", "fertilize"],
+      "sequenceAfter": [],
+      "flags": ["batchable_by_bed"],
+      "scheduleHints": { "relativeTo": "after_watering" },
+      "nbaHints": [
+        { "code": "retain_moisture", "label": "Mulch to retain moisture & suppress weeds" }
+      ]
+    },
+    {
+      "id": "action:harvest",
+      "name": "Harvest",
+      "icon": "basket",
+      "kind": "harvest",
+      "appliesTo": "crop",
+      "defaultDurationMin": 15,
+      "tools": ["pruners"],
+      "supplies": [],
+      "ppe": [],
+      "dwellTimeMin": 0,
+      "phiDays": 0,
+      "irrigation": { "allowed": false, "defaultMinutes": 0 },
+      "sequenceBefore": [],
+      "sequenceAfter": ["preserve"],
+      "flags": ["respect_phi"],
+      "scheduleHints": { "daypart": "morning" },
+      "nbaHints": [
+        { "code": "cluster_preserve", "label": "Cluster preservation when harvest spikes" }
+      ]
+    },
+    {
+      "id": "action:preserve",
+      "name": "Preserve (Process/Store)",
+      "icon": "jar",
+      "kind": "preserve",
+      "appliesTo": "plan",
+      "defaultDurationMin": 45,
+      "tools": [],
+      "supplies": [],
+      "ppe": [],
+      "dwellTimeMin": 0,
+      "phiDays": 0,
+      "irrigation": { "allowed": false, "defaultMinutes": 0 },
+      "sequenceBefore": ["harvest"],
+      "sequenceAfter": [],
+      "flags": ["kitchen_integration"],
+      "scheduleHints": { "clusterWith": "harvest" },
+      "nbaHints": [
+        { "code": "batch_canning", "label": "Batch canning/drying for peak weeks" }
+      ]
+    },
+    {
+      "id": "action:closeout",
+      "name": "Bed Closeout",
+      "icon": "archive",
+      "kind": "closeout",
+      "appliesTo": "bed",
+      "defaultDurationMin": 20,
+      "tools": ["hand_tools"],
+      "supplies": [],
+      "ppe": [],
+      "dwellTimeMin": 0,
+      "phiDays": 0,
+      "irrigation": { "allowed": false, "defaultMinutes": 0 },
+      "sequenceBefore": [],
+      "sequenceAfter": [],
+      "flags": ["remove_residue", "prep_cover_crop_optional"],
+      "scheduleHints": { "relativeTo": "season_end" },
+      "nbaHints": [
+        { "code": "plan_cover_crop", "label": "Lay cover crop after closeout" }
+      ]
+    }
+  ]
+}

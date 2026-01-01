@@ -1,0 +1,482 @@
+===============================================================================
+STEWARDSHIP MODE INFO PAGE – SSA “WEB OF MEANING”
+File: src/pages/mode/stewardship-mode-info.txt
+Role: Copy spec for the “What is Stewardship Mode?” / mode-explainer page
+===============================================================================
+
+0. CONCEPTUAL PURPOSE
+---------------------
+This file defines the **UI copy** for a page that explains STEWARDSHIP MODE:
+
+- What Stewardship Mode is in SSA.
+- How it differs from Tool Mode.
+- Why a householder might turn it on.
+- How it weaves cycles, seasons, yields, and storehouse posture across domains.
+
+Tone:
+- Calm, honoring, grounded in household reality.
+- No shame for not using Stewardship Mode.
+- Clear that this is a deeper **web of meaning** view, not a gamified “upgrade”.
+
+The page should work as:
+- A stand-alone info page reached from dashboards or “Mode” links.
+- A contextual overlay or side panel when a user is invited to “See the full stewardship view”.
+
+
+1. PAGE TITLE & HERO
+--------------------
+
+[PAGE.TITLE]
+"Stewardship Mode – Seeing the Web of Your Household"
+
+[PAGE.SUBTITLE]
+"Let cooking, storehouse, garden, preservation, cleaning, and feasts speak
+to each other so you can steward the whole house with clarity."
+
+[PAGE.HERO.TAGLINE]
+"Your flows are already in motion. Stewardship Mode helps you see how they weave together."
+
+[PAGE.HERO.BODY]
+"In Stewardship Mode, SSA lifts your view from a single tool to a connected picture.
+Cooking rhythms, preservation sessions, storehouse levels, garden yields, cleaning flows,
+and feasts are shown together with gentle insights about seasons, cycles, and dependencies.
+
+You can still work one flow at a time, but now you can also see how each rhythm draws
+from and feeds into the storehouse, the land, and the people in your household."
+
+[PAGE.HERO.CTA_PRIMARY]
+"Open the Stewardship Overview"
+
+[PAGE.HERO.CTA_SECONDARY]
+"Review how Stewardship Mode differs from Tool Mode"
+
+
+2. SECTION: WHAT IS STEWARDSHIP MODE?
+-------------------------------------
+
+[SECTION.WHAT_IS.TITLE]
+"What is Stewardship Mode?"
+
+[SECTION.WHAT_IS.BODY]
+"Stewardship Mode is SSA’s connected view of your household life. Instead of seeing
+only one tool at a time, you see how flows across domains form a living web:
+
+- garden and animals → preservation → storehouse → meals → cleaning → compost → garden
+- storehouse and feasts → rhythms of giving, mutual aid, and enterprise
+- cleaning, textiles, and maintenance → spaces that guard rest and dignity
+
+Stewardship Mode does not change your data. It changes how SSA arranges it:
+from isolated tools to a cycle- and season-aware stewardship map."
+
+[SECTION.WHAT_IS.KEY_POINT_1.TITLE]
+"Cross-domain view"
+
+[SECTION.WHAT_IS.KEY_POINT_1.BODY]
+"You can see multiple domains on one dashboard: cooking, storehouse, garden,
+animals, preservation, cleaning, feasts, and enterprise. Each panel reflects
+flows and yields that were recorded in Tool Mode."
+
+[SECTION.WHAT_IS.KEY_POINT_2.TITLE]
+"Season & cycle intelligence"
+
+[SECTION.WHAT_IS.KEY_POINT_2.BODY]
+"Stewardship Mode highlights planting windows, harvest seasons, feast clusters,
+and lean periods, and it shows how your rhythms line up with them."
+
+[SECTION.WHAT_IS.KEY_POINT_3.TITLE]
+"Storehouse posture & dependencies"
+
+[SECTION.WHAT_IS.KEY_POINT_3.BODY]
+"You can see how flows draw from or feed into your storehouse and where one
+domain depends on another – for example, when enterprise or feasts might strain
+provisions if garden and preservation flows are quiet."
+
+
+3. SECTION: WHY TURN ON STEWARDSHIP MODE?
+-----------------------------------------
+
+[SECTION.WHY.TITLE]
+"Why would a householder turn on Stewardship Mode?"
+
+[SECTION.WHY.BODY]
+"Over time, as you work with individual tools, rhythms begin to multiply.
+Meals, cleaning, yields, storehouse notes, and feasts all start to form patterns.
+Stewardship Mode is for the moment you begin to ask, ‘How does all of this work together?’"
+
+[SECTION.WHY.REASON_1.TITLE]
+"To see the whole household story"
+
+[SECTION.WHY.REASON_1.BODY]
+"Instead of guessing, you can see how your flows across domains combine to
+support or strain the household. You see where rhythms are steady, where they
+are quiet, and where a small adjustment could bring relief."
+
+[SECTION.WHY.REASON_2.TITLE]
+"To guard the storehouse"
+
+[SECTION.WHY.REASON_2.BODY]
+"Stewardship Mode lets you see, at a glance, how feasts, daily meals, preservation,
+enterprise, and mutual aid draw from your provisions. This makes it easier to
+plan feasts and generosity without emptying key categories."
+
+[SECTION.WHY.REASON_3.TITLE]
+"To let insights serve you"
+
+[SECTION.WHY.REASON_3.BODY]
+"When Stewardship Mode is active, SSA can offer short reflections that connect
+domains, such as:
+
+- ‘Garden yields and storehouse patterns suggest this is a good season for
+   a small preservation flow.’
+- ‘This enterprise rhythm may be pulling heavily from the storehouse ahead of a feast.’
+- ‘Cleaning cycles may be heavy compared to your current season and energy.’"
+
+[SECTION.WHY.CALM_NOTE]
+"Stewardship Mode is an invitation, not a demand. It is here for the householder
+who wants to see the web, not just the threads."
+
+
+4. SECTION: HOW STEWARDSHIP MODE WORKS WITH YOUR FLOWS
+------------------------------------------------------
+
+[SECTION.HOW_WORKS.TITLE]
+"How Stewardship Mode works with your flows"
+
+[SECTION.HOW_WORKS.BODY]
+"Stewardship Mode does not replace Tool Mode. It sits **on top of it**, using
+your existing flows to show the bigger picture."
+
+[SECTION.HOW_WORKS.POINT_1.TITLE]
+"Flows stay where they were created"
+
+[SECTION.HOW_WORKS.POINT_1.BODY]
+"You still shape and adjust rhythms in their own places:
+- Cooking & Meal Rhythm,
+- Storehouse Snapshot & Planning,
+- Garden Bed & Planting Flow,
+- Flock & Herd Care Rhythm,
+- Preservation & Long-Term Provision,
+- Cleaning & Care Cycle,
+- Feasts & Gatherings,
+- Household Enterprise.
+
+Stewardship Mode simply pulls them into one connected view."
+
+[SECTION.HOW_WORKS.POINT_2.TITLE]
+"Cycles & seasonality overlay"
+
+[SECTION.HOW_WORKS.POINT_2.BODY]
+"The cycles engine and seasonal intelligence layer sit over your flows, helping you see:
+- which rhythms are daily vs weekly vs seasonal,
+- where a season has shifted but a pattern has not,
+- where harvest or feast windows are approaching."
+
+[SECTION.HOW_WORKS.POINT_3.TITLE]
+"Storehouse & dependency overlay"
+
+[SECTION.HOW_WORKS.POINT_3.BODY]
+"When flows are marked as drawing from or feeding into the storehouse, Stewardship Mode:
+- summarizes your storehouse posture,
+- shows which flows lean heavily on key categories,
+- reveals dependencies, such as garden yields needed for planned feasts or enterprise."
+
+
+5. SECTION: TOOL MODE VS STEWARDSHIP MODE (COMPARISON)
+------------------------------------------------------
+
+[SECTION.COMPARISON.TITLE]
+"Tool Mode and Stewardship Mode – two ways to walk"
+
+[SECTION.COMPARISON.SUBTITLE]
+"Tool Mode focuses your hands. Stewardship Mode broadens your sight."
+
+[SECTION.COMPARISON.TABLE.HEADER.LEFT]
+"Tool Mode"
+
+[SECTION.COMPARISON.TABLE.HEADER.RIGHT]
+"Stewardship Mode"
+
+[SECTION.COMPARISON.ROW_1.LEFT_TITLE]
+"View"
+
+[SECTION.COMPARISON.ROW_1.LEFT_BODY]
+"One tool and one flow at a time."
+
+[SECTION.COMPARISON.ROW_1.RIGHT_BODY]
+"Multiple domains and flows shown together in an overview."
+
+[SECTION.COMPARISON.ROW_2.LEFT_TITLE]
+"Use"
+
+[SECTION.COMPARISON.ROW_2.LEFT_BODY]
+"Shape a single rhythm: a meal pattern, a cleaning cycle, a bed plan, a feast."
+
+[SECTION.COMPARISON.ROW_2.RIGHT_BODY]
+"See how all rhythms and yields line up with seasons, feasts, and the storehouse."
+
+[SECTION.COMPARISON.ROW_3.LEFT_TITLE]
+"Season & cycles"
+
+[SECTION.COMPARISON.ROW_3.LEFT_BODY]
+"Light hints about rhythms and simple season cues near each tool."
+
+[SECTION.COMPARISON.ROW_3.RIGHT_BODY]
+"Coordinated view of seasons, planting windows, feast clusters, and lean periods."
+
+[SECTION.COMPARISON.ROW_4.LEFT_TITLE]
+"Storehouse connection"
+
+[SECTION.COMPARISON.ROW_4.LEFT_BODY]
+"Flows can be marked as drawing from or feeding into the storehouse, but the view stays local."
+
+[SECTION.COMPARISON.ROW_4.RIGHT_BODY]
+"Storehouse posture and coverage are shown across domains, with insights about strain or surplus."
+
+[SECTION.COMPARISON.ROW_5.LEFT_TITLE]
+"Best fit for"
+
+[SECTION.COMPARISON.ROW_5.LEFT_BODY]
+"Householders who want to move gently, or who need to focus on one flow at a time."
+
+[SECTION.COMPARISON.ROW_5.RIGHT_BODY]
+"Householders who want to see the household as a whole: cycles, seasons, yields, and provision in one weave."
+
+
+6. SECTION: WHAT YOU SEE IN STEWARDSHIP MODE
+--------------------------------------------
+
+[SECTION.WHAT_YOU_SEE.TITLE]
+"What you can see in Stewardship Mode"
+
+[SECTION.WHAT_YOU_SEE.BODY]
+"Exact layout may change as SSA grows, but Stewardship Mode commonly includes:"
+
+[SECTION.WHAT_YOU_SEE.PANEL_1.TITLE]
+"Household Cycle Overview"
+
+[SECTION.WHAT_YOU_SEE.PANEL_1.BODY]
+"A visual of major flows:
+- cooking, cleaning, garden, animals, preservation, feasts, enterprise,
+with hints for whether each is steady, heavy, or quiet for this season."
+
+[SECTION.WHAT_YOU_SEE.PANEL_2.TITLE]
+"Storehouse Posture"
+
+[SECTION.WHAT_YOU_SEE.PANEL_2.BODY]
+"A snapshot of grain, beans, oil, preserved goods, and other key categories:
+- estimated weeks of coverage at current rhythms,
+- gentle alerts when lean patterns meet approaching feasts or heavy enterprise."
+
+[SECTION.WHAT_YOU_SEE.PANEL_3.TITLE]
+"Season & Feast Horizon"
+
+[SECTION.WHAT_YOU_SEE.PANEL_3.BODY]
+"Upcoming seasonal windows and gatherings:
+- planting and harvest windows,
+- lean seasons,
+- major feasts and gatherings tied to your calendar."
+
+[SECTION.WHAT_YOU_SEE.PANEL_4.TITLE]
+"Cross-Domain Insights"
+
+[SECTION.WHAT_YOU_SEE.PANEL_4.BODY]
+"Short reflections drawn from your real flows, such as:
+- ‘This is a rich garden season; consider a preservation run to strengthen the storehouse.’
+- ‘Multiple feasts fall in the next month; your grain posture may need attention.’"
+
+[SECTION.WHAT_YOU_SEE.PANEL_5.TITLE]
+"Rhythms & Rest"
+
+[SECTION.WHAT_YOU_SEE.PANEL_5.BODY]
+"A summary of how many rhythms are active and how heavy they appear for the current season,
+highlighting places where a lighter expression or a true rest may be wise."
+
+
+7. SECTION: EXAMPLES OF STEWARDSHIP MODE IN ACTION
+--------------------------------------------------
+
+[SECTION.EXAMPLES.TITLE]
+"Examples of Stewardship Mode in action"
+
+[SECTION.EXAMPLES.BODY]
+"These examples show how Stewardship Mode uses information you already recorded in Tool Mode."
+
+[SECTION.EXAMPLES.EXAMPLE_1.TITLE]
+"Example 1 – Garden flush meets lean storehouse"
+
+[SECTION.EXAMPLES.EXAMPLE_1.BODY]
+"You recorded several garden planting flows and now yields are arriving.
+Your storehouse snapshot, however, shows lean jars in key categories.
+
+Stewardship Mode insight:
+- ‘Garden yields and storehouse posture suggest this is a good moment
+   for a preservation flow focused on staples you’re low in.’"
+
+[SECTION.EXAMPLES.EXAMPLE_2.TITLE]
+"Example 2 – Feasts and enterprise drawing from the same provision"
+
+[SECTION.EXAMPLES.EXAMPLE_2.BODY]
+"You’ve set up a weekly bread-baking enterprise and also planned two major feasts.
+Both draw heavily from grain and oil.
+
+Stewardship Mode insight:
+- ‘Upcoming feasts and enterprise rhythms both lean on grains and oil.
+   Consider a provisioning cycle or adjusting an enterprise flow before the feasts.’"
+
+[SECTION.EXAMPLES.EXAMPLE_3.TITLE]
+"Example 3 – Cleaning rhythms too heavy for this season"
+
+[SECTION.EXAMPLES.EXAMPLE_3.BODY]
+"You’ve logged a whole-house cleaning rhythm along with work and care responsibilities.
+The cycles engine notices more cleaning flows than usual for this lean-energy season.
+
+Stewardship Mode insight:
+- ‘Cleaning rhythms may be heavy compared to your current season.
+   A simpler expression or fewer rooms per cycle may guard your rest.’"
+
+[SECTION.EXAMPLES.EXAMPLE_4.TITLE]
+"Example 4 – Storehouse suggests a mutual-aid opportunity"
+
+[SECTION.EXAMPLES.EXAMPLE_4.BODY]
+"Your storehouse snapshot shows strong surplus in a few categories over several months.
+At the same time, your feast and mutual-aid flows are quiet.
+
+Stewardship Mode insight:
+- ‘Your storehouse has held a surplus in [category] for several cycles.
+   Consider a mutual-aid cooking day or shared provision with another household.’"
+
+
+8. SECTION: GETTING READY FOR STEWARDSHIP MODE
+----------------------------------------------
+
+[SECTION.PREPARATION.TITLE]
+"How to prepare for Stewardship Mode (gently)"
+
+[SECTION.PREPARATION.BODY]
+"You do not need a perfect dataset. A few faithful rhythms are enough to begin."
+
+[SECTION.PREPARATION.STEP_1.TITLE]
+"Step 1 – Keep using tools as you are"
+
+[SECTION.PREPARATION.STEP_1.BODY]
+"Continue shaping and logging flows in the tools you already use:
+meals, storehouse, garden, animals, cleaning, or feasts."
+
+[SECTION.PREPARATION.STEP_2.TITLE]
+"Step 2 – Add simple storehouse direction"
+
+[SECTION.PREPARATION.STEP_2.BODY]
+"When possible, mark whether a flow:
+- draws from the storehouse,
+- feeds into the storehouse,
+- or is neutral.
+
+This helps Stewardship Mode read your flows clearly."
+
+[SECTION.PREPARATION.STEP_3.TITLE]
+"Step 3 – Provide basic season context"
+
+[SECTION.PREPARATION.STEP_3.BODY]
+"If you share your region and approximate seasonal pattern with SSA,
+it can align flows with planting windows, harvest times, and feast seasons."
+
+[SECTION.PREPARATION.NOTE]
+"Once a few flows are in place across two or more domains, Stewardship Mode
+can already begin to offer useful reflections."
+
+
+9. SECTION: FAQ SNIPPETS
+------------------------
+
+[SECTION.FAQ.TITLE]
+"Questions about Stewardship Mode"
+
+[SECTION.FAQ.Q1.QUESTION]
+"Do I have to use Stewardship Mode for SSA to be useful?"
+
+[SECTION.FAQ.Q1.ANSWER]
+"No. Tool Mode is fully useful by itself. Stewardship Mode is an additional
+way of seeing the same household data, not a requirement."
+
+[SECTION.FAQ.Q2.QUESTION]
+"Can I move back and forth between modes?"
+
+[SECTION.FAQ.Q2.ANSWER]
+"Yes. You can view a connected Stewardship overview when you want to see the whole
+web, and return to Tool Mode when you want to focus on a single flow."
+
+[SECTION.FAQ.Q3.QUESTION]
+"Will Stewardship Mode change how I record flows?"
+
+[SECTION.FAQ.Q3.ANSWER]
+"Not directly. You still shape flows inside each tool. Stewardship Mode simply
+reads them together and adds season, cycle, and storehouse overlays."
+
+[SECTION.FAQ.Q4.QUESTION]
+"Do I need to fill in every domain before Stewardship Mode works?"
+
+[SECTION.FAQ.Q4.ANSWER]
+"No. Even a few domains (for example, cooking, storehouse, and garden) are
+enough to begin seeing meaningful patterns."
+
+[SECTION.FAQ.Q5.QUESTION]
+"Is Stewardship Mode about judging how ‘good’ my house is?"
+
+[SECTION.FAQ.Q5.ANSWER]
+"No. It is about clarity, not shame. Stewardship Mode reveals patterns so that
+you can adjust rhythms in a way that protects rest, provision, and peace."
+
+[SECTION.FAQ.Q6.QUESTION]
+"Does Stewardship Mode change how sessions run?"
+
+[SECTION.FAQ.Q6.ANSWER]
+"SessionRunner still walks you through one flow at a time. In Stewardship Mode,
+sessions can also emit events that update the overview panels and insights in
+near real time."
+
+
+10. CLOSING CALL-TO-ACTION
+--------------------------
+
+[SECTION.CLOSING.TITLE]
+"Lift your eyes without losing your footing"
+
+[SECTION.CLOSING.BODY]
+"Stewardship Mode is here when you’re ready to see the web: how garden, animals,
+preservation, storehouse, meals, cleaning, feasts, mutual aid, and enterprise
+all speak to each other through cycles and seasons.
+
+You can still begin each day with one simple rhythm. Stewardship Mode simply
+makes it easier to see where those rhythms are carrying your household."
+
+[SECTION.CLOSING.CTA_PRIMARY]
+"Open the Stewardship Overview"
+
+[SECTION.CLOSING.CTA_SECONDARY]
+"Stay in Tool Mode and shape one more rhythm"
+
+
+11. TODO HOOKS FOR FUTURE INTEGRATION
+-------------------------------------
+
+// TODO[links]:
+// - Wire CTA buttons to the actual Stewardship dashboard and Tool Mode info page.
+
+// TODO[seasonal-logic]:
+// - Optionally tailor examples and insights based on current seasonRules.config
+//   (e.g., more garden/preservation guidance in harvest season).
+
+// TODO[insights]:
+// - Add a live “Sample insights from your own data” section when engines are active,
+//   using anonymized or on-the-fly computed examples.
+
+// TODO[dependencies]:
+// - Integrate visuals from dependencyMap so this page can show one small diagram
+//   of the garden → preservation → storehouse → meals → cleaning → compost → garden flow.
+
+// TODO[progression]:
+// - Use skillProgression.map and masteryStages to adjust wording for new vs experienced
+//   householders (e.g., more reassurance for beginners, more depth for advanced users).
+
+END OF STEWARDSHIP MODE INFO PAGE SPEC
+===============================================================================

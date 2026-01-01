@@ -1,0 +1,369 @@
+{
+  "defaults": [
+    {
+      "id": "default.after-planner.go-to-session-launcher",
+      "from": {
+        "nodeType": "planner",
+        "tagsAny": ["session-ready"]
+      },
+      "to": {
+        "targetId": "storehouse.sessions.launcher",
+        "label": "Open Session Launcher",
+        "reason": "You’ve finished planning. Launch a live session using this plan.",
+        "priority": 5,
+        "tags": ["launcher", "session", "planner"],
+        "autoStartSession": false
+      }
+    },
+    {
+      "id": "default.after-calculator.suggest-planner",
+      "from": {
+        "nodeType": "calculator"
+      },
+      "to": {
+        "targetId": "storehouse.meals.planner",
+        "label": "Plan Meals From These Numbers",
+        "reason": "Turn your calculator results into actionable meal plans.",
+        "priority": 3,
+        "tags": ["planner", "meals"],
+        "autoStartSession": false
+      }
+    },
+    {
+      "id": "default.after-import.suggest-planning",
+      "from": {
+        "nodeType": "import"
+      },
+      "to": {
+        "targetId": "storehouse.meals.planner",
+        "label": "Plan Around This Import",
+        "reason": "You imported new content. Plan how to use it in your storehouse and meals.",
+        "priority": 2,
+        "tags": ["planner", "import"],
+        "autoStartSession": false
+      }
+    }
+  ],
+  "byDomain": {
+    "cooking": [
+      {
+        "id": "cooking.after-recipe-import.macro-calculator",
+        "from": {
+          "domain": "cooking",
+          "nodeType": "import",
+          "tagsAny": ["recipe"]
+        },
+        "to": {
+          "targetId": "storehouse.meals.macroCalculator",
+          "label": "Check Macros for This Recipe",
+          "reason": "Analyze protein, carbs, and fats before planning your batch or weekly meals.",
+          "priority": 6,
+          "tags": ["calculator", "macros", "nutrition"],
+          "autoStartSession": false
+        }
+      },
+      {
+        "id": "cooking.after-recipe-import.meal-planner",
+        "from": {
+          "domain": "cooking",
+          "nodeType": "import",
+          "tagsAny": ["recipe"]
+        },
+        "to": {
+          "targetId": "storehouse.meals.planner",
+          "label": "Plan Meals Using This Recipe",
+          "reason": "Drop this recipe into your weekly or batch meal plan.",
+          "priority": 5,
+          "tags": ["planner", "meals"],
+          "autoStartSession": false
+        }
+      },
+      {
+        "id": "cooking.after-batch-planner.open-batch-session",
+        "from": {
+          "domain": "cooking",
+          "nodeType": "planner",
+          "tagsAny": ["batch-session"]
+        },
+        "to": {
+          "targetId": "cooking.batchSession.runnerTemplate",
+          "label": "Start Batch Cooking Session",
+          "reason": "You’ve finished planning a batch. Start the live session runner.",
+          "priority": 7,
+          "tags": ["session", "batch-session", "runner", "session-ready"],
+          "autoStartSession": true
+        }
+      },
+      {
+        "id": "cooking.after-batch-planner.preservation-path",
+        "from": {
+          "domain": "cooking",
+          "nodeType": "planner",
+          "tagsAny": ["batch-session"]
+        },
+        "to": {
+          "targetId": "preservation.sessionPlanner",
+          "label": "Plan Preservation for Leftovers",
+          "reason": "Map what portions of the batch will be canned, frozen, or dehydrated.",
+          "priority": 4,
+          "tags": ["planner", "preservation"],
+          "autoStartSession": false
+        }
+      }
+    ],
+    "cleaning": [
+      {
+        "id": "cleaning.after-zone-planner.run-cleaning-session",
+        "from": {
+          "domain": "cleaning",
+          "nodeType": "planner",
+          "tagsAny": ["zone-plan", "deep-clean"]
+        },
+        "to": {
+          "targetId": "cleaning.zoneSession.runnerTemplate",
+          "label": "Start Cleaning Session",
+          "reason": "You’ve planned your cleaning zones. Run a live guided cleaning session.",
+          "priority": 7,
+          "tags": ["session", "runner", "zone", "session-ready"],
+          "autoStartSession": true
+        }
+      },
+      {
+        "id": "cleaning.after-zone-planner.inventory-supplies",
+        "from": {
+          "domain": "cleaning",
+          "nodeType": "planner",
+          "tagsAny": ["zone-plan"]
+        },
+        "to": {
+          "targetId": "storehouse.inventory.cleaningSuppliesChecker",
+          "label": "Check Cleaning Supplies",
+          "reason": "Confirm you have enough supplies before your cleaning session.",
+          "priority": 4,
+          "tags": ["storehouse", "inventory", "supplies"],
+          "autoStartSession": false
+        }
+      }
+    ],
+    "garden": [
+      {
+        "id": "garden.after-planting-planner.session",
+        "from": {
+          "domain": "garden",
+          "nodeType": "planner",
+          "tagsAny": ["planting-plan"]
+        },
+        "to": {
+          "targetId": "garden.session.runnerTemplate",
+          "label": "Start Garden Work Session",
+          "reason": "You’ve planned your planting tasks. Run a live garden work session.",
+          "priority": 7,
+          "tags": ["session", "runner", "garden", "session-ready"],
+          "autoStartSession": true
+        }
+      },
+      {
+        "id": "garden.after-harvest-log.preservation",
+        "from": {
+          "domain": "garden",
+          "nodeType": "calculator",
+          "tagsAny": ["harvest-log"]
+        },
+        "to": {
+          "targetId": "preservation.canning.tracker",
+          "label": "Plan Canning/Preservation",
+          "reason": "You logged a harvest. Decide what needs canning, freezing, or dehydrating.",
+          "priority": 6,
+          "tags": ["preservation", "canning", "planner"],
+          "autoStartSession": false
+        }
+      },
+      {
+        "id": "garden.after-harvest-log.storehouse-update",
+        "from": {
+          "domain": "garden",
+          "nodeType": "calculator",
+          "tagsAny": ["harvest-log"]
+        },
+        "to": {
+          "targetId": "storehouse.inventory.harvestIntake",
+          "label": "Add Harvest to Storehouse",
+          "reason": "Update your storehouse inventory with newly harvested items.",
+          "priority": 5,
+          "tags": ["storehouse", "inventory", "harvest"],
+          "autoStartSession": false
+        }
+      }
+    ],
+    "animals": [
+      {
+        "id": "animals.after-care-planner.session",
+        "from": {
+          "domain": "animals",
+          "nodeType": "planner",
+          "tagsAny": ["care-plan"]
+        },
+        "to": {
+          "targetId": "animals.careSession.runnerTemplate",
+          "label": "Start Animal Care Session",
+          "reason": "You’ve planned animal care tasks. Run a live, guided care session.",
+          "priority": 7,
+          "tags": ["session", "runner", "animals", "session-ready"],
+          "autoStartSession": true
+        }
+      },
+      {
+        "id": "animals.after-butchery-calculator.meat-breakdown",
+        "from": {
+          "domain": "animals",
+          "nodeType": "calculator",
+          "tagsAny": ["butchery", "meat-yield"]
+        },
+        "to": {
+          "targetId": "storehouse.meals.MeatBreakdownCalculator",
+          "label": "Open Meat Breakdown Calculator",
+          "reason": "Translate carcass weights into cut types for the storehouse.",
+          "priority": 6,
+          "tags": ["calculator", "meat", "storehouse"],
+          "autoStartSession": false
+        }
+      },
+      {
+        "id": "animals.after-butchery-calculator.preservation-planner",
+        "from": {
+          "domain": "animals",
+          "nodeType": "calculator",
+          "tagsAny": ["butchery", "meat-yield"]
+        },
+        "to": {
+          "targetId": "preservation.meat.sessionPlanner",
+          "label": "Plan Meat Preservation",
+          "reason": "Decide what gets frozen, cured, canned, or dehydrated.",
+          "priority": 5,
+          "tags": ["planner", "preservation", "meat"],
+          "autoStartSession": false
+        }
+      }
+    ],
+    "preservation": [
+      {
+        "id": "preservation.after-session-planner.session-runner",
+        "from": {
+          "domain": "preservation",
+          "nodeType": "planner",
+          "tagsAny": ["canning-plan", "preservation-plan"]
+        },
+        "to": {
+          "targetId": "preservation.session.runnerTemplate",
+          "label": "Start Preservation Session",
+          "reason": "You planned preservation tasks. Launch a guided preservation session.",
+          "priority": 7,
+          "tags": ["session", "runner", "canning", "session-ready"],
+          "autoStartSession": true
+        }
+      },
+      {
+        "id": "preservation.after-session.storehouse-update",
+        "from": {
+          "domain": "preservation",
+          "nodeType": "planner",
+          "tagsAny": ["preservation-plan"]
+        },
+        "to": {
+          "targetId": "storehouse.inventory.preservedIntake",
+          "label": "Update Storehouse with Preserved Items",
+          "reason": "Reflect preserved jars, frozen packages, and dried goods in the storehouse.",
+          "priority": 6,
+          "tags": ["storehouse", "inventory", "preservation"],
+          "autoStartSession": false
+        }
+      }
+    ],
+    "storehouse": [
+      {
+        "id": "storehouse.after-inventory-audit.meal-planner",
+        "from": {
+          "domain": "storehouse",
+          "nodeType": "calculator",
+          "tagsAny": ["inventory-audit"]
+        },
+        "to": {
+          "targetId": "storehouse.meals.planner",
+          "label": "Plan Meals Based on Current Inventory",
+          "reason": "Turn your inventory snapshot into a practical meal plan.",
+          "priority": 7,
+          "tags": ["planner", "meals", "inventory"],
+          "autoStartSession": false
+        }
+      },
+      {
+        "id": "storehouse.after-meal-planner.cooking-session",
+        "from": {
+          "domain": "storehouse",
+          "nodeType": "planner",
+          "tagsAny": ["meal-plan"]
+        },
+        "to": {
+          "targetId": "cooking.batchSession.runnerTemplate",
+          "label": "Start Cooking Session from Plan",
+          "reason": "You have a meal plan. Launch a cooking session based on it.",
+          "priority": 6,
+          "tags": ["session", "runner", "batch-session", "session-ready"],
+          "autoStartSession": true
+        }
+      },
+      {
+        "id": "storehouse.after-meal-planner.garden-planner",
+        "from": {
+          "domain": "storehouse",
+          "nodeType": "planner",
+          "tagsAny": ["meal-plan"]
+        },
+        "to": {
+          "targetId": "garden.planting.planner",
+          "label": "Plan Garden Around Storehouse Gaps",
+          "reason": "Use your meal plan to decide what seeds and crops to plant.",
+          "priority": 4,
+          "tags": ["planner", "garden", "storehouse-gap"],
+          "autoStartSession": false
+        }
+      }
+    ]
+  },
+  "byNodeType": {
+    "calculator": [
+      {
+        "id": "nodeType.calculator.after-health-calcs.to-meals",
+        "from": {
+          "nodeType": "calculator",
+          "tagsAny": ["health", "nutrition"]
+        },
+        "to": {
+          "targetId": "storehouse.meals.planner",
+          "label": "Plan Meals from Health/Nutrition Targets",
+          "reason": "Align your daily meals with your health or hair nutrition calculator results.",
+          "priority": 5,
+          "tags": ["planner", "health", "nutrition"],
+          "autoStartSession": false
+        }
+      }
+    ],
+    "planner": [
+      {
+        "id": "nodeType.planner.after-homestead-planner.to-sessions-dashboard",
+        "from": {
+          "nodeType": "planner",
+          "tagsAny": ["homestead", "multi-domain"]
+        },
+        "to": {
+          "targetId": "storehouse.sessions.dashboard",
+          "label": "Review All Upcoming Sessions",
+          "reason": "You’ve created a multi-domain plan. Review or start the linked sessions.",
+          "priority": 4,
+          "tags": ["dashboard", "sessions", "multi-domain"],
+          "autoStartSession": false
+        }
+      }
+    ]
+  }
+}

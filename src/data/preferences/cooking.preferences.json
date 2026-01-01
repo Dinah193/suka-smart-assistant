@@ -1,0 +1,192 @@
+{
+  "version": "1.0.0",
+  "domain": "cooking",
+  "generatedAt": "2025-11-11T00:00:00.000Z",
+  "source": "Household defaults (SSA builtin)",
+  "preferences": {
+    "units": {
+      "temperature": "F",
+      "mass": "g",
+      "volume": "ml",
+      "time": "min",
+      "fallbacks": {
+        "temperature": ["C", "F"],
+        "mass": ["g", "kg", "oz", "lb"],
+        "volume": ["ml", "l", "tsp", "tbsp", "cup", "qt"],
+        "time": ["min", "hr"]
+      }
+    },
+    "saltAndSpice": {
+      "saltLevel": "medium",
+      "spiceLevel": "mild",
+      "saltGuides": {
+        "pastaWaterPct": 1.5,
+        "brineLightPct": 5,
+        "brineHeavyPct": 10
+      }
+    },
+    "oils": {
+      "oilPreferenceOrder": [
+        "avocado-refined",
+        "canola",
+        "refined-olive",
+        "ghee",
+        "extra-virgin-olive"
+      ],
+      "avoidOils": [],
+      "minSmokePointC": 200,
+      "defaultHighHeatOil": "avocado-refined",
+      "defaultMediumHeatOil": "refined-olive",
+      "defaultFinishingOil": "extra-virgin-olive"
+    },
+    "allergensAndDiet": {
+      "avoidAllergens": [],
+      "dietTags": [],
+      "allowAlcoholCooking": true
+    },
+    "donenessTargets": {
+      "beef_steak": {
+        "label": "medium-rare",
+        "targetTemp": { "unit": "F", "value": 130 },
+        "carryoverUpTo": { "unit": "F", "value": 135 }
+      },
+      "lamb": {
+        "label": "medium-rare",
+        "targetTemp": { "unit": "F", "value": 130 }
+      },
+      "pork_chop_tenderloin": {
+        "label": "juicy",
+        "targetTemp": { "unit": "F", "value": 145 }
+      },
+      "poultry_whole_breast_thigh": {
+        "label": "safe-juicy",
+        "targetTemp": { "unit": "F", "value": 165 }
+      },
+      "ground_meat": {
+        "label": "safe",
+        "targetTemp": { "unit": "F", "value": 160 }
+      },
+      "fish_fillet": {
+        "label": "flake",
+        "targetTemp": { "unit": "F", "value": 145 }
+      },
+      "duck_breast": {
+        "label": "rendered-skin-medium",
+        "targetTemp": { "unit": "F", "value": 135 }
+      },
+      "eggs": {
+        "scrambleStyle": "soft-scramble",
+        "panTempC": [68, 74]
+      }
+    },
+    "equipment": {
+      "preferredEquipment": [
+        "cast-iron-skillet",
+        "sheet-pan",
+        "dutch-oven",
+        "probe-thermometer",
+        "instant-read-thermometer"
+      ],
+      "backupEquipment": [
+        "nonstick-skillet",
+        "stainless-10in"
+      ],
+      "disallowedEquipment": [],
+      "applianceHints": {
+        "convectionPreferred": true,
+        "airFryerAllowed": true,
+        "outdoorGrillAvailable": false,
+        "sousVideAvailable": true
+      }
+    },
+    "utensils": {
+      "mustHave": ["tongs", "spatula", "ladle", "whisk", "peeler", "chef-knife", "paring-knife"],
+      "niceToHave": ["bench-scraper", "fish-spatula", "microplane", "mortar-pestle"]
+    },
+    "techniques": {
+      "preferSearThenOven": true,
+      "preferSousVideForSteak": true,
+      "preferStirFryForGreenVeg": true,
+      "allowDeepFry": false,
+      "defaultRiceMethod": "absorption",
+      "defaultVegFinishFat": "butter"
+    },
+    "substitutions": {
+      "enableAutoSubstitutions": true,
+      "strategy": "preference-first", 
+      "maps": [
+        { "from": "milk", "to": "oat milk", "ratio": 1.0, "reason": "preference" },
+        { "from": "butter", "to": "ghee", "ratio": 1.0, "reason": "high-heat" },
+        { "from": "canola", "to": "avocado-refined", "ratio": 1.0, "reason": "higher-smoke-point" }
+      ]
+    },
+    "timersAndAlerts": {
+      "defaultTimerOutput": "device",
+      "allowMultipleTimers": true,
+      "speakTimers": false,
+      "chimeStyle": "soft",
+      "prealerts": [
+        { "scenario": "resting-finish", "offsetSec": -60 },
+        { "scenario": "boil-water-ready", "offsetSec": 0 }
+      ]
+    },
+    "cuisineBias": {
+      "preferredCuisines": ["italian", "mexican", "japanese"],
+      "avoidCuisines": [],
+      "herbBias": ["parsley", "cilantro", "basil"]
+    },
+    "pantry": {
+      "staples": [
+        "kosher-salt",
+        "black-pepper",
+        "olive-oil-evoo",
+        "refined-olive-oil",
+        "avocado-oil-refined",
+        "all-purpose-flour",
+        "white-rice",
+        "dried-pasta",
+        "canned-tomato",
+        "chicken-stock",
+        "soy-sauce"
+      ],
+      "autoRestock": true,
+      "lowStockThresholds": {
+        "olive-oil-evoo_ml": 150,
+        "avocado-oil-refined_ml": 150,
+        "kosher-salt_g": 100
+      }
+    },
+    "safety": {
+      "requireProbeForPoultry": true,
+      "requireProbeForRoasts": true,
+      "warnOnAlcoholFlame": true,
+      "ventilateOnHighHeat": true
+    },
+    "sessionScheduling": {
+      "preferredMealTimes": ["18:30"],
+      "prepLeadTimeMin": 20,
+      "batchCookingAllowed": true,
+      "leftoverPolicyDays": 3
+    },
+    "integrationAnchors": {
+      "prepAnchorsEnabled": ["preheat-oven", "boil-water", "heat-sous-vide-bath"],
+      "mealTagsEnabled": ["weeknight", "company", "kid-friendly"]
+    },
+    "localization": {
+      "language": "en",
+      "decimalSeparator": ".",
+      "thousandSeparator": ","
+    },
+    "advanced": {
+      "rounding": {
+        "mass": "friendly", 
+        "volume": "friendly",
+        "temperature": "exact"
+      },
+      "yieldScaling": {
+        "defaultMultiplier": 1.0,
+        "allowFractionalServings": true
+      }
+    }
+  }
+}

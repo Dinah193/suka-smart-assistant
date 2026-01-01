@@ -1,0 +1,196 @@
+{
+  "$schema": "../../../../schemas/planningGraph/calculator.schema.json",
+  "title": "Feast Day Alignment Calculator Schema",
+  "description": "Schema for aligning Hebrew feast days to Gregorian dates based on month start rules and year selection.",
+  "input": {
+    "type": "object",
+    "properties": {
+      "gregorianYear": {
+        "type": "integer",
+        "minimum": 1900,
+        "maximum": 2500,
+        "description": "Gregorian year to align feasts within."
+      },
+      "hebrewYear": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 9999,
+        "description": "Hebrew year reference if different from Gregorian year mapping."
+      },
+      "monthStartMethod": {
+        "type": "string",
+        "enum": [
+          "fullMoon",
+          "firstVisibleCrescent",
+          "conjunction",
+          "moonDoesNotCrossMeridian"
+        ],
+        "description": "Method used to determine the start of each Hebrew month."
+      },
+      "baseMonthStartData": {
+        "type": "array",
+        "description": "Pre-computed month start dates from HebrewMonthStartCalendar for the target year.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "hebrewMonthIndex": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 13
+            },
+            "gregorianStartDate": {
+              "type": "string",
+              "format": "date"
+            },
+            "hebrewYear": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9999
+            }
+          },
+          "required": [
+            "hebrewMonthIndex",
+            "gregorianStartDate",
+            "hebrewYear"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "includeMinorFeasts": {
+        "type": "boolean",
+        "default": false,
+        "description": "Whether to include minor/non-pilgrimage observances in the output."
+      },
+      "timezone": {
+        "type": "string",
+        "description": "IANA timezone identifier to use for date alignment, e.g. 'America/Chicago'."
+      }
+    },
+    "required": [
+      "gregorianYear",
+      "monthStartMethod",
+      "baseMonthStartData"
+    ],
+    "additionalProperties": false
+  },
+  "output": {
+    "type": "object",
+    "properties": {
+      "gregorianYear": {
+        "type": "integer",
+        "minimum": 1900,
+        "maximum": 2500
+      },
+      "hebrewYear": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 9999
+      },
+      "monthStartMethod": {
+        "type": "string",
+        "enum": [
+          "fullMoon",
+          "firstVisibleCrescent",
+          "conjunction",
+          "moonDoesNotCrossMeridian"
+        ]
+      },
+      "feasts": {
+        "type": "array",
+        "description": "Resolved list of feast/appointed times for the given year.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "description": "Internal code for the feast, e.g. 'PESACH', 'MATZOT', 'SHAVUOT', 'YOM_TERUAH', 'YOM_KIPPUR', 'SUKKOT', 'SHEMINI_ATZERET'."
+            },
+            "label": {
+              "type": "string",
+              "description": "Human-readable label for the feast."
+            },
+            "category": {
+              "type": "string",
+              "enum": [
+                "pilgrimage",
+                "sabbath",
+                "appointedTime",
+                "memorial"
+              ],
+              "description": "Category of the feast for planning and grouping."
+            },
+            "hebrewMonthIndex": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 13,
+              "description": "Hebrew month index where this feast occurs."
+            },
+            "hebrewDay": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 30,
+              "description": "Day of the Hebrew month when the feast begins."
+            },
+            "hebrewSpanDays": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Number of days the feast spans in the Hebrew calendar."
+            },
+            "gregorianStartDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Gregorian calendar date when this feast begins."
+            },
+            "gregorianEndDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Gregorian calendar date when this feast ends (inclusive)."
+            },
+            "requiresPrepSession": {
+              "type": "boolean",
+              "description": "Whether this feast should trigger advance prep sessions (cooking, cleaning, storehouse, travel)."
+            },
+            "prepSessionHints": {
+              "type": "array",
+              "description": "Hints to the automation/runtime about which domains to schedule (cooking, cleaning, storehouse, animals, preservation).",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "cooking",
+                  "cleaning",
+                  "garden",
+                  "animals",
+                  "preservation",
+                  "storehouse"
+                ]
+              }
+            },
+            "notes": {
+              "type": "string",
+              "description": "Optional notes explaining alignment decisions or edge cases."
+            }
+          },
+          "required": [
+            "code",
+            "label",
+            "category",
+            "hebrewMonthIndex",
+            "hebrewDay",
+            "hebrewSpanDays",
+            "gregorianStartDate",
+            "gregorianEndDate",
+            "requiresPrepSession"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": [
+      "gregorianYear",
+      "hebrewYear",
+      "monthStartMethod",
+      "feasts"
+    ],
+    "additionalProperties": false
+  }
+}

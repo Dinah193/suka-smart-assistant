@@ -1,0 +1,108 @@
+{
+  "nodeId": "storehouseMeals.recipeScalingCalculator",
+  "label": "Recipe Scaling Calculator",
+  "description": "Scales recipes up or down based on household size, target portions, and storehouse constraints. Feeds scaled recipes into batch yield, shopping, and SessionRunner flows.",
+  "category": "storehouseMeals",
+  "featureKind": "calculator",
+  "version": 1,
+  "enabled": true,
+
+  "inputs": {
+    "requires": [
+      "recipeDefinition",
+      "baseServings"
+    ],
+    "optional": [
+      "householdPortionTargets",
+      "nutritionTargets",
+      "storehouseInventorySnapshot",
+      "equipmentConstraints",
+      "timeConstraints"
+    ],
+    "contracts": {
+      "recipeDefinition": "recipes.RecipeDefinition",
+      "baseServings": "number",
+      "householdPortionTargets": "health.HouseholdPortionTargets",
+      "nutritionTargets": "health.NutritionTargets",
+      "storehouseInventorySnapshot": "storehouse.InventorySnapshot",
+      "equipmentConstraints": "storehouseMeals.EquipmentConstraints",
+      "timeConstraints": "sessions.TimeConstraints"
+    }
+  },
+
+  "outputs": {
+    "provides": [
+      "scaledRecipeDefinition",
+      "scaledServings",
+      "ingredientScalingMap",
+      "scalingWarnings"
+    ],
+    "contracts": {
+      "scaledRecipeDefinition": "recipes.RecipeDefinition",
+      "scaledServings": "number",
+      "ingredientScalingMap": "storehouseMeals.IngredientScalingMap",
+      "scalingWarnings": "storehouseMeals.RecipeScalingWarnings"
+    }
+  },
+
+  "events": {
+    "invoked": "calculator.recipeScaling.invoked",
+    "calculated": "calculator.recipeScaling.calculated",
+    "error": "calculator.recipeScaling.error"
+  },
+
+  "ui": {
+    "route": "/storehouse/recipe-scaling",
+    "icon": "pi pi-sliders",
+    "quickLaunch": true,
+    "primaryCtaLabel": "Scale Recipe",
+    "showInPlannerShortcuts": true,
+    "helpText": "Choose a recipe, set how many people you want to feed and how many meals you want, then SSA will scale the recipe and show whether your storehouse can support it."
+  },
+
+  "planningGraph": {
+    "stage": "planning",
+    "priority": 2,
+    "consumes": [
+      "recipes.recipeVault",
+      "recipes.scannedRecipe",
+      "health.householdNutritionTargets",
+      "storehouse.inventorySnapshot"
+    ],
+    "provides": [
+      "storehouseMeals.scaledRecipe",
+      "storehouseMeals.scaledServings",
+      "storehouseMeals.scalingWarnings"
+    ],
+    "feedsInto": [
+      "storehouseMeals.batchYieldCalculator",
+      "storehouseMeals.shoppingListGenerator",
+      "sessions.cookingSessionComposer"
+    ],
+    "tags": [
+      "recipes",
+      "storehouseMeals",
+      "planning",
+      "scaling"
+    ]
+  },
+
+  "integration": {
+    "eventSource": "features/calculators/storehouseMeals/RecipeScalingCalculator",
+    "shimModule": "features/calculators/storehouseMeals/RecipeScalingCalculator/RecipeScalingCalculator.shim.js",
+    "schemaModule": "features/calculators/storehouseMeals/RecipeScalingCalculator/RecipeScalingCalculator.schema.json",
+    "mappingsModule": "features/calculators/storehouseMeals/RecipeScalingCalculator/RecipeScalingCalculator.mappings.json",
+    "supportsBackgroundExecution": true,
+    "supportsAutomationRuntime": true
+  },
+
+  "guards": {
+    "enabled": true,
+    "rules": [
+      "sabbathGuard",
+      "quietHoursGuard",
+      "deviceBatteryGuard"
+    ],
+    "behavior": "warnOnly"
+  }
+}

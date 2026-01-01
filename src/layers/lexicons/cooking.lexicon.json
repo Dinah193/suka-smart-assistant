@@ -1,0 +1,982 @@
+{
+  "$schema": "../schemas/lexicon.schema.json",
+  "lexicon": {
+    "key": "cooking.lexicon",
+    "version": 1,
+    "domain": "cooking",
+    "title": "Cooking Lexicon",
+    "description": "Parsing lexicon for SSA Layer Spine. Maps user text, imports, and notes to cooking method IDs/keys using aliases, keywords, negatives, and lightweight rules. Designed to feed parsed_candidates → method_maps → blueprints.",
+    "locale": "en-US",
+    "createdAt": "2025-12-27T00:00:00Z",
+    "updatedAt": "2025-12-27T00:00:00Z",
+    "normalization": {
+      "lowercase": true,
+      "stripPunctuation": true,
+      "collapseWhitespace": true,
+      "unicodeNormalize": "NFKC",
+      "stopwords": [
+        "the",
+        "a",
+        "an",
+        "and",
+        "or",
+        "to",
+        "of",
+        "for",
+        "with",
+        "in",
+        "on",
+        "at",
+        "by",
+        "from",
+        "into",
+        "over",
+        "under"
+      ],
+      "spellings": {
+        "barbecue": ["bbq", "barbeque", "bar-b-que"],
+        "grill": ["grille", "grilling"],
+        "saute": ["sauté", "sauté"],
+        "braise": ["braising"],
+        "cure": ["curing"],
+        "ferment": ["fermentation", "fermenting"],
+        "stew": ["stewing"],
+        "fry": ["frying", "fried"],
+        "roast": ["roasting"],
+        "smoke": ["smoked", "smoking"],
+        "poach": ["poaching"],
+        "simmer": ["simmering"],
+        "boil": ["boiling"],
+        "broil": ["broiling"],
+        "bake": ["baking"],
+        "steam": ["steaming"],
+        "pressure cook": [
+          "pressure-cook",
+          "pressure cooker",
+          "instant pot",
+          "instapot"
+        ]
+      }
+    },
+    "scoring": {
+      "matchTypes": {
+        "exact_phrase": 1.0,
+        "token_phrase": 0.85,
+        "keyword": 0.65,
+        "fuzzy": 0.5,
+        "negative": -0.9
+      },
+      "minScoreToSuggest": 0.55,
+      "minScoreToAutoMap": 0.78,
+      "maxSuggestions": 7
+    },
+    "notes": [
+      "methodId/methodKey should align to your cooking.methods.json catalog. If your catalog uses different keys, update methodKey values here (keep aliases/keywords).",
+      "Use negative tokens to prevent mis-mapping (e.g., 'no bake' should downrank baking).",
+      "Cuisine hints boost a method when that cuisine context is detected (optional)."
+    ],
+    "methods": [
+      {
+        "methodId": "cook.boil",
+        "methodKey": "cook.boil",
+        "weight": 1.0,
+        "aliases": [
+          "boil",
+          "boiled",
+          "rolling boil",
+          "hard boil",
+          "parboil",
+          "blanch",
+          "scald"
+        ],
+        "keywords": [
+          "water",
+          "pot",
+          "salt water",
+          "rapid bubbles",
+          "100c",
+          "212f"
+        ],
+        "cuisineHints": [
+          "general",
+          "mediterranean",
+          "west_african",
+          "east_african",
+          "asian"
+        ],
+        "negative": ["sous vide", "microwave", "no boil"]
+      },
+      {
+        "methodId": "cook.simmer",
+        "methodKey": "cook.simmer",
+        "weight": 1.0,
+        "aliases": [
+          "simmer",
+          "simmered",
+          "gentle simmer",
+          "low simmer",
+          "barely simmer",
+          "low and slow"
+        ],
+        "keywords": ["small bubbles", "gentle heat", "covered", "uncovered"],
+        "cuisineHints": ["general", "west_african", "caribbean", "asian"],
+        "negative": ["rolling boil", "deep fry"]
+      },
+      {
+        "methodId": "cook.poach",
+        "methodKey": "cook.poach",
+        "weight": 1.0,
+        "aliases": [
+          "poach",
+          "poached",
+          "oil poach",
+          "butter poach",
+          "shallow poach"
+        ],
+        "keywords": ["gentle heat", "barely simmer", "submerged", "liquid"],
+        "cuisineHints": ["french", "mediterranean", "asian"],
+        "negative": ["hard boil", "deep fry", "grill"]
+      },
+      {
+        "methodId": "cook.blanch_shock",
+        "methodKey": "cook.blanch_shock",
+        "weight": 0.9,
+        "aliases": ["blanch", "blanched", "shock", "ice bath", "par-cook"],
+        "keywords": [
+          "ice water",
+          "quick boil",
+          "brighten color",
+          "set texture"
+        ],
+        "cuisineHints": ["general", "asian", "mediterranean"],
+        "negative": ["slow cook", "braise"]
+      },
+      {
+        "methodId": "cook.steam",
+        "methodKey": "cook.steam",
+        "weight": 1.0,
+        "aliases": [
+          "steam",
+          "steamed",
+          "bamboo steamer",
+          "steam basket",
+          "steam bake"
+        ],
+        "keywords": ["moist heat", "covered", "gentle"],
+        "cuisineHints": ["chinese", "japanese", "korean", "southeast_asian"],
+        "negative": ["deep fry", "sear", "broil"]
+      },
+      {
+        "methodId": "cook.pressure_cook",
+        "methodKey": "cook.pressure_cook",
+        "weight": 1.1,
+        "aliases": [
+          "pressure cook",
+          "pressure cooker",
+          "instant pot",
+          "electric pressure cooker"
+        ],
+        "keywords": [
+          "high pressure",
+          "sealed",
+          "release",
+          "natural release",
+          "quick release"
+        ],
+        "cuisineHints": ["general", "indian", "latin_american", "west_african"],
+        "negative": ["slow cooker only", "no pressure"]
+      },
+      {
+        "methodId": "cook.slow_cook",
+        "methodKey": "cook.slow_cook",
+        "weight": 1.0,
+        "aliases": [
+          "slow cook",
+          "slow cooker",
+          "crockpot",
+          "crock pot",
+          "low and slow",
+          "set it and forget it"
+        ],
+        "keywords": ["hours", "low heat", "tender", "braise-like"],
+        "cuisineHints": ["general", "southern_us", "mexican", "caribbean"],
+        "negative": ["high heat", "quick sear only"]
+      },
+      {
+        "methodId": "cook.braise",
+        "methodKey": "cook.braise",
+        "weight": 1.2,
+        "aliases": [
+          "braise",
+          "braised",
+          "pot roast",
+          "short rib style",
+          "low braise",
+          "oven braise"
+        ],
+        "keywords": [
+          "sear then cover",
+          "liquid",
+          "tight lid",
+          "tender",
+          "collagen"
+        ],
+        "cuisineHints": [
+          "french",
+          "chinese",
+          "korean",
+          "west_african",
+          "southern_us"
+        ],
+        "negative": ["dry roast", "deep fry", "no liquid"]
+      },
+      {
+        "methodId": "cook.stew",
+        "methodKey": "cook.stew",
+        "weight": 1.1,
+        "aliases": [
+          "stew",
+          "stewed",
+          "ragout",
+          "goulash",
+          "pepper soup",
+          "soup stew"
+        ],
+        "keywords": ["chunks", "broth", "one pot", "simmer"],
+        "cuisineHints": [
+          "west_african",
+          "caribbean",
+          "irish",
+          "hungarian",
+          "middle_eastern"
+        ],
+        "negative": ["dry", "grill"]
+      },
+      {
+        "methodId": "cook.confit",
+        "methodKey": "cook.confit",
+        "weight": 1.0,
+        "aliases": ["confit", "oil confit", "garlic confit", "duck confit"],
+        "keywords": ["low heat", "submerged in fat", "gentle"],
+        "cuisineHints": ["french", "mediterranean"],
+        "negative": ["deep fry", "high heat"]
+      },
+      {
+        "methodId": "cook.sous_vide",
+        "methodKey": "cook.sous_vide",
+        "weight": 1.2,
+        "aliases": [
+          "sous vide",
+          "sous-vide",
+          "water bath",
+          "immersion circulator",
+          "vacuum seal cook"
+        ],
+        "keywords": ["precise temp", "bag", "circulator", "finish sear"],
+        "cuisineHints": ["modernist", "fine_dining"],
+        "negative": ["boil hard", "microwave"]
+      },
+      {
+        "methodId": "cook.sear_pan",
+        "methodKey": "cook.sear_pan",
+        "weight": 1.1,
+        "aliases": [
+          "sear",
+          "pan sear",
+          "hard sear",
+          "brown",
+          "browning",
+          "maillard"
+        ],
+        "keywords": ["high heat", "dry surface", "cast iron", "stainless"],
+        "cuisineHints": ["general", "steakhouse"],
+        "negative": ["poach", "steam"]
+      },
+      {
+        "methodId": "cook.saute",
+        "methodKey": "cook.saute",
+        "weight": 1.0,
+        "aliases": [
+          "saute",
+          "sauté",
+          "sauteed",
+          "stir saute",
+          "sweat onions",
+          "sweat"
+        ],
+        "keywords": ["pan", "medium heat", "oil", "butter"],
+        "cuisineHints": ["french", "italian", "general"],
+        "negative": ["deep fry", "boil"]
+      },
+      {
+        "methodId": "cook.stir_fry",
+        "methodKey": "cook.stir_fry",
+        "weight": 1.2,
+        "aliases": [
+          "stir fry",
+          "stir-fry",
+          "wok fry",
+          "wok hei",
+          "velvet then fry"
+        ],
+        "keywords": ["wok", "high heat", "quick toss", "small pieces"],
+        "cuisineHints": ["chinese", "thai", "vietnamese"],
+        "negative": ["low and slow", "braise only"]
+      },
+      {
+        "methodId": "cook.deep_fry",
+        "methodKey": "cook.deep_fry",
+        "weight": 1.2,
+        "aliases": [
+          "deep fry",
+          "deep-fry",
+          "fry",
+          "fried",
+          "drop fry",
+          "oil fry"
+        ],
+        "keywords": ["hot oil", "temperature", "350f", "175c", "drain"],
+        "cuisineHints": ["southern_us", "japanese", "korean", "caribbean"],
+        "negative": ["air fry only", "bake"]
+      },
+      {
+        "methodId": "cook.shallow_fry",
+        "methodKey": "cook.shallow_fry",
+        "weight": 1.0,
+        "aliases": ["shallow fry", "pan fry", "pan-fry", "skillet fry"],
+        "keywords": ["oil in pan", "flip", "crust"],
+        "cuisineHints": ["general", "southern_us", "mediterranean"],
+        "negative": ["deep fryer", "no oil"]
+      },
+      {
+        "methodId": "cook.air_fry",
+        "methodKey": "cook.air_fry",
+        "weight": 1.0,
+        "aliases": [
+          "air fry",
+          "air-fry",
+          "air fryer",
+          "convection fry",
+          "crispy in air fryer"
+        ],
+        "keywords": ["basket", "convection", "spray oil", "shake halfway"],
+        "cuisineHints": ["modern", "healthy"],
+        "negative": ["deep fry", "boil"]
+      },
+      {
+        "methodId": "cook.bake",
+        "methodKey": "cook.bake",
+        "weight": 1.1,
+        "aliases": [
+          "bake",
+          "baked",
+          "oven bake",
+          "sheet pan",
+          "tray bake",
+          "casserole"
+        ],
+        "keywords": ["oven", "preheat", "rack", "degrees"],
+        "cuisineHints": ["general", "european", "american"],
+        "negative": ["no bake", "raw", "microwave only"]
+      },
+      {
+        "methodId": "cook.roast",
+        "methodKey": "cook.roast",
+        "weight": 1.2,
+        "aliases": [
+          "roast",
+          "roasted",
+          "oven roast",
+          "pot roast (dry)",
+          "high-heat roast"
+        ],
+        "keywords": ["dry heat", "browning", "caramelize", "rack"],
+        "cuisineHints": ["general", "british", "american", "mediterranean"],
+        "negative": ["braise", "boil"]
+      },
+      {
+        "methodId": "cook.broil_grill_oven",
+        "methodKey": "cook.broil_grill_oven",
+        "weight": 1.0,
+        "aliases": ["broil", "broiled", "oven grill", "top heat", "gratin"],
+        "keywords": ["high radiant heat", "top rack", "quick color"],
+        "cuisineHints": ["general", "european"],
+        "negative": ["slow cook", "sous vide only"]
+      },
+      {
+        "methodId": "cook.grill_direct",
+        "methodKey": "cook.grill_direct",
+        "weight": 1.2,
+        "aliases": ["grill", "grilled", "direct grill", "open flame", "char"],
+        "keywords": ["grates", "preheat", "turn", "flare ups"],
+        "cuisineHints": [
+          "american",
+          "caribbean",
+          "african",
+          "middle_eastern",
+          "latin_american"
+        ],
+        "negative": ["oven only", "boil"]
+      },
+      {
+        "methodId": "cook.bbq_low_slow",
+        "methodKey": "cook.bbq_low_slow",
+        "weight": 1.3,
+        "aliases": [
+          "bbq",
+          "barbecue",
+          "smoke bbq",
+          "low and slow bbq",
+          "pit barbecue",
+          "offset smoker"
+        ],
+        "keywords": [
+          "smoker",
+          "wood",
+          "coal",
+          "bark",
+          "wrap",
+          "rest",
+          "probe tender"
+        ],
+        "cuisineHints": [
+          "southern_us",
+          "texas",
+          "carolina",
+          "memphis",
+          "jamaican"
+        ],
+        "negative": ["quick grill", "pan sear"]
+      },
+      {
+        "methodId": "cook.smoke_hot",
+        "methodKey": "cook.smoke_hot",
+        "weight": 1.1,
+        "aliases": [
+          "hot smoke",
+          "hot-smoke",
+          "smoke cook",
+          "smoked then serve"
+        ],
+        "keywords": ["smoker", "wood chips", "cook to temp"],
+        "cuisineHints": ["american", "scandinavian", "indigenous"],
+        "negative": ["cold smoke only"]
+      },
+      {
+        "methodId": "cook.smoke_cold",
+        "methodKey": "cook.smoke_cold",
+        "weight": 1.0,
+        "aliases": ["cold smoke", "cold-smoke", "cold smoked"],
+        "keywords": ["below 90f", "cure first", "food safety"],
+        "cuisineHints": ["scandinavian", "european", "indigenous"],
+        "negative": ["cook", "hot smoke"]
+      },
+      {
+        "methodId": "cook.tandoor",
+        "methodKey": "cook.tandoor",
+        "weight": 1.2,
+        "aliases": ["tandoor", "tandoori", "clay oven", "naan oven"],
+        "keywords": ["yogurt marinade", "high heat", "skewers"],
+        "cuisineHints": ["indian", "pakistani", "middle_eastern"],
+        "negative": ["slow cooker"]
+      },
+      {
+        "methodId": "cook.tagine",
+        "methodKey": "cook.tagine",
+        "weight": 1.0,
+        "aliases": ["tagine", "tajine", "tagine pot", "moroccan tagine"],
+        "keywords": [
+          "conical lid",
+          "steam circulate",
+          "spice",
+          "preserved lemon"
+        ],
+        "cuisineHints": ["north_african", "moroccan"],
+        "negative": ["deep fry", "broil"]
+      },
+      {
+        "methodId": "cook.dum_pukht",
+        "methodKey": "cook.dum_pukht",
+        "weight": 1.0,
+        "aliases": [
+          "dum",
+          "dum pukht",
+          "sealed pot cook",
+          "dum biryani",
+          "deg cooking"
+        ],
+        "keywords": ["seal", "dough seal", "steam trapped", "layered rice"],
+        "cuisineHints": ["indian", "south_asian"],
+        "negative": ["open boil", "quick fry"]
+      },
+      {
+        "methodId": "cook.biryani_layered",
+        "methodKey": "cook.biryani_layered",
+        "weight": 1.0,
+        "aliases": ["biryani", "biriyani", "layered rice", "yakhni biryani"],
+        "keywords": ["par-cooked rice", "layers", "steam finish", "dum"],
+        "cuisineHints": ["indian", "pakistani", "south_asian"],
+        "negative": ["risotto", "fried rice"]
+      },
+      {
+        "methodId": "cook.rice_fried",
+        "methodKey": "cook.rice_fried",
+        "weight": 1.0,
+        "aliases": ["fried rice", "jollof stir", "wok rice", "nasi goreng"],
+        "keywords": ["day-old rice", "high heat", "stir fry"],
+        "cuisineHints": ["chinese", "thai", "indonesian", "west_african"],
+        "negative": ["risotto", "congee"]
+      },
+      {
+        "methodId": "cook.rice_absorption",
+        "methodKey": "cook.rice_absorption",
+        "weight": 1.0,
+        "aliases": [
+          "absorption method",
+          "cook rice",
+          "steam rice",
+          "rice cooker"
+        ],
+        "keywords": ["ratio", "covered", "rest", "fluff"],
+        "cuisineHints": ["general", "asian", "african"],
+        "negative": ["risotto", "fried rice"]
+      },
+      {
+        "methodId": "cook.congee_porridge",
+        "methodKey": "cook.congee_porridge",
+        "weight": 0.9,
+        "aliases": ["congee", "rice porridge", "juk", "kanji"],
+        "keywords": ["lots of water", "long simmer", "soft grains"],
+        "cuisineHints": ["chinese", "korean", "japanese"],
+        "negative": ["fried rice", "pilaf"]
+      },
+      {
+        "methodId": "cook.griddle_flat_top",
+        "methodKey": "cook.griddle_flat_top",
+        "weight": 1.0,
+        "aliases": ["griddle", "flat top", "plancha", "blackstone", "comal"],
+        "keywords": ["flat surface", "even heat", "scrape"],
+        "cuisineHints": [
+          "mexican",
+          "latin_american",
+          "american",
+          "mediterranean"
+        ],
+        "negative": ["deep fry", "boil"]
+      },
+      {
+        "methodId": "cook.plancha",
+        "methodKey": "cook.plancha",
+        "weight": 1.0,
+        "aliases": ["plancha", "a la plancha", "sear on plancha"],
+        "keywords": ["flat metal", "high heat", "quick sear"],
+        "cuisineHints": ["spanish", "latin_american"],
+        "negative": ["steam", "poach"]
+      },
+      {
+        "methodId": "cook.comal",
+        "methodKey": "cook.comal",
+        "weight": 0.9,
+        "aliases": [
+          "comal",
+          "tortilla griddle",
+          "toast chiles",
+          "toast spices"
+        ],
+        "keywords": ["dry toast", "warm tortillas"],
+        "cuisineHints": ["mexican", "central_american"],
+        "negative": ["boil", "deep fry"]
+      },
+      {
+        "methodId": "cook.kebab_skewer",
+        "methodKey": "cook.kebab_skewer",
+        "weight": 1.0,
+        "aliases": [
+          "kebab",
+          "kabob",
+          "skewer",
+          "shish kebab",
+          "seekh kebab",
+          "kofta kebab"
+        ],
+        "keywords": ["skewers", "char", "grill", "minced"],
+        "cuisineHints": [
+          "middle_eastern",
+          "south_asian",
+          "mediterranean",
+          "central_asian"
+        ],
+        "negative": ["braise", "steam"]
+      },
+      {
+        "methodId": "cook.kofta",
+        "methodKey": "cook.kofta",
+        "weight": 0.9,
+        "aliases": ["kofta", "kefta", "minced kebab", "meatball kebab"],
+        "keywords": ["minced meat", "spice", "bind"],
+        "cuisineHints": ["middle_eastern", "north_african", "south_asian"],
+        "negative": ["whole roast"]
+      },
+      {
+        "methodId": "cook.breading_dredge",
+        "methodKey": "cook.breading_dredge",
+        "weight": 0.9,
+        "aliases": [
+          "bread",
+          "breading",
+          "dredge",
+          "flour then egg then crumbs",
+          "panko"
+        ],
+        "keywords": ["crispy coating", "seasoned flour"],
+        "cuisineHints": ["southern_us", "italian", "japanese"],
+        "negative": ["no breading", "gluten free only"]
+      },
+      {
+        "methodId": "cook.batter_fry",
+        "methodKey": "cook.batter_fry",
+        "weight": 0.9,
+        "aliases": ["batter", "tempura", "beer batter", "wet batter"],
+        "keywords": ["light crisp", "cold batter", "fry"],
+        "cuisineHints": ["japanese", "british", "southern_us"],
+        "negative": ["bake", "no fry"]
+      },
+      {
+        "methodId": "cook.marinade_general",
+        "methodKey": "cook.marinade_general",
+        "weight": 0.8,
+        "aliases": [
+          "marinate",
+          "marinated",
+          "soak in marinade",
+          "overnight marinade"
+        ],
+        "keywords": ["acid", "salt", "oil", "spices"],
+        "cuisineHints": ["general"],
+        "negative": ["dry rub only", "no marinade"]
+      },
+      {
+        "methodId": "cook.dry_rub",
+        "methodKey": "cook.dry_rub",
+        "weight": 0.8,
+        "aliases": ["dry rub", "rub", "spice rub", "seasoning rub"],
+        "keywords": ["paprika", "salt", "pepper", "cumin", "brown sugar"],
+        "cuisineHints": ["bbq", "caribbean", "african", "american"],
+        "negative": ["wet marinade only"]
+      },
+      {
+        "methodId": "cook.brine_wet",
+        "methodKey": "cook.brine_wet",
+        "weight": 0.9,
+        "aliases": ["brine", "wet brine", "saltwater brine", "soak in brine"],
+        "keywords": ["salt", "water", "sugar", "hours", "refrigerate"],
+        "cuisineHints": ["general", "southern_us"],
+        "negative": ["dry brine only", "no salt"]
+      },
+      {
+        "methodId": "cook.brine_dry",
+        "methodKey": "cook.brine_dry",
+        "weight": 0.9,
+        "aliases": [
+          "dry brine",
+          "salt overnight",
+          "salt ahead",
+          "season and rest"
+        ],
+        "keywords": ["salt", "uncovered", "fridge", "rest"],
+        "cuisineHints": ["general", "steakhouse"],
+        "negative": ["wet brine only"]
+      },
+      {
+        "methodId": "cook.velvet_meat",
+        "methodKey": "cook.velvet_meat",
+        "weight": 0.9,
+        "aliases": ["velvet", "velveting", "velvet chicken", "velvet beef"],
+        "keywords": ["cornstarch", "baking soda", "brief blanch", "stir fry"],
+        "cuisineHints": ["chinese"],
+        "negative": ["slow roast", "braise only"]
+      },
+      {
+        "methodId": "cook.emulsify_sauce",
+        "methodKey": "cook.emulsify_sauce",
+        "weight": 0.8,
+        "aliases": [
+          "emulsify",
+          "emulsion",
+          "aioli",
+          "mayonnaise",
+          "hollandaise",
+          "vinaigrette"
+        ],
+        "keywords": ["whisk", "oil", "egg", "mustard"],
+        "cuisineHints": ["french", "mediterranean"],
+        "negative": ["dry rub"]
+      },
+      {
+        "methodId": "cook.thicken_roux",
+        "methodKey": "cook.thicken_roux",
+        "weight": 0.9,
+        "aliases": ["roux", "make a roux", "dark roux", "light roux"],
+        "keywords": ["flour", "fat", "cook until", "gumbo base"],
+        "cuisineHints": ["cajun", "creole", "french"],
+        "negative": ["cornstarch slurry", "gluten free only"]
+      },
+      {
+        "methodId": "cook.thicken_slurry",
+        "methodKey": "cook.thicken_slurry",
+        "weight": 0.8,
+        "aliases": [
+          "slurry",
+          "cornstarch slurry",
+          "arrowroot slurry",
+          "starch slurry"
+        ],
+        "keywords": ["mix with cold water", "add to simmering liquid"],
+        "cuisineHints": ["chinese", "general"],
+        "negative": ["roux", "bake"]
+      },
+      {
+        "methodId": "cook.deglaze_pan",
+        "methodKey": "cook.deglaze_pan",
+        "weight": 0.8,
+        "aliases": ["deglaze", "deglazing", "scrape fond", "pan sauce"],
+        "keywords": ["wine", "stock", "fond", "reduce"],
+        "cuisineHints": ["french", "italian"],
+        "negative": ["no sauce"]
+      },
+      {
+        "methodId": "cook.reduce",
+        "methodKey": "cook.reduce",
+        "weight": 0.8,
+        "aliases": ["reduce", "reduction", "reduce down", "simmer to thicken"],
+        "keywords": ["evaporate", "concentrate", "thicken sauce"],
+        "cuisineHints": ["general", "french"],
+        "negative": ["add slurry immediately"]
+      },
+      {
+        "methodId": "cook.torrify_toast_spices",
+        "methodKey": "cook.torrify_toast_spices",
+        "weight": 0.7,
+        "aliases": [
+          "toast spices",
+          "bloom spices",
+          "fry spices",
+          "tarka",
+          "tadka",
+          "chaunk",
+          "tempering"
+        ],
+        "keywords": ["oil", "aroma", "brief", "cumin seeds", "mustard seed"],
+        "cuisineHints": ["indian", "south_asian", "ethiopian"],
+        "negative": ["boil spices raw only"]
+      },
+      {
+        "methodId": "cook.dough_knead",
+        "methodKey": "cook.dough_knead",
+        "weight": 0.9,
+        "aliases": ["knead", "kneading", "work the dough", "windowpane"],
+        "keywords": ["gluten", "elastic", "rest", "proof"],
+        "cuisineHints": ["general", "middle_eastern", "european"],
+        "negative": ["no knead only"]
+      },
+      {
+        "methodId": "cook.no_knead",
+        "methodKey": "cook.no_knead",
+        "weight": 0.8,
+        "aliases": ["no knead", "overnight dough", "folds only"],
+        "keywords": ["long fermentation", "stretch and fold"],
+        "cuisineHints": ["modern", "artisan_bread"],
+        "negative": ["knead 10 minutes"]
+      },
+      {
+        "methodId": "cook.proof_ferment_dough",
+        "methodKey": "cook.proof_ferment_dough",
+        "weight": 0.8,
+        "aliases": [
+          "proof",
+          "prove",
+          "rise",
+          "first rise",
+          "bulk ferment",
+          "second rise"
+        ],
+        "keywords": ["yeast", "time", "warm place", "double"],
+        "cuisineHints": ["general", "baking"],
+        "negative": ["bake immediately", "unleavened only"]
+      },
+      {
+        "methodId": "cook.jerk",
+        "methodKey": "cook.jerk",
+        "weight": 1.0,
+        "aliases": ["jerk", "jerk chicken", "jerk marinade", "pimento wood"],
+        "keywords": ["allspice", "scotch bonnet", "thyme", "smoke"],
+        "cuisineHints": ["jamaican", "caribbean"],
+        "negative": ["mild", "no spice"]
+      },
+      {
+        "methodId": "cook.sofrito_base",
+        "methodKey": "cook.sofrito_base",
+        "weight": 0.8,
+        "aliases": ["sofrito", "recaito", "base saute", "seasoning base"],
+        "keywords": ["onion", "pepper", "garlic", "cilantro"],
+        "cuisineHints": ["latin_american", "caribbean"],
+        "negative": ["raw only"]
+      },
+      {
+        "methodId": "cook.mirepoix_base",
+        "methodKey": "cook.mirepoix_base",
+        "weight": 0.8,
+        "aliases": ["mirepoix", "holy trinity", "aromatics base"],
+        "keywords": ["onion", "celery", "carrot", "bell pepper"],
+        "cuisineHints": ["french", "cajun", "creole"],
+        "negative": ["no aromatics"]
+      },
+      {
+        "methodId": "cook.curry_build",
+        "methodKey": "cook.curry_build",
+        "weight": 1.0,
+        "aliases": ["curry", "kari", "curry base", "masala", "spice paste"],
+        "keywords": [
+          "bloom spices",
+          "onion base",
+          "tomato base",
+          "coconut milk"
+        ],
+        "cuisineHints": ["indian", "thai", "jamaican", "east_african"],
+        "negative": ["no spice"]
+      },
+      {
+        "methodId": "cook.wok_steam_finish",
+        "methodKey": "cook.wok_steam_finish",
+        "weight": 0.8,
+        "aliases": [
+          "steam finish",
+          "cover to finish",
+          "wok steam",
+          "lid finish"
+        ],
+        "keywords": ["add splash water", "cover", "finish cooking"],
+        "cuisineHints": ["chinese", "japanese"],
+        "negative": ["dry sear only"]
+      }
+    ],
+    "entityHints": {
+      "proteins": {
+        "beef": [
+          "beef",
+          "steak",
+          "brisket",
+          "short rib",
+          "oxtail",
+          "chuck",
+          "round"
+        ],
+        "lamb": ["lamb", "mutton", "shoulder", "leg of lamb"],
+        "goat": ["goat", "chevon"],
+        "poultry": ["chicken", "hen", "turkey", "duck", "goose"],
+        "fish": ["fish", "salmon", "tilapia", "cod", "catfish"],
+        "shellfish": ["shrimp", "prawn", "crab", "lobster"]
+      },
+      "donenessTerms": [
+        "rare",
+        "medium rare",
+        "medium",
+        "medium well",
+        "well done",
+        "fall apart",
+        "fork tender",
+        "probe tender",
+        "pink center",
+        "clear juices"
+      ],
+      "tools": [
+        "oven",
+        "stove",
+        "skillet",
+        "cast iron",
+        "wok",
+        "air fryer",
+        "pressure cooker",
+        "instant pot",
+        "slow cooker",
+        "smoker",
+        "grill",
+        "tandoor",
+        "tagine"
+      ]
+    },
+    "rules": [
+      {
+        "id": "rule.no-bake-downrank-bake",
+        "when": { "containsAny": ["no bake", "no-bake", "raw dessert"] },
+        "actions": [
+          {
+            "type": "downrankMethodKey",
+            "methodKey": "cook.bake",
+            "amount": 0.8,
+            "reason": "Phrase implies baking should not be selected."
+          }
+        ]
+      },
+      {
+        "id": "rule.instant-pot-boost-pressure",
+        "when": {
+          "containsAny": ["instant pot", "instapot", "pressure cooker"]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "cook.pressure_cook",
+            "amount": 0.25,
+            "reason": "Appliance strongly indicates pressure cooking."
+          }
+        ]
+      },
+      {
+        "id": "rule.wok-boost-stirfry",
+        "when": { "containsAny": ["wok", "wok hei", "stir fry", "stir-fry"] },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "cook.stir_fry",
+            "amount": 0.25,
+            "reason": "Wok vocabulary indicates stir-fry workflow."
+          }
+        ]
+      },
+      {
+        "id": "rule.low-and-slow-bbq-vs-grill",
+        "when": {
+          "containsAll": ["bbq"],
+          "containsAny": ["low and slow", "smoker", "wrap", "bark"]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "cook.bbq_low_slow",
+            "amount": 0.3,
+            "reason": "Low-and-slow BBQ indicators."
+          },
+          {
+            "type": "downrankMethodKey",
+            "methodKey": "cook.grill_direct",
+            "amount": 0.3,
+            "reason": "Direct grilling is less likely when low-and-slow BBQ is present."
+          }
+        ]
+      },
+      {
+        "id": "rule.sous-vide-block-boil",
+        "when": { "containsAny": ["sous vide", "immersion circulator"] },
+        "actions": [
+          {
+            "type": "downrankMethodKey",
+            "methodKey": "cook.boil",
+            "amount": 0.6,
+            "reason": "Sous vide is temperature-controlled, not boiling."
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,408 @@
+{
+  "meta": {
+    "version": 1,
+    "generatedAt": "2025-11-19T00:00:00.000Z",
+    "description": "Declarative orchestrator mode definitions for SSA automation runtime (imports → intelligence → automation → hub)."
+  },
+  "defaults": {
+    "stageOrder": [
+      "import",
+      "normalize",
+      "infer",
+      "plan",
+      "schedule",
+      "run",
+      "export"
+    ],
+    "guardPolicy": {
+      "respectSabbath": true,
+      "respectQuietHours": true,
+      "respectWeather": true,
+      "respectInventory": true,
+      "respectBattery": true,
+      "failOpenOnGuardError": true
+    },
+    "sessionRunner": {
+      "autoStartOnImport": false,
+      "autoResumeOnReload": true,
+      "checkpointSeconds": 10,
+      "allowParallelSessions": false,
+      "maxParallelSessions": 1,
+      "defaultPrefs": {
+        "voiceGuidance": true,
+        "haptic": true,
+        "autoAdvance": false
+      }
+    },
+    "notifications": {
+      "enabled": true,
+      "toastOnStepChange": true,
+      "systemNotificationOnStepChange": true,
+      "systemNotificationActions": [
+        "pause",
+        "next"
+      ],
+      "miniHud": {
+        "usePictureInPictureWhenAvailable": true,
+        "showElapsed": true,
+        "showCurrentStepTitle": true
+      }
+    },
+    "hubExport": {
+      "enabled": true,
+      "exportOnlyCompletedSessions": true,
+      "retryOnFailure": true,
+      "maxRetries": 5,
+      "backoffMs": 60000
+    },
+    "importPipelines": {
+      "recipe": {
+        "normalizeUnits": true,
+        "mapToInventory": true,
+        "extractEquipment": true,
+        "detectYield": true,
+        "autoGenerateSessions": true
+      },
+      "cleaningPlan": {
+        "normalizeZones": true,
+        "mapToRooms": true,
+        "autoGenerateSessions": true
+      },
+      "gardenPlan": {
+        "normalizeCrops": true,
+        "mapToBeds": true,
+        "autoGenerateSessions": true
+      },
+      "animalTask": {
+        "normalizeSpecies": true,
+        "mapToAnimals": true,
+        "autoGenerateSessions": true
+      },
+      "manual": {
+        "autoGenerateSessions": false
+      }
+    }
+  },
+  "modes": {
+    "solo.deepFocus": {
+      "label": "Solo — Deep Focus",
+      "description": "One user in deep-focus mode. Run one high-quality session at a time with strict guards and rich guidance.",
+      "sessionRunner": {
+        "autoStartOnImport": false,
+        "autoResumeOnReload": true,
+        "checkpointSeconds": 10,
+        "allowParallelSessions": false,
+        "maxParallelSessions": 1,
+        "defaultPrefs": {
+          "voiceGuidance": true,
+          "haptic": true,
+          "autoAdvance": false
+        }
+      },
+      "guardPolicy": {
+        "respectSabbath": true,
+        "respectQuietHours": true,
+        "respectWeather": true,
+        "respectInventory": true,
+        "respectBattery": true,
+        "failOpenOnGuardError": false
+      },
+      "notifications": {
+        "enabled": true,
+        "toastOnStepChange": true,
+        "systemNotificationOnStepChange": true,
+        "systemNotificationActions": [
+          "pause",
+          "next"
+        ],
+        "miniHud": {
+          "usePictureInPictureWhenAvailable": true,
+          "showElapsed": true,
+          "showCurrentStepTitle": true
+        }
+      },
+      "hubExport": {
+        "enabled": false,
+        "exportOnlyCompletedSessions": true,
+        "retryOnFailure": false,
+        "maxRetries": 0,
+        "backoffMs": 60000
+      },
+      "domainOverrides": {
+        "cooking": {
+          "autoStartOnImport": false,
+          "toastOnStepChange": true,
+          "voiceGuidance": true
+        },
+        "cleaning": {
+          "autoStartOnImport": false,
+          "toastOnStepChange": true,
+          "voiceGuidance": false
+        }
+      }
+    },
+    "solo.gentle": {
+      "label": "Solo — Gentle Suggestions",
+      "description": "Soft helper mode. Never auto-start. Suggest sessions via toasts and banners only.",
+      "sessionRunner": {
+        "autoStartOnImport": false,
+        "autoResumeOnReload": true,
+        "checkpointSeconds": 15,
+        "allowParallelSessions": false,
+        "maxParallelSessions": 1,
+        "defaultPrefs": {
+          "voiceGuidance": false,
+          "haptic": true,
+          "autoAdvance": false
+        }
+      },
+      "guardPolicy": {
+        "respectSabbath": true,
+        "respectQuietHours": true,
+        "respectWeather": true,
+        "respectInventory": true,
+        "respectBattery": true,
+        "failOpenOnGuardError": true
+      },
+      "notifications": {
+        "enabled": true,
+        "toastOnStepChange": false,
+        "systemNotificationOnStepChange": false,
+        "systemNotificationActions": [],
+        "miniHud": {
+          "usePictureInPictureWhenAvailable": false,
+          "showElapsed": true,
+          "showCurrentStepTitle": true
+        }
+      },
+      "hubExport": {
+        "enabled": false,
+        "exportOnlyCompletedSessions": true,
+        "retryOnFailure": false,
+        "maxRetries": 0,
+        "backoffMs": 60000
+      }
+    },
+    "homestead.coop": {
+      "label": "Homestead — Cooperative",
+      "description": "Multiple household domains active (cooking, garden, animals, preservation). Allow a few parallel sessions with strong guard rules.",
+      "sessionRunner": {
+        "autoStartOnImport": false,
+        "autoResumeOnReload": true,
+        "checkpointSeconds": 10,
+        "allowParallelSessions": true,
+        "maxParallelSessions": 3,
+        "defaultPrefs": {
+          "voiceGuidance": true,
+          "haptic": true,
+          "autoAdvance": false
+        }
+      },
+      "guardPolicy": {
+        "respectSabbath": true,
+        "respectQuietHours": true,
+        "respectWeather": true,
+        "respectInventory": true,
+        "respectBattery": true,
+        "failOpenOnGuardError": false
+      },
+      "notifications": {
+        "enabled": true,
+        "toastOnStepChange": true,
+        "systemNotificationOnStepChange": true,
+        "systemNotificationActions": [
+          "pause",
+          "next"
+        ],
+        "miniHud": {
+          "usePictureInPictureWhenAvailable": true,
+          "showElapsed": true,
+          "showCurrentStepTitle": true
+        }
+      },
+      "hubExport": {
+        "enabled": false,
+        "exportOnlyCompletedSessions": true,
+        "retryOnFailure": true,
+        "maxRetries": 3,
+        "backoffMs": 120000
+      },
+      "domainOverrides": {
+        "garden": {
+          "autoStartOnImport": false,
+          "toastOnStepChange": true,
+          "respectWeather": true
+        },
+        "animals": {
+          "autoStartOnImport": true,
+          "toastOnStepChange": true,
+          "respectWeather": true,
+          "respectQuietHours": false
+        },
+        "preservation": {
+          "autoStartOnImport": false,
+          "toastOnStepChange": true
+        }
+      }
+    },
+    "familyFund.host": {
+      "label": "Family Fund — Host Hub Mode",
+      "description": "Orchestrator tuned for Family Fund Hub export. Prioritizes analytics and export after completion.",
+      "sessionRunner": {
+        "autoStartOnImport": false,
+        "autoResumeOnReload": true,
+        "checkpointSeconds": 10,
+        "allowParallelSessions": true,
+        "maxParallelSessions": 4,
+        "defaultPrefs": {
+          "voiceGuidance": true,
+          "haptic": true,
+          "autoAdvance": false
+        }
+      },
+      "guardPolicy": {
+        "respectSabbath": true,
+        "respectQuietHours": true,
+        "respectWeather": true,
+        "respectInventory": true,
+        "respectBattery": true,
+        "failOpenOnGuardError": false
+      },
+      "notifications": {
+        "enabled": true,
+        "toastOnStepChange": true,
+        "systemNotificationOnStepChange": true,
+        "systemNotificationActions": [
+          "pause",
+          "next"
+        ],
+        "miniHud": {
+          "usePictureInPictureWhenAvailable": true,
+          "showElapsed": true,
+          "showCurrentStepTitle": true
+        }
+      },
+      "hubExport": {
+        "enabled": true,
+        "exportOnlyCompletedSessions": true,
+        "retryOnFailure": true,
+        "maxRetries": 8,
+        "backoffMs": 60000
+      },
+      "domainOverrides": {
+        "cooking": {
+          "exportAnalytics": true
+        },
+        "cleaning": {
+          "exportAnalytics": true
+        },
+        "garden": {
+          "exportAnalytics": true
+        },
+        "animals": {
+          "exportAnalytics": true
+        },
+        "preservation": {
+          "exportAnalytics": true
+        },
+        "storehouse": {
+          "exportAnalytics": true
+        }
+      }
+    },
+    "demo": {
+      "label": "Demo / Onboarding",
+      "description": "Safe demo mode with fake exports and gentle notifications. Great for first-run experiences.",
+      "sessionRunner": {
+        "autoStartOnImport": false,
+        "autoResumeOnReload": false,
+        "checkpointSeconds": 0,
+        "allowParallelSessions": false,
+        "maxParallelSessions": 1,
+        "defaultPrefs": {
+          "voiceGuidance": true,
+          "haptic": false,
+          "autoAdvance": false
+        }
+      },
+      "guardPolicy": {
+        "respectSabbath": false,
+        "respectQuietHours": false,
+        "respectWeather": false,
+        "respectInventory": false,
+        "respectBattery": false,
+        "failOpenOnGuardError": true
+      },
+      "notifications": {
+        "enabled": true,
+        "toastOnStepChange": true,
+        "systemNotificationOnStepChange": false,
+        "systemNotificationActions": [],
+        "miniHud": {
+          "usePictureInPictureWhenAvailable": false,
+          "showElapsed": true,
+          "showCurrentStepTitle": true
+        }
+      },
+      "hubExport": {
+        "enabled": false,
+        "exportOnlyCompletedSessions": true,
+        "retryOnFailure": false,
+        "maxRetries": 0,
+        "backoffMs": 60000
+      }
+    },
+    "debug.verbose": {
+      "label": "Debug — Verbose Orchestrator",
+      "description": "Debug mode for development. Emits extra diagnostics and does not auto-export to Hub.",
+      "sessionRunner": {
+        "autoStartOnImport": false,
+        "autoResumeOnReload": true,
+        "checkpointSeconds": 5,
+        "allowParallelSessions": true,
+        "maxParallelSessions": 2,
+        "defaultPrefs": {
+          "voiceGuidance": false,
+          "haptic": false,
+          "autoAdvance": false
+        }
+      },
+      "guardPolicy": {
+        "respectSabbath": true,
+        "respectQuietHours": true,
+        "respectWeather": true,
+        "respectInventory": true,
+        "respectBattery": false,
+        "failOpenOnGuardError": false
+      },
+      "notifications": {
+        "enabled": true,
+        "toastOnStepChange": true,
+        "systemNotificationOnStepChange": true,
+        "systemNotificationActions": [
+          "pause",
+          "next"
+        ],
+        "miniHud": {
+          "usePictureInPictureWhenAvailable": true,
+          "showElapsed": true,
+          "showCurrentStepTitle": true
+        }
+      },
+      "hubExport": {
+        "enabled": false,
+        "exportOnlyCompletedSessions": true,
+        "retryOnFailure": false,
+        "maxRetries": 0,
+        "backoffMs": 60000
+      }
+    }
+  },
+  "runtime": {
+    "defaultMode": "solo.deepFocus",
+    "envOverrides": {
+      "development": "debug.verbose",
+      "demo": "demo"
+    }
+  }
+}

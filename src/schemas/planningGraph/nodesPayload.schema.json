@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Planning Graph Node Payload",
+  "description": "Base schema for calculator/planner payloads flowing through the Planning Graph. Individual calculators should reference this file in their `$schema` and extend with their own properties.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "seedLots": {
+      "description": "Optional array of seed lot or crop records.",
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "environment": {
+      "description": "Optional environment / climate payload.",
+      "type": "object"
+    },
+    "planningHints": {
+      "description": "Optional higher-level planning hints used by calculators and planners.",
+      "type": "object"
+    }
+  }
+}

@@ -1,0 +1,2067 @@
+{
+  "$schema": "../schemas/lexicon.schema.json",
+  "lexicon": {
+    "key": "garden.lexicon",
+    "version": 1,
+    "domain": "garden",
+    "title": "Garden Lexicon (Exhaustive)",
+    "description": "Synonyms, keywords, entity hints, and expressive rules for mapping user text/imported notes into fixed gardening method IDs/keys used by SSA layer spine. Includes indigenous/culture-rooted and natural methods alongside modern techniques. Safety-first for chemicals, tools, and heat.",
+    "locale": "en-US",
+    "createdAt": "2025-12-27T16:50:00Z",
+    "updatedAt": "2025-12-27T16:50:00Z",
+    "normalization": {
+      "lowercase": true,
+      "stripPunctuation": true,
+      "collapseWhitespace": true,
+      "unicodeNormalize": "NFKC",
+      "stopwords": [
+        "the",
+        "a",
+        "an",
+        "and",
+        "or",
+        "to",
+        "for",
+        "with",
+        "of",
+        "in",
+        "on",
+        "at",
+        "my",
+        "our",
+        "your",
+        "their",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "doing",
+        "do",
+        "did",
+        "this",
+        "that",
+        "these",
+        "those",
+        "please"
+      ],
+      "spellings": {
+        "mulch": [
+          "mulching",
+          "mulch layer",
+          "woodchips",
+          "wood chips",
+          "straw mulch"
+        ],
+        "compost": [
+          "composting",
+          "finished compost",
+          "compost pile",
+          "compost heap"
+        ],
+        "biochar": ["bio-char", "charcoal amendment"],
+        "fertilize": ["fertilise", "feed", "fertilizer", "fertiliser"],
+        "irrigation": ["irrigate", "watering system", "dripline", "drip line"],
+        "weeding": ["weed", "pull weeds", "hoe weeds", "weed out"],
+        "prune": ["pruning", "trim", "trimming", "deadhead", "deadheading"],
+        "transplant": ["transplanting", "pot up", "pot-up", "move seedlings"],
+        "propagate": [
+          "propagation",
+          "clone",
+          "cloning",
+          "cuttings",
+          "layering"
+        ],
+        "greenhouse": [
+          "hoophouse",
+          "hoop house",
+          "high tunnel",
+          "polytunnel",
+          "poly tunnel"
+        ],
+        "no-till": ["no till", "notill", "no tilling"],
+        "hugelkultur": ["hugel", "hügelkultur", "hugel culture"],
+        "graywater": ["greywater", "grey water", "gray water"],
+        "trellis": ["staking", "stake", "stakes", "cage", "tomato cage"],
+        "ipm": [
+          "integrated pest management",
+          "integrated pest",
+          "pest management"
+        ],
+        "cover crop": ["covercrop", "green manure", "green-manure"],
+        "seed starting": [
+          "start seeds",
+          "seed start",
+          "germinate seeds",
+          "germination"
+        ],
+        "raised bed": ["raised beds", "bed boxes", "garden beds"],
+        "row cover": [
+          "frost cloth",
+          "floating row cover",
+          "insect netting",
+          "ag fabric"
+        ],
+        "companion planting": ["companions", "plant guilds", "guild planting"],
+        "soil test": ["test soil", "ph test", "soil analysis", "lab test"]
+      }
+    },
+    "scoring": {
+      "matchTypes": {
+        "exact_phrase": 1.0,
+        "token_phrase": 0.7,
+        "keyword": 0.45,
+        "fuzzy": 0.25,
+        "negative": -0.85
+      },
+      "minScoreToSuggest": 0.45,
+      "minScoreToAutoMap": 0.72,
+      "maxSuggestions": 7
+    },
+    "notes": [
+      "This lexicon maps garden language → methodKey. Each methodKey should exist in garden.methods.json.",
+      "Rules support safer/correct selection based on crop/life-stage, environment, and constraints (heat, frost, chemicals).",
+      "Cultural methods are included as named approaches; SSA should present them respectfully and adapt them to local conditions/preferences via overrides."
+    ],
+    "methods": [
+      {
+        "methodId": "garden.plan.site_assessment",
+        "methodKey": "garden.plan.site_assessment",
+        "weight": 0.95,
+        "aliases": [
+          "site assessment",
+          "garden site assessment",
+          "assess the yard",
+          "evaluate the plot",
+          "check sun and shade",
+          "map the garden",
+          "garden layout assessment"
+        ],
+        "keywords": [
+          "sun",
+          "shade",
+          "slope",
+          "drainage",
+          "microclimate",
+          "wind",
+          "frost pocket",
+          "soil type",
+          "zone",
+          "aspect"
+        ],
+        "negative": ["plant now", "harvest now"],
+        "roomHints": ["yard", "front yard", "backyard", "garden"],
+        "surfaceHints": ["soil", "ground", "raised bed"],
+        "materialHints": [],
+        "toolHints": ["notebook", "tape measure", "string line"]
+      },
+      {
+        "methodId": "garden.plan.garden_bed_design",
+        "methodKey": "garden.plan.garden_bed_design",
+        "weight": 0.9,
+        "aliases": [
+          "design beds",
+          "plan beds",
+          "bed layout",
+          "raised bed plan",
+          "garden bed design",
+          "plot layout"
+        ],
+        "keywords": [
+          "bed",
+          "paths",
+          "rows",
+          "spacing",
+          "layout",
+          "planting plan",
+          "crop plan"
+        ],
+        "negative": ["pesticide"],
+        "roomHints": ["garden", "yard"],
+        "surfaceHints": ["soil", "raised bed"],
+        "materialHints": ["wood", "metal", "stone"],
+        "toolHints": ["string line", "stakes"]
+      },
+      {
+        "methodId": "garden.soil.soil_test",
+        "methodKey": "garden.soil.soil_test",
+        "weight": 1.05,
+        "aliases": [
+          "soil test",
+          "test soil",
+          "ph test",
+          "soil analysis",
+          "send soil to lab"
+        ],
+        "keywords": [
+          "ph",
+          "nitrogen",
+          "phosphorus",
+          "potassium",
+          "organic matter",
+          "salinity",
+          "compaction"
+        ],
+        "negative": ["spray pesticide"],
+        "roomHints": ["garden", "yard"],
+        "surfaceHints": ["soil"],
+        "materialHints": [],
+        "toolHints": ["soil test kit", "sample bag"]
+      },
+      {
+        "methodId": "garden.soil.amend_compost",
+        "methodKey": "garden.soil.amend_compost",
+        "weight": 1.1,
+        "aliases": [
+          "add compost",
+          "amend with compost",
+          "top dress compost",
+          "compost application",
+          "spread compost"
+        ],
+        "keywords": [
+          "compost",
+          "topdress",
+          "organic matter",
+          "soil health",
+          "humus"
+        ],
+        "negative": ["herbicide"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil", "raised bed"],
+        "materialHints": ["compost"],
+        "toolHints": ["shovel", "rake", "wheelbarrow"]
+      },
+      {
+        "methodId": "garden.soil.amend_manure",
+        "methodKey": "garden.soil.amend_manure",
+        "weight": 1.05,
+        "aliases": [
+          "add manure",
+          "aged manure",
+          "composted manure",
+          "manure amendment"
+        ],
+        "keywords": ["manure", "aged", "composted", "fertility", "nitrogen"],
+        "negative": ["fresh manure on greens"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": ["manure"],
+        "toolHints": ["shovel", "gloves"]
+      },
+      {
+        "methodId": "garden.soil.amend_biochar",
+        "methodKey": "garden.soil.amend_biochar",
+        "weight": 0.9,
+        "aliases": [
+          "add biochar",
+          "biochar amendment",
+          "charcoal amendment",
+          "terra preta style"
+        ],
+        "keywords": [
+          "biochar",
+          "char",
+          "carbon",
+          "soil structure",
+          "terra preta"
+        ],
+        "negative": ["uncharged biochar"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": ["biochar"],
+        "toolHints": ["bucket", "shovel"]
+      },
+      {
+        "methodId": "garden.soil.no_till_bed_prep",
+        "methodKey": "garden.soil.no_till_bed_prep",
+        "weight": 1.0,
+        "aliases": [
+          "no-till bed prep",
+          "no till bed prep",
+          "notill bed",
+          "sheet mulch bed prep"
+        ],
+        "keywords": [
+          "no-till",
+          "sheet mulch",
+          "cardboard",
+          "lasagna garden",
+          "smother"
+        ],
+        "negative": ["rototill"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": ["cardboard", "mulch"],
+        "toolHints": ["hose", "rake"]
+      },
+      {
+        "methodId": "garden.soil.till_rototill",
+        "methodKey": "garden.soil.till_rototill",
+        "weight": 0.75,
+        "aliases": [
+          "till",
+          "tilling",
+          "rototill",
+          "rototiller",
+          "turn the soil"
+        ],
+        "keywords": ["till", "turn over", "incorporate", "break ground"],
+        "negative": ["no-till only"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": [],
+        "toolHints": ["rototiller", "hoe"]
+      },
+      {
+        "methodId": "garden.soil.mound_hugelkultur",
+        "methodKey": "garden.soil.mound_hugelkultur",
+        "weight": 0.9,
+        "aliases": ["hugelkultur", "hügelkultur", "hugel bed", "log mound bed"],
+        "keywords": [
+          "logs",
+          "woody debris",
+          "mound",
+          "water retention",
+          "raised mound"
+        ],
+        "negative": ["treated lumber"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": ["logs", "branches", "leaves"],
+        "toolHints": ["shovel", "fork"]
+      },
+      {
+        "methodId": "garden.mulch.apply_mulch",
+        "methodKey": "garden.mulch.apply_mulch",
+        "weight": 1.15,
+        "aliases": [
+          "mulch",
+          "mulching",
+          "apply mulch",
+          "spread mulch",
+          "top with straw"
+        ],
+        "keywords": [
+          "mulch",
+          "straw",
+          "wood chips",
+          "leaf mold",
+          "moisture",
+          "weed suppression"
+        ],
+        "negative": ["mulch volcano"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil", "raised bed"],
+        "materialHints": ["straw", "wood chips", "leaves"],
+        "toolHints": ["rake", "wheelbarrow"]
+      },
+      {
+        "methodId": "garden.water.hand_watering",
+        "methodKey": "garden.water.hand_watering",
+        "weight": 0.9,
+        "aliases": [
+          "water",
+          "hand water",
+          "watering",
+          "water by hand",
+          "hose watering"
+        ],
+        "keywords": [
+          "water",
+          "hose",
+          "watering can",
+          "soak",
+          "deep water",
+          "dry soil"
+        ],
+        "negative": ["drip install"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": [],
+        "toolHints": ["hose", "watering can"]
+      },
+      {
+        "methodId": "garden.water.drip_irrigation_install",
+        "methodKey": "garden.water.drip_irrigation_install",
+        "weight": 1.0,
+        "aliases": [
+          "install drip irrigation",
+          "drip irrigation",
+          "dripline install",
+          "set up drip tape",
+          "irrigation setup"
+        ],
+        "keywords": [
+          "drip",
+          "irrigation",
+          "emitters",
+          "drip tape",
+          "timer",
+          "pressure regulator"
+        ],
+        "negative": ["hand water only"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": ["drip line", "emitters"],
+        "toolHints": ["scissors", "punch tool"]
+      },
+      {
+        "methodId": "garden.water.graywater_irrigation",
+        "methodKey": "garden.water.graywater_irrigation",
+        "weight": 0.75,
+        "aliases": [
+          "graywater",
+          "greywater",
+          "gray water irrigation",
+          "reuse rinse water"
+        ],
+        "keywords": [
+          "graywater",
+          "greywater",
+          "reuse",
+          "rinse water",
+          "soap free"
+        ],
+        "negative": ["edible leaves directly"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": [],
+        "toolHints": ["bucket", "hose"]
+      },
+      {
+        "methodId": "garden.seed.seed_starting_indoor",
+        "methodKey": "garden.seed.seed_starting_indoor",
+        "weight": 1.1,
+        "aliases": [
+          "start seeds",
+          "seed starting",
+          "start seedlings indoors",
+          "germinate seeds",
+          "nursery trays"
+        ],
+        "keywords": [
+          "seed tray",
+          "seedlings",
+          "germination",
+          "grow light",
+          "heat mat",
+          "potting mix"
+        ],
+        "negative": ["direct sow only"],
+        "roomHints": ["indoors", "greenhouse"],
+        "surfaceHints": [],
+        "materialHints": ["seed", "potting mix"],
+        "toolHints": ["seed tray", "grow light"]
+      },
+      {
+        "methodId": "garden.seed.direct_sow",
+        "methodKey": "garden.seed.direct_sow",
+        "weight": 1.1,
+        "aliases": [
+          "direct sow",
+          "sow seeds",
+          "plant seeds outside",
+          "seed in ground"
+        ],
+        "keywords": ["direct sow", "sow", "seed", "in row", "thin seedlings"],
+        "negative": ["transplant now"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil", "raised bed"],
+        "materialHints": ["seed"],
+        "toolHints": ["dibber", "string line"]
+      },
+      {
+        "methodId": "garden.plant.transplant_seedlings",
+        "methodKey": "garden.plant.transplant_seedlings",
+        "weight": 1.15,
+        "aliases": [
+          "transplant",
+          "transplant seedlings",
+          "move seedlings",
+          "plant starts",
+          "pot up"
+        ],
+        "keywords": [
+          "transplant",
+          "seedling",
+          "starter plant",
+          "harden off",
+          "root ball"
+        ],
+        "negative": ["direct sow"],
+        "roomHints": ["garden", "greenhouse"],
+        "surfaceHints": ["soil"],
+        "materialHints": [],
+        "toolHints": ["trowel", "watering can"]
+      },
+      {
+        "methodId": "garden.plant.harden_off",
+        "methodKey": "garden.plant.harden_off",
+        "weight": 1.0,
+        "aliases": [
+          "harden off",
+          "hardening off",
+          "acclimate seedlings",
+          "transition seedlings outside"
+        ],
+        "keywords": [
+          "harden",
+          "acclimate",
+          "sunscald",
+          "wind exposure",
+          "gradually"
+        ],
+        "negative": ["plant immediately"],
+        "roomHints": ["outdoors", "porch", "greenhouse"],
+        "surfaceHints": [],
+        "materialHints": [],
+        "toolHints": ["shade cloth", "tray"]
+      },
+      {
+        "methodId": "garden.plant.spacing_and_thinning",
+        "methodKey": "garden.plant.spacing_and_thinning",
+        "weight": 0.95,
+        "aliases": [
+          "thin seedlings",
+          "thinning",
+          "spacing",
+          "plant spacing",
+          "thin carrots"
+        ],
+        "keywords": ["thin", "spacing", "overcrowded", "crowded", "airflow"],
+        "negative": ["harvest all"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": [],
+        "toolHints": ["scissors"]
+      },
+      {
+        "methodId": "garden.support.stake_trellis",
+        "methodKey": "garden.support.stake_trellis",
+        "weight": 1.05,
+        "aliases": [
+          "stake",
+          "staking",
+          "trellis",
+          "cage tomatoes",
+          "string trellis",
+          "support vines"
+        ],
+        "keywords": [
+          "trellis",
+          "stake",
+          "cage",
+          "support",
+          "twine",
+          "vines",
+          "climbing"
+        ],
+        "negative": ["ground sprawl"],
+        "roomHints": ["garden"],
+        "surfaceHints": [],
+        "materialHints": ["twine", "bamboo", "wire"],
+        "toolHints": ["stakes", "zip ties"]
+      },
+      {
+        "methodId": "garden.prune.pruning",
+        "methodKey": "garden.prune.pruning",
+        "weight": 1.0,
+        "aliases": [
+          "prune",
+          "pruning",
+          "trim",
+          "trimming",
+          "cut back",
+          "shape plant"
+        ],
+        "keywords": [
+          "prune",
+          "trim",
+          "leggy",
+          "remove suckers",
+          "shape",
+          "canopy"
+        ],
+        "negative": ["do not prune"],
+        "roomHints": ["garden"],
+        "surfaceHints": [],
+        "materialHints": [],
+        "toolHints": ["pruners", "loppers"]
+      },
+      {
+        "methodId": "garden.prune.deadheading",
+        "methodKey": "garden.prune.deadheading",
+        "weight": 0.9,
+        "aliases": [
+          "deadhead",
+          "deadheading",
+          "remove spent blooms",
+          "snip flowers"
+        ],
+        "keywords": ["spent blooms", "flowers", "re-bloom", "seed heads"],
+        "negative": ["save seeds"],
+        "roomHints": ["garden"],
+        "surfaceHints": [],
+        "materialHints": [],
+        "toolHints": ["snips", "scissors"]
+      },
+      {
+        "methodId": "garden.weed.hand_weed",
+        "methodKey": "garden.weed.hand_weed",
+        "weight": 1.05,
+        "aliases": [
+          "weed",
+          "weeding",
+          "pull weeds",
+          "hand weed",
+          "weed the beds"
+        ],
+        "keywords": [
+          "weeds",
+          "pull",
+          "root",
+          "invasive",
+          "bindweed",
+          "crabgrass"
+        ],
+        "negative": ["spray herbicide"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": [],
+        "toolHints": ["gloves", "hand fork"]
+      },
+      {
+        "methodId": "garden.weed.hoe_weed",
+        "methodKey": "garden.weed.hoe_weed",
+        "weight": 0.95,
+        "aliases": ["hoe weeds", "use a hoe", "stirrup hoe", "scuffle hoe"],
+        "keywords": ["hoe", "scuffle", "shallow cultivation", "weed seedlings"],
+        "negative": ["mulch thick"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": [],
+        "toolHints": ["hoe", "stirrup hoe"]
+      },
+      {
+        "methodId": "garden.weed.sheet_mulch_smother",
+        "methodKey": "garden.weed.sheet_mulch_smother",
+        "weight": 1.0,
+        "aliases": [
+          "sheet mulch",
+          "smother weeds",
+          "cardboard mulch",
+          "lasagna garden"
+        ],
+        "keywords": [
+          "cardboard",
+          "smother",
+          "sheet mulch",
+          "weed suppression",
+          "no-till"
+        ],
+        "negative": ["till"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": ["cardboard", "mulch"],
+        "toolHints": ["hose", "rake"]
+      },
+      {
+        "methodId": "garden.pest.ipm_monitoring",
+        "methodKey": "garden.pest.ipm_monitoring",
+        "weight": 1.05,
+        "aliases": [
+          "ipm",
+          "integrated pest management",
+          "monitor pests",
+          "scout for pests",
+          "inspect leaves"
+        ],
+        "keywords": [
+          "scout",
+          "inspect",
+          "eggs",
+          "larvae",
+          "damage",
+          "chew",
+          "suck",
+          "sticky residue"
+        ],
+        "negative": ["spray immediately"],
+        "roomHints": ["garden"],
+        "surfaceHints": [],
+        "materialHints": [],
+        "toolHints": ["magnifier", "notebook"]
+      },
+      {
+        "methodId": "garden.pest.hand_pick",
+        "methodKey": "garden.pest.hand_pick",
+        "weight": 1.0,
+        "aliases": [
+          "hand pick pests",
+          "pick bugs off",
+          "remove caterpillars",
+          "squish aphids"
+        ],
+        "keywords": [
+          "hand pick",
+          "remove bugs",
+          "caterpillars",
+          "beetles",
+          "aphids",
+          "hornworm"
+        ],
+        "negative": ["broad-spectrum spray"],
+        "roomHints": ["garden"],
+        "surfaceHints": [],
+        "materialHints": [],
+        "toolHints": ["gloves", "bucket"]
+      },
+      {
+        "methodId": "garden.pest.row_cover",
+        "methodKey": "garden.pest.row_cover",
+        "weight": 1.05,
+        "aliases": [
+          "row cover",
+          "floating row cover",
+          "insect netting",
+          "frost cloth",
+          "cover plants"
+        ],
+        "keywords": [
+          "row cover",
+          "netting",
+          "mesh",
+          "exclude pests",
+          "flea beetles",
+          "cabbage moth"
+        ],
+        "negative": ["needs pollination"],
+        "roomHints": ["garden"],
+        "surfaceHints": [],
+        "materialHints": ["fabric", "mesh"],
+        "toolHints": ["clips", "hoops"]
+      },
+      {
+        "methodId": "garden.pest.neem_or_soap_spray",
+        "methodKey": "garden.pest.neem_or_soap_spray",
+        "weight": 0.8,
+        "aliases": [
+          "neem spray",
+          "insecticidal soap",
+          "soap spray",
+          "natural pest spray"
+        ],
+        "keywords": [
+          "neem",
+          "insecticidal soap",
+          "soft-bodied insects",
+          "aphids",
+          "mites",
+          "whiteflies"
+        ],
+        "negative": ["spray in heat"],
+        "roomHints": ["garden"],
+        "surfaceHints": [],
+        "materialHints": [],
+        "toolHints": ["sprayer"]
+      },
+      {
+        "methodId": "garden.pest.btk_caterpillars",
+        "methodKey": "garden.pest.btk_caterpillars",
+        "weight": 0.85,
+        "aliases": [
+          "bt",
+          "btk",
+          "bacillus thuringiensis",
+          "caterpillar bt spray"
+        ],
+        "keywords": ["caterpillars", "brassicas", "hornworm", "bt", "btk"],
+        "negative": ["pollinator spray"],
+        "roomHints": ["garden"],
+        "surfaceHints": [],
+        "materialHints": [],
+        "toolHints": ["sprayer"]
+      },
+      {
+        "methodId": "garden.disease.prune_sanitation",
+        "methodKey": "garden.disease.prune_sanitation",
+        "weight": 0.95,
+        "aliases": [
+          "sanitize tools",
+          "prune diseased leaves",
+          "remove infected foliage",
+          "garden sanitation"
+        ],
+        "keywords": [
+          "blight",
+          "mildew",
+          "spots",
+          "fungus",
+          "disease",
+          "sanitize pruners"
+        ],
+        "negative": ["compost diseased"],
+        "roomHints": ["garden"],
+        "surfaceHints": [],
+        "materialHints": [],
+        "toolHints": ["pruners", "alcohol"]
+      },
+      {
+        "methodId": "garden.fertilize.side_dress",
+        "methodKey": "garden.fertilize.side_dress",
+        "weight": 0.95,
+        "aliases": [
+          "side dress",
+          "side-dress",
+          "fertilize",
+          "feed plants",
+          "top dress fertilizer"
+        ],
+        "keywords": [
+          "fertilize",
+          "feed",
+          "nitrogen",
+          "slow release",
+          "granular",
+          "top dress"
+        ],
+        "negative": ["overfertilize"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": ["fertilizer"],
+        "toolHints": ["scoop", "gloves"]
+      },
+      {
+        "methodId": "garden.fertilize.foliar_feed",
+        "methodKey": "garden.fertilize.foliar_feed",
+        "weight": 0.85,
+        "aliases": [
+          "foliar feed",
+          "spray kelp",
+          "spray fish emulsion",
+          "leaf feed"
+        ],
+        "keywords": [
+          "foliar",
+          "kelp",
+          "fish emulsion",
+          "spray",
+          "micronutrients"
+        ],
+        "negative": ["spray in sun heat"],
+        "roomHints": ["garden"],
+        "surfaceHints": [],
+        "materialHints": [],
+        "toolHints": ["sprayer"]
+      },
+      {
+        "methodId": "garden.crop.cover_crop",
+        "methodKey": "garden.crop.cover_crop",
+        "weight": 0.9,
+        "aliases": [
+          "cover crop",
+          "green manure",
+          "sow cover crop",
+          "plant cover crop"
+        ],
+        "keywords": [
+          "cover crop",
+          "clover",
+          "vetch",
+          "rye",
+          "buckwheat",
+          "soil building"
+        ],
+        "negative": ["plant vegetables immediately"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": ["seed"],
+        "toolHints": ["broadcast spreader"]
+      },
+      {
+        "methodId": "garden.crop.crop_rotation",
+        "methodKey": "garden.crop.crop_rotation",
+        "weight": 0.85,
+        "aliases": [
+          "crop rotation",
+          "rotate crops",
+          "rotate beds",
+          "rotation plan"
+        ],
+        "keywords": [
+          "rotation",
+          "family",
+          "nightshade",
+          "brassica",
+          "legume",
+          "disease prevention"
+        ],
+        "negative": ["same spot every year"],
+        "roomHints": ["garden"],
+        "surfaceHints": [],
+        "materialHints": [],
+        "toolHints": ["planner"]
+      },
+      {
+        "methodId": "garden.polycluture.companion_planting",
+        "methodKey": "garden.polycluture.companion_planting",
+        "weight": 0.95,
+        "aliases": [
+          "companion planting",
+          "plant guilds",
+          "guild planting",
+          "interplanting",
+          "polyculture",
+          "three sisters"
+        ],
+        "keywords": [
+          "companions",
+          "guild",
+          "intercrop",
+          "beneficial",
+          "pollinators",
+          "pest reduction"
+        ],
+        "negative": ["monocrop only"],
+        "roomHints": ["garden"],
+        "surfaceHints": [],
+        "materialHints": [],
+        "toolHints": ["seed", "starts"]
+      },
+      {
+        "methodId": "garden.indigenous.three_sisters",
+        "methodKey": "garden.indigenous.three_sisters",
+        "weight": 0.9,
+        "aliases": [
+          "three sisters",
+          "corn beans squash",
+          "milpa style (north american)",
+          "mound three sisters"
+        ],
+        "keywords": ["corn", "beans", "squash", "mound", "guild", "companions"],
+        "negative": ["single crop row"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": ["seed"],
+        "toolHints": ["hoe"]
+      },
+      {
+        "methodId": "garden.indigenous.milpa",
+        "methodKey": "garden.indigenous.milpa",
+        "weight": 0.85,
+        "aliases": [
+          "milpa",
+          "mesoamerican milpa",
+          "corn bean squash chile",
+          "polyculture milpa"
+        ],
+        "keywords": [
+          "milpa",
+          "maize",
+          "beans",
+          "squash",
+          "chile",
+          "polyculture"
+        ],
+        "negative": ["monoculture"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": ["seed"],
+        "toolHints": ["hoe"]
+      },
+      {
+        "methodId": "garden.indigenous.zai_pits",
+        "methodKey": "garden.indigenous.zai_pits",
+        "weight": 0.8,
+        "aliases": [
+          "zai pits",
+          "zaï pits",
+          "planting pits",
+          "water harvesting pits"
+        ],
+        "keywords": [
+          "zai",
+          "pits",
+          "water harvesting",
+          "dryland",
+          "compost in pits",
+          "restoration"
+        ],
+        "negative": ["flood irrigation"],
+        "roomHints": ["garden", "field"],
+        "surfaceHints": ["soil"],
+        "materialHints": [],
+        "toolHints": ["digging tool"]
+      },
+      {
+        "methodId": "garden.indigenous.waffle_gardens",
+        "methodKey": "garden.indigenous.waffle_gardens",
+        "weight": 0.75,
+        "aliases": [
+          "waffle garden",
+          "zuni waffle garden",
+          "grid irrigation basins"
+        ],
+        "keywords": [
+          "waffle",
+          "basins",
+          "arid",
+          "water conserving",
+          "grid beds"
+        ],
+        "negative": ["overhead sprinkler"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": [],
+        "toolHints": ["hoe", "rake"]
+      },
+      {
+        "methodId": "garden.indigenous.terracing",
+        "methodKey": "garden.indigenous.terracing",
+        "weight": 0.8,
+        "aliases": ["terrace", "terracing", "contour beds", "contour farming"],
+        "keywords": [
+          "slope",
+          "terrace",
+          "contour",
+          "erosion control",
+          "swales"
+        ],
+        "negative": ["straight downhill rows"],
+        "roomHints": ["garden", "hillside", "field"],
+        "surfaceHints": ["soil"],
+        "materialHints": ["stones"],
+        "toolHints": ["level", "string line"]
+      },
+      {
+        "methodId": "garden.infra.swales_and_berms",
+        "methodKey": "garden.infra.swales_and_berms",
+        "weight": 0.85,
+        "aliases": [
+          "swales",
+          "swale",
+          "berm",
+          "water catchment berm",
+          "contour swale"
+        ],
+        "keywords": ["swale", "berm", "contour", "water harvesting", "runoff"],
+        "negative": ["digging near utilities"],
+        "roomHints": ["yard", "garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": [],
+        "toolHints": ["shovel", "level"]
+      },
+      {
+        "methodId": "garden.infra.rainwater_harvest",
+        "methodKey": "garden.infra.rainwater_harvest",
+        "weight": 0.85,
+        "aliases": [
+          "rainwater harvesting",
+          "rain barrel",
+          "collect rainwater",
+          "cistern for garden"
+        ],
+        "keywords": [
+          "rain barrel",
+          "cistern",
+          "downspout",
+          "runoff",
+          "catchment"
+        ],
+        "negative": ["unsafe water storage"],
+        "roomHints": ["yard", "garden"],
+        "surfaceHints": [],
+        "materialHints": ["barrel", "tank"],
+        "toolHints": ["hose", "spigot"]
+      },
+      {
+        "methodId": "garden.greenhouse.manage",
+        "methodKey": "garden.greenhouse.manage",
+        "weight": 0.85,
+        "aliases": [
+          "greenhouse management",
+          "high tunnel management",
+          "hoophouse management",
+          "vent greenhouse"
+        ],
+        "keywords": [
+          "greenhouse",
+          "high tunnel",
+          "hoop house",
+          "vent",
+          "shade cloth",
+          "humidity"
+        ],
+        "negative": ["outdoor only"],
+        "roomHints": ["greenhouse"],
+        "surfaceHints": [],
+        "materialHints": ["plastic", "shade cloth"],
+        "toolHints": ["thermometer", "fan"]
+      },
+      {
+        "methodId": "garden.harvest.pick_harvest",
+        "methodKey": "garden.harvest.pick_harvest",
+        "weight": 1.15,
+        "aliases": [
+          "harvest",
+          "pick harvest",
+          "pick vegetables",
+          "gather produce",
+          "harvest greens"
+        ],
+        "keywords": [
+          "harvest",
+          "pick",
+          "ripe",
+          "mature",
+          "ready",
+          "gather",
+          "cut"
+        ],
+        "negative": ["plant seeds"],
+        "roomHints": ["garden"],
+        "surfaceHints": [],
+        "materialHints": [],
+        "toolHints": ["knife", "basket"]
+      },
+      {
+        "methodId": "garden.harvest.wash_and_sort",
+        "methodKey": "garden.harvest.wash_and_sort",
+        "weight": 0.9,
+        "aliases": [
+          "wash produce",
+          "rinse harvest",
+          "sort produce",
+          "clean harvest"
+        ],
+        "keywords": ["wash", "rinse", "sort", "trim", "cool down", "shade"],
+        "negative": ["store dirty wet"],
+        "roomHints": ["kitchen", "outdoors"],
+        "surfaceHints": [],
+        "materialHints": [],
+        "toolHints": ["tub", "colander"]
+      },
+      {
+        "methodId": "garden.postharvest.cure_storage_crops",
+        "methodKey": "garden.postharvest.cure_storage_crops",
+        "weight": 0.9,
+        "aliases": [
+          "cure onions",
+          "cure garlic",
+          "cure sweet potatoes",
+          "cure squash"
+        ],
+        "keywords": ["cure", "storage crop", "dry", "ventilate", "skin harden"],
+        "negative": ["refrigerate immediately"],
+        "roomHints": ["shed", "garage", "pantry"],
+        "surfaceHints": [],
+        "materialHints": [],
+        "toolHints": ["rack", "fan"]
+      },
+      {
+        "methodId": "garden.cleanup.bed_cleanup",
+        "methodKey": "garden.cleanup.bed_cleanup",
+        "weight": 0.9,
+        "aliases": [
+          "bed cleanup",
+          "garden cleanup",
+          "pull spent plants",
+          "clear beds",
+          "end of season cleanup"
+        ],
+        "keywords": [
+          "cleanup",
+          "spent plants",
+          "remove debris",
+          "compost",
+          "disease cleanup"
+        ],
+        "negative": ["leave diseased"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": [],
+        "toolHints": ["gloves", "pruners"]
+      },
+      {
+        "methodId": "garden.compost.build_pile",
+        "methodKey": "garden.compost.build_pile",
+        "weight": 0.95,
+        "aliases": [
+          "build compost pile",
+          "start compost",
+          "compost heap",
+          "compost bin"
+        ],
+        "keywords": [
+          "greens",
+          "browns",
+          "pile",
+          "bin",
+          "turn",
+          "moisture",
+          "carbon",
+          "nitrogen"
+        ],
+        "negative": ["add meat"],
+        "roomHints": ["yard", "garden"],
+        "surfaceHints": [],
+        "materialHints": ["leaves", "grass clippings"],
+        "toolHints": ["pitchfork"]
+      },
+      {
+        "methodId": "garden.compost.turn_pile",
+        "methodKey": "garden.compost.turn_pile",
+        "weight": 0.85,
+        "aliases": [
+          "turn compost",
+          "turn pile",
+          "aerate compost",
+          "flip compost"
+        ],
+        "keywords": ["turn", "aerate", "heat", "hot compost", "oxygen"],
+        "negative": ["leave anaerobic"],
+        "roomHints": ["yard", "garden"],
+        "surfaceHints": [],
+        "materialHints": [],
+        "toolHints": ["pitchfork"]
+      },
+      {
+        "methodId": "garden.seed.save_seeds",
+        "methodKey": "garden.seed.save_seeds",
+        "weight": 0.85,
+        "aliases": [
+          "save seeds",
+          "seed saving",
+          "collect seeds",
+          "dry seeds",
+          "store seeds"
+        ],
+        "keywords": [
+          "save seed",
+          "seed heads",
+          "dry",
+          "ferment tomato seeds",
+          "label"
+        ],
+        "negative": ["hybrid won't breed true"],
+        "roomHints": ["garden", "indoors"],
+        "surfaceHints": [],
+        "materialHints": ["seed"],
+        "toolHints": ["envelopes", "labels"]
+      },
+      {
+        "methodId": "garden.control.frost_protection",
+        "methodKey": "garden.control.frost_protection",
+        "weight": 1.0,
+        "aliases": [
+          "frost protection",
+          "cover for frost",
+          "protect from frost",
+          "use frost cloth",
+          "row cover for frost"
+        ],
+        "keywords": [
+          "frost",
+          "freeze",
+          "cold snap",
+          "row cover",
+          "blanket plants",
+          "hoops"
+        ],
+        "negative": ["leave uncovered"],
+        "roomHints": ["garden"],
+        "surfaceHints": [],
+        "materialHints": ["fabric", "plastic"],
+        "toolHints": ["clips", "hoops"]
+      },
+      {
+        "methodId": "garden.control.heat_shade",
+        "methodKey": "garden.control.heat_shade",
+        "weight": 0.95,
+        "aliases": [
+          "shade plants",
+          "shade cloth",
+          "protect from heat",
+          "heat stress management"
+        ],
+        "keywords": [
+          "heat",
+          "heatwave",
+          "shade cloth",
+          "wilting",
+          "sunscald",
+          "hot wind"
+        ],
+        "negative": ["spray midday"],
+        "roomHints": ["garden"],
+        "surfaceHints": [],
+        "materialHints": ["shade cloth"],
+        "toolHints": ["stakes", "clips"]
+      },
+      {
+        "methodId": "garden.control.windbreaks",
+        "methodKey": "garden.control.windbreaks",
+        "weight": 0.8,
+        "aliases": [
+          "windbreak",
+          "windbreaks",
+          "block wind",
+          "protect from wind"
+        ],
+        "keywords": ["wind", "gusts", "wind damage", "windbreak", "screen"],
+        "negative": ["ignore staking"],
+        "roomHints": ["garden", "yard"],
+        "surfaceHints": [],
+        "materialHints": ["fabric", "fence"],
+        "toolHints": ["stakes", "ties"]
+      },
+      {
+        "methodId": "garden.modern.hydroponics_basic",
+        "methodKey": "garden.modern.hydroponics_basic",
+        "weight": 0.65,
+        "aliases": [
+          "hydroponics",
+          "hydroponic system",
+          "deep water culture",
+          "kratky",
+          "NFT system"
+        ],
+        "keywords": [
+          "hydroponics",
+          "nutrient solution",
+          "ph",
+          "EC",
+          "reservoir",
+          "air stone"
+        ],
+        "negative": ["soil only"],
+        "roomHints": ["indoors", "greenhouse"],
+        "surfaceHints": [],
+        "materialHints": ["nutrient solution"],
+        "toolHints": ["ph meter", "ec meter"]
+      },
+      {
+        "methodId": "garden.modern.aquaponics_basic",
+        "methodKey": "garden.modern.aquaponics_basic",
+        "weight": 0.6,
+        "aliases": [
+          "aquaponics",
+          "fish and plants system",
+          "media bed aquaponics"
+        ],
+        "keywords": [
+          "aquaponics",
+          "fish tank",
+          "biofilter",
+          "ammonia",
+          "nitrates"
+        ],
+        "negative": ["no fish"],
+        "roomHints": ["indoors", "greenhouse"],
+        "surfaceHints": [],
+        "materialHints": ["media", "tank"],
+        "toolHints": ["test kit"]
+      },
+      {
+        "methodId": "garden.modern.vertical_growing",
+        "methodKey": "garden.modern.vertical_growing",
+        "weight": 0.7,
+        "aliases": [
+          "vertical garden",
+          "grow wall",
+          "tower garden",
+          "stacked planters"
+        ],
+        "keywords": [
+          "vertical",
+          "tower",
+          "stacked",
+          "wall planter",
+          "small space"
+        ],
+        "negative": ["field planting"],
+        "roomHints": ["patio", "indoors", "yard"],
+        "surfaceHints": [],
+        "materialHints": ["planters"],
+        "toolHints": ["drip line"]
+      },
+      {
+        "methodId": "garden.modern.container_gardening",
+        "methodKey": "garden.modern.container_gardening",
+        "weight": 0.85,
+        "aliases": [
+          "container gardening",
+          "grow in pots",
+          "potted plants",
+          "planter gardening"
+        ],
+        "keywords": [
+          "container",
+          "pot",
+          "planter",
+          "patio",
+          "balcony",
+          "drainage holes"
+        ],
+        "negative": ["in-ground only"],
+        "roomHints": ["patio", "balcony", "deck"],
+        "surfaceHints": [],
+        "materialHints": ["pots", "planters"],
+        "toolHints": ["watering can"]
+      },
+      {
+        "methodId": "garden.traditions.kitchen_garden_intensive",
+        "methodKey": "garden.traditions.kitchen_garden_intensive",
+        "weight": 0.8,
+        "aliases": [
+          "kitchen garden",
+          "intensive garden",
+          "biointensive",
+          "double digging (biointensive)"
+        ],
+        "keywords": [
+          "kitchen garden",
+          "biointensive",
+          "intensive",
+          "close spacing",
+          "compost heavy"
+        ],
+        "negative": ["minimal input"],
+        "roomHints": ["garden"],
+        "surfaceHints": ["soil"],
+        "materialHints": ["compost"],
+        "toolHints": ["spade"]
+      },
+      {
+        "methodId": "garden.traditions.chinampa_style",
+        "methodKey": "garden.traditions.chinampa_style",
+        "weight": 0.65,
+        "aliases": [
+          "chinampa",
+          "floating garden style",
+          "raised island beds",
+          "wetland beds"
+        ],
+        "keywords": [
+          "chinampa",
+          "wetland",
+          "canals",
+          "raised island",
+          "aquatic"
+        ],
+        "negative": ["dryland only"],
+        "roomHints": ["garden", "pond edge"],
+        "surfaceHints": ["soil"],
+        "materialHints": [],
+        "toolHints": ["shovel"]
+      }
+    ],
+    "entityHints": {
+      "rooms": [
+        "garden",
+        "yard",
+        "field",
+        "greenhouse",
+        "high tunnel",
+        "patio",
+        "balcony",
+        "porch",
+        "shed",
+        "garage",
+        "pantry",
+        "indoors"
+      ],
+      "surfaces": [
+        "soil",
+        "raised bed",
+        "container",
+        "planter",
+        "mulch",
+        "compost pile",
+        "row",
+        "mound",
+        "terrace",
+        "swale",
+        "berm"
+      ],
+      "materials": [
+        "compost",
+        "manure",
+        "mulch",
+        "straw",
+        "wood chips",
+        "cardboard",
+        "biochar",
+        "fertilizer",
+        "seed",
+        "potting mix",
+        "shade cloth",
+        "row cover",
+        "netting"
+      ],
+      "tools": [
+        "shovel",
+        "rake",
+        "hoe",
+        "stirrup hoe",
+        "trowel",
+        "pruners",
+        "loppers",
+        "gloves",
+        "sprayer",
+        "watering can",
+        "hose",
+        "drip line",
+        "string line",
+        "stakes",
+        "clips",
+        "wheelbarrow"
+      ],
+      "crops": [
+        "tomato",
+        "pepper",
+        "eggplant",
+        "potato",
+        "cucumber",
+        "squash",
+        "zucchini",
+        "pumpkin",
+        "melon",
+        "corn",
+        "beans",
+        "peas",
+        "okra",
+        "greens",
+        "lettuce",
+        "spinach",
+        "kale",
+        "collards",
+        "cabbage",
+        "broccoli",
+        "cauliflower",
+        "carrot",
+        "beet",
+        "radish",
+        "onion",
+        "garlic",
+        "sweet potato",
+        "herbs",
+        "basil",
+        "cilantro",
+        "parsley",
+        "mint",
+        "fruit tree",
+        "berry"
+      ],
+      "pests": [
+        "aphids",
+        "mites",
+        "whiteflies",
+        "hornworm",
+        "cabbage moth",
+        "flea beetles",
+        "slugs",
+        "snails",
+        "beetles",
+        "caterpillars"
+      ],
+      "diseases": [
+        "powdery mildew",
+        "downy mildew",
+        "blight",
+        "rust",
+        "leaf spot",
+        "root rot"
+      ]
+    },
+    "rules": [
+      {
+        "id": "rule.frost_cues_to_frost_protection",
+        "title": "Frost/freeze cues → frost protection",
+        "severity": "hint",
+        "explain": "When text mentions frost or freeze risk, prioritize frost protection and row cover actions.",
+        "when": {
+          "containsAny": [
+            "frost",
+            "freeze",
+            "hard freeze",
+            "cold snap",
+            "overnight low",
+            "first frost",
+            "last frost"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.control.frost_protection",
+            "amount": 0.7,
+            "reason": "Frost/freeze cues detected"
+          },
+          {
+            "type": "addNote",
+            "note": "Cover before sunset if possible; remove or vent covers in the morning to prevent overheating."
+          },
+          { "type": "emitHintTag", "tag": "weather.frost-risk" }
+        ]
+      },
+      {
+        "id": "rule.heat_cues_to_shade",
+        "title": "Heat stress cues → shade/heat management",
+        "severity": "hint",
+        "when": {
+          "containsAny": [
+            "heatwave",
+            "extreme heat",
+            "heat stress",
+            "wilting",
+            "sunscald",
+            "hot wind",
+            "scorched"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.control.heat_shade",
+            "amount": 0.6,
+            "reason": "Heat stress cues detected"
+          },
+          {
+            "type": "addNote",
+            "note": "Water early morning; use shade cloth during peak sun; avoid foliar sprays at midday."
+          },
+          { "type": "emitHintTag", "tag": "weather.heat-risk" }
+        ]
+      },
+      {
+        "id": "rule.greediness_noon_sprays",
+        "title": "Noon spraying caution",
+        "severity": "warn",
+        "explain": "Spraying oils/soaps in strong sun can burn leaves.",
+        "when": {
+          "all": [
+            {
+              "containsAny": [
+                "neem",
+                "insecticidal soap",
+                "soap spray",
+                "horticultural oil"
+              ]
+            },
+            { "containsAny": ["midday", "noon", "hot sun", "full sun"] }
+          ]
+        },
+        "actions": [
+          {
+            "type": "addWarning",
+            "warning": "Avoid spraying neem/soap/oils in hot sun. Spray early morning or evening; test on a small section first."
+          },
+          {
+            "type": "requireVentilation",
+            "reason": "Use sprays outdoors or with airflow."
+          },
+          { "type": "emitHintTag", "tag": "safety.spray-timing" }
+        ]
+      },
+      {
+        "id": "rule.pest_monitoring_before_sprays",
+        "title": "Pest cues → IPM monitoring first",
+        "severity": "hint",
+        "explain": "If pests are mentioned, suggest scouting/monitoring and least-toxic approaches before broad sprays.",
+        "when": {
+          "containsAny": [
+            "aphids",
+            "mites",
+            "whiteflies",
+            "hornworm",
+            "caterpillars",
+            "slugs",
+            "snails",
+            "flea beetles",
+            "beetles",
+            "eggs on leaves",
+            "leaf damage",
+            "holes in leaves"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.pest.ipm_monitoring",
+            "amount": 0.55,
+            "reason": "Pest cues detected"
+          },
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.pest.hand_pick",
+            "amount": 0.35,
+            "reason": "Encourage least-toxic mechanical removal"
+          },
+          {
+            "type": "addNote",
+            "note": "Start with identification + monitoring (IPM). Use row cover or hand-picking when possible."
+          },
+          { "type": "emitHintTag", "tag": "ipm.first" }
+        ]
+      },
+      {
+        "id": "rule.caterpillars_to_btk",
+        "title": "Caterpillar cues → BTK",
+        "severity": "hint",
+        "when": {
+          "containsAny": [
+            "caterpillar",
+            "hornworm",
+            "cabbage worm",
+            "looper",
+            "chewed leaves",
+            "frass"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.pest.btk_caterpillars",
+            "amount": 0.55,
+            "reason": "Caterpillar cues detected"
+          },
+          {
+            "type": "addNote",
+            "note": "BTK targets caterpillars; apply in evening and reapply after rain per label directions."
+          }
+        ]
+      },
+      {
+        "id": "rule.seed_starting_vs_direct_sow",
+        "title": "Seed cues with trays/lights → indoor seed starting",
+        "severity": "hint",
+        "when": {
+          "any": [
+            {
+              "containsAny": [
+                "seed tray",
+                "grow light",
+                "heat mat",
+                "starting seeds indoors",
+                "nursery trays"
+              ]
+            },
+            {
+              "containsAny": [
+                "germinate indoors",
+                "start seedlings",
+                "seed starting"
+              ]
+            }
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.seed.seed_starting_indoor",
+            "amount": 0.65,
+            "reason": "Indoor seed starting cues"
+          },
+          {
+            "type": "addNote",
+            "note": "Use sterile seed-starting mix; keep evenly moist; provide strong light close to seedlings to prevent legginess."
+          }
+        ]
+      },
+      {
+        "id": "rule.direct_sow_cues",
+        "title": "Direct sow cues → direct sow method",
+        "severity": "hint",
+        "when": {
+          "containsAny": [
+            "direct sow",
+            "sow in ground",
+            "plant seeds outside",
+            "broadcast seed",
+            "sow rows"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.seed.direct_sow",
+            "amount": 0.7,
+            "reason": "Direct sow intent"
+          },
+          {
+            "type": "addNote",
+            "note": "Mark rows, keep seedbed moist through germination, and thin seedlings for airflow."
+          }
+        ]
+      },
+      {
+        "id": "rule.transplant_cues",
+        "title": "Transplant cues → harden off + transplant",
+        "severity": "hint",
+        "when": {
+          "containsAny": [
+            "transplant",
+            "plant starts",
+            "move seedlings",
+            "put in ground",
+            "set out seedlings"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.plant.harden_off",
+            "amount": 0.35,
+            "reason": "Often needed before transplanting"
+          },
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.plant.transplant_seedlings",
+            "amount": 0.65,
+            "reason": "Transplant intent"
+          },
+          {
+            "type": "addNote",
+            "note": "Water seedlings before and after transplant. Plant at the right depth for the crop (e.g., tomatoes can be planted deeper)."
+          }
+        ]
+      },
+      {
+        "id": "rule.no_till_sheet_mulch_cues",
+        "title": "No-till / sheet mulch cues → no-till prep",
+        "severity": "info",
+        "when": {
+          "containsAny": [
+            "no-till",
+            "no till",
+            "sheet mulch",
+            "cardboard",
+            "lasagna garden",
+            "smother weeds"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.soil.no_till_bed_prep",
+            "amount": 0.65,
+            "reason": "No-till cues"
+          },
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.weed.sheet_mulch_smother",
+            "amount": 0.45,
+            "reason": "Smothering weeds"
+          },
+          {
+            "type": "addNote",
+            "note": "Overlap cardboard seams, soak thoroughly, and top with compost + mulch for best results."
+          }
+        ]
+      },
+      {
+        "id": "rule.mulch_cues",
+        "title": "Mulch cues → apply mulch",
+        "severity": "hint",
+        "when": {
+          "containsAny": [
+            "mulch",
+            "mulching",
+            "wood chips",
+            "straw mulch",
+            "leaf mold",
+            "keep moisture",
+            "weed suppression"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.mulch.apply_mulch",
+            "amount": 0.75,
+            "reason": "Mulch intent"
+          },
+          {
+            "type": "addNote",
+            "note": "Keep mulch a few inches away from plant stems; avoid piling against tree trunks."
+          }
+        ]
+      },
+      {
+        "id": "rule.soil_test_cues",
+        "title": "pH/nutrients cues → soil test",
+        "severity": "hint",
+        "when": {
+          "containsAny": [
+            "soil test",
+            "ph",
+            "pH",
+            "nutrient deficiency",
+            "yellow leaves",
+            "chlorosis",
+            "salinity",
+            "soil analysis"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.soil.soil_test",
+            "amount": 0.7,
+            "reason": "Soil chemistry cues"
+          },
+          {
+            "type": "addNote",
+            "note": "Test before major amendments. Adjust gradually; over-correction can harm plants."
+          }
+        ]
+      },
+      {
+        "id": "rule.harvest_cues",
+        "title": "Harvest cues → harvest and post-harvest handling",
+        "severity": "hint",
+        "when": {
+          "containsAny": [
+            "harvest",
+            "pick",
+            "ripe",
+            "ready to pick",
+            "gather",
+            "mature fruit",
+            "pull carrots",
+            "dig potatoes"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.harvest.pick_harvest",
+            "amount": 0.7,
+            "reason": "Harvest intent"
+          },
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.harvest.wash_and_sort",
+            "amount": 0.35,
+            "reason": "Post-harvest handling"
+          },
+          {
+            "type": "addNote",
+            "note": "Harvest in the cool of morning when possible; shade produce quickly to preserve freshness."
+          }
+        ]
+      },
+      {
+        "id": "rule_storage_crop_curing",
+        "title": "Curing cues → cure storage crops",
+        "severity": "info",
+        "when": {
+          "containsAny": [
+            "cure",
+            "storage crop",
+            "onions",
+            "garlic",
+            "sweet potatoes",
+            "winter squash",
+            "hardening skins"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.postharvest.cure_storage_crops",
+            "amount": 0.65,
+            "reason": "Curing intent"
+          },
+          {
+            "type": "addNote",
+            "note": "Curing needs warmth + airflow; avoid stacking too tightly and keep out of direct sun."
+          }
+        ]
+      },
+      {
+        "id": "rule_indigenous_dryland_methods",
+        "title": "Dryland/arid cues → zai pits / waffle gardens / swales",
+        "severity": "info",
+        "when": {
+          "containsAny": [
+            "arid",
+            "dryland",
+            "drought",
+            "water conserving",
+            "water harvesting",
+            "low rainfall",
+            "hot and dry"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.indigenous.zai_pits",
+            "amount": 0.35,
+            "reason": "Dryland water-harvesting pits"
+          },
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.indigenous.waffle_gardens",
+            "amount": 0.35,
+            "reason": "Arid water-conserving basins"
+          },
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.infra.swales_and_berms",
+            "amount": 0.35,
+            "reason": "Runoff capture"
+          },
+          {
+            "type": "addNote",
+            "note": "In arid climates, prioritize water-harvesting earthworks + mulching to reduce evaporation."
+          }
+        ]
+      },
+      {
+        "id": "rule_companion_guilds",
+        "title": "Guild/companions cues → companion planting and traditional polycultures",
+        "severity": "hint",
+        "when": {
+          "containsAny": [
+            "companion planting",
+            "guild",
+            "polyculture",
+            "interplant",
+            "intercropping",
+            "beneficial flowers",
+            "pollinator strip"
+          ]
+        },
+        "actions": [
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.polycluture.companion_planting",
+            "amount": 0.55,
+            "reason": "Guild intent"
+          },
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.indigenous.three_sisters",
+            "amount": 0.25,
+            "reason": "Traditional guild example"
+          },
+          {
+            "type": "boostMethodKey",
+            "methodKey": "garden.indigenous.milpa",
+            "amount": 0.25,
+            "reason": "Traditional polyculture example"
+          },
+          {
+            "type": "addNote",
+            "note": "Pair plants by needs: sun, water, nutrients, and growth habit. Leave airflow to reduce disease."
+          }
+        ]
+      }
+    ]
+  }
+}

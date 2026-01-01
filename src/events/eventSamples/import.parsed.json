@@ -1,0 +1,179 @@
+{
+  "description": "Sample SSA event envelope for `import.parsed`. Use this as a reference when emitting from src/features/import/* and src/services/scraperService.js. This is the point where an incoming payload has been recognized and turned into SSA domain-friendly data so the engines (meals, cleaning, garden, animals, storehouse, preservation) can act on it.",
+  "envelopeShape": {
+    "type": "import.parsed",
+    "ts": "2025-11-02T13:05:00.000Z",
+    "source": "features/import/ImportService",
+    "data": {
+      "importId": "imp_xxxxxxxx",
+      "parsedType": "recipe | cleaning | garden | animal | storehouse | preservation | howto",
+      "contextIntelId": "ctx_xxxxxxxx (optional)",
+      "linkHints": {
+        "inventory": [],
+        "storehouse": [],
+        "garden": []
+      }
+    }
+  },
+  "samples": [
+    {
+      "label": "Recipe from web share (classic case)",
+      "event": {
+        "type": "import.parsed",
+        "ts": "2025-11-02T13:05:00.000Z",
+        "source": "features/import/ImportService",
+        "data": {
+          "importId": "imp_7c4a7b21",
+          "parsedType": "recipe",
+          "contextIntelId": "ctx_1340b9c2",
+          "linkHints": {
+            "inventory": [
+              { "name": "lamb shoulder", "normalized": "lamb_shoulder", "qty": 2, "unit": "lb" },
+              { "name": "rosemary", "normalized": "rosemary_dried", "qty": 1, "unit": "tbsp" },
+              { "name": "olive oil", "normalized": "olive_oil", "qty": 3, "unit": "tbsp" }
+            ],
+            "storehouse": [
+              { "name": "olive oil", "minLevel": 1 }
+            ],
+            "garden": [
+              { "name": "rosemary", "variety": "Tuscan Blue", "season": "perennial" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "label": "Cleaning / declutter routine (Pinterest/blog import)",
+      "event": {
+        "type": "import.parsed",
+        "ts": "2025-11-02T13:06:10.000Z",
+        "source": "features/import/ImportService",
+        "data": {
+          "importId": "imp_clean_91ff5bbd",
+          "parsedType": "cleaning",
+          "contextIntelId": "ctx_clean_4c0d3e10",
+          "linkHints": {
+            "inventory": [
+              { "name": "all-purpose cleaner", "normalized": "cleaner_all_purpose" },
+              { "name": "microfiber cloth", "normalized": "cleaning_cloth_microfiber" }
+            ],
+            "storehouse": [
+              { "name": "baking soda", "minLevel": 2 },
+              { "name": "white vinegar", "minLevel": 1 }
+            ],
+            "garden": []
+          }
+        }
+      }
+    },
+    {
+      "label": "Garden / seed packet scan",
+      "event": {
+        "type": "import.parsed",
+        "ts": "2025-11-02T13:07:25.000Z",
+        "source": "features/import/ImportService",
+        "data": {
+          "importId": "imp_garden_a312998a",
+          "parsedType": "garden",
+          "contextIntelId": "ctx_garden_a312998a",
+          "linkHints": {
+            "inventory": [],
+            "storehouse": [],
+            "garden": [
+              {
+                "crop": "collard greens",
+                "variety": "Georgia Southern",
+                "zone": "raised-bed-2",
+                "season": "cool",
+                "sowWindow": {
+                  "start": "2026-02-15",
+                  "end": "2026-03-15"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "label": "Animal / butchery plan import (for your sheep/goat/blood meal flows)",
+      "event": {
+        "type": "import.parsed",
+        "ts": "2025-11-02T13:08:00.000Z",
+        "source": "features/import/ImportService",
+        "data": {
+          "importId": "imp_animal_butchery_55da2f0a",
+          "parsedType": "animal",
+          "contextIntelId": "ctx_animal_55da2f0a",
+          "linkHints": {
+            "inventory": [
+              { "name": "butchering bags", "normalized": "butchering_bag" },
+              { "name": "salt", "normalized": "preservation_salt" }
+            ],
+            "storehouse": [
+              { "name": "rendering fat", "target": "soapmaking" }
+            ],
+            "garden": []
+          }
+        }
+      }
+    },
+    {
+      "label": "Storehouse plan / low-storehouse trigger (reverse generation)",
+      "event": {
+        "type": "import.parsed",
+        "ts": "2025-11-02T13:09:30.000Z",
+        "source": "features/import/ImportService",
+        "data": {
+          "importId": "imp_storehouse_low_cornmeal",
+          "parsedType": "storehouse",
+          "contextIntelId": "ctx_storehouse_low_cornmeal",
+          "linkHints": {
+            "inventory": [
+              { "name": "cornmeal", "normalized": "cornmeal", "currentQty": 2, "requiredQty": 8 }
+            ],
+            "storehouse": [
+              { "name": "cornmeal", "targetQty": 20, "unit": "lb" }
+            ],
+            "garden": [
+              { "name": "field corn", "variety": "Hickory King", "season": "warm" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "label": "Preservation how-to video import (YouTube / Rumble / blog video)",
+      "event": {
+        "type": "import.parsed",
+        "ts": "2025-11-02T13:11:05.000Z",
+        "source": "features/import/ImportService",
+        "data": {
+          "importId": "imp_preserve_ferment_cabbage",
+          "parsedType": "preservation",
+          "contextIntelId": "ctx_preserve_ferment_cabbage",
+          "linkHints": {
+            "inventory": [
+              { "name": "green cabbage", "normalized": "cabbage_green" },
+              { "name": "non-iodized salt", "normalized": "salt_sea" },
+              { "name": "fermentation jar", "normalized": "preservation_jar" }
+            ],
+            "storehouse": [
+              { "name": "green cabbage", "targetQty": 12, "unit": "head" }
+            ],
+            "garden": [
+              { "name": "green cabbage", "variety": "Brunswick", "season": "cool" }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "notes": [
+    "1. This sample shows the shape AFTER normalization and BEFORE engines run. Next steps: MealSessionEngine / CleaningSessionEngine / GardenSessionEngine / AnimalSessionEngine / PreservationSessionEngine consume this event.",
+    "2. Your automation runtime should listen for `import.parsed` and decide whether to immediately schedule a session or show a suggestion (Next Best Action).",
+    "3. If `featureFlags.familyFundMode=true` and the parsedType will eventually change household data (inventory, storehouse, or sessions), a downstream listener should call exportToHubIfEnabled(event).",
+    "4. `linkHints` is intentionally broad — this is how SSA converts one import into cross-domain intelligence.",
+    "5. Keep this file JSON-only (no $schema) to avoid VS Code remote schema errors."
+  ]
+}

@@ -1,0 +1,199 @@
+{
+  "$schema": "../../../../schemas/planningGraph/mappings.schema.json",
+  "version": "v1.0.0",
+  "calculatorId": "FermentationDurationCalculator",
+  "nodeKey": "PG_NODE_FERMENTATION_DURATION_CALCULATOR",
+  "label": "Fermentation Duration Next Steps Mapping",
+
+  "routes": {
+    "sessions": [
+      {
+        "id": "ferment_start_to_sessionRunner",
+        "from": "outputs.sessionSuggestions",
+        "filter": {
+          "kind": "start_batch"
+        },
+        "emitEvent": "session.request.fromFermentationDuration",
+        "targetDomain": "preservation",
+        "description": "Send initial fermentation start sessions into the SessionRunner pipeline."
+      },
+      {
+        "id": "ferment_checkpoint_to_sessionRunner",
+        "from": "outputs.sessionSuggestions",
+        "filter": {
+          "kind": "checkpoint"
+        },
+        "emitEvent": "session.request.fromFermentationDuration.batch",
+        "targetDomain": "preservation",
+        "description": "Send one or more checkpoint sessions (burp/check/taste) into SessionRunner."
+      },
+      {
+        "id": "ferment_move_to_cold_to_sessionRunner",
+        "from": "outputs.sessionSuggestions",
+        "filter": {
+          "kind": "move_to_cold"
+        },
+        "emitEvent": "session.request.fromFermentationDuration",
+        "targetDomain": "preservation",
+        "description": "Create a guidance session to move ferments into cold storage or root cellar."
+      }
+    ],
+
+    "feasts": [
+      {
+        "id": "ferment_readyWindow_to_feastAlignment",
+        "from": "outputs.targetReadyWindow",
+        "emitEvent": "calendar.ferment.feastAlignment.requested",
+        "description": "Ask the feast/holy-day engine to align this ferment’s ready window with upcoming feasts and appointed times.",
+        "payloadShape": {
+          "readyWindowPath": "outputs.targetReadyWindow",
+          "productPath": "inputs.product",
+          "householdPath": "inputs.product.householdId"
+        }
+      },
+      {
+        "id": "ferment_alignment_to_calendarHighlights",
+        "from": "feastAlignment.bestMatch",
+        "emitEvent": "calendar.ferment.feastHighlight.upserted",
+        "description": "Highlight this ferment batch on the calendar for the best-matching feast window.",
+        "requires": [
+          "feastAlignment.bestMatch",
+          "outputs.targetReadyWindow"
+        ]
+      }
+    ],
+
+    "storehouse": [
+      {
+        "id": "ferment_readyWindow_to_storehouseAvailability",
+        "from": "outputs.targetReadyWindow",
+        "emitEvent": "storehouse.inventory.ferment.readyWindow.updated",
+        "description": "Update storehouse inventory records so this ferment batch is considered available during its ready window.",
+        "payloadShape": {
+          "readyWindowPath": "outputs.targetReadyWindow",
+          "inventoryHintsPath": "outputs.inventoryHints",
+          "productPath": "inputs.product"
+        }
+      },
+      {
+        "id": "ferment_readyWindow_to_mealPlanner",
+        "from": "outputs.targetReadyWindow",
+        "emitEvent": "planner.meals.fermentWindow.updated",
+        "description": "Expose ferments to the meal planner only during the ready window for menus and feast planning.",
+        "payloadShape": {
+          "readyWindowPath": "outputs.targetReadyWindow",
+          "productPath": "inputs.product",
+          "calculatorId": "FermentationDurationCalculator"
+        }
+      }
+    ]
+  },
+
+  "nextSteps": [
+    {
+      "id": "ns_ferment_feast_alignment",
+      "label": "Align ferment with upcoming feast",
+      "description": "Check which feast days fall inside or near this ferment’s ready window and feature it as a special dish.",
+      "when": {
+        "hasOutput": [
+          "outputs.targetReadyWindow"
+        ]
+      },
+      "actions": [
+        {
+          "type": "emitEvent",
+          "eventType": "calendar.ferment.feastAlignment.requested",
+          "payloadFrom": "outputs.targetReadyWindow"
+        },
+        {
+          "type": "openRouteHint",
+          "route": "/tier2/household/calendar/feasts",
+          "note": "Review feast alignment suggestions and pin this batch to specific feast dates."
+        }
+      ]
+    },
+    {
+      "id": "ns_ferment_sessions_start",
+      "label": "Start fermentation guidance session",
+      "description": "Use SessionRunner to guide the initial mixing, packing, and first-day checks for this batch.",
+      "when": {
+        "hasOutput": [
+          "outputs.sessionSuggestions"
+        ]
+      },
+      "actions": [
+        {
+          "type": "emitEvent",
+          "eventType": "session.request.fromFermentationDuration",
+          "payloadFrom": "outputs.sessionSuggestions"
+        }
+      ]
+    },
+    {
+      "id": "ns_ferment_sessions_checkpoint",
+      "label": "Schedule burp/check sessions",
+      "description": "Create small recurring sessions to burp jars, skim foam, and taste at checkpoints during active fermentation.",
+      "when": {
+        "hasOutput": [
+          "outputs.sessionSuggestions"
+        ]
+      },
+      "actions": [
+        {
+          "type": "emitEvent",
+          "eventType": "session.request.fromFermentationDuration.batch",
+          "payloadFrom": "outputs.sessionSuggestions"
+        }
+      ]
+    },
+    {
+      "id": "ns_ferment_storehouse_sync",
+      "label": "Sync ferment to storehouse",
+      "description": "Update storehouse inventory so this ferment batch is visible to planners and stock views.",
+      "when": {
+        "hasOutput": [
+          "outputs.targetReadyWindow",
+          "outputs.inventoryHints"
+        ]
+      },
+      "actions": [
+        {
+          "type": "emitEvent",
+          "eventType": "storehouse.inventory.ferment.readyWindow.updated",
+          "payloadFrom": {
+            "readyWindowPath": "outputs.targetReadyWindow",
+            "inventoryHintsPath": "outputs.inventoryHints",
+            "productPath": "inputs.product"
+          }
+        },
+        {
+          "type": "openRouteHint",
+          "route": "/tier2/household/storehouse",
+          "note": "Confirm locations and labels for this ferment batch in the storehouse view."
+        }
+      ]
+    },
+    {
+      "id": "ns_ferment_root_cellar_shift",
+      "label": "Plan root cellar or cold storage shift",
+      "description": "Schedule a guidance session to move jars or crocks into cold storage at the end of the active fermentation phase.",
+      "when": {
+        "hasOutput": [
+          "outputs.storageShift"
+        ]
+      },
+      "actions": [
+        {
+          "type": "emitEvent",
+          "eventType": "session.request.fromFermentationDuration",
+          "payloadFrom": "outputs.sessionSuggestions"
+        },
+        {
+          "type": "openRouteHint",
+          "route": "/tier2/household/preservation",
+          "note": "Review preservation tasks for the week and ensure cold storage space is ready."
+        }
+      ]
+    }
+  ]
+}

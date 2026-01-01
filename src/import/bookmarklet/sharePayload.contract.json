@@ -1,0 +1,274 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka-smart-assistant.local/import/bookmarklet/sharePayload.contract.json",
+  "title": "SSA Bookmarklet / Share Payload",
+  "description": "Contract for data sent from the browser bookmarklet / mobile share sheet into Suka Smart Assistant (SSA). This is the FIRST object SSA receives before ImportService → ImportRouter → domain parsers → ImportNormalizer → automation → (optional) Hub export.",
+  "type": "object",
+  "required": [
+    "version",
+    "source",
+    "payload"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Semantic or date-stamped version for the bookmarklet/share payload shape.",
+      "examples": [
+        "2025-11-02",
+        "1.0.0"
+      ]
+    },
+    "source": {
+      "type": "string",
+      "description": "Client or integration that produced this payload.",
+      "examples": [
+        "browser.bookmarklet",
+        "mobile.share",
+        "extension.chrome",
+        "extension.firefox"
+      ]
+    },
+    "familyFundMode": {
+      "type": "boolean",
+      "description": "If true, SSA MAY immediately format a Hub-facing packet **in addition** to local processing. SSA still owns the data first.",
+      "default": false
+    },
+    "payload": {
+      "type": "object",
+      "description": "Domain-specific import data captured from the current page / app.",
+      "required": [
+        "url"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Original page/video URL that the user shared."
+        },
+        "domain": {
+          "type": "string",
+          "description": "Hint for ImportRouter about what kind of data this is. Router may override this if it detects something else.",
+          "enum": [
+            "recipe",
+            "cleaning",
+            "garden",
+            "animal",
+            "storehouse",
+            "howto",
+            "video",
+            "unknown"
+          ],
+          "default": "unknown"
+        },
+        "title": {
+          "type": "string",
+          "description": "Best-effort page or item title at time of share.",
+          "maxLength": 512
+        },
+        "description": {
+          "type": "string",
+          "description": "Best-effort long text found on the page (meta description, social description, first paragraphs, video description, etc.)."
+        },
+        "html": {
+          "type": "string",
+          "description": "Optional raw HTML captured at share-time for SSA to deep-parse if needed."
+        },
+        "textSelection": {
+          "type": "string",
+          "description": "Optional text the user highlighted before invoking the bookmarklet."
+        },
+        "images": {
+          "type": "array",
+          "description": "Images found on the page that may help parsers (recipe hero image, garden plan image, cleaning routine screenshot, etc.).",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "structuredData": {
+          "type": "array",
+          "description": "Raw JSON-LD / microdata blobs scraped from <script type=\"application/ld+json\"> or similar tags.",
+          "items": {
+            "type": "object"
+          }
+        },
+        "video": {
+          "type": "object",
+          "description": "If the shared page is a video/how-to, provide best-effort video metadata so ImportRouter can send it straight to videoParser.",
+          "properties": {
+            "platform": {
+              "type": "string",
+              "description": "youtube | tiktok | instagram | facebook | twitter | generic",
+              "maxLength": 64
+            },
+            "duration": {
+              "type": "integer",
+              "description": "Duration in seconds, if known.",
+              "minimum": 0
+            },
+            "author": {
+              "type": "string",
+              "description": "Uploader / channel / creator name."
+            },
+            "hashtags": {
+              "type": "array",
+              "description": "Hashtags extracted from video description to become SSA tags.",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": true
+        },
+        "recipe": {
+          "type": "object",
+          "description": "If the bookmarklet can already see a schema.org Recipe, send it here so SSA can skip HTML scraping.",
+          "properties": {
+            "@type": {
+              "type": "string",
+              "const": "Recipe"
+            }
+          },
+          "additionalProperties": true
+        },
+        "cleaning": {
+          "type": "object",
+          "description": "Structured daily/weekly/monthly/zone routines captured from the page.",
+          "additionalProperties": true
+        },
+        "garden": {
+          "type": "object",
+          "description": "Garden plan or seed packet captured by the bookmarklet.",
+          "additionalProperties": true
+        },
+        "animal": {
+          "type": "object",
+          "description": "Animal acquisition / care / butchery data detected on the page.",
+          "additionalProperties": true
+        },
+        "storehouse": {
+          "type": "object",
+          "description": "Storehouse / pantry / long-term stock planning content captured from the page.",
+          "additionalProperties": true
+        },
+        "notes": {
+          "type": "array",
+          "description": "Optional user-authored notes taken right in the bookmarklet/share UI (e.g. 'we like this marinade, add to meal plan').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "capturedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Client-side ISO timestamp for when the share happened."
+        },
+        "clientHints": {
+          "type": "object",
+          "description": "Hints for SSA import stack about how to treat this import.",
+          "properties": {
+            "preferDomain": {
+              "type": "string",
+              "description": "If the user explicitly said 'treat this as cleaning', it's set here.",
+              "enum": [
+                "recipe",
+                "cleaning",
+                "garden",
+                "animal",
+                "storehouse",
+                "howto",
+                "video"
+              ]
+            },
+            "autoSchedule": {
+              "type": "boolean",
+              "description": "Client suggests SSA should immediately request scheduling for generated sessions (respects user settings)."
+            },
+            "showPreview": {
+              "type": "boolean",
+              "description": "Client suggests SSA should pop the ImportPreviewModal right away."
+            }
+          },
+          "additionalProperties": true
+        }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "description": "Transport-level metadata that SSA can log/trace but that is not domain content.",
+      "additionalProperties": true,
+      "properties": {
+        "userAgent": {
+          "type": "string"
+        },
+        "clientTimezone": {
+          "type": "string",
+          "description": "IANA or offset, e.g. America/Chicago or -06:00"
+        },
+        "language": {
+          "type": "string",
+          "description": "User language at share time, e.g. en-US"
+        },
+        "sessionId": {
+          "type": "string",
+          "description": "Client-side session token to correlate multiple shares from same user."
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "version": "2025-11-02",
+      "source": "browser.bookmarklet",
+      "familyFundMode": false,
+      "payload": {
+        "url": "https://www.example.com/chicken-tikka-masala",
+        "domain": "recipe",
+        "title": "Chicken Tikka Masala",
+        "description": "This is a creamy tomato-based curry...",
+        "html": "<html>...</html>",
+        "structuredData": [
+          {
+            "@context": "https://schema.org",
+            "@type": "Recipe",
+            "name": "Chicken Tikka Masala",
+            "recipeIngredient": ["1 lb chicken", "1 cup yogurt"]
+          }
+        ],
+        "images": [
+          "https://www.example.com/img/tikka.jpg"
+        ],
+        "capturedAt": "2025-11-02T15:12:34.000Z",
+        "clientHints": {
+          "preferDomain": "recipe",
+          "autoSchedule": false,
+          "showPreview": true
+        }
+      }
+    },
+    {
+      "version": "2025-11-02",
+      "source": "mobile.share",
+      "familyFundMode": true,
+      "payload": {
+        "url": "https://www.youtube.com/watch?v=abc123",
+        "domain": "video",
+        "title": "How to Deep Clean Your Oven",
+        "description": "In this video I show you how to deep clean your oven. #cleaning #kitchen",
+        "video": {
+          "platform": "youtube",
+          "duration": 485,
+          "author": "CleanWithMe",
+          "hashtags": ["cleaning", "kitchen"]
+        },
+        "capturedAt": "2025-11-02T16:00:00.000Z",
+        "clientHints": {
+          "preferDomain": "cleaning",
+          "showPreview": true
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,550 @@
+/* --------------------------------------------------------------------------
+   Suka Global Styles (tokens + layout + components)
+   - HSL token system matches tailwind.config.js (shadcn-style tokens)
+   - Themeable via :root, .dark, and .theme--* skins
+   - Keeps your class names (.app/.sidebar/.main/.rightbar) for minimal refactor
+   - UPDATED to add tiny helpers for: import landing, analytics panels,
+     preservation queue, knowledge/hub viewer, and domain chips
+   - No major styling changes
+--------------------------------------------------------------------------- */
+
+/* ---------- Design Tokens (Light) ---------- */
+:root {
+  /* semantic tokens (HSL triples) */
+  --background: 36 33% 97%;
+  --foreground: 224 71% 4%;
+
+  --muted: 220 9% 90%;
+  --muted-foreground: 222 10% 40%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 224 71% 4%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 224 71% 4%;
+
+  --border: 214 12% 89%;
+  --input: 214 12% 89%;
+  --ring: 255 100% 66%;
+
+  --primary: 255 100% 66%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 27 96% 54%;
+  --secondary-foreground: 0 0% 12%;
+
+  --accent: 208 89% 53%;
+  --accent-foreground: 206 91% 9%;
+
+  /* brand set (was hex; now HSL for dynamic theming) */
+  --brand: 255 100% 66%;
+  --brand-ink: 249 47% 27%;
+  --brand-weak: 254 100% 95%;
+
+  /* status */
+  --success: 199 89% 48%;
+  --warn: 35 92% 52%;
+  --danger: 0 84% 60%;
+
+  /* warm skin palette (in HSL) */
+  --skin-deep: 18 33% 17%;
+  --skin-rich: 21 28% 28%;
+  --skin-warm: 14 31% 36%;
+  --skin-hi: 14 35% 48%;
+
+  /* layout */
+  --radius: 16px;
+  --radius-lg: 12px;
+  --radius-md: 10px;
+  --radius-sm: 8px;
+  --shadow: 0 10px 20px rgba(0,0,0,.06);
+  --sidebar-w: 240px;
+  --rightbar-w: 280px;
+  --container-max: 1100px;
+
+  /* buttons */
+  --btn-radius: 12px;
+  --btn-shadow-up: 0 6px 12px rgba(0,0,0,.10);
+  --btn-shadow-down: 0 3px 6px rgba(0,0,0,.18) inset, 0 0 0 rgba(0,0,0,0);
+}
+
+/* ---------- Dark Mode Tokens ---------- */
+.dark {
+  --background: 222 47% 11%;
+  --foreground: 0 0% 98%;
+
+  --muted: 217 19% 24%;
+  --muted-foreground: 215 14% 65%;
+
+  --popover: 222 47% 11%;
+  --popover-foreground: 0 0% 98%;
+
+  --card: 222 47% 13%;
+  --card-foreground: 0 0% 98%;
+
+  --border: 217 19% 24%;
+  --input: 217 19% 24%;
+  --ring: 255 100% 70%;
+
+  --primary: 255 100% 70%;
+  --primary-foreground: 0 0% 10%;
+
+  --secondary: 27 96% 60%;
+  --secondary-foreground: 0 0% 10%;
+
+  --accent: 208 89% 60%;
+  --accent-foreground: 210 40% 12%;
+
+  --brand: 255 100% 70%;
+  --brand-ink: 259 50% 85%;
+  --brand-weak: 255 100% 20%;
+
+  --success: 199 89% 60%;
+  --warn: 35 92% 60%;
+  --danger: 0 84% 66%;
+}
+
+/* ---------- Optional App Skins (switch on <body class="theme--...">) ---------- */
+.theme--sacred-village {
+  --brand: 255 100% 66%;
+  --brand-ink: 249 47% 27%;
+  --brand-weak: 254 100% 95%;
+  --primary: var(--brand);
+  --secondary: 14 35% 48%;
+  --accent: 35 92% 52%;
+}
+.theme--stronghold-fitness {
+  --brand: 199 89% 48%;
+  --primary: 199 89% 48%;
+  --accent: 16 95% 56%;
+  --secondary: 142 71% 45%;
+  --background: 222 47% 11%;
+  --foreground: 0 0% 98%;
+}
+
+/* ---------- Base Reset ---------- */
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  text-rendering: optimizeLegibility;
+}
+input, select, textarea, button { font: inherit; color: inherit; }
+a { color: hsl(var(--brand)); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ---------- Focus (consistent across components) ---------- */
+:where(a, button, [role="button"], input, select, textarea) {
+  outline-color: transparent;
+}
+:where(a, button, [role="button"], input, select, textarea):focus-visible {
+  outline: 3px solid hsl(var(--brand)/.35);
+  outline-offset: 2px;
+}
+
+/* ---------- Layout ---------- */
+.app {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr var(--rightbar-w);
+  min-height: 100%;
+  gap: 0;
+}
+@media (max-width: 1024px) {
+  .app { grid-template-columns: var(--sidebar-w) 1fr; }
+  .rightbar { display: none; }
+}
+
+.sidebar {
+  position: sticky; top: 0; height: 100vh; overflow: auto;
+  background: linear-gradient(180deg, hsl(var(--card)), hsl(var(--background)));
+  border-right: 1px solid hsl(var(--border));
+  padding: 20px 14px;
+}
+
+.main {
+  padding: 28px 32px;
+  overflow-x: hidden;
+}
+
+.rightbar {
+  position: sticky; top: 0; height: 100vh; overflow: auto;
+  background: hsl(var(--card));
+  border-left: 1px solid hsl(var(--border));
+  padding: 20px;
+  box-shadow: inset 6px 0 6px -6px rgba(0,0,0,0.06);
+}
+
+.container { width: 100%; max-width: var(--container-max); margin: 0 auto; }
+
+/* ---------- Sidebar header ---------- */
+.brandRow { display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+.brandBadge {
+  width:36px; height:36px; border-radius:50%;
+  background: radial-gradient(60% 60% at 40% 35%, hsl(var(--skin-warm)), hsl(var(--skin-rich)));
+  box-shadow: inset 0 -3px 8px rgba(0,0,0,.2);
+  border:2px solid #f5ebe6;
+}
+.brandName { font-weight:800; letter-spacing:.2px; }
+
+/* ---------- Nav ---------- */
+.navSectionTitle {
+  margin: 18px 8px 8px;
+  font-size:.85rem; text-transform:uppercase;
+  color: hsl(var(--muted-foreground)); letter-spacing:.08em;
+}
+.nav { display:flex; flex-direction:column; gap:4px; margin-bottom:10px; }
+.nav a {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px; border-radius:12px;
+  color: hsl(var(--foreground));
+}
+.nav a:hover { background: hsl(var(--brand-weak)); }
+.nav a.active {
+  background: hsl(var(--brand));
+  color: hsl(var(--primary-foreground));
+  text-decoration:none;
+  box-shadow: var(--shadow);
+}
+.nav .ico {
+  width:28px; height:28px; border-radius:50%;
+  display:grid; place-items:center;
+  background: hsl(var(--muted));
+  border:1px solid hsl(var(--border));
+}
+
+/* ---------- Cards / sections ---------- */
+.card {
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  border:1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding:20px; width:100%;
+}
+.card--muted { background: hsl(var(--muted)); color: hsl(var(--muted-foreground)); }
+
+/* ---------- Headings ---------- */
+h1 { font-size: clamp(24px, 2.2vw, 32px); line-height:1.1; margin: 0 0 8px; }
+.subtitle { color: hsl(var(--muted-foreground)); margin: 0 0 20px; }
+
+/* ---------- Avatar/illustration tint helpers ---------- */
+.skin-fill { fill: hsl(var(--skin-rich)); }
+.skin-grad { background: radial-gradient(60% 60% at 40% 35%, hsl(var(--skin-warm)), hsl(var(--skin-rich))); }
+
+/* ---------- Form layout helpers ---------- */
+.field-stack {
+  display:grid; grid-template-areas: "input" "selected"; row-gap: 10px; width:100%;
+}
+.field-stack .field-input { grid-area: input; width:100%; }
+.field-stack .field-selected { grid-area: selected; width:100%; }
+.field-input input, .field-input select, .field-input textarea { width:100%; }
+
+/* Re-usable grid utility for 2-col (md+) */
+.home-grid { display:grid; grid-template-columns: 1fr; gap: 1.5rem; }
+@media (min-width: 768px){ .home-grid { grid-template-columns: 1fr 1fr; } }
+.span-2 { grid-column: 1 / -1; }
+
+/* Chips */
+.chips { display:flex; flex-wrap:wrap; gap:8px; }
+.chip {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 10px;
+  background: hsl(var(--brand-weak));
+  color: hsl(var(--brand-ink));
+  border:1px solid hsl(var(--border));
+  border-radius: 999px; font-size:.85rem;
+}
+.chip .x { font-weight:700; cursor:pointer; line-height:1; }
+
+/* Stacks */
+.stack-sm, .stack-md, .stack-lg { display:flex; flex-direction:column; }
+.stack-sm { gap:8px; } .stack-md { gap:12px; } .stack-lg { gap:16px; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  --bg: hsl(var(--card));
+  --fg: hsl(var(--foreground));
+  --bd: hsl(var(--border));
+  appearance:none; -webkit-appearance:none; border:none;
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 14px; border-radius: var(--btn-radius);
+  background: var(--bg); color: var(--fg); border:1px solid var(--bd);
+  box-shadow: var(--btn-shadow-up);
+  transform: translateY(0);
+  transition: transform .06s ease, box-shadow .06s ease, background .15s ease, color .15s ease, border-color .15s ease;
+  cursor:pointer; user-select:none; font-weight:600;
+}
+.btn:focus-visible { outline:3px solid hsl(var(--brand)/.35); outline-offset:2px; }
+.btn:hover { filter: saturate(1.02); }
+.btn:active { transform: translateY(1px); box-shadow: var(--btn-shadow-down); }
+.btn.primary {
+  --bg: hsl(var(--brand)); --fg: #fff; --bd: hsl(var(--brand)/.85);
+}
+.btn.subtle {
+  --bg: hsl(var(--brand-weak)); --fg: hsl(var(--brand-ink)); --bd: hsl(var(--border));
+}
+.btn.icon { padding:9px; width:38px; height:38px; justify-content:center; }
+.btn.sm { padding:8px 12px; font-weight:600; }
+.btn.lg { padding:12px 16px; font-size:1.05rem; }
+
+.btn[aria-busy="true"] { pointer-events:none; opacity:.85; }
+.btn[aria-busy="true"] > .label { opacity:.9; }
+.btn[aria-busy="true"]::after {
+  content:""; width:1em; height:1em; border-radius:50%;
+  border:.18em solid color-mix(in oklab, var(--fg) 30%, transparent);
+  border-top-color: var(--fg);
+  animation: spin .9s linear infinite; display:inline-block;
+}
+
+/* success flash for completion moments (RewardPopup, etc.) */
+@keyframes flashSuccess { 0%{box-shadow:0 0 0 0 rgba(14,165,233,.0)} 40%{box-shadow:0 0 0 6px rgba(14,165,233,.18)} 100%{box-shadow:0 0 0 0 rgba(14,165,233,.0)} }
+.btn.success {
+  --bg: hsl(var(--success)); --fg:#00131a; --bd: hsl(var(--success)/.8);
+  animation: flashSuccess 800ms ease-out;
+}
+
+@media (hover:hover){
+  .btn { position:relative; overflow:hidden; }
+  .btn::before {
+    content:""; position:absolute; inset:auto; width:0; height:0; border-radius:50%;
+    background: rgba(255,255,255,.35); transform:translate(-50%,-50%); pointer-events:none; opacity:0;
+  }
+  .btn.is-pressed::before {
+    width:250px; height:250px; opacity:1;
+    transition: width .25s ease, height .25s ease, opacity .35s ease;
+  }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce){
+  .btn, .btn:active, .btn[aria-busy="true"]::after{ transition:none; animation:none; }
+}
+
+/* ---------- Full-width Form Controls ---------- */
+.control {
+  display:block; width:100%; padding:10px 14px;
+  border-radius: var(--btn-radius);
+  background: hsl(var(--card)); color: hsl(var(--foreground));
+  border:1px solid hsl(var(--border));
+  box-shadow: var(--btn-shadow-up);
+  transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .06s ease;
+}
+.control:focus {
+  outline: none;
+  border-color: hsl(var(--brand)/.45);
+  box-shadow: 0 0 0 3px hsl(var(--brand)/.20);
+}
+.control--select { appearance:none; padding-right:2.25rem; }
+.control--textarea { resize: vertical; }
+
+/* ---------- Skeleton / Shimmer ---------- */
+@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+.skeleton {
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.12) 50%, rgba(0,0,0,0.06) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.25s linear infinite;
+}
+.dark .skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 100%);
+}
+
+/* ---------- Accordions (height animation friendly) ---------- */
+@keyframes accordionDown { from { height: 0 } to { height: var(--radix-accordion-content-height) } }
+@keyframes accordionUp { from { height: var(--radix-accordion-content-height) } to { height: 0 } }
+.accordion-content[data-state="open"] { animation: accordionDown .2s ease-out; }
+.accordion-content[data-state="closed"] { animation: accordionUp .2s ease-out; }
+
+/* ---------- Scrollbars ---------- */
+.scrollbar-thin { scrollbar-width: thin; }
+.scrollbar-none { scrollbar-width: none; }
+.scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+.scrollbar-thumb::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground)/.35);
+  border-radius: 10px;
+}
+
+/* ---------- Toast / Inline Pill ---------- */
+.pill {
+  display:inline-flex; align-items:center; gap:.5rem;
+  padding:.4rem .7rem; border-radius: 999px;
+  background: hsl(var(--muted)); color: hsl(var(--muted-foreground));
+  border: 1px solid hsl(var(--border));
+}
+
+/* ---------- Badges ---------- */
+.badge {
+  display:inline-flex; align-items:center; gap:.35rem;
+  padding:.25rem .55rem; border-radius: 999px;
+  font-size: .75rem; font-weight: 600;
+  background: hsl(var(--brand-weak));
+  color: hsl(var(--brand-ink));
+  border: 1px solid hsl(var(--border));
+}
+
+/* ---------- Helpers ---------- */
+.visually-hidden {
+  position:absolute !important; height:1px; width:1px; overflow:hidden;
+  clip: rect(1px, 1px, 1px, 1px); white-space: nowrap; border:0; padding:0; margin:-1px;
+}
+
+/* ---------- “Ready to Use” homepage polish ---------- */
+.hero {
+  display:grid; gap: 1rem; align-items: start;
+}
+.hero h1 {
+  letter-spacing: -0.02em;
+  font-weight: 800;
+}
+.hero .cta-row {
+  display:flex; flex-wrap:wrap; gap:.75rem;
+}
+.hero .kpis {
+  display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:.75rem;
+}
+.kpi-card {
+  border-radius: 14px; padding: 14px;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  box-shadow: var(--shadow);
+}
+.kpi-card .label { color: hsl(var(--muted-foreground)); font-size:.85rem; }
+.kpi-card .value { font-weight:800; font-size: clamp(18px, 2.2vw, 28px); }
+
+/* ---------- Rightbar: “refresh on page change” hint styles ---------- */
+.rightbar .ad-slot {
+  border:1px dashed hsl(var(--border));
+  border-radius: 12px; padding: 12px; margin-bottom: 12px;
+  background: hsl(var(--card));
+}
+.rightbar .ad-slot .label {
+  font-size:.75rem; color: hsl(var(--muted-foreground));
+}
+
+/* ---------- Utilities you referenced in JS (non-TW) ---------- */
+.hidden-until-mounted { opacity: 0; }
+.hidden-until-mounted.is-mounted { opacity: 1; transition: opacity .25s ease; }
+
+.fade-in-up { animation: fadeInUp .6s ease-out both; }
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.bounce-once { animation: bounceOnce .5s ease; }
+@keyframes bounceOnce {
+  0%,100% { transform: translateY(0) }
+  50% { transform: translateY(-15px) }
+}
+
+/* ==========================================================================
+   SSA-SPECIFIC LIGHT ADDITIONS (import / analytics / preservation / knowledge)
+   NOTE: these are small, non-breaking helpers used by the new routes
+   you added to src/router.jsx. We keep colors from your palette.
+   ========================================================================== */
+
+/* --- Domain chips for router-level pages (import, analytics, preservation, hub) --- */
+.domain-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  background: hsl(var(--brand-weak));
+  color: hsl(var(--brand-ink));
+  border: 1px solid hsl(var(--border));
+  border-radius: 999px;
+  padding: .3rem .65rem;
+  font-size: .7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.domain-chip.import { background: hsla(208, 89%, 53%, .15); color: hsl(208 89% 25%); }
+.domain-chip.analytics { background: hsla(255, 100%, 66%, .12); color: hsl(249 47% 27%); }
+.domain-chip.preservation { background: hsla(35, 92%, 52%, .14); color: hsl(35 92% 25%); }
+.domain-chip.knowledge { background: hsla(142, 71%, 45%, .14); color: hsl(142 71% 20%); }
+.domain-chip.hub { background: hsla(14, 35%, 48%, .14); color: hsl(14 35% 25%); }
+
+/* --- Import landing panel --- */
+.import-landing {
+  display: grid;
+  gap: 1rem;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 1rem;
+  padding: 1rem;
+}
+.import-landing-header {
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+}
+.import-landing .import-sources {
+  display:flex;
+  gap:.5rem;
+  flex-wrap:wrap;
+}
+
+/* --- Analytics panel (Household, Inventory, Sessions) --- */
+.analytics-panel {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 1rem;
+  padding: 1rem 1.1rem 0.8rem;
+  display: grid;
+  gap: .7rem;
+}
+.analytics-panel small {
+  color: hsl(var(--muted-foreground));
+}
+.analytics-metric-row {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap:.65rem;
+}
+
+/* --- Preservation page cards --- */
+.preservation-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 1rem;
+  padding: 1rem;
+  display:flex;
+  align-items: flex-start;
+  gap: .75rem;
+}
+
+/* --- Knowledge / Hub viewer blocks --- */
+.knowledge-block,
+.hub-block {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 1rem;
+  padding: 1rem;
+  display: grid;
+  gap: .5rem;
+}
+
+/* --- Sticky footer for action bars in imports / sessions --- */
+.sticky-action-footer {
+  position: sticky;
+  bottom: 0;
+  background: hsl(var(--background)/.85);
+  backdrop-filter: blur(6px);
+  border-top: 1px solid hsl(var(--border));
+  padding: .6rem .8rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.5rem;
+}
+
+/* --- Lightweight 2 col helper for domain summaries --- */
+.domain-split {
+  display:grid;
+  gap: .8rem;
+}
+@media (min-width: 930px) {
+  .domain-split {
+    grid-template-columns: 1.1fr .9fr;
+  }
+}

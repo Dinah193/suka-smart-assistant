@@ -1,0 +1,27 @@
+{
+  "id": "garden.soilAmendment",
+  "kind": "calculator",
+  "label": "Soil Amendment Calculator",
+  "description": "Calculates soil amendment needs for each bed based on soil tests, target fertility, and the planned crops/planting calendar.",
+
+  "tags": [
+    "garden",
+    "soil",
+    "planning",
+    "amendments"
+  ],
+
+  "inputs": {
+    "soilProfile": "garden.soilProfile.outputs.profile",
+    "soilTests": "garden.soilProfile.outputs.tests",
+    "plantingPlan": "garden.plantingCalendar.outputs.plantingWindows",
+    "gardenLayout": "garden.layout.outputs.beds",
+    "householdProfile": "core.householdProfile.outputs.profile"
+  },
+
+  "outputs": {
+    "amendmentPlan": "garden.soilAmendment.outputs.amendmentPlan",
+    "amendmentSessions": "garden.soilAmendment.outputs.sessions",
+    "amendmentSummary": "garden.soilAmendment.outputs.summary"
+  }
+}

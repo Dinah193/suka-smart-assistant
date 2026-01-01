@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ssa.schemas/shopping.session.schema.json",
+  "title": "SSA Shopping Session",
+  "description": "Shopping session lifecycle: selected stores, start/end, status, and linkage to staged candidates and receipt reconciliation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "status",
+    "createdAt",
+    "updatedAt",
+    "startedAt",
+    "storeIds"
+  ],
+  "properties": {
+    "id": { "type": "string", "minLength": 6 },
+    "householdId": { "type": ["string", "null"] },
+    "userId": { "type": ["string", "null"] },
+
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "paused", "completed", "aborted"]
+    },
+
+    "startedAt": { "type": "string", "format": "date-time" },
+    "endedAt": { "type": ["string", "null"], "format": "date-time" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+
+    "primaryStoreId": { "type": ["string", "null"] },
+    "storeIds": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+
+    "geo": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+        "lon": { "type": "number", "minimum": -180, "maximum": 180 },
+        "radiusMeters": { "type": ["number", "null"], "minimum": 0 }
+      }
+    },
+
+    "mode": {
+      "type": "string",
+      "enum": ["shopping"],
+      "default": "shopping"
+    },
+
+    "selectedChains": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+
+    "budget": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "currency": { "type": "string", "default": "USD" },
+        "targetTotal": { "type": ["number", "null"], "minimum": 0 },
+        "softCap": { "type": ["number", "null"], "minimum": 0 }
+      }
+    },
+
+    "linkage": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "sessionId": {
+          "type": ["string", "null"],
+          "description": "Optional linkage to SSA runnable sessions table (sessions.sessionId)."
+        },
+        "receiptReconId": {
+          "type": ["string", "null"],
+          "description": "Optional linkage to receipt reconciliation record."
+        }
+      }
+    },
+
+    "notes": { "type": ["string", "null"] }
+  }
+}

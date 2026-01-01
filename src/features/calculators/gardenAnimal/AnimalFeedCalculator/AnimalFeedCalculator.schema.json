@@ -1,0 +1,446 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka-smart-assistant.local/schemas/calculators/AnimalFeedCalculator.schema.json",
+  "title": "AnimalFeedCalculator Result Schema",
+  "description": "Schema for AnimalFeedCalculator inputs and outputs, including livestock, weight, and ration-level details for SSA Planning Graph and SessionRunner integration.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "context",
+    "animals",
+    "dailyFeedPlan"
+  ],
+  "properties": {
+    "context": {
+      "type": "object",
+      "description": "High-level context for this calculation run (used for analytics and Planning Graph).",
+      "additionalProperties": false,
+      "required": [
+        "domain",
+        "calculatedAt"
+      ],
+      "properties": {
+        "domain": {
+          "type": "string",
+          "enum": [
+            "animals"
+          ],
+          "description": "SSA domain where this calculator is active."
+        },
+        "calculatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when the calculation was performed."
+        },
+        "planningHorizonDays": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of days forward used for batch and projection calculations."
+        },
+        "unitSystem": {
+          "type": "string",
+          "enum": [
+            "metric",
+            "imperial"
+          ],
+          "description": "Unit system used for weights and volumes."
+        },
+        "farmLocation": {
+          "type": "string",
+          "description": "Optional farm or site identifier for analytics."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Free-form notes or description about this calculation run."
+        }
+      }
+    },
+
+    "animals": {
+      "type": "array",
+      "description": "List of animals or groups included in this feed calculation.",
+      "items": {
+        "$ref": "#/definitions/AnimalSubject"
+      }
+    },
+
+    "dailyFeedPlan": {
+      "type": "array",
+      "description": "Per-animal (or per-group) daily feed rations with as-fed and dry-matter totals.",
+      "items": {
+        "$ref": "#/definitions/AnimalDailyFeedPlan"
+      }
+    },
+
+    "feedBatchPlan": {
+      "type": "array",
+      "description": "Aggregated feed requirements over the planning horizon for batching, pre-mixing, or bagging feed in advance.",
+      "items": {
+        "$ref": "#/definitions/FeedBatchRequirement"
+      }
+    },
+
+    "feedDemandProjection": {
+      "type": "array",
+      "description": "Projected inventory drawdown by feed item over the planning horizon.",
+      "items": {
+        "$ref": "#/definitions/FeedDemandProjectionEntry"
+      }
+    },
+
+    "nutritionGaps": {
+      "type": "array",
+      "description": "Flags where animals or groups are under- or over-supplied for key nutrients.",
+      "items": {
+        "$ref": "#/definitions/NutritionGap"
+      }
+    },
+
+    "analytics": {
+      "type": "object",
+      "description": "Optional roll-up metrics useful for dashboards and Planning Graph analytics.",
+      "additionalProperties": false,
+      "properties": {
+        "totalAsFedKgPerDay": {
+          "type": "number",
+          "description": "Total as-fed kg of feed used per day across all animals."
+        },
+        "totalDryMatterKgPerDay": {
+          "type": "number",
+          "description": "Total dry-matter kg of feed used per day across all animals."
+        },
+        "estimatedFeedCostPerDay": {
+          "type": "number",
+          "description": "Estimated daily feed cost across all animals (in base currency)."
+        },
+        "projectedShortageDays": {
+          "type": "integer",
+          "description": "Earliest day on which any feed item is projected to be exhausted, relative to calculation date."
+        }
+      }
+    }
+  },
+
+  "definitions": {
+    "AnimalSubject": {
+      "type": "object",
+      "description": "Represents a single animal or a homogeneous group (pen) for which a ration is calculated.",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "displayName",
+        "species",
+        "class",
+        "count",
+        "weightKg"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for this animal or group (should match animals.registry id when available)."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Friendly name for UI (e.g., 'Dairy does – Pen A', 'Steer #14')."
+        },
+        "species": {
+          "type": "string",
+          "description": "Species name (e.g., 'goat', 'sheep', 'cattle', 'chicken')."
+        },
+        "breed": {
+          "type": "string",
+          "description": "Optional breed or type (e.g., 'Boer', 'Nubian', 'Jersey')."
+        },
+        "class": {
+          "type": "string",
+          "description": "Production or physiological class (e.g., 'growing', 'lactating', 'dry', 'breeding', 'meat', 'layer')."
+        },
+        "role": {
+          "type": "string",
+          "description": "Farm role (e.g., 'meat', 'milk', 'egg', 'breeding', 'working')."
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of animals represented by this subject."
+        },
+        "weightKg": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Average live bodyweight per head in kilograms."
+        },
+        "targetWeightKg": {
+          "type": "number",
+          "description": "Target live weight per head (if growth or conditioning is a goal)."
+        },
+        "averageDailyGainKg": {
+          "type": "number",
+          "description": "Desired or observed average daily gain in kg per head."
+        },
+        "location": {
+          "type": "string",
+          "description": "Barn/pen/pasture or other location label for this subject."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional notes (e.g., 'late gestation', 'thin condition', 'on pasture')."
+        }
+      }
+    },
+
+    "AnimalDailyFeedPlan": {
+      "type": "object",
+      "description": "Daily ration breakdown for a single animal subject.",
+      "additionalProperties": false,
+      "required": [
+        "subjectId",
+        "rationId",
+        "feedItems",
+        "totals"
+      ],
+      "properties": {
+        "subjectId": {
+          "type": "string",
+          "description": "Reference to AnimalSubject.id."
+        },
+        "rationId": {
+          "type": "string",
+          "description": "Identifier for this ration (used to group feed prep tasks and sessions)."
+        },
+        "timesPerDay": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of times per day this ration is fed."
+        },
+        "feedItems": {
+          "type": "array",
+          "description": "List of feed components that make up this ration.",
+          "items": {
+            "$ref": "#/definitions/FeedRationItem"
+          }
+        },
+        "totals": {
+          "type": "object",
+          "description": "Summed amounts of feed for this subject (per day).",
+          "additionalProperties": false,
+          "required": [
+            "asFedKgPerHeadPerDay",
+            "dryMatterKgPerHeadPerDay"
+          ],
+          "properties": {
+            "asFedKgPerHeadPerDay": {
+              "type": "number",
+              "description": "Total as-fed feed weight per head per day (kg)."
+            },
+            "dryMatterKgPerHeadPerDay": {
+              "type": "number",
+              "description": "Total dry-matter feed weight per head per day (kg)."
+            },
+            "proteinPctOfDM": {
+              "type": "number",
+              "description": "Approximate crude protein percentage of dry matter in the ration."
+            },
+            "energyMjPerHeadPerDay": {
+              "type": "number",
+              "description": "Estimated metabolizable energy provided per head per day (MJ)."
+            },
+            "estimatedCostPerHeadPerDay": {
+              "type": "number",
+              "description": "Estimated feed cost per head per day (currency)."
+            }
+          }
+        },
+        "instructions": {
+          "type": "string",
+          "description": "Short instruction string suitable for a SessionRunner step (e.g., 'Feed 1.5 kg hay + 0.3 kg grain twice per day')."
+        }
+      }
+    },
+
+    "FeedRationItem": {
+      "type": "object",
+      "description": "One feed ingredient in a ration for a subject.",
+      "additionalProperties": false,
+      "required": [
+        "feedItemId",
+        "name",
+        "asFedKgPerHeadPerDay"
+      ],
+      "properties": {
+        "feedItemId": {
+          "type": "string",
+          "description": "Identifier for the feed item (should map to a storehouse inventory item when possible)."
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name of the feed (e.g., 'alfalfa hay', 'corn', 'mineral mix')."
+        },
+        "category": {
+          "type": "string",
+          "description": "Category of the feed (e.g., 'forage', 'grain', 'byproduct', 'mineral', 'pasture')."
+        },
+        "asFedKgPerHeadPerDay": {
+          "type": "number",
+          "description": "As-fed amount per head per day (kg)."
+        },
+        "dryMatterPercent": {
+          "type": "number",
+          "description": "Percent dry matter in this feed (0–100)."
+        },
+        "dryMatterKgPerHeadPerDay": {
+          "type": "number",
+          "description": "Dry-matter amount per head per day (kg)."
+        },
+        "crudeProteinPercentOfDM": {
+          "type": "number",
+          "description": "Crude protein percentage of the dry matter (0–100)."
+        },
+        "energyMjPerKgDM": {
+          "type": "number",
+          "description": "Metabolizable energy per kg of dry matter (MJ/kg DM)."
+        },
+        "estimatedCostPerKgAsFed": {
+          "type": "number",
+          "description": "Estimated cost per kg as-fed (in base currency)."
+        },
+        "feedingTimeHints": {
+          "type": "array",
+          "description": "Times of day when this feed is typically offered (used for scheduling sessions).",
+          "items": {
+            "type": "string",
+            "description": "Time label, e.g., 'morning', 'midday', 'evening'."
+          }
+        },
+        "notes": {
+          "type": "string",
+          "description": "Special handling or constraints (e.g., 'do not feed to sheep', 'introduce gradually')."
+        }
+      }
+    },
+
+    "FeedBatchRequirement": {
+      "type": "object",
+      "description": "Aggregated feed amount required over the planning horizon for a given feed item.",
+      "additionalProperties": false,
+      "required": [
+        "feedItemId",
+        "name",
+        "totalAsFedKg",
+        "totalDryMatterKg"
+      ],
+      "properties": {
+        "feedItemId": {
+          "type": "string",
+          "description": "Identifier for the feed item."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the feed item."
+        },
+        "totalAsFedKg": {
+          "type": "number",
+          "description": "Total as-fed kg required over the planning horizon."
+        },
+        "totalDryMatterKg": {
+          "type": "number",
+          "description": "Total dry-matter kg required over the planning horizon."
+        },
+        "estimatedCostTotal": {
+          "type": "number",
+          "description": "Estimated total cost for this feed over the planning horizon."
+        }
+      }
+    },
+
+    "FeedDemandProjectionEntry": {
+      "type": "object",
+      "description": "Projected inventory use and potential shortage for a specific feed item.",
+      "additionalProperties": false,
+      "required": [
+        "feedItemId",
+        "name",
+        "currentInventoryKg",
+        "projectedUsageKg",
+        "projectedShortageKg"
+      ],
+      "properties": {
+        "feedItemId": {
+          "type": "string",
+          "description": "Identifier for the feed item in inventory."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the feed item."
+        },
+        "currentInventoryKg": {
+          "type": "number",
+          "description": "Current recorded inventory (as-fed kg)."
+        },
+        "projectedUsageKg": {
+          "type": "number",
+          "description": "Projected usage (as-fed kg) over the planning horizon."
+        },
+        "projectedShortageKg": {
+          "type": "number",
+          "description": "If > 0, the amount of shortage (usage minus inventory) in kg."
+        },
+        "estimatedRunoutDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Estimated date when this feed item will run out, if known."
+        }
+      }
+    },
+
+    "NutritionGap": {
+      "type": "object",
+      "description": "Represents a nutrition under- or over-supply issue for a subject.",
+      "additionalProperties": false,
+      "required": [
+        "subjectId",
+        "severity",
+        "nutrient",
+        "direction"
+      ],
+      "properties": {
+        "subjectId": {
+          "type": "string",
+          "description": "Reference to AnimalSubject.id."
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "minor",
+            "moderate",
+            "major"
+          ],
+          "description": "How severe the gap is."
+        },
+        "nutrient": {
+          "type": "string",
+          "description": "Name of the nutrient (e.g., 'protein', 'energy', 'calcium', 'phosphorus')."
+        },
+        "direction": {
+          "type": "string",
+          "enum": [
+            "deficit",
+            "excess"
+          ],
+          "description": "Whether the nutrient is lacking or excessive."
+        },
+        "currentValue": {
+          "type": "number",
+          "description": "Calculated current value (e.g., % of requirement, or absolute)."
+        },
+        "targetValue": {
+          "type": "number",
+          "description": "Target value or range midpoint for this nutrient."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable explanation suitable for UI (e.g., 'Protein is 20% below target; consider adding more high-protein feed.')."
+        }
+      }
+    }
+  }
+}

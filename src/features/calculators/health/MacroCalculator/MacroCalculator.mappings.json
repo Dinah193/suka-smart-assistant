@@ -1,0 +1,297 @@
+{
+  "nodeId": "pg.health.macroCalculator",
+  "label": "Macro Calculator Next Steps",
+  "version": "1.0.0",
+  "status": "active",
+
+  "description": "Node-specific Next Steps mappings for the Macro Calculator. Extends the global Planning Graph so that when a macro plan is applied, SSA knows which planners and sessions to trigger next.",
+
+  "nextSteps": {
+    "primary": [
+      {
+        "id": "macro_to_mealPlanner_session",
+        "label": "Turn macros into meals",
+        "description": "Create or update a Meal Planner-focused session that uses the macro targets as daily constraints.",
+        "kind": "sessionBlueprint",
+        "priority": 100,
+        "enabled": true,
+        "trigger": {
+          "event": "health.macroPlan.appliedNow",
+          "conditions": [
+            {
+              "path": "input.ssaIntegration.allowAutoLinkToMealPlanner",
+              "operator": "===",
+              "value": true
+            }
+          ]
+        },
+        "target": {
+          "nodeId": "pg.meals.mealPlanner",
+          "domain": "storehouse",
+          "route": "/tier2/household/meals",
+          "routeAnchor": "MealPlanner"
+        },
+        "sessionBlueprint": {
+          "idTemplate": "session:macros→meals:${macroPresetId|fallback:adhoc}",
+          "domain": "storehouse",
+          "titleTemplate": "Apply Macro Targets to Meal Plan",
+          "source": {
+            "type": "manual",
+            "refIdTemplate": "${macroPresetId|nullIfEmpty}"
+          },
+          "steps": [
+            {
+              "id": "macro_meal_review",
+              "title": "Review daily macro targets",
+              "desc": "Confirm your daily calories and macro targets before building meals.",
+              "durationSec": 120,
+              "blockers": [],
+              "metadata": {
+                "tempTargetF": 0,
+                "donenessCue": "timer",
+                "cueNotes": "Show macro summary card and let the user confirm or tweak."
+              }
+            },
+            {
+              "id": "macro_meal_map",
+              "title": "Map macros to meals",
+              "desc": "Distribute your macros across meals and snacks in the Meal Planner.",
+              "durationSec": 300,
+              "blockers": [
+                "inventory",
+                "quietHours"
+              ],
+              "metadata": {
+                "tempTargetF": 0,
+                "donenessCue": "timer",
+                "cueNotes": "Open the Meal Planner panel pre-filled with per-meal macro targets."
+              }
+            },
+            {
+              "id": "macro_meal_save",
+              "title": "Save macro-based meal pattern",
+              "desc": "Save this macro pattern as a reusable day template.",
+              "durationSec": 120,
+              "blockers": [],
+              "metadata": {
+                "tempTargetF": 0,
+                "donenessCue": "timer",
+                "cueNotes": "Offer to save this as a preset and emit meal.plan.updated event."
+              }
+            }
+          ],
+          "prefs": {
+            "voiceGuidance": true,
+            "haptic": true,
+            "autoAdvance": false
+          }
+        }
+      },
+      {
+        "id": "macro_to_groceryPlanner_session",
+        "label": "Sync macros to grocery list",
+        "description": "Derive a grocery plan that supports macro-aligned meals for the current planning window (e.g., 7 days).",
+        "kind": "sessionBlueprint",
+        "priority": 90,
+        "enabled": true,
+        "trigger": {
+          "event": "health.macroPlan.appliedNow",
+          "conditions": [
+            {
+              "path": "input.ssaIntegration.allowAutoLinkToGroceryPlanner",
+              "operator": "===",
+              "value": true
+            }
+          ]
+        },
+        "target": {
+          "nodeId": "pg.storehouse.groceryPlanner",
+          "domain": "storehouse",
+          "route": "/tier2/household/storehouse",
+          "routeAnchor": "GroceryPlanner"
+        },
+        "sessionBlueprint": {
+          "idTemplate": "session:macros→grocery:${macroPresetId|fallback:adhoc}",
+          "domain": "storehouse",
+          "titleTemplate": "Build Grocery List from Macro Plan",
+          "source": {
+            "type": "manual",
+            "refIdTemplate": "${macroPresetId|nullIfEmpty}"
+          },
+          "steps": [
+            {
+              "id": "macro_grocery_range",
+              "title": "Choose planning window",
+              "desc": "Select how many days of macro-aligned meals you want to shop for.",
+              "durationSec": 90,
+              "blockers": [],
+              "metadata": {
+                "tempTargetF": 0,
+                "donenessCue": "timer",
+                "cueNotes": "Default to 7 days; allow quick presets (3, 7, 14)."
+              }
+            },
+            {
+              "id": "macro_grocery_suggestions",
+              "title": "Review suggested ingredients",
+              "desc": "SSA suggests proteins, fats, carbs, and produce that fit your macros.",
+              "durationSec": 240,
+              "blockers": [
+                "inventory"
+              ],
+              "metadata": {
+                "tempTargetF": 0,
+                "donenessCue": "timer",
+                "cueNotes": "Use inventory and favorite foods to propose a starting list."
+              }
+            },
+            {
+              "id": "macro_grocery_finalize",
+              "title": "Finalize grocery list",
+              "desc": "Confirm, adjust, and save the macro-aligned grocery list.",
+              "durationSec": 180,
+              "blockers": [],
+              "metadata": {
+                "tempTargetF": 0,
+                "donenessCue": "timer",
+                "cueNotes": "Emit inventory.shortage.detected and storehouse.groceryList.updated as needed."
+              }
+            }
+          ],
+          "prefs": {
+            "voiceGuidance": true,
+            "haptic": true,
+            "autoAdvance": false
+          }
+        }
+      }
+    ],
+
+    "secondary": [
+      {
+        "id": "macro_to_animalPlanner_session",
+        "label": "Plan animal products for macros",
+        "description": "Use macro targets to estimate needed animal products (eggs, milk, meat portions) over the planning window.",
+        "kind": "sessionBlueprint",
+        "priority": 60,
+        "enabled": true,
+        "trigger": {
+          "event": "health.macroPlan.appliedNow",
+          "conditions": [
+            {
+              "path": "input.ssaIntegration.allowAutoLinkToAnimalPlanner",
+              "operator": "===",
+              "value": true
+            }
+          ]
+        },
+        "target": {
+          "nodeId": "pg.animals.animalPlanner",
+          "domain": "animals",
+          "route": "/tier2/household/animals",
+          "routeAnchor": "AnimalPlanner"
+        },
+        "sessionBlueprint": {
+          "idTemplate": "session:macros→animals:${macroPresetId|fallback:adhoc}",
+          "domain": "storehouse",
+          "titleTemplate": "Match Animal Products to Macro Plan",
+          "source": {
+            "type": "manual",
+            "refIdTemplate": "${macroPresetId|nullIfEmpty}"
+          },
+          "steps": [
+            {
+              "id": "macro_animals_window",
+              "title": "Select planning period",
+              "desc": "Choose how many days you want to cover with current flock/herd output.",
+              "durationSec": 90,
+              "blockers": [
+                "weather"
+              ],
+              "metadata": {
+                "tempTargetF": 0,
+                "donenessCue": "timer",
+                "cueNotes": "Use garden/season data as hints for realistic yields."
+              }
+            },
+            {
+              "id": "macro_animals_map",
+              "title": "Map macros to animal outputs",
+              "desc": "Estimate how much egg, milk, and meat your macro plan needs.",
+              "durationSec": 300,
+              "blockers": [
+                "inventory",
+                "equipment"
+              ],
+              "metadata": {
+                "tempTargetF": 0,
+                "donenessCue": "timer",
+                "cueNotes": "Propose counts like 'dozen eggs/week' or 'lbs of ground meat/week'."
+              }
+            },
+            {
+              "id": "macro_animals_tasks",
+              "title": "Create care and butchery tasks",
+              "desc": "Optionally create animal care or butchery sessions aligned with this plan.",
+              "durationSec": 240,
+              "blockers": [
+                "quietHours",
+                "sabbath"
+              ],
+              "metadata": {
+                "tempTargetF": 0,
+                "donenessCue": "timer",
+                "cueNotes": "Link into animal care and butchery modules when appropriate."
+              }
+            }
+          ],
+          "prefs": {
+            "voiceGuidance": true,
+            "haptic": true,
+            "autoAdvance": false
+          }
+        }
+      },
+      {
+        "id": "macro_to_micronutrient_calculator",
+        "label": "Check micronutrients next",
+        "description": "Guide the user to the Micronutrient Calculator to see vitamin and mineral coverage for the chosen macros.",
+        "kind": "navigation",
+        "priority": 40,
+        "enabled": true,
+        "trigger": {
+          "event": "health.macroPlan.calculated",
+          "conditions": [
+            {
+              "path": "macroPlan.caloriesPerDay",
+              "operator": ">=",
+              "value": 800
+            }
+          ]
+        },
+        "target": {
+          "nodeId": "pg.health.micronutrientCalculator",
+          "domain": "health",
+          "route": "/calculators/health/micronutrients",
+          "nowCtaLabel": "Check Micronutrients Next"
+        }
+      }
+    ]
+  },
+
+  "uiHints": {
+    "nowButton": {
+      "label": "Use These Macros Now",
+      "primaryNextStepId": "macro_to_mealPlanner_session",
+      "secondaryNextStepIds": [
+        "macro_to_groceryPlanner_session",
+        "macro_to_animalPlanner_session"
+      ]
+    },
+    "selectorModal": {
+      "title": "What do you want to do with these macros?",
+      "subtitle": "Pick a next step and SSA will guide you through a focused session.",
+      "showWhenMultiple": true
+    }
+  }
+}

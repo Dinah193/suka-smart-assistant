@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ssa.schemas/price.observation.schema.json",
+  "title": "SSA Price Observation",
+  "description": "Store price snapshot for a UPC at a specific store/location/time.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "observationId",
+    "upc",
+    "storeId",
+    "observedAt",
+    "price",
+    "currency",
+    "source"
+  ],
+  "properties": {
+    "observationId": { "type": "string", "minLength": 6 },
+    "upc": { "type": "string", "pattern": "^[0-9]{8,14}$" },
+
+    "storeId": { "type": "string" },
+    "storeChainId": { "type": ["string", "null"] },
+
+    "observedAt": { "type": "string", "format": "date-time" },
+    "createdAt": { "type": ["string", "null"], "format": "date-time" },
+
+    "price": { "type": "number", "minimum": 0 },
+    "currency": { "type": "string", "default": "USD" },
+
+    "unitPrice": { "type": ["number", "null"], "minimum": 0 },
+    "priceText": { "type": ["string", "null"] },
+
+    "availability": {
+      "type": ["string", "null"],
+      "enum": ["in_stock", "out_of_stock", "unknown", null],
+      "default": "unknown"
+    },
+
+    "source": {
+      "type": "string",
+      "enum": ["user_scan", "receipt", "store_api", "coupon_feed", "manual"]
+    },
+
+    "evidence": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "receiptFingerprint": { "type": ["string", "null"] },
+        "receiptLineId": { "type": ["string", "null"] },
+        "photoRef": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

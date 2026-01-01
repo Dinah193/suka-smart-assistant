@@ -1,0 +1,124 @@
+{
+  "title": "Biblical Offering Calculator Schema",
+  "description": "Schema for computing biblical offerings (animals, grain, drink, timing) and generating household-friendly study outputs.",
+  "type": "object",
+  "required": ["input", "output"],
+  "properties": {
+    "input": {
+      "type": "object",
+      "required": ["offeringType", "scriptureRefs"],
+      "properties": {
+        "offeringType": {
+          "type": "string",
+          "enum": [
+            "burnt",
+            "peace",
+            "sin",
+            "guilt",
+            "grain",
+            "drink",
+            "votive",
+            "freewill",
+            "purification",
+            "ordination"
+          ]
+        },
+        "scriptureRefs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Chapter/verse strings used to anchor the offering to specific passages."
+        },
+        "includeAnimals": {
+          "type": "boolean",
+          "default": true
+        },
+        "includeGrainDrink": {
+          "type": "boolean",
+          "default": true
+        },
+        "householdContext": {
+          "type": "string",
+          "enum": ["study-only", "storytelling", "curriculum", "household-ritual"],
+          "default": "study-only"
+        }
+      },
+      "additionalProperties": false
+    },
+    "output": {
+      "type": "object",
+      "required": ["canonicalSummary", "animalPatterns", "grainDrinkPatterns", "studyPrompts"],
+      "properties": {
+        "canonicalSummary": {
+          "type": "object",
+          "required": ["label", "coreScriptures"],
+          "properties": {
+            "label": { "type": "string" },
+            "coreScriptures": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "briefExplanation": { "type": "string" }
+          }
+        },
+        "animalPatterns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["species", "agePattern", "sexPattern", "defectRule"],
+            "properties": {
+              "species": {
+                "type": "string",
+                "enum": ["bull", "ram", "goat", "lamb", "turtledove", "pigeon", "other"]
+              },
+              "agePattern": {
+                "type": "string",
+                "description": "Plain-language description like 'one year old', 'three years old', etc."
+              },
+              "sexPattern": {
+                "type": "string",
+                "enum": ["male-only", "female-only", "either", "not-specified"]
+              },
+              "defectRule": {
+                "type": "string",
+                "description": "Notes on requirements like 'without blemish', 'no defect', etc."
+              }
+            }
+          }
+        },
+        "grainDrinkPatterns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["elementType", "details"],
+            "properties": {
+              "elementType": {
+                "type": "string",
+                "enum": ["grain", "oil", "wine", "salt", "frankincense", "other"]
+              },
+              "details": {
+                "type": "string",
+                "description": "Plain-language description of quantities, preparation, and usage."
+              }
+            }
+          }
+        },
+        "studyPrompts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["question", "focus"],
+            "properties": {
+              "question": { "type": "string" },
+              "focus": {
+                "type": "string",
+                "enum": ["atonement", "thanksgiving", "fellowship", "holiness", "priesthood", "covenant", "other"]
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,1601 @@
+{
+  "domain": "preservation",
+  "lexiconVersion": 1,
+  "updatedAt": "2025-12-27",
+  "description": "SSA Lexicon: preservation parsing synonyms/keywords -> method IDs (methodKey). Uses strict actions only: boostMethodKey, downrankMethodKey, blockMethodKey, addNote, addWarning, emitHintTag.",
+  "defaults": {
+    "minimumTokenLength": 2,
+    "maxMatchesPerEntry": 35
+  },
+  "methodKeys": {
+    "PRESERVE_GENERAL": "preserve.general",
+
+    "PRESERVE_CANNING_GENERAL": "preserve.canning.general",
+    "PRESERVE_CANNING_WATER_BATH": "preserve.canning.water_bath",
+    "PRESERVE_CANNING_STEAM": "preserve.canning.steam",
+    "PRESERVE_CANNING_PRESSURE": "preserve.canning.pressure",
+    "PRESERVE_CANNING_HOT_PACK": "preserve.canning.hot_pack",
+    "PRESERVE_CANNING_RAW_PACK": "preserve.canning.raw_pack",
+    "PRESERVE_CANNING_SYRUP": "preserve.canning.syrup",
+    "PRESERVE_CANNING_BRINE": "preserve.canning.brine",
+    "PRESERVE_CANNING_PICKLE_VINEGAR": "preserve.canning.pickled_vinegar",
+    "PRESERVE_CANNING_JAM_JELLY": "preserve.canning.jam_jelly",
+    "PRESERVE_CANNING_TOMATOES": "preserve.canning.tomatoes",
+    "PRESERVE_CANNING_BROTH_STOCK": "preserve.canning.broth_stock",
+    "PRESERVE_CANNING_MEAT": "preserve.canning.meat",
+    "PRESERVE_CANNING_BEANS": "preserve.canning.beans",
+    "PRESERVE_CANNING_VEG_LOW_ACID": "preserve.canning.low_acid_veg",
+    "PRESERVE_CANNING_ALTITUDE": "preserve.canning.altitude_adjust",
+    "PRESERVE_CANNING_LID_SEAL": "preserve.canning.lid_seal",
+
+    "PRESERVE_FREEZING_GENERAL": "preserve.freezing.general",
+    "PRESERVE_FREEZING_FLASH": "preserve.freezing.flash",
+    "PRESERVE_FREEZING_BLANCH": "preserve.freezing.blanching",
+    "PRESERVE_FREEZING_VACUUM_SEAL": "preserve.freezing.vacuum_seal",
+    "PRESERVE_FREEZING_FREEZER_BURN": "preserve.freezing.issue.freezer_burn",
+
+    "PRESERVE_DEHYDRATING_GENERAL": "preserve.dehydrate.general",
+    "PRESERVE_DEHYDRATING_ELECTRIC": "preserve.dehydrate.electric",
+    "PRESERVE_DEHYDRATING_SOLAR": "preserve.dehydrate.solar",
+    "PRESERVE_DEHYDRATING_AIR_DRY": "preserve.dehydrate.air_dry",
+    "PRESERVE_DEHYDRATING_JERKY": "preserve.dehydrate.jerky",
+    "PRESERVE_DEHYDRATING_FRUIT_LEATHER": "preserve.dehydrate.fruit_leather",
+    "PRESERVE_DEHYDRATING_HERBS": "preserve.dehydrate.herbs",
+    "PRESERVE_DEHYDRATING_POWDERS": "preserve.dehydrate.powders",
+    "PRESERVE_DEHYDRATING_REHYDRATE": "preserve.dehydrate.rehydrate",
+
+    "PRESERVE_FREEZE_DRY_GENERAL": "preserve.freeze_dry.general",
+    "PRESERVE_FREEZE_DRY_STORAGE": "preserve.freeze_dry.storage",
+
+    "PRESERVE_SALTING_GENERAL": "preserve.salt.general",
+    "PRESERVE_SALTING_DRY": "preserve.salt.dry",
+    "PRESERVE_SALTING_BRINE": "preserve.salt.brine",
+    "PRESERVE_SUGAR_CURE": "preserve.sugar_cure",
+    "PRESERVE_HONEY_PRESERVE": "preserve.honey",
+    "PRESERVE_OIL_PRESERVE": "preserve.oil",
+
+    "PRESERVE_SMOKING_GENERAL": "preserve.smoke.general",
+    "PRESERVE_SMOKING_COLD": "preserve.smoke.cold",
+    "PRESERVE_SMOKING_HOT": "preserve.smoke.hot",
+
+    "PRESERVE_CURING_GENERAL": "preserve.cure.general",
+    "PRESERVE_CURING_DRY": "preserve.cure.dry",
+    "PRESERVE_CURING_WET": "preserve.cure.wet",
+    "PRESERVE_CURING_NITRITE": "preserve.cure.nitrite",
+    "PRESERVE_CURING_CHARCUTERIE": "preserve.cure.charcuterie",
+
+    "PRESERVE_CONFIT": "preserve.confit",
+    "PRESERVE_PEMMICAN": "preserve.pemmican",
+
+    "PRESERVE_ROOT_CELLAR": "preserve.root_cellar",
+    "PRESERVE_COLD_STORAGE": "preserve.cold_storage",
+    "PRESERVE_DRY_STORAGE": "preserve.dry_storage",
+    "PRESERVE_VACUUM_SEAL": "preserve.vacuum_seal",
+    "PRESERVE_MYlar_O2": "preserve.mylar_o2",
+    "PRESERVE_DESICCANT": "preserve.desiccant",
+    "PRESERVE_FOOD_GRADE_BUCKETS": "preserve.containers.bucket",
+    "PRESERVE_MASON_JARS": "preserve.containers.mason_jar",
+
+    "PRESERVE_SAFETY_GENERAL": "preserve.safety.general",
+    "PRESERVE_SAFETY_BOTULISM_RISK": "preserve.safety.botulism_risk",
+    "PRESERVE_SAFETY_PH_ACIDIFY": "preserve.safety.ph_acidify",
+    "PRESERVE_SAFETY_WATER_ACTIVITY": "preserve.safety.water_activity",
+    "PRESERVE_SAFETY_TEMP_DANGER_ZONE": "preserve.safety.temp_danger_zone",
+    "PRESERVE_SAFETY_SEAL_FAILURE": "preserve.safety.seal_failure",
+    "PRESERVE_SAFETY_MOLD": "preserve.safety.mold",
+    "PRESERVE_SAFETY_RANCIDITY": "preserve.safety.rancidity"
+  },
+  "entries": [
+    {
+      "id": "preserve_general_terms",
+      "priority": 10,
+      "when": {
+        "any": [
+          "preserve",
+          "preserved",
+          "preservation",
+          "put up",
+          "putting up",
+          "store for winter",
+          "long term storage",
+          "long-term storage",
+          "pantry stable",
+          "shelf stable",
+          "shelf-stable",
+          "extend shelf life",
+          "keep longer",
+          "storehouse",
+          "storehouse prep",
+          "food storage"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.general" },
+        { "action": "emitHintTag", "tag": "preservation" },
+        {
+          "action": "addNote",
+          "note": "Preservation detected. Prefer matching a specific method (canning, dehydrating, freezing, curing/smoking, root cellar, freeze-dry, vacuum sealing) when additional keywords are present."
+        }
+      ]
+    },
+
+    {
+      "id": "canning_general",
+      "priority": 20,
+      "when": {
+        "any": [
+          "canning",
+          "canned",
+          "home canning",
+          "jarred",
+          "jarring",
+          "mason jar",
+          "mason jars",
+          "ball jar",
+          "kerr jar",
+          "two-piece lid",
+          "two piece lid",
+          "ring and lid",
+          "processing time",
+          "process for",
+          "headspace",
+          "remove bubbles",
+          "wipe rim",
+          "finger tight",
+          "finger-tight",
+          "center should be down",
+          "sealed jar",
+          "seal the jar",
+          "jar seal",
+          "vacuum seal in jar"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.canning.general" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.containers.mason_jar"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.canning.lid_seal"
+        },
+        { "action": "emitHintTag", "tag": "canning" }
+      ]
+    },
+
+    {
+      "id": "canning_water_bath",
+      "priority": 30,
+      "when": {
+        "any": [
+          "water bath",
+          "water-bath",
+          "boiling water bath",
+          "boiling-water bath",
+          "hot water bath",
+          "submerged jars",
+          "cover jars by 1 inch",
+          "rolling boil",
+          "acid foods",
+          "high acid",
+          "high-acid"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.canning.water_bath"
+        },
+        { "action": "emitHintTag", "tag": "water-bath" },
+        {
+          "action": "addNote",
+          "note": "Water-bath canning detected. Typically for high-acid foods (fruits, jams/jellies, acidified pickles, many tomato recipes when properly acidified)."
+        }
+      ]
+    },
+
+    {
+      "id": "canning_steam",
+      "priority": 26,
+      "when": {
+        "any": [
+          "steam canning",
+          "steam-canning",
+          "atmospheric steam canner",
+          "steam canner"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.canning.steam" },
+        { "action": "emitHintTag", "tag": "steam-canning" },
+        {
+          "action": "addNote",
+          "note": "Steam canning detected. Treat similarly to water-bath for eligible high-acid recipes, but follow equipment-specific water/time rules."
+        }
+      ]
+    },
+
+    {
+      "id": "canning_pressure",
+      "priority": 40,
+      "when": {
+        "any": [
+          "pressure canning",
+          "pressure-canning",
+          "pressure canner",
+          "weighted gauge",
+          "dial gauge",
+          "10 psi",
+          "11 psi",
+          "15 psi",
+          "pounds pressure",
+          "vent for 10 minutes",
+          "vent 10 minutes",
+          "exhaust for 10 minutes",
+          "bring to pressure",
+          "natural release",
+          "cool to zero",
+          "depressurize",
+          "low acid",
+          "low-acid",
+          "low acid foods"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.canning.pressure"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.safety.botulism_risk"
+        },
+        { "action": "emitHintTag", "tag": "pressure-canning" },
+        {
+          "action": "addWarning",
+          "warning": "Pressure canning keywords detected. Low-acid foods require pressure canning for safety. Ensure correct pressure/time and equipment condition."
+        }
+      ]
+    },
+
+    {
+      "id": "canning_hot_pack_raw_pack",
+      "priority": 22,
+      "when": {
+        "any": [
+          "hot pack",
+          "hot-pack",
+          "raw pack",
+          "raw-pack",
+          "cold pack",
+          "cold-pack",
+          "pack hot",
+          "pack raw"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.canning.hot_pack"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.canning.raw_pack"
+        },
+        { "action": "emitHintTag", "tag": "pack-style" }
+      ]
+    },
+
+    {
+      "id": "canning_altitude",
+      "priority": 28,
+      "when": {
+        "any": [
+          "altitude",
+          "above sea level",
+          "elevation",
+          "adjust for altitude",
+          "increase processing time",
+          "increase pressure",
+          "high altitude"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.canning.altitude_adjust"
+        },
+        { "action": "emitHintTag", "tag": "altitude-adjust" },
+        {
+          "action": "addNote",
+          "note": "Altitude adjustment keywords detected. Canning times/pressure often need adjustment by elevation; route user to altitude-aware guidance."
+        }
+      ]
+    },
+
+    {
+      "id": "canning_jams_jellies",
+      "priority": 32,
+      "when": {
+        "any": [
+          "jam",
+          "jams",
+          "jelly",
+          "jellies",
+          "marmalade",
+          "preserves (jam)",
+          "fruit preserves",
+          "pectin",
+          "low sugar pectin",
+          "no sugar pectin",
+          "gel stage",
+          "sheet test",
+          "wrinkle test",
+          "freezer jam",
+          "refrigerator jam"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.canning.jam_jelly"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.canning.water_bath"
+        },
+        { "action": "emitHintTag", "tag": "jam-jelly" }
+      ]
+    },
+
+    {
+      "id": "canning_pickles_vinegar",
+      "priority": 34,
+      "when": {
+        "any": [
+          "pickled",
+          "pickles",
+          "vinegar",
+          "vinegar brine",
+          "pickling brine",
+          "pickling vinegar",
+          "5% acidity vinegar",
+          "distilled vinegar",
+          "apple cider vinegar",
+          "acv",
+          "quick pickles",
+          "refrigerator pickles",
+          "dill pickles (vinegar)",
+          "bread and butter pickles",
+          "pickle crisp",
+          "calcium chloride",
+          "acidified"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.canning.pickled_vinegar"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.safety.ph_acidify"
+        },
+        { "action": "emitHintTag", "tag": "vinegar-pickling" },
+        {
+          "action": "addNote",
+          "note": "Vinegar/acidified pickling detected. This is usually preservation (often water-bath canning or refrigerator pickles), not lacto-fermentation unless 'ferment' keywords are also present."
+        }
+      ]
+    },
+
+    {
+      "id": "canning_tomatoes_acidify",
+      "priority": 34,
+      "when": {
+        "any": [
+          "tomatoes",
+          "tomato sauce",
+          "tomato paste",
+          "tomato puree",
+          "tomato purée",
+          "crushed tomatoes",
+          "whole tomatoes",
+          "salsa (canned)",
+          "add lemon juice",
+          "add bottled lemon juice",
+          "citric acid",
+          "acidify tomatoes"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.canning.tomatoes"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.safety.ph_acidify"
+        },
+        { "action": "emitHintTag", "tag": "tomatoes" },
+        {
+          "action": "addWarning",
+          "warning": "Tomato canning keywords detected. Many tomato recipes require acidification (citric acid/lemon juice) for water-bath safety; some mixed-ingredient salsas may require pressure canning."
+        }
+      ]
+    },
+
+    {
+      "id": "canning_broth_stock",
+      "priority": 36,
+      "when": {
+        "any": [
+          "broth",
+          "stock",
+          "bone broth",
+          "chicken stock",
+          "beef stock",
+          "lamb stock",
+          "goat stock",
+          "pressure can broth",
+          "pressure canning broth",
+          "defat",
+          "remove fat cap",
+          "skim fat"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.canning.broth_stock"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.canning.pressure"
+        },
+        { "action": "emitHintTag", "tag": "broth-stock" }
+      ]
+    },
+
+    {
+      "id": "canning_meat_low_acid",
+      "priority": 42,
+      "when": {
+        "any": [
+          "canned meat",
+          "can meat",
+          "pressure can meat",
+          "pressure-canned meat",
+          "jarred meat",
+          "beef cubes",
+          "chicken chunks",
+          "turkey",
+          "lamb",
+          "goat",
+          "venison",
+          "rabbit",
+          "fish (canned)",
+          "salmon (canned)",
+          "tuna (canned)"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.canning.meat" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.canning.pressure"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.safety.botulism_risk"
+        },
+        { "action": "emitHintTag", "tag": "canned-meat" },
+        {
+          "action": "addWarning",
+          "warning": "Meat canning keywords detected. Meat is low-acid and requires pressure canning with validated times/pressure."
+        }
+      ]
+    },
+
+    {
+      "id": "canning_beans_veg_low_acid",
+      "priority": 40,
+      "when": {
+        "any": [
+          "beans",
+          "dry beans",
+          "pinto",
+          "black beans",
+          "kidney beans",
+          "chickpeas",
+          "garbanzo",
+          "lentils (canned)",
+          "green beans",
+          "carrots",
+          "corn",
+          "peas",
+          "potatoes (canned)",
+          "mixed vegetables",
+          "vegetable soup",
+          "stew (canned)"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.canning.beans" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.canning.low_acid_veg"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.canning.pressure"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.safety.botulism_risk"
+        },
+        { "action": "emitHintTag", "tag": "low-acid-canning" }
+      ]
+    },
+
+    {
+      "id": "freezing_general",
+      "priority": 22,
+      "when": {
+        "any": [
+          "freeze",
+          "freezing",
+          "frozen",
+          "deep freeze",
+          "deep-freeze",
+          "chest freezer",
+          "upright freezer",
+          "freeze for later",
+          "freeze it",
+          "bag and freeze",
+          "label and freeze"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.freezing.general"
+        },
+        { "action": "emitHintTag", "tag": "freezing" }
+      ]
+    },
+
+    {
+      "id": "freezing_flash_iqf",
+      "priority": 28,
+      "when": {
+        "any": [
+          "flash freeze",
+          "flash-freeze",
+          "iqf",
+          "individually quick frozen",
+          "freeze on a tray",
+          "sheet pan freeze",
+          "freeze on baking sheet",
+          "freeze separately then bag"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.freezing.flash" },
+        { "action": "emitHintTag", "tag": "flash-freeze" }
+      ]
+    },
+
+    {
+      "id": "freezing_blanching",
+      "priority": 28,
+      "when": {
+        "any": [
+          "blanch",
+          "blanching",
+          "blanch then freeze",
+          "blanch and freeze",
+          "shock in ice water",
+          "ice bath",
+          "parboil then freeze"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.freezing.blanching"
+        },
+        { "action": "emitHintTag", "tag": "blanching" },
+        {
+          "action": "addNote",
+          "note": "Blanching keywords detected. Often used for vegetables before freezing to preserve color/texture and reduce enzyme activity."
+        }
+      ]
+    },
+
+    {
+      "id": "vacuum_seal_general",
+      "priority": 24,
+      "when": {
+        "any": [
+          "vacuum seal",
+          "vacuum-seal",
+          "vac seal",
+          "foodsaver",
+          "vacuum bag",
+          "vacuum bags",
+          "seal-a-meal",
+          "chamber sealer",
+          "edge sealer"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.vacuum_seal" },
+        { "action": "emitHintTag", "tag": "vacuum-seal" },
+        {
+          "action": "addNote",
+          "note": "Vacuum sealing detected. Common as a packaging step for freezing, dehydrated foods, and some dry storage workflows."
+        }
+      ]
+    },
+
+    {
+      "id": "freezing_vacuum_seal",
+      "priority": 27,
+      "when": {
+        "any": [
+          "vacuum seal and freeze",
+          "vacuum-seal and freeze",
+          "freeze with vacuum seal",
+          "vacuum sealed in freezer",
+          "freezer storage vacuum sealed"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.freezing.vacuum_seal"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.freezing.general"
+        },
+        { "action": "emitHintTag", "tag": "freeze+vacuum" }
+      ]
+    },
+
+    {
+      "id": "freezer_burn_issue",
+      "priority": 45,
+      "when": {
+        "any": [
+          "freezer burn",
+          "dry spots",
+          "gray spots",
+          "ice crystals all over",
+          "oxidized in freezer",
+          "tastes like freezer",
+          "cardboard taste"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.freezing.issue.freezer_burn"
+        },
+        { "action": "emitHintTag", "tag": "freezer-burn" },
+        {
+          "action": "addNote",
+          "note": "Freezer burn issue detected. Usually linked to air exposure and temperature swings; vacuum sealing and better packaging can reduce it."
+        }
+      ]
+    },
+
+    {
+      "id": "dehydrating_general",
+      "priority": 22,
+      "when": {
+        "any": [
+          "dehydrate",
+          "dehydrated",
+          "dehydrating",
+          "drying",
+          "dried",
+          "dry it",
+          "dehydrator",
+          "food dehydrator",
+          "drying rack",
+          "air dry",
+          "air-dry"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.dehydrate.general"
+        },
+        { "action": "emitHintTag", "tag": "dehydrating" }
+      ]
+    },
+
+    {
+      "id": "dehydrating_electric",
+      "priority": 26,
+      "when": {
+        "any": [
+          "electric dehydrator",
+          "tray dehydrator",
+          "stackable trays",
+          "excalibur",
+          "nesco",
+          "dehydrator temperature",
+          "set to 135",
+          "set to 145",
+          "set to 125"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.dehydrate.electric"
+        },
+        { "action": "emitHintTag", "tag": "electric-dehydrator" }
+      ]
+    },
+
+    {
+      "id": "dehydrating_solar_air",
+      "priority": 24,
+      "when": {
+        "any": [
+          "solar dehydrator",
+          "sun dry",
+          "sun-dry",
+          "sun dried",
+          "sun-dried",
+          "screen dry",
+          "air dry",
+          "air-dry",
+          "hang to dry",
+          "hung to dry"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.dehydrate.solar" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.dehydrate.air_dry"
+        },
+        { "action": "emitHintTag", "tag": "solar-air-dry" }
+      ]
+    },
+
+    {
+      "id": "dehydrating_jerky",
+      "priority": 30,
+      "when": {
+        "any": [
+          "jerky",
+          "beef jerky",
+          "turkey jerky",
+          "venison jerky",
+          "lamb jerky",
+          "goat jerky",
+          "marinate jerky",
+          "cure jerky",
+          "dehydrate meat",
+          "dry meat strips"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.dehydrate.jerky" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.safety.water_activity"
+        },
+        { "action": "emitHintTag", "tag": "jerky" },
+        {
+          "action": "addWarning",
+          "warning": "Jerky keywords detected. Ensure time/temperature and dryness targets are met to reduce spoilage risk; storage and water activity matter."
+        }
+      ]
+    },
+
+    {
+      "id": "dehydrating_fruit_leather",
+      "priority": 28,
+      "when": {
+        "any": [
+          "fruit leather",
+          "fruit roll",
+          "fruit rolls",
+          "roll-ups",
+          "roll ups",
+          "puree and dehydrate",
+          "purée and dehydrate"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.dehydrate.fruit_leather"
+        },
+        { "action": "emitHintTag", "tag": "fruit-leather" }
+      ]
+    },
+
+    {
+      "id": "dehydrating_herbs_powders",
+      "priority": 26,
+      "when": {
+        "any": [
+          "dry herbs",
+          "drying herbs",
+          "dehydrate herbs",
+          "herb drying",
+          "dry basil",
+          "dry oregano",
+          "dry thyme",
+          "make powder",
+          "powdered",
+          "grind to powder",
+          "garlic powder",
+          "onion powder",
+          "tomato powder",
+          "pepper powder",
+          "mushroom powder"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.dehydrate.herbs" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.dehydrate.powders"
+        },
+        { "action": "emitHintTag", "tag": "herbs-powders" }
+      ]
+    },
+
+    {
+      "id": "dehydrating_rehydrate",
+      "priority": 18,
+      "when": {
+        "any": [
+          "rehydrate",
+          "re-hydrate",
+          "rehydration",
+          "soak to rehydrate",
+          "add hot water",
+          "add boiling water",
+          "let it bloom",
+          "bloom in water"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.dehydrate.rehydrate"
+        },
+        { "action": "emitHintTag", "tag": "rehydrate" }
+      ]
+    },
+
+    {
+      "id": "freeze_dry_general",
+      "priority": 28,
+      "when": {
+        "any": [
+          "freeze dry",
+          "freeze-dry",
+          "freeze dried",
+          "freeze-dried",
+          "freeze dryer",
+          "freeze-dryer",
+          "harvest right",
+          "sublimation"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.freeze_dry.general"
+        },
+        { "action": "emitHintTag", "tag": "freeze-dry" }
+      ]
+    },
+
+    {
+      "id": "freeze_dry_storage",
+      "priority": 30,
+      "when": {
+        "any": [
+          "mylar",
+          "mylar bags",
+          "oxygen absorber",
+          "oxygen absorbers",
+          "o2 absorber",
+          "o2 absorbers",
+          "heat seal mylar",
+          "impulse sealer",
+          "desiccant",
+          "silica gel",
+          "food grade bucket",
+          "gamma lid",
+          "bucket liner"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.freeze_dry.storage"
+        },
+        { "action": "boostMethodKey", "methodKey": "preserve.mylar_o2" },
+        { "action": "boostMethodKey", "methodKey": "preserve.desiccant" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.containers.bucket"
+        },
+        { "action": "emitHintTag", "tag": "long-term-packaging" },
+        {
+          "action": "addNote",
+          "note": "Long-term packaging keywords detected. Often paired with freeze-dried or dry-staple storage; ensure low moisture and correct oxygen absorber sizing."
+        }
+      ]
+    },
+
+    {
+      "id": "salting_general",
+      "priority": 24,
+      "when": {
+        "any": [
+          "salt cure",
+          "salt-cure",
+          "salt cured",
+          "salt-cured",
+          "preserve with salt",
+          "dry brine",
+          "dry-brine",
+          "wet brine",
+          "wet-brine",
+          "brining",
+          "brine it",
+          "salting",
+          "packed in salt"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.salt.general" },
+        { "action": "emitHintTag", "tag": "salting" }
+      ]
+    },
+
+    {
+      "id": "salting_dry_vs_brine",
+      "priority": 26,
+      "when": {
+        "any": [
+          "dry cure",
+          "dry-cure",
+          "dry cured",
+          "salt rub",
+          "rub with salt",
+          "packed in salt",
+          "salt box"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.salt.dry" },
+        { "action": "emitHintTag", "tag": "dry-salt" }
+      ]
+    },
+
+    {
+      "id": "salting_brine",
+      "priority": 26,
+      "when": {
+        "any": [
+          "brine",
+          "brined",
+          "saltwater brine",
+          "salt water brine",
+          "brine solution",
+          "submerged in brine",
+          "equilibrium brine"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.salt.brine" },
+        { "action": "emitHintTag", "tag": "brine" }
+      ]
+    },
+
+    {
+      "id": "sugar_honey_preserves",
+      "priority": 22,
+      "when": {
+        "any": [
+          "sugar syrup",
+          "simple syrup",
+          "heavy syrup",
+          "light syrup",
+          "candied",
+          "candied peel",
+          "preserve in sugar",
+          "sugar preserve",
+          "honey preserve",
+          "preserved in honey",
+          "honeyed",
+          "honey garlic",
+          "garlic in honey"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.sugar_cure" },
+        { "action": "boostMethodKey", "methodKey": "preserve.honey" },
+        { "action": "emitHintTag", "tag": "sugar-honey" },
+        {
+          "action": "addNote",
+          "note": "Sugar/honey preservation keywords detected. This overlaps with candying and some ferments; look for explicit 'ferment' keywords to route to fermentation instead."
+        }
+      ]
+    },
+
+    {
+      "id": "oil_preservation",
+      "priority": 26,
+      "when": {
+        "any": [
+          "preserve in oil",
+          "stored in oil",
+          "cover with oil",
+          "submerged in olive oil",
+          "garlic in oil",
+          "herbs in oil",
+          "infused oil",
+          "oil infusion",
+          "chili oil",
+          "pepper oil"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.oil" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.safety.botulism_risk"
+        },
+        { "action": "emitHintTag", "tag": "oil-storage" },
+        {
+          "action": "addWarning",
+          "warning": "Oil-based storage keywords detected. Low-acid foods submerged in oil can create anaerobic conditions; route to strict safety guidance (acidification, refrigeration, validated processes)."
+        }
+      ]
+    },
+
+    {
+      "id": "smoking_general",
+      "priority": 26,
+      "when": {
+        "any": [
+          "smoke",
+          "smoked",
+          "smoking",
+          "smokehouse",
+          "smoker",
+          "wood smoke",
+          "hickory",
+          "applewood",
+          "mesquite",
+          "cold smoke",
+          "cold-smoke",
+          "hot smoke",
+          "hot-smoke"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.smoke.general" },
+        { "action": "emitHintTag", "tag": "smoking" }
+      ]
+    },
+
+    {
+      "id": "smoking_cold_hot",
+      "priority": 30,
+      "when": {
+        "any": [
+          "cold smoke",
+          "cold-smoke",
+          "cold smoking",
+          "smoke without cooking",
+          "below 90f",
+          "below 90 f"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.smoke.cold" },
+        { "action": "emitHintTag", "tag": "cold-smoke" },
+        {
+          "action": "addWarning",
+          "warning": "Cold-smoke keywords detected. Cold smoking is not the same as fully cooking; it often pairs with curing/salting and requires strict safety/temperature control."
+        }
+      ]
+    },
+
+    {
+      "id": "smoking_hot",
+      "priority": 28,
+      "when": {
+        "any": [
+          "hot smoke",
+          "hot-smoke",
+          "smoke to temp",
+          "smoke until 165",
+          "smoke until 145",
+          "smoke to internal temp"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.smoke.hot" },
+        { "action": "emitHintTag", "tag": "hot-smoke" }
+      ]
+    },
+
+    {
+      "id": "curing_general",
+      "priority": 28,
+      "when": {
+        "any": [
+          "cure",
+          "curing",
+          "cured",
+          "dry cure",
+          "dry-cure",
+          "wet cure",
+          "wet-cure",
+          "brine cure",
+          "equilibrium cure",
+          "charcuterie",
+          "salami",
+          "pepperoni",
+          "prosciutto",
+          "pancetta",
+          "coppa",
+          "lonza",
+          "bresaola",
+          "guanciale"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.cure.general" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.cure.charcuterie"
+        },
+        { "action": "emitHintTag", "tag": "curing" }
+      ]
+    },
+
+    {
+      "id": "curing_nitrite_prague_powder",
+      "priority": 40,
+      "when": {
+        "any": [
+          "prague powder",
+          "pink salt (curing)",
+          "curing salt",
+          "instacure",
+          "insta cure",
+          "cure #1",
+          "cure #2",
+          "sodium nitrite",
+          "sodium nitrate"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.cure.nitrite" },
+        { "action": "emitHintTag", "tag": "curing-salt" },
+        {
+          "action": "addWarning",
+          "warning": "Nitrite/nitrate curing keywords detected. These require precise measurement and correct cure type (#1 vs #2) for safety and desired results."
+        }
+      ]
+    },
+
+    {
+      "id": "confit",
+      "priority": 26,
+      "when": {
+        "any": [
+          "confit",
+          "duck confit",
+          "goose confit",
+          "preserve in fat",
+          "stored under fat",
+          "fat cap storage",
+          "seal with fat"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.confit" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.safety.botulism_risk"
+        },
+        { "action": "emitHintTag", "tag": "confit" },
+        {
+          "action": "addWarning",
+          "warning": "Confit/preserved-in-fat keywords detected. Anaerobic storage can be safety-sensitive; route to strict temperature and storage guidance."
+        }
+      ]
+    },
+
+    {
+      "id": "pemmican",
+      "priority": 24,
+      "when": {
+        "any": [
+          "pemmican",
+          "rendered tallow",
+          "tallow",
+          "dried meat and fat",
+          "powdered jerky and fat",
+          "meat powder mixed with fat"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.pemmican" },
+        { "action": "emitHintTag", "tag": "pemmican" }
+      ]
+    },
+
+    {
+      "id": "root_cellar_cold_storage",
+      "priority": 24,
+      "when": {
+        "any": [
+          "root cellar",
+          "rootcellar",
+          "cellar storage",
+          "cold storage",
+          "cool dark place",
+          "cool and dark",
+          "store in basement",
+          "store in cellar",
+          "sand storage",
+          "pack in sand",
+          "pack in sawdust",
+          "store apples",
+          "store potatoes",
+          "store onions",
+          "store squash"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.root_cellar" },
+        { "action": "boostMethodKey", "methodKey": "preserve.cold_storage" },
+        { "action": "emitHintTag", "tag": "root-cellar" },
+        {
+          "action": "addNote",
+          "note": "Root cellar/cold storage detected. This is controlled-environment storage (temp/humidity/airflow) rather than a processing method."
+        }
+      ]
+    },
+
+    {
+      "id": "dry_storage_staples",
+      "priority": 22,
+      "when": {
+        "any": [
+          "dry storage",
+          "pantry staples",
+          "store dry goods",
+          "rice storage",
+          "beans storage",
+          "wheat berries",
+          "grain storage",
+          "flour storage",
+          "oats storage",
+          "lentils storage",
+          "sealed bucket",
+          "food grade bucket",
+          "mylar and o2",
+          "oxygen absorbers",
+          "desiccant",
+          "bay leaves (storage)",
+          "diatomaceous earth (food grade)"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.dry_storage" },
+        { "action": "boostMethodKey", "methodKey": "preserve.mylar_o2" },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.containers.bucket"
+        },
+        { "action": "emitHintTag", "tag": "dry-storage" }
+      ]
+    },
+
+    {
+      "id": "seal_failure_terms",
+      "priority": 55,
+      "when": {
+        "any": [
+          "didn't seal",
+          "did not seal",
+          "seal failed",
+          "unpopped lid",
+          "lid popped",
+          "lid came loose",
+          "lost seal",
+          "leaking jar",
+          "jar leaked",
+          "seal is not down",
+          "button popped up",
+          "jar is unsealed"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.safety.seal_failure"
+        },
+        { "action": "emitHintTag", "tag": "seal-failure" },
+        {
+          "action": "addWarning",
+          "warning": "Jar seal failure keywords detected. Treat as safety/quality risk: refrigeration, reprocessing, or freezing may be needed depending on food and timing."
+        }
+      ]
+    },
+
+    {
+      "id": "mold_terms",
+      "priority": 60,
+      "when": {
+        "any": [
+          "mold",
+          "mould",
+          "fuzzy",
+          "hairy",
+          "blue mold",
+          "green mold",
+          "black mold",
+          "pink mold",
+          "orange mold",
+          "spots on top",
+          "growth on top",
+          "surface mold"
+        ]
+      },
+      "then": [
+        { "action": "boostMethodKey", "methodKey": "preserve.safety.mold" },
+        { "action": "emitHintTag", "tag": "mold" },
+        {
+          "action": "addWarning",
+          "warning": "Mold keywords detected. Route to discard/salvage rules appropriate to the preservation method and food type."
+        }
+      ]
+    },
+
+    {
+      "id": "rancidity_terms",
+      "priority": 45,
+      "when": {
+        "any": [
+          "rancid",
+          "rancidity",
+          "paint-like smell",
+          "crayon smell",
+          "stale nuts",
+          "bitter oil",
+          "oxidized",
+          "oxidation",
+          "soapy taste"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.safety.rancidity"
+        },
+        { "action": "emitHintTag", "tag": "rancidity" },
+        {
+          "action": "addNote",
+          "note": "Rancidity keywords detected. Often linked to fat oxidation, heat, light, and oxygen exposure; improve packaging (mylar/O2, vacuum, cool/dark storage)."
+        }
+      ]
+    },
+
+    {
+      "id": "botulism_risk_terms",
+      "priority": 80,
+      "when": {
+        "any": [
+          "botulism",
+          "botulinum",
+          "anaerobic",
+          "low acid",
+          "low-acid",
+          "garlic in oil",
+          "herbs in oil",
+          "infused oil",
+          "oil infusion",
+          "vacuum sealed garlic",
+          "sealed at room temp",
+          "room temp sealed",
+          "room temperature sealed",
+          "canned without pressure",
+          "water bath low acid",
+          "canned meat in water bath",
+          "canned beans in water bath"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.safety.botulism_risk"
+        },
+        { "action": "emitHintTag", "tag": "safety-critical" },
+        {
+          "action": "addWarning",
+          "warning": "Safety-critical keywords detected. Low-acid anaerobic storage and incorrect canning methods can be dangerous. Route to strict safety guidance and validated processes."
+        }
+      ]
+    },
+
+    {
+      "id": "ph_acidify_terms",
+      "priority": 42,
+      "when": {
+        "any": [
+          "pH",
+          "ph",
+          "ph test",
+          "pH test",
+          "ph meter",
+          "pH meter",
+          "acidify",
+          "acidified",
+          "citric acid",
+          "bottled lemon juice",
+          "lemon juice (bottled)",
+          "vinegar 5%",
+          "5% acidity",
+          "acidity"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.safety.ph_acidify"
+        },
+        { "action": "emitHintTag", "tag": "acidification" }
+      ]
+    },
+
+    {
+      "id": "water_activity_terms",
+      "priority": 30,
+      "when": {
+        "any": [
+          "water activity",
+          "aw",
+          "a_w",
+          "dry enough",
+          "brittle dry",
+          "leather dry",
+          "snap test",
+          "condition jars",
+          "condition the jars",
+          "moisture check",
+          "moisture content"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.safety.water_activity"
+        },
+        { "action": "emitHintTag", "tag": "dryness" },
+        {
+          "action": "addNote",
+          "note": "Dryness/water activity keywords detected. Common for dehydrating and long-term dry storage; conditioning helps prevent mold in dried foods."
+        }
+      ]
+    },
+
+    {
+      "id": "temp_danger_zone_terms",
+      "priority": 32,
+      "when": {
+        "any": [
+          "danger zone",
+          "40-140",
+          "40 to 140",
+          "temperature danger zone",
+          "cool quickly",
+          "rapid chill",
+          "ice bath",
+          "refrigerate within 2 hours",
+          "leave out overnight",
+          "sat out overnight",
+          "left on counter overnight"
+        ]
+      },
+      "then": [
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.safety.temp_danger_zone"
+        },
+        { "action": "emitHintTag", "tag": "temperature-safety" },
+        {
+          "action": "addWarning",
+          "warning": "Time/temperature safety keywords detected. Route to rapid-cool, refrigeration, and safe handling guidance based on food type."
+        }
+      ]
+    },
+
+    {
+      "id": "downrank_fermentation_when_preservation_vinegar_pickles",
+      "priority": 8,
+      "when": {
+        "any": [
+          "quick pickle",
+          "quick-pickle",
+          "refrigerator pickles",
+          "fridge pickles",
+          "vinegar pickles",
+          "vinegar brine",
+          "water bath pickles",
+          "canned pickles",
+          "canning pickles"
+        ]
+      },
+      "then": [
+        { "action": "emitHintTag", "tag": "not-ferment-by-default" },
+        {
+          "action": "addNote",
+          "note": "These terms usually indicate vinegar pickling/canning rather than lacto-fermentation unless explicit 'ferment' keywords are present."
+        }
+      ]
+    },
+
+    {
+      "id": "block_unsafe_waterbath_low_acid_patterns",
+      "priority": 90,
+      "when": {
+        "any": [
+          "water bath canned meat",
+          "water-bath canned meat",
+          "water bath can meat",
+          "water bath beans",
+          "water-bath beans",
+          "water bath can beans",
+          "water bath low acid",
+          "water-bath low acid",
+          "canned meat in boiling water bath",
+          "canned beans in boiling water bath"
+        ]
+      },
+      "then": [
+        {
+          "action": "blockMethodKey",
+          "methodKey": "preserve.canning.water_bath"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.canning.pressure"
+        },
+        {
+          "action": "boostMethodKey",
+          "methodKey": "preserve.safety.botulism_risk"
+        },
+        { "action": "emitHintTag", "tag": "unsafe-pattern" },
+        {
+          "action": "addWarning",
+          "warning": "Unsafe canning pattern detected: low-acid foods/meat/beans cannot be safely water-bath canned. Route to pressure-canning safety guidance."
+        }
+      ]
+    }
+  ]
+}

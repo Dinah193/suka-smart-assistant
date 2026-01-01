@@ -1,0 +1,320 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka.local/agents/prompts/reasoner-contracts/substitutions.delta.schema.json",
+  "title": "SSA Reasoner – Cooking Substitutions Delta",
+  "description": "Delta-style output schema for cooking ingredient substitutions. Used by the Reasoner to propose, refine, or deprecate substitution rules the Session engine can apply when composing cooking sessions.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "description": "Semantic version for this schema’s payload shape.",
+      "default": "1.0.0"
+    },
+    "domain": {
+      "type": "string",
+      "const": "cooking",
+      "description": "Domain for which these substitutions apply. Fixed to 'cooking' for this schema."
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when this substitutions delta was generated."
+    },
+    "requestId": {
+      "type": "string",
+      "description": "Optional ID that ties this delta back to a Reasoner request."
+    },
+    "householdId": {
+      "type": "string",
+      "description": "Optional household or profile identifier this delta is scoped to."
+    },
+    "locale": {
+      "type": "string",
+      "description": "BCP-47 locale in which ingredient names and notes are expressed, e.g. 'en-US'.",
+      "default": "en-US"
+    },
+    "substitutions": {
+      "type": "array",
+      "description": "List of individual substitution rules to add or modify.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable identifier for this substitution rule. May reference an existing rule for updates."
+          },
+          "status": {
+            "type": "string",
+            "description": "Whether this substitution is newly proposed, already accepted, or deprecated.",
+            "enum": [
+              "proposed",
+              "accepted",
+              "deprecated"
+            ],
+            "default": "proposed"
+          },
+          "operation": {
+            "type": "string",
+            "description": "How this delta should be applied to the substitutions knowledge base.",
+            "enum": [
+              "upsert",
+              "remove"
+            ],
+            "default": "upsert"
+          },
+          "baseIngredient": {
+            "type": "object",
+            "description": "Ingredient being substituted.",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Optional canonical id for the base ingredient (if available from inventory/recipe DB)."
+              },
+              "name": {
+                "type": "string",
+                "description": "Human-facing name of the base ingredient, e.g. 'buttermilk'."
+              },
+              "category": {
+                "type": "string",
+                "description": "High-level category, e.g. 'dairy', 'fat', 'sweetener', 'spice'."
+              },
+              "tags": {
+                "type": "array",
+                "description": "Free-form tags for matching and clustering, e.g. ['dairy', 'acidic', 'liquid'].",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "name"
+            ]
+          },
+          "substituteIngredient": {
+            "type": "object",
+            "description": "Ingredient used as a substitute.",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Optional canonical id for the substitute ingredient."
+              },
+              "name": {
+                "type": "string",
+                "description": "Human-facing name of the substitute ingredient, e.g. 'whole milk + vinegar'."
+              },
+              "category": {
+                "type": "string",
+                "description": "High-level category, e.g. 'dairy', 'fat', 'sweetener', 'spice'."
+              },
+              "tags": {
+                "type": "array",
+                "description": "Free-form tags for matching and clustering, e.g. ['dairy', 'acidic', 'liquid'].",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "name"
+            ]
+          },
+          "ratio": {
+            "type": "number",
+            "description": "Multiplicative ratio for quantity conversion: substituteQuantity = baseQuantity * ratio. Use 1.0 for 1:1 substitutions.",
+            "minimum": 0
+          },
+          "unitHint": {
+            "type": "string",
+            "description": "Optional unit hint if the ratio is defined for specific units (e.g. 'cup', 'tablespoon', 'gram')."
+          },
+          "confidence": {
+            "type": "number",
+            "description": "0–1 numeric confidence score representing how safe/standard this substitution is.",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "strength": {
+            "type": "string",
+            "description": "Qualitative strength of the match.",
+            "enum": [
+              "strong",
+              "medium",
+              "weak"
+            ],
+            "default": "medium"
+          },
+          "origin": {
+            "type": "object",
+            "description": "Where this substitution knowledge came from.",
+            "additionalProperties": false,
+            "properties": {
+              "sourceType": {
+                "type": "string",
+                "enum": [
+                  "llm",
+                  "rule",
+                  "import",
+                  "user",
+                  "system"
+                ],
+                "description": "Type of source that produced this substitution."
+              },
+              "ref": {
+                "type": "string",
+                "description": "Optional reference id (e.g. recipe id, import id, user id, rule id)."
+              },
+              "notes": {
+                "type": "string",
+                "description": "Optional free-form notes about provenance."
+              }
+            }
+          },
+          "contexts": {
+            "type": "object",
+            "description": "Contextual constraints where this substitution is recommended or allowed.",
+            "additionalProperties": false,
+            "properties": {
+              "dietary": {
+                "type": "array",
+                "description": "Dietary patterns for which the substitution is appropriate.",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "vegan",
+                    "vegetarian",
+                    "dairy-free",
+                    "gluten-free",
+                    "nut-free",
+                    "egg-free",
+                    "pescetarian",
+                    "low-sodium",
+                    "low-sugar",
+                    "torah-clean"
+                  ]
+                }
+              },
+              "allergyRisk": {
+                "type": "object",
+                "description": "Allergy risk information for this substitution.",
+                "additionalProperties": false,
+                "properties": {
+                  "introducesNewAllergen": {
+                    "type": "boolean",
+                    "description": "Whether this substitute introduces an allergen that the original ingredient did not have."
+                  },
+                  "notes": {
+                    "type": "string",
+                    "description": "Free-form explanation of allergy risks, if any."
+                  }
+                }
+              },
+              "flavorProfile": {
+                "type": "array",
+                "description": "Flavor profile tags relevant to the substitution, e.g. ['smoky', 'sweet', 'savory'].",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "textureImpact": {
+                "type": "string",
+                "description": "Summary of how the substitution will impact texture.",
+                "enum": [
+                  "none",
+                  "softer",
+                  "firmer",
+                  "creamier",
+                  "crispier",
+                  "unknown"
+                ],
+                "default": "unknown"
+              },
+              "equipmentConstraints": {
+                "type": "array",
+                "description": "Equipment assumptions for this substitution to work as intended, e.g. 'stand-mixer', 'oven', 'pressure-cooker'.",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "methodConstraints": {
+                "type": "array",
+                "description": "Cooking methods where this substitution is valid, e.g. ['bake', 'saute', 'braise'].",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "recommendedAdjustments": {
+            "type": "object",
+            "description": "Optional recommendations for adjusting the recipe/session steps when this substitution is applied.",
+            "additionalProperties": false,
+            "properties": {
+              "timeSecDelta": {
+                "type": "number",
+                "description": "Suggested change to cook time in seconds for affected steps (can be negative)."
+              },
+              "tempFDiff": {
+                "type": "number",
+                "description": "Suggested change in temperature (°F) when using this substitution (can be negative)."
+              },
+              "notes": {
+                "type": "string",
+                "description": "Human-readable adjustment notes to surface in the SessionRunner (e.g. 'Check earlier for doneness; sugar substitutes can brown faster.')."
+              }
+            }
+          },
+          "guardImplications": {
+            "type": "object",
+            "description": "Hints about how this substitution interacts with Session guards (inventory, Sabbath, quiet hours, etc.).",
+            "additionalProperties": false,
+            "properties": {
+              "affectsInventory": {
+                "type": "boolean",
+                "description": "True if using this substitution can resolve an inventory blocker (e.g. missing original ingredient)."
+              },
+              "canLowerNoise": {
+                "type": "boolean",
+                "description": "True if this substitution tends to reduce noisy equipment usage (helpful for quiet hours)."
+              },
+              "torahRelevant": {
+                "type": "boolean",
+                "description": "True if this substitution helps align with Torah food-cleanliness or feast-day constraints."
+              }
+            }
+          },
+          "notes": {
+            "type": "string",
+            "description": "User-facing description of the substitution, including caveats and best-use cases."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when this substitution rule was first created."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when this substitution rule was last updated."
+          }
+        },
+        "required": [
+          "id",
+          "baseIngredient",
+          "substituteIngredient",
+          "operation"
+        ]
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "domain",
+    "generatedAt",
+    "substitutions"
+  ]
+}

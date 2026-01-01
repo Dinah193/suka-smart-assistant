@@ -1,0 +1,69 @@
+{
+  "meta": {
+    "id": "catalog.planning.textiles.index",
+    "domain": "textiles",
+    "kind": "index",
+    "title": "Textiles Planning Patterns",
+    "version": "1.0.0",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial textile workflows: capsule mending, build wardrobe basics, fiber-to-fabric, dye day, sewing batch."
+      }
+    ]
+  },
+  "patterns": [
+    {
+      "id": "pat.textiles.capsule_mending_cycle",
+      "path": "./patterns/capsule_mending_cycle.json",
+      "tags": [
+        "time:60-180",
+        "difficulty:low",
+        "mode:repair"
+      ]
+    },
+    {
+      "id": "pat.textiles.wardrobe_basics_builder",
+      "path": "./patterns/wardrobe_basics_builder.json",
+      "tags": [
+        "time:90-240",
+        "difficulty:medium",
+        "mode:build"
+      ]
+    },
+    {
+      "id": "pat.textiles.fiber_to_fabric_pipeline",
+      "path": "./patterns/fiber_to_fabric_pipeline.json",
+      "tags": [
+        "time:full_day",
+        "difficulty:high",
+        "mode:pipeline"
+      ]
+    },
+    {
+      "id": "pat.textiles.dye_day_natural",
+      "path": "./patterns/dye_day_natural.json",
+      "tags": [
+        "time:half_day",
+        "difficulty:medium",
+        "mode:dye"
+      ]
+    },
+    {
+      "id": "pat.textiles.sewing_batch_session",
+      "path": "./patterns/sewing_batch_session.json",
+      "tags": [
+        "time:90-240",
+        "difficulty:medium",
+        "mode:batch"
+      ]
+    }
+  ],
+  "ui": {
+    "defaultFilters": [
+      "time",
+      "difficulty",
+      "mode"
+    ]
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "id": "workflow.us.midwest_homestead",
+  "domain": "workflows",
+  "kind": "workflow_overlay",
+  "title": "Midwest Homestead Rhythm (USA)",
+  "tags": [
+    "region:usa",
+    "region:midwest",
+    "workflow:seasonal",
+    "values:thrift",
+    "values:buffering"
+  ],
+  "description": "A thrift-forward rhythm emphasizing winter buffers, pantry rotation, and batch days aligned to seasons.",
+  "optIn": true,
+  "editable": true,
+  "valuePriorities": [
+    "thrift",
+    "buffer_stock",
+    "waste_reduction"
+  ],
+  "defaults": {
+    "preferredStaples": [
+      "staple:grain",
+      "staple:beans",
+      "staple:root_veg",
+      "staple:preserved_meat_optional"
+    ],
+    "mealRhythm": [
+      "breakfast:hot",
+      "dinner:one_pot_optional",
+      "leftovers:planned"
+    ],
+    "preservationEmphasis": [
+      "freezing",
+      "canning_optional",
+      "drying_optional",
+      "fermentation_optional"
+    ],
+    "roleDefaults": {
+      "optInRoles": [
+        "planner",
+        "processor",
+        "packer"
+      ],
+      "roleNamesEditable": true
+    },
+    "valuePriorities": [
+      "thrift",
+      "buffer_stock",
+      "waste_reduction"
+    ]
+  },
+  "ordering": {
+    "planningOrder": [
+      "inventory_snapshot",
+      "meal_plan",
+      "storehouse_restock",
+      "preservation_follow_on"
+    ]
+  },
+  "naming": {
+    "sessionPrefixes": {
+      "preservation": "Preserve",
+      "storehouse": "Storehouse",
+      "textiles": "Mend/Make",
+      "animals": "Animal Care"
+    }
+  },
+  "constraints": {
+    "defaults": [
+      "constraint:quiet_hours"
+    ],
+    "seasonBias": {
+      "season:winter": [
+        "prefer:buffer_build",
+        "prefer:rotation"
+      ]
+    }
+  },
+  "uiOverlays": {
+    "form": {
+      "defaults": {
+        "bufferWeeks": 8,
+        "feedBufferWeeks": 6
+      }
+    }
+  },
+  "preferredDefaultPatterns": {
+    "meals": [
+      "pat.meals.weekly_batch",
+      "pat.meals.preservation_first"
+    ],
+    "storehouse": [
+      "pat.storehouse.winter_reserve",
+      "pat.storehouse.monthly_cycle_count"
+    ],
+    "preservation": [
+      "pat.preservation.batch_day",
+      "pat.preservation.shelf_stable_buffer"
+    ]
+  },
+  "notes": [
+    "This overlay provides defaults and ordering, not mandatory rules.",
+    "All role defaults are optional and user-editable."
+  ]
+}

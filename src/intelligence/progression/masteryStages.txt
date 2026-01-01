@@ -1,0 +1,538 @@
+===============================================================================
+MASTERY STAGES – DESIGN SPEC
+File: src/intelligence/progression/masteryStages.txt
+Role: Contract for defining household mastery stages across SSA’s web of meaning
+===============================================================================
+
+0. CONCEPTUAL PURPOSE
+---------------------
+The masteryStages spec defines how SSA understands **deep household mastery**:
+
+- Not just “skills you can perform,” but:
+  - rhythms you can keep in all seasons,
+  - yields you can reliably bring into the storehouse,
+  - feasts and mutual-aid you can sustain without draining future provision,
+  - the ability to shepherd others into those rhythms.
+
+It answers:
+
+- What are the **major mastery stages** of a householder?
+- How do these stages manifest across cooking, storehouse, garden, animals,
+  preservation, cleaning, textiles, maintenance, feasts, and enterprise?
+- How does SSA recognize and speak about those stages without gamifying?
+
+This is NOT a badge ladder and NOT “leveling up for points.”
+It is a **covenant-style posture map** for household stewardship:
+
+- Early stages focus on personal rhythms (self + immediate household).
+- Middle stages focus on deeper yields and stable storehouse provision.
+- Later stages focus on mutual-aid, mentoring, and enterprise that does not
+  starve the home.
+
+It must:
+
+- Work in TOOL MODE as a “Mastery Explorer / Reflection” view.
+- Plug into STEWARDSHIP MODE as a quiet posture engine that listens
+  to cycles, yields, and feasts.
+- Emit eventBus events when mastery posture is inferred or updated.
+- Expose TODO hooks for seasonal logic, cycles engine, dependencies, and insights.
+
+
+1. STRUCTURE – CONFIG SHAPE & DOMAINS
+-------------------------------------
+Meta-domain:
+- progression / mastery
+
+Connected domains:
+- All core + advanced domains:
+  - cooking, storehouse, garden, animals, preservation, cleaning, textiles,
+    home maintenance, feasts, enterprise, plus cycles engine and dependency map.
+
+Conceptual config shape (JSON-like):
+
+masteryStagesConfig = {
+  version: "1.0.0",
+  lastUpdatedAt: string,
+  modeHint?: "TOOL" | "STEWARDSHIP",
+
+  // Global mastery stage vocabulary
+  stages: MasteryStageDefinition[],
+
+  // Domain-specific manifestations of each stage
+  domainMasteryProfiles: DomainMasteryProfile[],
+
+  // Cross-domain mastery milestones
+  milestones: MasteryMilestoneDefinition[],
+
+  // Signaling preferences
+  signals: {
+    sendMasteryPostureUpdates: boolean,
+    sendMilestoneInsights: boolean,
+    sendStewardshipReflections: boolean,
+  },
+
+  metadata?: {
+    householdName?: string,
+    regionProfile?: string,
+  },
+};
+
+
+2. PROPS – DETAILED COMPONENTS
+------------------------------
+
+2.1 MasteryStageDefinition
+Defines global “stages of household mastery” that span all domains.
+
+MasteryStageDefinition = {
+  id: string,                        // e.g. "awakening", "keeper-of-rhythms",
+                                     //      "storehouse-builder",
+                                     //      "feast-steward", "village-mother",
+                                     //      "village-father"
+
+  label: string,                     // short name used in UI
+  order: number,                     // ordinal rank, low → high
+
+  description?: string,              // meaning of this stage in household life
+
+  // Posture emphasis for this stage
+  postureProfile?: {
+    rhythmScope:
+      "self" | "household-core" | "extended-household" |
+      "mutual-aid-circle" | "village",
+    yieldDepth:
+      "emerging" | "steady" | "deep" | "abundant",
+    storehouseEmphasis?:
+      "learning-storage" | "maintaining-core" |
+      "building-depth" | "overseeing-shared-storehouse",
+    feastEmphasis?:
+      "learning-feasts" | "hosting-house-feasts" |
+      "hosting-community-feasts",
+  },
+
+  // Reflection prompts for TOOL MODE
+  reflectionPrompts?: string[],      // e.g. "Which rhythms are steady across seasons?"
+
+  // TODO[seasonal-logic]:
+  // - Allow seasonalIntelligence to add nuance to stage descriptions per season
+  //   (e.g., how this stage expresses itself differently in planting vs lean season).
+
+  notes?: string,
+};
+
+
+2.2 DomainMasteryProfile
+Describes how each global mastery stage shows up in a specific domain.
+
+DomainMasteryProfile = {
+  id: string,                        // e.g. "cooking@keeper-of-rhythms",
+                                     //      "storehouse@storehouse-builder",
+                                     //      "feasts@feast-steward"
+
+  domain:
+    "cooking" | "storehouse" | "garden" | "animals" |
+    "preservation" | "cleaning" | "textiles" |
+    "homeMaintenance" | "feasts" | "enterprise",
+
+  masteryStageId: string,            // from MasteryStageDefinition.id
+  label?: string,                    // optional human-facing label
+  orderHint?: number,                // local ordering within domain, if needed
+
+  // How mastery manifests here in rhythms and yields
+  expression: {
+    rhythmsDescription?: string,     // e.g. "Can hold a weekly batch rhythm..."
+    yieldsDescription?: string,      // e.g. "Keeps lean-season grains and beans ready..."
+
+    // Examples for narrative usage and UI
+    exampleRhythms?: string[],       // e.g. ["steady breakfast rhythm", "weekly stew"]
+    exampleYields?: string[],        // e.g. ["pressure canned broth", "frozen greens"]
+  },
+
+  // Evidence hints for STEWARDSHIP MODE:
+  // What the progression engine will look at when inferring mastery posture.
+  evidenceHints?: {
+    requiredSeasonsObserved?: number,     // seasons where rhythm was observed
+    minimumCyclesCompleted?: number,      // e.g. # of feast cycles, preservation cycles, etc.
+    yieldIndicators?: string[],           // e.g. ["storehouse.jars.perSeason", "garden.pounds"]
+    referencedEvents?: string[],          // e.g. ["session.cooking.completed", "feast.completed"]
+  },
+
+  // Dependencies: which domain skill paths / tiers are usually present
+  // when this mastery expression is stable.
+  dependencies?: {
+    requiredSkillPaths?: {
+      [skillPathId: string]: string;      // tierId from skillProgression.map
+    },
+  },
+
+  // TODO[dependencies]:
+  // - Integrate with dependencyMapConfig to align domain mastery with
+  //   structural dependencies (e.g., advanced feast mastery relies on
+  //   storehouse and cooking mastery).
+
+  notes?: string,
+};
+
+
+2.3 MasteryMilestoneDefinition
+Represents meaningful cross-domain milestones (e.g., “First winter fully
+supported by own storehouse,” “First community feast supported by shared provision”).
+
+MasteryMilestoneDefinition = {
+  id: string,                        // e.g. "winter-storehouse-secure",
+                                     //      "first-community-feast",
+                                     //      "mutual-aid-cycle-established"
+
+  label: string,
+  description?: string,
+
+  // Approximate mastery stage context
+  stageHint?: {
+    minimumMasteryStageId?: string,  // approximate "floor" stage
+    idealMasteryStageId?: string,    // where this milestone is common
+  },
+
+  // Domain mastery profiles typically involved in this milestone
+  requiredDomainProfiles?: {
+    [domainId: string]: string[];    // array of DomainMasteryProfile.id
+  },
+
+  // Observable data markers
+  evidenceHints?: {
+    requiredEvents?: string[],       // event types (e.g. "storehouse.winterReady")
+    minimumRepetitions?: number,     // # of cycles/years/feasts
+    yieldThresholds?: {
+      storehouseSecurityScore?: number,  // from storehouseInsights
+      feastReadinessScore?: number,      // from feastInsights
+    },
+  },
+
+  // Narrative used in insights / dashboards
+  narratives?: {
+    summary?: string,                // "This winter, the storehouse carried the household."
+    reflection?: string,             // "Note the rhythms that made this possible..."
+  },
+
+  // TODO[insights]:
+  // - Surface these milestones via combined insights:
+  //   “Your cycles and yields show that you’ve reached the ‘winter-storehouse-secure’
+  //    milestone. This reflects a deepened household mastery posture.”
+
+  notes?: string,
+};
+
+
+2.4 MasteryPostureState (runtime shape)
+Not part of the config itself, but the **shape of inferred mastery state**.
+
+MasteryPostureState = {
+  currentStageId: string,            // global mastery posture
+  confidence: number,                // 0..1, based on evidence
+  lastEvaluatedAt: string,
+
+  // Domain-level expressions
+  domains: {
+    [domain: string]: {
+      profileId?: string,            // DomainMasteryProfile.id
+      confidence: number,
+      lastEvaluatedAt: string,
+    },
+  },
+
+  milestonesAchieved?: string[],     // MasteryMilestoneDefinition.id[]
+  history?: MasteryPostureEvent[],
+};
+
+MasteryPostureEvent = {
+  id: string,
+  at: string,
+  kind: "stage-change" | "milestone-achieved" | "re-alignment",
+  fromStageId?: string,
+  toStageId?: string,
+  milestoneId?: string,
+  evidenceSummary?: string,
+};
+
+
+3. DATA FLOW – TOOL MODE VS STEWARDSHIP MODE
+--------------------------------------------
+
+3.1 TOOL MODE – “Mastery Explorer / Reflection”
+In TOOL MODE, a standalone experience can:
+
+1) Load:
+   - masteryStagesConfig (static),
+   - optional manually defined MasteryPostureState.
+
+2) Display:
+   - MasteryStageDefinition stages as a ladder of household postures
+     (awakening → keeper-of-rhythms → storehouse-builder → feast-steward → village-level).
+   - DomainMasteryProfile summaries to show what mastery looks like in each domain.
+   - MasteryMilestoneDefinition milestones as waypoints.
+
+3) Let the householder:
+   - Manually set where they sense they are in the mastery ladder.
+   - Reflect on rhythms and yields for each domain.
+   - Identify milestones they have already crossed.
+   - Choose a gentle, season-appropriate direction for growth
+     (e.g. “For this planting season, strengthen garden + preservation rhythms
+      as a path toward ‘storehouse-builder’.”)
+
+4) Emit events:
+   - On manual posture changes and reflections.
+
+Typical TOOL MODE events:
+
+- "mastery.config.loaded"
+- "mastery.posture.selfAssessment.updated"
+- "mastery.milestone.selfMarked"
+
+
+3.2 STEWARDSHIP MODE – “Quiet Mastery Engine”
+In STEWARDSHIP MODE, SSA quietly **infers** mastery posture and milestones.
+
+Flow:
+
+1) App boot:
+   - Dexie loads:
+     - masteryStagesConfig,
+     - skillProgressionMapConfig,
+     - householdCycles.engine config,
+     - dependencyMapConfig.
+   - Mastery engine initializes MasteryPostureState from Dexie or default.
+
+2) Listen to events:
+   - skill progression events:
+     - "progression.skill.updated",
+   - domain rhythm and yield events:
+     - "storehouse.insights.generated",
+     - "garden.insights.generated",
+     - "cooking.insights.generated",
+     - "feast.insights.generated",
+     - "season.rules.season.shifted",
+   - yield + provision events:
+     - "storehouse.winterReady", "garden.harvest.logged",
+       "preservation.session.completed", "feast.completed".
+
+3) Aggregate evidence:
+   - For each domain, compute a mastery confidence score relative to
+     DomainMasteryProfile.evidenceHints.
+   - For global stage, consider:
+     - how many domains show steady rhythms,
+     - depth of storehouse yield,
+     - frequency and quality of feasts,
+     - signs of mutual-aid and enterprise that do not starve the storehouse.
+
+4) Evaluate stage and milestones:
+   - Compare aggregated evidence to MasteryStageDefinition postureProfile
+     and MasteryMilestoneDefinition evidenceHints.
+   - Suggest potential stage movement when confidence crosses thresholds.
+   - Recognize milestones when conditions are met.
+
+5) Update MasteryPostureState:
+   - Log MasteryPostureEvent entries.
+   - Persist state in Dexie.
+
+6) Emit mastery events:
+   - Posture updates,
+   - Milestone achievements,
+   - Alignment or misalignment messages.
+
+7) Downstream effects:
+   - Skill progression engine:
+     - May adjust recommended focus (e.g. more mutual-aid at higher stages).
+   - householdCycles.engine:
+     - May propose fewer but richer rhythms at higher stages
+       (less fuss, more essence).
+   - Insights engines:
+     - May change tone:
+       - early: “gentle learning suggestions”,
+       - later: “stewardship oversight and mentoring suggestions”.
+   - SessionRunner:
+     - May surface “teach others” or “host” sessions at mentor stages.
+
+
+4. EVENT TRIGGERS – EVENTBUS CONTRACT
+-------------------------------------
+All events follow SSA’s eventBus shape:
+
+  { type, ts, source, data }
+
+Where:
+- type: string
+- ts: ISO 8601 timestamp
+- source: e.g. "mastery.engine" or "mastery.config"
+- data: structured payload
+
+Recommended event types:
+
+1) Config lifecycle
+   - "mastery.config.loaded"
+     data: {
+       version,
+       stageCount,
+       domainProfileCount,
+       milestoneCount,
+     }
+
+   - "mastery.config.updated"
+     data: {
+       version,
+       changedBy,                    // "householder" | "system" | "migration"
+       changesSummary,               // e.g. { stagesAdded, profilesAdjusted }
+     }
+
+
+2) Self-assessment (TOOL MODE)
+   - "mastery.posture.selfAssessment.updated"
+     data: {
+       stageId,
+       source: "manual",
+       notes?: string,
+     }
+
+   - "mastery.milestone.selfMarked"
+     data: {
+       milestoneId,
+       notes?: string,
+     }
+
+
+3) Inferred posture & milestones (STEWARDSHIP MODE)
+   - "mastery.posture.inferred"
+     // Proposed stage change before confirmation (if UI confirmation needed)
+     data: {
+       fromStageId?: string,
+       toStageId: string,
+       confidence: number,
+       evidenceSummary?: string,
+     }
+
+   - "mastery.posture.updated"
+     // Stage change committed
+     data: {
+       fromStageId?: string,
+       toStageId: string,
+       reason: "inferred" | "manual" | "system",
+       runId?: string,
+     }
+
+   - "mastery.milestone.achieved"
+     data: {
+       milestoneId,
+       stageContextId?: string,      // currentStageId
+       runId?: string,
+       evidenceSummary?: string,
+     }
+
+
+4) Stewardship reflections & readiness
+   - "mastery.stewardship.reflection"
+     // High-level, human-friendly insight about posture
+     data: {
+       stageId,
+       seasonId?: string,
+       message,
+     }
+
+   - "mastery.stewardship.readiness"
+     // When mastery posture suggests a new kind of rhythm/yield is appropriate
+     data: {
+       stageId,
+       recommendedFocus:
+         "deepen-storehouse" |
+         "strengthen-garden" |
+         "grow-preservation" |
+         "host-feast" |
+         "extend-mutual-aid" |
+         "explore-enterprise",
+       suggestedSeasonId?: string,
+       notes?: string,
+     }
+
+
+5) Integration hooks for cycles / dependencies / insights
+   - "mastery.cycleAlignment"
+     // How mastery stages align with cycles engine
+     data: {
+       stageId,
+       seasonId,
+       alignmentScore: number,
+       notes?: string,
+     }
+
+   - "mastery.dependencyImpact"
+     // When a mastery change significantly alters dependency patterns
+     data: {
+       stageId,
+       impactedPatterns?: string[],  // from dependencyMapConfig
+     }
+
+   - "mastery.insight"
+     // A synthesized insight that other dashboards can show
+     data: {
+       insightId,
+       stageId,
+       kind: "milestone" | "alignment" | "opportunity",
+       message,
+       seasonId?: string,
+     }
+
+
+5. CONCEPTUAL PURPOSE – HOW MASTERY STAGES FIT THE WEB OF MEANING
+------------------------------------------------------------------
+Mastery stages are the **long arc** of the householder’s journey with SSA.
+
+They allow SSA to:
+
+- See beyond individual tools and sessions:
+  - Mastery is about **cycles kept**, **storehouse sustained**, **feasts honored**,
+    and **others uplifted**, not about how many times a single view was opened.
+
+- Respect **seasons and storehouse posture**:
+  - Early mastery: learning to keep simple daily and weekly rhythms.
+  - Middle mastery: building and managing a storehouse across seasons.
+  - Later mastery: orchestrating feasts, mutual-aid, and enterprise
+    from a place of abundance rather than scarcity.
+
+- Integrate **skillProgression.map** into a bigger story:
+  - Skill tiers express competence per domain.
+  - Mastery stages express the **woven whole** across domains:
+    cooking + storehouse + garden + preservation + feasts + mutual-aid.
+
+- Help SSA choose **how to speak**:
+  - Early stages:
+    - “Here is a gentle next rhythm for this season.”
+  - Middle stages:
+    - “Here is how to deepen your storehouse yield or feast rhythm.”
+  - Later stages:
+    - “Here is how to strengthen your mutual-aid circle or mentor others.”
+
+- Support TOOL MODE and STEWARDSHIP MODE:
+  - TOOL MODE:
+    - Allows frank, reflective self-description of where the householder is.
+  - STEWARDSHIP MODE:
+    - Quietly tracks evidence over seasons and returns narrative insights.
+
+Explicit TODO HOOKS:
+- TODO[seasonal-logic]:
+  - Bind mastery reflections and recommendations to seasonRulesConfig so
+    suggestions always harmonize with current and upcoming seasons.
+
+- TODO[cycles-engine]:
+  - Let householdCycles.engine consume MasteryPostureState to adjust
+    overall rhythm load and complexity per season (avoid overburdening).
+
+- TODO[dependencies]:
+  - Integrate with dependencyMapConfig so mastery posture acknowledges
+    which domains and rhythms are central to the householder’s current web.
+
+- TODO[insights]:
+  - Fuse mastery stages with storehouseInsights, gardenInsights, cookingInsights,
+    and feastInsights to craft rich, story-like stewardship insights:
+    “Across the last three seasons, your rhythms and yields look like a
+     ‘storehouse-builder’ stage. This is a season to protect that depth and
+     gently extend hospitality or mutual-aid.”
+
+END OF SPEC
+===============================================================================

@@ -1,0 +1,296 @@
+{
+  "id": "caribbean-light-pack",
+  "title": "Caribbean Light: Bright, Lean & Weeknight-Quick",
+  "description": "A lighter Caribbean set with grilled fish, citrus-chili shrimp, lean chicken, legumes, and garden-fresh sides. Pantry-first, no-pork, and rhythm-ready for your weekly flavor cycles.",
+  "tags": [
+    "collection",
+    "palette:caribbean",
+    "diet:no-pork",
+    "speed:weeknight",
+    "prep:pantry-first",
+    "light:lean"
+  ],
+  "flavor_profile": [
+    "Caribbean",
+    "Citrus-Chili",
+    "Garden-Fresh",
+    "Herb-Garlic",
+    "Pantry-First"
+  ],
+  "meta": {
+    "curation_notes": "Favor grill/roast/quick-skillet; keep sauces bright and portions sensible. Lean proteins, legumes, hearty salads.",
+    "serving_plan": "Pair mains with coconut-lime rice, quinoa peas, mango slaw, or greens. Use craft bases to cut weeknight time.",
+    "storage_policy": "2–3 days fridge for cooked items; 2–3 months freezer for proteins and rice; fresh salsas best within 3 days.",
+    "craft_opportunities": [
+      "Green Seasoning base",
+      "Pineapple–Habanero salsa",
+      "Pickled red onions"
+    ]
+  },
+  "items": [
+    {
+      "id": "grilled-citrus-chili-snapper",
+      "title": "Grilled Citrus–Chili Snapper",
+      "description": "Zesty lime/orange and mild chili on lean snapper; serve with mango slaw.",
+      "flavor_profile": ["Caribbean", "Citrus-Chili", "Garden-Fresh"],
+      "tags": ["flavor:Caribbean", "protein:fish", "grill", "time:20-min", "light:lean"],
+      "meta": { "yield": "4 servings", "storage": "1–2 days fridge", "reheat": "Skillet low heat 2–3 min" },
+      "ingredients": [
+        "4 snapper fillets (or similar white fish)",
+        "Zest + juice of 1 lime",
+        "Zest + juice of 1/2 orange",
+        "1 tsp mild chili flakes",
+        "1 tbsp oil",
+        "Salt, pepper"
+      ],
+      "steps": [
+        "Pat fish dry. Mix citrus, chili, oil, salt, pepper; brush on fish.",
+        "Grill or pan-sear 2–3 min/side until flaky."
+      ],
+      "images": []
+    },
+    {
+      "id": "citrus-chili-shrimp-skewers",
+      "title": "Citrus–Chili Shrimp Skewers",
+      "description": "Fast grill or broil; great over greens or coconut-lime rice.",
+      "flavor_profile": ["Citrus-Chili", "Caribbean"],
+      "tags": ["flavor:Citrus-Chili", "protein:shrimp", "grill", "broil", "time:15-min"],
+      "meta": { "yield": "4 servings", "storage": "1–2 days fridge", "reheat": "Brief skillet rewarm" },
+      "ingredients": [
+        "1 lb shrimp, peeled",
+        "1 tbsp oil",
+        "1 tsp chili flakes",
+        "Zest + juice of 1 lime",
+        "Salt"
+      ],
+      "steps": [
+        "Toss shrimp with oil, chili, lime, salt; skewer.",
+        "Grill/broil 2–3 min/side until just pink."
+      ],
+      "images": []
+    },
+    {
+      "id": "jerk-chicken-breast-lean",
+      "title": "Lean Jerk Chicken (Breast or Tenderloins)",
+      "description": "All the jerk flavor, trimmed calories. Pair with mango slaw or quinoa peas.",
+      "flavor_profile": ["Caribbean", "Herb-Garlic"],
+      "tags": ["flavor:Caribbean", "protein:chicken", "grill", "time:25-min", "light:lean"],
+      "meta": { "yield": "4 servings", "storage": "3 days fridge / 2 months freezer", "reheat": "Skillet with splash of broth" },
+      "ingredients": [
+        "1.5 lb chicken breast or tenders",
+        "2 tbsp jerk seasoning (or paste thinned with oil)",
+        "1 tbsp oil",
+        "Salt"
+      ],
+      "steps": [
+        "Rub chicken with jerk seasoning, oil, and salt.",
+        "Grill or roast at 425°F / 220°C for 12–18 min to 165°F; rest and slice."
+      ],
+      "images": []
+    },
+    {
+      "id": "island-chickpea-curry-light",
+      "title": "Island Chickpea Curry (Light)",
+      "description": "A quick coconut-lite curry with peppers and greens.",
+      "flavor_profile": ["Caribbean", "Pantry-First", "Garden-Fresh"],
+      "tags": ["flavor:Caribbean", "legume:chickpea", "stew", "time:25-min", "veg:greens"],
+      "meta": { "yield": "4 servings", "storage": "3 days fridge / 2 months freezer", "reheat": "Simmer 5 min, thin with water if needed" },
+      "ingredients": [
+        "1 tbsp oil",
+        "1 small onion, diced",
+        "2 cloves garlic, minced",
+        "1 bell pepper, sliced",
+        "2 tsp curry powder (Caribbean style)",
+        "1 can (14 oz) coconut milk (light)",
+        "1 can chickpeas, drained",
+        "2 cups spinach or callaloo",
+        "Salt, chili to taste"
+      ],
+      "steps": [
+        "Sauté onion/garlic/pepper in oil 3–4 min.",
+        "Add curry; toast 30 sec. Stir in coconut milk and chickpeas; simmer 8–10 min.",
+        "Fold in greens to wilt; season."
+      ],
+      "images": []
+    },
+    {
+      "id": "quinoa-peas-coconut-lime",
+      "title": "Quinoa “Rice & Peas” (Coconut–Lime)",
+      "description": "A lighter take on rice & peas with protein-rich quinoa.",
+      "flavor_profile": ["Caribbean", "Garden-Fresh"],
+      "tags": ["flavor:Caribbean", "grain:quinoa", "legume:beans", "time:25-min", "light:lean"],
+      "meta": { "yield": "6 cups", "storage": "4 days fridge / 2 months freezer", "reheat": "Microwave with splash of water" },
+      "ingredients": [
+        "1.5 cups quinoa, rinsed",
+        "1 can (14 oz) light coconut milk",
+        "1.25 cups water",
+        "1 cup cooked red beans or kidney beans",
+        "1 sprig thyme (or 1/2 tsp dried)",
+        "Zest of 1 lime",
+        "Salt"
+      ],
+      "steps": [
+        "Combine quinoa, coconut milk, water, beans, thyme, salt; simmer 15 min.",
+        "Rest 5 min; fluff with lime zest."
+      ],
+      "images": []
+    },
+    {
+      "id": "mango-lime-slaw",
+      "title": "Mango–Lime Slaw",
+      "description": "Crunchy, bright slaw for fish tacos, bowls, or jerk plates.",
+      "flavor_profile": ["Caribbean", "Garden-Fresh"],
+      "tags": ["flavor:Caribbean", "side:slaw", "time:10-min", "light:lean"],
+      "meta": { "yield": "6 cups", "storage": "2–3 days fridge", "reheat": "n/a" },
+      "ingredients": [
+        "4 cups shredded cabbage",
+        "1 ripe mango, thin strips",
+        "2 green onions, sliced",
+        "Juice of 1 lime",
+        "1 tbsp oil",
+        "Salt, pinch of chili"
+      ],
+      "steps": [
+        "Toss all; season to taste. Chill 10 min."
+      ],
+      "images": []
+    },
+    {
+      "id": "pan-seared-salmon-green-seasoning",
+      "title": "Pan-Seared Salmon with Green Seasoning",
+      "description": "Quick sear with a spoon of green seasoning to finish.",
+      "flavor_profile": ["Caribbean", "Herb-Garlic"],
+      "tags": ["flavor:Caribbean", "protein:salmon", "skillet", "time:15-min", "light:lean"],
+      "meta": { "yield": "4 servings", "storage": "1–2 days fridge", "reheat": "Low skillet rewarm" },
+      "ingredients": [
+        "4 salmon portions",
+        "1 tbsp oil",
+        "2–3 tbsp green seasoning (see craft base)",
+        "Salt, pepper"
+      ],
+      "steps": [
+        "Season salmon; sear in oil 2–3 min/side.",
+        "Top with spoonful of green seasoning; rest 1 min."
+      ],
+      "images": []
+    },
+    {
+      "id": "jerk-tofu-sheet-pan",
+      "title": "Jerk Tofu Sheet Pan",
+      "description": "Crispy-edged tofu with peppers and onions; toss with lime.",
+      "flavor_profile": ["Caribbean", "Pantry-First"],
+      "tags": ["flavor:Caribbean", "protein:tofu", "sheet-pan", "time:30-min", "veg:plant-based"],
+      "meta": { "yield": "4 servings", "storage": "3 days fridge", "reheat": "Oven 375°F 6–8 min" },
+      "ingredients": [
+        "16 oz firm tofu, pressed/cubed",
+        "1 tbsp oil",
+        "1.5 tbsp jerk seasoning",
+        "1 bell pepper + 1/2 red onion, sliced",
+        "Lime wedges, salt"
+      ],
+      "steps": [
+        "Heat oven 425°F / 220°C. Toss tofu & veg with oil, jerk, salt.",
+        "Roast 20–25 min until edges crisp; finish with lime."
+      ],
+      "images": []
+    },
+    {
+      "id": "callaloo-saute-quick",
+      "title": "Quick Callaloo Sauté (or Spinach)",
+      "description": "Garlicky, tender greens with a hint of chili.",
+      "flavor_profile": ["Garden-Fresh", "Herb-Garlic"],
+      "tags": ["flavor:Garden-Fresh", "greens", "skillet", "time:10-min", "light:lean"],
+      "meta": { "yield": "4 sides", "storage": "2 days fridge", "reheat": "Skillet 1–2 min" },
+      "ingredients": [
+        "1 tbsp oil",
+        "2 cloves garlic, sliced",
+        "10 oz callaloo or spinach",
+        "Pinch chili flakes",
+        "Salt"
+      ],
+      "steps": [
+        "Sauté garlic in oil 30 sec; add greens, chili, salt.",
+        "Cook 2–4 min to tender."
+      ],
+      "images": []
+    },
+    {
+      "id": "plantain-bake-light",
+      "title": "Light Baked Plantains (No Fry)",
+      "description": "Caramelized edges in the oven; minimal oil.",
+      "flavor_profile": ["Caribbean"],
+      "tags": ["flavor:Caribbean", "veg:plantain", "bake", "time:22-min", "light:lean"],
+      "meta": { "yield": "4 sides", "storage": "2 days fridge", "reheat": "Oven 375°F 5–7 min" },
+      "ingredients": [
+        "2 ripe plantains, diagonal slices",
+        "2 tsp oil",
+        "Pinch salt"
+      ],
+      "steps": [
+        "Heat oven 425°F / 220°C; toss plantains with oil and salt.",
+        "Bake 15–18 min, flipping once, until caramelized."
+      ],
+      "images": []
+    },
+    {
+      "id": "pineapple-habanero-salsa",
+      "title": "Pineapple–Habanero Salsa (Craft Base)",
+      "description": "Sweet-heat spoon sauce for fish, shrimp, and bowls.",
+      "flavor_profile": ["Citrus-Chili", "Caribbean"],
+      "tags": ["flavor:Citrus-Chili", "craft", "salsa", "light:lean"],
+      "meta": { "yield": "2 cups", "storage": "3 days fridge", "reheat": "n/a" },
+      "ingredients": [
+        "2 cups pineapple, small dice",
+        "1/4 small red onion, minced",
+        "1/2 habanero, minced (to taste)",
+        "Juice of 1 lime",
+        "Salt"
+      ],
+      "steps": [
+        "Mix all; rest 10 min to marry. Adjust heat/salt."
+      ],
+      "images": []
+    },
+    {
+      "id": "green-seasoning-base",
+      "title": "Green Seasoning (Craft Base)",
+      "description": "Herb–garlic blend to finish grills, fish, and tofu.",
+      "flavor_profile": ["Herb-Garlic", "Caribbean"],
+      "tags": ["flavor:Herb-Garlic", "craft", "base"],
+      "meta": { "yield": "1.5 cups", "storage": "1 week fridge / 2 months freezer", "reheat": "n/a" },
+      "ingredients": [
+        "2 cups mixed herbs (culantro/cilantro/parsley)",
+        "4 cloves garlic",
+        "2 green onions",
+        "1/2 small onion",
+        "2 tbsp oil",
+        "1 tbsp lime juice",
+        "1/2 tsp salt"
+      ],
+      "steps": [
+        "Blend smooth; thin with oil/lime to taste. Freeze in cubes if desired."
+      ],
+      "images": []
+    },
+    {
+      "id": "pickled-red-onions-quick",
+      "title": "Quick Pickled Red Onions (Craft)",
+      "description": "Bright topper for bowls, tacos, and salads.",
+      "flavor_profile": ["Garden-Fresh"],
+      "tags": ["craft", "pickle", "light:lean"],
+      "meta": { "yield": "1 pint", "storage": "2 weeks fridge", "reheat": "n/a" },
+      "ingredients": [
+        "1 red onion, thinly sliced",
+        "1/2 cup vinegar (apple cider or white)",
+        "1/2 cup water",
+        "1 tsp sugar (optional)",
+        "1/2 tsp salt"
+      ],
+      "steps": [
+        "Warm vinegar, water, sugar, salt to dissolve.",
+        "Pour over onions in jar; cool and chill."
+      ],
+      "images": []
+    }
+  ]
+}

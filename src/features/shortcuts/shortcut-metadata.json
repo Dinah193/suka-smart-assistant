@@ -1,0 +1,225 @@
+{
+  "name": "Suka Smart Assistant – Shortcut Integrations",
+  "version": "1.1.0",
+  "description": "Registry of mobile/desktop/OS-level shortcuts that push imports into the unified Suka pipeline (bookmarklet ↔ PWA share target ↔ iOS/Android share ↔ desktop quick import). All entries must preserve user-owned favorites, schedules, and reverse-generation metadata, and must support household domains: cleaning, garden (plan/care/harvest), storehouse (grocery-section), meal planning, and animal (acquisition/care/butchery).",
+  "updatedAt": "2025-10-30T18:05:00-05:00",
+  "shortcuts": [
+    {
+      "id": "ios-save-to-suka",
+      "platform": "iOS",
+      "title": "Save to Suka",
+      "file": "iOS_SaveToSuka.shortcut",
+      "category": "import",
+      "description": "Share any page, social post, Pinterest board, cleaning checklist, garden/seed page, store weekly ad, or animal/butchery note to Suka. Uses /import/share-capture, preserves reverseMeta, and respects app-level auto-favorite/auto-schedule settings.",
+      "routesTo": "/import/share-capture?from=ios-shortcut",
+      "emits": [
+        "import.queue.enqueue",
+        "import.preview.open",
+        "automation.schedule.request"
+      ],
+      "supports": {
+        "saveUserFavorites": true,
+        "attachSchedule": true,
+        "reverseGeneration": true,
+        "sharedOrchestration": true,
+        "importTypes": [
+          "recipe",
+          "mealPlan",
+          "cleaningPlan",
+          "gardenPlan",
+          "gardenCare",
+          "harvestPlan",
+          "storehouseGoal",
+          "storehouseStock",
+          "animalAcquisition",
+          "animalPlan",
+          "butcherySession",
+          "inventoryUpdate",
+          "generic"
+        ]
+      },
+      "defaults": {
+        "autoSaveFavorite": false,
+        "autoSchedule": false,
+        "autoScheduleRule": "once+5min",
+        "reverseMeta": {
+          "shareTarget": "family-fund-hub",
+          "includeShare": true,
+          "format": "json"
+        }
+      }
+    },
+    {
+      "id": "ios-photo-to-suka",
+      "platform": "iOS",
+      "title": "Photo → Suka (OCR/Scan)",
+      "file": "iOS_PhotoToSuka.shortcut",
+      "category": "scan-compare-trust",
+      "description": "Send a photo/screenshot of a receipt, grocery circular, or cleaning/garden/animal note to Suka. Routed to Scan • Compare • Trust or inventoryUpdate depending on content.",
+      "routesTo": "/import/share-capture?from=ios-photo",
+      "emits": [
+        "import.queue.enqueue",
+        "import.preview.open"
+      ],
+      "supports": {
+        "saveUserFavorites": true,
+        "attachSchedule": true,
+        "reverseGeneration": true,
+        "sharedOrchestration": true,
+        "importTypes": [
+          "inventoryUpdate",
+          "storehouseStock",
+          "cleaningPlan",
+          "gardenPlan",
+          "animalPlan",
+          "generic"
+        ]
+      },
+      "defaults": {
+        "autoSaveFavorite": false,
+        "autoSchedule": false,
+        "reverseMeta": {
+          "shareTarget": "family-fund-hub",
+          "includeShare": true,
+          "format": "json"
+        }
+      }
+    },
+    {
+      "id": "android-share-to-suka",
+      "platform": "Android",
+      "title": "Share to Suka (Android)",
+      "file": "android-share-to-suka.intent.json",
+      "category": "import",
+      "description": "Android system share → Suka PWA. Uses the same /import/share-capture endpoint as bookmarklet and iOS. Should infer cleaning/garden/storehouse/animal domains from the shared text/URL.",
+      "routesTo": "/import/share-capture?from=android",
+      "emits": [
+        "import.queue.enqueue",
+        "import.preview.open"
+      ],
+      "supports": {
+        "saveUserFavorites": true,
+        "attachSchedule": true,
+        "reverseGeneration": true,
+        "sharedOrchestration": true,
+        "importTypes": [
+          "recipe",
+          "mealPlan",
+          "cleaningPlan",
+          "gardenPlan",
+          "gardenCare",
+          "harvestPlan",
+          "storehouseGoal",
+          "storehouseStock",
+          "animalAcquisition",
+          "animalPlan",
+          "butcherySession",
+          "inventoryUpdate",
+          "generic"
+        ]
+      },
+      "defaults": {
+        "autoSaveFavorite": false,
+        "autoSchedule": false,
+        "reverseMeta": {
+          "shareTarget": "family-fund-hub",
+          "includeShare": true,
+          "format": "json"
+        }
+      }
+    },
+    {
+      "id": "desktop-quick-import",
+      "platform": "Desktop",
+      "title": "Desktop Quick Import",
+      "file": "desktop-quick-import.json",
+      "category": "import",
+      "description": "Clipboard → Suka /import. Mirrors bookmarklet but triggered from OS or launcher. Good for pasting cleaning checklists, gardening notes, harvest logs, storehouse spreadsheets, and animal/butchery instructions.",
+      "routesTo": "/import?from=desktop-shortcut",
+      "emits": [
+        "import.queue.enqueue",
+        "import.preview.open"
+      ],
+      "supports": {
+        "saveUserFavorites": true,
+        "attachSchedule": true,
+        "reverseGeneration": true,
+        "sharedOrchestration": true,
+        "importTypes": [
+          "recipe",
+          "mealPlan",
+          "cleaningPlan",
+          "gardenPlan",
+          "gardenCare",
+          "harvestPlan",
+          "storehouseGoal",
+          "storehouseStock",
+          "animalAcquisition",
+          "animalPlan",
+          "butcherySession",
+          "inventoryUpdate",
+          "generic"
+        ]
+      },
+      "defaults": {
+        "autoSaveFavorite": false,
+        "autoSchedule": false,
+        "reverseMeta": {
+          "shareTarget": "family-fund-hub",
+          "includeShare": true,
+          "format": "json"
+        }
+      }
+    }
+  ],
+  "rules": {
+    "mustEmit": [
+      "import.queue.enqueue"
+    ],
+    "allowedEvents": [
+      "import.queue.enqueue",
+      "import.preview.open",
+      "import.preview.favorite",
+      "import.preview.reverse",
+      "automation.schedule.request"
+    ],
+    "defaultRoute": "/import/share-capture",
+    "normalizeWith": "/schemas/import/ImportTypes.schema.json",
+    "notes": [
+      "Every shortcut payload must include: __importType (or 'auto' + domain hints), title/text/url, source.kind, meta.timestamp.",
+      "If the app has autoSaveFavorite ON, it wins over the shortcut default.",
+      "If the app has autoSchedule ON, it wins over the shortcut default and will fire automation.schedule.request.",
+      "Reverse generation must preserve reverseMeta for co-op / Family Fund Hub sharing and selling.",
+      "Shortcuts that produce domain-heavy imports (cleaning, gardenCare, harvestPlan, storehouseStock, animalPlan, butcherySession) SHOULD auto-open the preview in the UI so the user can refine tasks, quantities, and cadences."
+    ]
+  },
+  "suka": {
+    "integration": "shortcuts-registry",
+    "features": {
+      "saveUserFavorites": true,
+      "attachSchedule": true,
+      "reverseGeneration": true,
+      "sharedOrchestration": true
+    },
+    "events": {
+      "emit": [
+        "import.queue.enqueue",
+        "import.preview.open",
+        "import.preview.favorite",
+        "import.preview.reverse",
+        "automation.schedule.request"
+      ]
+    },
+    "defaults": {
+      "autoOpenPreviewFor": [
+        "cleaningPlan",
+        "gardenPlan",
+        "gardenCare",
+        "harvestPlan",
+        "storehouseStock",
+        "animalPlan",
+        "butcherySession"
+      ]
+    }
+  }
+}

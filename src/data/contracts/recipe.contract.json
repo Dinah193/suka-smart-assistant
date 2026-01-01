@@ -1,0 +1,524 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka.smart/contract/recipe.contract.json",
+  "title": "Suka Recipe Contract",
+  "type": "object",
+  "required": ["version", "recipe"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Contract version."
+    },
+    "recipe": {
+      "type": "object",
+      "required": [
+        "recipeId",
+        "versionId",
+        "semver",
+        "state",
+        "createdAt",
+        "updatedAt",
+        "title",
+        "yield",
+        "units",
+        "time",
+        "ingredients",
+        "steps",
+        "classifiers"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "recipeId": { "type": "string", "description": "Stable recipe identifier across versions." },
+        "versionId": { "type": "string", "description": "Unique id for this version." },
+        "semver": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "basedOnVersionId": { "type": "string", "description": "Fork/variant pointer for Version Picker and deduper." },
+        "canonicalKey": { "type": "string", "description": "Normalization key for deduping (title+domain+source hash)." },
+        "state": {
+          "type": "string",
+          "enum": ["draft", "verified", "approved", "deprecated", "archived"]
+        },
+        "stateHistory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["at", "from", "to", "by"],
+            "additionalProperties": false,
+            "properties": {
+              "at": { "type": "string", "format": "date-time" },
+              "from": { "type": "string" },
+              "to": { "type": "string" },
+              "by": { "type": "string" },
+              "note": { "type": "string" }
+            }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "ownerTier": { "type": "string", "enum": ["tier1", "tier2", "tier3", "tier4"], "default": "tier2" },
+
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "locale": { "type": "string", "default": "en-US" },
+
+        "yield": {
+          "type": "object",
+          "required": ["servings"],
+          "additionalProperties": false,
+          "properties": {
+            "servings": { "type": "number", "minimum": 0 },
+            "servingUnit": { "type": "string", "description": "slice, bowl, cup, jar, etc." },
+            "expectedWeightGramsTotal": { "type": "number", "minimum": 0 },
+            "expectedWeightGramsPerServing": { "type": "number", "minimum": 0 }
+          }
+        },
+        "units": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "system": { "type": "string", "enum": ["metric", "us-customary", "hybrid"], "default": "hybrid" },
+            "precision": { "type": "integer", "minimum": 0, "maximum": 4, "default": 2 }
+          }
+        },
+        "time": {
+          "type": "object",
+          "required": ["prepMinutes", "cookMinutes", "passiveMinutes", "totalMinutes"],
+          "additionalProperties": false,
+          "properties": {
+            "prepMinutes": { "type": "number", "minimum": 0 },
+            "cookMinutes": { "type": "number", "minimum": 0 },
+            "passiveMinutes": { "type": "number", "minimum": 0 },
+            "totalMinutes": { "type": "number", "minimum": 0 }
+          }
+        },
+
+        "classifiers": {
+          "type": "object",
+          "required": ["cuisine", "course", "effort", "appliances", "dietaryFlags"],
+          "additionalProperties": false,
+          "properties": {
+            "cuisine": { "type": "string" },
+            "course": { "type": "string", "enum": ["breakfast", "brunch", "lunch", "dinner", "snack", "dessert", "sauce", "preserve", "beverage", "other"] },
+            "effort": { "type": "string", "enum": ["very-easy", "easy", "moderate", "hard", "expert"], "default": "moderate" },
+            "appliances": { "type": "array", "items": { "type": "string" } },
+            "dietaryFlags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["clean", "dairy-free", "gluten-free", "grain-free", "nut-free", "soy-free", "egg-free", "low-carb", "keto", "paleo", "vegan", "vegetarian", "pescatarian", "passover-unleavened", "sabbath-friendly"]
+              }
+            },
+            "allergenProfile": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["milk", "egg", "fish", "shellfish", "tree-nuts", "peanuts", "wheat", "soy", "sesame"] }
+            },
+            "tags": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "origin": { "type": "string", "enum": ["family", "chef", "cookbook", "blog", "pinterest", "allrecipes", "youtube", "generated", "other"] },
+            "authors": { "type": "array", "items": { "type": "string" } },
+            "urls": { "type": "array", "items": { "type": "string", "format": "uri" } },
+            "license": { "type": "string" },
+            "attributionText": { "type": "string" },
+            "captureMethod": { "type": "string", "enum": ["manual", "imported", "scanned", "ocr"] },
+            "quality": { "type": "string", "enum": ["low", "medium", "high", "unknown"], "default": "unknown" }
+          }
+        },
+
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "src"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "src": { "type": "string", "format": "uri" },
+              "alt": { "type": "string" },
+              "kind": { "type": "string", "enum": ["cover", "step", "result", "ingredient"] },
+              "stepRef": { "type": "string" }
+            }
+          }
+        },
+
+        "nutrition": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "perServing": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kcal": { "type": "number" },
+                "protein_g": { "type": "number" },
+                "carbs_g": { "type": "number" },
+                "fat_g": { "type": "number" },
+                "fiber_g": { "type": "number" },
+                "sugar_g": { "type": "number" },
+                "sodium_mg": { "type": "number" }
+              }
+            },
+            "source": { "type": "string", "enum": ["usda", "calculated", "manual", "unknown"], "default": "unknown" }
+          }
+        },
+
+        "notes": { "type": "string" },
+        "changeNotes": { "type": "string" },
+        "x-uxHints": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "pinPanels": { "type": "array", "items": { "type": "string" } },
+            "primaryPanel": { "type": "string" }
+          }
+        },
+
+        "ingredientGroups": {
+          "type": "array",
+          "description": "Optional logical groupings for display (e.g., Sauce, Dough).",
+          "items": { "type": "object", "required": ["id", "label"], "properties": { "id": { "type": "string" }, "label": { "type": "string" } }, "additionalProperties": false }
+        },
+
+        "ingredients": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "quantity", "unit"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "groupId": { "type": "string" },
+              "name": { "type": "string" },
+              "alias": { "type": "array", "items": { "type": "string" } },
+              "quantity": { "type": "number" },
+              "unit": { "type": "string" },
+              "prepNote": { "type": "string" },
+              "optional": { "type": "boolean", "default": false },
+              "substitutions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["name"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "name": { "type": "string" },
+                    "ratio": { "type": "number" },
+                    "unit": { "type": "string" },
+                    "note": { "type": "string" }
+                  }
+                }
+              },
+              "inventoryLink": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "itemId": { "type": "string" },
+                  "sourceType": { "type": "string", "enum": ["pantry", "freezer", "fridge", "root-cellar", "garden", "animal", "bulk", "retailer", "unknown"] },
+                  "preferredLocationId": { "type": "string" }
+                }
+              },
+              "aisle": { "type": "string" },
+              "storeSkuMap": {
+                "type": "array",
+                "items": { "type": "object", "required": ["storeProfileId"], "properties": { "storeProfileId": { "type": "string" }, "sku": { "type": "string" }, "aisle": { "type": "string" } }, "additionalProperties": false }
+              },
+              "nutritionOverride": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "kcal": { "type": "number" },
+                  "protein_g": { "type": "number" },
+                  "carbs_g": { "type": "number" },
+                  "fat_g": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
+
+        "preSteps": {
+          "type": "array",
+          "description": "Defrost, brine, soak, preheat, sanitize—scheduled ahead of steps.",
+          "items": {
+            "type": "object",
+            "required": ["id", "kind", "offset"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "kind": { "type": "string", "enum": ["defrost", "marinate", "preheat", "soak", "brine", "activate-yeast", "sanitize", "charge-device"] },
+              "offset": {
+                "type": "object",
+                "required": ["unit", "value", "relation"],
+                "additionalProperties": false,
+                "properties": {
+                  "unit": { "type": "string", "enum": ["minutes", "hours", "days"] },
+                  "value": { "type": "integer", "minimum": 0 },
+                  "relation": { "type": "string", "enum": ["before-session", "before-step", "absolute"] },
+                  "absoluteAt": { "type": "string", "format": "date-time" }
+                }
+              },
+              "linkedStepId": { "type": "string" },
+              "sabbathSensitive": { "type": "boolean", "default": true },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "title", "actionType"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "actionType": { "type": "string" },
+              "description": { "type": "string" },
+              "ingredients": { "type": "array", "items": { "type": "string" }, "description": "Ingredient ids used in this step." },
+              "dependencies": { "type": "array", "items": { "type": "string" } },
+              "concurrencyGroup": { "type": "string" },
+              "resources": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["kind", "id"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": { "type": "string", "enum": ["appliance", "workstation", "tool", "surface", "zone", "container", "device"] },
+                    "id": { "type": "string" },
+                    "label": { "type": "string" },
+                    "x-power": { "type": "string", "enum": ["gas", "electric", "manual", "none"], "default": "none" }
+                  }
+                }
+              },
+              "duration": {
+                "type": "object",
+                "required": ["activeMinutes", "passiveMinutes"],
+                "additionalProperties": false,
+                "properties": {
+                  "activeMinutes": { "type": "number", "minimum": 0 },
+                  "passiveMinutes": { "type": "number", "minimum": 0 }
+                }
+              },
+              "timer": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "mode": { "type": "string", "enum": ["countdown", "stopwatch", "interval"] },
+                  "durationMinutes": { "type": "number", "minimum": 0 },
+                  "autostart": { "type": "boolean", "default": true },
+                  "speech": { "type": "string" }
+                }
+              },
+              "temperature": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "unit": { "type": "string", "enum": ["C", "F"], "default": "F" },
+                  "target": { "type": "number" }
+                }
+              },
+              "safety": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "flags": { "type": "array", "items": { "type": "string", "enum": ["raw-meat", "biohazard", "sharp", "hot", "pressurized", "allergen"] } },
+                  "ppe": { "type": "array", "items": { "type": "string", "enum": ["gloves", "apron", "face-shield", "goggles", "mask", "cut-resistant"] } }
+                }
+              },
+              "sabbathSensitive": { "type": "boolean", "default": true },
+              "labels": {
+                "type": "array",
+                "items": { "type": "object", "required": ["templateId"], "properties": { "templateId": { "type": "string" }, "copies": { "type": "integer", "minimum": 1, "default": 1 }, "data": { "type": "object" } }, "additionalProperties": true }
+              },
+              "x-nba": {
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                  "onStart": { "type": "array", "items": { "type": "string" } },
+                  "onComplete": { "type": "array", "items": { "type": "string" } }
+                }
+              }
+            }
+          }
+        },
+
+        "preservation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "method": { "type": "string", "enum": ["none", "pressure-canning", "water-bath", "dehydrating", "freezing", "curing", "smoking", "fermenting", "vacuum-seal"] },
+            "container": { "type": "string" },
+            "shelfLifeDays": { "type": "integer", "minimum": 0 },
+            "batchLabelTemplateId": { "type": "string" }
+          }
+        },
+
+        "variants": {
+          "type": "array",
+          "description": "Pointers to sibling versions (spicy, dairy-free, etc.).",
+          "items": { "type": "object", "required": ["versionId", "label"], "properties": { "versionId": { "type": "string" }, "label": { "type": "string" } }, "additionalProperties": false }
+        },
+
+        "ratings": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "avg": { "type": "number", "minimum": 0, "maximum": 5 },
+            "count": { "type": "integer", "minimum": 0 }
+          }
+        },
+
+        "automation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "emit": {
+              "type": "array",
+              "items": { "type": "object", "required": ["on", "topic"], "properties": { "on": { "type": "string", "enum": ["recipe-created", "recipe-updated", "recipe-approved"] }, "topic": { "type": "string" }, "payload": { "type": "object" } }, "additionalProperties": true }
+            }
+          }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "version": "1.0.0",
+      "recipe": {
+        "recipeId": "rec_lamb_stew",
+        "versionId": "rec_lamb_stew_v2",
+        "semver": "2.1.0",
+        "basedOnVersionId": "rec_lamb_stew_v1",
+        "canonicalKey": "lamb-stew|family|en-US",
+        "state": "approved",
+        "stateHistory": [
+          { "at": "2025-10-01T12:00:00Z", "from": "draft", "to": "verified", "by": "u_rhonda" },
+          { "at": "2025-10-05T12:00:00Z", "from": "verified", "to": "approved", "by": "u_rhonda" }
+        ],
+        "createdAt": "2025-09-28T18:00:00Z",
+        "updatedAt": "2025-10-05T12:00:00Z",
+        "ownerTier": "tier2",
+
+        "title": "Comfort Lamb Stew with Root Vegetables",
+        "subtitle": "Rich, hearty, freezer-friendly",
+
+        "yield": { "servings": 8, "servingUnit": "bowl", "expectedWeightGramsTotal": 3200, "expectedWeightGramsPerServing": 400 },
+        "units": { "system": "hybrid", "precision": 1 },
+        "time": { "prepMinutes": 20, "cookMinutes": 90, "passiveMinutes": 30, "totalMinutes": 140 },
+
+        "classifiers": {
+          "cuisine": "West African inspired",
+          "course": "dinner",
+          "effort": "moderate",
+          "appliances": ["stovetop", "dutch-oven"],
+          "dietaryFlags": ["clean", "sabbath-friendly"],
+          "allergenProfile": ["wheat"],
+          "tags": ["stew", "freezer-meal", "root-veg"]
+        },
+
+        "source": {
+          "origin": "family",
+          "authors": ["Household"],
+          "urls": [],
+          "license": "private",
+          "attributionText": "Family archive",
+          "captureMethod": "manual",
+          "quality": "high"
+        },
+
+        "images": [
+          { "id": "img_cover", "src": "https://example.com/img/lambstew.jpg", "alt": "Bowl of lamb stew", "kind": "cover" }
+        ],
+
+        "nutrition": {
+          "perServing": { "kcal": 520, "protein_g": 32, "carbs_g": 38, "fat_g": 24, "fiber_g": 6, "sugar_g": 8, "sodium_mg": 780 },
+          "source": "calculated"
+        },
+
+        "ingredientGroups": [
+          { "id": "grp_stew", "label": "Stew Base" }
+        ],
+
+        "ingredients": [
+          { "id": "ing_lamb", "groupId": "grp_stew", "name": "Lamb, cubed", "quantity": 3, "unit": "lb", "inventoryLink": { "itemId": "itm_lamb_cubes", "sourceType": "freezer", "preferredLocationId": "fz_main" }, "aisle": "Meat" },
+          { "id": "ing_onion", "groupId": "grp_stew", "name": "Onion, diced", "quantity": 2, "unit": "each", "aisle": "Produce", "substitutions": [{ "name": "Shallots", "ratio": 1, "unit": "each" }] },
+          { "id": "ing_carrot", "groupId": "grp_stew", "name": "Carrots, sliced", "quantity": 4, "unit": "each", "aisle": "Produce" },
+          { "id": "ing_potato", "groupId": "grp_stew", "name": "Potatoes, cubed", "quantity": 4, "unit": "each", "aisle": "Produce" },
+          { "id": "ing_stock", "groupId": "grp_stew", "name": "Beef stock", "quantity": 6, "unit": "cup", "aisle": "Broth" },
+          { "id": "ing_tomato", "groupId": "grp_stew", "name": "Tomato paste", "quantity": 3, "unit": "tbsp", "aisle": "Canned" },
+          { "id": "ing_oil", "groupId": "grp_stew", "name": "Olive oil", "quantity": 2, "unit": "tbsp", "aisle": "Oils" },
+          { "id": "ing_spice", "groupId": "grp_stew", "name": "Spice blend", "quantity": 2, "unit": "tbsp", "aisle": "Spices" },
+          { "id": "ing_salt", "groupId": "grp_stew", "name": "Salt", "quantity": 2, "unit": "tsp", "aisle": "Spices", "optional": true }
+        ],
+
+        "preSteps": [
+          { "id": "pre_defrost_lamb", "kind": "defrost", "offset": { "unit": "hours", "value": 24, "relation": "before-session" }, "linkedStepId": "step_brown_lamb", "sabbathSensitive": true }
+        ],
+
+        "steps": [
+          {
+            "id": "step_brown_lamb",
+            "title": "Brown lamb",
+            "actionType": "sear",
+            "description": "Heat oil in dutch oven; brown lamb in batches.",
+            "ingredients": ["ing_oil", "ing_lamb"],
+            "resources": [{ "kind": "appliance", "id": "stovetop_main", "label": "Stovetop", "x-power": "gas" }, { "kind": "tool", "id": "dutch_oven" }],
+            "duration": { "activeMinutes": 15, "passiveMinutes": 0 },
+            "safety": { "flags": ["hot", "raw-meat"], "ppe": ["apron", "gloves"] },
+            "sabbathSensitive": true
+          },
+          {
+            "id": "step_sweat_onion",
+            "title": "Sweat aromatics",
+            "actionType": "saute",
+            "description": "Add onion and spice; cook until translucent.",
+            "dependencies": ["step_brown_lamb"],
+            "ingredients": ["ing_onion", "ing_spice"],
+            "resources": [{ "kind": "appliance", "id": "stovetop_main" }, { "kind": "tool", "id": "dutch_oven" }],
+            "duration": { "activeMinutes": 6, "passiveMinutes": 0 },
+            "sabbathSensitive": true
+          },
+          {
+            "id": "step_stew",
+            "title": "Simmer stew",
+            "actionType": "simmer",
+            "description": "Add stock, tomato paste, carrots, potatoes. Simmer covered.",
+            "dependencies": ["step_sweat_onion"],
+            "ingredients": ["ing_stock", "ing_tomato", "ing_carrot", "ing_potato"],
+            "resources": [{ "kind": "appliance", "id": "stovetop_main" }, { "kind": "tool", "id": "dutch_oven" }],
+            "duration": { "activeMinutes": 10, "passiveMinutes": 80 },
+            "timer": { "mode": "countdown", "durationMinutes": 80, "autostart": true, "speech": "Stew done." },
+            "sabbathSensitive": false
+          }
+        ],
+
+        "preservation": { "method": "freezing", "container": "1-qt freezer bag", "shelfLifeDays": 120, "batchLabelTemplateId": "lbl_freezer_bag" },
+
+        "variants": [
+          { "versionId": "rec_lamb_stew_v2_df", "label": "Dairy-free (default)" },
+          { "versionId": "rec_lamb_stew_v2_spicy", "label": "Spicy" }
+        ],
+
+        "ratings": { "avg": 4.7, "count": 158 },
+
+        "automation": {
+          "emit": [
+            { "on": "recipe-approved", "topic": "recipe.catalog.updated", "payload": { "recipeId": "rec_lamb_stew" } }
+          ]
+        },
+
+        "notes": "Works well for batch cooking and freezing."
+      }
+    }
+  ]
+}

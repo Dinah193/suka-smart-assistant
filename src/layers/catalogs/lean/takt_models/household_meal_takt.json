@@ -1,0 +1,172 @@
+{
+  "id": "lean.takt.household_meal_takt",
+  "domain": "lean",
+  "kind": "takt_model",
+  "title": "Takt Model: Household Meal Demand",
+  "intentTags": [
+    "lean:takt_model"
+  ],
+  "inputs": [
+    {
+      "key": "mealsPerDay",
+      "label": "Meals per day",
+      "type": "number",
+      "required": true,
+      "default": 2,
+      "notes": "Typical range: 1–4"
+    },
+    {
+      "key": "householdSize",
+      "label": "Household size",
+      "type": "number",
+      "required": true,
+      "default": 4
+    },
+    {
+      "key": "snacksPerDay",
+      "label": "Snacks per day (optional)",
+      "type": "number",
+      "default": 0
+    },
+    {
+      "key": "fasting",
+      "label": "Fasting mode",
+      "type": "object",
+      "default": {
+        "enabled": false
+      }
+    },
+    {
+      "key": "quietHours",
+      "label": "Quiet hours / Sabbath guard",
+      "type": "object",
+      "default": {
+        "enabled": false
+      }
+    },
+    {
+      "key": "timeBudgetMinutes",
+      "label": "Available cook/prep minutes per day",
+      "type": "number",
+      "default": 120
+    },
+    {
+      "key": "equipment",
+      "label": "Equipment capacity hints",
+      "type": "object",
+      "default": {
+        "batchFriendly": true
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "key": "dailyDemandUnits",
+      "label": "Daily demand units",
+      "type": "number",
+      "required": true
+    },
+    {
+      "key": "recommendedCadence",
+      "label": "Recommended cadence",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "patternBiases",
+      "label": "Pattern bias suggestions",
+      "type": "object",
+      "required": true
+    }
+  ],
+  "constraints": [
+    "advisoryOnly",
+    "respectFasting",
+    "respectQuietHours"
+  ],
+  "steps": [],
+  "kpis": [
+    {
+      "key": "cadenceAdherence",
+      "label": "Cadence adherence",
+      "direction": "up",
+      "unit": "%"
+    },
+    {
+      "key": "timeOverrun",
+      "label": "Time overrun",
+      "direction": "down",
+      "unit": "%"
+    },
+    {
+      "key": "spoilageRate",
+      "label": "Spoilage rate",
+      "direction": "down",
+      "unit": "%"
+    }
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial Lean Six Sigma catalog."
+      }
+    ]
+  },
+  "taktModel": {
+    "units": "plate_units",
+    "formula": "dailyDemandUnits = (mealsPerDay + snacksPerDay*0.5) * householdSize * fastingFactor * quietHoursFactor",
+    "factors": {
+      "fastingFactor": {
+        "whenEnabled": 0.7,
+        "notes": "If fasting reduces meals, demand units decrease; break-fast meal may add a single spike."
+      },
+      "quietHoursFactor": {
+        "whenEnabled": 1.0,
+        "notes": "Quiet hours do not reduce demand, but shift cadence toward make-ahead sessions."
+      }
+    },
+    "cadenceRules": [
+      {
+        "when": "dailyDemandUnits >= 20",
+        "recommend": {
+          "mealPattern": "pat.meals.weekly_batch",
+          "storehousePattern": "pat.storehouse.weekly_restock",
+          "batchSessionsPerWeek": 2
+        }
+      },
+      {
+        "when": "dailyDemandUnits >= 10 and dailyDemandUnits < 20",
+        "recommend": {
+          "mealPattern": "pat.meals.weekly_batch",
+          "batchSessionsPerWeek": 1
+        }
+      },
+      {
+        "when": "dailyDemandUnits < 10",
+        "recommend": {
+          "mealPattern": "pat.meals.daily_fresh",
+          "batchSessionsPerWeek": 0
+        }
+      }
+    ],
+    "notes": "LeanOptimizer should use this to recommend cadence, not enforce."
+  },
+  "links": {
+    "affectsPatterns": [
+      "pat.meals.weekly_batch",
+      "pat.meals.daily_fresh",
+      "pat.meals.fast_day_light",
+      "pat.meals.feast_anchored"
+    ],
+    "suggestsStandardWork": [
+      "lean.sw.weekly_meal_cycle"
+    ],
+    "wasteMaps": [
+      "lean.wm.cooking",
+      "lean.wm.storage"
+    ]
+  }
+}

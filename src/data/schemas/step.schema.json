@@ -1,0 +1,107 @@
+{
+  "$id": "https://schemas.suka.smart/step.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SSA Step (Execution Atom)",
+  "description": "Structure for an executable Step used by Play/Remote/Overlay. Minimal contract focused on orchestration & concurrency. Compatible with the Session schema’s steps[].",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "omp"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable step identifier, unique within a session.",
+      "pattern": "^[A-Za-z0-9_.:-]{2,}$"
+    },
+    "deps": {
+      "type": "array",
+      "description": "IDs of prerequisite steps that must complete before this step starts.",
+      "items": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{2,}$" },
+      "uniqueItems": true,
+      "default": []
+    },
+    "device": {
+      "type": "string",
+      "description": "Preferred device identifier (logical or physical) to execute this step (e.g., phone.rhonda, oven.main).",
+      "maxLength": 128
+    },
+    "role": {
+      "type": "string",
+      "description": "Preferred human/household role (e.g., cook, cleaner, gardener, butcher).",
+      "maxLength": 64
+    },
+    "omp": {
+      "type": "string",
+      "description": "O/M/P criticality flag — O=Optional (can be skipped), M=Mandatory (must run), P=Preferred (soft requirement; may degrade).",
+      "enum": ["O", "M", "P"]
+    },
+    "riskTag": {
+      "type": "string",
+      "description": "Primary risk category tag (e.g., heat, sharp, bio, allergen, heavy, electrical, ladder, chemical, animal).",
+      "pattern": "^[a-z0-9._-]{2,32}$"
+    },
+    "canParallelize": {
+      "type": "boolean",
+      "description": "If true, this step is eligible to run in parallel with other steps (subject to runtime policy).",
+      "default": false
+    },
+    "parallelKey": {
+      "type": "string",
+      "description": "Concurrency grouping key. Steps with the same key may run together up to the group policy limits.",
+      "pattern": "^[A-Za-z0-9_.:-]{2,40}$"
+    },
+    "label": {
+      "type": "string",
+      "description": "Short human-friendly label for UI surfaces.",
+      "maxLength": 240
+    },
+    "meta": {
+      "type": "object",
+      "description": "Forward-compatible bucket for domain-specific hints (kept permissive).",
+      "additionalProperties": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "canParallelize": { "const": true } },
+        "required": ["canParallelize"]
+      },
+      "then": {
+        "required": ["parallelKey"]
+      }
+    }
+  ],
+  "examples": [
+    {
+      "id": "s1",
+      "label": "Preheat oven to 325°F",
+      "deps": [],
+      "device": "oven.main",
+      "role": "cook",
+      "omp": "M",
+      "riskTag": "heat",
+      "canParallelize": false,
+      "meta": { "targetTempF": 325 }
+    },
+    {
+      "id": "s2",
+      "label": "Wash cutting board",
+      "deps": ["s3"],
+      "role": "cleaner",
+      "omp": "P",
+      "riskTag": "bio",
+      "canParallelize": true,
+      "parallelKey": "cleanup"
+    },
+    {
+      "id": "s3",
+      "label": "Sear shanks",
+      "deps": ["s1"],
+      "device": "stove.top",
+      "role": "cook",
+      "omp": "M",
+      "riskTag": "heat",
+      "canParallelize": false
+    }
+  ]
+}

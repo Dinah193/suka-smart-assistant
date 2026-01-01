@@ -1,0 +1,191 @@
+{
+  "metadata": {
+    "name": "AnimalCareTables",
+    "version": "1.0.0",
+    "updatedAt": "2025-11-10T00:00:00.000Z",
+    "units": "metric",
+    "notes": "Baseline animal-care and smallholder butchery tables to drive synthesis, validation, and scheduling. Always defer to the product label, veterinarian guidance, and local regulations. Values are conservative defaults intended for planning—not a substitute for veterinary care."
+  },
+
+  "brooderCurves": {
+    "_comment": "Target floor-level brooder temps (measured at chick height) and weekly reductions. Provide warm/cool escape zones; watch behavior to fine-tune.",
+    "chicken_layer": {
+      "startAgeDays": 0,
+      "targetsCByWeek": [33, 31, 29, 27, 25, 23],
+      "dropPerWeekC": 2,
+      "holdRoomAboveC": 20,
+      "notes": ["Lower 2–3°C at edges for gradation", "Reduce if chicks spread far from heat or pant"]
+    },
+    "chicken_broiler": {
+      "startAgeDays": 0,
+      "targetsCByWeek": [33, 31, 29, 27, 25],
+      "dropPerWeekC": 2,
+      "holdRoomAboveC": 20,
+      "notes": ["Broilers heat quickly; ensure ventilation"]
+    },
+    "duck": {
+      "startAgeDays": 0,
+      "targetsCByWeek": [32, 30, 28, 26, 24],
+      "dropPerWeekC": 2,
+      "holdRoomAboveC": 18,
+      "notes": ["Provide non-slip, dry bedding; avoid soaking"]
+    },
+    "turkey_poult": {
+      "startAgeDays": 0,
+      "targetsCByWeek": [35, 33, 31, 29, 27, 25],
+      "dropPerWeekC": 2,
+      "holdRoomAboveC": 20,
+      "notes": ["Turkeys are sensitive early; ensure easy feed/water access"]
+    },
+    "quail": {
+      "startAgeDays": 0,
+      "targetsCByWeek": [35, 33, 31, 29, 27, 25],
+      "dropPerWeekC": 2,
+      "holdRoomAboveC": 20,
+      "notes": ["Fine mesh for feeders/drinkers; avoid drafts"]
+    },
+    "brooderChecklist": [
+      "Thermometer at chick level + behavior check",
+      "Draft shield first week",
+      "24–48h extra feeders/drinkers on paper to teach pecking",
+      "Dry litter, change wet spots daily"
+    ]
+  },
+
+  "milkReplacer": {
+    "_comment": "Mixing and feeding temperature targets; verify label solids % and species-specific osmolality recommendations.",
+    "calf_dairy": {
+      "mixWaterTempC": 50,
+      "feedTempC": 38,
+      "solidsPctTypical": 12.5,
+      "notes": ["Mix thoroughly, then cool to feed temp", "Consistent timing and volume reduce scours"]
+    },
+    "lamb": {
+      "mixWaterTempC": 45,
+      "feedTempC": 39,
+      "solidsPctTypical": 20,
+      "notes": ["Smaller, frequent feeds early; sanitize nipples and bottles"]
+    },
+    "kid_goat": {
+      "mixWaterTempC": 45,
+      "feedTempC": 39,
+      "solidsPctTypical": 18,
+      "notes": ["Warm, draft-free pen; do not over-concentrate"]
+    },
+    "piglet": {
+      "mixWaterTempC": 45,
+      "feedTempC": 37,
+      "solidsPctTypical": 20,
+      "notes": ["Offer fresh often; discard leftovers; creep feed transition by week 2–3"]
+    },
+    "general": {
+      "sanitation": ["Wash bottles/nipples with hot water + detergent", "Rinse, sanitize, air-dry"],
+      "transitionHints": ["Weigh weekly to adjust volume", "Introduce starter feed as per label"]
+    }
+  },
+
+  "dipProtocols": {
+    "_comment": "Hygiene dips for navels (neonates) and teats (dairy). Contact time means visibly wet for the full duration; follow label.",
+    "navelDip": {
+      "iodine_tincture_7pct": {
+        "contactTimeSec": 30,
+        "repeatAtHours": 12,
+        "notes": ["Fully coat stump and base; avoid ingestion; provide dry bedding"]
+      },
+      "chlorhexidine_2pct": {
+        "contactTimeSec": 30,
+        "repeatAtHours": 12,
+        "notes": ["Alternative when iodine not available; stain-free"]
+      }
+    },
+    "teatDip": {
+      "preMilking": {
+        "options": [
+          { "chemistry": "iodine_0_5to1pct", "contactTimeSec": 30 },
+          { "chemistry": "chlorhexidine_0_5pct", "contactTimeSec": 30 }
+        ],
+        "steps": ["Pre-dip", "Contact time", "Wipe dry with single-use towel"]
+      },
+      "postMilking": {
+        "options": [
+          { "chemistry": "iodine_1pct", "contactTimeSec": 30 },
+          { "chemistry": "chlorhexidine_0_5pct", "contactTimeSec": 30 },
+          { "chemistry": "lactic_acid_1_5pct", "contactTimeSec": 30 }
+        ],
+        "steps": ["Full coverage of teat end", "Allow to air dry"]
+      }
+    },
+    "footbath": {
+      "_comment": "Herd-level hoof hygiene; maintain solution and keep traffic calm.",
+      "copper_sulfate_5pct": { "walkThroughsPerCharge": 150, "notes": ["Corrosion risk; dispose per regulation"] },
+      "zinc_sulfate_10pct": { "walkThroughsPerCharge": 150, "notes": ["Less corrosive alternative"] }
+    }
+  },
+
+  "butcheryChillTargets": {
+    "_comment": "Smallholder chilling targets for food safety planning. Comply with local inspection rules where applicable.",
+    "poultry": {
+      "carcassCoreToCWithinHours": { "C": 4, "hours": 6 },
+      "bathAgitationRecommended": true,
+      "notes": ["Agitate chill tank; change water to manage load", "Alternatively use refrigerated air with humidity control"]
+    },
+    "red_meat_quarters": {
+      "surfaceToCWithinHours": { "C": 7, "hours": 24 },
+      "deepMuscleToCWithinHours": { "C": 7, "hours": 48 },
+      "notes": ["Avoid cold shortening (pre-rigor below ~10°C); use stepwise chill where possible"]
+    },
+    "offal": {
+      "toCWithinHours": { "C": 4, "hours": 4 },
+      "notes": ["Rinse, drain, rapid chill; store separately from carcasses"]
+    },
+    "storage": {
+      "hotHoldingMaxC": 54,
+      "coldHoldingMaxC": 4,
+      "frozenTargetC": -18,
+      "coolingWindow": { "to21CWithinH": 2, "to5CWithinH": 4 }
+    }
+  },
+
+  "waterersAndThermal": {
+    "_comment": "Drinker temperature ranges improve intake and reduce chilling stress.",
+    "poultryDrinkerTargetC": { "brooder": [20, 25], "growOut": [15, 20] },
+    "ruminantWaterTargetC": { "calf": [15, 20], "adult": [10, 20] },
+    "summerElectrolyteHint": "Short-term electrolytes during heat spikes; follow label."
+  },
+
+  "cleaningAndSanitation": {
+    "_comment": "Cross-link to CleaningContactTimes when available; provide minimal fallbacks here.",
+    "equipmentSanitizerFallback": {
+      "peracetic_acid_80ppm": { "contactTimeMin": 1, "rinseFoodContact": true },
+      "chlorine_100ppm": { "contactTimeMin": 1, "rinseFoodContact": true }
+    },
+    "eggSanitation": {
+      "washWaterAboveEggTempC": 5,
+      "sanitizer": { "chlorine_ppm": 50, "contactTimeSec": 90 },
+      "drying": "Air dry; store cool"
+    }
+  },
+
+  "plannerHints": {
+    "_comment": "Helpers for synthesis engines to create steps/sessions and validation checks.",
+    "events": {
+      "animal.brooder.set": { "payload": ["species", "targetC", "week", "thermometerPlaced"] },
+      "animal.milk.mix": { "payload": ["species", "mixWaterTempC", "feedTempC", "volumeL", "solidsPct"] },
+      "animal.navel.dip": { "payload": ["chemistry", "contactTimeSec", "repeatAtHours"] },
+      "animal.teat.dip": { "payload": ["phase (pre/post)", "chemistry", "contactTimeSec"] },
+      "butchery.chill.start": { "payload": ["species", "batchCount", "method (water/air)"] },
+      "butchery.chill.verify": { "payload": ["coreTempC", "elapsedH"] }
+    },
+    "readinessMap": {
+      "brooderHeatSource": ["heater_available", "thermometer_at_bird_height"],
+      "milkReplacer": ["label_checked", "scale_measuring_solids", "sanitized_bottles"],
+      "dipStation": ["correct_dip_made", "timer_available", "single_use_cups"]
+    },
+    "safety": [
+      "Never mix chemicals; read label PPE",
+      "Discard leftover milk replacer after feed",
+      "Keep neonates dry and out of drafts",
+      "Chill carcasses rapidly; avoid cross-contamination"
+    ]
+  }
+}

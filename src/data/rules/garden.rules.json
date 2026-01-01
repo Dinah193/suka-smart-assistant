@@ -1,0 +1,353 @@
+{
+  "version": "1.0.0",
+  "domain": "garden",
+  "generatedAt": "2025-11-11T00:00:00.000Z",
+  "source": "SSA builtin",
+  "rules": [
+    {
+      "id": "soil-prep-general-compost",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 200,
+      "tags": ["soil-prep", "organic-matter"],
+      "match": { "byMethod": { "methodsAny": ["prepare-bed", "prepare-raised-bed", "sow-direct", "transplant"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "add-compost-and-mix",
+            "title": "Incorporate compost before planting",
+            "description": "Spread 2–5 cm (1–2 in) of finished compost over the bed. Gently mix into the top 10–15 cm (4–6 in) of soil; avoid deep tilling to preserve structure.",
+            "duration": "PT15M",
+            "equipment": ["garden-fork", "rake"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "soil-prep-moisten-bed",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 210,
+      "tags": ["soil-prep", "watering"],
+      "match": { "byMethod": { "methodsAny": ["sow-direct", "transplant"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "pre-moisten-bed",
+            "title": "Pre-moisten the bed",
+            "description": "Water the planting area to achieve evenly moist (not soggy) soil 10–15 cm deep. This reduces transplant shock and improves germination.",
+            "duration": "PT10M",
+            "equipment": ["hose", "watering-wand"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "seed-pre-soak-large-seeds",
+      "ruleType": "timing",
+      "enabled": true,
+      "priority": 400,
+      "tags": ["pre-soak", "germination"],
+      "applyTo": { "byIngredient": { "names": ["pea", "peas", "snap pea", "snow pea", "bean", "beans", "runner bean", "fava", "nasturtium"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "pre-soak-seeds",
+            "title": "Pre-soak large seeds",
+            "description": "Soak seeds in room-temperature water prior to sowing to speed germination. Drain and surface-dry before planting.",
+            "duration": "PT0S",
+            "equipment": ["jar", "strainer"]
+          }
+        },
+        {
+          "action": "setTimer",
+          "duration": "PT8H",
+          "label": "Seed pre-soak (common large seeds)"
+        }
+      ]
+    },
+    {
+      "id": "seed-scarify-hardcoat",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 410,
+      "tags": ["scarify", "germination"],
+      "match": {
+        "byIngredient": {
+          "names": ["nasturtium", "morning glory", "okra", "lupine", "sweet pea"]
+        }
+      },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "light-scarify",
+            "title": "Lightly scarify hard-coated seeds",
+            "description": "Nick or rub seed coats gently with a nail file or sandpaper until you see a slight color change. Do not damage the embryo. Optionally pre-soak 2–4 hours after scarifying.",
+            "duration": "PT3M",
+            "equipment": ["nail-file", "fine-sandpaper"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "legume-inoculation",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 420,
+      "tags": ["soil-biology", "rhizobia", "nitrogen-fixation"],
+      "match": { "byIngredient": { "names": ["pea", "peas", "bean", "beans", "soybean", "clover", "vetch"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "inoculate-legume-seed",
+            "title": "Inoculate legume seeds (optional but recommended)",
+            "description": "Dust seeds with the appropriate rhizobia inoculant just before sowing to enhance nitrogen fixation, especially in new beds.",
+            "duration": "PT2M",
+            "equipment": ["inoculant", "gloves(optional)"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "harden-off-seedlings-schedule",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 300,
+      "tags": ["transplant", "hardening-off"],
+      "match": { "byMethod": { "methodsAny": ["transplant"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "start-hardening-off",
+            "title": "Begin hardening off 7–10 days before transplant",
+            "description": "Gradually expose seedlings to outdoor conditions: Day 1-2: 1–2h shade; Day 3-4: 3–4h bright shade; Day 5-6: 4–6h morning sun; Day 7+: full day if temps are suitable; protect from wind/frost.",
+            "duration": "PT0S",
+            "equipment": ["tray", "shade-cloth(optional)"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "transplant-cooler-hours",
+      "ruleType": "timing",
+      "enabled": true,
+      "priority": 310,
+      "tags": ["transplant", "microclimate"],
+      "applyTo": { "byMethod": { "methodsAny": ["transplant"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "choose-evening-or-cloudy",
+            "title": "Transplant in the evening or on a cloudy day",
+            "description": "Lower light and temperature reduce shock. Provide temporary shade if conditions are hot or windy.",
+            "duration": "PT0S",
+            "equipment": ["shade-cloth(optional)"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "transplant-water-in",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 315,
+      "tags": ["transplant", "watering"],
+      "match": { "byMethod": { "methodsAny": ["transplant"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "water-in-transplants",
+            "title": "Water in after planting",
+            "description": "Water at the root zone immediately after transplanting to settle soil and remove air pockets. Optionally use a mild starter solution.",
+            "duration": "PT5M",
+            "equipment": ["watering-can", "hose"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "mulch-after-transplant",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 320,
+      "tags": ["mulch", "moisture", "weed-suppression"],
+      "match": { "byMethod": { "methodsAny": ["transplant", "sow-direct"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "apply-mulch",
+            "title": "Apply light mulch",
+            "description": "After soil has warmed, apply 2–5 cm organic mulch around (not touching) stems to conserve moisture and suppress weeds.",
+            "duration": "PT10M",
+            "equipment": ["mulch", "hands", "rake"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "spacing-check-insert",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 230,
+      "tags": ["spacing", "plant-health"],
+      "match": { "byMethod": { "methodsAny": ["sow-direct", "transplant"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "check-spacing",
+            "title": "Check recommended spacing",
+            "description": "Verify in-row and between-row spacing for the crop; thin seedlings as needed to reduce disease pressure and competition.",
+            "duration": "PT0S",
+            "equipment": ["measuring-tape"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "label-and-log-planting",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 240,
+      "tags": ["garden-plan", "logging"],
+      "match": { "byMethod": { "methodsAny": ["sow-direct", "seed-start", "transplant"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "label-bed-and-log",
+            "title": "Label bed & log planting",
+            "description": "Place weatherproof labels with variety and date. Log bed, variety, source, and planting date to enable scheduling and harvest forecasting.",
+            "duration": "PT2M",
+            "equipment": ["plant-label", "marker", "garden-journal"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "pre-sow-warm-season-warning",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 260,
+      "tags": ["seasonality", "soil-temperature"],
+      "match": { "byIngredient": { "names": ["tomato", "pepper", "eggplant", "cucumber", "squash", "melon", "corn", "bean"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "soil-temp-check",
+            "title": "Check soil temperature for warm-season crops",
+            "description": "Ensure soil temp at 5–10 cm depth meets the crop’s minimum (often ≥16–18°C / 60–65°F). Delay planting or use row cover if cooler.",
+            "duration": "PT0S",
+            "equipment": ["soil-thermometer"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "direct-sow-depth-guide",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 245,
+      "tags": ["sowing-depth"],
+      "match": { "byMethod": { "methodsAny": ["sow-direct"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "before-first-match",
+          "step": {
+            "id": "seed-depth-general",
+            "title": "Follow general seed depth rule",
+            "description": "Plant seeds at ~2–3× their diameter unless crop-specific guidance differs; keep seeded zone evenly moist until emergence.",
+            "duration": "PT0S",
+            "equipment": ["dibber(optional)"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "post-planting-mist-and-shade-for-tender",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 335,
+      "tags": ["establishment", "heat-protection"],
+      "match": { "byIngredient": { "names": ["lettuce", "spinach", "brassica", "kale", "chard", "cilantro"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "mist-and-shade",
+            "title": "Mist and provide temporary shade if hot",
+            "description": "Lightly mist twice daily for 2–3 days and use shade cloth in hot, sunny conditions to reduce transplant shock.",
+            "duration": "PT0S",
+            "equipment": ["mister", "shade-cloth"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "clean-tools-between-beds",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 180,
+      "tags": ["hygiene", "disease-prevention"],
+      "match": { "byMethod": { "methodsAny": ["prepare-bed", "transplant", "prune"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "sanitize-tools",
+            "title": "Sanitize tools between beds",
+            "description": "Wipe blades and tools with 70% alcohol or a 1:9 bleach solution, then rinse/dry to reduce disease transfer.",
+            "duration": "PT1M",
+            "equipment": ["isopropyl-70", "rag"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "plan-successive-sowings",
+      "ruleType": "prep-insertion",
+      "enabled": true,
+      "priority": 260,
+      "tags": ["garden-plan", "succession"],
+      "match": { "byMethod": { "methodsAny": ["sow-direct", "seed-start"] } },
+      "actions": [
+        {
+          "action": "insertStep",
+          "position": "after-last-match",
+          "step": {
+            "id": "schedule-succession",
+            "title": "Schedule successive sowings",
+            "description": "For quick-maturing crops (radish, lettuce, bush beans), schedule repeat sowings every 1–3 weeks to extend harvest.",
+            "duration": "PT0S",
+            "equipment": ["calendar"]
+          }
+        }
+      ]
+    }
+  ]
+}

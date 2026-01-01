@@ -1,0 +1,261 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka.smart/contracts/session.play.contract.json",
+  "title": "SSA Event Contract — session.play.*",
+  "description": "Exact schema for all session.play.* runtime control events on the SSA eventBus. Canonical envelope: { type, ts, source, data } with ISO timestamps.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "ts", "source", "data"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "session.play.start",
+        "session.play.stop",
+        "session.play.pause",
+        "session.play.resume",
+        "session.play.step.next",
+        "session.play.step.prev",
+        "session.play.step.go",
+        "session.play.announce",
+        "session.play.keepAwake",
+        "session.play.state.sync",
+        "session.play.timer.start",
+        "session.play.timer.pause",
+        "session.play.timer.resume",
+        "session.play.timer.cancel"
+      ]
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp at emit time."
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Logical emitter (e.g., 'pages.cooking.play', 'engine.cleaning.session')."
+    },
+    "data": {
+      "type": "object",
+      "description": "Event-specific payload. Exact shape enforced by if/then below.",
+      "additionalProperties": true
+    }
+  },
+
+  "allOf": [
+    {
+      "anyOf": [
+        { "if": { "properties": { "type": { "const": "session.play.start" } } }, "then": { "properties": { "data": { "$ref": "#/definitions/StartData" } } } },
+        { "if": { "properties": { "type": { "const": "session.play.stop" } } },  "then": { "properties": { "data": { "$ref": "#/definitions/StopData" } } } },
+        { "if": { "properties": { "type": { "const": "session.play.pause" } } }, "then": { "properties": { "data": { "$ref": "#/definitions/PauseResumeData" } } } },
+        { "if": { "properties": { "type": { "const": "session.play.resume" } } }, "then": { "properties": { "data": { "$ref": "#/definitions/PauseResumeData" } } } },
+
+        { "if": { "properties": { "type": { "const": "session.play.step.next" } } }, "then": { "properties": { "data": { "$ref": "#/definitions/StepNextPrevData" } } } },
+        { "if": { "properties": { "type": { "const": "session.play.step.prev" } } }, "then": { "properties": { "data": { "$ref": "#/definitions/StepNextPrevData" } } } },
+        { "if": { "properties": { "type": { "const": "session.play.step.go" } } },   "then": { "properties": { "data": { "$ref": "#/definitions/StepGoData" } } } },
+
+        { "if": { "properties": { "type": { "const": "session.play.announce" } } },  "then": { "properties": { "data": { "$ref": "#/definitions/AnnounceData" } } } },
+        { "if": { "properties": { "type": { "const": "session.play.keepAwake" } } }, "then": { "properties": { "data": { "$ref": "#/definitions/KeepAwakeData" } } } },
+        { "if": { "properties": { "type": { "const": "session.play.state.sync" } } }, "then": { "properties": { "data": { "$ref": "#/definitions/StateSyncData" } } } },
+
+        { "if": { "properties": { "type": { "const": "session.play.timer.start" } } },  "then": { "properties": { "data": { "$ref": "#/definitions/TimerStartData" } } } },
+        { "if": { "properties": { "type": { "const": "session.play.timer.pause" } } },  "then": { "properties": { "data": { "$ref": "#/definitions/TimerSimpleData" } } } },
+        { "if": { "properties": { "type": { "const": "session.play.timer.resume" } } }, "then": { "properties": { "data": { "$ref": "#/definitions/TimerSimpleData" } } } },
+        { "if": { "properties": { "type": { "const": "session.play.timer.cancel" } } }, "then": { "properties": { "data": { "$ref": "#/definitions/TimerSimpleData" } } } }
+      ]
+    }
+  ],
+
+  "definitions": {
+    "Domain": {
+      "type": "string",
+      "enum": ["cooking", "cleaning", "garden", "animals", "preservation", "storehouse"]
+    },
+    "ID": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "PositiveMs": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "Bool": { "type": "boolean" },
+
+    "CommonFields": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["domain", "sessionId"],
+      "properties": {
+        "domain": { "$ref": "#/definitions/Domain" },
+        "sessionId": { "$ref": "#/definitions/ID" },
+        "draftId": { "type": "string", "minLength": 1 },
+        "room": { "type": "string", "minLength": 1 },
+        "streamerSafe": { "$ref": "#/definitions/Bool" },
+        "meta": { "type": "object", "additionalProperties": true }
+      }
+    },
+
+    "StartData": {
+      "allOf": [
+        { "$ref": "#/definitions/CommonFields" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "startAtStepIndex": { "type": "integer", "minimum": 0 },
+            "keepAwake": { "$ref": "#/definitions/Bool" },
+            "speech": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": { "$ref": "#/definitions/Bool" },
+                "lang": { "type": "string" },
+                "voiceHint": { "type": "string" },
+                "rate": { "type": "number", "minimum": 0.1, "maximum": 3.0 },
+                "pitch": { "type": "number", "minimum": 0.0, "maximum": 2.0 },
+                "volume": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+              }
+            }
+          }
+        }
+      ]
+    },
+
+    "StopData": {
+      "allOf": [
+        { "$ref": "#/definitions/CommonFields" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "reason": {
+              "type": "string",
+              "enum": ["user", "completed", "error", "navigation", "remote"]
+            }
+          }
+        }
+      ]
+    },
+
+    "PauseResumeData": { "$ref": "#/definitions/CommonFields" },
+
+    "StepNextPrevData": {
+      "allOf": [
+        { "$ref": "#/definitions/CommonFields" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "announce": { "$ref": "#/definitions/Bool" }
+          }
+        }
+      ]
+    },
+
+    "StepGoData": {
+      "allOf": [
+        { "$ref": "#/definitions/CommonFields" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["stepIndex"],
+          "properties": {
+            "stepIndex": { "type": "integer", "minimum": 0 },
+            "announce": { "$ref": "#/definitions/Bool" }
+          }
+        }
+      ]
+    },
+
+    "AnnounceData": {
+      "allOf": [
+        { "$ref": "#/definitions/CommonFields" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["text"],
+          "properties": {
+            "text": { "type": "string", "minLength": 1 },
+            "lang": { "type": "string" },
+            "tag": { "type": "string" }
+          }
+        }
+      ]
+    },
+
+    "KeepAwakeData": {
+      "allOf": [
+        { "$ref": "#/definitions/CommonFields" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["on"],
+          "properties": {
+            "on": { "$ref": "#/definitions/Bool" }
+          }
+        }
+      ]
+    },
+
+    "StateSyncData": {
+      "allOf": [
+        { "$ref": "#/definitions/CommonFields" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["stepIndex"],
+          "properties": {
+            "stepIndex": { "type": "integer", "minimum": 0 },
+            "timerStates": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "label", "remainingMs", "status"],
+                "properties": {
+                  "id": { "$ref": "#/definitions/ID" },
+                  "label": { "type": "string" },
+                  "remainingMs": { "$ref": "#/definitions/PositiveMs" },
+                  "status": { "type": "string", "enum": ["idle", "running", "paused", "done", "canceled"] }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+
+    "TimerStartData": {
+      "allOf": [
+        { "$ref": "#/definitions/CommonFields" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["timerId", "durationMs"],
+          "properties": {
+            "timerId": { "$ref": "#/definitions/ID" },
+            "label": { "type": "string" },
+            "durationMs": { "$ref": "#/definitions/PositiveMs" },
+            "autobeep": { "$ref": "#/definitions/Bool" }
+          }
+        }
+      ]
+    },
+
+    "TimerSimpleData": {
+      "allOf": [
+        { "$ref": "#/definitions/CommonFields" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["timerId"],
+          "properties": {
+            "timerId": { "$ref": "#/definitions/ID" }
+          }
+        }
+      ]
+    }
+  }
+}

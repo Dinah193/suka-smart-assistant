@@ -1,0 +1,288 @@
+{
+  "id": "pat.textiles.wardrobe_basics_builder",
+  "domain": "textiles",
+  "kind": "planning_pattern",
+  "title": "Wardrobe Basics Builder",
+  "intentTags": [
+    "intent:wardrobe",
+    "mode:build",
+    "workflow:standard_work"
+  ],
+  "description": "Plan a small set of durable basics with measured sizing, fabric planning, and staged sewing sessions.",
+  "inputs": [
+    {
+      "key": "householdSize",
+      "type": "number",
+      "label": "Household size",
+      "required": false,
+      "default": 4,
+      "min": 1,
+      "max": 30
+    },
+    {
+      "key": "timeBudgetMin",
+      "type": "number",
+      "label": "Time budget (minutes)",
+      "required": false,
+      "default": 120,
+      "min": 30,
+      "max": 960
+    },
+    {
+      "key": "equipment",
+      "type": "multiselect",
+      "label": "Equipment",
+      "required": false,
+      "options": [
+        "needle_thread",
+        "machine_basic",
+        "machine_serger",
+        "loom",
+        "spindle",
+        "dye_pots",
+        "iron"
+      ]
+    },
+    {
+      "key": "fiberPreferences",
+      "type": "multiselect",
+      "label": "Fiber preferences",
+      "required": false,
+      "options": [
+        "cotton",
+        "linen",
+        "wool",
+        "hemp",
+        "silk",
+        "synthetic"
+      ],
+      "default": [
+        "cotton",
+        "linen"
+      ]
+    },
+    {
+      "key": "budgetCap",
+      "type": "number",
+      "label": "Budget cap ($)",
+      "required": false,
+      "default": 0,
+      "min": 0,
+      "max": 5000
+    },
+    {
+      "key": "items",
+      "type": "multiselect",
+      "label": "Items involved",
+      "required": false,
+      "options": [
+        "shirts",
+        "pants",
+        "dresses",
+        "headwraps",
+        "aprons",
+        "blankets",
+        "children_clothes",
+        "workwear"
+      ]
+    },
+    {
+      "key": "skillLevel",
+      "type": "select",
+      "label": "Skill level",
+      "required": false,
+      "default": "beginner",
+      "options": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "type": "sessions",
+      "notes": "Blueprint bundle for cutting + sewing + finishing."
+    },
+    {
+      "type": "shoppingDelta",
+      "notes": "Fabric/notions delta."
+    }
+  ],
+  "constraints": [
+    {
+      "type": "safety",
+      "tag": "constraint:safety",
+      "notes": "Heat, dyes, sharp tools—surface safety checks."
+    },
+    {
+      "type": "time",
+      "tag": "constraint:time_budget",
+      "notes": "Respect time caps; propose splitting sessions."
+    }
+  ],
+  "requires": [
+    {
+      "type": "inventory",
+      "tag": "needsTextileInventory",
+      "optional": true
+    }
+  ],
+  "produces": [
+    {
+      "type": "session",
+      "domain": "textiles",
+      "title": "Wardrobe Basics Builder Session"
+    }
+  ],
+  "steps": [
+    {
+      "id": "measure",
+      "title": "Measure + size plan",
+      "kind": "template",
+      "timeboxMin": 20
+    },
+    {
+      "id": "design",
+      "title": "Select basics + fabric plan",
+      "kind": "template",
+      "timeboxMin": 25
+    },
+    {
+      "id": "cut",
+      "title": "Cutting session",
+      "kind": "template",
+      "timeboxMin": 45
+    },
+    {
+      "id": "sew",
+      "title": "Sewing session(s)",
+      "kind": "template",
+      "timeboxMin": 120
+    },
+    {
+      "id": "finish",
+      "title": "Finish + press + log",
+      "kind": "template",
+      "timeboxMin": 20
+    }
+  ],
+  "kpis": [
+    {
+      "key": "fit_success",
+      "label": "Fit success",
+      "unit": "%",
+      "target": "≥80%"
+    },
+    {
+      "key": "rework_rate",
+      "label": "Rework rate",
+      "unit": "%",
+      "target": "≤10%"
+    }
+  ],
+  "lean": {
+    "wasteTargets": [
+      "defects",
+      "overprocessing"
+    ],
+    "countermeasures": [
+      {
+        "waste": "defects",
+        "do": "Mock fit check before final seam."
+      }
+    ]
+  },
+  "ui": {
+    "form": {
+      "fields": [
+        {
+          "key": "householdSize",
+          "type": "number",
+          "label": "Household size",
+          "required": false,
+          "default": 4,
+          "min": 1,
+          "max": 30
+        },
+        {
+          "key": "timeBudgetMin",
+          "type": "number",
+          "label": "Time budget (minutes)",
+          "required": false,
+          "default": 120,
+          "min": 30,
+          "max": 960
+        },
+        {
+          "key": "equipment",
+          "type": "multiselect",
+          "label": "Equipment",
+          "required": false,
+          "options": [
+            "needle_thread",
+            "machine_basic",
+            "machine_serger",
+            "loom",
+            "spindle",
+            "dye_pots",
+            "iron"
+          ]
+        },
+        {
+          "key": "fiberPreferences",
+          "type": "multiselect",
+          "label": "Fiber preferences",
+          "required": false,
+          "options": [
+            "cotton",
+            "linen",
+            "wool",
+            "hemp",
+            "silk",
+            "synthetic"
+          ],
+          "default": [
+            "cotton",
+            "linen"
+          ]
+        },
+        {
+          "key": "budgetCap",
+          "type": "number",
+          "label": "Budget cap ($)",
+          "required": false,
+          "default": 0,
+          "min": 0,
+          "max": 5000
+        },
+        {
+          "key": "basicsCount",
+          "type": "slider",
+          "label": "Number of basics",
+          "min": 1,
+          "max": 12,
+          "step": 1,
+          "default": 4
+        }
+      ]
+    },
+    "help": {
+      "title": "Wardrobe Basics",
+      "intro": "Build durable basics with staged sessions.",
+      "tips": [
+        "Measure first.",
+        "Cut in batches, sew in batches."
+      ]
+    }
+  },
+  "links": {
+    "storehousePatterns": [
+      "pat.storehouse.monthly_cycle_count"
+    ],
+    "homesteadPatterns": [
+      "pat.homestead.mixed_subsistence"
+    ]
+  },
+  "variants": []
+}

@@ -1,0 +1,134 @@
+{
+  "id": "lean.sw.seasonal_preservation_push",
+  "domain": "lean",
+  "kind": "standard_work",
+  "title": "Standard Work: Seasonal Preservation Push",
+  "intentTags": [
+    "lean:standard_work"
+  ],
+  "inputs": [
+    {
+      "key": "timeBudgetMinutes",
+      "label": "Time budget (minutes)",
+      "type": "number"
+    },
+    {
+      "key": "householdSize",
+      "label": "Household size",
+      "type": "number",
+      "default": 4
+    },
+    {
+      "key": "inventorySnapshot",
+      "label": "Inventory snapshot",
+      "type": "object"
+    },
+    {
+      "key": "quietHours",
+      "label": "Quiet hours / Sabbath guard",
+      "type": "object",
+      "default": {
+        "enabled": false
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "key": "sessionBlueprintSteps",
+      "label": "Convertible session steps",
+      "type": "array",
+      "required": true
+    }
+  ],
+  "constraints": [
+    "definitionOfDoneRequired",
+    "timeboxesRequired",
+    "convertibleToSessionSteps"
+  ],
+  "steps": [
+    {
+      "id": "convert",
+      "title": "Convert to session blueprint steps",
+      "template": "tpl.lean.standardWork.toSession",
+      "domain": "lean",
+      "hints": [
+        "emitHintTag:convertToSession"
+      ]
+    }
+  ],
+  "kpis": [
+    {
+      "key": "completionRate",
+      "label": "Completion rate",
+      "direction": "up",
+      "unit": "%"
+    },
+    {
+      "key": "timeVariance",
+      "label": "Time variance",
+      "direction": "down",
+      "unit": "%"
+    }
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial Lean Six Sigma catalog."
+      }
+    ]
+  },
+  "standardWork": {
+    "steps": [
+      {
+        "id": "sw.step.forecast",
+        "title": "Yield/Surplus forecast",
+        "timeboxMin": 20,
+        "definitionOfDone": "Forecast confirmed; batch sizes set by capacity.",
+        "sessionTemplate": "tpl.homestead.yield.aggregate",
+        "domain": "homestead"
+      },
+      {
+        "id": "sw.step.sort",
+        "title": "Sort + stage",
+        "timeboxMin": 30,
+        "definitionOfDone": "Produce sorted into use-fresh / preserve-now / store-hold bins.",
+        "sessionTemplate": "tpl.harvest.sort.stage",
+        "domain": "homestead"
+      },
+      {
+        "id": "sw.step.methods",
+        "title": "Select methods by constraints",
+        "timeboxMin": 15,
+        "definitionOfDone": "Preservation plan created based on equipment/time/budget.",
+        "sessionTemplate": "tpl.preservation.plan.build",
+        "domain": "homestead"
+      },
+      {
+        "id": "sw.step.preserve",
+        "title": "Preserve in batches",
+        "timeboxMin": 90,
+        "definitionOfDone": "Target batch completed; labels prepared.",
+        "sessionTemplate": "tpl.preservation.run.batch",
+        "domain": "homestead"
+      },
+      {
+        "id": "sw.step.store",
+        "title": "Store + label + inventory update",
+        "timeboxMin": 25,
+        "definitionOfDone": "Goods stored in correct zones; inventory updated; FIFO labels applied.",
+        "sessionTemplate": "tpl.storehouse.store.label.update",
+        "domain": "storehouse"
+      }
+    ]
+  },
+  "links": {
+    "affectsPatterns": [
+      "pat.meals.preservation_first",
+      "pat.homestead.garden_led",
+      "pat.storehouse.winter_reserve"
+    ]
+  }
+}

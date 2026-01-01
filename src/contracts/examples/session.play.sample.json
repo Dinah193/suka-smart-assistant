@@ -1,0 +1,9 @@
+{
+  "type": "session.play.start",
+  "ts": "2025-11-07T00:00:00.000Z",
+  "source": "pages.cooking.play",
+  "data": {
+    "domain": "cooking",
+    "sessionId": "sess_abc123"
+  }
+}

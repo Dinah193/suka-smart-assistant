@@ -1,0 +1,233 @@
+digraph SukaSystem {
+  graph [fontname="Inter", fontsize=10, rankdir=LR, splines=true, overlap=false, pad="0.1", nodesep="0.35", ranksep="0.6"];
+  node  [fontname="Inter", fontsize=9, shape=box, style="rounded,filled", fillcolor="#ffffff", color="#C7C9D1"];
+  edge  [fontname="Inter", fontsize=9, color="#6B7280", arrowsize=0.7];
+
+  /* ------------------------------ Legend ------------------------------ */
+  subgraph cluster_legend {
+    label="Legend"; fontsize=9; color="#E5E7EB";
+    l1 [label="UI / Pages",        fillcolor="#EEF2FF"];
+    l2 [label="Features",          fillcolor="#F0FDFA"];
+    l3 [label="Engines",           fillcolor="#FFF7ED"];
+    l4 [label="Managers",          fillcolor="#FEF3C7"];
+    l5 [label="Services",          fillcolor="#F3F4F6"];
+    l6 [label="Stores",            fillcolor="#ECFCCB"];
+    l7 [label="Automation/Orch.",  fillcolor="#FFE4E6"];
+    l8 [label="Data / DB",         fillcolor="#FAE8FF"];
+    l9 [label="External / Cloud",  fillcolor="#E0F2FE"];
+  }
+
+  /* ------------------------------ Shared Core ------------------------------ */
+  subgraph cluster_shared {
+    label="Shared Core"; color="#D1D5DB";
+
+    subgraph cluster_orch {
+      label="Automation & Orchestration"; color="#FCA5A5"; style="rounded";
+      EventBus               [label="eventBus\n(@/services/eventBus)", fillcolor="#FFE4E6"];
+      AutomationRuntime      [label="automation/runtime.js\n(Local Event-driven)", fillcolor="#FFE4E6"];
+      RelativeScheduler      [label="RelativeScheduler\n(@/services/schedule/RelativeScheduler)", fillcolor="#FFE4E6"];
+      SessionRunner          [label="SessionRunner\n(@/services/session/SessionRunner)", fillcolor="#FFE4E6"];
+      PrepSessionOrchestrator[label="PrepSessionOrchestrator\n(@/services/session/PrepSessionOrchestrator)", fillcolor="#FFE4E6"];
+      Guards                 [label="Guards: Sabbath / QuietHours / Weather / Inventory\n(@/services/session/guards/*)", fillcolor="#FFE4E6"];
+      NBAOrchestrator        [label="Next Best Action (NBA)\n(@/services/nba/Orchestrator)", fillcolor="#FFE4E6"];
+      PlanStorageRouter      [label="PlanStorageRouter\n(local ➜ cloud)", fillcolor="#FFE4E6"];
+    }
+
+    subgraph cluster_db {
+      label="Data & DB"; color="#E9D5FF";
+      DexieDB         [label="DexieDB\n(@/db)", fillcolor="#FAE8FF"];
+      TablesInventory [label="tables: inventory, supplies, batches,\nplans, sessions, coupons, pricebook,\nrecipes, gardens, animals, tags", fillcolor="#FAE8FF"];
+      FilesSchemas    [label="/schemas/*.json\n(contracts)", fillcolor="#FAE8FF"];
+      FilesFixtures   [label="fixtures/*\n(seed data)", fillcolor="#FAE8FF"];
+    }
+
+    subgraph cluster_services {
+      label="Domain Services"; color="#E5E7EB";
+      ProductResolver        [label="ProductResolver", fillcolor="#F3F4F6"];
+      CouponService          [label="CouponService", fillcolor="#F3F4F6"];
+      StoreCatalogAdapters   [label="StoreCatalogAdapters\n(Walmart/Kroger/Costco/Sam's/Aldi…)", fillcolor="#F3F4F6"];
+      CycleAnalyzer          [label="CycleAnalyzer\n(discount cadence)", fillcolor="#F3F4F6"];
+      PriceComparator        [label="PriceComparator\n(unit/pack math)", fillcolor="#F3F4F6"];
+      OCRWorker              [label="OCR Worker (Tesseract)\n(web worker)", fillcolor="#F3F4F6"];
+      SafetyRules            [label="Safety/Allergen Rules", fillcolor="#F3F4F6"];
+      CalendarMapper         [label="Calendar Mapping Engine\n(Hebrew/Gregorian rules)", fillcolor="#F3F4F6"];
+      Exporters              [label="Exporters (PDF/CSV/ICS)", fillcolor="#F3F4F6"];
+      KnowledgeBase          [label="Engines KB / How-To Library", fillcolor="#F3F4F6"];
+      TemplateConnector      [label="TemplateConnector (remote)\n(read-only market APIs)", fillcolor="#F3F4F6"];
+    }
+
+    subgraph cluster_stores {
+      label="State Stores"; color="#BBF7D0";
+      UseCouponPrefs   [label="useCouponPrefs", fillcolor="#ECFCCB"];
+      UseInventory     [label="useInventory", fillcolor="#ECFCCB"];
+      UseRecipes       [label="useRecipes", fillcolor="#ECFCCB"];
+      UsePlans         [label="usePlans (draft/favorite)", fillcolor="#ECFCCB"];
+      UseSessions      [label="useSessions", fillcolor="#ECFCCB"];
+      UseGarden        [label="useGarden", fillcolor="#ECFCCB"];
+      UseAnimals       [label="useAnimals", fillcolor="#ECFCCB"];
+      UseTags          [label="useTags", fillcolor="#ECFCCB"];
+      UseUserProfile   [label="useUserProfile\n(zone, prefs, roles)", fillcolor="#ECFCCB"];
+      EntitlementFlags [label="Entitlement Flags\n(feature gates)", fillcolor="#ECFCCB"];
+    }
+  }
+
+  /* ------------------------------ SSA (Household App) ------------------------------ */
+  subgraph cluster_ssa {
+    label="Suka Smart Assistant (SSA)"; color="#A7F3D0"; style="rounded";
+
+    subgraph cluster_ssa_ui {
+      label="UI / Pages"; color="#C7D2FE";
+      HomePage          [label="pages/home.jsx\n(Dashboard)", fillcolor="#EEF2FF"];
+      MealsPage         [label="pages/meals/index.jsx", fillcolor="#EEF2FF"];
+      CleaningPage      [label="pages/cleaning/index.jsx", fillcolor="#EEF2FF"];
+      GardenPage        [label="pages/garden/index.jsx", fillcolor="#EEF2FF"];
+      AnimalsPage       [label="pages/animals/index.jsx", fillcolor="#EEF2FF"];
+      InventoryPage     [label="pages/inventory/index.jsx", fillcolor="#EEF2FF"];
+      StorehousePage    [label="pages/storehouse/index.jsx\n(Goals Planner)", fillcolor="#EEF2FF"];
+      SessionsPage      [label="pages/sessions/index.jsx", fillcolor="#EEF2FF"];
+      CalendarPage      [label="pages/calendar.jsx", fillcolor="#EEF2FF"];
+      ScanTrustPage     [label="features/scan-compare-trust/ui\n(Scanner, ScanSheet, CompareTable…)", fillcolor="#EEF2FF"];
+    }
+
+    subgraph cluster_ssa_features {
+      label="Features"; color="#99F6E4";
+      RecipeVault       [label="Recipe Vault + Batch Planner\n(drag/checkbox to session)", fillcolor="#F0FDFA"];
+      BatchSessionTray  [label="Batch Session Planner/Builder", fillcolor="#F0FDFA"];
+      MultiTimerPanel   [label="MultiTimer Panel", fillcolor="#F0FDFA"];
+      IntegratedTaskParser [label="Integrated Task Parser", fillcolor="#F0FDFA"];
+      GardenPlanner     [label="Garden Planner", fillcolor="#F0FDFA"];
+      AnimalPlanner     [label="Animal Planner", fillcolor="#F0FDFA"];
+      PinterestImporter [label="Pinterest / Web Importer", fillcolor="#F0FDFA"];
+      GroceryListGen    [label="Shopping+Grocery List Generator", fillcolor="#F0FDFA"];
+      SafetyBadges      [label="Safety Badges", fillcolor="#F0FDFA"];
+      CoOpPlanningUI    [label="Co-op Planning UI\n(gated by entitlements)", fillcolor="#F0FDFA"];
+    }
+
+    subgraph cluster_ssa_engines {
+      label="Engines"; color="#FED7AA";
+      MealPlanEngine      [label="MealPlanEngine", fillcolor="#FFF7ED"];
+      CleaningPlanManager [label="CleaningPlanManager", fillcolor="#FFF7ED"];
+      GardenQueueManager  [label="GardenQueueManager", fillcolor="#FFF7ED"];
+      AnimalQueueManager  [label="AnimalQueueManager", fillcolor="#FFF7ED"];
+      StorehouseEngine    [label="StorehouseEngine\n(Goals ➜ Targets)", fillcolor="#FFF7ED"];
+      InventoryEngine     [label="InventoryEngine\n(Execution ➜ Stock Levels)", fillcolor="#FFF7ED"];
+      CoopPlannerEngine   [label="Co-op Planner Engine\n(plan-with-others)", fillcolor="#FFF7ED"];
+      CalendarEngine      [label="CalendarEngine\n(ICS, recurring, guards)", fillcolor="#FFF7ED"];
+    }
+
+    subgraph cluster_ssa_mgrs {
+      label="Managers"; color="#FDE68A";
+      PlanManager       [label="Plan Manager\n(drafts/favorites/templates)", fillcolor="#FEF3C7"];
+      SessionManager    [label="Session Manager\n(start/pause/resume/undo)", fillcolor="#FEF3C7"];
+      InventorySync     [label="InventorySync\n(Recipe↔Inventory)", fillcolor="#FEF3C7"];
+      PrepChecklist     [label="Prep Checklist Generator", fillcolor="#FEF3C7"];
+      LabelPrinter      [label="Label Printer", fillcolor="#FEF3C7"];
+      PricebookManager  [label="Pricebook Manager", fillcolor="#FEF3C7"];
+    }
+  }
+
+  /* ------------------------------ External / Cloud ------------------------------ */
+  subgraph cluster_external {
+    label="External Integrations"; color="#A7F3D0";
+    GoogleCalendar  [label="Google Calendar", fillcolor="#E0F2FE"];
+    CloudDrive      [label="Cloud Storage\n(Drive/S3)", fillcolor="#E0F2FE"];
+    PriceAPIs       [label="Store APIs / Scrapers", fillcolor="#E0F2FE"];
+    CouponProviders [label="Coupons/Ibotta/Rakuten…", fillcolor="#E0F2FE"];
+    TimeAndDateAPI  [label="Astronomy Data\n(timeanddate)", fillcolor="#E0F2FE"];
+    MapWaze         [label="Waze / Maps", fillcolor="#E0F2FE"];
+    TemplateMarket  [label="Template Market (remote)\n(read-only endpoints)", fillcolor="#E0F2FE"];
+  }
+
+  /* ------------------------------ Identity / Entitlements ------------------------------ */
+  subgraph cluster_identity {
+    label="Identity & Gating"; color="#F3F4F6";
+    AppAuth          [label="AppAuth\n(local/email)", fillcolor="#F3F4F6"];
+    SVFFHAuthBridge  [label="SVFFHAuthBridge\n(OIDC/SAML/Token verify)", fillcolor="#F3F4F6"];
+    SVFFHClaims      [label="SVFFH Claims → Tiers/Roles", fillcolor="#F3F4F6"];
+  }
+
+  /* ============================== Edges: Core Flow ============================== */
+
+  /* Events & Automation backbone */
+  HomePage -> EventBus [label="dispatch UI events"];
+  EventBus -> AutomationRuntime [label="emit"];
+  AutomationRuntime -> RelativeScheduler [label="schedule"];
+  AutomationRuntime -> SessionRunner [label="run"];
+  SessionRunner -> PrepSessionOrchestrator [label="delegate"];
+  {MealPlanEngine CleaningPlanManager GardenQueueManager AnimalQueueManager StorehouseEngine InventoryEngine} -> NBAOrchestrator [label="suggest NBAs"];
+  PlanStorageRouter -> CloudDrive [label="sync/export"];
+
+  /* DB relations */
+  DexieDB -> {TablesInventory UseInventory UseRecipes UsePlans UseSessions UseGarden UseAnimals UseTags UseUserProfile EntitlementFlags} [label="tables"];
+  FilesSchemas -> AutomationRuntime [label="validate schedules"];
+  FilesFixtures -> DexieDB [label="seed"];
+
+  /* Features wiring (SSA) */
+  HomePage -> {RecipeVault BatchSessionTray GardenPlanner AnimalPlanner PinterestImporter GroceryListGen MultiTimerPanel IntegratedTaskParser SafetyBadges ScanTrustPage StorehousePage InventoryPage SessionsPage CalendarPage CoOpPlanningUI} [label="widgets/sections"];
+  RecipeVault -> {MealPlanEngine InventorySync PlanManager} [label="select recipes ➜ plan"];
+  BatchSessionTray -> {SessionManager PrepSessionOrchestrator MultiTimerPanel} [label="build session"];
+  IntegratedTaskParser -> {SessionManager PrepChecklist LabelPrinter} [label="tasks ➜ steps"];
+  GardenPlanner -> GardenQueueManager;
+  AnimalPlanner -> AnimalQueueManager;
+  StorehousePage -> StorehouseEngine;
+  InventoryPage -> InventoryEngine;
+  SessionsPage -> {SessionManager MultiTimerPanel};
+  CalendarPage -> CalendarEngine;
+
+  /* Engines ⇄ Managers ⇄ Stores */
+  MealPlanEngine -> {PlanManager UsePlans} [label="create/update plans"];
+  CleaningPlanManager -> {PlanManager UsePlans};
+  GardenQueueManager -> {PlanManager UsePlans UseGarden};
+  AnimalQueueManager -> {PlanManager UsePlans UseAnimals};
+  StorehouseEngine -> {UseUserProfile UseTags UsePlans} [label="goal targets"];
+  InventoryEngine -> {UseInventory UsePlans};
+  PlanManager -> {UsePlans UseTags};
+  SessionManager -> {UseSessions UsePlans};
+  InventorySync -> {UseInventory UseRecipes UsePlans} [label="bidirectional"];
+  PrepChecklist -> UsePlans;
+  LabelPrinter -> UsePlans;
+
+  /* Engines ⇄ Automation */
+  {MealPlanEngine CleaningPlanManager GardenQueueManager AnimalQueueManager InventoryEngine} -> AutomationRuntime [label="emit plan/session events"];
+  RelativeScheduler -> CalendarEngine [label="generate occurrences"];
+  CalendarEngine -> {GoogleCalendar Exporters CalendarMapper} [label="sync/ics/map"];
+
+  /* Scan • Compare • Trust pipeline */
+  ScanTrustPage -> OCRWorker [label="image/scan"];
+  OCRWorker -> ProductResolver [label="normalize"];
+  ProductResolver -> {PriceComparator StoreCatalogAdapters SafetyRules} [label="enrich"];
+  StoreCatalogAdapters -> PriceAPIs;
+  {CouponService CycleAnalyzer} -> CouponProviders;
+  PriceComparator -> {CouponService CycleAnalyzer PricebookManager} [label="compare & learn"];
+  {PricebookManager CouponService CycleAnalyzer SafetyRules} -> RecipeVault [label="insights & flags"];
+  {ProductResolver PriceComparator SafetyRules} -> InventorySync [label="on add/scan"];
+
+  /* Co-op planning (gated) */
+  CoOpPlanningUI -> CoopPlannerEngine;
+  EntitlementFlags -> {CoOpPlanningUI CoopPlannerEngine TemplateConnector} [label="enable if SVFFH claims"];
+
+  /* Template market (read-only, gated) */
+  TemplateConnector -> TemplateMarket [label="fetch templates"];
+  TemplateConnector -> PlanManager [label="import as drafts/favorites"];
+
+  /* Knowledge base usage */
+  {MealPlanEngine CleaningPlanManager GardenQueueManager AnimalQueueManager StorehouseEngine InventoryEngine ScanTrustPage} -> KnowledgeBase [label="inline docs / tips"];
+
+  /* Calendar & Guards */
+  {SessionRunner PrepSessionOrchestrator} -> Guards [label="respect"];
+  Guards -> RelativeScheduler [label="gate runs"];
+  CalendarMapper -> TimeAndDateAPI [label="astronomy rules"];
+
+  /* Storehouse vs Inventory clarity */
+  StorehouseEngine -> InventoryEngine [label="targets ➜ picklists"];
+  StorehousePage -> HomePage [label="KPIs, progress"];
+  InventoryPage  -> HomePage [label="stock levels, alerts"];
+
+  /* Identity & entitlements */
+  AppAuth -> UseUserProfile [label="local account"];
+  SVFFHAuthBridge -> SVFFHClaims [label="token → claims"];
+  SVFFHClaims -> EntitlementFlags [label="derive feature flags"];
+
+  /* Pages consume Stores directly for reactive UI */
+  {HomePage MealsPage CleaningPage GardenPage AnimalsPage InventoryPage StorehousePage SessionsPage CalendarPage ScanTrustPage} -> {UseUserProfile UsePlans UseSessions UseInventory UseGarden UseAnimals UseTags UseRecipes EntitlementFlags} [label="subscribe"];
+}

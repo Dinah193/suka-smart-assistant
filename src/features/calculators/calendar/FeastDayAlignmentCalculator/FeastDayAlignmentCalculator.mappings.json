@@ -1,0 +1,165 @@
+{
+  "$schema": "../../../../schemas/planningGraph/mappings.schema.json",
+  "id": "calendar.feastDayAlignment.mappings",
+  "nodeId": "calendar.feastDayAlignment",
+  "domain": "storehouse",
+  "version": 1,
+  "calculatorId": "calendar.FeastDayAlignmentCalculator",
+  "nextSteps": [
+    {
+      "id": "feastDayAlignment.toCookingFeastMenus",
+      "label": "Build feast menus from aligned dates",
+      "description": "Use aligned feast dates to generate or refine feast menus and batch cooking sessions.",
+      "domain": "cooking",
+      "actionType": "session.suggested",
+      "payloadTemplate": {
+        "sourceNodeId": "calendar.feastDayAlignment",
+        "targetNodeId": "cooking.feastMenus",
+        "feastCode": "{{feast.code}}",
+        "feastLabel": "{{feast.label}}",
+        "feastStart": "{{feast.gregorianStartDate}}",
+        "feastEnd": "{{feast.gregorianEndDate}}",
+        "prepWindowStart": "{{feast.prepWindowStart}}",
+        "prepWindowEnd": "{{feast.prepWindowEnd}}",
+        "tags": [
+          "feast",
+          "menu-planning",
+          "batch-cooking"
+        ]
+      }
+    },
+    {
+      "id": "feastDayAlignment.toCleaningPrep",
+      "label": "Schedule feast cleaning prep blocks",
+      "description": "Use feast alignment to schedule pre-feast cleaning sessions around quiet hours and sabbath guardrails.",
+      "domain": "cleaning",
+      "actionType": "session.suggested",
+      "payloadTemplate": {
+        "sourceNodeId": "calendar.feastDayAlignment",
+        "targetNodeId": "cleaning.feastPrep",
+        "feastCode": "{{feast.code}}",
+        "feastLabel": "{{feast.label}}",
+        "feastStart": "{{feast.gregorianStartDate}}",
+        "feastEnd": "{{feast.gregorianEndDate}}",
+        "prepWindowStart": "{{feast.prepWindowStart}}",
+        "prepWindowEnd": "{{feast.prepWindowEnd}}",
+        "tags": [
+          "feast",
+          "cleaning",
+          "quiet-hours-check"
+        ]
+      }
+    },
+    {
+      "id": "feastDayAlignment.toPreservationFlows",
+      "label": "Plan preservation flows for feasts and leftovers",
+      "description": "From feast dates, create preservation sessions for make-ahead dishes and planned leftovers.",
+      "domain": "preservation",
+      "actionType": "session.suggested",
+      "payloadTemplate": {
+        "sourceNodeId": "calendar.feastDayAlignment",
+        "targetNodeId": "preservation.feastFlows",
+        "feastCode": "{{feast.code}}",
+        "feastLabel": "{{feast.label}}",
+        "feastStart": "{{feast.gregorianStartDate}}",
+        "feastEnd": "{{feast.gregorianEndDate}}",
+        "prepWindowStart": "{{feast.prepWindowStart}}",
+        "prepWindowEnd": "{{feast.prepWindowEnd}}",
+        "tags": [
+          "feast",
+          "preservation",
+          "leftovers"
+        ]
+      }
+    },
+    {
+      "id": "feastDayAlignment.toStorehouseFeastInventory",
+      "label": "Align feast inventory and storehouse pulls",
+      "description": "Use feast alignment to calculate storehouse pulls, shopping gaps, and bulk purchases.",
+      "domain": "storehouse",
+      "actionType": "plan.update",
+      "payloadTemplate": {
+        "sourceNodeId": "calendar.feastDayAlignment",
+        "targetNodeId": "storehouse.feastInventory",
+        "feastCode": "{{feast.code}}",
+        "feastLabel": "{{feast.label}}",
+        "feastStart": "{{feast.gregorianStartDate}}",
+        "feastEnd": "{{feast.gregorianEndDate}}",
+        "prepWindowStart": "{{feast.prepWindowStart}}",
+        "prepWindowEnd": "{{feast.prepWindowEnd}}",
+        "tags": [
+          "feast",
+          "inventory",
+          "shopping-list"
+        ]
+      }
+    },
+    {
+      "id": "feastDayAlignment.toGardenFeastPlantings",
+      "label": "Tie plantings to upcoming feasts",
+      "description": "Create garden planning prompts that align specific crops or harvest windows with key feasts.",
+      "domain": "garden",
+      "actionType": "plan.update",
+      "payloadTemplate": {
+        "sourceNodeId": "calendar.feastDayAlignment",
+        "targetNodeId": "garden.feastPlantings",
+        "feastCode": "{{feast.code}}",
+        "feastLabel": "{{feast.label}}",
+        "hebrewMonthIndex": "{{feast.hebrewMonthIndex}}",
+        "hebrewDay": "{{feast.hebrewDay}}",
+        "feastStart": "{{feast.gregorianStartDate}}",
+        "feastEnd": "{{feast.gregorianEndDate}}",
+        "tags": [
+          "feast",
+          "garden",
+          "seasonal"
+        ]
+      }
+    },
+    {
+      "id": "feastDayAlignment.toHouseholdDecorAndAtmosphere",
+      "label": "Suggest decor, table, and atmosphere sessions",
+      "description": "Use feast information to propose small decorating and atmosphere-building sessions ahead of time.",
+      "domain": "storehouse",
+      "actionType": "session.suggested",
+      "payloadTemplate": {
+        "sourceNodeId": "calendar.feastDayAlignment",
+        "targetNodeId": "storehouse.feastDecorAtmosphere",
+        "feastCode": "{{feast.code}}",
+        "feastLabel": "{{feast.label}}",
+        "feastStart": "{{feast.gregorianStartDate}}",
+        "feastEnd": "{{feast.gregorianEndDate}}",
+        "prepWindowStart": "{{feast.prepWindowStart}}",
+        "prepWindowEnd": "{{feast.prepWindowEnd}}",
+        "tags": [
+          "feast",
+          "decor",
+          "atmosphere"
+        ]
+      }
+    },
+    {
+      "id": "feastDayAlignment.toAnimalAndButcheryPlanning",
+      "label": "Align animal processing and butchery with feasts",
+      "description": "When applicable, use feast dates to time animal acquisition, butchery sessions, and meat curing.",
+      "domain": "animals",
+      "actionType": "session.suggested",
+      "payloadTemplate": {
+        "sourceNodeId": "calendar.feastDayAlignment",
+        "targetNodeId": "animals.feastButcheryPlanning",
+        "feastCode": "{{feast.code}}",
+        "feastLabel": "{{feast.label}}",
+        "feastStart": "{{feast.gregorianStartDate}}",
+        "feastEnd": "{{feast.gregorianEndDate}}",
+        "prepWindowStart": "{{feast.prepWindowStart}}",
+        "prepWindowEnd": "{{feast.prepWindowEnd}}",
+        "tags": [
+          "feast",
+          "animals",
+          "butchery",
+          "meat-yields"
+        ]
+      }
+    }
+  ]
+}

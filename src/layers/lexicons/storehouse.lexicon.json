@@ -1,0 +1,394 @@
+{
+  "meta": {
+    "id": "lex.storehouse.domain",
+    "domain": "storehouse",
+    "version": "1.0.0",
+    "title": "Storehouse Domain Lexicon",
+    "description": "Pantry/storehouse vocabulary routing to storehouse patterns. Emits constraints (budget/space/time caps) and links to inventory categories.",
+    "updatedAt": "2025-12-27",
+    "tags": [
+      "storehouse",
+      "inventory",
+      "planning"
+    ]
+  },
+  "methods": {
+    "pat.storehouse.restock.weekly": {
+      "label": "Weekly storehouse restock pattern",
+      "domain": "storehouse",
+      "intentTags": [
+        "plan:storehouse",
+        "horizon:week"
+      ]
+    },
+    "pat.storehouse.pantry.reset": {
+      "label": "Pantry reset + rezone pattern",
+      "domain": "storehouse",
+      "intentTags": [
+        "plan:storehouse",
+        "mode:reset"
+      ]
+    },
+    "pat.storehouse.inventory.snapshot": {
+      "label": "Inventory snapshot + cycle count pattern",
+      "domain": "storehouse",
+      "intentTags": [
+        "plan:storehouse",
+        "mode:inventory"
+      ]
+    },
+    "pat.storehouse.deep.pantry.build": {
+      "label": "Deep pantry/buffer stock build pattern",
+      "domain": "storehouse",
+      "intentTags": [
+        "plan:storehouse",
+        "mode:bufferStock"
+      ]
+    },
+    "pat.storehouse.root.cellar.manage": {
+      "label": "Root cellar management pattern",
+      "domain": "storehouse",
+      "intentTags": [
+        "plan:storehouse",
+        "storage:rootCellar"
+      ]
+    },
+    "inv.cat.dry": {
+      "label": "Inventory category: dry",
+      "domain": "storehouse",
+      "intentTags": [
+        "inventory:dry"
+      ]
+    },
+    "inv.cat.cold": {
+      "label": "Inventory category: cold",
+      "domain": "storehouse",
+      "intentTags": [
+        "inventory:cold"
+      ]
+    },
+    "inv.cat.frozen": {
+      "label": "Inventory category: frozen",
+      "domain": "storehouse",
+      "intentTags": [
+        "inventory:frozen"
+      ]
+    },
+    "inv.cat.rootcellar": {
+      "label": "Inventory category: root cellar",
+      "domain": "storehouse",
+      "intentTags": [
+        "inventory:root_cellar"
+      ]
+    },
+    "constraint.budget_cap": {
+      "label": "Constraint: budget cap",
+      "domain": "storehouse",
+      "intentTags": [
+        "constraint:budget"
+      ]
+    },
+    "constraint.space_cap": {
+      "label": "Constraint: space cap",
+      "domain": "storehouse",
+      "intentTags": [
+        "constraint:space"
+      ]
+    },
+    "constraint.time_cap": {
+      "label": "Constraint: time cap",
+      "domain": "storehouse",
+      "intentTags": [
+        "constraint:time"
+      ]
+    },
+    "concept.fifo": {
+      "label": "Concept: FIFO rotation",
+      "domain": "storehouse",
+      "intentTags": [
+        "concept:fifo"
+      ]
+    },
+    "concept.rotate": {
+      "label": "Concept: rotation",
+      "domain": "storehouse",
+      "intentTags": [
+        "concept:rotation"
+      ]
+    },
+    "concept.buffer_stock": {
+      "label": "Concept: buffer stock",
+      "domain": "storehouse",
+      "intentTags": [
+        "concept:buffer_stock"
+      ]
+    }
+  },
+  "synonyms": {
+    "restock": {
+      "methodIds": [
+        "pat.storehouse.restock.weekly"
+      ],
+      "boost": 1.3
+    },
+    "stock up": {
+      "methodIds": [
+        "pat.storehouse.deep.pantry.build"
+      ],
+      "boost": 1.25
+    },
+    "deep pantry": {
+      "methodIds": [
+        "pat.storehouse.deep.pantry.build",
+        "concept.buffer_stock"
+      ],
+      "boost": 1.45
+    },
+    "buffer stock": {
+      "methodIds": [
+        "pat.storehouse.deep.pantry.build",
+        "concept.buffer_stock"
+      ],
+      "boost": 1.35
+    },
+    "pantry reset": {
+      "methodIds": [
+        "pat.storehouse.pantry.reset"
+      ],
+      "boost": 1.6
+    },
+    "inventory": {
+      "methodIds": [
+        "pat.storehouse.inventory.snapshot"
+      ],
+      "boost": 1.1,
+      "notes": "Generic; refined by phrases/rules"
+    },
+    "inventory snapshot": {
+      "methodIds": [
+        "pat.storehouse.inventory.snapshot"
+      ],
+      "boost": 1.55
+    },
+    "cycle count": {
+      "methodIds": [
+        "pat.storehouse.inventory.snapshot"
+      ],
+      "boost": 1.4
+    },
+    "rotate": {
+      "methodIds": [
+        "concept.rotate",
+        "pat.storehouse.pantry.reset"
+      ],
+      "boost": 1.15
+    },
+    "fifo": {
+      "methodIds": [
+        "concept.fifo",
+        "pat.storehouse.pantry.reset"
+      ],
+      "boost": 1.25
+    },
+    "first in first out": {
+      "methodIds": [
+        "concept.fifo"
+      ],
+      "boost": 1.2
+    },
+    "root cellar": {
+      "methodIds": [
+        "pat.storehouse.root.cellar.manage",
+        "inv.cat.rootcellar"
+      ],
+      "boost": 1.6
+    },
+    "dry goods": {
+      "methodIds": [
+        "inv.cat.dry"
+      ],
+      "boost": 1.2
+    },
+    "pantry": {
+      "methodIds": [
+        "inv.cat.dry"
+      ],
+      "boost": 1.0
+    },
+    "fridge": {
+      "methodIds": [
+        "inv.cat.cold"
+      ],
+      "boost": 1.1
+    },
+    "refrigerator": {
+      "methodIds": [
+        "inv.cat.cold"
+      ],
+      "boost": 1.1
+    },
+    "freezer": {
+      "methodIds": [
+        "inv.cat.frozen"
+      ],
+      "boost": 1.1
+    },
+    "on a budget": {
+      "methodIds": [
+        "constraint.budget_cap"
+      ],
+      "boost": 1.15
+    },
+    "limited budget": {
+      "methodIds": [
+        "constraint.budget_cap"
+      ],
+      "boost": 1.2
+    },
+    "small pantry": {
+      "methodIds": [
+        "constraint.space_cap"
+      ],
+      "boost": 1.15
+    },
+    "limited space": {
+      "methodIds": [
+        "constraint.space_cap"
+      ],
+      "boost": 1.2
+    },
+    "short on time": {
+      "methodIds": [
+        "constraint.time_cap"
+      ],
+      "boost": 1.15
+    },
+    "time cap": {
+      "methodIds": [
+        "constraint.time_cap"
+      ],
+      "boost": 1.1
+    }
+  },
+  "phrases": [
+    {
+      "text": "restock the pantry for the week",
+      "methodIds": [
+        "pat.storehouse.restock.weekly"
+      ],
+      "boost": 1.5
+    },
+    {
+      "text": "do a pantry reset and label everything",
+      "methodIds": [
+        "pat.storehouse.pantry.reset",
+        "concept.rotate"
+      ],
+      "boost": 1.55
+    },
+    {
+      "text": "set up fifo rotation",
+      "methodIds": [
+        "concept.fifo",
+        "pat.storehouse.pantry.reset"
+      ],
+      "boost": 1.6
+    },
+    {
+      "text": "inventory snapshot of dry goods",
+      "methodIds": [
+        "pat.storehouse.inventory.snapshot",
+        "inv.cat.dry"
+      ],
+      "boost": 1.55
+    },
+    {
+      "text": "inventory the freezer",
+      "methodIds": [
+        "pat.storehouse.inventory.snapshot",
+        "inv.cat.frozen"
+      ],
+      "boost": 1.45
+    },
+    {
+      "text": "organize the root cellar",
+      "methodIds": [
+        "pat.storehouse.root.cellar.manage",
+        "inv.cat.rootcellar"
+      ],
+      "boost": 1.55
+    },
+    {
+      "text": "deep pantry build with buffer stock",
+      "methodIds": [
+        "pat.storehouse.deep.pantry.build",
+        "concept.buffer_stock"
+      ],
+      "boost": 1.6
+    }
+  ],
+  "rules": [
+    {
+      "id": "rule.storehouse.always.needs.snapshot",
+      "when": {
+        "anyPhrases": [
+          "restock",
+          "deep pantry",
+          "buffer stock",
+          "pantry reset",
+          "fifo"
+        ]
+      },
+      "then": [
+        {
+          "type": "emitHintTag",
+          "hintTag": "needsInventorySnapshot",
+          "message": "Storehouse planning should start from an inventory snapshot."
+        }
+      ]
+    },
+    {
+      "id": "rule.storehouse.constraints",
+      "when": {
+        "anyMethods": [
+          "constraint.budget_cap",
+          "constraint.space_cap",
+          "constraint.time_cap"
+        ]
+      },
+      "then": [
+        {
+          "type": "emitHintTag",
+          "hintTag": "hasStorehouseConstraints",
+          "message": "Constraints detected. Apply caps while selecting patterns and generating lists."
+        }
+      ]
+    },
+    {
+      "id": "rule.storehouse.inventory.category.link",
+      "when": {
+        "anyMethods": [
+          "inv.cat.dry",
+          "inv.cat.cold",
+          "inv.cat.frozen",
+          "inv.cat.rootcellar"
+        ]
+      },
+      "then": [
+        {
+          "type": "emitHintTag",
+          "hintTag": "inventoryCategoryScoped",
+          "message": "Storage category detected; scope snapshot and lists to that zone."
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "emitHintTag",
+      "hintTag": "storehouseLexiconActive",
+      "message": "Storehouse lexicon active. Route to storehouse patterns and emit caps/categories."
+    }
+  ],
+  "signals": []
+}

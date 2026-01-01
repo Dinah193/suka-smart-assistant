@@ -1,0 +1,559 @@
+{
+  "$id": "https://schemas.suka.smart/events.catalog.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SSA Event Envelope (Scheduling Catalog)",
+  "description": "Validates SSA's event envelopes for the scheduling + automation pipeline. Events MUST use the shape { type, ts, source, data }. This catalog enumerates core scheduling-related types (plan.compiled, gate.failed, risk.escalated, etc.) while remaining forward-compatible.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "ts", "source", "data"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "plan.compiled",
+        "plan.replanned",
+        "gate.failed",
+        "gate.passed",
+        "risk.escalated",
+        "risk.deescalated",
+        "session.created",
+        "session.queued",
+        "session.started",
+        "session.paused",
+        "session.resumed",
+        "session.completed",
+        "session.canceled",
+        "session.failed",
+        "step.started",
+        "step.completed",
+        "inventory.updated",
+        "inventory.shortage.detected",
+        "import.parsed",
+        "meal.executed",
+        "garden.harvest.logged",
+        "preservation.completed",
+        "route.changed",
+        "rtc.unavailable",
+        "rtc.recovered",
+        "overlay.opened",
+        "overlay.closed"
+      ]
+    },
+    "ts": { "type": "string", "format": "date-time" },
+    "source": { "type": "string", "minLength": 1, "maxLength": 160 },
+    "data": { "type": "object" }
+  },
+  "oneOf": [
+    {
+      "properties": { "type": { "const": "plan.compiled" } },
+      "required": ["data"],
+      "allOf": [
+        {
+          "properties": {
+            "data": { "$ref": "#/definitions/planData" }
+          }
+        }
+      ]
+    },
+    {
+      "properties": { "type": { "const": "plan.replanned" } },
+      "required": ["data"],
+      "allOf": [
+        {
+          "properties": {
+            "data": {
+              "allOf": [
+                { "$ref": "#/definitions/planData" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "reason": { "type": "string", "maxLength": 240 }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "properties": { "type": { "const": "gate.failed" } },
+      "required": ["data"],
+      "allOf": [
+        {
+          "properties": {
+            "data": {
+              "type": "object",
+              "additionalProperties": true,
+              "required": ["sessionId", "gateId", "reasonCode", "blocking"],
+              "properties": {
+                "sessionId": { "$ref": "#/definitions/id" },
+                "gateId": { "$ref": "#/definitions/id" },
+                "reasonCode": { "type": "string", "pattern": "^[A-Z0-9_\\.:-]{3,}$" },
+                "message": { "type": "string", "maxLength": 400 },
+                "blocking": { "type": "boolean" },
+                "context": { "type": "object", "additionalProperties": true }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "properties": { "type": { "const": "gate.passed" } },
+      "required": ["data"],
+      "allOf": [
+        {
+          "properties": {
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["sessionId", "gateId"],
+              "properties": {
+                "sessionId": { "$ref": "#/definitions/id" },
+                "gateId": { "$ref": "#/definitions/id" }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "properties": { "type": { "const": "risk.escalated" } },
+      "required": ["data"],
+      "allOf": [
+        {
+          "properties": {
+            "data": { "$ref": "#/definitions/riskChange" }
+          }
+        }
+      ]
+    },
+    {
+      "properties": { "type": { "const": "risk.deescalated" } },
+      "required": ["data"],
+      "allOf": [
+        {
+          "properties": {
+            "data": { "$ref": "#/definitions/riskChange" }
+          }
+        }
+      ]
+    },
+    {
+      "properties": { "type": { "const": "session.created" } },
+      "required": ["data"],
+      "allOf": [{ "properties": { "data": { "$ref": "#/definitions/sessionRef" } } }]
+    },
+    {
+      "properties": { "type": { "const": "session.queued" } },
+      "required": ["data"],
+      "allOf": [{ "properties": { "data": { "$ref": "#/definitions/sessionRef" } } }]
+    },
+    {
+      "properties": { "type": { "const": "session.started" } },
+      "required": ["data"],
+      "allOf": [
+        {
+          "properties": {
+            "data": {
+              "allOf": [
+                { "$ref": "#/definitions/sessionRef" },
+                { "type": "object", "properties": { "startedAt": { "type": "string", "format": "date-time" } } }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "properties": { "type": { "const": "session.paused" } },
+      "required": ["data"],
+      "allOf": [{ "properties": { "data": { "$ref": "#/definitions/sessionRef" } } }]
+    },
+    {
+      "properties": { "type": { "const": "session.resumed" } },
+      "required": ["data"],
+      "allOf": [{ "properties": { "data": { "$ref": "#/definitions/sessionRef" } } }]
+    },
+    {
+      "properties": { "type": { "const": "session.completed" } },
+      "required": ["data"],
+      "allOf": [
+        {
+          "properties": {
+            "data": {
+              "allOf": [
+                { "$ref": "#/definitions/sessionRef" },
+                { "type": "object", "properties": { "completedAt": { "type": "string", "format": "date-time" } } }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "properties": { "type": { "const": "session.canceled" } },
+      "required": ["data"],
+      "allOf": [
+        {
+          "properties": {
+            "data": {
+              "allOf": [
+                { "$ref": "#/definitions/sessionRef" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "reason": { "type": "string", "maxLength": 240 }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "properties": { "type": { "const": "session.failed" } },
+      "required": ["data"],
+      "allOf": [
+        {
+          "properties": {
+            "data": {
+              "allOf": [
+                { "$ref": "#/definitions/sessionRef" },
+                {
+                  "type": "object",
+                  "required": ["errorCode"],
+                  "properties": {
+                    "errorCode": { "type": "string", "pattern": "^[A-Z0-9_\\.:-]{3,}$" },
+                    "message": { "type": "string", "maxLength": 400 }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "properties": { "type": { "const": "step.started" } },
+      "required": ["data"],
+      "allOf": [
+        {
+          "properties": {
+            "data": { "$ref": "#/definitions/stepProgress" }
+          }
+        }
+      ]
+    },
+    {
+      "properties": { "type": { "const": "step.completed" } },
+      "required": ["data"],
+      "allOf": [
+        {
+          "properties": {
+            "data": {
+              "allOf": [
+                { "$ref": "#/definitions/stepProgress" },
+                { "type": "object", "properties": { "durationMs": { "$ref": "#/definitions/durationMs" } } }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "properties": { "type": { "const": "inventory.updated" } },
+      "required": ["data"],
+      "allOf": [
+        {
+          "properties": {
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["itemsChanged"],
+              "properties": {
+                "itemsChanged": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["itemId", "delta"],
+                    "properties": {
+                      "itemId": { "$ref": "#/definitions/id" },
+                      "delta": { "type": "number" },
+                      "unit": { "type": "string", "maxLength": 24 }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "properties": { "type": { "const": "inventory.shortage.detected" } },
+      "required": ["data"],
+      "allOf": [
+        {
+          "properties": {
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["shortages"],
+              "properties": {
+                "shortages": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["ref", "requiredQty", "availableQty"],
+                    "properties": {
+                      "ref": { "type": "string", "maxLength": 120 },
+                      "requiredQty": { "type": "number" },
+                      "availableQty": { "type": "number" },
+                      "unit": { "type": "string", "maxLength": 24 }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "properties": { "type": { "const": "import.parsed" } },
+      "required": ["data"],
+      "allOf": [
+        {
+          "properties": {
+            "data": {
+              "type": "object",
+              "additionalProperties": true,
+              "required": ["importId", "domain"],
+              "properties": {
+                "importId": { "$ref": "#/definitions/id" },
+                "domain": { "type": "string", "enum": ["recipe", "cleaning", "garden", "animals", "storehouse", "video", "other"] },
+                "url": { "type": "string", "format": "uri" }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "properties": { "type": { "const": "meal.executed" } },
+      "required": ["data"],
+      "allOf": [{ "properties": { "data": { "$ref": "#/definitions/sessionRef" } } }]
+    },
+    {
+      "properties": { "type": { "const": "garden.harvest.logged" } },
+      "required": ["data"],
+      "allOf": [
+        {
+          "properties": {
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["sessionId", "crop", "qty"],
+              "properties": {
+                "sessionId": { "$ref": "#/definitions/id" },
+                "crop": { "type": "string", "maxLength": 80 },
+                "qty": { "type": "number" },
+                "unit": { "type": "string", "maxLength": 24 }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "properties": { "type": { "const": "preservation.completed" } },
+      "required": ["data"],
+      "allOf": [
+        {
+          "properties": {
+            "data": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["sessionId", "method"],
+              "properties": {
+                "sessionId": { "$ref": "#/definitions/id" },
+                "method": { "type": "string", "enum": ["freeze", "can_water_bath", "can_pressure", "dehydrate", "smoke", "cure", "pickle", "other"] },
+                "yield": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "count": { "type": "integer", "minimum": 0 },
+                    "unit": { "type": "string", "maxLength": 24 },
+                    "notes": { "type": "string", "maxLength": 160 }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "properties": { "type": { "const": "route.changed" } },
+      "required": ["data"],
+      "allOf": [
+        {
+          "properties": {
+            "data": { "type": "object", "additionalProperties": false, "required": ["path"], "properties": { "path": { "type": "string", "minLength": 1 } } }
+          }
+        }
+      ]
+    },
+    {
+      "properties": { "type": { "const": "rtc.unavailable" } },
+      "required": ["data"],
+      "allOf": [{ "properties": { "data": { "$ref": "#/definitions/rtcEvent" } } }]
+    },
+    {
+      "properties": { "type": { "const": "rtc.recovered" } },
+      "required": ["data"],
+      "allOf": [{ "properties": { "data": { "$ref": "#/definitions/rtcEvent" } } }]
+    },
+    {
+      "properties": { "type": { "const": "overlay.opened" } },
+      "required": ["data"],
+      "allOf": [{ "properties": { "data": { "$ref": "#/definitions/overlayEvent" } } }]
+    },
+    {
+      "properties": { "type": { "const": "overlay.closed" } },
+      "required": ["data"],
+      "allOf": [{ "properties": { "data": { "$ref": "#/definitions/overlayEvent" } } }]
+    }
+  ],
+  "definitions": {
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{2,}$" },
+    "durationMs": { "type": "integer", "minimum": 0 },
+    "riskBadge": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+
+    "planData": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sessionId", "plannedStartTs", "p50Ms", "p80Ms", "p95Ms", "criticalPath", "riskBadge"],
+      "properties": {
+        "sessionId": { "$ref": "#/definitions/id" },
+        "plannedStartTs": { "type": "string", "format": "date-time" },
+        "plannedEndTs": { "type": "string", "format": "date-time" },
+        "p50Ms": { "$ref": "#/definitions/durationMs" },
+        "p80Ms": { "$ref": "#/definitions/durationMs" },
+        "p95Ms": { "$ref": "#/definitions/durationMs" },
+        "criticalPath": { "type": "array", "items": { "$ref": "#/definitions/id" }, "minItems": 1, "uniqueItems": true },
+        "riskBadge": { "$ref": "#/definitions/riskBadge" },
+        "selectedPercentile": { "type": "string", "enum": ["p50", "p80", "p95"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "explanations": { "type": "array", "items": { "type": "string", "maxLength": 300 } }
+      }
+    },
+
+    "riskChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sessionId", "from", "to"],
+      "properties": {
+        "sessionId": { "$ref": "#/definitions/id" },
+        "from": { "$ref": "#/definitions/riskBadge" },
+        "to": { "$ref": "#/definitions/riskBadge" },
+        "reason": { "type": "string", "maxLength": 240 },
+        "score": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "sessionRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sessionId"],
+      "properties": {
+        "sessionId": { "$ref": "#/definitions/id" },
+        "domain": { "type": "string", "enum": ["cooking", "cleaning", "garden", "animals", "preservation", "inventory", "storehouse", "other"] }
+      }
+    },
+
+    "stepProgress": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sessionId", "stepId"],
+      "properties": {
+        "sessionId": { "$ref": "#/definitions/id" },
+        "stepId": { "$ref": "#/definitions/id" },
+        "group": { "type": "string", "maxLength": 40 },
+        "startedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "rtcEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transport"],
+      "properties": {
+        "deviceId": { "type": "string", "maxLength": 128 },
+        "room": { "type": "string", "maxLength": 64 },
+        "transport": { "type": "string", "enum": ["webrtc", "websocket", "auto"] },
+        "reason": { "type": "string", "maxLength": 240 }
+      }
+    },
+
+    "overlayEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sessionId": { "$ref": "#/definitions/id" },
+        "stepId": { "$ref": "#/definitions/id" },
+        "deviceId": { "type": "string", "maxLength": 128 },
+        "room": { "type": "string", "maxLength": 64 }
+      }
+    }
+  },
+  "examples": [
+    {
+      "type": "plan.compiled",
+      "ts": "2025-11-08T20:10:00.000Z",
+      "source": "automation.scheduler",
+      "data": {
+        "sessionId": "sess_01JABCXYZ",
+        "plannedStartTs": "2025-11-08T22:00:00.000Z",
+        "plannedEndTs": "2025-11-08T23:45:00.000Z",
+        "p50Ms": 5400000,
+        "p80Ms": 6300000,
+        "p95Ms": 7800000,
+        "criticalPath": ["s1_prep", "s3_sear", "s4_braise", "s5_rest"],
+        "riskBadge": "medium",
+        "selectedPercentile": "p80",
+        "confidence": 0.78
+      }
+    },
+    {
+      "type": "gate.failed",
+      "ts": "2025-11-08T20:12:00.000Z",
+      "source": "automation.gates.inventory",
+      "data": {
+        "sessionId": "sess_01JABCXYZ",
+        "gateId": "inv.check#onions",
+        "reasonCode": "INV_SHORTAGE",
+        "message": "Onions below required quantity",
+        "blocking": true,
+        "context": { "requiredQty": 2, "availableQty": 0, "unit": "pcs" }
+      }
+    },
+    {
+      "type": "risk.escalated",
+      "ts": "2025-11-08T20:13:00.000Z",
+      "source": "automation.scheduler",
+      "data": {
+        "sessionId": "sess_01JABCXYZ",
+        "from": "low",
+        "to": "medium",
+        "reason": "Quiet hours window approaching",
+        "score": 0.62
+      }
+    }
+  ]
+}

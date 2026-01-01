@@ -1,0 +1,314 @@
+{
+  "version": "1.0.0",
+  "updatedAt": "2025-10-20T23:05:00Z",
+  "template": {
+    "id": "tpl_7day_dinners_v1",
+    "title": "7-Day Dinners",
+    "subtitle": "Balanced, budget-aware, and batch-smart",
+    "timezone": "America/Chicago",
+    "status": "planned",
+    "description": "Builds a full week of dinners with diversity across cuisine and protein, a healthy mix of effort levels, and a leftovers strategy. Friday tilts to no-cook/reheat for Sabbath; one batch anchor mid-week powers a later night.",
+    "dateRange": {
+      "lengthDays": 7,
+      "startPolicy": "next-monday",
+      "allowWeekend": true
+    },
+    "constraints": {
+      "peopleCount": 6,
+      "budget": { "currency": "USD", "maxPerDay": 28, "maxTotal": 175 },
+      "dietaryFlags": [],
+      "excludeAllergens": [],
+      "applianceAvailability": ["stovetop", "oven", "instant-pot", "air-fryer"],
+      "timeWindows": [
+        { "daysOfWeek": ["Mon", "Tue", "Wed", "Thu", "Fri"], "from": "17:30", "to": "19:30" },
+        { "daysOfWeek": ["Sat", "Sun"], "from": "16:30", "to": "19:30" }
+      ],
+      "fastingRules": { "mode": "none" },
+      "nutritionTargets": { "kcalPerDay": 2200, "protein_g": 110, "carbs_g": 220, "fat_g": 80 },
+      "sabbathGuard": { "enabled": true, "windows": [], "policy": "defer" }
+    },
+    "groceryOptions": {
+      "storeSelector": "default",
+      "includeHave": false,
+      "collapseDuplicates": true,
+      "allowSubstitutions": true,
+      "householdItems": true
+    },
+    "selection": {
+      "globalFilters": {
+        "courseAnyOf": ["dinner", "main", "soup", "salad", "freezer-meal"],
+        "effortAnyOf": ["easy", "moderate"],
+        "maxActiveMinutes": 40,
+        "maxTotalMinutes": 90,
+        "disallowAppliancesAnyOf": ["pressure_canner", "smoker"],
+        "preferSabbathFriendly": true
+      },
+      "diversity": {
+        "minUniqueCuisines": 4,
+        "avoidSameCuisineOnConsecutiveDays": true,
+        "proteinRotation": {
+          "maxRepeatPer7": 3,
+          "buckets": {
+            "poultry": ["chicken", "turkey"],
+            "red-meat": ["beef", "lamb", "goat"],
+            "seafood": ["fish", "shrimp", "tuna"],
+            "veg": ["tofu", "tempeh", "beans", "lentils", "egg"],
+            "mixed": ["sausage", "bacon"]
+          }
+        }
+      },
+      "themes": {
+        "mon": "Comfort Bowl",
+        "tue": "Taco / Wrap",
+        "wed": "Batch Anchor",
+        "thu": "Pasta Night",
+        "fri": "No-Cook / Reheat",
+        "sat": "Family Share",
+        "sun": "Roast or One-Pan"
+      }
+    },
+    "slots": [
+      {
+        "id": "slot_d0_dinner",
+        "relativeDate": { "offsetDays": 0 },
+        "mealType": "dinner",
+        "status": "planned",
+        "servings": 6,
+        "labels": ["Comfort Bowl"],
+        "strategy": {
+          "preferCourse": ["dinner", "main"],
+          "preferCuisines": ["american-classic", "greek", "west-african", "mediterranean"],
+          "rules": [
+            { "id": "bowl-boost", "where": "title ~ /bowl|stew|rice/i OR tags contains 'grain-bowl'" },
+            { "id": "mon-moderate-cap", "where": "recipe.classifiers.effort in ['easy','moderate']" }
+          ]
+        },
+        "notes": "Start hearty but simple—grain/veg/protein bowl or quick stew."
+      },
+      {
+        "id": "slot_d1_dinner",
+        "relativeDate": { "offsetDays": 1 },
+        "mealType": "dinner",
+        "status": "planned",
+        "servings": 6,
+        "labels": ["Taco / Wrap"],
+        "strategy": {
+          "preferCourse": ["dinner", "main"],
+          "preferCuisines": ["mexican", "tex-mex", "caribbean"],
+          "rules": [
+            { "id": "handhelds", "where": "title ~ /taco|wrap|fajita|burrito/i OR tags contains 'handheld'" },
+            { "id": "easy-cap", "where": "recipe.classifiers.effort in ['very-easy','easy']" }
+          ]
+        }
+      },
+      {
+        "id": "slot_d2_dinner",
+        "relativeDate": { "offsetDays": 2 },
+        "mealType": "dinner",
+        "status": "planned",
+        "servings": 8,
+        "labels": ["Batch Anchor"],
+        "strategy": {
+          "preferCourse": ["dinner", "main", "soup", "freezer-meal"],
+          "preferCuisines": ["italian", "american-classic", "north-african", "levantine"],
+          "rules": [
+            { "id": "batchable", "where": "classifiers.tags contains 'freezer-meal' OR servings >= 8 OR totalMinutes >= 60" },
+            { "id": "gear-ok", "where": "count(resources where kind in ['appliance','tool']) <= 5" }
+          ]
+        },
+        "notes": "Cook extra: earmark leftovers for Thursday or Friday."
+      },
+      {
+        "id": "slot_d3_dinner",
+        "relativeDate": { "offsetDays": 3 },
+        "mealType": "dinner",
+        "status": "planned",
+        "servings": 6,
+        "labels": ["Pasta Night"],
+        "strategy": {
+          "preferCourse": ["dinner", "main"],
+          "preferCuisines": ["italian", "greek", "mediterranean"],
+          "rules": [
+            { "id": "pasta-boost", "where": "title ~ /pasta|spaghetti|penne|rigatoni|noodle/i OR tags contains 'pasta'" },
+            { "id": "use-leftovers-if-available", "where": "exists(prev.slot_d2_dinner.leftovers) ? true : true" }
+          ]
+        }
+      },
+      {
+        "id": "slot_d4_dinner",
+        "relativeDate": { "offsetDays": 4 },
+        "mealType": "dinner",
+        "status": "planned",
+        "servings": 6,
+        "labels": ["No-Cook / Reheat"],
+        "strategy": {
+          "preferCourse": ["freezer-meal", "salad", "dinner"],
+          "preferCuisines": ["mediterranean", "israeli", "greek", "american-classic"],
+          "rules": [
+            { "id": "friday-sabbath-tilt", "where": "sabbathGuardActive(date) ? (course in ['freezer-meal','salad'] OR tags contains 'no-cook') : true" },
+            { "id": "leftovers-first", "where": "exists(prev.slot_d2_dinner.leftovers) ? course in ['freezer-meal','dinner'] : true" }
+          ]
+        },
+        "notes": "Prefer no-cook platters or reheat-friendly casserole."
+      },
+      {
+        "id": "slot_d5_dinner",
+        "relativeDate": { "offsetDays": 5 },
+        "mealType": "dinner",
+        "status": "planned",
+        "servings": 6,
+        "labels": ["Family Share"],
+        "strategy": {
+          "preferCourse": ["dinner", "main"],
+          "preferCuisines": ["thai", "korean", "japanese", "vietnamese", "southern-us"],
+          "rules": [
+            { "id": "shareable", "where": "title ~ /tray|sheet|skillet|family|platter/i OR ingredients.length <= 12" },
+            { "id": "effort-cap", "where": "recipe.classifiers.effort in ['easy','moderate']" }
+          ]
+        }
+      },
+      {
+        "id": "slot_d6_dinner",
+        "relativeDate": { "offsetDays": 6 },
+        "mealType": "dinner",
+        "status": "planned",
+        "servings": 6,
+        "labels": ["Roast or One-Pan"],
+        "strategy": {
+          "preferCourse": ["dinner", "main"],
+          "preferCuisines": ["american-classic", "greek", "north-african", "balkan"],
+          "rules": [
+            { "id": "roast-onepan", "where": "title ~ /roast|sheet-pan|one[- ]pan/i OR tags contains 'sheet-pan'" },
+            { "id": "sun-ease", "where": "recipe.classifiers.effort in ['easy','moderate']" }
+          ]
+        }
+      }
+    ],
+    "leftovers": {
+      "policy": "smart-consume",
+      "map": [
+        { "fromSlotId": "slot_d2_dinner", "toSlotId": "slot_d3_dinner", "portionServings": 2 },
+        { "fromSlotId": "slot_d2_dinner", "toSlotId": "slot_d4_dinner", "portionServings": 2 }
+      ]
+    },
+    "batchSessions": {
+      "generate": true,
+      "rules": [
+        {
+          "id": "midweek-batch",
+          "where": "slot.id == 'slot_d2_dinner'",
+          "prepSteps": ["defrost", "marinate", "pre-chop", "cook-base"],
+          "timers": [{ "label": "Simmer Base 60m", "durationMinutes": 60 }]
+        }
+      ]
+    },
+    "automation": {
+      "emit": [
+        { "on": "plan-created", "topic": "planner.template.created", "payload": { "templateId": "tpl_7day_dinners_v1" } },
+        { "on": "slot-prep-due", "topic": "meal.prep.reminder" },
+        { "on": "shopping-generated", "topic": "grocery.list.ready" }
+      ]
+    },
+    "x-uxHints": {
+      "pinPanels": ["Collect", "Decide", "Plan", "GroceryList", "BatchSessionPlanner"],
+      "primaryPanel": "Plan",
+      "badges": ["Balanced", "Budget-Aware", "Batch-Smart"]
+    }
+  },
+  "render": {
+    "planFromTemplate": {
+      "mapToMealPlan": true,
+      "resolveDatesFromStart": true,
+      "hebrewCalendar": { "enable": true }
+    },
+    "groceryList": {
+      "generateOnCreate": true,
+      "mergeUnitsStrategy": "smart"
+    }
+  },
+  "examples": [
+    {
+      "preview": {
+        "plan": {
+          "id": "mealplan_7day_dinners_example",
+          "createdAt": "2025-10-20T23:05:00Z",
+          "updatedAt": "2025-10-20T23:05:00Z",
+          "ownerTier": "tier2",
+          "title": "7-Day Dinners",
+          "subtitle": "Auto-generated from template",
+          "timezone": "America/Chicago",
+          "status": "planned",
+          "dateRange": { "start": "2025-10-27", "end": "2025-11-02" },
+          "groceryOptions": {
+            "storeSelector": "default",
+            "includeHave": false,
+            "collapseDuplicates": true,
+            "allowSubstitutions": true,
+            "householdItems": true
+          },
+          "slots": [
+            {
+              "id": "slot_2025-10-27_dinner",
+              "date": "2025-10-27",
+              "mealType": "dinner",
+              "status": "planned",
+              "labels": ["Comfort Bowl"],
+              "recipeRef": { "recipeId": "rec_lamb_stew", "versionId": "rec_lamb_stew_v2", "servings": 6 }
+            },
+            {
+              "id": "slot_2025-10-28_dinner",
+              "date": "2025-10-28",
+              "mealType": "dinner",
+              "status": "planned",
+              "labels": ["Taco / Wrap"],
+              "recipeRef": { "recipeId": "rec_mex_chicken_tacos_20m", "versionId": "v1", "servings": 6 }
+            },
+            {
+              "id": "slot_2025-10-29_dinner",
+              "date": "2025-10-29",
+              "mealType": "dinner",
+              "status": "planned",
+              "labels": ["Batch Anchor"],
+              "recipeRef": { "recipeId": "rec_bolognese_bulk", "versionId": "v3", "servings": 8 },
+              "batchSessionRef": { "sessionId": "sess_2025_10_29_batch", "stepIds": [] }
+            },
+            {
+              "id": "slot_2025-10-30_dinner",
+              "date": "2025-10-30",
+              "mealType": "dinner",
+              "status": "planned",
+              "labels": ["Pasta Night"],
+              "recipeRef": { "recipeId": "rec_spaghetti_bolognese_fast", "versionId": "v2", "servings": 6 },
+              "notes": "Use 2 servings from Wednesday sauce if available."
+            },
+            {
+              "id": "slot_2025-10-31_dinner",
+              "date": "2025-10-31",
+              "mealType": "dinner",
+              "status": "planned",
+              "labels": ["No-Cook / Reheat"],
+              "recipeRef": { "recipeId": "rec_cold_platter", "versionId": "v3", "servings": 6 },
+              "sabbathSensitive": false
+            },
+            {
+              "id": "slot_2025-11-01_dinner",
+              "date": "2025-11-01",
+              "mealType": "dinner",
+              "status": "planned",
+              "labels": ["Family Share"],
+              "recipeRef": { "recipeId": "rec_korean_chicken_tray", "versionId": "v1", "servings": 6 }
+            },
+            {
+              "id": "slot_2025-11-02_dinner",
+              "date": "2025-11-02",
+              "mealType": "dinner",
+              "status": "planned",
+              "labels": ["Roast or One-Pan"],
+              "recipeRef": { "recipeId": "rec_sheetpan_roast_veg_sausage", "versionId": "v1", "servings": 6 }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

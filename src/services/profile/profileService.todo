@@ -1,0 +1,363 @@
+{
+  "version": "1.0.0",
+  "module": "profile",
+  "title": "Household Profile",
+  "ia": {
+    "nav": [
+      { "key": "profile.home", "label": "Profile", "icon": "UserCircle", "path": "/profile", "placement": "primary" },
+      { "key": "profile.household", "label": "Household", "icon": "Home", "path": "/profile/household", "placement": "secondary" },
+      { "key": "profile.diet", "label": "Diet & Torah Rules", "icon": "Heart", "path": "/profile/diet", "placement": "secondary" },
+      { "key": "profile.rhythm", "label": "Weekly Flavor Rhythm", "icon": "Palette", "path": "/profile/rhythm", "placement": "secondary" },
+      { "key": "profile.preferences", "label": "Preferences", "icon": "Sliders", "path": "/profile/preferences", "placement": "secondary" },
+      { "key": "profile.integrations", "label": "Integrations", "icon": "Plug", "path": "/profile/integrations", "placement": "secondary" },
+      { "key": "profile.sharing", "label": "Sharing", "icon": "Users", "path": "/profile/sharing", "placement": "utility" },
+      { "key": "profile.settings", "label": "Settings", "icon": "Settings", "path": "/profile/settings", "placement": "utility" }
+    ],
+    "routes": [
+      { "path": "/profile", "component": "@/pages/profile/ProfileHome.jsx", "title": "Household Profile", "auth": "member" },
+      { "path": "/profile/household", "component": "@/pages/profile/Household.jsx", "title": "Household Details", "auth": "member" },
+      { "path": "/profile/diet", "component": "@/pages/profile/Diet.jsx", "title": "Diet & Torah Rules", "auth": "member" },
+      { "path": "/profile/rhythm", "component": "@/pages/profile/FlavorRhythm.jsx", "title": "Weekly Flavor Rhythm", "auth": "member" },
+      { "path": "/profile/preferences", "component": "@/pages/profile/Preferences.jsx", "title": "Preferences", "auth": "member" },
+      { "path": "/profile/integrations", "component": "@/pages/profile/Integrations.jsx", "title": "Integrations", "auth": "member" },
+      { "path": "/profile/sharing", "component": "@/pages/profile/Sharing.jsx", "title": "Family & Community Sharing", "auth": "member" },
+      { "path": "/profile/settings", "component": "@/pages/profile/Settings.jsx", "title": "Profile Settings", "auth": "admin" }
+    ]
+  },
+  "designSystem": {
+    "tokens": {
+      "radius": "1rem",
+      "gap": { "sm": "0.5rem", "md": "1rem", "lg": "1.5rem" },
+      "elevation": { "card": "shadow-lg", "modal": "shadow-2xl" }
+    },
+    "components": {
+      "button": {
+        "base": "btn btn-md rounded-2xl",
+        "variants": { "primary": "btn-primary", "secondary": "btn-secondary", "ghost": "btn-ghost", "danger": "btn-error" },
+        "states": { "loading": "loading", "disabled": "btn-disabled", "success": "btn-success" }
+      },
+      "card": { "base": "rounded-2xl border border-base-200 bg-base-100 shadow-lg p-4" },
+      "confirm": { "modal": "modal modal-open", "panel": "modal-box rounded-2xl" },
+      "empty": { "base": "text-base-content/60 flex flex-col items-center justify-center gap-2 p-8" },
+      "toast": { "success": "alert alert-success", "error": "alert alert-error", "info": "alert alert-info" },
+      "pill": { "base": "badge badge-lg rounded-2xl" }
+    }
+  },
+  "emptyStates": {
+    "profile.home": {
+      "title": "Let’s set up your household",
+      "subtitle": "A few quick steps unlock meal planning, garden forecasts, and shared goals.",
+      "primaryAction": { "label": "Start Setup", "action": "flow.profile.wizard" },
+      "secondary": [
+        { "label": "Import from a template", "action": "ui.openProfileImporter" },
+        { "label": "Skip and explore", "action": "ui.goto", "to": "/profile/household" }
+      ]
+    },
+    "profile.rhythm": {
+      "title": "No Weekly Flavor Rhythm yet",
+      "subtitle": "Choose 5–7 anchor cuisines and rotate them through the week.",
+      "primaryAction": { "label": "Create Rhythm", "action": "flow.rhythm.create" }
+    },
+    "profile.diet": {
+      "title": "Diet rules not set",
+      "subtitle": "Toggle allowances based on your Torah-aligned interpretation.",
+      "primaryAction": { "label": "Set Diet Rules", "action": "ui.goto", "to": "/profile/diet" }
+    }
+  },
+  "undo": {
+    "ttlMs": 180000,
+    "actions": {
+      "profile.update": { "undoEvent": "profile.reverted", "ui": { "label": "Profile saved", "undoLabel": "Undo" } },
+      "diet.update": { "undoEvent": "diet.reverted", "ui": { "label": "Diet rules updated", "undoLabel": "Undo" } },
+      "rhythm.update": { "undoEvent": "rhythm.reverted", "ui": { "label": "Flavor rhythm updated", "undoLabel": "Undo" } },
+      "sharing.update": { "undoEvent": "sharing.reverted", "ui": { "label": "Sharing settings saved", "undoLabel": "Undo" } }
+    }
+  },
+  "nextBestAction": {
+    "afterSuccess": [
+      {
+        "when": "event == 'diet.update.success'",
+        "actions": [
+          { "type": "ui.suggest", "title": "Regenerate meal suggestions", "desc": "Apply your updated rules to this week’s plan.", "cta": { "label": "Regenerate", "action": "flow.meals.regenerateFromProfile" } },
+          { "type": "ui.suggest", "title": "Refresh preservation queues", "desc": "Adjust curing/canning/freezing tasks to match.", "cta": { "label": "Refresh queues", "action": "flow.preservation.refreshFromProfile" } }
+        ]
+      },
+      {
+        "when": "event == 'rhythm.update.success'",
+        "actions": [
+          { "type": "ui.suggest", "title": "Rebuild Weekly Menu", "desc": "Align dinners with your flavor rhythm.", "cta": { "label": "Build menu", "action": "flow.meals.buildFromRhythm" } }
+        ]
+      },
+      {
+        "when": "event == 'sharing.update.success'",
+        "actions": [
+          { "type": "ui.suggest", "title": "Invite family agrarian", "desc": "They’ll receive forecasts for garden/animal needs.", "cta": { "label": "Invite", "action": "ui.openInviteRole", "args": { "role": "Agrarian" } } }
+        ]
+      }
+    ]
+  },
+  "sharing": {
+    "modes": [
+      { "key": "private", "label": "Private (household only)" },
+      { "key": "family", "label": "Family Sharing", "desc": "Select households in the family network" },
+      { "key": "community", "label": "Community Planning", "desc": "Share with selected circles/roles" }
+    ],
+    "capabilities": {
+      "coPlan": true,
+      "roleScopes": ["Householder", "Agrarian", "Cook", "Cleaner", "AnimalKeeper", "Gardener", "Finance", "Defense"],
+      "permissions": ["view", "comment", "edit"]
+    },
+    "defaults": { "mode": "family", "permissions": ["view", "comment"] }
+  },
+  "profileModel": {
+    "household": {
+      "fields": [
+        "householdName",
+        "members",
+        "address",
+        "usdaZone",
+        "sabbathDay",
+        "calendarPreference"
+      ]
+    },
+    "diet": {
+      "fields": [
+        "allowBlood",
+        "allowFatCaps",
+        "allowLeaven",
+        "shellfishAllowed",
+        "fishRequireFinsAndScales",
+        "meatSpeciesAllowed",
+        "dairySeparation",
+        "sweeteners",
+        "allergies",
+        "fastingWindows"
+      ],
+      "defaults": {
+        "allowBlood": false,
+        "allowFatCaps": false,
+        "allowLeaven": true,
+        "shellfishAllowed": false,
+        "fishRequireFinsAndScales": true,
+        "meatSpeciesAllowed": ["beef","lamb","goat","venison"],
+        "dairySeparation": "user_choice",
+        "sweeteners": ["honey","date_syrup"],
+        "allergies": [],
+        "fastingWindows": []
+      }
+    },
+    "rhythm": {
+      "fields": ["days", "cuisineAnchors", "rotationWeeks", "budgetTier"],
+      "example": {
+        "days": {
+          "Sun": "Caribbean",
+          "Mon": "Mediterranean",
+          "Tue": "Soul Food",
+          "Wed": "East African",
+          "Thu": "Tex-Mex",
+          "Fri": "Sabbath Feast",
+          "Sat": "Leftovers + Soup"
+        },
+        "cuisineAnchors": ["Caribbean","Mediterranean","Soul Food","East African","Tex-Mex","Feast","Soup"],
+        "rotationWeeks": 4,
+        "budgetTier": "frugal"
+      }
+    },
+    "preferences": {
+      "fields": [
+        "doneness",
+        "softness",
+        "spiceLevel",
+        "proteinTargets",
+        "calorieTargets",
+        "prepTimeWindows",
+        "batchCookingCadence",
+        "preservationMethods"
+      ],
+      "defaults": {
+        "doneness": "medium",
+        "softness": "balanced",
+        "spiceLevel": 2,
+        "proteinTargets": 90,
+        "calorieTargets": 2000,
+        "prepTimeWindows": ["Weeknights 30m","Sabbath Eve 90m"],
+        "batchCookingCadence": "weekly",
+        "preservationMethods": ["pressure_canning","freezing","dehydrating","curing"]
+      }
+    },
+    "integrations": {
+      "fields": ["calendar", "storageSensors", "scale", "thermometers", "barcodeScanner"],
+      "calendar": { "providers": ["Google","Outlook","ICS"], "sync": "two_way" }
+    }
+  },
+  "flows": [
+    {
+      "key": "flow.profile.wizard",
+      "label": "Profile Setup Wizard",
+      "steps": [
+        { "type": "collect", "id": "household", "fields": ["householdName","members","usdaZone","sabbathDay"] },
+        { "type": "collect", "id": "diet", "fields": ["shellfishAllowed","fishRequireFinsAndScales","meatSpeciesAllowed","allowLeaven","allergies"] },
+        { "type": "collect", "id": "rhythm", "fields": ["cuisineAnchors","rotationWeeks","budgetTier"] },
+        { "type": "collect", "id": "prefs", "fields": ["doneness","softness","spiceLevel","batchCookingCadence"] },
+        { "type": "persist", "id": "saveAll", "fn": "ProfileStore.saveAll", "argsFrom": ["household","diet","rhythm","prefs"] },
+        { "type": "emit", "event": "profile.update.success" },
+        { "type": "toast", "style": "success", "message": "Profile saved" },
+        { "type": "ui", "action": "ui.goto", "args": { "to": "/profile/rhythm" } }
+      ],
+      "undoKey": "profile.update"
+    },
+    {
+      "key": "flow.meals.regenerateFromProfile",
+      "label": "Regenerate Meals From Profile",
+      "steps": [
+        { "type": "fetch", "id": "context", "from": "ProfileStore.getActive" },
+        { "type": "emit", "event": "mealplan.regenerate.requested", "payloadFrom": "context" },
+        { "type": "call", "id": "recompute", "fn": "MealPlanEngine.generate", "argsFrom": "context" },
+        { "type": "emit", "event": "mealplan.created" },
+        { "type": "toast", "style": "success", "message": "Meal plan updated" }
+      ]
+    },
+    {
+      "key": "flow.preservation.refreshFromProfile",
+      "label": "Refresh Preservation Queues",
+      "steps": [
+        { "type": "fetch", "id": "needs", "from": "MealPlanEngine.computeOutputs" },
+        { "type": "call", "id": "refresh", "fn": "PreservationPlanner.refresh", "argsFrom": "needs" },
+        { "type": "emit", "event": "preservation.queues.updated" },
+        { "type": "toast", "style": "info", "message": "Preservation queues refreshed" }
+      ]
+    },
+    {
+      "key": "flow.rhythm.create",
+      "label": "Create Weekly Flavor Rhythm",
+      "steps": [
+        { "type": "collect", "id": "rhythm", "fields": ["days","cuisineAnchors","rotationWeeks","budgetTier"] },
+        { "type": "persist", "id": "save", "fn": "ProfileStore.saveRhythm", "argsFrom": "rhythm" },
+        { "type": "emit", "event": "rhythm.update.success" },
+        { "type": "toast", "style": "success", "message": "Flavor rhythm saved" }
+      ],
+      "undoKey": "rhythm.update"
+    },
+    {
+      "key": "flow.diet.toggle",
+      "label": "Update Diet Rule",
+      "confirm": { "title": "Apply diet change?", "body": "This may alter meal suggestions and preservation plans.", "confirmLabel": "Apply" },
+      "steps": [
+        { "type": "persist", "id": "saveDiet", "fn": "ProfileStore.updateDietRule" },
+        { "type": "emit", "event": "torah.profile.updated" },
+        { "type": "emit", "event": "diet.update.success" },
+        { "type": "toast", "style": "success", "message": "Diet updated" }
+      ],
+      "undoKey": "diet.update"
+    },
+    {
+      "key": "flow.integrations.connectCalendar",
+      "label": "Connect Calendar",
+      "steps": [
+        { "type": "call", "id": "connect", "fn": "Calendar.connect" },
+        { "type": "emit", "event": "calendar.synced" },
+        { "type": "toast", "style": "success", "message": "Calendar connected" }
+      ]
+    },
+    {
+      "key": "flow.profile.export",
+      "label": "Export Profile",
+      "steps": [
+        { "type": "fetch", "id": "data", "from": "ProfileStore.getActive" },
+        { "type": "call", "id": "export", "fn": "Exporter.profileToJSON", "argsFrom": "data" },
+        { "type": "toast", "style": "info", "message": "Profile exported" }
+      ]
+    }
+  ],
+  "events": {
+    "listen": [
+      {
+        "on": "recipes.consolidated",
+        "do": [
+          { "type": "compute", "fn": "ProfileInsights.alignWithRhythm" },
+          { "type": "ui.toast", "style": "info", "message": "Recipes consolidated — check match with your Flavor Rhythm" },
+          { "type": "suggest", "flow": "flow.meals.regenerateFromProfile" }
+        ]
+      },
+      {
+        "on": "inventory.updated",
+        "do": [
+          { "type": "compute", "fn": "ProfileInsights.stockToRhythmImpact" },
+          { "type": "ui.badge.bump", "key": "profile.rhythm" }
+        ]
+      },
+      {
+        "on": "calendar.synced",
+        "do": [
+          { "type": "refresh", "target": "ProfileHome.widgets.upcomingFeasts" }
+        ]
+      },
+      {
+        "on": "mealplan.created",
+        "do": [
+          { "type": "emit", "event": "garden.plan.forecasted" },
+          { "type": "emit", "event": "cleaning.plan.forecasted" }
+        ]
+      },
+      {
+        "on": "batch.started",
+        "do": [
+          { "type": "emit", "event": "animal.plan.forecasted" }
+        ]
+      },
+      {
+        "on": "torah.profile.updated",
+        "do": [
+          { "type": "compute", "fn": "Scenario.compareShellfishToggle" },
+          { "type": "suggest", "flow": "flow.meals.regenerateFromProfile" },
+          { "type": "suggest", "flow": "flow.preservation.refreshFromProfile" }
+        ]
+      }
+    ],
+    "emitOnUI": [
+      { "ui": "Profile.Save", "emit": "profile.update.requested" },
+      { "ui": "Diet.Toggle", "emit": "diet.update.requested" },
+      { "ui": "Rhythm.Save", "emit": "rhythm.update.requested" },
+      { "ui": "Sharing.Save", "emit": "sharing.update.requested" }
+    ]
+  },
+  "uiGlue": {
+    "widgets": [
+      { "key": "ProfileHome.widgets.upcomingFeasts", "source": "Calendar.getUpcomingFeasts", "refreshOn": ["calendar.synced","profile.update.success"] },
+      { "key": "ProfileHome.widgets.rhythmPreview", "source": "ProfileStore.getRhythm", "refreshOn": ["rhythm.update.success"] },
+      { "key": "ProfileHome.widgets.dietSummary", "source": "ProfileStore.getDietSummary", "refreshOn": ["diet.update.success","torah.profile.updated"] }
+    ],
+    "badges": [
+      { "navKey": "profile.rhythm", "from": "ProfileStore.getRhythmStatus" },
+      { "navKey": "profile.diet", "from": "ProfileStore.getDietAlertCount" }
+    ]
+  },
+  "forecasting": {
+    "autoNotifyAgrarian": true,
+    "channels": ["inbox","email"],
+    "payloads": [
+      { "source": "meal.plan", "topic": "garden.plan.forecasted", "include": ["produceDemand","herbDemand","grainDemand","preservationQueue"] },
+      { "source": "batch.cooking", "topic": "animal.plan.forecasted", "include": ["offalUsage","fatRenderNeeds","sausageRuns","cureSchedules"] },
+      { "source": "cleaning.routines", "topic": "cleaning.plan.forecasted", "include": ["supplyNeeds","wasteSchedule","waterUseWindows"] }
+    ]
+  },
+  "guards": {
+    "preSaveProfile": ["Profile.validators.hasHouseholdName"],
+    "preSaveDiet": ["Profile.validators.validDietShape"],
+    "preSaveRhythm": ["Profile.validators.validRhythmDays"]
+  },
+  "metrics": {
+    "kpis": [
+      { "id": "profile.completeness", "label": "Profile Completeness", "source": "Profile.metrics.completeness" },
+      { "id": "meals.matchRhythm", "label": "Meals Matching Rhythm", "source": "Profile.metrics.matchRhythmRate" }
+    ]
+  },
+  "accessibility": {
+    "aria": true,
+    "keyboardShortcuts": [
+      { "keys": ["Ctrl","S"], "action": "ui.saveProfile" },
+      { "keys": ["Ctrl","Shift","R"], "action": "flow.meals.regenerateFromProfile" }
+    ]
+  },
+  "autosave": { "enabled": true, "debounceMs": 1200, "emit": "profile.autosave" }
+}

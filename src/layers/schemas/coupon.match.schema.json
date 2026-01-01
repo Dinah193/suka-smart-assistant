@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ssa.schemas/coupon.match.schema.json",
+  "title": "SSA Coupon Match",
+  "description": "Coupon matches tied to UPC/store eligibility. Used to attach savings opportunities to shopping candidates.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["matchId", "upc", "eligibleAt", "source", "status"],
+  "properties": {
+    "matchId": { "type": "string", "minLength": 6 },
+
+    "upc": { "type": "string", "pattern": "^[0-9]{8,14}$" },
+    "storeId": { "type": ["string", "null"] },
+    "storeChainId": { "type": ["string", "null"] },
+
+    "eligibleAt": { "type": "string", "format": "date-time" },
+    "expiresAt": { "type": ["string", "null"], "format": "date-time" },
+    "createdAt": { "type": ["string", "null"], "format": "date-time" },
+
+    "status": {
+      "type": "string",
+      "enum": ["active", "expired", "invalid", "unknown"]
+    },
+
+    "coupon": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "couponId": { "type": ["string", "null"] },
+        "title": { "type": ["string", "null"] },
+        "discountType": {
+          "type": ["string", "null"],
+          "enum": ["amount_off", "percent_off", "bogo", null]
+        },
+        "amountOff": { "type": ["number", "null"], "minimum": 0 },
+        "percentOff": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "minPurchase": { "type": ["number", "null"], "minimum": 0 },
+        "terms": { "type": ["string", "null"] }
+      }
+    },
+
+    "source": {
+      "type": "string",
+      "enum": ["store_feed", "brand_feed", "user_entered", "partner"]
+    }
+  }
+}

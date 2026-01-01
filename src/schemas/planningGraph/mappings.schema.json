@@ -1,0 +1,6 @@
+{
+  "$id": "mappings.schema.json",
+  "title": "Planning Graph Mappings Schema",
+  "type": "object",
+  "additionalProperties": true
+}

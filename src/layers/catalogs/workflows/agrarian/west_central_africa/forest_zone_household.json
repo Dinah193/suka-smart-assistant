@@ -1,0 +1,87 @@
+{
+  "id": "workflow.wca.forest_zone_household",
+  "domain": "workflows",
+  "kind": "workflow_overlay",
+  "title": "Forest-Zone Household Rhythm (West/Central Africa)",
+  "tags": [
+    "region:wca",
+    "zone:forest",
+    "values:staples",
+    "workflow:market_optional"
+  ],
+  "description": "Forest-zone rhythm emphasizing staple processing, fermentation options, and produce rotation to reduce spoilage.",
+  "optIn": true,
+  "editable": true,
+  "valuePriorities": [
+    "spoilage_reduction",
+    "staple_processing",
+    "community_sharing_optional"
+  ],
+  "defaults": {
+    "preferredStaples": [
+      "staple:roots_tubers",
+      "staple:plantain_like",
+      "staple:grain_optional",
+      "staple:legumes"
+    ],
+    "mealRhythm": [
+      "staple_base:daily",
+      "sauce_stew:regular"
+    ],
+    "preservationEmphasis": [
+      "fermentation_optional",
+      "drying_optional",
+      "smoking_optional"
+    ],
+    "valuePriorities": [
+      "spoilage_reduction",
+      "staple_processing",
+      "community_sharing_optional"
+    ]
+  },
+  "ordering": {
+    "planningOrder": [
+      "inventory_snapshot",
+      "produce_rotation",
+      "preservation_triage",
+      "meal_plan"
+    ]
+  },
+  "naming": {
+    "sessionPrefixes": {
+      "preservation": "Preserve + Ferment",
+      "storehouse": "Storehouse Rotation"
+    }
+  },
+  "constraints": {
+    "defaults": [
+      "constraint:food_safety"
+    ]
+  },
+  "uiOverlays": {
+    "form": {
+      "defaults": {
+        "inventorySnapshot": "recommended",
+        "timeBudgetMin": 120
+      }
+    }
+  },
+  "preferredDefaultPatterns": {
+    "preservation": [
+      "pat.preservation.fermentation_first",
+      "pat.preservation.surplus_triage"
+    ],
+    "storehouse": [
+      "pat.storehouse.root_cellar_optimizer",
+      "pat.storehouse.weekly_restock"
+    ],
+    "meals": [
+      "pat.meals.preservation_first",
+      "pat.meals.weekly_batch"
+    ]
+  },
+  "notes": [
+    "This overlay provides defaults and ordering, not mandatory rules.",
+    "All role defaults are optional and user-editable."
+  ]
+}

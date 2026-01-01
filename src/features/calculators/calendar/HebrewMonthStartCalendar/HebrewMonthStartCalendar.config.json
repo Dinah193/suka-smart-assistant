@@ -1,0 +1,96 @@
+{
+  "$schema": "../../../../schemas/planningGraph/nodes.schema.json",
+  "id": "calendar.hebrewMonthStart",
+  "nodeKey": "calendar.hebrewMonthStart",
+  "kind": "calculator-node",
+  "domain": "storehouse",
+  "label": "Hebrew Month Start Calculator",
+  "description": "Calculates Hebrew month start dates using selected moon/sun/star rules and feeds results into calendar, feast, meal, and storehouse planning.",
+  "version": "1.0.0",
+  "calculator": {
+    "schemaRef": "@/features/calculators/calendar/HebrewMonthStartCalendar/HebrewMonthStartCalendar.schema.json",
+    "shimPath": "@/features/calculators/calendar/HebrewMonthStartCalendar/HebrewMonthStartCalendar.shim.js",
+    "viewPath": "@/features/calculators/calendar/HebrewMonthStartCalendar/HebrewMonthStartCalendar.view.jsx"
+  },
+  "config": {
+    "supportedRulePresets": [
+      {
+        "id": "fullMoon",
+        "label": "Full Moon (Month 1 at/near Full Moon)",
+        "description": "Treats the full moon as the anchor for Hebrew month start, matching your Exodus/Passover full-moon departure logic.",
+        "uses": {
+          "moonPhase": true,
+          "sunPosition": true,
+          "stars": true
+        }
+      },
+      {
+        "id": "newMoonAstronomical",
+        "label": "Astronomical New Moon",
+        "description": "Uses the astronomical conjunction (new moon) as the boundary for month transitions.",
+        "uses": {
+          "moonPhase": true,
+          "sunPosition": false,
+          "stars": false
+        }
+      },
+      {
+        "id": "firstVisibleCrescent",
+        "label": "First Visible Crescent",
+        "description": "Month starts at the first evening when the crescent moon is visible after conjunction.",
+        "uses": {
+          "moonPhase": true,
+          "sunPosition": true,
+          "stars": false
+        }
+      },
+      {
+        "id": "noMeridianCrossing",
+        "label": "Moon Does Not Cross Meridian",
+        "description": "Uses the rule that the moon does not pass the meridian between sunsets as a month boundary signal.",
+        "uses": {
+          "moonPhase": true,
+          "sunPosition": true,
+          "stars": false
+        }
+      }
+    ],
+    "defaultPresetId": "fullMoon",
+    "timeDataProvider": {
+      "id": "timeanddate.com",
+      "label": "timeanddate.com API or CSV imports",
+      "notes": "Shim should request or parse moonrise, moonset, sunrise, sunset, and (optionally) star/constellation info from timeanddate.com-compatible data sources."
+    },
+    "calendarOutputs": {
+      "emitsHebrewMonthStartEvents": true,
+      "outputShape": {
+        "hebrewMonthIndex": "1–12 (13 for leap years)",
+        "gregorianStartDate": "ISO date string",
+        "rulePresetId": "ID of the preset used",
+        "location": {
+          "lat": "number",
+          "lon": "number",
+          "tz": "IANA timezone string"
+        }
+      }
+    },
+    "graph": {
+      "feedsInto": [
+        "calendar.hebrewMonthGrid",
+        "calendar.feastDayPlanner",
+        "meals.feastMealPlanner",
+        "storehouse.feastStorehousePlanner"
+      ],
+      "listensTo": [
+        "calendar.location.updated",
+        "calendar.epoch.updated",
+        "calendar.hebrewRulePreset.changed"
+      ],
+      "eventEmits": [
+        "calendar.hebrewMonthStart.calculated",
+        "calendar.hebrewMonthStart.updated",
+        "calendar.hebrewMonthStart.error"
+      ]
+    }
+  }
+}

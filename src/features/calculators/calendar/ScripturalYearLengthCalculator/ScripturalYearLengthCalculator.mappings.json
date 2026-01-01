@@ -1,0 +1,80 @@
+{
+  "$schema": "../../../../schemas/planningGraph/mappings.schema.json",
+  "nodeKey": "calendar.ScripturalYearLengthCalculator",
+  "mappings": [
+    {
+      "id": "calendar.ScripturalYearLengthCalculator→garden.SeasonPlanner",
+      "label": "Year structure → garden seasons and sowing windows",
+      "source": {
+        "nodeKey": "calendar.ScripturalYearLengthCalculator",
+        "outputKey": "yearStructure"
+      },
+      "targets": [
+        {
+          "nodeKey": "garden.SeasonPlanner",
+          "inputKey": "yearStructure",
+          "reason": "Use scriptural year months and anchor dates to derive sowing, harvest, and rest windows."
+        },
+        {
+          "nodeKey": "garden.CropRotationPlanner",
+          "inputKey": "yearStructure",
+          "reason": "Align crop rotations with scriptural seasons and intercalary patterns."
+        }
+      ],
+      "priority": 90
+    },
+    {
+      "id": "calendar.ScripturalYearLengthCalculator→calendar.FeastDayAlignmentCalculator",
+      "label": "Year structure → feast alignment context",
+      "source": {
+        "nodeKey": "calendar.ScripturalYearLengthCalculator",
+        "outputKey": "yearStructure"
+      },
+      "targets": [
+        {
+          "nodeKey": "calendar.FeastDayAlignmentCalculator",
+          "inputKey": "yearStructure",
+          "reason": "Provide canonical scriptural year layout for calculating feast dates and prep periods."
+        }
+      ],
+      "priority": 85
+    },
+    {
+      "id": "calendar.ScripturalYearLengthCalculator→storehouse.AnnualGoalPlanner",
+      "label": "Year structure → storehouse and preservation goals",
+      "source": {
+        "nodeKey": "calendar.ScripturalYearLengthCalculator",
+        "outputKey": "yearStructure"
+      },
+      "targets": [
+        {
+          "nodeKey": "storehouse.AnnualGoalPlanner",
+          "inputKey": "yearStructure",
+          "reason": "Translate seasons and year length into annual grain, oil, and meat preservation targets."
+        },
+        {
+          "nodeKey": "preservation.SessionSuggester",
+          "inputKey": "yearStructure",
+          "reason": "Suggest preservation sessions around harvest-heavy months and rest seasons."
+        }
+      ],
+      "priority": 80
+    },
+    {
+      "id": "calendar.ScripturalYearLengthCalculator→curriculum.ScripturalTermPlanner",
+      "label": "Year structure → curriculum terms and learning blocks",
+      "source": {
+        "nodeKey": "calendar.ScripturalYearLengthCalculator",
+        "outputKey": "yearStructure"
+      },
+      "targets": [
+        {
+          "nodeKey": "curriculum.ScripturalTermPlanner",
+          "inputKey": "yearStructure",
+          "reason": "Shape study terms around scriptural seasons, feasts, and agricultural cycles."
+        }
+      ],
+      "priority": 75
+    }
+  ]
+}

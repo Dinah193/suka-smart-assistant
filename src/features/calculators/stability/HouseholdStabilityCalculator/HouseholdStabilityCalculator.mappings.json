@@ -1,0 +1,277 @@
+{
+  "nodeKey": "household-stability",
+  "kind": "mappings",
+  "version": 1,
+  "description": "Next Steps mapping from HouseholdStabilityCalculator into downstream planning flows (storehouse, meals, cleaning, garden, curriculum, and relationship rhythms).",
+  "mappings": [
+    {
+      "id": "stability-critical-core-triage",
+      "label": "Critical stability – core survival triage",
+      "priority": "urgent",
+      "from": {
+        "nodeKey": "household-stability",
+        "band": ["critical"],
+        "minStabilityIndex": 0,
+        "maxStabilityIndex": 39
+      },
+      "to": [
+        {
+          "targetNodeKey": "storehouse-baseline-requirements",
+          "flowKind": "planner",
+          "reason": "Ensure food, water, hygiene, and energy basics are covered for the next 30–90 days."
+        },
+        {
+          "targetNodeKey": "meal-planner",
+          "flowKind": "planner",
+          "reason": "Stabilize meals with repeatable weekly patterns using what is actually in the storehouse."
+        },
+        {
+          "targetNodeKey": "cleaning-route-planner",
+          "flowKind": "planner",
+          "reason": "Create minimal, repeatable cleaning loops to prevent overwhelm and health issues."
+        }
+      ],
+      "conditions": {
+        "requireAlerts": true,
+        "minAlertCount": 1
+      },
+      "nextSteps": [
+        {
+          "ctaKey": "open-stability-action-plan",
+          "label": "Open Stability Action Plan",
+          "targetRoute": "/planning/stability/action-plan",
+          "sessionDomain": "storehouse",
+          "sessionTemplateHint": "stability-core-triage"
+        },
+        {
+          "ctaKey": "open-storehouse-baseline-wizard",
+          "label": "Baseline Storehouse Wizard",
+          "targetRoute": "/storehouse/baseline",
+          "sessionDomain": "storehouse",
+          "sessionTemplateHint": "storehouse-baseline-check"
+        },
+        {
+          "ctaKey": "open-weekly-meal-stabilizer",
+          "label": "Weekly Meal Stabilizer",
+          "targetRoute": "/meals/weekly-stabilizer",
+          "sessionDomain": "cooking",
+          "sessionTemplateHint": "simple-7-day-rotation"
+        }
+      ]
+    },
+    {
+      "id": "stability-fragile-routine-builders",
+      "label": "Fragile stability – routine builders",
+      "priority": "high",
+      "from": {
+        "nodeKey": "household-stability",
+        "band": ["fragile"],
+        "minStabilityIndex": 40,
+        "maxStabilityIndex": 59
+      },
+      "to": [
+        {
+          "targetNodeKey": "daily-rhythm-planner",
+          "flowKind": "planner",
+          "reason": "Convert ad-hoc habits into a predictable daily/weekly rhythm."
+        },
+        {
+          "targetNodeKey": "batch-cooking-session-planner",
+          "flowKind": "planner",
+          "reason": "Use batch cooking to free cognitive load and protect food budget."
+        },
+        {
+          "targetNodeKey": "light-cleaning-route-planner",
+          "flowKind": "planner",
+          "reason": "Create lightweight cleaning passes that can survive bad weeks."
+        }
+      ],
+      "conditions": {
+        "requireAlerts": false
+      },
+      "nextSteps": [
+        {
+          "ctaKey": "open-daily-rhythm-planner",
+          "label": "Design a Daily Rhythm",
+          "targetRoute": "/planning/rhythms/daily",
+          "sessionDomain": "cleaning",
+          "sessionTemplateHint": "daily-core-rhythm"
+        },
+        {
+          "ctaKey": "open-batch-cooking-planner",
+          "label": "Plan a Batch Cooking Session",
+          "targetRoute": "/meals/batch/planner",
+          "sessionDomain": "cooking",
+          "sessionTemplateHint": "batch-cooking-core"
+        }
+      ]
+    },
+    {
+      "id": "stability-steady-optimization",
+      "label": "Steady stability – optimization & growth",
+      "priority": "medium",
+      "from": {
+        "nodeKey": "household-stability",
+        "band": ["steady"],
+        "minStabilityIndex": 60,
+        "maxStabilityIndex": 79
+      },
+      "to": [
+        {
+          "targetNodeKey": "garden-season-planner",
+          "flowKind": "planner",
+          "reason": "Use surplus stability to extend food production via the garden."
+        },
+        {
+          "targetNodeKey": "preservation-cycle-planner",
+          "flowKind": "planner",
+          "reason": "Add preserving sessions to protect against future instability."
+        },
+        {
+          "targetNodeKey": "curriculum-cycle-planner",
+          "flowKind": "planner",
+          "reason": "Strengthen education and skills now that basics are stable."
+        }
+      ],
+      "conditions": {
+        "requireAlerts": false
+      },
+      "nextSteps": [
+        {
+          "ctaKey": "open-garden-season-planner",
+          "label": "Align Garden With Stability",
+          "targetRoute": "/garden/seasons",
+          "sessionDomain": "garden",
+          "sessionTemplateHint": "garden-season-from-stability"
+        },
+        {
+          "ctaKey": "open-preservation-planner",
+          "label": "Plan Preservation Sessions",
+          "targetRoute": "/preservation/planner",
+          "sessionDomain": "preservation",
+          "sessionTemplateHint": "preservation-from-surplus"
+        },
+        {
+          "ctaKey": "open-curriculum-cycle-planner",
+          "label": "Tune Curriculum Cycle",
+          "targetRoute": "/curriculum/cycle",
+          "sessionDomain": "storehouse",
+          "sessionTemplateHint": "curriculum-from-stability"
+        }
+      ]
+    },
+    {
+      "id": "stability-thriving-long-range",
+      "label": "Thriving households – long-range projects",
+      "priority": "normal",
+      "from": {
+        "nodeKey": "household-stability",
+        "band": ["thriving"],
+        "minStabilityIndex": 80,
+        "maxStabilityIndex": 100
+      },
+      "to": [
+        {
+          "targetNodeKey": "animal-planner",
+          "flowKind": "planner",
+          "reason": "Introduce or expand animal projects only when the household is stable."
+        },
+        {
+          "targetNodeKey": "infrastructure-project-planner",
+          "flowKind": "planner",
+          "reason": "Green-light infrastructure builds (ponds, fencing, cold storage, etc.)."
+        },
+        {
+          "targetNodeKey": "family-fund-investment-planner",
+          "flowKind": "planner",
+          "reason": "Channel surplus into community and investment projects."
+        }
+      ],
+      "conditions": {
+        "requireAlerts": false
+      },
+      "nextSteps": [
+        {
+          "ctaKey": "open-animal-planner",
+          "label": "Plan Animal Projects",
+          "targetRoute": "/animals/planner",
+          "sessionDomain": "animals",
+          "sessionTemplateHint": "animals-from-thriving"
+        },
+        {
+          "ctaKey": "open-infrastructure-project-planner",
+          "label": "Plan Homestead Projects",
+          "targetRoute": "/projects/homestead",
+          "sessionDomain": "storehouse",
+          "sessionTemplateHint": "infrastructure-from-stability"
+        }
+      ]
+    },
+    {
+      "id": "stability-domain-specific-flags",
+      "label": "Domain-specific follow-ups from subScores",
+      "priority": "contextual",
+      "from": {
+        "nodeKey": "household-stability",
+        "subScoreThresholds": {
+          "mealsAndStorehouse": 60,
+          "cleanlinessAndOrder": 60,
+          "timeRhythms": 60,
+          "relationshipsAndSupport": 60,
+          "educationAndSkill": 60
+        }
+      },
+      "domainTriggers": [
+        {
+          "subScoreKey": "mealsAndStorehouse",
+          "belowThresholdFlow": {
+            "targetNodeKey": "meal-planner",
+            "flowKind": "planner",
+            "reason": "Meals & storehouse below target – tighten menu, batch cooking, and pantry strategy."
+          }
+        },
+        {
+          "subScoreKey": "cleanlinessAndOrder",
+          "belowThresholdFlow": {
+            "targetNodeKey": "cleaning-route-planner",
+            "flowKind": "planner",
+            "reason": "Cleaning & order below target – simplify and schedule smaller repeatable routes."
+          }
+        },
+        {
+          "subScoreKey": "timeRhythms",
+          "belowThresholdFlow": {
+            "targetNodeKey": "daily-rhythm-planner",
+            "flowKind": "planner",
+            "reason": "Time rhythms below target – align chores, meals, and rest into a stable pattern."
+          }
+        },
+        {
+          "subScoreKey": "relationshipsAndSupport",
+          "belowThresholdFlow": {
+            "targetNodeKey": "relationship-rhythm-planner",
+            "flowKind": "planner",
+            "reason": "Relationships below target – add rituals like family meetings and shared meals."
+          }
+        },
+        {
+          "subScoreKey": "educationAndSkill",
+          "belowThresholdFlow": {
+            "targetNodeKey": "curriculum-cycle-planner",
+            "flowKind": "planner",
+            "reason": "Education & skills below target – stabilize learning rhythms and household skills."
+          }
+        }
+      ],
+      "nextSteps": [
+        {
+          "ctaKey": "open-stability-domain-review",
+          "label": "Review Domains & Choose a Focus",
+          "targetRoute": "/planning/stability/domains",
+          "sessionDomain": "storehouse",
+          "sessionTemplateHint": "stability-domain-review"
+        }
+      ]
+    }
+  ]
+}

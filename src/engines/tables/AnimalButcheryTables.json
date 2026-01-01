@@ -1,0 +1,541 @@
+{
+  "metadata": {
+    "name": "AnimalButcheryTables",
+    "version": "1.0.0",
+    "updatedAt": "2025-11-10T00:00:00.000Z",
+    "units": "metric",
+    "notes": "Reference tables for smallholder butchery planning used by SynthesisEngine, SynthesisValidator, and LeadTimeCalculator. Values are conservative baselines; follow local regulations, inspection requirements, and humane handling standards. Always verify product-label instructions for chemicals and cleaners."
+  },
+
+  "schemaHints": {
+    "_comment": "Shape guidance for consumers; not enforced by loader.",
+    "speciesRecord": {
+      "id": "string (e.g., poultry_chicken)",
+      "species": "string",
+      "humaneHandling": {
+        "feedWithdrawalH": "number",
+        "waterAccessUntil": "string (e.g., 'pre-capture')",
+        "stressMinimization": ["string"]
+      },
+      "stunBleed": {
+        "method": "string (e.g., electrical, captive_bolt, firearm where legal)",
+        "parameters": { "volts": "number|null", "amps": "number|null", "durationSec": "number|null", "caliber": "string|null" },
+        "bleedDurationMin": "number"
+      },
+      "dehairDefeather": {
+        "path": "pluck|skin|scald|scrape|dehair",
+        "scald": { "tempC": "number|null", "timeSec": "number|null", "additives": ["string"] },
+        "wax": { "enabled": "bool", "tempC": "number|null" }
+      },
+      "evisceration": {
+        "steps": ["string"],
+        "visceraSegregation": ["string"],
+        "offalCoolingTargetC": "number"
+      },
+      "washSanitation": {
+        "rinses": ["string"],
+        "sanitizer": { "chemistry": "string", "ppm": "number", "contactTimeSec": "number" }
+      },
+      "chilling": {
+        "method": "water|air|combo",
+        "targets": { "coreCWithinH": { "C": "number", "hours": "number" } },
+        "agitationRecommended": "bool"
+      },
+      "agingResting": {
+        "enabled": "bool",
+        "surfaceTargetCMax": "number|null",
+        "days": "number|null",
+        "notes": "string"
+      },
+      "yieldMap": {
+        "fieldToPackLossPct": "number",
+        "primalBreakoutPct": { "front": "number|null", "hind": "number|null", "loin": "number|null", "belly": "number|null", "trim": "number|null", "quarters": "number|null" },
+        "edibleOffalPct": "number"
+      },
+      "cutMap": {
+        "primals": ["string"],
+        "retailCuts": ["string"]
+      },
+      "packaging": {
+        "methods": ["string"],
+        "labelHints": ["string"]
+      },
+      "cleaningCrossContamination": {
+        "stations": ["string"],
+        "knifeBoardChangeovers": ["string"],
+        "handwashMoments": ["string"]
+      },
+      "eventsMap": {
+        "butchery.stun": ["species", "method", "parameters"],
+        "butchery.bleed.start": ["ts"],
+        "butchery.scald.start": ["tempC", "timeSec"],
+        "butchery.evisceration.start": [],
+        "butchery.chill.start": ["method", "bathC"],
+        "butchery.chill.verify": ["coreTempC", "elapsedH"],
+        "butchery.pack.start": [],
+        "butchery.pack.complete": ["packages", "weightKg"]
+      },
+      "source": "manual:curated"
+    }
+  },
+
+  "plannerDefaults": {
+    "handWashWaterMinC": 38,
+    "toolSanitizer": { "chemistry": "peracetic_acid", "ppm": 80, "contactTimeSec": 60 },
+    "knifeDipAlt": { "chemistry": "chlorine", "ppm": 100, "contactTimeSec": 60 },
+    "workroomAirTargetC": 10,
+    "workroomMaxC": 12,
+    "offalImmediateChillC": 4,
+    "packagingOptions": ["vacuum", "butcher_paper", "freezer_wrap"],
+    "labelFields": ["cut", "weight_kg", "date_ISO", "lot", "use_by"]
+  },
+
+  "species": [
+    {
+      "id": "poultry_chicken",
+      "species": "Chicken",
+      "humaneHandling": {
+        "feedWithdrawalH": 8,
+        "waterAccessUntil": "pre-capture",
+        "stressMinimization": ["dim_light", "quiet_handling", "proper_cones_or_cradles"]
+      },
+      "stunBleed": {
+        "method": "electrical (head-only) or mechanical per local rules",
+        "parameters": { "volts": 110, "amps": 0.2, "durationSec": 5, "caliber": null },
+        "bleedDurationMin": 2
+      },
+      "dehairDefeather": {
+        "path": "scald→pluck",
+        "scald": { "tempC": 60, "timeSec": 90, "additives": ["non-foaming_wetting_agent_optional"] },
+        "wax": { "enabled": false, "tempC": null }
+      },
+      "evisceration": {
+        "steps": ["remove_oil_gland", "open_vent_carefully", "free_bowel", "remove_viscera_heart_liver_gizzard", "inspect_and_trim"],
+        "visceraSegregation": ["liver_gizzard_heart_edible", "guts_disposal_bin", "gizzard_cleaning_station"],
+        "offalCoolingTargetC": 4
+      },
+      "washSanitation": {
+        "rinses": ["potable_water_rinse", "optional_chilled_water_rinse"],
+        "sanitizer": { "chemistry": "peracetic_acid", "ppm": 80, "contactTimeSec": 60 }
+      },
+      "chilling": {
+        "method": "water",
+        "targets": { "coreCWithinH": { "C": 4, "hours": 6 } },
+        "agitationRecommended": true
+      },
+      "agingResting": { "enabled": false, "surfaceTargetCMax": null, "days": null, "notes": "Cook or package after chilling" },
+      "yieldMap": {
+        "fieldToPackLossPct": 28,
+        "primalBreakoutPct": { "front": null, "hind": null, "loin": null, "belly": null, "trim": 12, "quarters": null },
+        "edibleOffalPct": 6
+      },
+      "cutMap": {
+        "primals": ["whole", "split_half"],
+        "retailCuts": ["breast", "tender", "wing", "thigh", "drumstick", "backs_for_stock"]
+      },
+      "packaging": {
+        "methods": ["vacuum", "shrink_bag", "butcher_paper"],
+        "labelHints": ["species", "cut", "weight_kg", "date_ISO", "keep_refrigerated_or_frozen"]
+      },
+      "cleaningCrossContamination": {
+        "stations": ["evisceration_table", "offal_station", "chill_tank", "pack_table"],
+        "knifeBoardChangeovers": ["raw_poultry_only_boards", "sanitize_between_carcasses_as_needed"],
+        "handwashMoments": ["after_viscera", "before_pack", "after_surface_cleaning"]
+      },
+      "eventsMap": {
+        "butchery.stun": ["species", "method", "parameters"],
+        "butchery.bleed.start": ["ts"],
+        "butchery.scald.start": ["tempC", "timeSec"],
+        "butchery.evisceration.start": [],
+        "butchery.chill.start": ["method", "bathC"],
+        "butchery.chill.verify": ["coreTempC", "elapsedH"],
+        "butchery.pack.start": [],
+        "butchery.pack.complete": ["packages", "weightKg"]
+      },
+      "source": "manual:curated"
+    },
+    {
+      "id": "poultry_duck",
+      "species": "Duck",
+      "humaneHandling": {
+        "feedWithdrawalH": 8,
+        "waterAccessUntil": "pre-capture",
+        "stressMinimization": ["calm_movement", "support_body_and_neck"]
+      },
+      "stunBleed": {
+        "method": "electrical or mechanical per local rules",
+        "parameters": { "volts": 110, "amps": 0.25, "durationSec": 7, "caliber": null },
+        "bleedDurationMin": 3
+      },
+      "dehairDefeather": {
+        "path": "scald→pluck→optional_wax",
+        "scald": { "tempC": 65, "timeSec": 120, "additives": ["wetting_agent_optional"] },
+        "wax": { "enabled": true, "tempC": 65 }
+      },
+      "evisceration": {
+        "steps": ["oil_gland_trim", "careful_evisceration", "neck_skin_management"],
+        "visceraSegregation": ["liver_heart_gizzard", "guts_bin"],
+        "offalCoolingTargetC": 4
+      },
+      "washSanitation": {
+        "rinses": ["potable_rinse", "chilled_rinse"],
+        "sanitizer": { "chemistry": "peracetic_acid", "ppm": 80, "contactTimeSec": 60 }
+      },
+      "chilling": {
+        "method": "water",
+        "targets": { "coreCWithinH": { "C": 4, "hours": 6 } },
+        "agitationRecommended": true
+      },
+      "agingResting": { "enabled": false, "surfaceTargetCMax": null, "days": null, "notes": "" },
+      "yieldMap": {
+        "fieldToPackLossPct": 30,
+        "primalBreakoutPct": { "front": null, "hind": null, "loin": null, "belly": null, "trim": 10, "quarters": null },
+        "edibleOffalPct": 5
+      },
+      "cutMap": { "primals": ["whole"], "retailCuts": ["breast", "leg_quarters", "wings", "fat_for_render"] },
+      "packaging": { "methods": ["vacuum", "shrink_bag"], "labelHints": ["keep_refrigerated", "cook_to_safe_temp"] },
+      "cleaningCrossContamination": {
+        "stations": ["pluck_station", "evisceration_table", "chill_tank"],
+        "knifeBoardChangeovers": ["dedicated_waterfowl_tools"],
+        "handwashMoments": ["after_gutting", "after_trash_handling"]
+      },
+      "eventsMap": {
+        "butchery.stun": ["species", "method", "parameters"],
+        "butchery.bleed.start": ["ts"],
+        "butchery.scald.start": ["tempC", "timeSec"],
+        "butchery.evisceration.start": [],
+        "butchery.chill.start": ["method", "bathC"],
+        "butchery.chill.verify": ["coreTempC", "elapsedH"],
+        "butchery.pack.start": [],
+        "butchery.pack.complete": ["packages", "weightKg"]
+      },
+      "source": "manual:curated"
+    },
+    {
+      "id": "poultry_turkey",
+      "species": "Turkey",
+      "humaneHandling": {
+        "feedWithdrawalH": 8,
+        "waterAccessUntil": "pre-capture",
+        "stressMinimization": ["two_person_lift_large_birds", "cone_size_matched"]
+      },
+      "stunBleed": {
+        "method": "electrical or mechanical per local rules",
+        "parameters": { "volts": 150, "amps": 0.4, "durationSec": 7, "caliber": null },
+        "bleedDurationMin": 4
+      },
+      "dehairDefeather": {
+        "path": "scald→pluck",
+        "scald": { "tempC": 62, "timeSec": 120, "additives": ["wetting_agent_optional"] },
+        "wax": { "enabled": false, "tempC": null }
+      },
+      "evisceration": {
+        "steps": ["oil_gland_trim", "vent_cut", "viscera_removal", "neck_and_giblets_collect"],
+        "visceraSegregation": ["giblets_food", "guts_disposal"],
+        "offalCoolingTargetC": 4
+      },
+      "washSanitation": {
+        "rinses": ["potable_rinse"],
+        "sanitizer": { "chemistry": "peracetic_acid", "ppm": 80, "contactTimeSec": 60 }
+      },
+      "chilling": {
+        "method": "water or air",
+        "targets": { "coreCWithinH": { "C": 4, "hours": 8 } },
+        "agitationRecommended": true
+      },
+      "agingResting": { "enabled": false, "surfaceTargetCMax": null, "days": null, "notes": "" },
+      "yieldMap": { "fieldToPackLossPct": 29, "primalBreakoutPct": { "front": null, "hind": null, "loin": null, "belly": null, "trim": 12, "quarters": null }, "edibleOffalPct": 5 },
+      "cutMap": { "primals": ["whole"], "retailCuts": ["breast", "tender", "thigh", "drum", "wings"] },
+      "packaging": { "methods": ["vacuum"], "labelHints": ["cook_thoroughly"] },
+      "cleaningCrossContamination": { "stations": ["evisceration_table"], "knifeBoardChangeovers": ["sanitize_between_birds_if_soiled"], "handwashMoments": ["before_pack"] },
+      "eventsMap": {
+        "butchery.stun": ["species", "method", "parameters"],
+        "butchery.bleed.start": ["ts"],
+        "butchery.scald.start": ["tempC", "timeSec"],
+        "butchery.evisceration.start": [],
+        "butchery.chill.start": ["method", "bathC"],
+        "butchery.chill.verify": ["coreTempC", "elapsedH"],
+        "butchery.pack.start": [],
+        "butchery.pack.complete": ["packages", "weightKg"]
+      },
+      "source": "manual:curated"
+    },
+    {
+      "id": "rabbit",
+      "species": "Rabbit",
+      "humaneHandling": {
+        "feedWithdrawalH": 8,
+        "waterAccessUntil": "pre-capture",
+        "stressMinimization": ["quiet_environment", "support_spine_and_hindquarters"]
+      },
+      "stunBleed": {
+        "method": "mechanical or electrical per local rules",
+        "parameters": { "volts": 110, "amps": 0.2, "durationSec": 3, "caliber": null },
+        "bleedDurationMin": 3
+      },
+      "dehairDefeather": {
+        "path": "skin",
+        "scald": { "tempC": null, "timeSec": null, "additives": [] },
+        "wax": { "enabled": false, "tempC": null }
+      },
+      "evisceration": {
+        "steps": ["remove_hide", "open_abdomen", "remove_viscera", "separate_liver_heart_kidneys"],
+        "visceraSegregation": ["liver_heart_kidneys", "guts_bin"],
+        "offalCoolingTargetC": 4
+      },
+      "washSanitation": {
+        "rinses": ["potable_rinse"],
+        "sanitizer": { "chemistry": "peracetic_acid", "ppm": 80, "contactTimeSec": 60 }
+      },
+      "chilling": {
+        "method": "air or water",
+        "targets": { "coreCWithinH": { "C": 4, "hours": 6 } },
+        "agitationRecommended": false
+      },
+      "agingResting": { "enabled": true, "surfaceTargetCMax": 4, "days": 1, "notes": "Short rest improves tenderness" },
+      "yieldMap": {
+        "fieldToPackLossPct": 20,
+        "primalBreakoutPct": { "front": 22, "hind": 30, "loin": 28, "belly": 8, "trim": 12, "quarters": null },
+        "edibleOffalPct": 4
+      },
+      "cutMap": { "primals": ["front", "saddle_loin", "hind"], "retailCuts": ["hind_leg", "loin", "front_quarters", "ribs", "trim"] },
+      "packaging": { "methods": ["vacuum"], "labelHints": ["cook_thoroughly"] },
+      "cleaningCrossContamination": { "stations": ["skin_station", "evisceration_table"], "knifeBoardChangeovers": ["hide_off_tools_separate_from_evisceration_tools"], "handwashMoments": ["after_hide_removal"] },
+      "eventsMap": {
+        "butchery.stun": ["species", "method", "parameters"],
+        "butchery.bleed.start": ["ts"],
+        "butchery.scald.start": ["tempC", "timeSec"],
+        "butchery.evisceration.start": [],
+        "butchery.chill.start": ["method", "bathC"],
+        "butchery.chill.verify": ["coreTempC", "elapsedH"],
+        "butchery.pack.start": [],
+        "butchery.pack.complete": ["packages", "weightKg"]
+      },
+      "source": "manual:curated"
+    },
+    {
+      "id": "small_ruminant_lamb",
+      "species": "Lamb",
+      "humaneHandling": {
+        "feedWithdrawalH": 12,
+        "waterAccessUntil": "pre-transport",
+        "stressMinimization": ["calm_movement", "non-slip_floors", "separate_from_adults_if_needed"]
+      },
+      "stunBleed": {
+        "method": "captive_bolt or electrical per local rules",
+        "parameters": { "volts": 250, "amps": 1.0, "durationSec": 3, "caliber": "captive_bolt_spec" },
+        "bleedDurationMin": 5
+      },
+      "dehairDefeather": {
+        "path": "skin",
+        "scald": { "tempC": null, "timeSec": null, "additives": [] },
+        "wax": { "enabled": false, "tempC": null }
+      },
+      "evisceration": {
+        "steps": ["hide_pull", "midline_open", "pluck_pluckset (heart_lungs)", "weasand_tie", "viscera_removal"],
+        "visceraSegregation": ["liver_heart_kidneys", "rumen_intestines_bin"],
+        "offalCoolingTargetC": 4
+      },
+      "washSanitation": {
+        "rinses": ["potable_rinse"],
+        "sanitizer": { "chemistry": "peracetic_acid", "ppm": 80, "contactTimeSec": 60 }
+      },
+      "chilling": {
+        "method": "air",
+        "targets": { "coreCWithinH": { "C": 7, "hours": 24 } },
+        "agitationRecommended": false
+      },
+      "agingResting": { "enabled": true, "surfaceTargetCMax": 7, "days": 3, "notes": "Short dry-age improves tenderness; avoid cold-shortening" },
+      "yieldMap": {
+        "fieldToPackLossPct": 40,
+        "primalBreakoutPct": { "front": 38, "hind": 33, "loin": 18, "belly": 6, "trim": 5, "quarters": null },
+        "edibleOffalPct": 3
+      },
+      "cutMap": { "primals": ["shoulder", "rack", "loin", "leg", "breast_flank"], "retailCuts": ["leg_steaks_or_roast", "loin_chops", "rack_chops", "shoulder_roast", "shanks", "stew_meat"] },
+      "packaging": { "methods": ["vacuum"], "labelHints": ["species", "cut", "weight_kg", "date_ISO"] },
+      "cleaningCrossContamination": { "stations": ["hide_off", "evisceration", "split_saw", "trim_table"], "knifeBoardChangeovers": ["hide_off_tools_separate"], "handwashMoments": ["after_hide", "before_final_trim"] },
+      "eventsMap": {
+        "butchery.stun": ["species", "method", "parameters"],
+        "butchery.bleed.start": ["ts"],
+        "butchery.scald.start": ["tempC", "timeSec"],
+        "butchery.evisceration.start": [],
+        "butchery.chill.start": ["method", "bathC"],
+        "butchery.chill.verify": ["coreTempC", "elapsedH"],
+        "butchery.pack.start": [],
+        "butchery.pack.complete": ["packages", "weightKg"]
+      },
+      "source": "manual:curated"
+    },
+    {
+      "id": "small_ruminant_goat",
+      "species": "Goat (Chevon/Kid)",
+      "humaneHandling": {
+        "feedWithdrawalH": 12,
+        "waterAccessUntil": "pre-transport",
+        "stressMinimization": ["calm_movement", "shade_in_heat"]
+      },
+      "stunBleed": {
+        "method": "captive_bolt or electrical per local rules",
+        "parameters": { "volts": 250, "amps": 1.0, "durationSec": 3, "caliber": "captive_bolt_spec" },
+        "bleedDurationMin": 5
+      },
+      "dehairDefeather": {
+        "path": "skin",
+        "scald": { "tempC": null, "timeSec": null, "additives": [] },
+        "wax": { "enabled": false, "tempC": null }
+      },
+      "evisceration": {
+        "steps": ["hide_pull", "midline_open", "pluck_set", "weasand_tie", "viscera_remove"],
+        "visceraSegregation": ["liver_heart_kidneys", "rumen_guts_bin"],
+        "offalCoolingTargetC": 4
+      },
+      "washSanitation": { "rinses": ["potable_rinse"], "sanitizer": { "chemistry": "peracetic_acid", "ppm": 80, "contactTimeSec": 60 } },
+      "chilling": { "method": "air", "targets": { "coreCWithinH": { "C": 7, "hours": 24 } }, "agitationRecommended": false },
+      "agingResting": { "enabled": true, "surfaceTargetCMax": 7, "days": 2, "notes": "Kid often cooked fresh; short rest improves tenderness" },
+      "yieldMap": { "fieldToPackLossPct": 42, "primalBreakoutPct": { "front": 37, "hind": 34, "loin": 17, "belly": 6, "trim": 6, "quarters": null }, "edibleOffalPct": 3 },
+      "cutMap": { "primals": ["shoulder", "rack", "loin", "leg", "breast_flank"], "retailCuts": ["leg", "loin_chops", "shoulder_curry_cuts", "ribs", "stew_meat"] },
+      "packaging": { "methods": ["vacuum"], "labelHints": ["species", "cut", "weight_kg", "date_ISO"] },
+      "cleaningCrossContamination": { "stations": ["hide_off", "evisceration", "trim"], "knifeBoardChangeovers": ["separate_hide_off_tools"], "handwashMoments": ["after_hide", "before_pack"] },
+      "eventsMap": {
+        "butchery.stun": ["species", "method", "parameters"],
+        "butchery.bleed.start": ["ts"],
+        "butchery.scald.start": ["tempC", "timeSec"],
+        "butchery.evisceration.start": [],
+        "butchery.chill.start": ["method", "bathC"],
+        "butchery.chill.verify": ["coreTempC", "elapsedH"],
+        "butchery.pack.start": [],
+        "butchery.pack.complete": ["packages", "weightKg"]
+      },
+      "source": "manual:curated"
+    },
+    {
+      "id": "swine_pork",
+      "species": "Pig",
+      "humaneHandling": {
+        "feedWithdrawalH": 12,
+        "waterAccessUntil": "pre-transport",
+        "stressMinimization": ["low-stress_movement", "non-slip_floors", "cooling_in_heat"]
+      },
+      "stunBleed": {
+        "method": "captive_bolt or electrical per local rules",
+        "parameters": { "volts": 300, "amps": 1.3, "durationSec": 3, "caliber": "captive_bolt_spec" },
+        "bleedDurationMin": 6
+      },
+      "dehairDefeather": {
+        "path": "scald→scrape→dehair",
+        "scald": { "tempC": 63, "timeSec": 180, "additives": ["wetting_agent_optional"] },
+        "wax": { "enabled": false, "tempC": null }
+      },
+      "evisceration": {
+        "steps": ["bung_tie", "midline_open", "pluck (heart_lungs)", "viscera_remove", "split_carcass_if_required"],
+        "visceraSegregation": ["liver_heart_kidneys", "intestines_for_casing_if_cleaned", "guts_bin"],
+        "offalCoolingTargetC": 4
+      },
+      "washSanitation": {
+        "rinses": ["potable_rinse"],
+        "sanitizer": { "chemistry": "peracetic_acid", "ppm": 80, "contactTimeSec": 60 }
+      },
+      "chilling": {
+        "method": "air",
+        "targets": { "coreCWithinH": { "C": 7, "hours": 24 } },
+        "agitationRecommended": false
+      },
+      "agingResting": { "enabled": true, "surfaceTargetCMax": 7, "days": 2, "notes": "Avoid cold-shortening by stepwise chill if possible" },
+      "yieldMap": {
+        "fieldToPackLossPct": 44,
+        "primalBreakoutPct": { "front": 22, "hind": 24, "loin": 20, "belly": 16, "trim": 18, "quarters": null },
+        "edibleOffalPct": 4
+      },
+      "cutMap": { "primals": ["ham", "loin", "belly", "shoulder", "picnic"], "retailCuts": ["chops", "roasts", "spare_ribs", "bacon_belly", "shoulder_butt", "trim_for_sausage"] },
+      "packaging": { "methods": ["vacuum", "butcher_paper"], "labelHints": ["cook_pork_to_safe_temp", "store_below_4C"] },
+      "cleaningCrossContamination": { "stations": ["scald_scrape", "evisceration", "split", "trim"], "knifeBoardChangeovers": ["separate_scrape_tools"], "handwashMoments": ["after_guts", "before_pack"] },
+      "eventsMap": {
+        "butchery.stun": ["species", "method", "parameters"],
+        "butchery.bleed.start": ["ts"],
+        "butchery.scald.start": ["tempC", "timeSec"],
+        "butchery.evisceration.start": [],
+        "butchery.chill.start": ["method", "bathC"],
+        "butchery.chill.verify": ["coreTempC", "elapsedH"],
+        "butchery.pack.start": [],
+        "butchery.pack.complete": ["packages", "weightKg"]
+      },
+      "source": "manual:curated"
+    },
+    {
+      "id": "beef_cattle_quarter",
+      "species": "Beef (Quarter/Side Planning)",
+      "humaneHandling": {
+        "feedWithdrawalH": 12,
+        "waterAccessUntil": "pre-transport",
+        "stressMinimization": ["low_stress_handling", "shade", "calm_environment"]
+      },
+      "stunBleed": {
+        "method": "captive_bolt or firearm where legal",
+        "parameters": { "volts": null, "amps": null, "durationSec": null, "caliber": "per_local_rules" },
+        "bleedDurationMin": 8
+      },
+      "dehairDefeather": {
+        "path": "skin",
+        "scald": { "tempC": null, "timeSec": null, "additives": [] },
+        "wax": { "enabled": false, "tempC": null }
+      },
+      "evisceration": {
+        "steps": ["hide_off", "midline_open", "pluck", "viscera_removal", "split_halves"],
+        "visceraSegregation": ["liver_heart_kidneys", "paunch_manure_management"],
+        "offalCoolingTargetC": 4
+      },
+      "washSanitation": { "rinses": ["potable_rinse"], "sanitizer": { "chemistry": "peracetic_acid", "ppm": 80, "contactTimeSec": 60 } },
+      "chilling": { "method": "air", "targets": { "coreCWithinH": { "C": 7, "hours": 48 } }, "agitationRecommended": false },
+      "agingResting": { "enabled": true, "surfaceTargetCMax": 7, "days": 7, "notes": "1–14 days typical smallholder; monitor surface dryness and temp" },
+      "yieldMap": {
+        "fieldToPackLossPct": 50,
+        "primalBreakoutPct": { "front": 38, "hind": 31, "loin": 12, "belly": 7, "trim": 12, "quarters": null },
+        "edibleOffalPct": 2
+      },
+      "cutMap": { "primals": ["round", "loin", "rib", "chuck", "plate", "flank", "brisket", "shank"], "retailCuts": ["steaks", "roasts", "short_ribs", "brisket", "stew", "ground"] },
+      "packaging": { "methods": ["vacuum"], "labelHints": ["species", "cut", "weight_kg", "date_ISO", "lot"] },
+      "cleaningCrossContamination": { "stations": ["hide_off", "evisceration", "split", "trim"], "knifeBoardChangeovers": ["hide_off_tools_separate"], "handwashMoments": ["after_hide", "after_gut"], "": "" },
+      "eventsMap": {
+        "butchery.stun": ["species", "method", "parameters"],
+        "butchery.bleed.start": ["ts"],
+        "butchery.scald.start": ["tempC", "timeSec"],
+        "butchery.evisceration.start": [],
+        "butchery.chill.start": ["method", "bathC"],
+        "butchery.chill.verify": ["coreTempC", "elapsedH"],
+        "butchery.pack.start": [],
+        "butchery.pack.complete": ["packages", "weightKg"]
+      },
+      "source": "manual:curated"
+    }
+  ],
+
+  "sanitationFlows": {
+    "_comment": "Planner-friendly sequences that engines can expand into tasks with SharedResources.",
+    "toolCycle": ["scrape_debris", "wash_detergent_hot", "rinse", "sanitize (peracetic_80ppm 60s)", "air_dry"],
+    "tableTurn": ["remove_waste", "wash", "rinse", "sanitize_contact_time", "verify_ppm_with_test_strip", "log_in_sanitation_sheet"]
+  },
+
+  "safetyFloors": {
+    "_comment": "Validator checks; engines must block if floors cannot be met.",
+    "handwashSinkRequired": true,
+    "separate_hide_off_area": true,
+    "no_mixing_bleach_acids": true,
+    "minChillTargets": {
+      "poultry": { "C": 4, "hours": 6 },
+      "red_meat_surface": { "C": 7, "hours": 24 },
+      "offal": { "C": 4, "hours": 4 }
+    }
+  },
+
+  "eventTemplates": {
+    "_comment": "Canonical event payloads for observability; engines fill values at runtime.",
+    "butchery.stun": { "type": "butchery.stun", "ts": "<ISO>", "source": "animal.butchery", "data": { "species": "", "method": "", "parameters": {} } },
+    "butchery.bleed.start": { "type": "butchery.bleed.start", "ts": "<ISO>", "source": "animal.butchery", "data": {} },
+    "butchery.scald.start": { "type": "butchery.scald.start", "ts": "<ISO>", "source": "animal.butchery", "data": { "tempC": 0, "timeSec": 0 } },
+    "butchery.evisceration.start": { "type": "butchery.evisceration.start", "ts": "<ISO>", "source": "animal.butchery", "data": {} },
+    "butchery.chill.start": { "type": "butchery.chill.start", "ts": "<ISO>", "source": "animal.butchery", "data": { "method": "", "bathC": 0 } },
+    "butchery.chill.verify": { "type": "butchery.chill.verify", "ts": "<ISO>", "source": "animal.butchery", "data": { "coreTempC": 0, "elapsedH": 0 } },
+    "butchery.pack.start": { "type": "butchery.pack.start", "ts": "<ISO>", "source": "animal.butchery", "data": {} },
+    "butchery.pack.complete": { "type": "butchery.pack.complete", "ts": "<ISO>", "source": "animal.butchery", "data": { "packages": 0, "weightKg": 0 } }
+  }
+}

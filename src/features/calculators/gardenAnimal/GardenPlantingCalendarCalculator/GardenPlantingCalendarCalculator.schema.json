@@ -1,0 +1,516 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "GardenPlantingCalendarCalculator.schema.json",
+  "title": "GardenPlantingCalendarCalculatorPayload",
+  "description": "Schema describing the inputs and outputs for the Garden Planting Calendar Calculator. Focuses on climate, frost dates, crops, and garden layout to produce planting and harvest date windows.",
+  "type": "object",
+  "properties": {
+    "context": {
+      "type": "object",
+      "description": "Optional context passed in from SSA or the Planning Graph.",
+      "properties": {
+        "householdId": {
+          "type": "string",
+          "description": "Identifier for the household."
+        },
+        "projectId": {
+          "type": "string",
+          "description": "Optional project or garden plan id."
+        },
+        "calculatorId": {
+          "type": "string",
+          "description": "Calculator identifier, should be GardenPlantingCalendarCalculator."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When this calculation request was created."
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "inputs": {
+      "type": "object",
+      "description": "Inputs describing climate, calendar preferences, garden layout, and crops.",
+      "properties": {
+        "climate": {
+          "type": "object",
+          "description": "Climate and frost-date information for the garden location.",
+          "properties": {
+            "zone": {
+              "type": "string",
+              "description": "USDA or similar climate zone, e.g. '7b'."
+            },
+            "lastFrostDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Average last frost date in spring."
+            },
+            "firstFrostDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Average first frost date in fall."
+            },
+            "latitude": {
+              "type": "number",
+              "description": "Latitude of the garden location."
+            },
+            "longitude": {
+              "type": "number",
+              "description": "Longitude of the garden location."
+            },
+            "microclimateNotes": {
+              "type": "string",
+              "description": "Notes about shade, wind, slope, or other microclimate factors."
+            }
+          },
+          "required": [
+            "lastFrostDate",
+            "firstFrostDate"
+          ],
+          "additionalProperties": false
+        },
+
+        "calendar": {
+          "type": "object",
+          "description": "Calendar preferences including planting window and optional feast-day coordination.",
+          "properties": {
+            "year": {
+              "type": "integer",
+              "minimum": 1900,
+              "maximum": 3000,
+              "description": "Target calendar year for planning."
+            },
+            "startDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Optional start date for focusing the plan; defaults to beginning of garden season."
+            },
+            "endDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Optional end date for focusing the plan; defaults to end of garden season."
+            },
+            "alignWithFeastDays": {
+              "type": "boolean",
+              "description": "If true, planner tries to highlight harvests that overlap with key feast days."
+            },
+            "feastDays": {
+              "type": "array",
+              "description": "Optional list of feast days to align with harvest windows.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Feast identifier."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Human-readable feast name."
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Gregorian date of the feast for this planning year."
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "date"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "year"
+          ],
+          "additionalProperties": false
+        },
+
+        "gardenLayout": {
+          "type": "object",
+          "description": "High-level garden layout and available beds or zones.",
+          "properties": {
+            "beds": {
+              "type": "array",
+              "description": "List of beds or zones where crops can be planted.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "bedId": {
+                    "type": "string",
+                    "description": "Unique identifier for the bed or zone."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Display name for the bed."
+                  },
+                  "areaSqFt": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Approximate area of the bed in square feet."
+                  },
+                  "sunExposure": {
+                    "type": "string",
+                    "enum": [
+                      "full-sun",
+                      "partial-sun",
+                      "partial-shade",
+                      "shade",
+                      "mixed"
+                    ],
+                    "description": "Sun exposure classification."
+                  },
+                  "notes": {
+                    "type": "string",
+                    "description": "Additional notes such as heavy feeder bed, trellis, etc."
+                  }
+                },
+                "required": [
+                  "bedId",
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+
+        "crops": {
+          "type": "array",
+          "description": "List of crops to plan plantings for.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "cropId": {
+                "type": "string",
+                "description": "Unique identifier for the crop entry."
+              },
+              "name": {
+                "type": "string",
+                "description": "Crop name, e.g. 'Tomato', 'Collard Greens'."
+              },
+              "variety": {
+                "type": "string",
+                "description": "Specific variety, e.g. 'Cherokee Purple'."
+              },
+              "family": {
+                "type": "string",
+                "description": "Botanical family, e.g. 'Solanaceae'."
+              },
+              "daysToMaturity": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Average days from planting (or transplanting) to harvest."
+              },
+              "startMethod": {
+                "type": "string",
+                "enum": [
+                  "direct-seed",
+                  "transplant",
+                  "either"
+                ],
+                "description": "Whether the crop is usually direct-seeded, transplanted, or either."
+              },
+              "successionEnabled": {
+                "type": "boolean",
+                "description": "If true, planner will generate multiple successive plantings."
+              },
+              "successionIntervalDays": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Number of days between succession plantings when enabled."
+              },
+              "maxSuccessions": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Maximum number of successions for this crop."
+              },
+              "frostSensitivity": {
+                "type": "string",
+                "enum": [
+                  "frost-tolerant",
+                  "frost-hardy",
+                  "tender",
+                  "very-tender"
+                ],
+                "description": "Used to determine how close to frost dates this crop can be planted."
+              },
+              "targetUse": {
+                "type": "string",
+                "enum": [
+                  "fresh",
+                  "preserve",
+                  "animal-fodder",
+                  "seed-saving",
+                  "mixed"
+                ],
+                "description": "Primary target use to coordinate with storehouse and animal planners."
+              },
+              "preferredBedIds": {
+                "type": "array",
+                "description": "List of preferred bed ids for this crop.",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "plantingNotes": {
+                "type": "string",
+                "description": "Any special notes about spacing, timing, or companions."
+              }
+            },
+            "required": [
+              "cropId",
+              "name",
+              "daysToMaturity"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "climate",
+        "calendar",
+        "crops"
+      ],
+      "additionalProperties": false
+    },
+
+    "outputs": {
+      "type": "object",
+      "description": "Planning results: planting windows, harvest windows, and optional calendar events.",
+      "properties": {
+        "plantingWindows": {
+          "type": "array",
+          "description": "Recommended planting windows per crop and bed.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "windowId": {
+                "type": "string",
+                "description": "Unique identifier for this planting window."
+              },
+              "cropId": {
+                "type": "string",
+                "description": "References inputs.crops[*].cropId."
+              },
+              "cropName": {
+                "type": "string",
+                "description": "Convenience copy of crop name."
+              },
+              "bedId": {
+                "type": "string",
+                "description": "Garden bed or zone for this planting."
+              },
+              "successionIndex": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "0 for first planting, 1 for second succession, etc."
+              },
+              "startDate": {
+                "type": "string",
+                "format": "date",
+                "description": "Recommended start date for planting window."
+              },
+              "endDate": {
+                "type": "string",
+                "format": "date",
+                "description": "Recommended end date for planting window."
+              },
+              "earliestSafeDate": {
+                "type": "string",
+                "format": "date",
+                "description": "Earliest safe planting date considering frost sensitivity."
+              },
+              "latestSafeDate": {
+                "type": "string",
+                "format": "date",
+                "description": "Latest safe planting date before heat or frost risk."
+              },
+              "flags": {
+                "type": "array",
+                "description": "Flags such as 'tight-before-frost', 'heat-risk', or 'aligns-with-feast'.",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "windowId",
+              "cropId",
+              "startDate",
+              "endDate"
+            ],
+            "additionalProperties": false
+          }
+        },
+
+        "harvestWindows": {
+          "type": "array",
+          "description": "Projected harvest windows derived from planting windows and days to maturity.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "windowId": {
+                "type": "string",
+                "description": "Unique identifier for this harvest window."
+              },
+              "cropId": {
+                "type": "string",
+                "description": "References inputs.crops[*].cropId."
+              },
+              "cropName": {
+                "type": "string",
+                "description": "Convenience copy of crop name."
+              },
+              "bedId": {
+                "type": "string",
+                "description": "Garden bed or zone for this harvest."
+              },
+              "successionIndex": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Succession number corresponding to planting window."
+              },
+              "startDate": {
+                "type": "string",
+                "format": "date",
+                "description": "Projected beginning of harvest window."
+              },
+              "endDate": {
+                "type": "string",
+                "format": "date",
+                "description": "Projected end of harvest window."
+              },
+              "alignedFeastDays": {
+                "type": "array",
+                "description": "Any feast days that overlap this harvest window.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "feastId": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "date": {
+                      "type": "string",
+                      "format": "date"
+                    }
+                  },
+                  "required": [
+                    "feastId",
+                    "name",
+                    "date"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "targetUse": {
+                "type": "string",
+                "description": "Resolved target use, copied from crop definition."
+              }
+            },
+            "required": [
+              "windowId",
+              "cropId",
+              "startDate",
+              "endDate"
+            ],
+            "additionalProperties": false
+          }
+        },
+
+        "calendarEvents": {
+          "type": "array",
+          "description": "Optional calendar events suitable for inserting into SSA calendar and SessionRunner queues.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "eventId": {
+                "type": "string",
+                "description": "Identifier for this event."
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "bed-prep",
+                  "planting",
+                  "succession-check",
+                  "harvest-start",
+                  "harvest-peak",
+                  "harvest-final"
+                ],
+                "description": "Type of garden calendar event."
+              },
+              "cropId": {
+                "type": "string",
+                "description": "Optional crop reference."
+              },
+              "bedId": {
+                "type": "string",
+                "description": "Optional bed reference."
+              },
+              "date": {
+                "type": "string",
+                "format": "date",
+                "description": "Date the event is scheduled for."
+              },
+              "title": {
+                "type": "string",
+                "description": "Short title to display on the calendar."
+              },
+              "notes": {
+                "type": "string",
+                "description": "Additional instructions or reminders."
+              }
+            },
+            "required": [
+              "eventId",
+              "kind",
+              "date",
+              "title"
+            ],
+            "additionalProperties": false
+          }
+        },
+
+        "summary": {
+          "type": "object",
+          "description": "High-level summary of the plan.",
+          "properties": {
+            "totalCropsPlanned": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "totalPlantingEvents": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "totalHarvestWindows": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "notes": {
+              "type": "string",
+              "description": "Any summary notes or warnings from the calculator."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+
+  "required": [
+    "inputs"
+  ],
+  "additionalProperties": false
+}

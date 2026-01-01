@@ -1,0 +1,405 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka.local/agents/prompts/reasoner-contracts/scheduleTradeoffs.delta.schema.json",
+  "title": "SSA Reasoner – Garden/Animal Schedule Tradeoffs Delta",
+  "description": "Delta-style schema for proposed schedule tradeoffs for garden and animal sessions/steps. Used by the Reasoner to suggest rescheduling, batching, or skipping tasks based on weather, daylight, Sabbath, quiet hours, animal welfare, and household workload.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "description": "Semantic version for this payload shape.",
+      "default": "1.0.0"
+    },
+    "domains": {
+      "type": "array",
+      "description": "Domains this delta applies to. Typically a subset of ['garden', 'animals'].",
+      "items": {
+        "type": "string",
+        "enum": [
+          "garden",
+          "animals"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when this tradeoff delta was generated."
+    },
+    "requestId": {
+      "type": "string",
+      "description": "Optional ID that ties this delta back to a Reasoner request."
+    },
+    "householdId": {
+      "type": "string",
+      "description": "Optional household/profile identifier this tradeoff set is scoped to."
+    },
+    "locale": {
+      "type": "string",
+      "description": "BCP-47 locale in which labels and notes are expressed, e.g. 'en-US'.",
+      "default": "en-US"
+    },
+    "tradeoffs": {
+      "type": "array",
+      "description": "List of individual schedule tradeoff proposals to add/update/remove in the planning knowledge base.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable identifier for this tradeoff rule or recommendation. May reference an existing rule for updates."
+          },
+          "status": {
+            "type": "string",
+            "description": "Whether this tradeoff is newly proposed, already accepted, or deprecated.",
+            "enum": [
+              "proposed",
+              "accepted",
+              "deprecated"
+            ],
+            "default": "proposed"
+          },
+          "operation": {
+            "type": "string",
+            "description": "How this delta should be applied.",
+            "enum": [
+              "upsert",
+              "remove"
+            ],
+            "default": "upsert"
+          },
+          "sessionId": {
+            "type": "string",
+            "description": "Optional reference to a specific session this tradeoff targets."
+          },
+          "stepId": {
+            "type": "string",
+            "description": "Optional reference to a specific step within the session that is most impacted."
+          },
+          "task": {
+            "type": "object",
+            "description": "High-level description of the garden/animal task being traded off.",
+            "additionalProperties": false,
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "Human-facing name of the task, e.g. 'Evening milking' or 'Plant tomato seedlings'."
+              },
+              "category": {
+                "type": "string",
+                "description": "Task category for grouping and UI filters.",
+                "enum": [
+                  "planting",
+                  "watering",
+                  "weeding",
+                  "harvest",
+                  "feeding",
+                  "milking",
+                  "cleaning",
+                  "healthCheck",
+                  "butchering",
+                  "maintenance",
+                  "other"
+                ],
+                "default": "other"
+              },
+              "priority": {
+                "type": "string",
+                "description": "Priority within household operations.",
+                "enum": [
+                  "low",
+                  "medium",
+                  "high",
+                  "critical"
+                ],
+                "default": "medium"
+              }
+            },
+            "required": [
+              "title"
+            ]
+          },
+          "currentSchedule": {
+            "type": "object",
+            "description": "The current scheduled window or typical time for this task.",
+            "additionalProperties": false,
+            "properties": {
+              "start": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Current/planned start time (ISO 8601)."
+              },
+              "end": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Current/planned end time (ISO 8601)."
+              },
+              "slotLabel": {
+                "type": "string",
+                "description": "Human-friendly label such as 'early morning', 'midday', 'evening', 'after sunset'."
+              }
+            },
+            "required": [
+              "start",
+              "end"
+            ]
+          },
+          "alternativeSlots": {
+            "type": "array",
+            "description": "Alternative time windows the Reasoner believes may be better given current constraints.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "start": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Alternative start time."
+                },
+                "end": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Alternative end time."
+                },
+                "slotLabel": {
+                  "type": "string",
+                  "description": "Human-friendly label for this slot."
+                },
+                "score": {
+                  "type": "number",
+                  "description": "Relative desirability score (0–1) for this alternative slot.",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "notes": {
+                  "type": "string",
+                  "description": "Notes explaining why this slot is recommended (e.g. 'cooler temperatures, less animal stress')."
+                }
+              },
+              "required": [
+                "start",
+                "end"
+              ]
+            }
+          },
+          "drivers": {
+            "type": "object",
+            "description": "Key factors driving this tradeoff recommendation, normalized to 0–1 where possible.",
+            "additionalProperties": false,
+            "properties": {
+              "weatherRisk": {
+                "type": "number",
+                "description": "0–1 risk score for adverse weather during the current schedule (1 = high risk).",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "daylightUtilization": {
+                "type": "number",
+                "description": "0–1 score indicating how well the schedule uses daylight (1 = optimal).",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "animalStressRisk": {
+                "type": "number",
+                "description": "0–1 risk score for animal stress (1 = high stress).",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "yieldImpact": {
+                "type": "number",
+                "description": "Estimated impact on yield from following the current schedule vs. the recommended alternative. Negative values mean potential loss, positive values mean potential gain. Range is -1.0 (severe loss) to 1.0 (significant gain).",
+                "minimum": -1,
+                "maximum": 1
+              },
+              "laborSpike": {
+                "type": "number",
+                "description": "0–1 measure of how much the current schedule contributes to a short-term labor spike (1 = very spiky).",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "sabbathConflict": {
+                "type": "boolean",
+                "description": "True if the current schedule overlaps with Sabbath in a way that should be avoided, except for essential care."
+              },
+              "quietHoursConflict": {
+                "type": "boolean",
+                "description": "True if the current schedule likely conflicts with household quiet hours (e.g. noisy equipment at night)."
+              }
+            }
+          },
+          "guardSummary": {
+            "$ref": "#/$defs/guardSummary"
+          },
+          "recommendedAction": {
+            "type": "string",
+            "description": "Primary recommended scheduling decision for this task.",
+            "enum": [
+              "keep",
+              "moveEarlier",
+              "moveLater",
+              "moveToAlternativeSlot",
+              "splitAcrossSlots",
+              "batchWithOtherTasks",
+              "skipIfLowPriority"
+            ],
+            "default": "keep"
+          },
+          "batchingHints": {
+            "type": "object",
+            "description": "Hints for batching this task with others to reduce labor spikes or make better use of weather/daylight.",
+            "additionalProperties": false,
+            "properties": {
+              "canBatch": {
+                "type": "boolean",
+                "description": "True if this task is safe/reasonable to batch with others."
+              },
+              "batchWithTaskIds": {
+                "type": "array",
+                "description": "Optional list of other tradeoff/task ids that are good candidates for batching.",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "notes": {
+                "type": "string",
+                "description": "Human-readable batching guidance."
+              }
+            }
+          },
+          "notes": {
+            "type": "string",
+            "description": "User-facing explanation of the tradeoff and its implications, suitable for display in the SessionRunner or scheduling UI."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when this tradeoff record was first created."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when this tradeoff record was last updated."
+          }
+        },
+        "required": [
+          "id",
+          "operation",
+          "task",
+          "currentSchedule",
+          "recommendedAction"
+        ]
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "domains",
+    "generatedAt",
+    "tradeoffs"
+  ],
+  "$defs": {
+    "guardResult": {
+      "type": "object",
+      "description": "Result of a single guard evaluation (e.g. Sabbath, weather, inventory, quiet hours, battery).",
+      "additionalProperties": false,
+      "properties": {
+        "guardId": {
+          "type": "string",
+          "description": "Identifier of the guard, e.g. 'sabbath', 'weather', 'inventory'."
+        },
+        "ok": {
+          "type": "boolean",
+          "description": "True if this guard passed, false if it failed or is blocking."
+        },
+        "severity": {
+          "type": "string",
+          "description": "Severity level for a non-ok guard.",
+          "enum": [
+            "info",
+            "warning",
+            "hard-block"
+          ]
+        },
+        "reasonCode": {
+          "type": "string",
+          "description": "Machine-readable code representing the reason (e.g. 'within-sabbath-window')."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable explanation."
+        },
+        "details": {
+          "type": "object",
+          "description": "Guard-specific structured details."
+        },
+        "suggestedAction": {
+          "type": "string",
+          "description": "Suggested next step if this guard is not ok.",
+          "enum": [
+            "proceed",
+            "reschedule",
+            "require-user-confirmation"
+          ]
+        },
+        "checkedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the guard was evaluated."
+        }
+      },
+      "required": [
+        "guardId",
+        "ok"
+      ]
+    },
+    "guardSummary": {
+      "type": "object",
+      "description": "Aggregate summary of multiple guard results for a given session/step.",
+      "additionalProperties": false,
+      "properties": {
+        "okToStart": {
+          "type": "boolean",
+          "description": "True only if all blocking guards passed."
+        },
+        "hasWarnings": {
+          "type": "boolean",
+          "description": "True if one or more guards emitted warnings."
+        },
+        "blockingGuards": {
+          "type": "array",
+          "description": "List of guardIds that are currently blocking.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warningGuards": {
+          "type": "array",
+          "description": "List of guardIds that are warning-only.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "results": {
+          "type": "array",
+          "description": "Per-guard results used to compute this summary.",
+          "items": {
+            "$ref": "#/$defs/guardResult"
+          }
+        },
+        "checkedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp for the aggregate evaluation."
+        }
+      },
+      "required": [
+        "okToStart",
+        "hasWarnings"
+      ]
+    }
+  }
+}

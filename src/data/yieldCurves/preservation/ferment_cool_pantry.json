@@ -1,0 +1,340 @@
+{
+  "$schema": "../../schemas/preservation.schema.json",
+  "version": "2025-10-31T18:20:00-05:00",
+  "meta": {
+    "id": "ferment_cool_pantry",
+    "title": "Preservation – Cool-Pantry Ferments (Crocks/Jars, Brined/Veg/Relish)",
+    "description": "Preservation profile for no-heat / low-heat ferments that live in your preserve-ferment-space (cool pantry, basement shelf, cold room). Meant to catch garden overflow (leafy_shade_bed, herbs_perennial_corner, tomato_hot_strip seconds, orchard_row_1 surplus), create storehouse stock (fermented veg, relishes, kraut, brined peppers), and surface cleaning/sanitizing runs for crocks, lids, weights, and airlocks. It should OFFER ferment sessions — not auto-schedule — and it must support reverse-generation from storehouse fermented targets, feast/prep weeks, and co-op pooled ferments. Torah-compliant: clean produce lines only; do not mix unclean ingredients.",
+    "source": "suka-smart-assistant",
+    "tags": [
+      "preservation",
+      "ferment",
+      "cool-pantry",
+      "storehouse",
+      "garden",
+      "cleaning",
+      "meal-planning",
+      "co-op",
+      "reverse-gen"
+    ],
+    "zone": "preserve-ferment-space",
+    "calendar": {
+      "hebrewMonthStart": "full-moon",
+      "supportsAltStart": true,
+      "notes": "Use your full-moon month start so ferments can be ready for Sabbaths/feasts without colliding with cleaning-day workloads."
+    }
+  },
+  "ui": {
+    "layout": "cards/timeline",
+    "hints": {
+      "primaryCTA": "Offer Ferment Session (Cool Pantry)",
+      "secondaryCTA": "Save as Favorite",
+      "tertiaryCTA": "Reverse-generate From Storehouse Ferment Targets",
+      "showSeasonalityBadge": true,
+      "groupBy": [
+        "sourceDomain",
+        "vegType",
+        "vesselSize"
+      ],
+      "suggestOnly": true,
+      "notes": "Show incoming harvest lots as tappable chips: ‘6 lb cabbage’, ‘herb stems’, ‘2 qt cherry tomatoes (2nd grade)’. Let user drag them into 1 ferment run — like good meal-prep UIs."
+    },
+    "badges": [
+      {
+        "text": "Ferment",
+        "color": "emerald"
+      },
+      {
+        "text": "Cool Pantry",
+        "color": "slate"
+      },
+      {
+        "text": "User-Initiated",
+        "color": "amber"
+      }
+    ]
+  },
+  "orchestration": {
+    "bus": "window.__suka?.eventBus",
+    "emitOnLoad": [
+      "preservation.profile.loaded",
+      "preservation.ferment.cool-pantry.loaded"
+    ],
+    "listen": [
+      "garden.harvest.completed",
+      "garden.session.request",
+      "storehouse.goal.request",
+      "meal.session.request",
+      "cleaning.session.request",
+      "inventory.restock.request",
+      "automation.schedule.request"
+    ],
+    "sharedScopes": [
+      "garden",
+      "storehouse",
+      "meals",
+      "cleaning",
+      "animals"
+    ]
+  },
+  "engines": {
+    "primary": "preservationEngine",
+    "supports": [
+      "storehouseGoalEngine",
+      "gardenQueueEngine",
+      "mealPlanEngine",
+      "cleaningSessionEngine",
+      "animalSessionEngine"
+    ],
+    "notes": "preservationEngine should watch garden_harvest/* and orchard_row_* entries and, when a processable lot appears, OFFER a ‘Ferment in cool pantry’ run sized to available crocks/jars. It should not auto-run unless a user confirms or a schedule template is explicitly enabled."
+  },
+  "reverse": {
+    "generateFrom": [
+      "storehouse.targets.fermented-veg",
+      "storehouse.targets.fermented-herbs",
+      "storehouse.targets.brined-peppers",
+      "mealplan.requirements.pickled-sides",
+      "community.feast-days.fermented",
+      "coop-pool.ferment-shared",
+      "garden.overflow.leafy",
+      "garden.overflow.orchard-small"
+    ],
+    "strategies": [
+      {
+        "id": "from-storehouse-ferment-target",
+        "title": "Back into pantry ferments from storehouse fermented-veg target",
+        "input": {
+          "targetQuarts": 12,
+          "avgQuartsPerBatch": 3
+        },
+        "output": {
+          "suggestedBatches": 4,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Run 4 cool-pantry ferments (3 qt each) to meet storehouse target",
+              "emitOnUserAccept": [
+                "preservation.session.request",
+                "cleaning.session.request"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "from-garden-overflow-leafy",
+        "title": "Offer ferments from leafy/shade bed overflow",
+        "input": {
+          "leafyKgAvailable": 6,
+          "saltPct": 0.025
+        },
+        "output": {
+          "estimatedFermentQuarts": 5,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Ferment 5 qt from today’s leafy overflow",
+              "emitOnUserAccept": [
+                "preservation.session.request"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "from-feast-pickle",
+        "title": "Offer ferments for upcoming feast/weekend pickle platters",
+        "input": {
+          "feastDaysInNextMonth": 2,
+          "quartsPerFeast": 2
+        },
+        "output": {
+          "requiredQuarts": 4,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Start 4 qt ferments for feast platters",
+              "emitOnUserAccept": [
+                "preservation.session.request",
+                "storehouse.plan.generated"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "preservation": {
+    "method": "fermenting",
+    "jarSize": "quart",
+    "zone": "preserve-ferment-space",
+    "supportedSources": [
+      "garden_harvest/leafy_shade_bed",
+      "garden_harvest/herbs_perennial_corner",
+      "garden_harvest/tomato_hot_strip",
+      "garden_harvest/orchard_row_1",
+      "garden_harvest/orchard_row_1_overflow"
+    ],
+    "batchModel": {
+      "formula": "floor(processableKg * 0.8)",
+      "notes": "Rough: 1 kg veg → ~0.8 qt once cut, salted, packed. Actual recipes (kraut vs. mixed pickles) can override."
+    }
+  },
+  "storehouse": {
+    "targets": {
+      "fermented_veg_quarts": 10,
+      "fermented_herb_condiments_quarts": 4,
+      "brined_pepper_quarts": 6,
+      "winter_kraut_quarts": 8
+    },
+    "grocerySectionsInspiration": [
+      "Pickles & Ferments",
+      "Condiments & Relishes",
+      "International / Middle Eastern / Korean",
+      "Meal Starters / Toppers",
+      "Cold Storage / Root Cellar"
+    ],
+    "autoPlan": {
+      "enabled": false
+    }
+  },
+  "meals": {
+    "recipes": [
+      {
+        "id": "fermented-side-with-dinner",
+        "title": "Fermented Side for Dinner",
+        "linksTo": [
+          "/meals/dinner",
+          "/inventory/storehouse"
+        ]
+      },
+      {
+        "id": "fermented-herb-condiment",
+        "title": "Fermented Herb Condiment (use perennial corner herbs)",
+        "linksTo": [
+          "/meals/lunch",
+          "/garden/herbs"
+        ]
+      }
+    ],
+    "autoSession": {
+      "everyDays": 0,
+      "emit": []
+    }
+  },
+  "garden": {
+    "care": [
+      {
+        "id": "prep-leafy-for-ferment",
+        "title": "Prep Leafy Harvest for Ferment (wash, trim, sort)",
+        "emit": "garden.session.request"
+      },
+      {
+        "id": "prep-herbs-for-brine",
+        "title": "Prep Herbs from Perennial Corner",
+        "emit": "garden.session.request"
+      }
+    ],
+    "harvest": {
+      "autoSuggest": true,
+      "userMustConfirm": true,
+      "emitOnConfirm": [
+        "garden.session.request"
+      ]
+    },
+    "notes": "When garden_harvest entries produce ‘seconds’ or ‘soft fruit’, surface only if recipe allows it (e.g., fermented cherry tomo)."
+  },
+  "cleaning": {
+    "routines": [
+      {
+        "id": "sanitize-crocks-and-weights",
+        "title": "Sanitize Crocks / Jars / Weights / Airlocks",
+        "frequency": "PER_RUN",
+        "emit": "cleaning.session.request",
+        "tools": [
+          "sanitizer",
+          "hot-water",
+          "drying-rack"
+        ]
+      },
+      {
+        "id": "ferment-shelf-wipe",
+        "title": "Ferment Shelf / Cool Pantry Wipe-Down",
+        "frequency": "WEEKLY",
+        "emit": "cleaning.session.request"
+      }
+    ],
+    "sabbathGuard": true
+  },
+  "animals": {
+    "routing": {
+      "trimmingsAndPeels": [
+        "compost",
+        "poultry",
+        "goat"
+      ],
+      "notes": "If mold or off-ferment occurs, do NOT feed to animals — send to hot compost only."
+    },
+    "emit": [
+      "animal.care.session.request"
+    ]
+  },
+  "inventory": {
+    "productId": "preservation-ferment-cool-pantry",
+    "unit": "quart",
+    "trackLots": true,
+    "shelfLifeDays": 120
+  },
+  "favoriteSessions": [
+    {
+      "id": "fav-ferment-leafy-overflow",
+      "title": "Ferment Leafy Overflow (Cool Pantry)",
+      "domain": "preservation/ferment",
+      "schedule": "",
+      "sabbathGuard": true
+    },
+    {
+      "id": "fav-weekly-ferment-offer",
+      "title": "Weekly Ferment Offer (User Confirm)",
+      "domain": "preservation/ferment",
+      "schedule": "RRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=14;BYMINUTE=0;BYSECOND=0"
+    }
+  ],
+  "scheduleTemplates": [
+    {
+      "id": "ferment-user-confirm",
+      "title": "User-Confirmed Ferment Slot",
+      "rrules": [
+        "RRULE:FREQ=WEEKLY;BYDAY=TU;BYHOUR=10;BYMINUTE=0;BYSECOND=0"
+      ],
+      "options": {
+        "userMustConfirm": true,
+        "sabbathGuard": true,
+        "quietHoursGuard": true
+      }
+    }
+  ],
+  "userProfiles": {
+    "allowUserOwnedSchedules": true,
+    "allowUserOwnedFavorites": true,
+    "allowExportShare": true,
+    "shareFormats": [
+      "json",
+      "suka-plan",
+      "calendar-rrule"
+    ]
+  },
+  "events": {
+    "emits": [
+      "preservation.session.request",
+      "cleaning.session.request",
+      "storehouse.plan.generated",
+      "inventory.restock.request"
+    ],
+    "consumes": [
+      "garden.harvest.completed",
+      "storehouse.targets.changed",
+      "meal.session.completed"
+    ]
+  }
+}

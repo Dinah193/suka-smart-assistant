@@ -1,0 +1,255 @@
+{
+  "id": "pat.homestead.urban_homestead",
+  "domain": "homestead",
+  "kind": "planning_pattern",
+  "title": "Urban Homestead Planning",
+  "description": "Space-efficient plan for small yards/balconies with micro-batching and strict schedules.",
+  "intentTags": [
+    "plan:homestead",
+    "mode:urban"
+  ],
+  "inputs": [
+    {
+      "key": "landOrSpace",
+      "label": "Land/space available",
+      "type": "object",
+      "required": true,
+      "default": {
+        "type": "yard",
+        "size": 0.25,
+        "unit": "acre"
+      }
+    },
+    {
+      "key": "laborCapacity",
+      "label": "Labor capacity",
+      "type": "object",
+      "required": true,
+      "default": {
+        "adults": 1,
+        "kids": 0,
+        "hoursPerWeek": 10
+      }
+    },
+    {
+      "key": "season",
+      "label": "Season",
+      "type": "string",
+      "required": true,
+      "default": "spring"
+    },
+    {
+      "key": "climateZone",
+      "label": "Climate zone",
+      "type": "string"
+    },
+    {
+      "key": "equipment",
+      "label": "Equipment",
+      "type": "array",
+      "default": [
+        "hand_tools"
+      ]
+    },
+    {
+      "key": "schoolWorkSchedule",
+      "label": "School/work schedules",
+      "type": "object"
+    },
+    {
+      "key": "weatherWindows",
+      "label": "Weather windows",
+      "type": "object"
+    },
+    {
+      "key": "humaneWindows",
+      "label": "Humane windows / animal constraints",
+      "type": "object"
+    }
+  ],
+  "outputs": [
+    {
+      "key": "weeklySchedule",
+      "label": "Weekly task schedule",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "yieldForecasts",
+      "label": "Yield forecasts",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "sessions",
+      "label": "Session blueprints requested",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "storehouseProvisioning",
+      "label": "Storehouse provisioning links",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "preservationSessions",
+      "label": "Preservation sessions",
+      "type": "array",
+      "required": true
+    }
+  ],
+  "constraints": [
+    "humaneWindows",
+    "weatherWindows",
+    "schoolWorkSchedules",
+    "quietHours/sabbathGuard"
+  ],
+  "requires": [
+    "catalog:gardenTasks",
+    "catalog:animalTasks"
+  ],
+  "produces": [
+    "artifact:weeklySchedule",
+    "artifact:yieldForecasts",
+    "blueprint:homesteadSessions",
+    "trigger:storehouseProvisioning",
+    "trigger:preservation"
+  ],
+  "lean": {
+    "wasteTargets": [
+      "waiting",
+      "motion",
+      "transport",
+      "overprocessing"
+    ],
+    "standardWorkRefs": [
+      "stdwork.garden.batch",
+      "stdwork.animals.rounds",
+      "stdwork.harvest.sort"
+    ],
+    "taktModelRef": "takt.homestead.weekly",
+    "kpiTargets": {
+      "tasksCompleted": "increase",
+      "missedWindows": "reduce",
+      "tripsPerWeek": "reduce"
+    }
+  },
+  "ui": {
+    "icon": "leaf",
+    "chips": [
+      "time:medium",
+      "difficulty:low",
+      "mode:urban"
+    ],
+    "defaultFilters": {
+      "domain": "homestead"
+    },
+    "form": [
+      {
+        "key": "spaceType",
+        "type": "select",
+        "label": "Space type",
+        "options": [
+          "balcony",
+          "backyard",
+          "community_garden",
+          "indoor"
+        ],
+        "default": "backyard"
+      },
+      {
+        "key": "hoursPerWeek",
+        "type": "slider",
+        "label": "Hours/week available",
+        "min": 1,
+        "max": 20,
+        "default": 6
+      }
+    ]
+  },
+  "steps": [
+    {
+      "id": "schedule.guard",
+      "title": "Apply schedule constraints",
+      "template": "tpl.homestead.schedule.guard",
+      "domain": "homestead",
+      "params": {
+        "schoolWorkScheduleKey": "schoolWorkSchedule",
+        "hoursPerWeekKey": "hoursPerWeek"
+      }
+    },
+    {
+      "id": "garden.micro",
+      "title": "Build micro garden plan",
+      "template": "tpl.garden.plan.micro",
+      "domain": "homestead",
+      "params": {
+        "spaceTypeKey": "spaceType"
+      }
+    },
+    {
+      "id": "animals.optional",
+      "title": "Optional small livestock plan",
+      "template": "tpl.animals.plan.micro",
+      "domain": "homestead",
+      "params": {
+        "allowed": [
+          "poultry"
+        ]
+      },
+      "optional": true
+    },
+    {
+      "id": "storehouse.sync",
+      "title": "Sync small-batch provisioning",
+      "template": "tpl.storehouse.provision.micro",
+      "domain": "storehouse",
+      "params": {
+        "zones": [
+          "pantry",
+          "cold"
+        ]
+      }
+    },
+    {
+      "id": "sessions.build",
+      "title": "Generate session blueprints",
+      "template": "tpl.blueprint.build.sessions",
+      "domain": "homestead",
+      "params": {
+        "sessionStyles": [
+          "garden",
+          "storehouse_pull"
+        ],
+        "emitEvent": "session.blueprints.created"
+      }
+    }
+  ],
+  "kpis": [
+    {
+      "key": "tasksCompleted",
+      "label": "Tasks completed",
+      "direction": "up",
+      "unit": "%"
+    },
+    {
+      "key": "missedWindows",
+      "label": "Missed windows",
+      "direction": "down",
+      "unit": "count"
+    }
+  ],
+  "variants": [],
+  "links": {
+    "storehouseSuggested": [
+      "pat.storehouse.weekly_restock",
+      "pat.storehouse.winter_reserve"
+    ]
+  },
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "tags": []
+  }
+}

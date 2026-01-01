@@ -1,0 +1,226 @@
+{
+  "$schema": "../../../../schemas/planningGraph/calculator.schema.json",
+  "id": "calendar.ScripturalYearLengthCalculator",
+  "title": "Scriptural Year Length Calculator",
+  "description": "Calculates the length of the scriptural year and key anchor dates based on the selected scriptural cycle and month start rules.",
+  "version": "1.0.0",
+  "input": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "cycleType",
+      "referenceYear",
+      "referenceMonth",
+      "referenceDay",
+      "monthStartMethod"
+    ],
+    "properties": {
+      "cycleType": {
+        "type": "string",
+        "enum": [
+          "solar",
+          "lunar",
+          "luniSolar"
+        ],
+        "description": "Scriptural cycle model used for the year (solar, lunar, or luniSolar)."
+      },
+      "referenceYear": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "Reference Gregorian year for which to compute the scriptural year alignment."
+      },
+      "referenceMonth": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 12,
+        "description": "Reference Gregorian month used as an anchor for deriving the scriptural year (often when Aviv is expected)."
+      },
+      "referenceDay": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 31,
+        "description": "Reference Gregorian day used as an anchor for deriving the scriptural year."
+      },
+      "monthStartMethod": {
+        "type": "string",
+        "enum": [
+          "fullMoon",
+          "firstVisibleCrescent",
+          "conjunction",
+          "moonDoesNotCrossMeridian"
+        ],
+        "description": "Month start rule selected in the Hebrew Month Start calculator."
+      },
+      "avivRuleEnabled": {
+        "type": "boolean",
+        "default": true,
+        "description": "Whether to enforce an Aviv/seasonal rule (e.g., ensuring the first month lands in the correct agricultural season)."
+      },
+      "intercalationRule": {
+        "type": "string",
+        "enum": [
+          "auto",
+          "noLeap",
+          "forceLeap"
+        ],
+        "default": "auto",
+        "description": "How leap/intercalary months are handled: auto based on rules, disabled, or forced."
+      },
+      "baseMonthStartDate": {
+        "type": "string",
+        "format": "date",
+        "description": "Optional pre-computed first month start date (ISO 8601). If omitted, the calculator will request or derive it from the HebrewMonthStartCalendar node."
+      },
+      "location": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "lat",
+          "lon",
+          "tz"
+        ],
+        "properties": {
+          "lat": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90,
+            "description": "Latitude in decimal degrees."
+          },
+          "lon": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180,
+            "description": "Longitude in decimal degrees."
+          },
+          "tz": {
+            "type": "string",
+            "description": "IANA timezone identifier (e.g., America/Chicago)."
+          }
+        },
+        "description": "Location used for astronomical calculations and day boundary decisions."
+      }
+    }
+  },
+  "output": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "yearLabel",
+      "daysInYear",
+      "isLeapYear",
+      "months",
+      "anchorDates"
+    ],
+    "properties": {
+      "yearLabel": {
+        "type": "string",
+        "description": "Human-readable label for the scriptural year (e.g., \"Year starting Aviv 2026\")."
+      },
+      "daysInYear": {
+        "type": "integer",
+        "minimum": 300,
+        "maximum": 400,
+        "description": "Total number of days in the scriptural year."
+      },
+      "isLeapYear": {
+        "type": "boolean",
+        "description": "Whether the scriptural year includes an intercalary month."
+      },
+      "months": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "index",
+            "name",
+            "startDate",
+            "endDate",
+            "days"
+          ],
+          "properties": {
+            "index": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Ordinal position of the month in the scriptural year (1–13)."
+            },
+            "name": {
+              "type": "string",
+              "description": "Scriptural month name or label (e.g., \"Month 1\", \"Aviv\")."
+            },
+            "startDate": {
+              "type": "string",
+              "format": "date",
+              "description": "ISO 8601 date when this month begins."
+            },
+            "endDate": {
+              "type": "string",
+              "format": "date",
+              "description": "ISO 8601 date when this month ends."
+            },
+            "days": {
+              "type": "integer",
+              "minimum": 27,
+              "maximum": 32,
+              "description": "Number of days in this scriptural month."
+            },
+            "isIntercalary": {
+              "type": "boolean",
+              "default": false,
+              "description": "True if this month is an added intercalary (leap) month."
+            }
+          }
+        },
+        "description": "List of months in the computed scriptural year with their date ranges."
+      },
+      "anchorDates": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "yearStart",
+          "midYearMarker",
+          "yearEnd"
+        ],
+        "properties": {
+          "yearStart": {
+            "type": "string",
+            "format": "date",
+            "description": "ISO date of the first day of Month 1 in the scriptural year."
+          },
+          "midYearMarker": {
+            "type": "string",
+            "format": "date",
+            "description": "ISO date of a mid-year marker such as the nearest equinox or seasonal midpoint."
+          },
+          "yearEnd": {
+            "type": "string",
+            "format": "date",
+            "description": "ISO date of the final day of the scriptural year."
+          }
+        },
+        "description": "Key anchor dates for aligning feasts, plantings, and storehouse goals to the scriptural year."
+      },
+      "meta": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "computedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO timestamp when this year-length calculation was produced."
+          },
+          "sourceMonthStartMethod": {
+            "type": "string",
+            "description": "Resolved month start method used by the calculator (may duplicate monthStartMethod input if unchanged)."
+          },
+          "notes": {
+            "type": "string",
+            "description": "Optional notes about rule applications, overrides, or edge cases encountered during calculation."
+          }
+        },
+        "description": "Additional metadata about the computation for debugging and analytics."
+      }
+    }
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "id": "lean.wm.garden",
+  "domain": "lean",
+  "kind": "waste_map",
+  "title": "Waste Map: Garden/Homestead",
+  "intentTags": [
+    "lean:waste_map",
+    "domain:homestead"
+  ],
+  "inputs": [
+    {
+      "key": "signals",
+      "label": "Detected signals",
+      "type": "array",
+      "default": []
+    },
+    {
+      "key": "context",
+      "label": "Context",
+      "type": "object",
+      "default": {}
+    }
+  ],
+  "outputs": [
+    {
+      "key": "countermeasures",
+      "label": "Recommended countermeasures",
+      "type": "array",
+      "required": true
+    }
+  ],
+  "constraints": [
+    "advisoryOnly",
+    "linkToPatternsAndSessions"
+  ],
+  "steps": [],
+  "kpis": [
+    {
+      "key": "wasteIncidents",
+      "label": "Waste incidents",
+      "direction": "down",
+      "unit": "count"
+    },
+    {
+      "key": "timeLost",
+      "label": "Time lost",
+      "direction": "down",
+      "unit": "min"
+    }
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial Lean Six Sigma catalog."
+      }
+    ]
+  },
+  "wasteMap": {
+    "categories": [
+      {
+        "waste": "waiting",
+        "commonCauses": [
+          "missed_weather_window",
+          "tools_not_ready",
+          "seedling_delay"
+        ],
+        "countermeasures": [
+          {
+            "type": "hintTag",
+            "value": "batchByZone"
+          },
+          {
+            "type": "standard_work_ref",
+            "ref": "stdwork.garden.batch"
+          }
+        ],
+        "affects": [
+          "pat.homestead.garden_led",
+          "pat.homestead.mixed_subsistence"
+        ],
+        "sessions": [
+          "garden"
+        ]
+      },
+      {
+        "waste": "motion",
+        "commonCauses": [
+          "scatter_tasks",
+          "multiple_trips",
+          "no_zone_batches"
+        ],
+        "countermeasures": [
+          {
+            "type": "soft_constraint",
+            "value": {
+              "batchByZone": true
+            }
+          },
+          {
+            "type": "pattern_bias",
+            "patternId": "pat.homestead.garden_led",
+            "boost": 0.07
+          }
+        ],
+        "affects": [
+          "pat.homestead.garden_led",
+          "pat.homestead.urban_homestead"
+        ],
+        "sessions": [
+          "garden"
+        ]
+      },
+      {
+        "waste": "defects",
+        "commonCauses": [
+          "harvest_damage",
+          "improper_storage",
+          "late_preservation"
+        ],
+        "countermeasures": [
+          {
+            "type": "standard_work_ref",
+            "ref": "lean.sw.seasonal_preservation_push"
+          },
+          {
+            "type": "hintTag",
+            "value": "needsPreservationSession"
+          }
+        ],
+        "affects": [
+          "pat.meals.preservation_first",
+          "pat.homestead.garden_led"
+        ],
+        "sessions": [
+          "preservation"
+        ]
+      }
+    ]
+  },
+  "links": {
+    "affectsPatterns": [
+      "pat.homestead.garden_led",
+      "pat.homestead.mixed_subsistence",
+      "pat.meals.preservation_first"
+    ]
+  }
+}

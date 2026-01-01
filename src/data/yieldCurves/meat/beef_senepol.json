@@ -1,0 +1,515 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "2025-10-31T13:25:00-05:00",
+  "description": "Meat yield curve for Beef – Senepol (heat-tolerant). Built for Suka Smart Assistant cross-domain flows: animal acquisition → butchery → storehouse stock planning → meal planning → garden planning → cleaning/sanitation → reverse generation → user favorites.",
+  "__notes": [
+    "Senepol is heat-tolerant, so this profile can be preferred for your Southern / West African / Caribbean / Sahel style deployments that you talked about.",
+    "Patterned to match beef_brangus.json but tuned slightly for Senepol (often a bit smaller and selected for tropics).",
+    "This file is system-level. User overrides go to Dexie/local DB (your favorite sessions/schedules).",
+    "Supports reverse generation: storehouse or meal plan can ask 'how many Senepol do we need, and when do we butcher?'"
+  ],
+  "animal": {
+    "species": "cattle",
+    "breed": "Senepol",
+    "class": "beef",
+    "heat_tolerant": true,
+    "tropics_suitable": true,
+    "typical_live_weight_lbs": [850, 950, 1050, 1150],
+    "default_live_weight_lbs": 1000,
+    "live_to_hanging_yield_pct": 0.58,
+    "hanging_to_carcass_yield_pct": 0.71,
+    "default_hanging_days": 8,
+    "butchery_style_default": "household-standard",
+    "butchery_supported_styles": [
+      "household-standard",
+      "bbq/smoking",
+      "low-waste",
+      "bulk-ground",
+      "halal/torah-compliant-no-unclean-cross-contamination"
+    ],
+    "torah_compliant_profile": {
+      "allow_unclean_animals": false,
+      "separate_tools_required": true,
+      "separate_surfaces_required": true,
+      "blood_draining_required": true,
+      "notes": "Same logic as Brangus, but exposed here so your USDA/Torah facility blueprint can pick from data."
+    }
+  },
+  "yield_model": {
+    "formula_hint": "carcass = live_weight * live_to_hanging_yield_pct * hanging_to_carcass_yield_pct",
+    "example": {
+      "live_weight_lbs": 1000,
+      "live_to_hanging_yield_pct": 0.58,
+      "hanging_to_carcass_yield_pct": 0.71,
+      "calculated_hanging_weight_lbs": 580,
+      "calculated_carcass_weight_lbs": 411.8
+    },
+    "primal_breakdown_pct": {
+      "chuck": 0.26,
+      "rib": 0.085,
+      "loin": 0.16,
+      "round": 0.215,
+      "brisket": 0.05,
+      "plate_flank": 0.065,
+      "other_trim_fat_bones": 0.165
+    },
+    "retail_cut_defaults": [
+      {
+        "cut_id": "beef_ground",
+        "label": "Ground Beef 80/20 (Senepol)",
+        "source_primals": ["chuck", "round", "trim"],
+        "default_pct_of_carcass": 0.19,
+        "storehouse_section_hint": "Meat → Ground / Mince → Beef",
+        "mealplanner_tags": ["west-african-stew-base", "tacos", "rice-and-beef", "batch-cookable"],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "pressure-can", "dehydrate"],
+        "cleaning_profile_ref": "meat_heavy_sanitation"
+      },
+      {
+        "cut_id": "beef_stew_meat",
+        "label": "Stew / Curry Cubes",
+        "source_primals": ["chuck", "round"],
+        "default_pct_of_carcass": 0.06,
+        "storehouse_section_hint": "Meat → Stew / Curry",
+        "mealplanner_tags": ["curry", "peanut-stew", "okra-stew", "palm-oil-stew"],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "pressure-can"],
+        "cleaning_profile_ref": "meat_standard_sanitation"
+      },
+      {
+        "cut_id": "beef_roast_chuck",
+        "label": "Chuck Roast",
+        "source_primals": ["chuck"],
+        "default_pct_of_carcass": 0.055,
+        "storehouse_section_hint": "Meat → Roasts → Beef",
+        "mealplanner_tags": ["pot-roast", "holy-day", "sabbath"],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "smoke"],
+        "cleaning_profile_ref": "meat_heavy_sanitation"
+      },
+      {
+        "cut_id": "beef_steak_senepol",
+        "label": "Senepol Steak (mixed loin/rib)",
+        "source_primals": ["rib", "loin"],
+        "default_pct_of_carcass": 0.045,
+        "storehouse_section_hint": "Meat → Steaks → Standard",
+        "mealplanner_tags": ["grill", "pan-sear", "feast-day"],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "vac-seal"],
+        "cleaning_profile_ref": "meat_standard_sanitation"
+      },
+      {
+        "cut_id": "beef_brisket",
+        "label": "Brisket (Senepol)",
+        "source_primals": ["brisket"],
+        "default_pct_of_carcass": 0.05,
+        "storehouse_section_hint": "Meat → Roasts → Brisket",
+        "mealplanner_tags": ["smoke", "event", "community-meal"],
+        "inventory_unit": "lb",
+        "preservation": ["smoke", "freeze"],
+        "cleaning_profile_ref": "meat_heavy_sanitation"
+      },
+      {
+        "cut_id": "beef_soup_bones",
+        "label": "Soup / Marrow Bones",
+        "source_primals": ["other_trim_fat_bones"],
+        "default_pct_of_carcass": 0.035,
+        "storehouse_section_hint": "Meat → Bones / Broth Base",
+        "mealplanner_tags": ["bone-broth", "ramen-stock", "pepper-soup"],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "roast-then-freeze"],
+        "cleaning_profile_ref": "meat_heavy_sanitation"
+      },
+      {
+        "cut_id": "beef_organs",
+        "label": "Organs (liver, heart, tongue)",
+        "source_primals": ["offal"],
+        "default_pct_of_carcass": 0.012,
+        "storehouse_section_hint": "Meat → Organs",
+        "mealplanner_tags": ["nutrient-dense", "traditional"],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "meat_heavy_sanitation"
+      }
+    ]
+  },
+  "storehouse_mapping": {
+    "purpose": "Map Senepol butchery output → storehouse goals → inventory execution.",
+    "sections": [
+      {
+        "id": "STH-MEAT-FRESH",
+        "label": "Meat → Fresh / Chilled",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "beef_ground",
+          "beef_stew_meat",
+          "beef_steak_senepol"
+        ],
+        "grocery_inspo": [
+          "H-E-B → Beef (warm climate retail pattern)",
+          "Caribbean groceries → Beef cuts"
+        ]
+      },
+      {
+        "id": "STH-MEAT-FROZEN",
+        "label": "Meat → Frozen",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "beef_ground",
+          "beef_roast_chuck",
+          "beef_steak_senepol",
+          "beef_brisket",
+          "beef_soup_bones"
+        ],
+        "grocery_inspo": [
+          "Costco → Frozen Meats",
+          "Farm store co-op freezer"
+        ]
+      },
+      {
+        "id": "STH-MEAT-PRESERVED",
+        "label": "Meat → Preserved / Canned / Smoked",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "beef_stew_meat",
+          "beef_soup_bones"
+        ],
+        "grocery_inspo": [
+          "Village market → Smoked meats",
+          "Amish bulk → Canned meats"
+        ]
+      }
+    ],
+    "reverse_generation_rules": [
+      {
+        "id": "RG-MEAL-TO-SENEPOL",
+        "when_event": "mealplanner.requests.meat.beef.senepol",
+        "action": "estimate required beef → map to Senepol carcass → map to live animals → emit automation.schedule.request",
+        "notes": "Use this when the meal plan prefers 'heat-tolerant' or 'local Senepol source.'"
+      },
+      {
+        "id": "RG-STOREHOUSE-TO-BUTCHERY",
+        "when_event": "storehouse.goal.short.beef-ground",
+        "action": "trigger animal.acquisition.plan('beef-senepol') and butchery.session.generate"
+      }
+    ]
+  },
+  "meal_planner_hooks": {
+    "default_meal_templates": [
+      {
+        "id": "mt-senepol-stew",
+        "label": "Senepol Stew / Curry Pot",
+        "uses_cuts": [
+          {
+            "cut_id": "beef_stew_meat",
+            "qty_lb": 2
+          }
+        ],
+        "suggested_sides": [
+          "rice",
+          "yam",
+          "plantain",
+          "flatbread"
+        ],
+        "garden_suggestions": [
+          "okra",
+          "tomato",
+          "pepper (hot/sweet)",
+          "onion",
+          "garlic"
+        ],
+        "cleaning_profiles": [
+          "meat_standard_sanitation"
+        ]
+      },
+      {
+        "id": "mt-senepol-smoked-brisket-feast",
+        "label": "Senepol Smoked Brisket Feast",
+        "uses_cuts": [
+          {
+            "cut_id": "beef_brisket",
+            "qty_lb": 4
+          }
+        ],
+        "suggested_sides": [
+          "garden greens",
+          "root veg roast",
+          "fermented veg"
+        ],
+        "garden_suggestions": [
+          "greens (amaranth, collards, callaloo)",
+          "carrot",
+          "sweet potato",
+          "herbs for rubs"
+        ],
+        "cleaning_profiles": [
+          "meat_heavy_sanitation",
+          "smoker_grill_clean"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "can_generate_animal_plan": true,
+      "handler_event": "animal.plan.requested",
+      "notes": "When a meal plan locks in 30–40 lb Senepol beef for a hot-weather month, fire this so Animals module can create procurement/slaughter schedule that avoids extreme heat stress days."
+    }
+  },
+  "garden_integration": {
+    "purpose": "Connect Senepol beef meals to warm-climate garden crops (okra, pepper, tomato, callaloo, greens).",
+    "crops_to_recommend": [
+      {
+        "crop": "okra",
+        "use_case": "beef & okra stew",
+        "harvest_window": "summer-long",
+        "preservation": ["freeze", "dry"],
+        "cleaning_profile_ref": "garden_light"
+      },
+      {
+        "crop": "tomato",
+        "use_case": "stew base, sauce",
+        "harvest_window": "summer",
+        "preservation": ["can", "freeze"],
+        "cleaning_profile_ref": "garden_light"
+      },
+      {
+        "crop": "hot_pepper",
+        "use_case": "flavor for stews/curries",
+        "harvest_window": "summer-autumn",
+        "preservation": ["dry", "powder", "ferment"],
+        "cleaning_profile_ref": "garden_light"
+      },
+      {
+        "crop": "onion",
+        "use_case": "stew base",
+        "harvest_window": "late summer",
+        "preservation": ["cure", "store dry"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "callaloo_or_greens",
+        "use_case": "side for smoked brisket / roast",
+        "harvest_window": "hot season",
+        "preservation": ["blanch-freeze"],
+        "cleaning_profile_ref": "garden_light"
+      }
+    ],
+    "reverse_generation": {
+      "when_meat_menu_fixed_event": "garden.plan.adjust.requested",
+      "notes": "If Senepol meals include okra/tomato/onion repeatedly, call garden planner to schedule succession plantings."
+    }
+  },
+  "animal_care_and_butchery": {
+    "pre_slaughter_care_checklist": [
+      "fasting_window_10hr (heat-aware)",
+      "clean_cool_water_available",
+      "stress_minimized (shade, early-morning handling)",
+      "inspect_for_disease",
+      "torah_compliant_tools_ready"
+    ],
+    "butchery_session_template": {
+      "id": "butchery-session-beef-senepol",
+      "label": "Beef Senepol – Standard Butchery (Heat-Aware)",
+      "estimated_duration_hours": 5,
+      "roles_needed": [
+        "primary-butcher",
+        "assistant",
+        "sanitation-runner"
+      ],
+      "outputs": [
+        "primal_cuts",
+        "retail_cuts",
+        "bones",
+        "offal",
+        "rendering_fat"
+      ],
+      "emits_events": [
+        "inventory.add.requested",
+        "storehouse.update.requested",
+        "cleaning.plan.requested",
+        "mealplan.refresh.requested"
+      ],
+      "scheduling": {
+        "supports_user_favorites": true,
+        "supports_recurring": false,
+        "supports_coop_mode": true,
+        "coop_mode_notes": "Use shared orchestration to let multiple hot-climate households line up Senepol days in cooler hours."
+      }
+    },
+    "cleaning_after_butchery": {
+      "cleaning_profile_id": "meat_heavy_sanitation",
+      "label": "Post-Butchery Heavy Sanitation",
+      "tasks": [
+        "bag offal waste",
+        "wash all surfaces, tables, knives",
+        "sanitize with torah-safe cleaner",
+        "mop floor",
+        "launder aprons/towels"
+      ],
+      "emits_events": [
+        "cleaning.log.added",
+        "inventory.cleaning-supplies.decrement"
+      ]
+    }
+  },
+  "cleaning_integration": {
+    "profiles": [
+      {
+        "id": "meat_heavy_sanitation",
+        "label": "Meat – Heavy Sanitation",
+        "zone": "Kitchen / Butchery Area",
+        "supplies": [
+          "hot_water",
+          "food_safe_disinfectant",
+          "scrub_brush",
+          "mop_bucket",
+          "laundry_detergent"
+        ]
+      },
+      {
+        "id": "meat_standard_sanitation",
+        "label": "Meat – Standard Sanitation",
+        "zone": "Kitchen",
+        "supplies": [
+          "dish_soap",
+          "surface_spray",
+          "towels"
+        ]
+      },
+      {
+        "id": "garden_root",
+        "label": "Garden Root Veg Cleanup",
+        "zone": "Utility / Outdoor Sink",
+        "supplies": [
+          "hose",
+          "brush",
+          "drain_screens"
+        ]
+      },
+      {
+        "id": "garden_light",
+        "label": "Garden Light Wash",
+        "zone": "Kitchen",
+        "supplies": [
+          "sink_sanitizer",
+          "drying_rack"
+        ]
+      },
+      {
+        "id": "smoker_grill_clean",
+        "label": "Smoker/Grill Clean (after brisket)",
+        "zone": "Outdoor Cooking",
+        "supplies": [
+          "grill_brush",
+          "ash_disposal",
+          "degreaser"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "when_butchery_scheduled_event": "cleaning.session.auto-created",
+      "when_heavy_meat_meal_event": "cleaning.session.suggested"
+    }
+  },
+  "scheduling_and_favorites": {
+    "can_be_favorited": true,
+    "favorite_key": "yieldcurve:meat:beef_senepol",
+    "suggested_schedules": [
+      {
+        "id": "sched-senepol-cool-season",
+        "label": "Senepol Butchery in Cool Season",
+        "rule": "FREQ=YEARLY;BYMONTH=12;BYDAY=SA;BYSETPOS=2",
+        "creates": [
+          "butchery-session-beef-senepol",
+          "cleaning:meat_heavy_sanitation",
+          "storehouse:update",
+          "mealplan:refresh"
+        ]
+      },
+      {
+        "id": "sched-senepol-quarter",
+        "label": "Quarter Senepol Every 4 Months",
+        "rule": "FREQ=MONTHLY;INTERVAL=4;BYDAY=SA;BYSETPOS=2",
+        "creates": [
+          "butchery-session-beef-senepol"
+        ]
+      }
+    ],
+    "shared_orchestration": {
+      "event_bus_path": "window.__suka.eventBus",
+      "events_emitted": [
+        "yieldcurve.loaded",
+        "yieldcurve.butchery.session.generated",
+        "storehouse.goal.derived",
+        "cleaning.session.derived",
+        "mealplan.refresh.requested",
+        "garden.plan.adjust.requested"
+      ],
+      "events_listened_for": [
+        "automation.schedule.request",
+        "mealplanner.menu.locked",
+        "storehouse.goal.short",
+        "garden.plan.adjust.requested"
+      ]
+    }
+  },
+  "reverse_generation": {
+    "enabled": true,
+    "scenarios": [
+      {
+        "id": "RG-SEN-01",
+        "source": "meal-planner",
+        "input_example": {
+          "beef_stew_meat_lb": 18,
+          "beef_brisket_lb": 8
+        },
+        "output_example": {
+          "required_carcass_lb": 230,
+          "required_live_animals": 1,
+          "suggested_date": "next-cool-morning-slot",
+          "auto_cleaning_sessions": [
+            "meat_heavy_sanitation"
+          ]
+        }
+      },
+      {
+        "id": "RG-SEN-02",
+        "source": "storehouse",
+        "input_example": {
+          "target_section": "STH-MEAT-FROZEN",
+          "target_lb": 200
+        },
+        "output_example": {
+          "required_carcass_lb": 310,
+          "required_live_animals": 1,
+          "notes": "310 is example; app should recalc from actual Senepol yield."
+        }
+      }
+    ],
+    "notes": "UI should show 'Generate Senepol Butchery Day' and 'Generate Garden Support Plan' when storehouse or meal plan is beef-heavy."
+  },
+  "user_overrides_placeholder": {
+    "explanation": "User-specific changes belong in Dexie/local DB, not in this JSON.",
+    "keys": [
+      "animal.live_to_hanging_yield_pct",
+      "animal.hanging_to_carcass_yield_pct",
+      "yield_model.retail_cut_defaults",
+      "scheduling_and_favorites.suggested_schedules"
+    ]
+  },
+  "interop": {
+    "import_sources_supported": [
+      "csv-butchery-yields",
+      "google-sheets-yields",
+      "extension.capture.butchery",
+      "pinterest-board-to-planner",
+      "recipe-site-beef-detector"
+    ],
+    "export_targets_supported": [
+      "household.storehouse",
+      "household.inventory",
+      "community.coop-planner",
+      "family-fund.hub",
+      "pdf-labels"
+    ]
+  }
+}

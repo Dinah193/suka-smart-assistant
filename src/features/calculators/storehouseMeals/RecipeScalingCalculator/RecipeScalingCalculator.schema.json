@@ -1,0 +1,319 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka.local/schemas/RecipeScalingCalculator.schema.json",
+  "title": "RecipeScalingCalculatorPayload",
+  "description": "Schema describing input and output for the Recipe Scaling Calculator. Scales recipe ingredients and servings based on target portions, scale factor, and optional constraints from storehouse, time, and equipment.",
+  "type": "object",
+  "properties": {
+    "input": {
+      "type": "object",
+      "title": "RecipeScalingInput",
+      "properties": {
+        "recipeId": {
+          "type": ["string", "null"],
+          "description": "Optional identifier of the recipe from the Recipe Vault or import system."
+        },
+        "recipeName": {
+          "type": ["string", "null"],
+          "description": "Human-readable name of the recipe. Used for display and logging."
+        },
+        "baseServings": {
+          "type": "number",
+          "minimum": 0.1,
+          "description": "Number of servings that the original recipe is designed to produce."
+        },
+        "targetServings": {
+          "type": ["number", "null"],
+          "minimum": 0.1,
+          "description": "Desired number of servings after scaling. If null, scaleFactor must be provided."
+        },
+        "scaleFactor": {
+          "type": ["number", "null"],
+          "minimum": 0.01,
+          "description": "Explicit multiplier to apply to ingredient quantities. If provided, takes precedence over derived factor from targetServings."
+        },
+        "roundingMode": {
+          "type": "string",
+          "enum": [
+            "none",
+            "friendlyKitchen",
+            "storePackage",
+            "fractionQuarter"
+          ],
+          "default": "friendlyKitchen",
+          "description": "How scaled ingredient quantities should be rounded: none (exact), friendlyKitchen (spoons/cups), storePackage (align with package sizes), fractionQuarter (nearest 0.25 unit)."
+        },
+        "maxScaleFactor": {
+          "type": ["number", "null"],
+          "minimum": 0.1,
+          "description": "Optional upper bound on allowed scale factor to avoid extreme scaling."
+        },
+        "minScaleFactor": {
+          "type": ["number", "null"],
+          "minimum": 0.01,
+          "description": "Optional lower bound on allowed scale factor to avoid extreme downscaling."
+        },
+        "respectInventory": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, scaling will consider storehouse inventory and may reduce targetServings or flag shortages."
+        },
+        "respectEquipmentLimits": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, scaling will respect maximum equipment capacity (pans, pots, oven size, mixers)."
+        },
+        "respectTimeConstraints": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, scaling will consider available time and may recommend multiple sessions or reduced batch size."
+        },
+        "inventorySnapshot": {
+          "type": ["object", "null"],
+          "description": "Optional snapshot of current inventory to validate scaled ingredient requirements.",
+          "properties": {
+            "snapshotId": {
+              "type": ["string", "null"],
+              "description": "Identifier for the inventory snapshot."
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "storehouseItemId": {
+                    "type": "string",
+                    "description": "Internal storehouse item identifier."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Human readable item name."
+                  },
+                  "quantityAvailable": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Quantity currently available in the storehouse."
+                  },
+                  "unit": {
+                    "type": "string",
+                    "description": "Measurement unit for quantityAvailable (g, ml, cup, piece, etc.)."
+                  }
+                },
+                "required": [
+                  "storehouseItemId",
+                  "name",
+                  "quantityAvailable",
+                  "unit"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "items"
+          ],
+          "additionalProperties": false
+        },
+        "equipmentConstraints": {
+          "type": ["object", "null"],
+          "description": "Optional equipment capacity limits that constrain scaling.",
+          "properties": {
+            "maxOvenTrays": {
+              "type": ["integer", "null"],
+              "minimum": 1,
+              "description": "Maximum number of trays that can fit in the oven at once."
+            },
+            "maxPotVolumeLiters": {
+              "type": ["number", "null"],
+              "minimum": 0.1,
+              "description": "Maximum useful volume for primary cooking pot or stock pot."
+            },
+            "maxPanAreaSqIn": {
+              "type": ["number", "null"],
+              "minimum": 1,
+              "description": "Maximum pan area in square inches for baking/roasting."
+            }
+          },
+          "additionalProperties": false
+        },
+        "timeConstraints": {
+          "type": ["object", "null"],
+          "description": "Optional time constraints for the batch.",
+          "properties": {
+            "totalMinutesAvailable": {
+              "type": ["number", "null"],
+              "minimum": 1,
+              "description": "Total number of minutes available for this cooking session."
+            },
+            "allowMultipleSessions": {
+              "type": "boolean",
+              "default": true,
+              "description": "If true, the calculator can suggest splitting into multiple sessions or batches."
+            }
+          },
+          "additionalProperties": false
+        },
+        "householdContext": {
+          "type": ["object", "null"],
+          "description": "Optional household context for connecting to SSA planning and batch yield.",
+          "properties": {
+            "householdId": {
+              "type": ["string", "null"],
+              "description": "Identifier of the active household profile."
+            },
+            "planningHorizonDays": {
+              "type": ["integer", "null"],
+              "minimum": 1,
+              "description": "Number of days this scaled recipe is meant to cover."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "baseServings"
+      ],
+      "additionalProperties": false
+    },
+    "output": {
+      "type": "object",
+      "title": "RecipeScalingOutput",
+      "properties": {
+        "scaledServings": {
+          "type": "number",
+          "minimum": 0.1,
+          "description": "The final computed number of servings after applying the scale factor and constraints."
+        },
+        "appliedScaleFactor": {
+          "type": "number",
+          "minimum": 0.01,
+          "description": "The actual factor applied to ingredient quantities, after enforcing min/max and constraints."
+        },
+        "ingredients": {
+          "type": "array",
+          "description": "List of ingredients with their base and scaled quantities.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ingredientId": {
+                "type": ["string", "null"],
+                "description": "Identifier linking to recipe ingredient or storehouse item mapping."
+              },
+              "name": {
+                "type": "string",
+                "description": "Display name of the ingredient."
+              },
+              "baseQuantity": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Original quantity in the base recipe."
+              },
+              "baseUnit": {
+                "type": "string",
+                "description": "Measurement unit used for baseQuantity."
+              },
+              "scaledQuantity": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Quantity after scaling and rounding."
+              },
+              "scaledUnit": {
+                "type": "string",
+                "description": "Unit to use for scaledQuantity (may differ from baseUnit after unit normalization)."
+              },
+              "storehouseItemId": {
+                "type": ["string", "null"],
+                "description": "Linked storehouse item id, if available."
+              },
+              "inventoryStatus": {
+                "type": "string",
+                "enum": [
+                  "unknown",
+                  "sufficient",
+                  "low",
+                  "shortage"
+                ],
+                "default": "unknown",
+                "description": "Whether inventory can fully cover the scaled quantity."
+              },
+              "inventoryDelta": {
+                "type": ["number", "null"],
+                "description": "Quantity that will be consumed from inventory if this batch is executed, in scaledUnit (negative for consumption)."
+              },
+              "warnings": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Any warnings or notes for this ingredient (e.g., out of stock, over equipment capacity, awkward fraction)."
+              }
+            },
+            "required": [
+              "name",
+              "baseQuantity",
+              "baseUnit",
+              "scaledQuantity",
+              "scaledUnit"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "scalingWarnings": {
+          "type": "array",
+          "description": "High-level warnings for the entire scaled recipe.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sessionsHints": {
+          "type": "object",
+          "description": "Hints for downstream SessionRunner and batch yield, such as recommended batch splits.",
+          "properties": {
+            "recommendedBatchCount": {
+              "type": ["integer", "null"],
+              "minimum": 1,
+              "description": "Suggested number of batches to run based on equipment/time constraints."
+            },
+            "estimatedTotalCookMinutes": {
+              "type": ["number", "null"],
+              "minimum": 0,
+              "description": "Estimated total cook time for the scaled recipe, across all batches."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "scaledServings",
+        "appliedScaleFactor",
+        "ingredients"
+      ],
+      "additionalProperties": false
+    },
+    "meta": {
+      "type": "object",
+      "title": "RecipeScalingMeta",
+      "description": "Optional metadata used for logging and SSA analytics.",
+      "properties": {
+        "calculatorVersion": {
+          "type": "string",
+          "description": "Implementation version for the scaling logic, used for analytics and debugging."
+        },
+        "invokedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when the calculation was invoked."
+        },
+        "householdId": {
+          "type": ["string", "null"],
+          "description": "Household this calculation belongs to, if available."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "input"
+  ],
+  "additionalProperties": false
+}

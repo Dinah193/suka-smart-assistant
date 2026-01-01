@@ -1,0 +1,299 @@
+{
+  "id": "pat.meals.feast_anchored",
+  "domain": "meals",
+  "kind": "planning_pattern",
+  "title": "Feast-Anchored Meal Planning",
+  "description": "Plan meals and sessions around upcoming appointed times (make-ahead + shared options).",
+  "intentTags": [
+    "plan:meals",
+    "mode:feastAnchored",
+    "moed:feast"
+  ],
+  "inputs": [
+    {
+      "key": "householdSize",
+      "label": "Household size",
+      "type": "number",
+      "required": true,
+      "default": 4
+    },
+    {
+      "key": "dietaryLaws",
+      "label": "Dietary laws / household rules",
+      "type": "object",
+      "default": {},
+      "notes": "Use household preferences and Torah-based constraints as configured."
+    },
+    {
+      "key": "inventorySnapshot",
+      "label": "Inventory snapshot",
+      "type": "object",
+      "required": true,
+      "notes": "Include pantry/cold/frozen/root cellar/leftovers."
+    },
+    {
+      "key": "timeBudgetMinutes",
+      "label": "Time budget (minutes)",
+      "type": "number",
+      "required": true,
+      "default": 180
+    },
+    {
+      "key": "equipment",
+      "label": "Available equipment",
+      "type": "array",
+      "default": [
+        "stove",
+        "oven"
+      ],
+      "notes": "Examples: stove, oven, slowcooker, pressurecooker, grill, dehydrator, freezer."
+    },
+    {
+      "key": "budgetCap",
+      "label": "Budget cap (optional)",
+      "type": "number"
+    },
+    {
+      "key": "allergies",
+      "label": "Allergies / avoid list (optional)",
+      "type": "array",
+      "default": []
+    },
+    {
+      "key": "quietHours",
+      "label": "Quiet hours / Sabbath guard",
+      "type": "object",
+      "default": {
+        "enabled": false
+      },
+      "notes": "Use to avoid noisy tasks or disallowed work windows."
+    }
+  ],
+  "outputs": [
+    {
+      "key": "mealPlan",
+      "label": "Meal plan structure",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "sessions",
+      "label": "Session blueprints requested",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "shoppingNeeds",
+      "label": "Shopping list needs",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "storehouseTriggers",
+      "label": "Storehouse patterns triggered",
+      "type": "array",
+      "default": []
+    }
+  ],
+  "constraints": [
+    "quietHours/sabbathGuard",
+    "fastingRules",
+    "budgetCap",
+    "allergiesAvoidList",
+    "dietaryLaws"
+  ],
+  "requires": [
+    "artifact:inventorySnapshot"
+  ],
+  "produces": [
+    "artifact:mealPlan",
+    "blueprint:cookingSessions",
+    "artifact:shoppingListDraft"
+  ],
+  "lean": {
+    "wasteTargets": [
+      "overprocessing",
+      "motion",
+      "defects",
+      "waiting",
+      "inventory"
+    ],
+    "standardWorkRefs": [
+      "stdwork.kitchen.staging",
+      "stdwork.batch.prep",
+      "stdwork.fifo.labels"
+    ],
+    "taktModelRef": "takt.household.meals",
+    "kpiTargets": {
+      "tripsPerMeal": "reduce",
+      "spoilageRate": "reduce",
+      "timeToFirstPlate": "reduce",
+      "leftoverUtilization": "increase"
+    },
+    "notes": "Advisory only; propose countermeasures via LeanOptimizer hooks."
+  },
+  "ui": {
+    "icon": "utensils",
+    "chips": [
+      "time:high",
+      "difficulty:high",
+      "equipment:oven",
+      "equipment:large_pot",
+      "Sabbath-safe"
+    ],
+    "defaultFilters": {
+      "domain": "meals"
+    },
+    "form": [
+      {
+        "key": "feastDate",
+        "type": "date",
+        "label": "Feast date",
+        "default": null
+      },
+      {
+        "key": "guestCount",
+        "type": "number",
+        "label": "Guest count",
+        "default": 0
+      },
+      {
+        "key": "quietHoursEnabled",
+        "type": "toggle",
+        "label": "Sabbath/quiet hours guard",
+        "default": true
+      },
+      {
+        "key": "makeAheadDays",
+        "type": "slider",
+        "label": "Make-ahead window (days)",
+        "min": 1,
+        "max": 7,
+        "default": 3
+      }
+    ],
+    "help": [
+      "Patterns create session blueprints (prep/cook/storehouse pulls), not raw UI task lists.",
+      "Inventory snapshot enables smarter shopping + fewer duplicates."
+    ]
+  },
+  "steps": [
+    {
+      "id": "feast.window",
+      "title": "Compute feast prep window",
+      "template": "tpl.moed.compute.window",
+      "domain": "meals",
+      "params": {
+        "feastDateKey": "feastDate",
+        "makeAheadDaysKey": "makeAheadDays",
+        "guardQuietHoursKey": "quietHoursEnabled"
+      },
+      "hints": [
+        "sabbathGuard"
+      ]
+    },
+    {
+      "id": "inv.snapshot",
+      "title": "Confirm full inventory snapshot",
+      "template": "tpl.inventory.snapshot.confirm",
+      "domain": "storehouse",
+      "params": {
+        "zones": [
+          "pantry",
+          "cold",
+          "frozen",
+          "rootCellar",
+          "fermentationRoom"
+        ],
+        "includeLeftovers": true
+      },
+      "hints": [
+        "needsInventorySnapshot"
+      ]
+    },
+    {
+      "id": "menu.build",
+      "title": "Build feast menu + quantities",
+      "template": "tpl.meals.feast.menu",
+      "domain": "meals",
+      "params": {
+        "guestCountKey": "guestCount",
+        "householdSizeKey": "householdSize"
+      }
+    },
+    {
+      "id": "sessions.multi",
+      "title": "Generate multi-session blueprints",
+      "template": "tpl.blueprint.build.sessions",
+      "domain": "meals",
+      "params": {
+        "sessionStyles": [
+          "prep_only",
+          "batch",
+          "single"
+        ],
+        "splitByDay": true,
+        "emitEvent": "session.blueprints.created"
+      },
+      "hints": [
+        "emitBlueprint"
+      ]
+    },
+    {
+      "id": "storehouse.buffer",
+      "title": "Trigger storehouse buffer build",
+      "template": "tpl.storehouse.trigger.from.feast",
+      "domain": "storehouse",
+      "params": {
+        "patternId": "pat.storehouse.feast_buffer_build"
+      },
+      "hints": [
+        "needsStorehouseBuffer"
+      ]
+    },
+    {
+      "id": "shopping.consolidate",
+      "title": "Generate consolidated shopping list",
+      "template": "tpl.shopping.from.gaps",
+      "domain": "storehouse",
+      "params": {
+        "respectBudgetKey": "budgetCap",
+        "dedupe": true
+      },
+      "hints": [
+        "needsShoppingList"
+      ]
+    }
+  ],
+  "kpis": [
+    {
+      "key": "onTimeReadiness",
+      "label": "On-time readiness",
+      "direction": "up",
+      "unit": "%"
+    },
+    {
+      "key": "spoilageRate",
+      "label": "Spoilage rate",
+      "direction": "down",
+      "unit": "%"
+    },
+    {
+      "key": "prepOverrun",
+      "label": "Prep time overrun",
+      "direction": "down",
+      "unit": "%"
+    }
+  ],
+  "variants": [],
+  "links": {
+    "storehouseSuggested": [
+      "pat.storehouse.feast_buffer_build"
+    ]
+  },
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "tags": []
+  }
+}

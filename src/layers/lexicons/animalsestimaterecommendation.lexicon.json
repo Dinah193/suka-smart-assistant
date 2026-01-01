@@ -1,0 +1,219 @@
+{
+  "meta": {
+    "id": "lex.animals_estimate_recommendation",
+    "title": "Animals Estimate & Recommendation Lexicon",
+    "domain": "animals_estimate_recommendation",
+    "version": "1.0.0",
+    "updated": "2025-12-27",
+    "description": "Routes animal-related planning intent to finite planning patterns and emits hint tags for missing context.",
+    "tags": [
+      "domain:animals_estimate_recommendation"
+    ]
+  },
+  "methods": {
+    "pat.animals.recommendation_household_protein": {
+      "label": "Animal recommendations for household protein"
+    },
+    "pat.animals.stocking_estimate_land_labor": {
+      "label": "Stocking estimate by land/labor"
+    },
+    "pat.animals.feed_water_plan": {
+      "label": "Feed and water planning"
+    },
+    "pat.animals.breeding_cycle_planner": {
+      "label": "Breeding cycle planner"
+    },
+    "pat.animals.slaughter_to_storage_pipeline": {
+      "label": "Slaughter to storage pipeline"
+    }
+  },
+  "synonyms": {
+    "recommend animals": {
+      "methodIds": [
+        "pat.animals.recommendation_household_protein"
+      ],
+      "boost": 0.25,
+      "notes": "Direct recommendation phrasing"
+    },
+    "what animals should i raise": {
+      "methodIds": [
+        "pat.animals.recommendation_household_protein"
+      ],
+      "boost": 0.25
+    },
+    "how many chickens": {
+      "methodIds": [
+        "pat.animals.stocking_estimate_land_labor"
+      ],
+      "boost": 0.2
+    },
+    "stocking rate": {
+      "methodIds": [
+        "pat.animals.stocking_estimate_land_labor"
+      ],
+      "boost": 0.25
+    },
+    "feed plan": {
+      "methodIds": [
+        "pat.animals.feed_water_plan"
+      ],
+      "boost": 0.2
+    },
+    "water plan": {
+      "methodIds": [
+        "pat.animals.feed_water_plan"
+      ],
+      "boost": 0.15
+    },
+    "breeding schedule": {
+      "methodIds": [
+        "pat.animals.breeding_cycle_planner"
+      ],
+      "boost": 0.25
+    },
+    "butcher day": {
+      "methodIds": [
+        "pat.animals.slaughter_to_storage_pipeline"
+      ],
+      "boost": 0.25
+    },
+    "slaughter to storage": {
+      "methodIds": [
+        "pat.animals.slaughter_to_storage_pipeline"
+      ],
+      "boost": 0.3
+    }
+  },
+  "phrases": [
+    {
+      "phrase": "protein animals for my family",
+      "methodIds": [
+        "pat.animals.recommendation_household_protein"
+      ],
+      "confidence": 0.75,
+      "domains": [
+        "animals_estimate_recommendation"
+      ]
+    },
+    {
+      "phrase": "estimate how many goats i can keep",
+      "methodIds": [
+        "pat.animals.stocking_estimate_land_labor"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "phrase": "plan feed and water route",
+      "methodIds": [
+        "pat.animals.feed_water_plan"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "phrase": "plan breeding cycle",
+      "methodIds": [
+        "pat.animals.breeding_cycle_planner"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "phrase": "plan slaughter and storage",
+      "methodIds": [
+        "pat.animals.slaughter_to_storage_pipeline"
+      ],
+      "confidence": 0.8
+    }
+  ],
+  "rules": [
+    {
+      "id": "rule.need_land_for_stocking",
+      "when": {
+        "anyTokens": [
+          "how many",
+          "stocking",
+          "per acre",
+          "acres"
+        ],
+        "missingContext": [
+          "landAcres"
+        ]
+      },
+      "actions": [
+        {
+          "type": "emitHintTag",
+          "emitHintTag": "needsLandAcres"
+        }
+      ],
+      "notes": "Stocking estimates need land/space context."
+    },
+    {
+      "id": "rule.need_labor_for_animals",
+      "when": {
+        "anyTokens": [
+          "animals",
+          "livestock",
+          "chores",
+          "feed"
+        ],
+        "missingContext": [
+          "laborHoursPerWeek"
+        ]
+      },
+      "actions": [
+        {
+          "type": "emitHintTag",
+          "emitHintTag": "needsLaborCapacity"
+        }
+      ]
+    },
+    {
+      "id": "rule.processing_disambiguation",
+      "when": {
+        "anyTokens": [
+          "butcher",
+          "slaughter",
+          "process"
+        ],
+        "alsoTokens": [
+          "freeze",
+          "freezer",
+          "storehouse"
+        ]
+      },
+      "actions": [
+        {
+          "type": "boostMethodKey",
+          "methodKey": "pat.animals.slaughter_to_storage_pipeline",
+          "amount": 0.25
+        },
+        {
+          "type": "emitHintTag",
+          "emitHintTag": "needsColdChainCheck"
+        }
+      ]
+    }
+  ],
+  "actions": [],
+  "signals": [
+    {
+      "id": "sig.animal_motion",
+      "phrases": [
+        "too many trips to coop",
+        "walking back and forth to feed",
+        "hauling water all day"
+      ],
+      "signal": "waste:motion",
+      "severity": 0.7
+    },
+    {
+      "id": "sig.animal_stockout",
+      "phrases": [
+        "ran out of feed",
+        "always out of bedding",
+        "no water in trough"
+      ],
+      "signal": "waste:waiting",
+      "severity": 0.8
+    }
+  ]
+}

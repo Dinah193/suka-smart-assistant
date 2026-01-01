@@ -1,0 +1,282 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:suka:vocab:animal.species",
+  "title": "Suka Animal Species Vocabulary",
+  "description": "Canonical species presets for barn plans: lifecycle, production, feed, space, climate, vaccines, withhold heuristics, zone/handling hints.",
+  "type": "object",
+  "x-version": "1.0.0",
+  "x-domain": "animals",
+  "meta": {
+    "generatedAt": "2025-10-24T00:00:00.000Z",
+    "notes": [
+      "Fields align with barnplan.validate.js (zones, tasks/resources, withhold), placementRules, scheduleHelpers, and listBuilder.",
+      "Names for feed/meds are normalized to support SKU consolidation.",
+      "Use species.zoneHints and space/climate fields for placement and scheduling advisories."
+    ]
+  },
+  "units": {
+    "weight": "kg",
+    "length": "in",
+    "area": "sqft",
+    "land": "acres",
+    "temp": "C",
+    "volume": "L",
+    "rate_time": "per_day"
+  },
+  "globals": {
+    "withholdHeuristics": [
+      { "med": "penicillin", "product": "meat", "days": 10 },
+      { "med": "penicillin", "product": "milk", "days": 5 },
+      { "med": "ivermectin", "product": "meat", "days": 14 },
+      { "med": "ivermectin", "product": "milk", "days": 0 },
+      { "med": "tetracycline", "product": "meat", "days": 28 },
+      { "med": "tetracycline", "product": "milk", "days": 4 }
+    ],
+    "vaccineCatalog": [
+      "CDT_vaccine",
+      "clostridial_7way",
+      "resp_complex",
+      "salmonella_vaccine",
+      "mareks_vaccine",
+      "newcastle_bronchitis"
+    ],
+    "feedCatalog": [
+      "pasture",
+      "grass_hay",
+      "alfalfa",
+      "dairy_ration",
+      "grower_ration",
+      "layer_ration",
+      "scratch_grain",
+      "mineral_block",
+      "salt_block"
+    ]
+  },
+  "species": [
+    {
+      "id": "species:chicken",
+      "name": "Chicken",
+      "class": "poultry",
+      "products": ["eggs", "meat", "manure"],
+      "lifecycle": {
+        "maturityMonths": 5,
+        "lifespanYears": 6,
+        "breedingSeason": "year_round",
+        "incubationDays": 21
+      },
+      "production": {
+        "eggPerWeek": 5,
+        "meatDressingPct": 0.68
+      },
+      "space": {
+        "coopSqFtPerAdult": 4,
+        "runSqFtPerAdult": 10,
+        "roostInPerBird": 8,
+        "nestBoxesPerHens": "1 per 4-5"
+      },
+      "fencing": { "minHeightIn": 60, "electrifiedRecommended": false, "predationRisk": "high" },
+      "climate": { "minComfortC": -6, "maxComfortC": 30, "notes": "Ventilation over insulation; draft-free coop." },
+      "feed": {
+        "base": ["layer_ration"],
+        "supplements": ["oyster_shell", "grit", "scratch_grain"],
+        "waterPerDayL": 0.25
+      },
+      "vaccines": ["mareks_vaccine", "newcastle_bronchitis"],
+      "zoneHints": { "preferred": ["coop", "run"], "avoid": ["barn_processing"] },
+      "handling": {
+        "ppe": [],
+        "equipment": [],
+        "notes": "Collect eggs daily; refresh nesting material weekly."
+      }
+    },
+    {
+      "id": "species:duck",
+      "name": "Duck",
+      "class": "poultry",
+      "products": ["eggs", "meat", "manure"],
+      "lifecycle": {
+        "maturityMonths": 6,
+        "lifespanYears": 8,
+        "breedingSeason": "year_round",
+        "incubationDays": 28
+      },
+      "production": { "eggPerWeek": 4, "meatDressingPct": 0.65 },
+      "space": { "coopSqFtPerAdult": 4, "runSqFtPerAdult": 15 },
+      "fencing": { "minHeightIn": 48, "electrifiedRecommended": false, "predationRisk": "high" },
+      "climate": { "minComfortC": -10, "maxComfortC": 28, "notes": "Require water for bill cleaning; manage mud." },
+      "feed": {
+        "base": ["layer_ration"],
+        "supplements": ["niacin_support", "grit"],
+        "waterPerDayL": 0.5
+      },
+      "vaccines": ["newcastle_bronchitis"],
+      "zoneHints": { "preferred": ["coop", "run"], "avoid": ["barn_processing"] },
+      "handling": { "ppe": [], "equipment": [], "notes": "Deep water dish for bill dunking; keep bedding dry." }
+    },
+    {
+      "id": "species:rabbit",
+      "name": "Rabbit",
+      "class": "lagomorph",
+      "products": ["meat", "manure", "fiber"],
+      "lifecycle": {
+        "maturityMonths": 4,
+        "lifespanYears": 6,
+        "breedingSeason": "year_round",
+        "gestationDays": 31,
+        "litterSizeAvg": 7
+      },
+      "production": { "fiberYieldKgYr": 0.3 },
+      "space": { "hutchSqFtPerAdult": 4, "runSqFtPerAdult": 10 },
+      "fencing": { "minHeightIn": 36, "electrifiedRecommended": false, "predationRisk": "high" },
+      "climate": { "minComfortC": -1, "maxComfortC": 24, "notes": "Heat stress risk >24C; shade and airflow." },
+      "feed": {
+        "base": ["grass_hay"],
+        "supplements": ["pellets_small", "greens"],
+        "waterPerDayL": 0.2
+      },
+      "vaccines": [],
+      "zoneHints": { "preferred": ["pen", "hutch"], "avoid": ["coop", "processing"] },
+      "handling": { "ppe": [], "equipment": [], "notes": "Never lift by ears; provide chew for teeth." }
+    },
+    {
+      "id": "species:goat",
+      "name": "Goat",
+      "class": "ruminant",
+      "products": ["milk", "meat", "manure"],
+      "lifecycle": {
+        "maturityMonths": 8,
+        "lifespanYears": 12,
+        "breedingSeason": "fall_winter",
+        "gestationDays": 150,
+        "estrusCycleDays": 21,
+        "estrusDurationHrs": 36
+      },
+      "production": { "milkAvgLDay": 2.5, "meatDressingPct": 0.5 },
+      "space": { "stallSqFtPerAdult": 15, "penSqFtPerAdult": 25, "pastureAcresPerAdult": 0.1 },
+      "fencing": { "minHeightIn": 48, "electrifiedRecommended": true, "predationRisk": "medium", "escapeRisk": "high" },
+      "climate": { "minComfortC": -10, "maxComfortC": 32, "notes": "Dry bedding; draft-free; copper needs vary by region." },
+      "feed": {
+        "base": ["pasture", "grass_hay", "alfalfa"],
+        "supplements": ["mineral_block", "salt_block"],
+        "waterPerDayL": 5
+      },
+      "vaccines": ["CDT_vaccine", "clostridial_7way"],
+      "withhold": [
+        { "med": "ivermectin", "product": "meat", "days": 14 },
+        { "med": "penicillin", "product": "meat", "days": 10 },
+        { "med": "tetracycline", "product": "milk", "days": 4 }
+      ],
+      "zoneHints": { "preferred": ["barn", "pen", "pasture"], "avoid": ["coop"] },
+      "handling": { "ppe": [], "equipment": ["clippers", "chute_optional"], "notes": "Trim hooves 6–8 weeks; FAMACHA in parasite season." }
+    },
+    {
+      "id": "species:sheep",
+      "name": "Sheep",
+      "class": "ruminant",
+      "products": ["meat", "milk", "fiber", "manure"],
+      "lifecycle": {
+        "maturityMonths": 8,
+        "lifespanYears": 12,
+        "breedingSeason": "fall_winter",
+        "gestationDays": 147,
+        "estrusCycleDays": 17,
+        "estrusDurationHrs": 30
+      },
+      "production": { "milkAvgLDay": 1.2, "fiberYieldKgYr": 3, "meatDressingPct": 0.52 },
+      "space": { "stallSqFtPerAdult": 12, "penSqFtPerAdult": 20, "pastureAcresPerAdult": 0.2 },
+      "fencing": { "minHeightIn": 42, "electrifiedRecommended": true, "predationRisk": "high" },
+      "climate": { "minComfortC": -15, "maxComfortC": 28, "notes": "Foot rot risk in wet; footbath and rotation." },
+      "feed": {
+        "base": ["pasture", "grass_hay"],
+        "supplements": ["mineral_block", "salt_block"],
+        "waterPerDayL": 4
+      },
+      "vaccines": ["CDT_vaccine", "clostridial_7way"],
+      "withhold": [{ "med": "ivermectin", "product": "meat", "days": 14 }],
+      "zoneHints": { "preferred": ["pasture", "pen", "barn"], "avoid": ["coop"] },
+      "handling": { "ppe": [], "equipment": ["clippers", "chute_optional"], "notes": "Shear annually (breed-dependent)." }
+    },
+    {
+      "id": "species:cow",
+      "name": "Cattle",
+      "class": "ruminant",
+      "products": ["milk", "meat", "manure"],
+      "lifecycle": {
+        "maturityMonths": 15,
+        "lifespanYears": 18,
+        "breedingSeason": "year_round",
+        "gestationDays": 283,
+        "estrusCycleDays": 21,
+        "estrusDurationHrs": 18
+      },
+      "production": { "milkAvgLDay": 18, "meatDressingPct": 0.62 },
+      "space": { "stallSqFtPerAdult": 80, "penSqFtPerAdult": 120, "pastureAcresPerAdult": 1.5 },
+      "fencing": { "minHeightIn": 54, "electrifiedRecommended": true, "predationRisk": "low" },
+      "climate": { "minComfortC": -15, "maxComfortC": 24, "notes": "Heat stress mitigation above 24C (shade, water, airflow)." },
+      "feed": {
+        "base": ["pasture", "grass_hay", "silage_optional"],
+        "supplements": ["mineral_block", "salt_block", "dairy_ration"],
+        "waterPerDayL": 40
+      },
+      "vaccines": ["CDT_vaccine", "resp_complex"],
+      "withhold": [
+        { "med": "tetracycline", "product": "milk", "days": 4 },
+        { "med": "penicillin", "product": "milk", "days": 5 }
+      ],
+      "zoneHints": { "preferred": ["barn", "pasture", "pen"], "avoid": ["coop"] },
+      "handling": { "ppe": [], "equipment": ["chute", "bucket_milker"], "notes": "Consistent milking times; hoof care annually." }
+    },
+    {
+      "id": "species:pig",
+      "name": "Pig",
+      "class": "suid",
+      "products": ["meat", "manure"],
+      "lifecycle": {
+        "maturityMonths": 6,
+        "lifespanYears": 10,
+        "breedingSeason": "year_round",
+        "gestationDays": 115,
+        "estrusCycleDays": 21,
+        "estrusDurationHrs": 60
+      },
+      "production": { "meatDressingPct": 0.72 },
+      "space": { "penSqFtPerAdult": 48, "pastureAcresPerAdult": 0.25 },
+      "fencing": { "minHeightIn": 36, "electrifiedRecommended": true, "predationRisk": "low", "escapeRisk": "medium" },
+      "climate": { "minComfortC": -5, "maxComfortC": 25, "notes": "Heat stress sensitive; provide wallows/shade." },
+      "feed": {
+        "base": ["grower_ration"],
+        "supplements": ["mineral_block", "salt_block"],
+        "waterPerDayL": 10
+      },
+      "vaccines": ["resp_complex", "salmonella_vaccine_optional"],
+      "withhold": [{ "med": "tetracycline", "product": "meat", "days": 28 }],
+      "zoneHints": { "preferred": ["pen", "pasture"], "avoid": ["coop"] },
+      "handling": { "ppe": [], "equipment": [], "notes": "Rooting damage—rotate paddocks; secure fencing." }
+    },
+    {
+      "id": "species:alpaca",
+      "name": "Alpaca",
+      "class": "camelid",
+      "products": ["fiber", "manure"],
+      "lifecycle": {
+        "maturityMonths": 12,
+        "lifespanYears": 20,
+        "breedingSeason": "year_round",
+        "gestationDays": 345
+      },
+      "production": { "fiberYieldKgYr": 3 },
+      "space": { "penSqFtPerAdult": 50, "pastureAcresPerAdult": 0.2 },
+      "fencing": { "minHeightIn": 48, "electrifiedRecommended": false, "predationRisk": "medium" },
+      "climate": { "minComfortC": -10, "maxComfortC": 26, "notes": "Shear annually; heat stress risk >26C." },
+      "feed": {
+        "base": ["pasture", "grass_hay"],
+        "supplements": ["mineral_block"],
+        "waterPerDayL": 5
+      },
+      "vaccines": ["CDT_vaccine"],
+      "withhold": [],
+      "zoneHints": { "preferred": ["pasture", "pen"], "avoid": ["coop"] },
+      "handling": { "ppe": [], "equipment": [], "notes": "Toenail trims; avoid stress heat events." }
+    }
+  ]
+}

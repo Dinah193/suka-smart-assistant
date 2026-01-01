@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ssa.schemas/sponsored.placement.schema.json",
+  "title": "SSA Sponsored Placement",
+  "description": "Sponsored listing metadata (what showed, why, caps). Supports transparency controls and auditing of ad decisions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "placementId",
+    "provider",
+    "status",
+    "createdAt",
+    "updatedAt",
+    "why"
+  ],
+  "properties": {
+    "placementId": { "type": "string", "minLength": 6 },
+
+    "provider": { "type": "string", "minLength": 2 },
+    "campaignId": { "type": ["string", "null"] },
+
+    "status": { "type": "string", "enum": ["active", "paused", "ended"] },
+
+    "storeId": { "type": ["string", "null"] },
+    "storeChainId": { "type": ["string", "null"] },
+
+    "upc": { "type": ["string", "null"], "pattern": "^[0-9]{8,14}$" },
+    "title": { "type": ["string", "null"] },
+    "brand": { "type": ["string", "null"] },
+
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+
+    "rankHint": { "type": ["number", "null"], "minimum": 0 },
+    "bid": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": ["string", "null"],
+          "enum": ["cpm", "cpc", "cpa", null]
+        },
+        "amount": { "type": ["number", "null"], "minimum": 0 },
+        "currency": { "type": "string", "default": "USD" }
+      }
+    },
+
+    "caps": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "daily": { "type": ["number", "null"], "minimum": 0 },
+        "weekly": { "type": ["number", "null"], "minimum": 0 },
+        "perSession": { "type": ["number", "null"], "minimum": 0 }
+      }
+    },
+
+    "why": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reasonCodes"],
+      "properties": {
+        "reasonCodes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "explainText": { "type": ["string", "null"] },
+        "targeting": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "properties": {
+            "category": { "type": ["string", "null"] },
+            "keywords": {
+              "type": "array",
+              "items": { "type": "string" },
+              "default": []
+            },
+            "geo": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+
+    "transparency": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "label": { "type": "string", "default": "Sponsored" },
+        "showWhy": { "type": "boolean", "default": true },
+        "allowOptOut": { "type": "boolean", "default": true }
+      }
+    }
+  }
+}

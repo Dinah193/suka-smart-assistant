@@ -1,0 +1,5525 @@
+{
+  "$schema": "../schemas/methods.catalog.schema.json",
+  "catalog": {
+    "key": "fermentation.methods",
+    "version": 1,
+    "domain": "preservation",
+    "subdomain": "fermentation",
+    "title": "Fermentation & Culture Methods Catalog",
+    "description": "Fixed method definitions for fermentation, cultured foods, cured meats, vinegars, beverages, and (where applicable) legally compliant, safety-first distillation workflows. Designed for SSA layer spine: method_maps → blueprints.",
+    "createdAt": "2025-12-27T16:08:43Z",
+    "updatedAt": "2025-12-27T16:08:43Z",
+    "locale": "en-US",
+    "tags": [
+      "fermentation",
+      "culturing",
+      "curing",
+      "pickling",
+      "vinegar",
+      "winemaking",
+      "beer",
+      "mead",
+      "kombucha",
+      "kimchi",
+      "sauerkraut",
+      "yogurt",
+      "cheese",
+      "koji",
+      "miso",
+      "tempeh",
+      "charcuterie",
+      "bacon",
+      "dry-curing",
+      "wet-brining",
+      "smoking",
+      "safety",
+      "legal"
+    ],
+    "defaults": {
+      "stepTemplate": {
+        "fields": [
+          "id",
+          "title",
+          "why",
+          "instructions",
+          "visualCues",
+          "checkpoints",
+          "timers",
+          "tools",
+          "ingredients",
+          "hazards",
+          "notes",
+          "nextOnSuccess",
+          "nextOnFail"
+        ]
+      },
+      "cueTemplate": {
+        "fields": [
+          "type",
+          "label",
+          "signals",
+          "actions",
+          "escalateIf"
+        ]
+      },
+      "timerTemplate": {
+        "fields": [
+          "id",
+          "label",
+          "duration",
+          "kind",
+          "startTrigger",
+          "endTrigger",
+          "reminders"
+        ]
+      },
+      "hazardTemplate": {
+        "fields": [
+          "type",
+          "severity",
+          "avoid",
+          "ifOccurs",
+          "references"
+        ]
+      },
+      "safety": {
+        "general": [
+          "If you are immunocompromised, pregnant, or cooking for high-risk individuals, use validated recipes and strict sanitation.",
+          "When in doubt: discard. Off-odors (putrid/rotten), fuzzy colored mold on foods that shouldn’t mold, or slimy textures can indicate spoilage.",
+          "Use calibrated thermometers, pH strips/meters, and accurate scales where required."
+        ],
+        "legal": [
+          "Some processes (especially alcohol distillation) may require licenses/permits depending on your jurisdiction. Always verify local laws and comply."
+        ]
+      }
+    }
+  },
+  "methods": [
+    {
+      "id": "ferment.lacto.vegetable.core",
+      "title": "Lacto-Fermented Vegetables (Core Method)",
+      "kind": "fermentation.lacto",
+      "summary": "Salt-driven lactic acid fermentation for vegetables (kraut, curtido, kimchi-style base). Focuses on sanitation, salt control, and sensory cues.",
+      "cultureTags": [
+        "global",
+        "indigenous",
+        "european",
+        "korean",
+        "caribbean",
+        "african",
+        "middle-eastern"
+      ],
+      "applicability": {
+        "foods": [
+          "cabbage",
+          "carrot",
+          "cucumber",
+          "okra",
+          "turnip",
+          "greens",
+          "mixed vegetables"
+        ],
+        "dietary": [
+          "vegan",
+          "vegetarian",
+          "omnivore"
+        ],
+        "equipmentLevel": [
+          "basic"
+        ],
+        "notes": [
+          "Use validated salt/pH guidance for your recipe family; SSA stores saltPercent and target pH as parameters."
+        ]
+      },
+      "parameters": {
+        "saltPercent": {
+          "type": "number",
+          "unit": "%",
+          "default": 2.0,
+          "min": 1.5,
+          "max": 3.5,
+          "help": "Percent of vegetable weight. Use recipe-validated ranges."
+        },
+        "targetPH": {
+          "type": "number",
+          "default": 4.0,
+          "help": "Optional safety target for certain ferments."
+        },
+        "tempRangeC": {
+          "type": "range",
+          "min": 16,
+          "max": 24,
+          "default": [
+            18,
+            22
+          ]
+        }
+      },
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Prepare workspace and sanitize",
+          "why": "Reduce unwanted microbes so lactic acid bacteria dominate.",
+          "instructions": [
+            "Wash hands; sanitize jar, weights, airlock/lid, utensils."
+          ],
+          "visualCues": [
+            {
+              "type": "check",
+              "label": "Sanitized",
+              "signals": [
+                "No visible residue; sanitized tools"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Prep produce",
+          "why": "Uniform cuts ferment evenly and predictably.",
+          "instructions": [
+            "Rinse produce; trim damaged spots; shred/slice to uniform size."
+          ],
+          "visualCues": [
+            {
+              "type": "visual",
+              "label": "Uniform cut size",
+              "signals": [
+                "Pieces are consistent"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Salt and pack",
+          "why": "Salt draws brine and creates selective environment.",
+          "instructions": [
+            "Weigh produce; add measured salt per chosen method; massage until brine forms; pack tightly."
+          ],
+          "visualCues": [
+            {
+              "type": "visual",
+              "label": "Brine forming",
+              "signals": [
+                "Liquid appears after massaging/packing"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": [
+                "No brine after reasonable mixing"
+              ]
+            }
+          ],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "botulism_risk",
+              "severity": "critical",
+              "avoid": [
+                "Use validated processes for low-acid foods.",
+                "Maintain recommended salt/pH controls for anaerobic ferments."
+              ],
+              "ifOccurs": [
+                "Discard immediately if you suspect unsafe conditions (swollen containers, off odors). Seek medical advice if exposure suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_04",
+          "title": "Submerge and seal",
+          "why": "Anaerobic brine zone prevents surface spoilage.",
+          "instructions": [
+            "Ensure solids are under brine; add weight; fit airlock or burp-cap."
+          ],
+          "visualCues": [
+            {
+              "type": "warning",
+              "label": "Solids above brine",
+              "signals": [
+                "Floating pieces visible"
+              ],
+              "actions": [
+                "Push down; add weight; top up brine if recipe allows"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "pressure",
+              "severity": "medium",
+              "avoid": [
+                "Use airlocks or burp jars for active ferments to prevent explosions."
+              ],
+              "ifOccurs": [
+                "Move to sink, vent safely, clean spills, and consider discarding if contamination suspected."
+              ],
+              "references": []
+            },
+            {
+              "type": "botulism_risk",
+              "severity": "critical",
+              "avoid": [
+                "Use validated processes for low-acid foods.",
+                "Maintain recommended salt/pH controls for anaerobic ferments."
+              ],
+              "ifOccurs": [
+                "Discard immediately if you suspect unsafe conditions (swollen containers, off odors). Seek medical advice if exposure suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_05",
+          "title": "Ferment and monitor",
+          "why": "Track activity to catch issues early.",
+          "instructions": [
+            "Keep at stable room temp; check daily early on; skim harmless kahm yeast if present."
+          ],
+          "visualCues": [
+            {
+              "type": "sensory",
+              "label": "Healthy ferment",
+              "signals": [
+                "Pleasant tangy aroma",
+                "Bubbles/active brine"
+              ],
+              "actions": [
+                "Continue"
+              ],
+              "escalateIf": []
+            },
+            {
+              "type": "danger",
+              "label": "Spoilage signs",
+              "signals": [
+                "Putrid smell",
+                "Fuzzy colored mold",
+                "Slimy texture"
+              ],
+              "actions": [
+                "Discard batch"
+              ],
+              "escalateIf": [
+                "Escalate to safety discard"
+              ]
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_ferment_window",
+              "label": "Primary ferment window",
+              "duration": "3-14 days",
+              "kind": "countdown",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Daily check (first 3 days)",
+                "Every 2 days thereafter"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "pressure",
+              "severity": "medium",
+              "avoid": [
+                "Use airlocks or burp jars for active ferments to prevent explosions."
+              ],
+              "ifOccurs": [
+                "Move to sink, vent safely, clean spills, and consider discarding if contamination suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_06",
+          "title": "Taste, decide endpoint, and cold-store",
+          "why": "Cold slows fermentation and stabilizes flavor/texture.",
+          "instructions": [
+            "Taste with clean utensil; when desired tang reached, move to refrigerator/cold storage."
+          ],
+          "visualCues": [
+            {
+              "type": "sensory",
+              "label": "Endpoint reached",
+              "signals": [
+                "Taste matches target sourness",
+                "Crunch acceptable"
+              ],
+              "actions": [
+                "Cold-store"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [
+        {
+          "type": "reminder",
+          "label": "Burp non-airlocked jars",
+          "signals": [
+            "Lid bulging",
+            "hissing on open"
+          ],
+          "actions": [
+            "Burp carefully; switch to airlock if recurring"
+          ],
+          "escalateIf": []
+        }
+      ],
+      "outputs": {
+        "storage": "refrigerated",
+        "shelfLife": "weeks-months (recipe dependent)"
+      },
+      "compliance": {
+        "legal": [],
+        "references": [
+          "General food fermentation safety guidance; use validated recipes for low-acid or anaerobic preparations."
+        ]
+      }
+    },
+    {
+      "id": "ferment.lacto.kimchi.traditional",
+      "title": "Kimchi (Traditional-Style Lacto Fermentation)",
+      "kind": "fermentation.lacto",
+      "summary": "Structured kimchi workflow: salt-brining, seasoning paste, pack, ferment, and mature.",
+      "cultureTags": [
+        "korean",
+        "east-asian"
+      ],
+      "applicability": {
+        "foods": [
+          "napa cabbage",
+          "radish",
+          "scallion"
+        ],
+        "equipmentLevel": [
+          "basic"
+        ],
+        "notes": [
+          "Seasoning heat level and seafood components are parameterized."
+        ]
+      },
+      "parameters": {
+        "heatLevel": {
+          "type": "enum",
+          "values": [
+            "mild",
+            "medium",
+            "hot"
+          ],
+          "default": "medium"
+        },
+        "seafoodComponent": {
+          "type": "enum",
+          "values": [
+            "none",
+            "fish_sauce",
+            "shrimp_paste",
+            "anchovy"
+          ],
+          "default": "fish_sauce"
+        }
+      },
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Sanitize and stage ingredients",
+          "why": "Clean setup keeps flavors clean.",
+          "instructions": [
+            "Sanitize vessels/tools; stage cabbage, salt, aromatics, seasonings."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Salt-brine cabbage",
+          "why": "Brining sets texture and starts microbial control.",
+          "instructions": [
+            "Salt cabbage per recipe; rest/turn periodically; rinse and drain."
+          ],
+          "visualCues": [
+            {
+              "type": "visual",
+              "label": "Cabbage pliable",
+              "signals": [
+                "Leaves bend without snapping"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_brine",
+              "label": "Brine time",
+              "duration": "2-6 hours",
+              "kind": "countdown",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Turn/redistribute halfway"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Mix seasoning paste",
+          "why": "Even paste = even fermentation.",
+          "instructions": [
+            "Combine aromatics and seasonings; optionally include seafood component per preference."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_04",
+          "title": "Coat and pack",
+          "why": "Coating drives flavor distribution.",
+          "instructions": [
+            "Coat cabbage; pack tightly; press to remove air pockets; cover to reduce oxygen."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "pressure",
+              "severity": "medium",
+              "avoid": [
+                "Use airlocks or burp jars for active ferments to prevent explosions."
+              ],
+              "ifOccurs": [
+                "Move to sink, vent safely, clean spills, and consider discarding if contamination suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_05",
+          "title": "Ferment and mature",
+          "why": "Control tang and carbonation.",
+          "instructions": [
+            "Ferment at room temp briefly; then move to cold storage to mature."
+          ],
+          "visualCues": [
+            {
+              "type": "sensory",
+              "label": "Balanced tang",
+              "signals": [
+                "Aroma pleasantly sour",
+                "Taste matches target"
+              ],
+              "actions": [
+                "Cold-store/continue maturing"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_room",
+              "label": "Room-temp ferment",
+              "duration": "1-3 days",
+              "kind": "countdown",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Check daily"
+              ]
+            },
+            {
+              "id": "t_mature",
+              "label": "Cold maturation",
+              "duration": "1-6 weeks",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Weekly taste check"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "storage": "refrigerated",
+        "shelfLife": "weeks-months"
+      },
+      "compliance": {
+        "legal": [],
+        "references": []
+      }
+    },
+    {
+      "id": "ferment.sourdough.starter.maintenance",
+      "title": "Sourdough Starter (Create + Maintain)",
+      "kind": "fermentation.yeast_lacto",
+      "summary": "Starter creation and maintenance method focused on feeding schedule, sensory cues, and contamination checks.",
+      "cultureTags": [
+        "global",
+        "european",
+        "north-african",
+        "middle-eastern"
+      ],
+      "applicability": {
+        "foods": [
+          "flour",
+          "water"
+        ],
+        "equipmentLevel": [
+          "basic"
+        ],
+        "notes": [
+          "Baking steps live in cooking.methods.json; this method produces a mature starter artifact."
+        ]
+      },
+      "parameters": {
+        "hydration": {
+          "type": "number",
+          "unit": "%",
+          "default": 100,
+          "min": 50,
+          "max": 125
+        },
+        "feedSchedule": {
+          "type": "enum",
+          "values": [
+            "daily_room_temp",
+            "twice_daily",
+            "weekly_fridge"
+          ],
+          "default": "daily_room_temp"
+        }
+      },
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Create seed mixture",
+          "why": "Establish wild yeast + lactobacilli culture.",
+          "instructions": [
+            "Combine flour and water per chosen hydration; mix; cover loosely."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            },
+            {
+              "type": "pressure",
+              "severity": "medium",
+              "avoid": [
+                "Use airlocks or burp jars for active ferments to prevent explosions."
+              ],
+              "ifOccurs": [
+                "Move to sink, vent safely, clean spills, and consider discarding if contamination suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Daily feeds (early phase)",
+          "why": "Build stable culture over several days.",
+          "instructions": [
+            "Discard and feed on schedule; keep jar clean; track rise/fall."
+          ],
+          "visualCues": [
+            {
+              "type": "visual",
+              "label": "Activity increases",
+              "signals": [
+                "Bubbles appear",
+                "Volume rises then falls"
+              ],
+              "actions": [
+                "Continue feeds"
+              ],
+              "escalateIf": []
+            },
+            {
+              "type": "danger",
+              "label": "Contamination",
+              "signals": [
+                "Colored mold",
+                "putrid odor"
+              ],
+              "actions": [
+                "Discard and restart"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_feed",
+              "label": "Feed interval",
+              "duration": "24 hours",
+              "kind": "countdown",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Feed and record rise time"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Stabilize and store",
+          "why": "Shift to maintenance once predictable.",
+          "instructions": [
+            "When rise time is predictable and aroma is pleasant, move to maintenance schedule (room or fridge)."
+          ],
+          "visualCues": [
+            {
+              "type": "sensory",
+              "label": "Mature starter",
+              "signals": [
+                "Smells pleasantly tangy",
+                "Predictable rise"
+              ],
+              "actions": [
+                "Ready"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "artifact": "starter.mature",
+        "storage": "room/fridge"
+      },
+      "compliance": {
+        "legal": [],
+        "references": []
+      }
+    },
+    {
+      "id": "ferment.vinegar.acetic.core",
+      "title": "Vinegar (Acetic Fermentation) — Core Method",
+      "kind": "fermentation.acetic",
+      "summary": "Acetobacter-driven conversion of alcoholic base into vinegar. Emphasizes oxygen exposure and contamination management.",
+      "cultureTags": [
+        "global",
+        "mediterranean",
+        "east-asian",
+        "african",
+        "indigenous"
+      ],
+      "applicability": {
+        "foods": [
+          "cider",
+          "wine",
+          "beer",
+          "rice_wine",
+          "fruit_wine"
+        ],
+        "equipmentLevel": [
+          "basic"
+        ],
+        "notes": [
+          "Requires an alcoholic base; SSA can chain from beverage methods."
+        ]
+      },
+      "parameters": {
+        "starterType": {
+          "type": "enum",
+          "values": [
+            "mother",
+            "raw_vinegar",
+            "commercial_culture"
+          ],
+          "default": "raw_vinegar"
+        },
+        "targetAcidity": {
+          "type": "string",
+          "default": "recipe dependent"
+        }
+      },
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Sanitize vessel",
+          "why": "Reduce unwanted microbes.",
+          "instructions": [
+            "Sanitize jar/crock; use breathable cover (cloth) to allow oxygen."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Prepare alcoholic base",
+          "why": "Acetic bacteria require ethanol.",
+          "instructions": [
+            "Use finished alcoholic base (validated ABV range per recipe); cool to room temp."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "alcohol_safety",
+              "severity": "high",
+              "avoid": [
+                "Keep away from flames. Use food-grade equipment. Avoid lead-containing components."
+              ],
+              "ifOccurs": [
+                "Ventilate area, remove ignition sources, and follow facility safety protocols."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Inoculate with mother/culture",
+          "why": "Start acetic conversion.",
+          "instructions": [
+            "Add vinegar mother or unpasteurized vinegar starter per recipe; cover with cloth; secure band."
+          ],
+          "visualCues": [
+            {
+              "type": "visual",
+              "label": "Mother forming",
+              "signals": [
+                "Gelatinous layer forming on surface"
+              ],
+              "actions": [
+                "Continue"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_04",
+          "title": "Ferment with airflow",
+          "why": "Oxygen drives acetic fermentation.",
+          "instructions": [
+            "Store in dark, room-temp area; avoid disturbance early on; taste periodically."
+          ],
+          "visualCues": [
+            {
+              "type": "sensory",
+              "label": "Vinegar acidity reached",
+              "signals": [
+                "Smell sharp and clean",
+                "Taste matches target sour"
+              ],
+              "actions": [
+                "Proceed to bottle"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_vinegar",
+              "label": "Vinegar fermentation",
+              "duration": "2-8 weeks",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Taste every 1-2 weeks with clean utensil"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_05",
+          "title": "Bottle and store",
+          "why": "Stabilize and store.",
+          "instructions": [
+            "Strain if needed; bottle; label date; store cool/dark."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "storage": "cool/dark",
+        "shelfLife": "months-years"
+      },
+      "compliance": {
+        "legal": [],
+        "references": []
+      }
+    },
+    {
+      "id": "ferment.culture.yogurt.core",
+      "title": "Yogurt (Cultured Milk) — Core Method",
+      "kind": "fermentation.culture",
+      "summary": "Controlled thermophilic culture fermentation for yogurt-style products. Focus on temperature control and set indicators.",
+      "cultureTags": [
+        "middle-eastern",
+        "balkan",
+        "south-asian",
+        "east-african",
+        "global"
+      ],
+      "applicability": {
+        "foods": [
+          "milk",
+          "goat_milk",
+          "sheep_milk"
+        ],
+        "equipmentLevel": [
+          "basic"
+        ],
+        "notes": [
+          "Non-dairy yogurt uses different starters and thickeners; modeled as a variant."
+        ]
+      },
+      "parameters": {
+        "style": {
+          "type": "enum",
+          "values": [
+            "set",
+            "stirred",
+            "greek_strained"
+          ],
+          "default": "set"
+        },
+        "incubationHours": {
+          "type": "range",
+          "min": 4,
+          "max": 24,
+          "default": [
+            6,
+            10
+          ]
+        }
+      },
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Sanitize tools",
+          "why": "Avoid contamination.",
+          "instructions": [
+            "Sanitize pot, spoon, jars."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Heat and cool milk (per recipe)",
+          "why": "Protein denaturation improves set.",
+          "instructions": [
+            "Heat milk to recipe temp; cool to inoculation temp."
+          ],
+          "visualCues": [
+            {
+              "type": "check",
+              "label": "Target inoculation temp",
+              "signals": [
+                "Thermometer reads target range"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Inoculate with starter",
+          "why": "Introduce desired culture.",
+          "instructions": [
+            "Mix starter into tempered milk; distribute evenly; jar."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_04",
+          "title": "Incubate undisturbed",
+          "why": "Time + temp create set.",
+          "instructions": [
+            "Hold at stable incubation temperature until set."
+          ],
+          "visualCues": [
+            {
+              "type": "visual",
+              "label": "Set achieved",
+              "signals": [
+                "Gel-like set",
+                "whey separation minimal"
+              ],
+              "actions": [
+                "Chill to stop"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_incubate",
+              "label": "Incubation",
+              "duration": "4-12 hours",
+              "kind": "countdown",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Check set at minimum time"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "storage": "refrigerated",
+        "shelfLife": "1-3 weeks"
+      },
+      "compliance": {
+        "legal": [],
+        "references": []
+      }
+    },
+    {
+      "id": "ferment.culture.fresh_cheese.core",
+      "title": "Fresh Cultured Cheese (Non-aged) — Core Method",
+      "kind": "fermentation.culture",
+      "summary": "Fresh cultured cheese workflow emphasizing cleanliness, curd formation cues, and safe cold storage.",
+      "cultureTags": [
+        "middle-eastern",
+        "european",
+        "african",
+        "south-asian",
+        "global"
+      ],
+      "applicability": {
+        "foods": [
+          "milk"
+        ],
+        "equipmentLevel": [
+          "intermediate"
+        ],
+        "notes": [
+          "Aged cheeses require stricter controls and are modeled separately."
+        ]
+      },
+      "parameters": {},
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Sanitize and stage",
+          "why": "Clean system for clean curds.",
+          "instructions": [
+            "Sanitize pot, thermometer, ladle, colander, cheesecloth."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Warm milk and add culture",
+          "why": "Culture acidifies milk.",
+          "instructions": [
+            "Warm milk to culture temp; add starter culture; hold per recipe."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_ripen",
+              "label": "Ripen culture",
+              "duration": "30-60 min",
+              "kind": "countdown",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": []
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Set curd (per recipe)",
+          "why": "Form curds for draining.",
+          "instructions": [
+            "Add coagulant/acid per recipe; rest until clean break."
+          ],
+          "visualCues": [
+            {
+              "type": "visual",
+              "label": "Clean break",
+              "signals": [
+                "Knife cut yields clean split"
+              ],
+              "actions": [
+                "Proceed to cut curds"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_04",
+          "title": "Cut, stir, and drain",
+          "why": "Control moisture.",
+          "instructions": [
+            "Cut curds; stir gently; drain; optionally press lightly."
+          ],
+          "visualCues": [
+            {
+              "type": "visual",
+              "label": "Curd size consistent",
+              "signals": [
+                "Curds similar size"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_05",
+          "title": "Salt and store",
+          "why": "Flavor and preservation.",
+          "instructions": [
+            "Salt per recipe; refrigerate; label date."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "storage": "refrigerated",
+        "shelfLife": "days-weeks"
+      },
+      "compliance": {
+        "legal": [],
+        "references": []
+      }
+    },
+    {
+      "id": "ferment.mold.koji.core",
+      "title": "Koji (Aspergillus oryzae) — Culture Base Method",
+      "kind": "fermentation.mold",
+      "summary": "Koji culture method as a base for miso, shoyu, amazake, and related ferments. Focus on cleanliness and temperature/humidity awareness without operational lab-level detail.",
+      "cultureTags": [
+        "japanese",
+        "east-asian"
+      ],
+      "applicability": {
+        "foods": [
+          "rice",
+          "barley",
+          "soybeans"
+        ],
+        "equipmentLevel": [
+          "advanced"
+        ],
+        "notes": [
+          "Use reputable food-grade koji spores and validated practices."
+        ]
+      },
+      "parameters": {},
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Sanitize and prep substrate",
+          "why": "Prevent competing molds.",
+          "instructions": [
+            "Sanitize trays/cloths; cook substrate to proper texture; cool to inoculation temperature."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Inoculate and incubate",
+          "why": "Grow koji mold under controlled environment.",
+          "instructions": [
+            "Inoculate with food-grade koji starter per supplier guidance; incubate under controlled warmth and airflow."
+          ],
+          "visualCues": [
+            {
+              "type": "visual",
+              "label": "Koji growth",
+              "signals": [
+                "Sweet aroma",
+                "white mycelium spread"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_koji",
+              "label": "Koji incubation window",
+              "duration": "36-48 hours",
+              "kind": "countdown",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Periodic check per supplier guidance"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Harvest and use/store",
+          "why": "Koji becomes input to other ferments.",
+          "instructions": [
+            "Use immediately or dry/chill per validated method."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {},
+      "compliance": {
+        "legal": [],
+        "references": [
+          "Follow supplier/validated koji instructions; avoid uncontrolled wild-mold growth."
+        ]
+      }
+    },
+    {
+      "id": "ferment.miso.traditional",
+      "title": "Miso (Koji + Legume Paste) — Traditional Method",
+      "kind": "fermentation.mold",
+      "summary": "Koji-fermented paste method with salinity control, pack/seal, aging, and contamination checks.",
+      "cultureTags": [
+        "japanese",
+        "east-asian"
+      ],
+      "applicability": {
+        "foods": [
+          "soybeans",
+          "chickpeas",
+          "beans"
+        ],
+        "equipmentLevel": [
+          "advanced"
+        ],
+        "notes": [
+          "Salt and sanitation are critical."
+        ]
+      },
+      "parameters": {
+        "style": {
+          "type": "enum",
+          "values": [
+            "white",
+            "yellow",
+            "red",
+            "mixed_legume"
+          ],
+          "default": "yellow"
+        },
+        "ageMonths": {
+          "type": "range",
+          "min": 3,
+          "max": 36,
+          "default": [
+            6,
+            12
+          ]
+        }
+      },
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Prepare cooked legumes",
+          "why": "Soft cooked beans mash smoothly.",
+          "instructions": [
+            "Cook legumes to soft; cool."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Combine with koji and salt",
+          "why": "Salinity selects desirable microbes.",
+          "instructions": [
+            "Mix koji with measured salt; combine with mashed legumes; form paste."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "botulism_risk",
+              "severity": "critical",
+              "avoid": [
+                "Use validated processes for low-acid foods.",
+                "Maintain recommended salt/pH controls for anaerobic ferments."
+              ],
+              "ifOccurs": [
+                "Discard immediately if you suspect unsafe conditions (swollen containers, off odors). Seek medical advice if exposure suspected."
+              ],
+              "references": []
+            },
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Pack and weight",
+          "why": "Exclude air pockets.",
+          "instructions": [
+            "Pack tightly; smooth surface; add salt cap if recipe uses; weight and cover."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "pressure",
+              "severity": "medium",
+              "avoid": [
+                "Use airlocks or burp jars for active ferments to prevent explosions."
+              ],
+              "ifOccurs": [
+                "Move to sink, vent safely, clean spills, and consider discarding if contamination suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_04",
+          "title": "Age and monitor",
+          "why": "Slow fermentation develops flavor.",
+          "instructions": [
+            "Store cool; check periodically for surface issues; remove undesirable growth per validated guidance."
+          ],
+          "visualCues": [
+            {
+              "type": "sensory",
+              "label": "Ready",
+              "signals": [
+                "Aroma savory",
+                "taste balanced"
+              ],
+              "actions": [
+                "Portion and store"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_age",
+              "label": "Aging window",
+              "duration": "3-18 months",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Monthly check"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "storage": "cool/refrigerated after opening",
+        "shelfLife": "months-years"
+      },
+      "compliance": {
+        "legal": [],
+        "references": []
+      }
+    },
+    {
+      "id": "ferment.tempeh.traditional",
+      "title": "Tempeh (Rhizopus) — Traditional Method",
+      "kind": "fermentation.mold",
+      "summary": "Bean cake fermentation method with inoculation, incubation, and doneness cues.",
+      "cultureTags": [
+        "indonesian",
+        "southeast-asian"
+      ],
+      "applicability": {
+        "foods": [
+          "soybeans",
+          "black_beans",
+          "chickpeas"
+        ],
+        "equipmentLevel": [
+          "advanced"
+        ],
+        "notes": [
+          "Use reputable starter and validated process."
+        ]
+      },
+      "parameters": {},
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Prepare beans",
+          "why": "Remove skins, cook, and dry to proper moisture.",
+          "instructions": [
+            "Cook beans; drain thoroughly; ensure surface moisture is controlled."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Inoculate with starter",
+          "why": "Uniform distribution improves set.",
+          "instructions": [
+            "Inoculate per starter guidance; pack in breathable perforated bags/trays."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Incubate and monitor",
+          "why": "Track mycelium coverage.",
+          "instructions": [
+            "Incubate at controlled warmth; monitor for white binding; avoid overheating."
+          ],
+          "visualCues": [
+            {
+              "type": "visual",
+              "label": "Bound cake",
+              "signals": [
+                "White mycelium binds beans"
+              ],
+              "actions": [
+                "Stop and chill"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_tempeh",
+              "label": "Incubation window",
+              "duration": "24-48 hours",
+              "kind": "countdown",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Check at 12h intervals"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "storage": "refrigerated/frozen",
+        "shelfLife": "days-weeks (refrigerated)"
+      },
+      "compliance": {
+        "legal": [],
+        "references": []
+      }
+    },
+    {
+      "id": "ferment.kombucha.scoby.core",
+      "title": "Kombucha (SCOBY) — Core Method",
+      "kind": "fermentation.scoby",
+      "summary": "Tea fermentation using SCOBY with primary + optional secondary carbonation. Focus on acidity, cleanliness, and pressure safety.",
+      "cultureTags": [
+        "global",
+        "east-asian",
+        "modern"
+      ],
+      "applicability": {
+        "foods": [
+          "tea",
+          "sugar"
+        ],
+        "equipmentLevel": [
+          "basic"
+        ],
+        "notes": [
+          "Monitor acidity; avoid over-carbonation in secondary."
+        ]
+      },
+      "parameters": {},
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Brew sweet tea and cool",
+          "why": "Create fermentation base.",
+          "instructions": [
+            "Brew tea; dissolve sugar; cool to room temp."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Inoculate with SCOBY + starter tea",
+          "why": "Acidic starter protects batch.",
+          "instructions": [
+            "Add SCOBY and starter liquid; cover with breathable cloth."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Primary ferment",
+          "why": "Build acids and flavor.",
+          "instructions": [
+            "Ferment until desired tartness; taste with clean straw/spoon."
+          ],
+          "visualCues": [
+            {
+              "type": "sensory",
+              "label": "Ready for bottling",
+              "signals": [
+                "Balanced sweet-tart"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_primary",
+              "label": "Primary fermentation",
+              "duration": "5-14 days",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Taste every 2-3 days after day 5"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_04",
+          "title": "Optional secondary ferment (carbonation)",
+          "why": "Build natural carbonation.",
+          "instructions": [
+            "Bottle with flavoring per recipe; leave headspace; burp if needed."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_secondary",
+              "label": "Secondary carbonation",
+              "duration": "1-5 days",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Burp daily if very active"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "pressure",
+              "severity": "medium",
+              "avoid": [
+                "Use airlocks or burp jars for active ferments to prevent explosions."
+              ],
+              "ifOccurs": [
+                "Move to sink, vent safely, clean spills, and consider discarding if contamination suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "storage": "refrigerated after carbonation",
+        "shelfLife": "weeks"
+      },
+      "compliance": {
+        "legal": [],
+        "references": []
+      }
+    },
+    {
+      "id": "ferment.beverage.beer.core",
+      "title": "Beer (Brewing) — Core Workflow",
+      "kind": "beverage.beer",
+      "summary": "High-level beer fermentation workflow (wort creation → yeast pitch → ferment → condition). Detailed recipes live elsewhere; SSA uses steps for checklists and cues.",
+      "cultureTags": [
+        "global",
+        "european",
+        "african",
+        "indigenous",
+        "modern"
+      ],
+      "applicability": {
+        "foods": [
+          "grain",
+          "malt_extract",
+          "hops"
+        ],
+        "equipmentLevel": [
+          "intermediate"
+        ],
+        "notes": [
+          "Use validated sanitation and temperature control."
+        ]
+      },
+      "parameters": {
+        "style": {
+          "type": "enum",
+          "values": [
+            "ale",
+            "lager",
+            "sour",
+            "stout",
+            "indigenous_sorghum",
+            "millet"
+          ],
+          "default": "ale"
+        },
+        "packaging": {
+          "type": "enum",
+          "values": [
+            "bottle",
+            "keg"
+          ],
+          "default": "bottle"
+        }
+      },
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Sanitize fermentation pathway",
+          "why": "Prevent infection.",
+          "instructions": [
+            "Sanitize fermenter, airlock, siphon, bottles/keg."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Prepare fermentable wort (per recipe)",
+          "why": "Create yeast food.",
+          "instructions": [
+            "Create wort per your recipe system; cool to yeast pitch temperature."
+          ],
+          "visualCues": [
+            {
+              "type": "check",
+              "label": "Pitch temp reached",
+              "signals": [
+                "Thermometer in recipe range"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Pitch yeast and seal",
+          "why": "Start fermentation.",
+          "instructions": [
+            "Pitch yeast; seal with airlock."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "pressure",
+              "severity": "medium",
+              "avoid": [
+                "Use airlocks or burp jars for active ferments to prevent explosions."
+              ],
+              "ifOccurs": [
+                "Move to sink, vent safely, clean spills, and consider discarding if contamination suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_04",
+          "title": "Primary fermentation and monitoring",
+          "why": "Track attenuation and off-flavors.",
+          "instructions": [
+            "Maintain fermentation temp; observe activity; measure gravity if you track it."
+          ],
+          "visualCues": [
+            {
+              "type": "sensory",
+              "label": "Off-aromas",
+              "signals": [
+                "Sulfur or solvent notes persist"
+              ],
+              "actions": [
+                "Stabilize temps; consult recipe guidance"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_beer_primary",
+              "label": "Primary fermentation",
+              "duration": "5-21 days",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Check activity at day 2-3",
+                "Check readiness at day 7+"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "alcohol_safety",
+              "severity": "high",
+              "avoid": [
+                "Keep away from flames. Use food-grade equipment. Avoid lead-containing components."
+              ],
+              "ifOccurs": [
+                "Ventilate area, remove ignition sources, and follow facility safety protocols."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_05",
+          "title": "Condition and package",
+          "why": "Clarify and carbonate.",
+          "instructions": [
+            "Condition as needed; bottle/keg; carbonate; cold-store."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "pressure",
+              "severity": "medium",
+              "avoid": [
+                "Use airlocks or burp jars for active ferments to prevent explosions."
+              ],
+              "ifOccurs": [
+                "Move to sink, vent safely, clean spills, and consider discarding if contamination suspected."
+              ],
+              "references": []
+            },
+            {
+              "type": "alcohol_safety",
+              "severity": "high",
+              "avoid": [
+                "Keep away from flames. Use food-grade equipment. Avoid lead-containing components."
+              ],
+              "ifOccurs": [
+                "Ventilate area, remove ignition sources, and follow facility safety protocols."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "artifact": "beverage.beer.finished",
+        "storage": "cool",
+        "shelfLife": "weeks-months"
+      },
+      "compliance": {
+        "legal": [],
+        "references": []
+      }
+    },
+    {
+      "id": "ferment.beverage.wine.core",
+      "title": "Wine (Grape/Fruit) — Core Workflow",
+      "kind": "beverage.wine",
+      "summary": "High-level wine fermentation workflow: must prep → ferment → rack → age → stabilize/bottle (as desired).",
+      "cultureTags": [
+        "global",
+        "mediterranean",
+        "georgian",
+        "north-african",
+        "modern"
+      ],
+      "applicability": {
+        "foods": [
+          "grapes",
+          "fruit"
+        ],
+        "equipmentLevel": [
+          "intermediate"
+        ],
+        "notes": [
+          "Sanitation and controlled fermentation protect flavor."
+        ]
+      },
+      "parameters": {
+        "type": {
+          "type": "enum",
+          "values": [
+            "red",
+            "white",
+            "fruit",
+            "honey_mead_style"
+          ],
+          "default": "fruit"
+        }
+      },
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Sanitize vessels and tools",
+          "why": "Avoid spoilage organisms.",
+          "instructions": [
+            "Sanitize fermenter, airlocks, siphon, bottles."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Prepare must (juice/pulp)",
+          "why": "Create fermentable base.",
+          "instructions": [
+            "Crush/press per method; measure/adjust per your validated recipe framework."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Pitch yeast/culture",
+          "why": "Start fermentation.",
+          "instructions": [
+            "Pitch yeast per recipe; seal with airlock."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "pressure",
+              "severity": "medium",
+              "avoid": [
+                "Use airlocks or burp jars for active ferments to prevent explosions."
+              ],
+              "ifOccurs": [
+                "Move to sink, vent safely, clean spills, and consider discarding if contamination suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_04",
+          "title": "Ferment and monitor",
+          "why": "Track completion; avoid oxidation.",
+          "instructions": [
+            "Maintain temperature; observe cap management for reds; monitor aroma."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_wine_primary",
+              "label": "Primary fermentation",
+              "duration": "7-21 days",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Daily check first week"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "alcohol_safety",
+              "severity": "high",
+              "avoid": [
+                "Keep away from flames. Use food-grade equipment. Avoid lead-containing components."
+              ],
+              "ifOccurs": [
+                "Ventilate area, remove ignition sources, and follow facility safety protocols."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_05",
+          "title": "Rack/age and bottle",
+          "why": "Clarify and mature.",
+          "instructions": [
+            "Rack off lees as needed; age; bottle when stable."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_wine_age",
+              "label": "Aging (optional)",
+              "duration": "1-12 months",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Monthly check"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "artifact": "beverage.wine.finished",
+        "storage": "cool/dark",
+        "shelfLife": "months-years"
+      },
+      "compliance": {
+        "legal": [],
+        "references": []
+      }
+    },
+    {
+      "id": "ferment.beverage.mead.core",
+      "title": "Mead (Honey Fermentation) — Core Workflow",
+      "kind": "beverage.mead",
+      "summary": "Honey fermentation workflow similar to wine; focuses on oxygen management early, nutrients per recipe system, and aging.",
+      "cultureTags": [
+        "global",
+        "european",
+        "african",
+        "modern"
+      ],
+      "applicability": {
+        "foods": [
+          "honey"
+        ],
+        "equipmentLevel": [
+          "intermediate"
+        ],
+        "notes": [
+          "Recipe details are parameterized; SSA stores 'mustGravity' optionally."
+        ]
+      },
+      "parameters": {},
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Sanitize equipment",
+          "why": "Prevent contamination.",
+          "instructions": [
+            "Sanitize fermenter, airlock, tools."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Mix must and cool",
+          "why": "Create honey-water must per recipe.",
+          "instructions": [
+            "Mix honey and water; cool to pitch temp."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Pitch yeast and start fermentation",
+          "why": "Begin ferment.",
+          "instructions": [
+            "Pitch yeast; seal with airlock."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "pressure",
+              "severity": "medium",
+              "avoid": [
+                "Use airlocks or burp jars for active ferments to prevent explosions."
+              ],
+              "ifOccurs": [
+                "Move to sink, vent safely, clean spills, and consider discarding if contamination suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_04",
+          "title": "Ferment, monitor, and rack",
+          "why": "Manage clarity and flavor.",
+          "instructions": [
+            "Monitor; rack as needed; age if desired."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_mead",
+              "label": "Primary ferment window",
+              "duration": "14-60 days",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Weekly check after first week"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "alcohol_safety",
+              "severity": "high",
+              "avoid": [
+                "Keep away from flames. Use food-grade equipment. Avoid lead-containing components."
+              ],
+              "ifOccurs": [
+                "Ventilate area, remove ignition sources, and follow facility safety protocols."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "artifact": "beverage.mead.finished"
+      },
+      "compliance": {
+        "legal": [],
+        "references": []
+      }
+    },
+    {
+      "id": "ferment.lacto.hot_sauce.core",
+      "title": "Fermented Hot Sauce (Pepper Mash/Brine)",
+      "kind": "fermentation.lacto",
+      "summary": "Lacto-fermented pepper sauce workflow with brine/mash options, blending, and stabilization.",
+      "cultureTags": [
+        "caribbean",
+        "mexican",
+        "african",
+        "global",
+        "indigenous"
+      ],
+      "applicability": {
+        "foods": [
+          "peppers",
+          "garlic",
+          "onion"
+        ],
+        "equipmentLevel": [
+          "basic"
+        ],
+        "notes": [
+          "Salt percent and pH targets are parameterized."
+        ]
+      },
+      "parameters": {
+        "style": {
+          "type": "enum",
+          "values": [
+            "mash",
+            "brine"
+          ],
+          "default": "mash"
+        },
+        "saltPercent": {
+          "type": "number",
+          "unit": "%",
+          "default": 2.5,
+          "min": 2.0,
+          "max": 5.0
+        }
+      },
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Sanitize and prep peppers",
+          "why": "Clean start prevents off-flavors.",
+          "instructions": [
+            "Sanitize jar; prep peppers (gloves recommended)."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Choose mash or brine pack",
+          "why": "Two variants of same principle.",
+          "instructions": [
+            "Mash: blend peppers with salt. Brine: pack pieces under brine."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "botulism_risk",
+              "severity": "critical",
+              "avoid": [
+                "Use validated processes for low-acid foods.",
+                "Maintain recommended salt/pH controls for anaerobic ferments."
+              ],
+              "ifOccurs": [
+                "Discard immediately if you suspect unsafe conditions (swollen containers, off odors). Seek medical advice if exposure suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Ferment and monitor",
+          "why": "Develop acidity and flavor.",
+          "instructions": [
+            "Ferment; monitor bubbles; keep solids submerged."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_hotsauce",
+              "label": "Fermentation",
+              "duration": "7-30 days",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Check every 2-3 days early"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "pressure",
+              "severity": "medium",
+              "avoid": [
+                "Use airlocks or burp jars for active ferments to prevent explosions."
+              ],
+              "ifOccurs": [
+                "Move to sink, vent safely, clean spills, and consider discarding if contamination suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_04",
+          "title": "Blend, strain, and bottle",
+          "why": "Finish texture.",
+          "instructions": [
+            "Blend to desired texture; strain optional; bottle; refrigerate."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "storage": "refrigerated",
+        "shelfLife": "months"
+      },
+      "compliance": {
+        "legal": [],
+        "references": []
+      }
+    },
+    {
+      "id": "curing.bacon.pork.core",
+      "title": "Pork Bacon — Cure + Rest + (Optional) Smoke (Core Workflow)",
+      "kind": "curing.bacon",
+      "summary": "Curing workflow for bacon-style cuts. This is a checklist + cue method; exact cure formulation, nitrite use, and validated time/temperature are parameterized. SSA should require 'validated recipe profile' selection for production runs.",
+      "cultureTags": [
+        "european",
+        "american_southern",
+        "east_asian",
+        "charcuterie",
+        "global",
+        "modern",
+        "traditional"
+      ],
+      "applicability": {
+        "foods": [
+          "pork belly or suitable cut"
+        ],
+        "equipmentLevel": [
+          "intermediate"
+        ],
+        "notes": [
+          "Follow validated curing formulations and temperature controls.",
+          "SSA captures cure profile selection, thickness, and intended outcome (fresh-cured vs smoked)."
+        ]
+      },
+      "parameters": {
+        "validatedProfileId": {
+          "type": "string",
+          "required": true,
+          "help": "Pointer to your cure profiles library (not defined here)."
+        },
+        "thicknessCm": {
+          "type": "number",
+          "min": 0.5,
+          "max": 10,
+          "default": 3.0
+        },
+        "smoke": {
+          "type": "boolean",
+          "default": false
+        },
+        "storage": {
+          "type": "enum",
+          "values": [
+            "refrigerated",
+            "frozen"
+          ],
+          "default": "refrigerated"
+        }
+      },
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Plan cure profile (validated)",
+          "why": "Curing safety depends on correct formulation and time/temp controls.",
+          "instructions": [
+            "Select a validated cure profile in SSA (salt %, sugar %, curing salt if used, target temp, rest days).",
+            "Record cut thickness and weight."
+          ],
+          "visualCues": [
+            {
+              "type": "check",
+              "label": "Profile selected",
+              "signals": [
+                "Validated profile selected in SSA"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": [
+                "No validated profile chosen"
+              ]
+            }
+          ],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            },
+            {
+              "type": "botulism_risk",
+              "severity": "critical",
+              "avoid": [
+                "Use validated processes for low-acid foods.",
+                "Maintain recommended salt/pH controls for anaerobic ferments."
+              ],
+              "ifOccurs": [
+                "Discard immediately if you suspect unsafe conditions (swollen containers, off odors). Seek medical advice if exposure suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Sanitize and prep cut",
+          "why": "Clean surface improves cure consistency.",
+          "instructions": [
+            "Sanitize trays/bags; trim and pat dry; label cut."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Apply cure and bag/rest",
+          "why": "Uniform contact yields uniform cure.",
+          "instructions": [
+            "Apply cure per profile; bag or cover; refrigerate at controlled temperature; flip/redistribute on schedule."
+          ],
+          "visualCues": [
+            {
+              "type": "check",
+              "label": "Cure penetration",
+              "signals": [
+                "Firming across cut"
+              ],
+              "actions": [
+                "Proceed to rinse/soak per profile"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_cure",
+              "label": "Cure rest window",
+              "duration": "5-14 days",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Flip daily or per profile"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_04",
+          "title": "Rinse/soak (per profile) and dry",
+          "why": "Adjust salinity; create pellicle for smoke adhesion.",
+          "instructions": [
+            "Rinse/soak if profile requires; dry surface; rest uncovered in fridge to form pellicle."
+          ],
+          "visualCues": [
+            {
+              "type": "visual",
+              "label": "Pellicle formed",
+              "signals": [
+                "Surface feels tacky, not wet"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_pellicle",
+              "label": "Pellicle rest",
+              "duration": "4-24 hours",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Check tacky surface"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_05",
+          "title": "Optional smoke and/or cook",
+          "why": "Flavor and preservation; follow safe temps.",
+          "instructions": [
+            "If smoking: follow your validated smoker/cook plan; record time/temp; cool safely."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_06",
+          "title": "Slice, package, and store",
+          "why": "Portion for use; label for traceability.",
+          "instructions": [
+            "Slice to desired thickness; package; label date and cure profile; refrigerate or freeze."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "artifact": "meat.cured.bacon",
+        "traceability": [
+          "profileId",
+          "batchId",
+          "dates"
+        ]
+      },
+      "compliance": {
+        "legal": [],
+        "references": [
+          "Use jurisdiction-appropriate, validated curing guidance. Maintain strict refrigeration and sanitation."
+        ]
+      }
+    },
+    {
+      "id": "curing.bacon.beef.core",
+      "title": "Beef Bacon — Cure + Rest + (Optional) Smoke (Core Workflow)",
+      "kind": "curing.bacon",
+      "summary": "Curing workflow for bacon-style cuts. This is a checklist + cue method; exact cure formulation, nitrite use, and validated time/temperature are parameterized. SSA should require 'validated recipe profile' selection for production runs.",
+      "cultureTags": [
+        "global",
+        "middle-eastern",
+        "african",
+        "american",
+        "charcuterie",
+        "global",
+        "modern",
+        "traditional"
+      ],
+      "applicability": {
+        "foods": [
+          "beef belly or suitable cut"
+        ],
+        "equipmentLevel": [
+          "intermediate"
+        ],
+        "notes": [
+          "Follow validated curing formulations and temperature controls.",
+          "SSA captures cure profile selection, thickness, and intended outcome (fresh-cured vs smoked)."
+        ]
+      },
+      "parameters": {
+        "validatedProfileId": {
+          "type": "string",
+          "required": true,
+          "help": "Pointer to your cure profiles library (not defined here)."
+        },
+        "thicknessCm": {
+          "type": "number",
+          "min": 0.5,
+          "max": 10,
+          "default": 3.0
+        },
+        "smoke": {
+          "type": "boolean",
+          "default": false
+        },
+        "storage": {
+          "type": "enum",
+          "values": [
+            "refrigerated",
+            "frozen"
+          ],
+          "default": "refrigerated"
+        }
+      },
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Plan cure profile (validated)",
+          "why": "Curing safety depends on correct formulation and time/temp controls.",
+          "instructions": [
+            "Select a validated cure profile in SSA (salt %, sugar %, curing salt if used, target temp, rest days).",
+            "Record cut thickness and weight."
+          ],
+          "visualCues": [
+            {
+              "type": "check",
+              "label": "Profile selected",
+              "signals": [
+                "Validated profile selected in SSA"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": [
+                "No validated profile chosen"
+              ]
+            }
+          ],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            },
+            {
+              "type": "botulism_risk",
+              "severity": "critical",
+              "avoid": [
+                "Use validated processes for low-acid foods.",
+                "Maintain recommended salt/pH controls for anaerobic ferments."
+              ],
+              "ifOccurs": [
+                "Discard immediately if you suspect unsafe conditions (swollen containers, off odors). Seek medical advice if exposure suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Sanitize and prep cut",
+          "why": "Clean surface improves cure consistency.",
+          "instructions": [
+            "Sanitize trays/bags; trim and pat dry; label cut."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Apply cure and bag/rest",
+          "why": "Uniform contact yields uniform cure.",
+          "instructions": [
+            "Apply cure per profile; bag or cover; refrigerate at controlled temperature; flip/redistribute on schedule."
+          ],
+          "visualCues": [
+            {
+              "type": "check",
+              "label": "Cure penetration",
+              "signals": [
+                "Firming across cut"
+              ],
+              "actions": [
+                "Proceed to rinse/soak per profile"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_cure",
+              "label": "Cure rest window",
+              "duration": "5-14 days",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Flip daily or per profile"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_04",
+          "title": "Rinse/soak (per profile) and dry",
+          "why": "Adjust salinity; create pellicle for smoke adhesion.",
+          "instructions": [
+            "Rinse/soak if profile requires; dry surface; rest uncovered in fridge to form pellicle."
+          ],
+          "visualCues": [
+            {
+              "type": "visual",
+              "label": "Pellicle formed",
+              "signals": [
+                "Surface feels tacky, not wet"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_pellicle",
+              "label": "Pellicle rest",
+              "duration": "4-24 hours",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Check tacky surface"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_05",
+          "title": "Optional smoke and/or cook",
+          "why": "Flavor and preservation; follow safe temps.",
+          "instructions": [
+            "If smoking: follow your validated smoker/cook plan; record time/temp; cool safely."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_06",
+          "title": "Slice, package, and store",
+          "why": "Portion for use; label for traceability.",
+          "instructions": [
+            "Slice to desired thickness; package; label date and cure profile; refrigerate or freeze."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "artifact": "meat.cured.bacon",
+        "traceability": [
+          "profileId",
+          "batchId",
+          "dates"
+        ]
+      },
+      "compliance": {
+        "legal": [],
+        "references": [
+          "Use jurisdiction-appropriate, validated curing guidance. Maintain strict refrigeration and sanitation."
+        ]
+      }
+    },
+    {
+      "id": "curing.bacon.turkey.core",
+      "title": "Turkey Bacon — Cure + Rest + (Optional) Smoke (Core Workflow)",
+      "kind": "curing.bacon",
+      "summary": "Curing workflow for bacon-style cuts. This is a checklist + cue method; exact cure formulation, nitrite use, and validated time/temperature are parameterized. SSA should require 'validated recipe profile' selection for production runs.",
+      "cultureTags": [
+        "american",
+        "modern",
+        "global",
+        "charcuterie",
+        "global",
+        "modern",
+        "traditional"
+      ],
+      "applicability": {
+        "foods": [
+          "turkey belly or suitable cut"
+        ],
+        "equipmentLevel": [
+          "intermediate"
+        ],
+        "notes": [
+          "Follow validated curing formulations and temperature controls.",
+          "SSA captures cure profile selection, thickness, and intended outcome (fresh-cured vs smoked)."
+        ]
+      },
+      "parameters": {
+        "validatedProfileId": {
+          "type": "string",
+          "required": true,
+          "help": "Pointer to your cure profiles library (not defined here)."
+        },
+        "thicknessCm": {
+          "type": "number",
+          "min": 0.5,
+          "max": 10,
+          "default": 3.0
+        },
+        "smoke": {
+          "type": "boolean",
+          "default": false
+        },
+        "storage": {
+          "type": "enum",
+          "values": [
+            "refrigerated",
+            "frozen"
+          ],
+          "default": "refrigerated"
+        }
+      },
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Plan cure profile (validated)",
+          "why": "Curing safety depends on correct formulation and time/temp controls.",
+          "instructions": [
+            "Select a validated cure profile in SSA (salt %, sugar %, curing salt if used, target temp, rest days).",
+            "Record cut thickness and weight."
+          ],
+          "visualCues": [
+            {
+              "type": "check",
+              "label": "Profile selected",
+              "signals": [
+                "Validated profile selected in SSA"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": [
+                "No validated profile chosen"
+              ]
+            }
+          ],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            },
+            {
+              "type": "botulism_risk",
+              "severity": "critical",
+              "avoid": [
+                "Use validated processes for low-acid foods.",
+                "Maintain recommended salt/pH controls for anaerobic ferments."
+              ],
+              "ifOccurs": [
+                "Discard immediately if you suspect unsafe conditions (swollen containers, off odors). Seek medical advice if exposure suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Sanitize and prep cut",
+          "why": "Clean surface improves cure consistency.",
+          "instructions": [
+            "Sanitize trays/bags; trim and pat dry; label cut."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Apply cure and bag/rest",
+          "why": "Uniform contact yields uniform cure.",
+          "instructions": [
+            "Apply cure per profile; bag or cover; refrigerate at controlled temperature; flip/redistribute on schedule."
+          ],
+          "visualCues": [
+            {
+              "type": "check",
+              "label": "Cure penetration",
+              "signals": [
+                "Firming across cut"
+              ],
+              "actions": [
+                "Proceed to rinse/soak per profile"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_cure",
+              "label": "Cure rest window",
+              "duration": "5-14 days",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Flip daily or per profile"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_04",
+          "title": "Rinse/soak (per profile) and dry",
+          "why": "Adjust salinity; create pellicle for smoke adhesion.",
+          "instructions": [
+            "Rinse/soak if profile requires; dry surface; rest uncovered in fridge to form pellicle."
+          ],
+          "visualCues": [
+            {
+              "type": "visual",
+              "label": "Pellicle formed",
+              "signals": [
+                "Surface feels tacky, not wet"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_pellicle",
+              "label": "Pellicle rest",
+              "duration": "4-24 hours",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Check tacky surface"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_05",
+          "title": "Optional smoke and/or cook",
+          "why": "Flavor and preservation; follow safe temps.",
+          "instructions": [
+            "If smoking: follow your validated smoker/cook plan; record time/temp; cool safely."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_06",
+          "title": "Slice, package, and store",
+          "why": "Portion for use; label for traceability.",
+          "instructions": [
+            "Slice to desired thickness; package; label date and cure profile; refrigerate or freeze."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "artifact": "meat.cured.bacon",
+        "traceability": [
+          "profileId",
+          "batchId",
+          "dates"
+        ]
+      },
+      "compliance": {
+        "legal": [],
+        "references": [
+          "Use jurisdiction-appropriate, validated curing guidance. Maintain strict refrigeration and sanitation."
+        ]
+      }
+    },
+    {
+      "id": "curing.bacon.lamb.core",
+      "title": "Lamb Bacon — Cure + Rest + (Optional) Smoke (Core Workflow)",
+      "kind": "curing.bacon",
+      "summary": "Curing workflow for bacon-style cuts. This is a checklist + cue method; exact cure formulation, nitrite use, and validated time/temperature are parameterized. SSA should require 'validated recipe profile' selection for production runs.",
+      "cultureTags": [
+        "middle-eastern",
+        "mediterranean",
+        "african",
+        "global",
+        "charcuterie",
+        "global",
+        "modern",
+        "traditional"
+      ],
+      "applicability": {
+        "foods": [
+          "lamb belly or suitable cut"
+        ],
+        "equipmentLevel": [
+          "intermediate"
+        ],
+        "notes": [
+          "Follow validated curing formulations and temperature controls.",
+          "SSA captures cure profile selection, thickness, and intended outcome (fresh-cured vs smoked)."
+        ]
+      },
+      "parameters": {
+        "validatedProfileId": {
+          "type": "string",
+          "required": true,
+          "help": "Pointer to your cure profiles library (not defined here)."
+        },
+        "thicknessCm": {
+          "type": "number",
+          "min": 0.5,
+          "max": 10,
+          "default": 3.0
+        },
+        "smoke": {
+          "type": "boolean",
+          "default": false
+        },
+        "storage": {
+          "type": "enum",
+          "values": [
+            "refrigerated",
+            "frozen"
+          ],
+          "default": "refrigerated"
+        }
+      },
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Plan cure profile (validated)",
+          "why": "Curing safety depends on correct formulation and time/temp controls.",
+          "instructions": [
+            "Select a validated cure profile in SSA (salt %, sugar %, curing salt if used, target temp, rest days).",
+            "Record cut thickness and weight."
+          ],
+          "visualCues": [
+            {
+              "type": "check",
+              "label": "Profile selected",
+              "signals": [
+                "Validated profile selected in SSA"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": [
+                "No validated profile chosen"
+              ]
+            }
+          ],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            },
+            {
+              "type": "botulism_risk",
+              "severity": "critical",
+              "avoid": [
+                "Use validated processes for low-acid foods.",
+                "Maintain recommended salt/pH controls for anaerobic ferments."
+              ],
+              "ifOccurs": [
+                "Discard immediately if you suspect unsafe conditions (swollen containers, off odors). Seek medical advice if exposure suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Sanitize and prep cut",
+          "why": "Clean surface improves cure consistency.",
+          "instructions": [
+            "Sanitize trays/bags; trim and pat dry; label cut."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Apply cure and bag/rest",
+          "why": "Uniform contact yields uniform cure.",
+          "instructions": [
+            "Apply cure per profile; bag or cover; refrigerate at controlled temperature; flip/redistribute on schedule."
+          ],
+          "visualCues": [
+            {
+              "type": "check",
+              "label": "Cure penetration",
+              "signals": [
+                "Firming across cut"
+              ],
+              "actions": [
+                "Proceed to rinse/soak per profile"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_cure",
+              "label": "Cure rest window",
+              "duration": "5-14 days",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Flip daily or per profile"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_04",
+          "title": "Rinse/soak (per profile) and dry",
+          "why": "Adjust salinity; create pellicle for smoke adhesion.",
+          "instructions": [
+            "Rinse/soak if profile requires; dry surface; rest uncovered in fridge to form pellicle."
+          ],
+          "visualCues": [
+            {
+              "type": "visual",
+              "label": "Pellicle formed",
+              "signals": [
+                "Surface feels tacky, not wet"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_pellicle",
+              "label": "Pellicle rest",
+              "duration": "4-24 hours",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Check tacky surface"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_05",
+          "title": "Optional smoke and/or cook",
+          "why": "Flavor and preservation; follow safe temps.",
+          "instructions": [
+            "If smoking: follow your validated smoker/cook plan; record time/temp; cool safely."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_06",
+          "title": "Slice, package, and store",
+          "why": "Portion for use; label for traceability.",
+          "instructions": [
+            "Slice to desired thickness; package; label date and cure profile; refrigerate or freeze."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "artifact": "meat.cured.bacon",
+        "traceability": [
+          "profileId",
+          "batchId",
+          "dates"
+        ]
+      },
+      "compliance": {
+        "legal": [],
+        "references": [
+          "Use jurisdiction-appropriate, validated curing guidance. Maintain strict refrigeration and sanitation."
+        ]
+      }
+    },
+    {
+      "id": "curing.bacon.goat.core",
+      "title": "Goat Bacon — Cure + Rest + (Optional) Smoke (Core Workflow)",
+      "kind": "curing.bacon",
+      "summary": "Curing workflow for bacon-style cuts. This is a checklist + cue method; exact cure formulation, nitrite use, and validated time/temperature are parameterized. SSA should require 'validated recipe profile' selection for production runs.",
+      "cultureTags": [
+        "african",
+        "caribbean",
+        "south-asian",
+        "global",
+        "charcuterie",
+        "global",
+        "modern",
+        "traditional"
+      ],
+      "applicability": {
+        "foods": [
+          "goat belly or suitable cut"
+        ],
+        "equipmentLevel": [
+          "intermediate"
+        ],
+        "notes": [
+          "Follow validated curing formulations and temperature controls.",
+          "SSA captures cure profile selection, thickness, and intended outcome (fresh-cured vs smoked)."
+        ]
+      },
+      "parameters": {
+        "validatedProfileId": {
+          "type": "string",
+          "required": true,
+          "help": "Pointer to your cure profiles library (not defined here)."
+        },
+        "thicknessCm": {
+          "type": "number",
+          "min": 0.5,
+          "max": 10,
+          "default": 3.0
+        },
+        "smoke": {
+          "type": "boolean",
+          "default": false
+        },
+        "storage": {
+          "type": "enum",
+          "values": [
+            "refrigerated",
+            "frozen"
+          ],
+          "default": "refrigerated"
+        }
+      },
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Plan cure profile (validated)",
+          "why": "Curing safety depends on correct formulation and time/temp controls.",
+          "instructions": [
+            "Select a validated cure profile in SSA (salt %, sugar %, curing salt if used, target temp, rest days).",
+            "Record cut thickness and weight."
+          ],
+          "visualCues": [
+            {
+              "type": "check",
+              "label": "Profile selected",
+              "signals": [
+                "Validated profile selected in SSA"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": [
+                "No validated profile chosen"
+              ]
+            }
+          ],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            },
+            {
+              "type": "botulism_risk",
+              "severity": "critical",
+              "avoid": [
+                "Use validated processes for low-acid foods.",
+                "Maintain recommended salt/pH controls for anaerobic ferments."
+              ],
+              "ifOccurs": [
+                "Discard immediately if you suspect unsafe conditions (swollen containers, off odors). Seek medical advice if exposure suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Sanitize and prep cut",
+          "why": "Clean surface improves cure consistency.",
+          "instructions": [
+            "Sanitize trays/bags; trim and pat dry; label cut."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Apply cure and bag/rest",
+          "why": "Uniform contact yields uniform cure.",
+          "instructions": [
+            "Apply cure per profile; bag or cover; refrigerate at controlled temperature; flip/redistribute on schedule."
+          ],
+          "visualCues": [
+            {
+              "type": "check",
+              "label": "Cure penetration",
+              "signals": [
+                "Firming across cut"
+              ],
+              "actions": [
+                "Proceed to rinse/soak per profile"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_cure",
+              "label": "Cure rest window",
+              "duration": "5-14 days",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Flip daily or per profile"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_04",
+          "title": "Rinse/soak (per profile) and dry",
+          "why": "Adjust salinity; create pellicle for smoke adhesion.",
+          "instructions": [
+            "Rinse/soak if profile requires; dry surface; rest uncovered in fridge to form pellicle."
+          ],
+          "visualCues": [
+            {
+              "type": "visual",
+              "label": "Pellicle formed",
+              "signals": [
+                "Surface feels tacky, not wet"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_pellicle",
+              "label": "Pellicle rest",
+              "duration": "4-24 hours",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Check tacky surface"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_05",
+          "title": "Optional smoke and/or cook",
+          "why": "Flavor and preservation; follow safe temps.",
+          "instructions": [
+            "If smoking: follow your validated smoker/cook plan; record time/temp; cool safely."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_06",
+          "title": "Slice, package, and store",
+          "why": "Portion for use; label for traceability.",
+          "instructions": [
+            "Slice to desired thickness; package; label date and cure profile; refrigerate or freeze."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "artifact": "meat.cured.bacon",
+        "traceability": [
+          "profileId",
+          "batchId",
+          "dates"
+        ]
+      },
+      "compliance": {
+        "legal": [],
+        "references": [
+          "Use jurisdiction-appropriate, validated curing guidance. Maintain strict refrigeration and sanitation."
+        ]
+      }
+    },
+    {
+      "id": "curing.bacon.chicken.core",
+      "title": "Chicken Bacon — Cure + Rest + (Optional) Smoke (Core Workflow)",
+      "kind": "curing.bacon",
+      "summary": "Curing workflow for bacon-style cuts. This is a checklist + cue method; exact cure formulation, nitrite use, and validated time/temperature are parameterized. SSA should require 'validated recipe profile' selection for production runs.",
+      "cultureTags": [
+        "modern",
+        "global",
+        "charcuterie",
+        "global",
+        "modern",
+        "traditional"
+      ],
+      "applicability": {
+        "foods": [
+          "chicken belly or suitable cut"
+        ],
+        "equipmentLevel": [
+          "intermediate"
+        ],
+        "notes": [
+          "Follow validated curing formulations and temperature controls.",
+          "SSA captures cure profile selection, thickness, and intended outcome (fresh-cured vs smoked)."
+        ]
+      },
+      "parameters": {
+        "validatedProfileId": {
+          "type": "string",
+          "required": true,
+          "help": "Pointer to your cure profiles library (not defined here)."
+        },
+        "thicknessCm": {
+          "type": "number",
+          "min": 0.5,
+          "max": 10,
+          "default": 3.0
+        },
+        "smoke": {
+          "type": "boolean",
+          "default": false
+        },
+        "storage": {
+          "type": "enum",
+          "values": [
+            "refrigerated",
+            "frozen"
+          ],
+          "default": "refrigerated"
+        }
+      },
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Plan cure profile (validated)",
+          "why": "Curing safety depends on correct formulation and time/temp controls.",
+          "instructions": [
+            "Select a validated cure profile in SSA (salt %, sugar %, curing salt if used, target temp, rest days).",
+            "Record cut thickness and weight."
+          ],
+          "visualCues": [
+            {
+              "type": "check",
+              "label": "Profile selected",
+              "signals": [
+                "Validated profile selected in SSA"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": [
+                "No validated profile chosen"
+              ]
+            }
+          ],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            },
+            {
+              "type": "botulism_risk",
+              "severity": "critical",
+              "avoid": [
+                "Use validated processes for low-acid foods.",
+                "Maintain recommended salt/pH controls for anaerobic ferments."
+              ],
+              "ifOccurs": [
+                "Discard immediately if you suspect unsafe conditions (swollen containers, off odors). Seek medical advice if exposure suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Sanitize and prep cut",
+          "why": "Clean surface improves cure consistency.",
+          "instructions": [
+            "Sanitize trays/bags; trim and pat dry; label cut."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Apply cure and bag/rest",
+          "why": "Uniform contact yields uniform cure.",
+          "instructions": [
+            "Apply cure per profile; bag or cover; refrigerate at controlled temperature; flip/redistribute on schedule."
+          ],
+          "visualCues": [
+            {
+              "type": "check",
+              "label": "Cure penetration",
+              "signals": [
+                "Firming across cut"
+              ],
+              "actions": [
+                "Proceed to rinse/soak per profile"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_cure",
+              "label": "Cure rest window",
+              "duration": "5-14 days",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Flip daily or per profile"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_04",
+          "title": "Rinse/soak (per profile) and dry",
+          "why": "Adjust salinity; create pellicle for smoke adhesion.",
+          "instructions": [
+            "Rinse/soak if profile requires; dry surface; rest uncovered in fridge to form pellicle."
+          ],
+          "visualCues": [
+            {
+              "type": "visual",
+              "label": "Pellicle formed",
+              "signals": [
+                "Surface feels tacky, not wet"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_pellicle",
+              "label": "Pellicle rest",
+              "duration": "4-24 hours",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Check tacky surface"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_05",
+          "title": "Optional smoke and/or cook",
+          "why": "Flavor and preservation; follow safe temps.",
+          "instructions": [
+            "If smoking: follow your validated smoker/cook plan; record time/temp; cool safely."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_06",
+          "title": "Slice, package, and store",
+          "why": "Portion for use; label for traceability.",
+          "instructions": [
+            "Slice to desired thickness; package; label date and cure profile; refrigerate or freeze."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "artifact": "meat.cured.bacon",
+        "traceability": [
+          "profileId",
+          "batchId",
+          "dates"
+        ]
+      },
+      "compliance": {
+        "legal": [],
+        "references": [
+          "Use jurisdiction-appropriate, validated curing guidance. Maintain strict refrigeration and sanitation."
+        ]
+      }
+    },
+    {
+      "id": "curing.dry_whole_muscle.core",
+      "title": "Dry-Cured Whole Muscle (Generic) — Checklist Workflow",
+      "kind": "curing.dry",
+      "summary": "Generic dry-curing workflow for whole muscles (e.g., bresaola-style). Non-formulaic; requires validated profile selection.",
+      "cultureTags": [
+        "italian",
+        "spanish",
+        "global",
+        "traditional"
+      ],
+      "applicability": {
+        "foods": [
+          "whole muscle cuts"
+        ],
+        "equipmentLevel": [
+          "advanced"
+        ],
+        "notes": [
+          "Requires humidity/temp control. SSA should store chamber setpoints."
+        ]
+      },
+      "parameters": {
+        "validatedProfileId": {
+          "type": "string",
+          "required": true
+        },
+        "targetWeightLossPercent": {
+          "type": "number",
+          "default": 35,
+          "min": 20,
+          "max": 50
+        }
+      },
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Select validated profile",
+          "why": "Controls safety and quality.",
+          "instructions": [
+            "Choose validated profile; confirm chamber capability."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "botulism_risk",
+              "severity": "critical",
+              "avoid": [
+                "Use validated processes for low-acid foods.",
+                "Maintain recommended salt/pH controls for anaerobic ferments."
+              ],
+              "ifOccurs": [
+                "Discard immediately if you suspect unsafe conditions (swollen containers, off odors). Seek medical advice if exposure suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Cure/rest under refrigeration",
+          "why": "Initiate preservation and flavor.",
+          "instructions": [
+            "Apply cure; rest per profile; keep cold."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Dry in controlled chamber",
+          "why": "Controlled drying prevents case hardening.",
+          "instructions": [
+            "Hang/dry in chamber; monitor weight loss and surface."
+          ],
+          "visualCues": [
+            {
+              "type": "visual",
+              "label": "Case hardening risk",
+              "signals": [
+                "Outside very hard while inside soft"
+              ],
+              "actions": [
+                "Adjust humidity/airflow per profile"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_dry",
+              "label": "Drying phase",
+              "duration": "2-12 weeks",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Weekly weight check"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "artifact": "meat.cured.whole_muscle"
+      },
+      "compliance": {
+        "legal": [],
+        "references": []
+      }
+    },
+    {
+      "id": "beverage.distillation.legal_workflow",
+      "title": "Distillation (Spirits) — Legally Compliant Workflow (Non-operational)",
+      "kind": "beverage.distillation",
+      "summary": "Non-operational, compliance-first distillation method for SSA planning. It does NOT provide step-by-step still operation. Use for tracking licensed production runs, co-packer jobs, or permitted facilities.",
+      "cultureTags": [
+        "global",
+        "traditional",
+        "modern"
+      ],
+      "applicability": {
+        "foods": [
+          "fermented wash/mash from beer/wine/mead-style bases"
+        ],
+        "equipmentLevel": [
+          "licensed_facility_required"
+        ],
+        "notes": [
+          "This method is intentionally non-instructional. It is designed for compliance tracking and workflow orchestration in SSA.",
+          "SSA should require a 'licensedFacilityId' and 'permitStatus' before allowing 'run' status."
+        ]
+      },
+      "parameters": {
+        "licensedFacilityId": {
+          "type": "string",
+          "required": true
+        },
+        "permitStatus": {
+          "type": "enum",
+          "values": [
+            "verified",
+            "pending",
+            "not_applicable"
+          ],
+          "default": "pending"
+        },
+        "productType": {
+          "type": "enum",
+          "values": [
+            "whiskey",
+            "rum",
+            "vodka",
+            "brandy",
+            "gin",
+            "neutral_spirit",
+            "other"
+          ],
+          "default": "other"
+        }
+      },
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Verify legal compliance and facility",
+          "why": "Distillation may be regulated.",
+          "instructions": [
+            "Confirm jurisdiction rules; confirm licensing/permits; select licensed facility or co-packer."
+          ],
+          "visualCues": [
+            {
+              "type": "check",
+              "label": "Compliance verified",
+              "signals": [
+                "Permit/license confirmed",
+                "Facility selected"
+              ],
+              "actions": [
+                "Proceed"
+              ],
+              "escalateIf": [
+                "No license/permit confirmed"
+              ]
+            }
+          ],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "distillation_legal",
+              "severity": "high",
+              "avoid": [
+                "Verify legal compliance (licenses/permits). Use licensed facilities if required."
+              ],
+              "ifOccurs": [
+                "Pause the process and move to a compliant pathway (licensed distillery/co-packer)."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Log batch inputs and transport chain",
+          "why": "Traceability for regulated production.",
+          "instructions": [
+            "Record source batch IDs, volumes, dates, and custody chain."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "alcohol_safety",
+              "severity": "high",
+              "avoid": [
+                "Keep away from flames. Use food-grade equipment. Avoid lead-containing components."
+              ],
+              "ifOccurs": [
+                "Ventilate area, remove ignition sources, and follow facility safety protocols."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Execute run under facility SOP",
+          "why": "Facility runs the process under its SOP.",
+          "instructions": [
+            "Mark run as executed by facility; attach SOP reference and measured outputs from facility logs."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "alcohol_safety",
+              "severity": "high",
+              "avoid": [
+                "Keep away from flames. Use food-grade equipment. Avoid lead-containing components."
+              ],
+              "ifOccurs": [
+                "Ventilate area, remove ignition sources, and follow facility safety protocols."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_04",
+          "title": "Quality review and compliant packaging",
+          "why": "Ensure labeling/tax compliance.",
+          "instructions": [
+            "Record lab results if provided; record packaging run, labels, and regulatory marks."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "alcohol_safety",
+              "severity": "high",
+              "avoid": [
+                "Keep away from flames. Use food-grade equipment. Avoid lead-containing components."
+              ],
+              "ifOccurs": [
+                "Ventilate area, remove ignition sources, and follow facility safety protocols."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_05",
+          "title": "Store and distribute per regulations",
+          "why": "Track lot numbers.",
+          "instructions": [
+            "Record lot IDs, storage location, distribution ledger."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "alcohol_safety",
+              "severity": "high",
+              "avoid": [
+                "Keep away from flames. Use food-grade equipment. Avoid lead-containing components."
+              ],
+              "ifOccurs": [
+                "Ventilate area, remove ignition sources, and follow facility safety protocols."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "artifact": "beverage.spirit.lot",
+        "traceability": [
+          "facilityId",
+          "permitStatus",
+          "lotId"
+        ]
+      },
+      "compliance": {
+        "legal": [
+          "Do not attempt distillation without required licenses/permits. Use licensed facilities where required."
+        ],
+        "references": [
+          "Compliance-first workflow; operational guidance must come from licensed facility SOPs and legal counsel."
+        ]
+      }
+    },
+    {
+      "id": "ferment.beverage.indigenous.sorghum_millet",
+      "title": "Indigenous Sorghum/Millet Beer (Traditional Workflow)",
+      "kind": "beverage.beer",
+      "summary": "High-level traditional sorghum/millet beer workflow capturing stages and cues. Recipe-specific details are parameterized.",
+      "cultureTags": [
+        "african",
+        "indigenous"
+      ],
+      "applicability": {
+        "foods": [
+          "sorghum",
+          "millet"
+        ],
+        "equipmentLevel": [
+          "intermediate"
+        ],
+        "notes": [
+          "Local traditions vary widely; SSA treats this as a method family with recipe profiles."
+        ]
+      },
+      "parameters": {
+        "starterApproach": {
+          "type": "enum",
+          "values": [
+            "wild",
+            "backslop",
+            "culture"
+          ],
+          "default": "backslop"
+        },
+        "profileId": {
+          "type": "string",
+          "required": true
+        }
+      },
+      "defaultSteps": [
+        {
+          "id": "step_01",
+          "title": "Prepare grain base (per tradition)",
+          "why": "Create fermentable base.",
+          "instructions": [
+            "Prepare grain base according to selected cultural profile."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "sanitation",
+              "severity": "high",
+              "avoid": [
+                "Clean and sanitize vessels, tools, and work surfaces.",
+                "Use clean hands/gloves; avoid cross-contamination."
+              ],
+              "ifOccurs": [
+                "Stop and re-sanitize. If active fermentation is compromised and spoilage signs are present, discard batch."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_02",
+          "title": "Cool and inoculate",
+          "why": "Start fermentation with yeast/culture.",
+          "instructions": [
+            "Inoculate using selected starter approach (wild, backslop, or culture)."
+          ],
+          "visualCues": [],
+          "checkpoints": [],
+          "timers": [],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [
+            {
+              "type": "pressure",
+              "severity": "medium",
+              "avoid": [
+                "Use airlocks or burp jars for active ferments to prevent explosions."
+              ],
+              "ifOccurs": [
+                "Move to sink, vent safely, clean spills, and consider discarding if contamination suspected."
+              ],
+              "references": []
+            }
+          ],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        },
+        {
+          "id": "step_03",
+          "title": "Ferment and monitor",
+          "why": "Track activity and taste endpoint.",
+          "instructions": [
+            "Monitor aroma and bubbles; stop at preferred strength/tartness."
+          ],
+          "visualCues": [
+            {
+              "type": "sensory",
+              "label": "Endpoint",
+              "signals": [
+                "Taste matches target",
+                "Aroma clean"
+              ],
+              "actions": [
+                "Chill/serve"
+              ],
+              "escalateIf": []
+            }
+          ],
+          "checkpoints": [],
+          "timers": [
+            {
+              "id": "t_indig_beer",
+              "label": "Fermentation",
+              "duration": "1-5 days",
+              "kind": "countup",
+              "startTrigger": "manual",
+              "endTrigger": "manual",
+              "reminders": [
+                "Check twice daily"
+              ]
+            }
+          ],
+          "tools": [],
+          "ingredients": [],
+          "hazards": [],
+          "notes": "",
+          "nextOnSuccess": null,
+          "nextOnFail": null
+        }
+      ],
+      "cues": [],
+      "outputs": {
+        "artifact": "beverage.beer.traditional"
+      },
+      "compliance": {
+        "legal": [],
+        "references": []
+      }
+    }
+  ]
+}

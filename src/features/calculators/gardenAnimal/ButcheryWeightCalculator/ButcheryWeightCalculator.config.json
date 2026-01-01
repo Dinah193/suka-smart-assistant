@@ -1,0 +1,65 @@
+{
+  "nodeKey": "storehouseMeals.butcheryWeight",
+  "id": "storehouseMeals.butcheryWeight",
+  "kind": "calculator-node",
+  "domain": "storehouse",
+
+  "label": "Butchery Weight Calculator",
+  "description": "Calculator node that converts live weights and species/class info into estimated carcass, retail cut, and by-product weights for storehouse planning.",
+  "version": "1.0.0",
+  "status": "active",
+
+  "calculator": {
+    "schema": "./ButcheryWeightCalculator.schema.json",
+    "shim": "./ButcheryWeightCalculator.shim.js",
+    "view": "./ButcheryWeightCalculator.view.jsx"
+  },
+
+  "inputs": {
+    "animals": {
+      "description": "Animals or lots to be processed, including live weight, species, class, and planned processing date.",
+      "required": true
+    },
+    "yieldCurves": {
+      "description": "Optional species/class-specific dressing percentage and retail yield curves. If omitted, calculator falls back to sane defaults.",
+      "required": false
+    },
+    "storehouseInventory": {
+      "description": "Optional current meat inventory snapshot to support planning against storehouse targets.",
+      "required": false
+    },
+    "planningContext": {
+      "description": "Optional planning context such as target cut focus (roasts vs. ground), packaging sizes, and time horizon.",
+      "required": false
+    }
+  },
+
+  "outputs": {
+    "carcassBreakdown": {
+      "description": "Per-animal or per-lot estimates of hot carcass weight, chilled carcass weight, and primal weights."
+    },
+    "retailCutPlan": {
+      "description": "Planned retail cut weights and units by cut type (steaks, roasts, ground, stew, etc.), per-animal and aggregated."
+    },
+    "offalAndByproducts": {
+      "description": "Estimated weights for offal, bones, fat trim, soup bones, organs, and other by-products."
+    },
+    "analytics": {
+      "description": "Summary metrics: average dressing percentage, retail yield percentage, total hanging weight, and total saleable meat.",
+      "hint": "Can be exported to Family Fund Hub when familyFundMode is enabled."
+    }
+  },
+
+  "ui": {
+    "route": "/tier2/storehouse/meat/butchery-weight",
+    "navGroup": "storehouse.meat",
+    "icon": "scale",
+    "tags": [
+      "meat",
+      "butchery",
+      "yield",
+      "storehouse",
+      "planning"
+    ]
+  }
+}

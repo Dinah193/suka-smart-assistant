@@ -1,0 +1,336 @@
+{
+  "$schema": "../../schemas/preservation.schema.json",
+  "version": "2025-10-31T17:55:00-05:00",
+  "meta": {
+    "id": "canning_standard_quart",
+    "title": "Preservation – Standard Water-Bath / Pressure Canning (Quart Jars)",
+    "description": "Preservation profile for canning quart jars in your preserve-canning-kitchen zone. Built to connect to: (1) garden harvest streams (tomato, orchard, leafy/veg for soups), (2) storehouse stock planning (canned veg, sauces, soups, fruit), (3) meal planning (use from storehouse later), (4) cleaning/sanitizing sessions for jars, rings, funnels, kettles, and (5) animal/compost routing for scraps & peelings. Offers canning sessions to the user — does not have to auto-run. Supports reverse generation: storehouse canning targets → suggest sessions → user saves as favorites/schedules.",
+    "source": "suka-smart-assistant",
+    "tags": [
+      "preservation",
+      "canning",
+      "water-bath",
+      "pressure-canning",
+      "quart",
+      "storehouse",
+      "garden",
+      "cleaning",
+      "meal-planning",
+      "reverse-gen"
+    ],
+    "zone": "preserve-canning-kitchen",
+    "calendar": {
+      "hebrewMonthStart": "full-moon",
+      "supportsAltStart": true,
+      "notes": "Align canning pushes with harvest peaks and feast prep weeks, using your full-moon month start."
+    }
+  },
+  "ui": {
+    "layout": "cards/timeline",
+    "hints": {
+      "primaryCTA": "Offer Canning Session (Quarts)",
+      "secondaryCTA": "Save as Favorite",
+      "tertiaryCTA": "Reverse-generate From Storehouse Targets",
+      "showSeasonalityBadge": true,
+      "groupBy": [
+        "sourceDomain",
+        "recipeType",
+        "jarSize"
+      ],
+      "suggestOnly": true,
+      "notes": "Show incoming ‘processable’ items from garden_harvest/* and orchard_* as small cards the user can drag into a canning session — like well-done recipe planners."
+    },
+    "badges": [
+      { "text": "Preservation", "color": "amber" },
+      { "text": "Quart", "color": "blue" },
+      { "text": "Canning Kitchen", "color": "slate" }
+    ]
+  },
+  "orchestration": {
+    "bus": "window.__suka?.eventBus",
+    "emitOnLoad": [
+      "preservation.profile.loaded",
+      "preservation.canning.quart.loaded"
+    ],
+    "listen": [
+      "garden.session.request",
+      "garden.harvest.completed",
+      "storehouse.goal.request",
+      "meal.session.request",
+      "cleaning.session.request",
+      "inventory.restock.request",
+      "automation.schedule.request"
+    ],
+    "sharedScopes": [
+      "garden",
+      "storehouse",
+      "meals",
+      "cleaning",
+      "animals",
+      "butchery"
+    ]
+  },
+  "engines": {
+    "primary": "preservationEngine",
+    "supports": [
+      "storehouseGoalEngine",
+      "gardenQueueEngine",
+      "mealPlanEngine",
+      "cleaningSessionEngine",
+      "animalSessionEngine"
+    ],
+    "notes": "preservationEngine should collect harvest-ready lots (tomato_hot_strip, orchard_row_1, orchard_row_1_overflow, leafy_shade_bed, herbs_perennial_corner) and offer a canning session sized to available quarts and user’s storehouse targets. It should not auto-schedule unless user enables it."
+  },
+  "reverse": {
+    "generateFrom": [
+      "storehouse.targets.canned-veg-quarts",
+      "storehouse.targets.tomato-sauce-quarts",
+      "storehouse.targets.soup-base-quarts",
+      "storehouse.targets.orchard-fruit-quarts",
+      "mealplan.requirements.canned-items",
+      "community.feast-days.preserved",
+      "coop-pool.canning"
+    ],
+    "strategies": [
+      {
+        "id": "from-storehouse-canned-veg",
+        "title": "Back into canning sessions from storehouse canned-veg targets",
+        "input": {
+          "targetQuarts": 24,
+          "avgQuartsPerSession": 8
+        },
+        "output": {
+          "suggestedSessions": 3,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Run 3 canning sessions (8 qt each) to meet veg target",
+              "emitOnUserAccept": [
+                "preservation.session.request",
+                "cleaning.session.request"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "from-garden-overflow",
+        "title": "Back into canning from garden/orchard overflow",
+        "input": {
+          "harvestKgAvailable": 18,
+          "estimatedQuartsPer10Kg": 7
+        },
+        "output": {
+          "estimatedQuartsPossible": 12,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Canning: 12 quarts from today’s harvest",
+              "emitOnUserAccept": [
+                "preservation.session.request"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "from-feast-prep",
+        "title": "Back into canning for upcoming feast/holy days",
+        "input": {
+          "feastMenus": 2,
+          "quartsPerMenu": 4
+        },
+        "output": {
+          "requiredQuarts": 8,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Prep 8 quarts for feast menus",
+              "emitOnUserAccept": [
+                "preservation.session.request",
+                "storehouse.plan.generated"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "preservation": {
+    "method": "canning",
+    "jarSize": "quart",
+    "zone": "preserve-canning-kitchen",
+    "supportedSources": [
+      "garden_harvest/tomato_hot_strip",
+      "garden_harvest/orchard_row_1",
+      "garden_harvest/orchard_row_1_overflow",
+      "garden_harvest/leafy_shade_bed",
+      "garden_harvest/herbs_perennial_corner"
+    ],
+    "batchModel": {
+      "formula": "floor(processableKg * 0.7)",
+      "notes": "Rough: 1 kg produce → ~0.7 qt after trim/cook-down. Actual recipes can override."
+    },
+    "examples": [
+      {
+        "label": "10 kg tomato intake",
+        "estimatedQuarts": 7
+      },
+      {
+        "label": "12 kg mixed orchard intake",
+        "estimatedQuarts": 8
+      }
+    ]
+  },
+  "storehouse": {
+    "targets": {
+      "canned_tomato_quarts": 16,
+      "canned_fruit_quarts": 10,
+      "soup_base_quarts": 12,
+      "broth_companion_quarts": 6
+    },
+    "grocerySectionsInspiration": [
+      "Canned Vegetables",
+      "Tomatoes & Sauces",
+      "Soups & Broths",
+      "Canned Fruit & Pie Fillings",
+      "Meal Starters / Bases"
+    ],
+    "autoPlan": {
+      "enabled": false
+    }
+  },
+  "meals": {
+    "recipes": [
+      {
+        "id": "use-canned-tomato-quart",
+        "title": "Use 1 Quart Canned Tomatoes",
+        "linksTo": [
+          "/meals/dinner",
+          "/inventory/storehouse"
+        ]
+      },
+      {
+        "id": "quart-soup-base",
+        "title": "Quart of Soup Base (Weeknight)",
+        "linksTo": [
+          "/meals/dinner",
+          "/storehouse/soups"
+        ]
+      }
+    ],
+    "autoSession": {
+      "everyDays": 0,
+      "emit": []
+    }
+  },
+  "garden": {
+    "care": [
+      {
+        "id": "prep-produce-for-canning",
+        "title": "Prep Produce for Canning (wash, sort, trim)",
+        "emit": "garden.session.request"
+      }
+    ],
+    "harvest": {
+      "autoSuggest": true,
+      "userMustConfirm": true,
+      "emitOnConfirm": [
+        "garden.session.request"
+      ]
+    },
+    "notes": "Canning profile should appear as an option when harvest creates processableKg above minBatchThreshold."
+  },
+  "cleaning": {
+    "routines": [
+      {
+        "id": "sanitize-jars-rings-lids",
+        "title": "Sanitize Jars / Rings / Lids",
+        "frequency": "PER_RUN",
+        "emit": "cleaning.session.request",
+        "tools": [
+          "sanitizer",
+          "hot-water",
+          "drying-rack"
+        ]
+      },
+      {
+        "id": "canning-kettle-clean",
+        "title": "Canning Kettle / Countertop Clean",
+        "frequency": "PER_RUN",
+        "emit": "cleaning.session.request"
+      }
+    ],
+    "sabbathGuard": true
+  },
+  "animals": {
+    "routing": {
+      "trimmingsAndPeels": [
+        "compost",
+        "poultry",
+        "goat"
+      ],
+      "notes": "Route only clean, acceptable trimmings to animals. Compost anything questionable. Keep unclean species separated from this kitchen line."
+    },
+    "emit": [
+      "animal.care.session.request"
+    ]
+  },
+  "inventory": {
+    "productId": "preservation-canned-quart",
+    "unit": "quart",
+    "trackLots": true,
+    "shelfLifeDays": 365
+  },
+  "favoriteSessions": [
+    {
+      "id": "fav-canning-from-tomatoes",
+      "title": "Canning Run – Tomatoes (Quarts)",
+      "domain": "preservation/canning",
+      "schedule": "",
+      "sabbathGuard": true
+    },
+    {
+      "id": "fav-canning-from-orchard",
+      "title": "Canning Run – Orchard Overflow (Quarts)",
+      "domain": "preservation/canning",
+      "schedule": ""
+    }
+  ],
+  "scheduleTemplates": [
+    {
+      "id": "canning-weekly-user",
+      "title": "Weekly Canning Block – User Confirm",
+      "rrules": [
+        "RRULE:FREQ=WEEKLY;BYDAY=TU;BYHOUR=13;BYMINUTE=0;BYSECOND=0"
+      ],
+      "options": {
+        "userMustConfirm": true,
+        "sabbathGuard": true
+      }
+    }
+  ],
+  "userProfiles": {
+    "allowUserOwnedSchedules": true,
+    "allowUserOwnedFavorites": true,
+    "allowExportShare": true,
+    "shareFormats": [
+      "json",
+      "suka-plan",
+      "calendar-rrule"
+    ]
+  },
+  "events": {
+    "emits": [
+      "preservation.session.request",
+      "cleaning.session.request",
+      "storehouse.plan.generated",
+      "inventory.restock.request"
+    ],
+    "consumes": [
+      "garden.harvest.completed",
+      "storehouse.targets.changed",
+      "meal.session.completed"
+    ]
+  }
+}

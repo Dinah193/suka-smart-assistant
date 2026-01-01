@@ -1,0 +1,121 @@
+{
+  "description": "Sample SSA event envelope for `garden.harvest.logged`. Emit this when a harvest is recorded from the garden module (manual entry, scan from garden task list, or auto-log after a scheduled task). This is the bridge from GARDEN → INVENTORY/STOREHOUSE → (optional) PRESERVATION and (optional) HUB export.",
+  "envelopeShape": {
+    "type": "garden.harvest.logged",
+    "ts": "2025-11-02T13:35:00.000Z",
+    "source": "domain/garden/GardenSessionEngine",
+    "data": {
+      "harvestId": "harv_xxxxxxxx",
+      "crop": "string — e.g. 'collard greens', 'tomato, roma', 'rosemary'",
+      "quantity": 0,
+      "unit": "string — lb | oz | bunch | head | basket | crate",
+      "inventoryItemId": "string | null — where we deposited it (if already linked to inventory/storehouse)",
+      "preservationSuggested": false
+    }
+  },
+  "samples": [
+    {
+      "label": "Simple greens harvest → goes straight to inventory",
+      "event": {
+        "type": "garden.harvest.logged",
+        "ts": "2025-11-02T13:35:00.000Z",
+        "source": "domain/garden/GardenSessionEngine",
+        "data": {
+          "harvestId": "harv_collards_2025_11_02_am",
+          "crop": "Collard Greens",
+          "quantity": 3,
+          "unit": "bunch",
+          "inventoryItemId": "inv_collards_fresh",
+          "preservationSuggested": false
+        }
+      }
+    },
+    {
+      "label": "Tomato harvest (large) → suggests preservation (canning/freezing)",
+      "event": {
+        "type": "garden.harvest.logged",
+        "ts": "2025-11-02T13:37:15.000Z",
+        "source": "domain/garden/GardenSessionEngine",
+        "data": {
+          "harvestId": "harv_tomato_roma_bed3_2025_11_02",
+          "crop": "Tomato, Roma",
+          "quantity": 18,
+          "unit": "lb",
+          "inventoryItemId": "inv_tomato_roma_fresh",
+          "preservationSuggested": true
+        }
+      }
+    },
+    {
+      "label": "Herb harvest (rosemary) → can link to inventory OR to garden-only ledger",
+      "event": {
+        "type": "garden.harvest.logged",
+        "ts": "2025-11-02T13:38:40.000Z",
+        "source": "domain/garden/GardenSessionEngine",
+        "data": {
+          "harvestId": "harv_rosemary_2025_11_02",
+          "crop": "Rosemary",
+          "quantity": 12,
+          "unit": "sprig",
+          "inventoryItemId": "inv_rosemary_fresh",
+          "preservationSuggested": false
+        }
+      }
+    },
+    {
+      "label": "Bulk root crop harvest → likely needs storehouse + preservation",
+      "event": {
+        "type": "garden.harvest.logged",
+        "ts": "2025-11-02T13:40:05.000Z",
+        "source": "domain/garden/GardenSessionEngine",
+        "data": {
+          "harvestId": "harv_sweet_potato_bed1_2025_11_02",
+          "crop": "Sweet Potato",
+          "quantity": 42,
+          "unit": "lb",
+          "inventoryItemId": "inv_sweet_potato_fresh",
+          "preservationSuggested": true
+        }
+      }
+    },
+    {
+      "label": "Leafy + medicinal garden (no inventory link yet) → just log it",
+      "event": {
+        "type": "garden.harvest.logged",
+        "ts": "2025-11-02T13:41:30.000Z",
+        "source": "domain/garden/GardenSessionEngine",
+        "data": {
+          "harvestId": "harv_moringa_leaves_2025_11_02",
+          "crop": "Moringa Leaves",
+          "quantity": 1.25,
+          "unit": "lb",
+          "inventoryItemId": null,
+          "preservationSuggested": true
+        }
+      }
+    },
+    {
+      "label": "Animal-feed harvest (for your agrarian + animal integration) → send to inventory as feed",
+      "event": {
+        "type": "garden.harvest.logged",
+        "ts": "2025-11-02T13:43:00.000Z",
+        "source": "domain/garden/GardenSessionEngine",
+        "data": {
+          "harvestId": "harv_fodder_barley_tray4_2025_11_02",
+          "crop": "Barley Fodder",
+          "quantity": 12,
+          "unit": "lb",
+          "inventoryItemId": "inv_animal_feed_barley",
+          "preservationSuggested": false
+        }
+      }
+    }
+  ],
+  "notes": [
+    "1. This event is what the INVENTORY module should listen for to auto-create or auto-increment items. If an inventory item is created/updated, that module should emit `inventory.updated` right after.",
+    "2. If preservationSuggested=true, the preservation engine can emit `automation.schedule.request` to create a canning/dehydrating/fermenting task.",
+    "3. Because garden harvests produce household assets, this event is a good candidate to export if featureFlags.familyFundMode=true. A listener like src/events/eventMappers.js can map → hub:garden.harvest and send.",
+    "4. Keep this file JSON-only (no $schema) to avoid VS Code remote schema errors.",
+    "5. You can add more domains in linkHints-style later if you want harvests to directly inform meal planning (e.g. 'we harvested 18 lb tomatoes → suggest pasta sauce meal sessions')."
+  ]
+}

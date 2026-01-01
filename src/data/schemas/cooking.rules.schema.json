@@ -1,0 +1,612 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka.smart/schema/cooking.rules.schema.json",
+  "title": "Suka Smart Assistant — Cooking Synthesis Rules",
+  "description": "Validation schema for SSA's domain-agnostic → cooking synthesis rules library. These rules transform imported recipes into actionable, timed, and preference-aware task graphs (imports → intelligence → automation → (optional) hub export).",
+  "type": "object",
+  "required": ["version", "domain", "rules"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semver for this rules bundle (not the schema). Increment when contents change."
+    },
+    "domain": {
+      "const": "cooking",
+      "description": "Fixed domain tag so the synthesis engine can route appropriately."
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when this rules bundle was generated."
+    },
+    "source": {
+      "type": "string",
+      "format": "uri",
+      "description": "Optional canonical URI for this bundle (e.g., git blob URL)."
+    },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/Rule" },
+      "description": "Ordered evaluation list. Earlier rules run first. Use priority for fine-grained control."
+    }
+  },
+  "$defs": {
+    "UUID": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$"
+    },
+    "IsoDuration": {
+      "type": "string",
+      "pattern": "^P(?!$)(\\d+Y)?(\\d+M)?(\\d+D)?(T(\\d+H)?(\\d+M)?(\\d+S)?)?$",
+      "description": "ISO-8601 duration (e.g., PT10M, PT1H30M)."
+    },
+    "Temperature": {
+      "type": "object",
+      "required": ["unit", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "unit": { "type": "string", "enum": ["C", "F"] },
+        "value": { "type": "number" }
+      }
+    },
+    "Quantity": {
+      "type": "object",
+      "required": ["unit", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "unit": { "type": "string" },
+        "value": { "type": "number" }
+      }
+    },
+    "TagArray": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true,
+      "maxItems": 32
+    },
+    "Selector": {
+      "type": "object",
+      "description": "Flexible selector for ingredients, steps, or methods derived from imports.",
+      "additionalProperties": false,
+      "properties": {
+        "byIngredient": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "names": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+            "includesAny": { "$ref": "#/$defs/TagArray" },
+            "excludesAny": { "$ref": "#/$defs/TagArray" },
+            "ancestorTagsAny": { "$ref": "#/$defs/TagArray" },
+            "minAmount": { "$ref": "#/$defs/Quantity" },
+            "maxAmount": { "$ref": "#/$defs/Quantity" }
+          }
+        },
+        "byMethod": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "methodsAny": { "$ref": "#/$defs/TagArray" },
+            "heat": { "type": "string", "enum": ["direct", "indirect", "none"] },
+            "moisture": { "type": "string", "enum": ["dry", "moist", "mixed", "none"] },
+            "applianceAny": { "$ref": "#/$defs/TagArray" }
+          }
+        },
+        "byStepText": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "regex": { "type": "string", "minLength": 1 },
+            "flags": { "type": "string", "pattern": "^[gimsuy]{0,6}$" }
+          }
+        }
+      }
+    },
+    "Guard": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requiresEquipmentAny": { "$ref": "#/$defs/TagArray" },
+        "forbiddenEquipmentAny": { "$ref": "#/$defs/TagArray" },
+        "allergenSafeFor": { "$ref": "#/$defs/TagArray", "description": "E.g., ['gluten','peanut','dairy']" },
+        "householdPrefs": {
+          "type": "object",
+          "description": "Preference gates (from HouseholdProfile).",
+          "additionalProperties": true,
+          "properties": {
+            "saltLevel": { "type": "string", "enum": ["low", "medium", "high"] },
+            "spiceLevel": { "type": "string", "enum": ["none", "mild", "medium", "hot"] },
+            "donenessDefault": { "type": "string" },
+            "aromaticsAllowed": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "DonenessProfile": {
+      "type": "object",
+      "description": "Target cues for doneness by species/cut with temps and visual cues.",
+      "required": ["species", "targets"],
+      "additionalProperties": false,
+      "properties": {
+        "species": {
+          "type": "string",
+          "enum": ["beef", "lamb", "goat", "pork", "chicken", "turkey", "duck", "fish", "other"]
+        },
+        "cut": { "type": "string" },
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["label"],
+            "additionalProperties": false,
+            "properties": {
+              "label": {
+                "type": "string",
+                "enum": [
+                  "rare",
+                  "medium-rare",
+                  "medium",
+                  "medium-well",
+                  "well-done",
+                  "safe",
+                  "tender",
+                  "flake",
+                  "probe-tender"
+                ]
+              },
+              "internalTemp": { "$ref": "#/$defs/Temperature" },
+              "carryoverTemp": { "$ref": "#/$defs/Temperature" },
+              "visualCues": { "type": "array", "items": { "type": "string" }, "maxItems": 8 },
+              "timeRange": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "min": { "$ref": "#/$defs/IsoDuration" },
+                  "max": { "$ref": "#/$defs/IsoDuration" }
+                }
+              },
+              "notes": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "Action_InsertStep": {
+      "type": "object",
+      "required": ["action", "step"],
+      "additionalProperties": false,
+      "properties": {
+        "action": { "const": "insertStep" },
+        "position": {
+          "type": "string",
+          "enum": ["before-first-match", "after-last-match", "at-index", "before-each-match", "after-each-match"],
+          "default": "before-first-match"
+        },
+        "index": { "type": "integer", "minimum": 0 },
+        "matchSelector": { "$ref": "#/$defs/Selector" },
+        "step": {
+          "type": "object",
+          "required": ["id", "title"],
+          "additionalProperties": false,
+          "properties": {
+            "id": { "type": "string", "pattern": "^[a-zA-Z0-9_-]{3,64}$" },
+            "title": { "type": "string" },
+            "description": { "type": "string" },
+            "duration": { "$ref": "#/$defs/IsoDuration" },
+            "setTimer": { "type": "boolean", "default": false },
+            "targetTemp": { "$ref": "#/$defs/Temperature" },
+            "dependsOn": { "type": "array", "items": { "type": "string" } },
+            "equipment": { "$ref": "#/$defs/TagArray" },
+            "produces": { "type": "array", "items": { "type": "string" } },
+            "consumes": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "Action_ModifyStep": {
+      "type": "object",
+      "required": ["action", "matchSelector"],
+      "additionalProperties": false,
+      "properties": {
+        "action": { "const": "modifyStep" },
+        "matchSelector": { "$ref": "#/$defs/Selector" },
+        "patch": {
+          "type": "object",
+          "description": "Shallow partial update for matched steps.",
+          "additionalProperties": false,
+          "properties": {
+            "duration": { "$ref": "#/$defs/IsoDuration" },
+            "title": { "type": "string" },
+            "description": { "type": "string" },
+            "targetTemp": { "$ref": "#/$defs/Temperature" },
+            "equipment": { "$ref": "#/$defs/TagArray" }
+          }
+        }
+      }
+    },
+    "Action_SetTimer": {
+      "type": "object",
+      "required": ["action", "duration"],
+      "additionalProperties": false,
+      "properties": {
+        "action": { "const": "setTimer" },
+        "duration": { "$ref": "#/$defs/IsoDuration" },
+        "label": { "type": "string" },
+        "forStepId": { "type": "string" }
+      }
+    },
+    "Action_SetDoneness": {
+      "type": "object",
+      "required": ["action", "doneness"],
+      "additionalProperties": false,
+      "properties": {
+        "action": { "const": "setDoneness" },
+        "doneness": { "$ref": "#/$defs/DonenessProfile" },
+        "applyTo": { "$ref": "#/$defs/Selector" }
+      }
+    },
+    "Action_RecommendAromatics": {
+      "type": "object",
+      "required": ["action", "aromatics"],
+      "additionalProperties": false,
+      "properties": {
+        "action": { "const": "recommendAromatics" },
+        "aromatics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "when": { "type": "string", "enum": ["start", "mid", "finish"] },
+              "amount": { "$ref": "#/$defs/Quantity" },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "applyIfMissing": { "type": "boolean", "default": true },
+        "avoidIfAllergen": { "type": "boolean", "default": true }
+      }
+    },
+    "Action_SwapIngredient": {
+      "type": "object",
+      "required": ["action", "applyTo", "replacement"],
+      "additionalProperties": false,
+      "properties": {
+        "action": { "const": "swapIngredient" },
+        "applyTo": { "$ref": "#/$defs/Selector" },
+        "replacement": {
+          "type": "object",
+          "required": ["name"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string" },
+            "ratio": { "type": "number", "minimum": 0.0, "default": 1.0 },
+            "notes": { "type": "string" }
+          }
+        },
+        "reason": { "type": "string", "enum": ["allergen", "availability", "preference", "cost"] }
+      }
+    },
+    "Action_ScaleYield": {
+      "type": "object",
+      "required": ["action", "multiplier"],
+      "additionalProperties": false,
+      "properties": {
+        "action": { "const": "scaleYield" },
+        "multiplier": { "type": "number", "exclusiveMinimum": 0 },
+        "rounding": { "type": "string", "enum": ["none", "friendly", "pack-size"], "default": "friendly" },
+        "packSizeHint": { "type": "string" }
+      }
+    },
+    "Action_SetEquipment": {
+      "type": "object",
+      "required": ["action"],
+      "additionalProperties": false,
+      "properties": {
+        "action": { "const": "setEquipment" },
+        "applyTo": { "$ref": "#/$defs/Selector" },
+        "equipment": { "$ref": "#/$defs/TagArray" },
+        "exclusive": { "type": "boolean", "default": false }
+      }
+    },
+    "Action": {
+      "oneOf": [
+        { "$ref": "#/$defs/Action_InsertStep" },
+        { "$ref": "#/$defs/Action_ModifyStep" },
+        { "$ref": "#/$defs/Action_SetTimer" },
+        { "$ref": "#/$defs/Action_SetDoneness" },
+        { "$ref": "#/$defs/Action_RecommendAromatics" },
+        { "$ref": "#/$defs/Action_SwapIngredient" },
+        { "$ref": "#/$defs/Action_ScaleYield" },
+        { "$ref": "#/$defs/Action_SetEquipment" }
+      ]
+    },
+    "RuleBase": {
+      "type": "object",
+      "required": ["id", "ruleType", "enabled"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-_]{2,63}$" },
+        "enabled": { "type": "boolean", "default": true },
+        "priority": { "type": "integer", "minimum": 0, "maximum": 1000, "default": 500 },
+        "tags": { "$ref": "#/$defs/TagArray" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "author": { "type": "string" },
+            "sourceUri": { "type": "string", "format": "uri" },
+            "license": { "type": "string" }
+          }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "PrepInsertionRule": {
+      "allOf": [
+        { "$ref": "#/$defs/RuleBase" },
+        {
+          "type": "object",
+          "required": ["ruleType", "match", "actions"],
+          "additionalProperties": false,
+          "properties": {
+            "ruleType": { "const": "prep-insertion" },
+            "match": { "$ref": "#/$defs/Selector" },
+            "guards": { "$ref": "#/$defs/Guard" },
+            "actions": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/Action" }
+            }
+          }
+        }
+      ]
+    },
+    "DonenessRule": {
+      "allOf": [
+        { "$ref": "#/$defs/RuleBase" },
+        {
+          "type": "object",
+          "required": ["ruleType", "doneness", "applyTo"],
+          "additionalProperties": false,
+          "properties": {
+            "ruleType": { "const": "doneness" },
+            "doneness": { "$ref": "#/$defs/DonenessProfile" },
+            "applyTo": { "$ref": "#/$defs/Selector" },
+            "guards": { "$ref": "#/$defs/Guard" }
+          }
+        }
+      ]
+    },
+    "AromaticsRule": {
+      "allOf": [
+        { "$ref": "#/$defs/RuleBase" },
+        {
+          "type": "object",
+          "required": ["ruleType", "applyTo", "actions"],
+          "additionalProperties": false,
+          "properties": {
+            "ruleType": { "const": "aromatics" },
+            "applyTo": { "$ref": "#/$defs/Selector" },
+            "guards": { "$ref": "#/$defs/Guard" },
+            "actions": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/Action_RecommendAromatics" },
+              "minItems": 1,
+              "maxItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "SubstitutionRule": {
+      "allOf": [
+        { "$ref": "#/$defs/RuleBase" },
+        {
+          "type": "object",
+          "required": ["ruleType", "applyTo", "actions"],
+          "additionalProperties": false,
+          "properties": {
+            "ruleType": { "const": "substitution" },
+            "applyTo": { "$ref": "#/$defs/Selector" },
+            "guards": { "$ref": "#/$defs/Guard" },
+            "actions": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/Action_SwapIngredient" },
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "ScalingRule": {
+      "allOf": [
+        { "$ref": "#/$defs/RuleBase" },
+        {
+          "type": "object",
+          "required": ["ruleType", "actions"],
+          "additionalProperties": false,
+          "properties": {
+            "ruleType": { "const": "scaling" },
+            "match": { "$ref": "#/$defs/Selector" },
+            "guards": { "$ref": "#/$defs/Guard" },
+            "actions": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/Action_ScaleYield" },
+              "minItems": 1,
+              "maxItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "EquipmentRule": {
+      "allOf": [
+        { "$ref": "#/$defs/RuleBase" },
+        {
+          "type": "object",
+          "required": ["ruleType", "applyTo", "actions"],
+          "additionalProperties": false,
+          "properties": {
+            "ruleType": { "const": "equipment" },
+            "applyTo": { "$ref": "#/$defs/Selector" },
+            "guards": { "$ref": "#/$defs/Guard" },
+            "actions": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/Action_SetEquipment" },
+              "minItems": 1,
+              "maxItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "TimingRule": {
+      "allOf": [
+        { "$ref": "#/$defs/RuleBase" },
+        {
+          "type": "object",
+          "required": ["ruleType", "applyTo", "actions"],
+          "additionalProperties": false,
+          "properties": {
+            "ruleType": { "const": "timing" },
+            "applyTo": { "$ref": "#/$defs/Selector" },
+            "guards": { "$ref": "#/$defs/Guard" },
+            "actions": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "oneOf": [
+                  { "$ref": "#/$defs/Action_SetTimer" },
+                  { "$ref": "#/$defs/Action_ModifyStep" },
+                  { "$ref": "#/$defs/Action_InsertStep" }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Rule": {
+      "oneOf": [
+        { "$ref": "#/$defs/PrepInsertionRule" },
+        { "$ref": "#/$defs/DonenessRule" },
+        { "$ref": "#/$defs/AromaticsRule" },
+        { "$ref": "#/$defs/SubstitutionRule" },
+        { "$ref": "#/$defs/ScalingRule" },
+        { "$ref": "#/$defs/EquipmentRule" },
+        { "$ref": "#/$defs/TimingRule" }
+      ]
+    }
+  },
+  "examples": [
+    {
+      "version": "1.0.0",
+      "domain": "cooking",
+      "generatedAt": "2025-11-11T12:00:00.000Z",
+      "rules": [
+        {
+          "id": "boil-water-early",
+          "ruleType": "prep-insertion",
+          "enabled": true,
+          "priority": 400,
+          "tags": ["pasta", "boil", "staging"],
+          "match": { "byIngredient": { "names": ["pasta", "spaghetti", "penne"] } },
+          "guards": { "requiresEquipmentAny": ["stovetop", "stockpot"] },
+          "actions": [
+            {
+              "action": "insertStep",
+              "position": "before-first-match",
+              "step": {
+                "id": "prestage-boiling-water",
+                "title": "Prestage boiling water",
+                "description": "Fill a large pot with water and bring to a rolling boil. Salt generously.",
+                "duration": "PT10M",
+                "setTimer": true,
+                "equipment": ["stockpot", "stovetop"]
+              }
+            }
+          ]
+        },
+        {
+          "id": "doneness-lamb-chops",
+          "ruleType": "doneness",
+          "enabled": true,
+          "priority": 350,
+          "tags": ["lamb", "probe", "visual-cues"],
+          "applyTo": { "byIngredient": { "names": ["lamb", "lamb chops"] } },
+          "doneness": {
+            "species": "lamb",
+            "cut": "chop",
+            "targets": [
+              {
+                "label": "medium-rare",
+                "internalTemp": { "unit": "F", "value": 130 },
+                "carryoverTemp": { "unit": "F", "value": 135 },
+                "visualCues": ["ruby center", "beads of juice on surface"],
+                "notes": "Sear 2–3 min per side; rest 5 minutes."
+              },
+              {
+                "label": "safe",
+                "internalTemp": { "unit": "F", "value": 145 },
+                "carryoverTemp": { "unit": "F", "value": 150 },
+                "visualCues": ["pink center fading", "clear juices"]
+              }
+            ]
+          }
+        },
+        {
+          "id": "recommend-aromatics-saute",
+          "ruleType": "aromatics",
+          "enabled": true,
+          "priority": 500,
+          "applyTo": { "byMethod": { "methodsAny": ["saute", "sweat"], "applianceAny": ["stovetop"] } },
+          "guards": { "householdPrefs": { "aromaticsAllowed": true } },
+          "actions": [
+            {
+              "action": "recommendAromatics",
+              "aromatics": [
+                { "name": "onion", "when": "start", "amount": { "unit": "cup", "value": 1 } },
+                { "name": "garlic", "when": "mid", "amount": { "unit": "clove", "value": 3 } }
+              ],
+              "applyIfMissing": true,
+              "avoidIfAllergen": true
+            }
+          ]
+        },
+        {
+          "id": "swap-dairy-for-allergy",
+          "ruleType": "substitution",
+          "enabled": true,
+          "priority": 700,
+          "applyTo": { "byIngredient": { "names": ["milk", "cream", "butter"] } },
+          "guards": { "allergenSafeFor": ["dairy"] },
+          "actions": [
+            {
+              "action": "swapIngredient",
+              "applyTo": { "byIngredient": { "names": ["milk"] } },
+              "replacement": { "name": "oat milk", "ratio": 1.0 },
+              "reason": "allergen"
+            }
+          ]
+        },
+        {
+          "id": "scale-yield-friendly",
+          "ruleType": "scaling",
+          "enabled": true,
+          "priority": 900,
+          "actions": [
+            { "action": "scaleYield", "multiplier": 2, "rounding": "friendly" }
+          ]
+        }
+      ]
+    }
+  ]
+}

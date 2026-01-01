@@ -1,0 +1,496 @@
+{
+  "$id": "file:///c:/Users/larho/suka-smart-assistant/src/schemas/gardenHarvest.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Suka Garden Harvest / Bed Yield Curve",
+  "description": "Schema for garden/bed harvest curves that plug into Suka’s garden planning, care & harvest, storehouse stock planning (grocery sections for inspiration), meal planning, and animal/compost routing. Also supports reverse generation (start from storehouse/feast/co-op goals → suggest harvest sessions) and user-owned favorites/schedules.",
+  "type": "object",
+  "required": [
+    "version",
+    "meta",
+    "curve"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Local/absolute path to this schema so VS Code can validate."
+    },
+    "version": {
+      "type": "string",
+      "description": "ISO datetime of this curve definition."
+    },
+    "meta": {
+      "type": "object",
+      "required": ["id", "title"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "source": { "type": "string" },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "calendar": {
+          "type": "object",
+          "properties": {
+            "hebrewMonthStart": { "type": "string" },
+            "supportsAltStart": { "type": "boolean" },
+            "notes": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "locationPreset": {
+          "type": "string",
+          "description": "ID of the garden bed/location in your locationPresets/garden_beds.json that this curve belongs to."
+        }
+      },
+      "additionalProperties": true
+    },
+    "ui": {
+      "type": "object",
+      "description": "UI hints so the React screens can render cards/timelines like well-executed gardening websites.",
+      "properties": {
+        "layout": {
+          "type": "string",
+          "description": "e.g. cards/timeline, board, chart"
+        },
+        "hints": {
+          "type": "object",
+          "properties": {
+            "primaryCTA": { "type": "string" },
+            "secondaryCTA": { "type": "string" },
+            "tertiaryCTA": { "type": "string" },
+            "showSeasonalityBadge": { "type": "boolean" },
+            "groupBy": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "suggestOnly": { "type": "boolean" },
+            "notes": { "type": "string" }
+          },
+          "additionalProperties": true
+        },
+        "badges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": { "type": "string" },
+              "color": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "orchestration": {
+      "type": "object",
+      "description": "Glue into window.__suka?.eventBus and shared scopes so harvest can talk to meals, storehouse, cleaning, and animals.",
+      "properties": {
+        "bus": { "type": "string" },
+        "emitOnLoad": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "listen": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "sharedScopes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "engines": {
+      "type": "object",
+      "description": "Which Suka engines understand this curve.",
+      "properties": {
+        "primary": { "type": "string" },
+        "supports": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "reverse": {
+      "type": "object",
+      "description": "Reverse generation: start from storehouse/feast/co-op goals → suggest/offer harvest sessions. User must be able to accept/decline.",
+      "properties": {
+        "generateFrom": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "strategies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "title"],
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "input": { "type": "object" },
+              "output": {
+                "type": "object",
+                "properties": {
+                  "requiredRawTomatoKg": { "type": "number" },
+                  "requiredFreshTomatoKg": { "type": "number" },
+                  "suggestedHarvestSessions": { "type": "number" },
+                  "actions": {
+                    "type": "array",
+                    "description": "Actions that should be OFFERED, not auto-scheduled.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": { "type": "string" },
+                        "label": { "type": "string" },
+                        "emitOnUserAccept": {
+                          "type": "array",
+                          "items": { "type": "string" }
+                        }
+                      },
+                      "additionalProperties": true
+                    }
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "curve": {
+      "type": "object",
+      "description": "Actual harvest/yield curve for this bed/crop.",
+      "required": ["units", "base"],
+      "properties": {
+        "units": {
+          "type": "string",
+          "enum": [
+            "kg-per-day",
+            "kg-per-harvest",
+            "lb-per-day",
+            "lb-per-harvest",
+            "count-per-day",
+            "count-per-harvest"
+          ]
+        },
+        "seasonLengthDays": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Total number of days in this harvest window."
+        },
+        "base": {
+          "type": "array",
+          "description": "Primary time series, usually by day since first harvest.",
+          "items": {
+            "type": "object",
+            "required": ["day", "value"],
+            "properties": {
+              "day": { "type": "integer", "minimum": 1 },
+              "value": { "type": "number", "minimum": 0 },
+              "stage": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "weeklyView": {
+          "type": "array",
+          "description": "Optional smoothed/summary weekly view.",
+          "items": {
+            "type": "object",
+            "required": ["week", "avg"],
+            "properties": {
+              "week": { "type": "integer", "minimum": 1 },
+              "avg": { "type": "number", "minimum": 0 }
+            },
+            "additionalProperties": true
+          }
+        },
+        "bed": {
+          "type": "object",
+          "description": "Bed-level metadata that helps the garden engine map this curve to a real bed.",
+          "properties": {
+            "id": { "type": "string" },
+            "areaSqft": { "type": "number" },
+            "plantSpacingIn": { "type": "number" },
+            "rowCount": { "type": "integer" },
+            "trellised": { "type": "boolean" },
+            "notes": { "type": "string" }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "adjustments": {
+      "type": "object",
+      "description": "Adjust harvest by climate, care level, or disease pressure.",
+      "properties": {
+        "byClimateZone": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["zone", "multiplier"],
+            "properties": {
+              "zone": { "type": "string" },
+              "multiplier": { "type": "number" },
+              "notes": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "byCareLevel": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["level", "multiplier"],
+            "properties": {
+              "level": { "type": "string" },
+              "multiplier": { "type": "number" }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "storehouse": {
+      "type": "object",
+      "description": "How harvest feeds storehouse stock planning (‘Grocery sections for inspiration’ lives here).",
+      "properties": {
+        "targets": {
+          "type": "object",
+          "description": "Tomato sauce, salsa, paste, etc.",
+          "additionalProperties": {
+            "type": ["number", "string", "boolean"]
+          }
+        },
+        "grocerySectionsInspiration": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "autoPlan": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "emit": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": true
+    },
+    "meals": {
+      "type": "object",
+      "description": "Meal-planning hooks — fresh tomato windows, sauce batches, feast-prep.",
+      "properties": {
+        "recipes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "title"],
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "useWithinHours": { "type": "number" },
+              "linksTo": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "emit": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "autoSession": {
+          "type": "object",
+          "properties": {
+            "everyDays": { "type": "number" },
+            "emit": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "cleaning": {
+      "type": "object",
+      "description": "Cleaning/sanitizing sessions tied to harvest (tools, buckets, trellis).",
+      "properties": {
+        "routines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "title"],
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "frequency": { "type": "string" },
+              "emit": { "type": "string" },
+              "tools": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "sabbathGuard": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "garden": {
+      "type": "object",
+      "description": "Garden-care hooks (prune, trellis, water, harvest confirm).",
+      "properties": {
+        "care": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "title"],
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "emit": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "harvest": {
+          "type": "object",
+          "properties": {
+            "autoSuggest": { "type": "boolean" },
+            "userMustConfirm": { "type": "boolean" },
+            "emitOnConfirm": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": true
+        },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "animals": {
+      "type": "object",
+      "description": "Where to send vines/scraps (compost, goats, poultry) and related animal care.",
+      "properties": {
+        "routing": {
+          "type": "object",
+          "properties": {
+            "spentVines": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "notes": { "type": "string" }
+          },
+          "additionalProperties": true
+        },
+        "emit": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "inventory": {
+      "type": "object",
+      "description": "Inventory mapping for harvested produce.",
+      "properties": {
+        "productId": { "type": "string" },
+        "unit": { "type": "string" },
+        "trackLots": { "type": "boolean" },
+        "harvestTag": { "type": "string" },
+        "shelfLifeDays": { "type": "number" }
+      },
+      "additionalProperties": true
+    },
+    "favoriteSessions": {
+      "type": "array",
+      "description": "User + system session templates (Mon/Wed harvest, stock day, sauce day).",
+      "items": {
+        "type": "object",
+        "required": ["id", "title"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "domain": { "type": "string" },
+          "schedule": { "type": "string" },
+          "sabbathGuard": { "type": "boolean" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "scheduleTemplates": {
+      "type": "array",
+      "description": "RRULE-based patterns (e.g. harvest 3x/week).",
+      "items": {
+        "type": "object",
+        "required": ["id", "title"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "rrules": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "options": {
+            "type": "object",
+            "properties": {
+              "sabbathGuard": { "type": "boolean" },
+              "quietHoursGuard": { "type": "boolean" },
+              "userMustConfirm": { "type": "boolean" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "userProfiles": {
+      "type": "object",
+      "description": "Allow users to save their own favorite sessions/schedules, and to export/share.",
+      "properties": {
+        "allowUserOwnedSchedules": { "type": "boolean" },
+        "allowUserOwnedFavorites": { "type": "boolean" },
+        "allowExportShare": { "type": "boolean" },
+        "shareFormats": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "events": {
+      "type": "object",
+      "description": "What this curve emits and what it listens to.",
+      "properties": {
+        "emits": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "consumes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

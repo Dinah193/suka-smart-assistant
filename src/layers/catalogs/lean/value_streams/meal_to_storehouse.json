@@ -1,0 +1,263 @@
+{
+  "id": "lean.vs.meal_to_storehouse",
+  "domain": "lean",
+  "kind": "value_stream",
+  "title": "Value Stream: Meal Plan → Storehouse Provisioning",
+  "intentTags": [
+    "lean:value_stream"
+  ],
+  "inputs": [
+    {
+      "key": "demandModelRef",
+      "label": "Demand model ref",
+      "type": "string"
+    },
+    {
+      "key": "inventorySnapshot",
+      "label": "Inventory snapshot",
+      "type": "object"
+    },
+    {
+      "key": "season",
+      "label": "Season",
+      "type": "string"
+    },
+    {
+      "key": "householdSize",
+      "label": "Household size",
+      "type": "number",
+      "default": 4
+    }
+  ],
+  "outputs": [
+    {
+      "key": "stageMetrics",
+      "label": "Stage metrics",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "bottlenecks",
+      "label": "Detected bottlenecks",
+      "type": "array",
+      "required": true
+    }
+  ],
+  "constraints": [
+    "measureFirst",
+    "respectQuietHours",
+    "nonPunitiveMetrics"
+  ],
+  "steps": [],
+  "kpis": [
+    {
+      "key": "leadTime",
+      "label": "Total lead time",
+      "direction": "down",
+      "unit": "min"
+    },
+    {
+      "key": "touchTime",
+      "label": "Total touch time",
+      "direction": "down",
+      "unit": "min"
+    },
+    {
+      "key": "firstPassYield",
+      "label": "First-pass yield",
+      "direction": "up",
+      "unit": "%"
+    },
+    {
+      "key": "reworkRate",
+      "label": "Rework rate",
+      "direction": "down",
+      "unit": "%"
+    }
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial Lean Six Sigma catalog."
+      }
+    ]
+  },
+  "valueStream": {
+    "stages": [
+      {
+        "id": "stage.capture_demand",
+        "title": "Capture Demand",
+        "inputs": [
+          "householdPreferences",
+          "calendarConstraints"
+        ],
+        "outputs": [
+          "mealDemandSignal"
+        ],
+        "commonDelays": [
+          "unclear_preferences",
+          "missing_calendar"
+        ],
+        "kpis": [
+          {
+            "key": "timeToDemand",
+            "label": "Time to capture demand",
+            "direction": "down",
+            "unit": "min"
+          },
+          {
+            "key": "decisionRework",
+            "label": "Decision rework",
+            "direction": "down",
+            "unit": "count"
+          }
+        ]
+      },
+      {
+        "id": "stage.check_inventory",
+        "title": "Check Inventory Truth",
+        "inputs": [
+          "inventorySnapshot"
+        ],
+        "outputs": [
+          "gapsList"
+        ],
+        "commonDelays": [
+          "stale_snapshot",
+          "zones_not_counted"
+        ],
+        "kpis": [
+          {
+            "key": "snapshotCompleteness",
+            "label": "Snapshot completeness",
+            "direction": "up",
+            "unit": "%"
+          },
+          {
+            "key": "duplicateBuys",
+            "label": "Duplicate buys",
+            "direction": "down",
+            "unit": "count"
+          }
+        ]
+      },
+      {
+        "id": "stage.build_plan",
+        "title": "Build Meal Plan + Sessions",
+        "inputs": [
+          "mealDemandSignal",
+          "gapsList"
+        ],
+        "outputs": [
+          "mealPlan",
+          "sessionBlueprints"
+        ],
+        "commonDelays": [
+          "overcustomization",
+          "too_many_new_recipes"
+        ],
+        "kpis": [
+          {
+            "key": "timeToPlan",
+            "label": "Time to plan",
+            "direction": "down",
+            "unit": "min"
+          },
+          {
+            "key": "newRecipes",
+            "label": "New recipes/week",
+            "direction": "down",
+            "unit": "count"
+          }
+        ]
+      },
+      {
+        "id": "stage_generate_reorder",
+        "title": "Generate Reorder + Rotation",
+        "inputs": [
+          "mealPlan",
+          "inventorySnapshot"
+        ],
+        "outputs": [
+          "reorderActions",
+          "rotationActions"
+        ],
+        "commonDelays": [
+          "no_par_levels",
+          "unclear_storage_zones"
+        ],
+        "kpis": [
+          {
+            "key": "stockouts",
+            "label": "Stockouts",
+            "direction": "down",
+            "unit": "count"
+          },
+          {
+            "key": "overstocks",
+            "label": "Overstocks",
+            "direction": "down",
+            "unit": "count"
+          }
+        ]
+      },
+      {
+        "id": "stage_execute",
+        "title": "Execute: Shop/Restock/Label",
+        "inputs": [
+          "reorderActions",
+          "rotationActions"
+        ],
+        "outputs": [
+          "updatedInventory",
+          "labeledZones"
+        ],
+        "commonDelays": [
+          "too_many_trips",
+          "missing_labels"
+        ],
+        "kpis": [
+          {
+            "key": "trips",
+            "label": "Trips",
+            "direction": "down",
+            "unit": "trips"
+          },
+          {
+            "key": "fifoCompliance",
+            "label": "FIFO compliance",
+            "direction": "up",
+            "unit": "%"
+          }
+        ]
+      }
+    ],
+    "commonDelays": [
+      "handoff_wait",
+      "missing_inputs",
+      "equipment_unavailable"
+    ],
+    "handoffs": [
+      "household",
+      "storehouse",
+      "garden",
+      "animals",
+      "preservation"
+    ]
+  },
+  "links": {
+    "affectsPatterns": [
+      "pat.meals.weekly_batch",
+      "pat.storehouse.weekly_restock",
+      "pat.storehouse.monthly_cycle_count"
+    ],
+    "suggestsStandardWork": [
+      "lean.sw.weekly_meal_cycle",
+      "lean.sw.monthly_storehouse_check"
+    ],
+    "taktModelRef": "lean.takt.household_meal_takt"
+  }
+}

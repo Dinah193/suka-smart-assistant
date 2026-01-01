@@ -1,0 +1,719 @@
+{
+  "_meta": {
+    "table": "sausage.ratios",
+    "description": "Sausage ratio reference for SSA. Used by animal butchery, preservation, cooking sessions, and storehouse planning (spices, casings, freezer space). Supports forward session generation and reverse generation from user notes like “classic breakfast sausage” or “40/60 lean-to-fat smoked link.” All examples use lamb, goat, and/or chicken instead of pork.",
+    "version": 2,
+    "updatedAt": "2025-11-18T00:00:00.000Z",
+    "domains": [
+      "animals",
+      "preservation",
+      "cooking",
+      "storehouse",
+      "cleaning"
+    ]
+  },
+  "schema": {
+    "id": "string",
+    "label": "string",
+    "style": "string",
+    "meatSources": [
+      "string"
+    ],
+    "baseRatio": {
+      "leanParts": "number",
+      "fatParts": "number",
+      "liquidParts": "number",
+      "icePct": "number"
+    },
+    "targetFatPct": {
+      "min": "number",
+      "max": "number"
+    },
+    "saltPctRange": {
+      "min": "number",
+      "max": "number"
+    },
+    "sweetenerPctRange": {
+      "min": "number",
+      "max": "number"
+    },
+    "seasoningProfiles": [
+      {
+        "id": "string",
+        "label": "string",
+        "notes": "string"
+      }
+    ],
+    "binderOptions": [
+      "string"
+    ],
+    "cureRecommended": "boolean",
+    "cureNotes": "string",
+    "grindSizes": [
+      "string"
+    ],
+    "idealUses": [
+      "string"
+    ],
+    "safetyNotes": "string",
+    "reverseGeneration": {
+      "keywords": [
+        "string"
+      ],
+      "phrases": [
+        "string"
+      ]
+    },
+    "sessionHints": {
+      "butcherySessions": [
+        "string"
+      ],
+      "cookingSessions": [
+        "string"
+      ],
+      "preservationSessions": [
+        "string"
+      ],
+      "cleaningSessions": [
+        "string"
+      ]
+    },
+    "storehouseHints": {
+      "grocerySections": [
+        "string"
+      ],
+      "stockNotes": "string",
+      "batchSessionIdeas": [
+        "string"
+      ]
+    },
+    "animalHints": {
+      "preferredCuts": [
+        "string"
+      ],
+      "trimNotes": "string",
+      "offalAllowed": [
+        "string"
+      ]
+    },
+    "tags": [
+      "string"
+    ]
+  },
+  "rows": [
+    {
+      "id": "breakfast_small_ruminant_basic",
+      "label": "Basic Breakfast Sausage (Lamb/Goat/Chicken)",
+      "style": "fresh_breakfast",
+      "meatSources": [
+        "lamb_shoulder",
+        "goat_shoulder",
+        "chicken_thigh",
+        "skin_fat"
+      ],
+      "baseRatio": {
+        "leanParts": 70,
+        "fatParts": 30,
+        "liquidParts": 5,
+        "icePct": 5
+      },
+      "targetFatPct": {
+        "min": 25,
+        "max": 30
+      },
+      "saltPctRange": {
+        "min": 1.6,
+        "max": 2.0
+      },
+      "sweetenerPctRange": {
+        "min": 0.3,
+        "max": 1.0
+      },
+      "seasoningProfiles": [
+        {
+          "id": "sage_forward",
+          "label": "Sage-Forward Country Breakfast",
+          "notes": "Dried rubbed sage, black pepper, garlic, optional red pepper flakes. Slight sweetness from sugar or maple. Works well with lamb, goat, or chicken."
+        },
+        {
+          "id": "maple_brown_sugar",
+          "label": "Maple & Brown Sugar",
+          "notes": "Use maple syrup or brown sugar at upper sweetener range; go lighter on sage and pepper. Excellent for mild lamb/goat or chicken breakfast links and patties."
+        }
+      ],
+      "binderOptions": [
+        "none_for_home_use",
+        "2–3%_ice_cold_water_only",
+        "up_to_3%_finely_ground_oats",
+        "up_to_3%_rice_crumbs"
+      ],
+      "cureRecommended": false,
+      "cureNotes": "Fresh sausage only. Keep cold, cook thoroughly. Do not slow-smoke at low temperature without proper cure.",
+      "grindSizes": [
+        "coarse_6–8mm_single_grind",
+        "medium_4.5mm_for_more_uniform_texture"
+      ],
+      "idealUses": [
+        "patties",
+        "loose_breakfast_sausage",
+        "small_links_for_freezer"
+      ],
+      "safetyNotes": "Keep meat and grinder parts very cold (near-freezing). Do not leave ground sausage at room temp. Cook lamb/goat mixtures to at least 160°F and poultry-inclusive mixes to at least 165°F internal.",
+      "reverseGeneration": {
+        "keywords": [
+          "breakfast",
+          "sage",
+          "country",
+          "patties",
+          "maple",
+          "lamb breakfast",
+          "goat breakfast",
+          "chicken breakfast"
+        ],
+        "phrases": [
+          "classic breakfast sausage without pork",
+          "sage-heavy lamb or goat breakfast patties",
+          "maple chicken breakfast sausage",
+          "non-pork breakfast links"
+        ]
+      },
+      "sessionHints": {
+        "butcherySessions": [
+          "Reserve 70% lean shoulder from lamb/goat and 30% firm fat or chicken skin/trim for breakfast grind.",
+          "Pre-chill cubed meat and grinder parts before grinding to protect texture."
+        ],
+        "cookingSessions": [
+          "Form patties and pan-fry over medium heat until safe internal temp is reached (165°F if chicken is included).",
+          "Bake links on a sheet pan for batch cooking and freezer storage."
+        ],
+        "preservationSessions": [
+          "Shape into patties or logs, freeze on trays, then bag in family-size packs.",
+          "Label by style (sage_forward vs maple) and by meat combo (lamb/goat/chicken) and date for rotation."
+        ],
+        "cleaningSessions": [
+          "Immediately soak grinder parts in warm soapy water after use; follow with a bleach-free sanitizing rinse.",
+          "Run bread pieces through grinder as a first dry clean before washing."
+        ]
+      },
+      "storehouseHints": {
+        "grocerySections": [
+          "meat+freezer",
+          "spices",
+          "baking_(sugar)_and_breakfast_(maple)"
+        ],
+        "stockNotes": "Keep bulk sage, black pepper, garlic powder, and optional maple or brown sugar as breakfast-sausage core kit, regardless of meat source.",
+        "batchSessionIdeas": [
+          "Monthly breakfast-sausage day: grind, season, form patties, freeze in labeled stacks (lamb/goat/chicken variations).",
+          "Link breakfast sessions to egg and pancake mix sessions for full weekend breakfasts."
+        ]
+      },
+      "animalHints": {
+        "preferredCuts": [
+          "lamb_shoulder",
+          "goat_shoulder",
+          "chicken_thighs_and_skin",
+          "trim_from_legs_and_roasts"
+        ],
+        "trimNotes": "Use clean white/firm fat; trim away heavy silver skin and glands to prevent off flavors in lamb/goat.",
+        "offalAllowed": []
+      },
+      "tags": [
+        "fresh",
+        "lamb",
+        "goat",
+        "chicken",
+        "breakfast",
+        "kid_friendly",
+        "no_pork"
+      ]
+    },
+    {
+      "id": "fresh_poultry_herb",
+      "label": "Fresh Poultry Herb Sausage",
+      "style": "fresh_light",
+      "meatSources": [
+        "chicken_thigh",
+        "turkey_thigh",
+        "skin_fat"
+      ],
+      "baseRatio": {
+        "leanParts": 80,
+        "fatParts": 20,
+        "liquidParts": 8,
+        "icePct": 5
+      },
+      "targetFatPct": {
+        "min": 18,
+        "max": 22
+      },
+      "saltPctRange": {
+        "min": 1.6,
+        "max": 2.0
+      },
+      "sweetenerPctRange": {
+        "min": 0.0,
+        "max": 0.5
+      },
+      "seasoningProfiles": [
+        {
+          "id": "lemon_garlic_herb",
+          "label": "Lemon, Garlic & Garden Herbs",
+          "notes": "Garlic, thyme, rosemary, sage, cracked pepper, lemon zest. Great for skillet meals and sheet-pan dinners."
+        },
+        {
+          "id": "mild_breakfast_poultry",
+          "label": "Mild Poultry Breakfast",
+          "notes": "Sage, pepper, small amount of sugar or maple; lighter flavor than lamb/goat breakfast mixes."
+        }
+      ],
+      "binderOptions": [
+        "none_for_loose_sausage",
+        "2–3%_milk_powder_for_juiciness",
+        "2–3%_cooked_rice_for_bulk"
+      ],
+      "cureRecommended": false,
+      "cureNotes": "Treat like fresh ground poultry. Keep below 40°F, cook fully to at least 165°F internal.",
+      "grindSizes": [
+        "medium_4.5mm",
+        "fine_3mm_for_smoother_links"
+      ],
+      "idealUses": [
+        "sheet_pan_meals",
+        "poultry_breakfast_patties",
+        "stuffed_peppers",
+        "meatballs"
+      ],
+      "safetyNotes": "Poultry carries higher pathogen risk—clean and sanitize surfaces after grinding. Cook to 165°F internal.",
+      "reverseGeneration": {
+        "keywords": [
+          "chicken sausage",
+          "turkey sausage",
+          "herb",
+          "lighter",
+          "poultry links"
+        ],
+        "phrases": [
+          "light chicken herb sausage",
+          "herb turkey breakfast patties",
+          "chicken sausage for sheet pan meals"
+        ]
+      },
+      "sessionHints": {
+        "butcherySessions": [
+          "Save dark meat and skins from poultry processing for sausage grind.",
+          "Weigh lean and fat separately to hit 80/20 ratio."
+        ],
+        "cookingSessions": [
+          "Pan-sear patties then finish in oven until 165°F.",
+          "Slice links into veggies for quick skillet or sheet-pan dinners."
+        ],
+        "preservationSessions": [
+          "Pre-shape meatballs or patties, freeze on trays, then bag.",
+          "Group poultry sausage packs with veggie kits in freezer for quick meals."
+        ],
+        "cleaningSessions": [
+          "Sanitize cutting boards and grinder with poultry-safe protocol (hot soapy wash, then disinfectant or 3% peroxide).",
+          "Run a poultry-specific cleaning session after grinding to protect other foods."
+        ]
+      },
+      "storehouseHints": {
+        "grocerySections": [
+          "meat+freezer",
+          "spices",
+          "produce_(lemon,_garlic)",
+          "dairy_(milk_powder_if_used)"
+        ],
+        "stockNotes": "Keep lemon, garlic, and core poultry herbs (thyme, rosemary, sage) on hand for multiple recipes.",
+        "batchSessionIdeas": [
+          "Combine poultry sausage and prepped veggies in freezer meal kits.",
+          "Plan poultry sausage days after processing multiple chickens or turkeys."
+        ]
+      },
+      "animalHints": {
+        "preferredCuts": [
+          "thighs",
+          "leg_meat",
+          "trim_from_breakdown"
+        ],
+        "trimNotes": "Include some skin fat for moisture, but avoid thick skin flaps that may clog grinder.",
+        "offalAllowed": [
+          "small_amounts_of_heart",
+          "small_amounts_of_liver_(for_flavor_only)"
+        ]
+      },
+      "tags": [
+        "fresh",
+        "poultry",
+        "herb_forward",
+        "family_meal",
+        "no_pork"
+      ]
+    },
+    {
+      "id": "smoked_small_ruminant_link",
+      "label": "Smoked Lamb/Goat Link (Cured)",
+      "style": "smoked_cured",
+      "meatSources": [
+        "lamb_shoulder",
+        "goat_shoulder",
+        "back_fat",
+        "tail_fat_if_available"
+      ],
+      "baseRatio": {
+        "leanParts": 70,
+        "fatParts": 30,
+        "liquidParts": 10,
+        "icePct": 5
+      },
+      "targetFatPct": {
+        "min": 28,
+        "max": 32
+      },
+      "saltPctRange": {
+        "min": 1.8,
+        "max": 2.2
+      },
+      "sweetenerPctRange": {
+        "min": 0.3,
+        "max": 1.0
+      },
+      "seasoningProfiles": [
+        {
+          "id": "garlic_smoke_paprika",
+          "label": "Garlic & Smoked Paprika",
+          "notes": "Garlic, smoked paprika, black pepper, crushed coriander. Mild heat optional via chili flakes. Works beautifully with lamb/goat’s savory flavor."
+        },
+        {
+          "id": "cajun_style",
+          "label": "Cajun-Style Hot Link (No Pork)",
+          "notes": "Smoked paprika, cayenne, thyme, oregano, black pepper, garlic, onion. Bolder spice profile for stews and beans using lamb or goat instead of pork."
+        }
+      ],
+      "binderOptions": [
+        "3%_ice_cold_water_or_broth",
+        "2–3%_milk_powder_for_emulsion_stability"
+      ],
+      "cureRecommended": true,
+      "cureNotes": "Use appropriate curing salt and follow tested recipes for grams per kg. Required for low-temp smoking and food safety. Never guess cure amounts.",
+      "grindSizes": [
+        "coarse_first_grind_8mm",
+        "medium_second_grind_4.5mm"
+      ],
+      "idealUses": [
+        "smoked_links",
+        "gumbo_and_stews",
+        "red_beans_and_rice_style_dishes",
+        "sheet_pan_meals"
+      ],
+      "safetyNotes": "Because links are smoked at low temps, proper curing is essential. Always follow tested time/temp and cure formulas; cook links to safe internal temp before cooling or storing.",
+      "reverseGeneration": {
+        "keywords": [
+          "smoked sausage",
+          "hot links",
+          "cajun",
+          "paprika",
+          "cured lamb",
+          "cured goat"
+        ],
+        "phrases": [
+          "smoked lamb links for beans and rice",
+          "cajun style hot goat link",
+          "sausage for smoking day without pork",
+          "cured links for gumbo from lamb or goat"
+        ]
+      },
+      "sessionHints": {
+        "butcherySessions": [
+          "Set aside 70% lean and 30% firm white or tail fat from lamb/goat processing for smoked links.",
+          "Pre-cube and weigh for accurate cure measurements."
+        ],
+        "cookingSessions": [
+          "After smoking, finish links to a safe internal temp (often 155–160°F) before chilling.",
+          "Slice into stews, beans, or sheet-pan meals on busy nights."
+        ],
+        "preservationSessions": [
+          "Smoke, chill, vacuum seal, and freeze links in meal-size packs.",
+          "Tag smoked lamb/goat link packs as flavor boosters for beans, greens, and rice dishes."
+        ],
+        "cleaningSessions": [
+          "Include smoker-cleaning session after big sausage smoke days (grates, drip pans, ash).",
+          "Run a grinder-and-stuffer deep-clean protocol with hot soapy water and sanitizing rinse."
+        ]
+      },
+      "storehouseHints": {
+        "grocerySections": [
+          "meat+freezer",
+          "spices_(paprika,_cayenne,_coriander)",
+          "storehouse:smoke_wood",
+          "dairy_(milk_powder_if_used)"
+        ],
+        "stockNotes": "Keep a dedicated smoked-sausage spice blend on hand for consistency. Store cure in clearly labeled, child-safe container.",
+        "batchSessionIdeas": [
+          "Quarterly smoked-sausage day: prep, stuff, smoke, cool, vacuum seal, freeze lamb/goat links.",
+          "Bundle smoked lamb/goat links with dried beans and rice in pantry for quick ‘beans & sausage’ nights without pork."
+        ]
+      },
+      "animalHints": {
+        "preferredCuts": [
+          "lamb_shoulder",
+          "goat_shoulder",
+          "trim_from_legs",
+          "back_fat",
+          "tail_fat"
+        ],
+        "trimNotes": "Avoid soft, smeary fat; choose firm back or tail fat for best texture.",
+        "offalAllowed": []
+      },
+      "tags": [
+        "smoked",
+        "cured",
+        "lamb",
+        "goat",
+        "stew_component",
+        "no_pork"
+      ]
+    },
+    {
+      "id": "fresh_lamb_herb_mediterranean",
+      "label": "Fresh Lamb Herb (Mediterranean)",
+      "style": "fresh_herb_forward",
+      "meatSources": [
+        "lamb_shoulder",
+        "lamb_breast_trim",
+        "fat_tail_if_available"
+      ],
+      "baseRatio": {
+        "leanParts": 70,
+        "fatParts": 30,
+        "liquidParts": 5,
+        "icePct": 5
+      },
+      "targetFatPct": {
+        "min": 25,
+        "max": 30
+      },
+      "saltPctRange": {
+        "min": 1.6,
+        "max": 2.1
+      },
+      "sweetenerPctRange": {
+        "min": 0.0,
+        "max": 0.3
+      },
+      "seasoningProfiles": [
+        {
+          "id": "garlic_oregano",
+          "label": "Garlic, Oregano & Lemon",
+          "notes": "Garlic, oregano, black pepper, lemon zest, optional mint. Excellent for kofta-style shapes and kebabs."
+        },
+        {
+          "id": "spiced_lamb_cumin_fennel",
+          "label": "Cumin, Fennel & Chili",
+          "notes": "Cumin, fennel seed, chili flakes, coriander, black pepper. Good for stews and braises."
+        }
+      ],
+      "binderOptions": [
+        "none_for_loose_or_kofta",
+        "2–3%_fine_breadcrumbs",
+        "2–3%_cooked_bulgur_for_kofta_style"
+      ],
+      "cureRecommended": false,
+      "cureNotes": "Typically used as a fresh sausage or kofta mix; not smoked low-and-slow.",
+      "grindSizes": [
+        "coarse_6–8mm_for_rustic_texture",
+        "medium_4.5mm_for_kofta"
+      ],
+      "idealUses": [
+        "patties",
+        "kofta_skewers",
+        "meatballs",
+        "stuffed_flatbreads"
+      ],
+      "safetyNotes": "As with other fresh ground meats, keep cold and cook thoroughly. Lamb fat can become strong if stored too long; rotate freezer stock.",
+      "reverseGeneration": {
+        "keywords": [
+          "lamb sausage",
+          "kofta",
+          "Mediterranean",
+          "oregano",
+          "cumin"
+        ],
+        "phrases": [
+          "Herby lamb sausage",
+          "lamb kofta mix",
+          "lamb for flatbreads or pitas",
+          "Mediterranean lamb patties"
+        ]
+      },
+      "sessionHints": {
+        "butcherySessions": [
+          "Trim shoulder and breast meat with attached fat for lamb sausage/kofta bin.",
+          "Weigh lean/fat to maintain 70/30 balance."
+        ],
+        "cookingSessions": [
+          "Shape kofta on skewers and grill or broil until browned and cooked through.",
+          "Pan-sear patties and serve with flatbreads and yogurt-based sauces."
+        ],
+        "preservationSessions": [
+          "Freeze pre-shaped kofta logs or patties on trays, then bag.",
+          "Batch-cook lamb meatballs and freeze for quick tagine or stew nights."
+        ],
+        "cleaningSessions": [
+          "Run grinder cleaning immediately after lamb grinding to reduce lingering aroma.",
+          "Wipe counters with a degreasing cleaner, then follow with a mild disinfecting step."
+        ]
+      },
+      "storehouseHints": {
+        "grocerySections": [
+          "meat+freezer",
+          "spices_(cumin,_fennel,_oregano,_mint)",
+          "grain_(bulgur,_flatbreads)",
+          "dairy_(yogurt_for_sauces)"
+        ],
+        "stockNotes": "Tie lamb-sausage days to flatbread and yogurt sessions so full meals are planned.",
+        "batchSessionIdeas": [
+          "Prepare lamb kofta mix, pre-shape and freeze for grill nights.",
+          "Make lamb meatball tagine base, then cool and freeze for future dinners."
+        ]
+      },
+      "animalHints": {
+        "preferredCuts": [
+          "shoulder",
+          "breast",
+          "trimmings_from_legs"
+        ],
+        "trimNotes": "Include some firm fat from tail or back; avoid thick surface fat with strong flavor if animals are very old.",
+        "offalAllowed": [
+          "small_amounts_of_heart",
+          "tiny_amount_liver_for_depth_if_desired"
+        ]
+      },
+      "tags": [
+        "fresh",
+        "lamb",
+        "Mediterranean",
+        "kofta",
+        "no_pork"
+      ]
+    },
+    {
+      "id": "offal_blend_nose_to_tail",
+      "label": "Nose-to-Tail Offal Blend (Training Sausage)",
+      "style": "fresh_offal_blend",
+      "meatSources": [
+        "shoulder_trim_(any_species)",
+        "back_fat_or_tail_fat",
+        "heart",
+        "liver",
+        "kidney_(small_percentage)"
+      ],
+      "baseRatio": {
+        "leanParts": 65,
+        "fatParts": 25,
+        "liquidParts": 10,
+        "icePct": 5
+      },
+      "targetFatPct": {
+        "min": 25,
+        "max": 30
+      },
+      "saltPctRange": {
+        "min": 1.6,
+        "max": 2.2
+      },
+      "sweetenerPctRange": {
+        "min": 0.0,
+        "max": 0.5
+      },
+      "seasoningProfiles": [
+        {
+          "id": "garlic_spice_cover",
+          "label": "Garlic, Onion & Warm Spices",
+          "notes": "Garlic, onion, paprika, black pepper, thyme, coriander. Designed to soften offal flavor. Works with lamb, goat, or poultry trim."
+        }
+      ],
+      "binderOptions": [
+        "2–3%_rice_or_oat_crumbs",
+        "2–3%_milk_powder_if_dairy_ok"
+      ],
+      "cureRecommended": false,
+      "cureNotes": "Treat as fresh; do not use for low-temp smoke unless following a very specific tested recipe.",
+      "grindSizes": [
+        "fine_3mm_for_smooth_texture",
+        "mix_offal_with_lean_before_second_grind"
+      ],
+      "idealUses": [
+        "patties_for_internal_use",
+        "training_sausage_for_family_that_eats_offal",
+        "crumbled_into_stews_and_rice_dishes"
+      ],
+      "safetyNotes": "Offal is highly perishable; chill quickly after slaughter and use or freeze promptly. Observe strict hygiene for all species.",
+      "reverseGeneration": {
+        "keywords": [
+          "offal",
+          "nose to tail",
+          "liver sausage",
+          "heart",
+          "kidney",
+          "no pork"
+        ],
+        "phrases": [
+          "use up organ meats in sausage without pork",
+          "nose-to-tail training sausage",
+          "blend liver into lamb or goat sausage so it’s milder"
+        ]
+      },
+      "sessionHints": {
+        "butcherySessions": [
+          "Sort heart, liver, and kidney into labeled offal bins immediately upon slaughter.",
+          "Weigh offal and ensure it does not exceed ~10–15% of total sausage weight for milder flavor (adjust to family taste)."
+        ],
+        "cookingSessions": [
+          "Pan-fry small patties and serve mixed into rice or stews.",
+          "Taste-test small batch before committing entire grind to a heavy offal ratio."
+        ],
+        "preservationSessions": [
+          "Make smaller offal sausage batches and freeze quickly for nose-to-tail meals.",
+          "Label packs clearly as ‘offal blend’ and species (lamb, goat, chicken) for intentional usage."
+        ],
+        "cleaningSessions": [
+          "Run a high-priority cleaning protocol after offal sessions: sanitize boards, knives, grinders and wash aprons or towels.",
+          "Schedule follow-up cleaning of drains and sinks if large organ prep was done."
+        ]
+      },
+      "storehouseHints": {
+        "grocerySections": [
+          "meat+freezer",
+          "spices",
+          "grain_(rice,_oats)"
+        ],
+        "stockNotes": "Treat offal sausage as nutrient-dense training food; keep portions modest and clearly labeled by species.",
+        "batchSessionIdeas": [
+          "Quarterly ‘nose-to-tail’ day: convert accumulated frozen offal from lamb/goat/chicken into sausage, meatballs, or patties.",
+          "Pair offal sausage with heavily seasoned stews, curries, or rice dishes to balance flavor."
+        ]
+      },
+      "animalHints": {
+        "preferredCuts": [
+          "heart_(all_species)",
+          "liver",
+          "kidney",
+          "lean_trim_(lamb,_goat,_chicken,_etc.)"
+        ],
+        "trimNotes": "Soak kidney if needed to mellow flavor. Remove heavy connective tissue and bile ducts from livers.",
+        "offalAllowed": [
+          "heart_up_to_10%",
+          "liver_5–10%_for_family_food",
+          "kidney_2–5%_max_for_mildness"
+        ]
+      },
+      "tags": [
+        "offal",
+        "nose_to_tail",
+        "training_food",
+        "nutrient_dense",
+        "no_pork"
+      ]
+    }
+  ]
+}

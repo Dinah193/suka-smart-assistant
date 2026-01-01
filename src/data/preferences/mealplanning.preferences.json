@@ -1,0 +1,196 @@
+{
+  "version": "1.0.0",
+  "domain": "mealplanning",
+  "generatedAt": "2025-11-11T00:00:00.000Z",
+  "source": "Household defaults (SSA builtin)",
+  "preferences": {
+    "household": {
+      "members": 4,
+      "defaultServingsPerMeal": 4,
+      "kidsPresent": true,
+      "guestsBufferPct": 15
+    },
+
+    "schedule": {
+      "planningHorizonDays": 14,
+      "cookDays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      "leftoverDays": ["Sun"],
+      "timeWindows": {
+        "weekdayDinner": "18:00-19:30",
+        "weekendMain": "12:00-14:00"
+      },
+      "maxActiveTimersPerMeal": 3,
+      "maxConcurrentDishes": 3,
+      "prepLeadTimeMin": 20
+    },
+
+    "dietary": {
+      "dietTags": [],
+      "allergensAvoid": [],
+      "ingredientsDisliked": ["cilantro-stems"],
+      "ingredientsPreferred": ["garlic", "lemon", "parmesan"],
+      "allowAlcoholInCooking": true,
+      "nutritionTargets": {
+        "perServing": {
+          "caloriesKcal": { "min": 450, "max": 750 },
+          "proteinG": { "min": 20, "max": 55 },
+          "fiberG": { "min": 6, "max": 18 },
+          "sodiumMg": { "max": 900 }
+        }
+      }
+    },
+
+    "cuisineBias": {
+      "preferred": ["italian", "mexican", "japanese", "mediterranean"],
+      "rotateCuisines": true,
+      "minDaysBeforeRepeatCuisine": 3,
+      "avoid": []
+    },
+
+    "varietyRules": {
+      "minDaysBetweenSameProtein": {
+        "chicken": 2,
+        "beef": 3,
+        "pork": 3,
+        "fish": 2,
+        "legume": 1
+      },
+      "greensAtLeastPerWeek": 4,
+      "soupOrStewPerWeek": 1,
+      "meatlessMealsPerWeek": 2
+    },
+
+    "leftovers": {
+      "strategy": "plan-for-leftovers",
+      "maxFridgeDays": 4,
+      "autoScheduleLeftoverDay": true,
+      "packForLunches": true,
+      "portioning": {
+        "containers": ["750ml", "1000ml"],
+        "labelFormat": "name|date|servings"
+      }
+    },
+
+    "batchCooking": {
+      "enabled": true,
+      "targets": ["rice", "beans", "stock", "roast-veg"],
+      "maxBatchSessionsPerWeek": 2,
+      "freezerMealsPerMonth": 6
+    },
+
+    "budget": {
+      "weeklyBudgetUSD": 160,
+      "flexPct": 10,
+      "preferOnSale": true,
+      "maxPremiumMealsPerWeek": 1
+    },
+
+    "inventoryIntegration": {
+      "usePantryInventory": true,
+      "respectUseByDates": true,
+      "prioritizeOldestFirst": true,
+      "autoGenerateShoppingList": true,
+      "autoReserveInventoryOnPlan": true,
+      "substitutionPolicy": "prefer-pantry",
+      "minStockForStaples": {
+        "white-rice_g": 1000,
+        "dried-pasta_g": 500,
+        "olive-oil-evoo_ml": 250,
+        "chicken-stock_ml": 1000,
+        "eggs_count": 6
+      }
+    },
+
+    "shoppingList": {
+      "groupBy": "store-aisle",
+      "includeQuantities": true,
+      "units": { "mass": "g", "volume": "ml", "count": "ea" },
+      "rounding": {
+        "mass": "friendly",
+        "volume": "friendly"
+      },
+      "preferredStores": ["costco", "aldi", "local-butcher"],
+      "deliveryAllowed": true
+    },
+
+    "timeConstraints": {
+      "weeknightMaxActiveCookingMin": 45,
+      "weekendMaxActiveCookingMin": 120,
+      "slowCookerAvailable": true,
+      "pressureCookerAvailable": true,
+      "sousVideAvailable": true
+    },
+
+    "scoringWeights": {
+      "inventoryUseUp": 0.35,
+      "timeFit": 0.25,
+      "budget": 0.15,
+      "variety": 0.15,
+      "cuisineBias": 0.10
+    },
+
+    "recipeSources": {
+      "allowExternalImports": true,
+      "trustedDomains": ["seriouseats.com", "budgetbytes.com", "nytimes.com"],
+      "fallbackToSSAReference": true
+    },
+
+    "childFriendliness": {
+      "spiceLevel": "mild",
+      "texturePrefs": ["tender", "crisp-veg-not-mushy"],
+      "sauceOnSide": true,
+      "cutIntoBiteSize": true
+    },
+
+    "platingAndServings": {
+      "defaultSideOptions": ["green-salad", "steamed-veg", "rice"],
+      "autoAddSideIfMissing": true,
+      "fruitCoursePerWeek": 3
+    },
+
+    "sustainability": {
+      "preferSeasonalProduce": true,
+      "localFirst": true,
+      "reduceFoodWaste": true,
+      "compostScraps": true
+    },
+
+    "automationHooks": {
+      "emitEvents": true,
+      "events": [
+        "meal.plan.created",
+        "meal.plan.updated",
+        "shopping.list.generated",
+        "inventory.reserved",
+        "inventory.shortage.detected"
+      ],
+      "suggestPrepAnchors": ["pre-chop-veg", "make-stock", "cook-beans", "thaw-proteins"],
+      "allowAutoRescheduleOnShortage": true
+    },
+
+    "calSync": {
+      "enabled": true,
+      "createCalendarEvents": true,
+      "eventTitleFormat": "Dinner: {recipe}",
+      "defaultReminderMin": 60
+    },
+
+    "localization": {
+      "language": "en",
+      "decimalSeparator": ".",
+      "thousandSeparator": ",",
+      "timezone": "America/Chicago"
+    },
+
+    "advanced": {
+      "yieldScaling": {
+        "allowFractionalServings": true,
+        "defaultMultiplier": 1.0
+      },
+      "conflictResolution": {
+        "onAllergenConflict": "skip",
+        "onInventoryShortage": "substitute"
+      }
+    }
+  }
+}

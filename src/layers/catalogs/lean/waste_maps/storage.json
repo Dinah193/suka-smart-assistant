@@ -1,0 +1,155 @@
+{
+  "id": "lean.wm.storage",
+  "domain": "lean",
+  "kind": "waste_map",
+  "title": "Waste Map: Storage/Storehouse",
+  "intentTags": [
+    "lean:waste_map",
+    "domain:storehouse"
+  ],
+  "inputs": [
+    {
+      "key": "signals",
+      "label": "Detected signals",
+      "type": "array",
+      "default": []
+    },
+    {
+      "key": "context",
+      "label": "Context",
+      "type": "object",
+      "default": {}
+    }
+  ],
+  "outputs": [
+    {
+      "key": "countermeasures",
+      "label": "Recommended countermeasures",
+      "type": "array",
+      "required": true
+    }
+  ],
+  "constraints": [
+    "advisoryOnly",
+    "linkToPatternsAndSessions"
+  ],
+  "steps": [],
+  "kpis": [
+    {
+      "key": "wasteIncidents",
+      "label": "Waste incidents",
+      "direction": "down",
+      "unit": "count"
+    },
+    {
+      "key": "timeLost",
+      "label": "Time lost",
+      "direction": "down",
+      "unit": "min"
+    }
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial Lean Six Sigma catalog."
+      }
+    ]
+  },
+  "wasteMap": {
+    "categories": [
+      {
+        "waste": "inventory",
+        "commonCauses": [
+          "no_par_levels",
+          "duplicate_buys",
+          "unknown_expiry"
+        ],
+        "countermeasures": [
+          {
+            "type": "standard_work_ref",
+            "ref": "lean.sw.monthly_storehouse_check"
+          },
+          {
+            "type": "hintTag",
+            "value": "needsInventorySnapshot"
+          },
+          {
+            "type": "pattern_bias",
+            "patternId": "pat.storehouse.monthly_cycle_count",
+            "boost": 0.1
+          }
+        ],
+        "affects": [
+          "pat.storehouse.weekly_restock",
+          "pat.storehouse.monthly_cycle_count"
+        ],
+        "sessions": [
+          "storehouse_restock"
+        ]
+      },
+      {
+        "waste": "transport",
+        "commonCauses": [
+          "zones_not_grouped",
+          "shopping_list_not_grouped",
+          "too_many_stops"
+        ],
+        "countermeasures": [
+          {
+            "type": "hintTag",
+            "value": "groupShoppingByZone"
+          },
+          {
+            "type": "soft_constraint",
+            "value": {
+              "dedupe": true
+            }
+          }
+        ],
+        "affects": [
+          "pat.storehouse.weekly_restock",
+          "pat.storehouse.feast_buffer_build"
+        ],
+        "sessions": [
+          "storehouse_restock"
+        ]
+      },
+      {
+        "waste": "defects",
+        "commonCauses": [
+          "fifo_not_followed",
+          "labels_missing",
+          "freezer_overpacked"
+        ],
+        "countermeasures": [
+          {
+            "type": "hintTag",
+            "value": "fifoLabels"
+          },
+          {
+            "type": "pattern_bias",
+            "patternId": "pat.storehouse.root_cellar_optimizer",
+            "boost": 0.06
+          }
+        ],
+        "affects": [
+          "pat.storehouse.root_cellar_optimizer",
+          "pat.storehouse.monthly_cycle_count"
+        ],
+        "sessions": [
+          "storehouse_restock"
+        ]
+      }
+    ]
+  },
+  "links": {
+    "affectsPatterns": [
+      "pat.storehouse.weekly_restock",
+      "pat.storehouse.monthly_cycle_count",
+      "pat.storehouse.root_cellar_optimizer"
+    ]
+  }
+}

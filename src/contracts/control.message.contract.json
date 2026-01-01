@@ -1,0 +1,275 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka.smart/contracts/control.message.contract.json",
+  "title": "SSA Control Message Envelope — player controls",
+  "description": "Draft-07 schema for player control messages sent across SSA eventBus, WebRTC rooms, or WS bridges. Canonical envelope: { type, ts, source, data }. This schema validates the exact shape of control payloads like step.next, step.go, timer.start/toggle, keepAwake, speech.say, overlay.toggle, and state.requestSync.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "ts", "source", "data"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "Control message type.",
+      "enum": [
+        "control.step.next",
+        "control.step.prev",
+        "control.step.go",
+        "control.timer.start",
+        "control.timer.pause",
+        "control.timer.resume",
+        "control.timer.cancel",
+        "control.timer.toggle",
+        "control.keepAwake",
+        "control.speech.say",
+        "control.speech.toggle",
+        "control.overlay.toggle",
+        "control.state.requestSync",
+        "control.play.pause",
+        "control.play.resume",
+        "control.play.stop"
+      ]
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp at emit time."
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Logical emitter (e.g., 'ui.remote', 'pages.cooking.play', 'overlay')."
+    },
+    "data": {
+      "type": "object",
+      "description": "Message-specific payload; exact shape enforced via if/then below.",
+      "additionalProperties": true
+    }
+  },
+
+  "allOf": [
+    {
+      "anyOf": [
+        { "if": { "properties": { "type": { "const": "control.step.next" } } }, "then": { "properties": { "data": { "$ref": "#/definitions/StepNextPrev" } } } },
+        { "if": { "properties": { "type": { "const": "control.step.prev" } } }, "then": { "properties": { "data": { "$ref": "#/definitions/StepNextPrev" } } } },
+        { "if": { "properties": { "type": { "const": "control.step.go" } } },   "then": { "properties": { "data": { "$ref": "#/definitions/StepGo" } } } },
+
+        { "if": { "properties": { "type": { "const": "control.timer.start" } } },  "then": { "properties": { "data": { "$ref": "#/definitions/TimerStart" } } } },
+        { "if": { "properties": { "type": { "const": "control.timer.pause" } } },  "then": { "properties": { "data": { "$ref": "#/definitions/TimerKeyOnly" } } } },
+        { "if": { "properties": { "type": { "const": "control.timer.resume" } } }, "then": { "properties": { "data": { "$ref": "#/definitions/TimerKeyOnly" } } } },
+        { "if": { "properties": { "type": { "const": "control.timer.cancel" } } }, "then": { "properties": { "data": { "$ref": "#/definitions/TimerKeyOnly" } } } },
+        { "if": { "properties": { "type": { "const": "control.timer.toggle" } } }, "then": { "properties": { "data": { "$ref": "#/definitions/TimerToggle" } } } },
+
+        { "if": { "properties": { "type": { "const": "control.keepAwake" } } }, "then": { "properties": { "data": { "$ref": "#/definitions/KeepAwake" } } } },
+
+        { "if": { "properties": { "type": { "const": "control.speech.say" } } },     "then": { "properties": { "data": { "$ref": "#/definitions/SpeechSay" } } } },
+        { "if": { "properties": { "type": { "const": "control.speech.toggle" } } },  "then": { "properties": { "data": { "$ref": "#/definitions/SpeechToggle" } } } },
+
+        { "if": { "properties": { "type": { "const": "control.overlay.toggle" } } }, "then": { "properties": { "data": { "$ref": "#/definitions/OverlayToggle" } } } },
+        { "if": { "properties": { "type": { "const": "control.state.requestSync" } } }, "then": { "properties": { "data": { "$ref": "#/definitions/StateRequestSync" } } } },
+
+        { "if": { "properties": { "type": { "const": "control.play.pause" } } },  "then": { "properties": { "data": { "$ref": "#/definitions/PlayBasic" } } } },
+        { "if": { "properties": { "type": { "const": "control.play.resume" } } }, "then": { "properties": { "data": { "$ref": "#/definitions/PlayBasic" } } } },
+        { "if": { "properties": { "type": { "const": "control.play.stop" } } },   "then": { "properties": { "data": { "$ref": "#/definitions/PlayStop" } } } }
+      ]
+    }
+  ],
+
+  "definitions": {
+    "Domain": {
+      "type": "string",
+      "enum": ["cooking", "cleaning", "garden", "animals", "preservation", "storehouse"]
+    },
+    "ID": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "Ms": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "Bool": { "type": "boolean" },
+
+    "Common": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["domain", "sessionId"],
+      "properties": {
+        "domain": { "$ref": "#/definitions/Domain" },
+        "sessionId": { "$ref": "#/definitions/ID" },
+        "room": { "type": "string", "minLength": 1, "description": "Optional remote room code for cross-device control." },
+        "controllerId": { "type": "string", "minLength": 1, "description": "Optional controller/client id for multi-remote scenarios." },
+        "streamerSafe": { "$ref": "#/definitions/Bool", "description": "If true, UIs should redact private content." }
+      }
+    },
+
+    "StepNextPrev": {
+      "allOf": [
+        { "$ref": "#/definitions/Common" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "announce": { "$ref": "#/definitions/Bool", "description": "If true, speak the step after navigation." }
+          }
+        }
+      ]
+    },
+
+    "StepGo": {
+      "allOf": [
+        { "$ref": "#/definitions/Common" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["stepIndex"],
+          "properties": {
+            "stepIndex": { "type": "integer", "minimum": 0 },
+            "announce": { "$ref": "#/definitions/Bool" }
+          }
+        }
+      ]
+    },
+
+    "TimerStart": {
+      "allOf": [
+        { "$ref": "#/definitions/Common" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["timerId", "durationMs"],
+          "properties": {
+            "timerId": { "$ref": "#/definitions/ID" },
+            "label": { "type": "string" },
+            "durationMs": { "$ref": "#/definitions/Ms" },
+            "autobeep": { "$ref": "#/definitions/Bool", "description": "Beep when done (notify.js)." }
+          }
+        }
+      ]
+    },
+
+    "TimerKeyOnly": {
+      "allOf": [
+        { "$ref": "#/definitions/Common" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["timerId"],
+          "properties": {
+            "timerId": { "$ref": "#/definitions/ID" }
+          }
+        }
+      ]
+    },
+
+    "TimerToggle": {
+      "allOf": [
+        { "$ref": "#/definitions/Common" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["timerId", "action"],
+          "properties": {
+            "timerId": { "$ref": "#/definitions/ID" },
+            "action": { "type": "string", "enum": ["start", "pause", "resume", "cancel"] },
+            "durationMs": { "$ref": "#/definitions/Ms", "description": "Required when action=start (ignored otherwise)." },
+            "label": { "type": "string" },
+            "autobeep": { "$ref": "#/definitions/Bool" }
+          },
+          "allOf": [
+            {
+              "if": { "properties": { "action": { "const": "start" } }, "required": ["action"] },
+              "then": { "required": ["durationMs"] }
+            }
+          ]
+        }
+      ]
+    },
+
+    "KeepAwake": {
+      "allOf": [
+        { "$ref": "#/definitions/Common" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["on"],
+          "properties": {
+            "on": { "$ref": "#/definitions/Bool" }
+          }
+        }
+      ]
+    },
+
+    "SpeechToggle": {
+      "allOf": [
+        { "$ref": "#/definitions/Common" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled"],
+          "properties": {
+            "enabled": { "$ref": "#/definitions/Bool" }
+          }
+        }
+      ]
+    },
+
+    "SpeechSay": {
+      "allOf": [
+        { "$ref": "#/definitions/Common" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["text"],
+          "properties": {
+            "text": { "type": "string", "minLength": 1 },
+            "lang": { "type": "string" },
+            "tag": { "type": "string" }
+          }
+        }
+      ]
+    },
+
+    "OverlayToggle": {
+      "allOf": [
+        { "$ref": "#/definitions/Common" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled"],
+          "properties": {
+            "enabled": { "$ref": "#/definitions/Bool" }
+          }
+        }
+      ]
+    },
+
+    "StateRequestSync": {
+      "allOf": [
+        { "$ref": "#/definitions/Common" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "reason": { "type": "string", "enum": ["manual", "join", "recover", "other"] }
+          }
+        }
+      ]
+    },
+
+    "PlayBasic": { "$ref": "#/definitions/Common" },
+
+    "PlayStop": {
+      "allOf": [
+        { "$ref": "#/definitions/Common" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "reason": { "type": "string", "enum": ["user", "completed", "error", "remote", "navigation"] }
+          }
+        }
+      ]
+    }
+  }
+}

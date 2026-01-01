@@ -1,0 +1,215 @@
+{
+  "metadata": {
+    "name": "CleaningContactTimes",
+    "version": "1.0.0",
+    "updatedAt": "2025-11-10T00:00:00.000Z",
+    "units": "metric",
+    "notes": "Baselines for synthesis/validator. Always defer to the product label and local regulations. Contact/dwell time means the surface stays visibly wet for the full duration."
+  },
+  "defaults": {
+    "rinseFoodContactSurfaces": true,
+    "petSafeOnly": true,
+    "labelOverridesAll": true,
+    "ventilationRecommended": true
+  },
+  "fragranceFamilies": {
+    "_comment": "Map fragrance tags used in preferences to common descriptors.",
+    "unscented": { "aliases": ["none", "fragrance-free"], "notes": ["no added perfume"] },
+    "citrus": { "aliases": ["lemon", "orange", "grapefruit"], "notes": ["bright", "kitchen-friendly"] },
+    "floral": { "aliases": ["lavender", "rose"], "notes": ["soft", "laundry"] },
+    "wood": { "aliases": ["cedar", "sandalwood"], "notes": ["warm", "floor care"] },
+    "fresh": { "aliases": ["linen", "marine"], "notes": ["clean", "bath"] }
+  },
+  "chemistries": {
+    "_comment": "Representative classes. Prefer exact product records when available.",
+    "bleach_sodium_hypochlorite": {
+      "epaHospitalGrade": true,
+      "typicalDilution": { "label": "1:10–1:50", "examples": [{ "ratio": "1:10", "use": "bodily fluids" }, { "ratio": "1:50", "use": "general hard surfaces" }] },
+      "contactTimeMin": 5,
+      "rangeMinMax": { "min": 1, "max": 10 },
+      "foodContactRinseRequired": true,
+      "petSafe": false,
+      "mixingWarnings": ["Do not mix with ammonia, acids, or vinegar"],
+      "surfaceCompatibility": {
+        "safe": ["sealed tile", "porcelain", "stainless_steel (short contact)"],
+        "caution": ["laminate", "sealed_granite"],
+        "avoid": ["unfinished_wood", "marble", "fabric_colored"]
+      },
+      "fragrance": ["unscented", "fresh"]
+    },
+    "quaternary_ammonium_quat": {
+      "epaHospitalGrade": true,
+      "typicalDilution": { "label": "per label (often 1:64)", "examples": [{ "ratio": "1:64", "use": "general disinfection" }] },
+      "contactTimeMin": 10,
+      "rangeMinMax": { "min": 5, "max": 10 },
+      "foodContactRinseRequired": true,
+      "petSafe": "check_label",
+      "mixingWarnings": ["Do not mix with soaps that neutralize quats"],
+      "surfaceCompatibility": {
+        "safe": ["sealed tile", "vinyl", "sealed_wood", "stainless_steel"],
+        "caution": ["natural_stone (may leave film)"],
+        "avoid": ["unfinished_wood", "food_prep_surfaces_without_rinse"]
+      },
+      "fragrance": ["fresh", "citrus", "floral", "unscented"]
+    },
+    "hydrogen_peroxide_standard_3pct": {
+      "epaHospitalGrade": false,
+      "typicalDilution": { "label": "ready-to-use 3%", "examples": [{ "ratio": "RTU", "use": "spot disinfection" }] },
+      "contactTimeMin": 10,
+      "rangeMinMax": { "min": 3, "max": 10 },
+      "foodContactRinseRequired": true,
+      "petSafe": "relative (avoid ingestion/contact)",
+      "mixingWarnings": ["Do not mix with vinegar in closed containers (peracetic acid hazard)"],
+      "surfaceCompatibility": {
+        "safe": ["sealed tile", "grout (test first)", "glass", "stainless_steel"],
+        "caution": ["painted_surfaces"],
+        "avoid": ["silk_fabrics"]
+      },
+      "fragrance": ["unscented"]
+    },
+    "hydrogen_peroxide_accelerated": {
+      "epaHospitalGrade": true,
+      "typicalDilution": { "label": "ready-to-use (accelerated formulations)", "examples": [{ "ratio": "RTU", "use": "fast hospital disinfection" }] },
+      "contactTimeMin": 1,
+      "rangeMinMax": { "min": 0.5, "max": 5 },
+      "foodContactRinseRequired": true,
+      "petSafe": "relative",
+      "mixingWarnings": ["Use as directed; do not mix"],
+      "surfaceCompatibility": {
+        "safe": ["sealed tile", "vinyl", "stainless_steel", "glass"],
+        "caution": ["anodized_aluminum"],
+        "avoid": ["uncertain_dyes (colorfast test)"]
+      },
+      "fragrance": ["unscented", "fresh"]
+    },
+    "alcohol_ethyl_isopropyl_70pct": {
+      "epaHospitalGrade": false,
+      "typicalDilution": { "label": "70% v/v", "examples": [{ "ratio": "RTU", "use": "electronics (quick evaporating)" }] },
+      "contactTimeMin": 1,
+      "rangeMinMax": { "min": 0.5, "max": 5 },
+      "foodContactRinseRequired": true,
+      "petSafe": "keep_away (vapors/ingestion hazard)",
+      "mixingWarnings": ["Flammable; keep from heat/flame"],
+      "surfaceCompatibility": {
+        "safe": ["glass", "stainless_steel", "electronics_housings (check OEM)"],
+        "caution": ["acrylic", "lacquered_surfaces"],
+        "avoid": ["raw_wood", "some_plastics (crazing)"]
+      },
+      "fragrance": ["unscented"]
+    },
+    "citric_acid_disinfectant": {
+      "epaHospitalGrade": "product_specific",
+      "typicalDilution": { "label": "per label (RTU common)", "examples": [{ "ratio": "RTU", "use": "bathroom fixtures, soap scum + disinfect" }] },
+      "contactTimeMin": 5,
+      "rangeMinMax": { "min": 3, "max": 10 },
+      "foodContactRinseRequired": true,
+      "petSafe": "generally_favorable (do not ingest)",
+      "mixingWarnings": ["Do not mix with bleach"],
+      "surfaceCompatibility": {
+        "safe": ["ceramic_tile", "porcelain", "glass", "chrome"],
+        "caution": ["stainless_steel (spotting if not rinsed)"],
+        "avoid": ["marble", "limestone", "other_calcareous_stone"]
+      },
+      "fragrance": ["citrus", "fresh", "unscented"]
+    },
+    "acetic_acid_vinegar_cleaner": {
+      "_note": "Sanitizer for some uses; not a broad-spectrum disinfectant. Use for cleaning/descaling.",
+      "typicalDilution": { "label": "1:1–1:4 with water", "examples": [{ "ratio": "1:1", "use": "heavy scale" }, { "ratio": "1:4", "use": "light clean" }] },
+      "contactTimeMin": 0,
+      "foodContactRinseRequired": true,
+      "petSafe": "relative (odor/ingestion caution)",
+      "mixingWarnings": ["Do not mix with bleach"],
+      "surfaceCompatibility": {
+        "safe": ["glass", "ceramic_tile"],
+        "caution": ["stainless_steel (rinse)"],
+        "avoid": ["marble", "travertine", "limestone", "cast_iron_seasoning"]
+      },
+      "fragrance": ["unscented"]
+    },
+    "steam_100C": {
+      "_note": "Non-chemical; requires sufficient exposure and soil removal.",
+      "typicalDilution": { "label": "N/A", "examples": [] },
+      "contactTimeMin": 3,
+      "rangeMinMax": { "min": 1, "max": 5 },
+      "foodContactRinseRequired": false,
+      "petSafe": true,
+      "mixingWarnings": [],
+      "surfaceCompatibility": {
+        "safe": ["sealed_tile", "grout (test)", "glass", "metal_hardware"],
+        "caution": ["sealed_wood (warping risk)"],
+        "avoid": ["unsealed_wood", "soft_plastics (deform)"]
+      },
+      "fragrance": ["unscented"]
+    }
+  },
+  "sanitizersFoodService": {
+    "_comment": "Typical no-rinse food-contact surface sanitizers used in kitchens; verify label and local code.",
+    "quat_200ppm": {
+      "concentration": "200 ppm",
+      "contactTimeMin": 1,
+      "testStripsRecommended": true,
+      "rinseRequired": false
+    },
+    "chlorine_50ppm": {
+      "concentration": "50–100 ppm",
+      "contactTimeMin": 1,
+      "testStripsRecommended": true,
+      "rinseRequired": false
+    },
+    "iodine_12_5ppm": {
+      "concentration": "12.5–25 ppm",
+      "contactTimeMin": 1,
+      "testStripsRecommended": true,
+      "rinseRequired": false
+    }
+  },
+  "surfacePresets": {
+    "_comment": "Quick picks for planners; engines combine with preferences (petSafeOnly, scentFamily).",
+    "bathroom_high_touch": {
+      "preferred": ["hydrogen_peroxide_accelerated", "quaternary_ammonium_quat", "citric_acid_disinfectant"],
+      "avoid": [],
+      "fragrance": ["fresh", "unscented"]
+    },
+    "kitchen_food_contact": {
+      "preferred": ["sanitizersFoodService.quat_200ppm", "sanitizersFoodService.chlorine_50ppm"],
+      "avoid": ["bleach_sodium_hypochlorite (unless rinsed)"],
+      "fragrance": ["unscented"]
+    },
+    "pet_areas": {
+      "preferred": ["hydrogen_peroxide_standard_3pct", "steam_100C"],
+      "avoid": ["quaternary_ammonium_quat", "bleach_sodium_hypochlorite"],
+      "fragrance": ["unscented"]
+    },
+    "stone_countertops": {
+      "preferred": ["quaternary_ammonium_quat (stone-safe label)", "hydrogen_peroxide_accelerated"],
+      "avoid": ["citric_acid_disinfectant", "acetic_acid_vinegar_cleaner", "bleach_sodium_hypochlorite"],
+      "fragrance": ["unscented", "fresh"]
+    }
+  },
+  "plannerHints": {
+    "_comment": "Helpers for synthesis/validator.",
+    "keepSurfaceWet": true,
+    "reapplyIfDriesEarly": true,
+    "preCleanSoilRequired": true,
+    "ppe": ["gloves (chemistry-dependent)", "eye_protection (splashes)", "ventilation"],
+    "neverMix": [
+      "bleach + ammonia",
+      "bleach + acids (vinegar/citric)",
+      "peroxide + vinegar (in closed container)"
+    ],
+    "contactTimeFloorMin": 10,
+    "overrideByPreference": {
+      "petSafeOnly": {
+        "excludeChemistries": ["bleach_sodium_hypochlorite", "quaternary_ammonium_quat"],
+        "prefer": ["hydrogen_peroxide_standard_3pct", "steam_100C"]
+      },
+      "scentFamily": {
+        "unscented": { "prefer": ["unscented"] },
+        "citrus": { "prefer": ["citrus"] },
+        "floral": { "prefer": ["floral"] },
+        "wood": { "prefer": ["wood"] },
+        "fresh": { "prefer": ["fresh"] }
+      }
+    }
+  }
+}

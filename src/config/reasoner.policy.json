@@ -1,0 +1,134 @@
+{
+  "meta": {
+    "version": 1,
+    "generatedAt": "2025-11-19T00:00:00.000Z",
+    "description": "Declarative policies for SSA Reasoner shims (model type, token budgets, follow-up limits)."
+  },
+  "defaults": {
+    "model": "gpt-5.1-mini",
+    "maxInputTokens": 6000,
+    "maxOutputTokens": 1500,
+    "temperature": 0.4,
+    "topP": 0.95,
+    "presencePenalty": 0.0,
+    "frequencyPenalty": 0.0,
+    "maxFollowUps": 2,
+    "maxToolCalls": 4,
+    "maxConcurrentSessions": 2,
+    "timeoutMs": 120000,
+    "allowTools": true,
+    "allowShimChaining": true
+  },
+  "reasoners": {
+    "imports.normalizer": {
+      "label": "Import Normalizer",
+      "description": "Low-latency helper that normalizes raw imports (recipes, cleaning plans, garden plans, etc.) into SSA canonical shapes.",
+      "model": "gpt-5.1-mini",
+      "maxInputTokens": 4000,
+      "maxOutputTokens": 900,
+      "temperature": 0.2,
+      "maxFollowUps": 1,
+      "timeoutMs": 60000
+    },
+    "sessions.planner": {
+      "label": "Session Planner",
+      "description": "Transforms normalized imports into multi-step Sessions with cues, blockers, and metadata.",
+      "model": "gpt-5.1",
+      "maxInputTokens": 8000,
+      "maxOutputTokens": 2000,
+      "temperature": 0.45,
+      "maxFollowUps": 3,
+      "timeoutMs": 180000
+    },
+    "sessions.guardExplainer": {
+      "label": "Guard Explainer",
+      "description": "Explains why a session is blocked (Sabbath, Quiet Hours, inventory, weather) in user-friendly language.",
+      "model": "gpt-5.1-mini",
+      "maxInputTokens": 3000,
+      "maxOutputTokens": 600,
+      "temperature": 0.3,
+      "maxFollowUps": 1,
+      "timeoutMs": 45000
+    },
+    "sessions.coach": {
+      "label": "Session Coach",
+      "description": "Optional in-session coach that gives tips, substitutions, and safety notes for the current step.",
+      "model": "gpt-5.1",
+      "maxInputTokens": 6000,
+      "maxOutputTokens": 1000,
+      "temperature": 0.6,
+      "maxFollowUps": 2,
+      "timeoutMs": 90000
+    },
+    "nutrition.analyzer": {
+      "label": "Nutrition Analyzer",
+      "description": "Evaluates meals, recipes, and batch sessions for nutritional profile and macro alignment.",
+      "model": "gpt-5.1",
+      "maxInputTokens": 7000,
+      "maxOutputTokens": 1300,
+      "temperature": 0.35,
+      "maxFollowUps": 2,
+      "timeoutMs": 120000
+    },
+    "storehouse.optimizer": {
+      "label": "Storehouse Optimizer",
+      "description": "Suggests replenishment plans, batch cooking strategies, and preservation sessions based on inventory and goals.",
+      "model": "gpt-5.1",
+      "maxInputTokens": 8000,
+      "maxOutputTokens": 1800,
+      "temperature": 0.45,
+      "maxFollowUps": 3,
+      "timeoutMs": 180000
+    },
+    "homestead.strategist": {
+      "label": "Homestead Strategist",
+      "description": "Higher-budget planner that coordinates garden, animals, preservation, and storehouse sessions over days or weeks.",
+      "model": "gpt-5.1",
+      "maxInputTokens": 12000,
+      "maxOutputTokens": 2400,
+      "temperature": 0.5,
+      "maxFollowUps": 4,
+      "timeoutMs": 240000
+    },
+    "chat.assistant": {
+      "label": "User Chat Assistant",
+      "description": "General chat interface inside SSA (explanations, Q&A, walkthroughs).",
+      "model": "gpt-5.1",
+      "maxInputTokens": 8000,
+      "maxOutputTokens": 1800,
+      "temperature": 0.6,
+      "maxFollowUps": 4,
+      "timeoutMs": 180000
+    },
+    "debug.trace": {
+      "label": "Debug Trace Reasoner",
+      "description": "Verbose reasoning used only in development for tracing pipelines. Never exposed to end users.",
+      "model": "gpt-5.1-mini",
+      "maxInputTokens": 4000,
+      "maxOutputTokens": 1200,
+      "temperature": 0.0,
+      "maxFollowUps": 1,
+      "timeoutMs": 60000
+    }
+  },
+  "limits": {
+    "dailySessionPlans": 200,
+    "dailyImportsNormalized": 800,
+    "dailyNutritionAnalyses": 200,
+    "dailyHomesteadStrategies": 40,
+    "maxFollowUpsPerUserPerHour": 40
+  },
+  "runtime": {
+    "defaultReasoner": "sessions.planner",
+    "envOverrides": {
+      "development": {
+        "defaultReasoner": "debug.trace",
+        "maxFollowUpsMultiplier": 2
+      },
+      "demo": {
+        "defaultReasoner": "imports.normalizer",
+        "maxFollowUpsMultiplier": 1
+      }
+    }
+  }
+}

@@ -1,0 +1,459 @@
+{
+  "$id": "src/data/schemas/torah-substitutions.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Suka Smart Assistant – Torah Substitutions",
+  "description": "Schema for clean / Torah-appropriate substitutions that power meal, cleaning, garden, storehouse, animal/butchery, and preservation engines. Supports user favorites, household overrides, reverse generation, and import/orchestration hooks. NO Talmud/Mishna/Jewish-tradition references.",
+  "type": "object",
+  "required": [
+    "version",
+    "description",
+    "substitutions"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional self-reference for VS Code. Feast files, torah files, and other substitution JSONs can set this to a relative path."
+    },
+    "version": {
+      "type": "string",
+      "description": "Timestamped version for migrations and Dexie sync. Example: 2025-10-31T20:25:00-05:00"
+    },
+    "description": {
+      "type": "string"
+    },
+    "meta": {
+      "type": "object",
+      "description": "UI + engine hints so we can render this like well-executed sites (grouping, badges, order) and tell engines how to consume.",
+      "properties": {
+        "sourceFile": {
+          "type": "string",
+          "description": "Path to the actual JSON file in the repo."
+        },
+        "schemaSource": {
+          "type": "string",
+          "description": "E.g. 'draft-07 (public)' or 'local'."
+        },
+        "compatibleEngines": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Engines that should auto-load this file. We wire: mealPlanEngine, cookingSessionEngine, storehouseGoalEngine, gardenQueueEngine, cleaningPlanEngine, animalSessionEngine."
+        },
+        "supportsReverseGeneration": {
+          "type": "boolean",
+          "default": true
+        },
+        "supportsUserFavorites": {
+          "type": "boolean",
+          "default": true
+        },
+        "uiHints": {
+          "type": "object",
+          "properties": {
+            "groupOrder": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Controls how the UI groups cards: meals → storehouse → garden → animals → cleaning."
+            },
+            "badgeMap": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "description": "Optional CSS/class hints for your Tailwind/DaisyUI cards."
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "defaults": {
+      "type": "object",
+      "description": "Global defaults for a Torah household.",
+      "properties": {
+        "targetCulture": {
+          "type": "string",
+          "enum": [
+            "torah"
+          ]
+        },
+        "preferredCleanMeat": {
+          "type": "string",
+          "description": "What to use first when multiple clean meats are valid."
+        },
+        "preferredCleanFat": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "scopes": {
+      "type": "array",
+      "description": "Domains this file covers – this is where we go beyond 'just recipes'.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "meals",
+          "storehouse",
+          "garden",
+          "animals",
+          "cleaning",
+          "processing-butchery",
+          "preservation"
+        ]
+      }
+    },
+    "profiles": {
+      "type": "object",
+      "description": "Pre-baked household or facility profiles – used by import/orchestration to pick the right set quickly.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "preferredMeats": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "preferredSeafood": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "preferredFats": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "disallow": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Things we never let back in, even in reverse generation (e.g. pork, ham, shellfish)."
+          },
+          "disallowMixedFacility": {
+            "type": "boolean",
+            "description": "For Torah-compliant slaughter/processing facilities."
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "substitutions": {
+      "type": "array",
+      "description": "The actual mappings. Each entry can target meals, cleaning, garden, storehouse, animal-care/butchery, or preservation.",
+      "items": {
+        "$ref": "#/definitions/substitutionEntry"
+      }
+    },
+    "reverseGeneration": {
+      "type": "object",
+      "description": "Controls whether we can go clean→original for sharing/export/collab with other households.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "strategy": {
+          "type": "string",
+          "enum": [
+            "per-item",
+            "global"
+          ],
+          "default": "per-item"
+        },
+        "blockedOriginals": {
+          "type": "array",
+          "description": "Original items we must NOT regenerate because of Torah rules (pork, ham, bacon, shellfish…).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "userOverrides": {
+      "type": "object",
+      "description": "This is how we meet the requirement: 'Ensure users can save their own favorite sessions and schedules, not just system sessions and schedules.' Overrides let users pin THEIR clean subs.",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "favorites": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "substitutionId"
+            ],
+            "properties": {
+              "substitutionId": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "householdId": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "blocked": {
+          "type": "array",
+          "description": "Subs the user NEVER wants auto-applied.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "custom": {
+          "type": "array",
+          "description": "User-created subs – e.g. chitterlings → beef stew meat.",
+          "items": {
+            "$ref": "#/definitions/substitutionEntry"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "integration": {
+      "type": "object",
+      "description": "Hooks into the shared orchestration/event bus the way we’ve been doing it in ImportService.js, ImportRouter.js, and automation/runtime.js.",
+      "properties": {
+        "importRouter": {
+          "type": "object",
+          "properties": {
+            "listenFor": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Events like import.recipe.detected, import.gardenPlan.detected, import.cleaningPlan.detected, import.storehouseGoal.detected, import.animalCarePlan.detected"
+            },
+            "applySubstitutionsOn": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Dot paths inside the imported payload where subs should run."
+            }
+          },
+          "additionalProperties": false
+        },
+        "automationRuntime": {
+          "type": "object",
+          "properties": {
+            "onEvent": {
+              "type": "string",
+              "description": "Usually automation.schedule.request or calendar.feast.upcoming"
+            },
+            "actions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "e.g. validate-substitutions, apply-household-overrides, emit-cleaned-session"
+            },
+            "emit": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "e.g. session.created.cleaned, session.shared.cleaned"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "definitions": {
+    "substitutionEntry": {
+      "type": "object",
+      "required": [
+        "id",
+        "domain",
+        "from",
+        "to"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique in this file. e.g. meat:bacon-to-lamb-beef-bacon"
+        },
+        "domain": {
+          "type": "string",
+          "description": "Which planner/engine this mainly targets.",
+          "enum": [
+            "meals",
+            "storehouse",
+            "garden",
+            "animals",
+            "cleaning",
+            "processing-butchery",
+            "preservation"
+          ]
+        },
+        "category": {
+          "type": "string",
+          "description": "For UI grouping e.g. feast-core, storehouse-grocery, garden-seed, cleaning-household."
+        },
+        "from": {
+          "type": "array",
+          "description": "Ingredients/materials/items we want to AVOID (unclean) or normalize away.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "to": {
+          "type": "array",
+          "description": "Clean or allowed replacements. Order matters (first is preferred).",
+          "items": {
+            "type": "object",
+            "required": [
+              "item"
+            ],
+            "properties": {
+              "item": {
+                "type": "string",
+                "description": "Name of the clean item (e.g. lamb-bacon, smoked-lamb-shoulder, beef-tallow)."
+              },
+              "ratio": {
+                "type": "number",
+                "description": "Multiplier to reach equivalent yield.",
+                "default": 1.0
+              },
+              "yieldCurveRef": {
+                "type": "string",
+                "description": "Path to a yield curve JSON (e.g. src/data/yieldCurves/meat/sheep_katahdin.json) so animal/butchery and storehouse engines can project volume → preserved → servings."
+              }
+            },
+            "additionalProperties": true
+          },
+          "minItems": 1
+        },
+        "cuisineAdjustments": {
+          "type": "object",
+          "description": "For meal planner / cooking session engine to tweak seasonings/smoke/acid by cuisine.",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "storehouseMapping": {
+          "type": "object",
+          "description": "So storehouse stock planning can drop this into a grocery-like sectional layout (Meat, Pantry, Oils & Fats, Cleaning, Garden, Animal Feed).",
+          "properties": {
+            "aisle": {
+              "type": "string"
+            },
+            "grocerySection": {
+              "type": "string"
+            },
+            "preserveOptions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": true
+        },
+        "butchery": {
+          "type": "object",
+          "description": "Signals to the animal/butchery side that this substitution may involve a processing schedule.",
+          "properties": {
+            "usdaFacility": {
+              "type": "boolean"
+            },
+            "torahCompliant": {
+              "type": "boolean"
+            },
+            "note": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "processing": {
+          "type": "object",
+          "description": "If the replacement requires smoking, curing, pressure canning, fermentation, or other Tier 2 preservation.",
+          "properties": {
+            "required": {
+              "type": "boolean",
+              "default": false
+            },
+            "queues": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Namespaced targets like cookingSessionEngine:smoke, storehouseGoalEngine:preserve, animalSessionEngine:butcher"
+            }
+          },
+          "additionalProperties": false
+        },
+        "ui": {
+          "type": "object",
+          "description": "Extra display hints for your React/Tailwind cards.",
+          "properties": {
+            "label": {
+              "type": "string"
+            },
+            "badge": {
+              "type": "string"
+            },
+            "icon": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
+        },
+        "reverseGeneration": {
+          "type": "object",
+          "description": "Per-item override for reverse generation.",
+          "properties": {
+            "allowReverse": {
+              "type": "boolean",
+              "default": false
+            },
+            "originals": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "note": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

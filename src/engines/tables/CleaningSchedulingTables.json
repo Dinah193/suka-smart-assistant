@@ -1,0 +1,263 @@
+{
+  "metadata": {
+    "name": "CleaningSchedulingTables",
+    "version": "1.0.0",
+    "updatedAt": "2025-11-10T00:00:00.000Z",
+    "units": "metric",
+    "notes": "Declarative scheduling baselines for home cleaning. Synthesis uses these to build sessions, merge sanitizer resources, and honor dwell/contact times from CleaningContactTimes.json."
+  },
+  "schemaHints": {
+    "_comment": "Shape guidance for consumers; not enforced by loader.",
+    "task": {
+      "id": "string (snake_case)",
+      "category": "sanitize|clean|launder|dish|waste",
+      "defaultDurationMin": "int",
+      "dwellDependency": {
+        "chemistryId": "string (id from CleaningContactTimes.json) | null",
+        "floorSec": "int | null"
+      },
+      "requiredResources": ["ids from SharedResources.json"],
+      "exclusiveWith": ["resource or area class ids"],
+      "petSafe": "bool",
+      "fragranceFamily": "citrus|herbal|unscented|other|null",
+      "notes": "string"
+    },
+    "zoneSchedule": {
+      "zoneId": "string (kitchen, bathroom_main, entryway, etc.)",
+      "recommendedSequence": ["array of task ids in order"],
+      "recurrence": {
+        "default": "ISO RRULE-like hint (e.g., FREQ=DAILY)",
+        "intensive": "optional stricter cadence"
+      },
+      "windows": {
+        "quietHours": ["range e.g., 21:00-07:00"],
+        "busyHoursAvoid": ["range(s) to avoid crowds/traffic]"]
+      }
+    }
+  },
+  "plannerDefaults": {
+    "_comment": "Used by SynthesisEngine when household prefs do not override.",
+    "dwellPaddingSec": 30,
+    "bucketCapacityTasks": 2,
+    "maxConcurrentSanitizeZones": 1,
+    "floorDryTimeMin": 20,
+    "openWindowWhen": ["use_bleach", "use_ammonia", "strong_fragrance"],
+    "unscentedPreferred": true
+  },
+  "taskCatalog": [
+    {
+      "id": "sanitize_food_prep_surfaces",
+      "category": "sanitize",
+      "defaultDurationMin": 12,
+      "dwellDependency": { "chemistryId": "quaternary_ammonium_quat", "floorSec": 600 },
+      "requiredResources": ["SANITIZER_BUCKET", "WORKSPACE"],
+      "exclusiveWith": ["FOOD_PREP_IN_PROGRESS"],
+      "petSafe": true,
+      "fragranceFamily": "unscented",
+      "notes": "Includes counters, cutting boards, appliance handles. Rinse per label if required."
+    },
+    {
+      "id": "kitchen_floor_clean_disinfect",
+      "category": "clean",
+      "defaultDurationMin": 18,
+      "dwellDependency": { "chemistryId": "chlorine_50ppm", "floorSec": 300 },
+      "requiredResources": ["MOP_SET", "SANITIZER_BUCKET"],
+      "exclusiveWith": ["FOOT_TRAFFIC"],
+      "petSafe": false,
+      "fragranceFamily": "unscented",
+      "notes": "Sweep → mop → dwell → air-dry. Block traffic until dry."
+    },
+    {
+      "id": "bathroom_high_touch_disinfect",
+      "category": "sanitize",
+      "defaultDurationMin": 10,
+      "dwellDependency": { "chemistryId": "peracetic_acid_80ppm", "floorSec": 60 },
+      "requiredResources": ["SANITIZER_BUCKET", "MICROFIBER_SET"],
+      "exclusiveWith": ["BATHROOM_OCCUPIED"],
+      "petSafe": true,
+      "fragranceFamily": "herbal",
+      "notes": "Faucets, handles, flush levers, switches. Ventilate."
+    },
+    {
+      "id": "toilet_clean_and_disinfect",
+      "category": "sanitize",
+      "defaultDurationMin": 12,
+      "dwellDependency": { "chemistryId": "quaternary_ammonium_quat", "floorSec": 600 },
+      "requiredResources": ["TOILET_BRUSH", "SANITIZER_BUCKET"],
+      "exclusiveWith": ["BATHROOM_OCCUPIED"],
+      "petSafe": true,
+      "fragranceFamily": "unscented",
+      "notes": "Apply bowl cleaner; seat/lid hinges get separate cloth (color-coded)."
+    },
+    {
+      "id": "dishwasher_sanitize_cycle",
+      "category": "dish",
+      "defaultDurationMin": 90,
+      "dwellDependency": { "chemistryId": null, "floorSec": null },
+      "requiredResources": ["DISHWASHER"],
+      "exclusiveWith": ["DISHWASHER_IN_USE"],
+      "petSafe": true,
+      "fragranceFamily": "unscented",
+      "notes": "High-temp sanitize option; schedule off-peak power hours."
+    },
+    {
+      "id": "laundry_hot_sanitize",
+      "category": "launder",
+      "defaultDurationMin": 70,
+      "dwellDependency": { "chemistryId": null, "floorSec": null },
+      "requiredResources": ["WASHER", "DRYER"],
+      "exclusiveWith": ["WASHER_IN_USE"],
+      "petSafe": true,
+      "fragranceFamily": "unscented",
+      "notes": "≥60°C wash when fabrics allow; add oxygen bleach if fabric-safe."
+    },
+    {
+      "id": "trash_and_recycling_service",
+      "category": "waste",
+      "defaultDurationMin": 8,
+      "dwellDependency": { "chemistryId": null, "floorSec": null },
+      "requiredResources": ["WORKSPACE"],
+      "exclusiveWith": [],
+      "petSafe": true,
+      "fragranceFamily": "unscented",
+      "notes": "Bag replacement with scented/unscented per preferences."
+    },
+    {
+      "id": "litter_box_service_pet_safe",
+      "category": "clean",
+      "defaultDurationMin": 10,
+      "dwellDependency": { "chemistryId": null, "floorSec": null },
+      "requiredResources": ["WORKSPACE"],
+      "exclusiveWith": ["PET_IN_ROOM"],
+      "petSafe": true,
+      "fragranceFamily": "unscented",
+      "notes": "Scoop daily; full change weekly; avoid phenol cleaners."
+    },
+    {
+      "id": "fridge_spills_spot_sanitize",
+      "category": "sanitize",
+      "defaultDurationMin": 8,
+      "dwellDependency": { "chemistryId": "peracetic_acid_80ppm", "floorSec": 60 },
+      "requiredResources": ["SANITIZER_BUCKET", "MICROFIBER_SET"],
+      "exclusiveWith": [],
+      "petSafe": true,
+      "fragranceFamily": "unscented",
+      "notes": "Food-contact safe sanitizer; dry before restocking."
+    },
+    {
+      "id": "entryway_floor_clean",
+      "category": "clean",
+      "defaultDurationMin": 12,
+      "dwellDependency": { "chemistryId": null, "floorSec": null },
+      "requiredResources": ["MOP_SET"],
+      "exclusiveWith": ["FOOT_TRAFFIC"],
+      "petSafe": true,
+      "fragranceFamily": "citrus",
+      "notes": "Salt/sand removal in winter; schedule after peak arrival."
+    }
+  ],
+  "zoneSchedules": [
+    {
+      "zoneId": "kitchen",
+      "recommendedSequence": [
+        "trash_and_recycling_service",
+        "dishwasher_sanitize_cycle",
+        "sanitize_food_prep_surfaces",
+        "fridge_spills_spot_sanitize",
+        "kitchen_floor_clean_disinfect"
+      ],
+      "recurrence": {
+        "default": "FREQ=DAILY",
+        "intensive": "FREQ=WEEKLY;BYDAY=SA"
+      },
+      "windows": {
+        "quietHours": ["21:00-07:00"],
+        "busyHoursAvoid": ["07:00-09:00", "17:00-19:30"]
+      }
+    },
+    {
+      "zoneId": "bathroom_main",
+      "recommendedSequence": [
+        "trash_and_recycling_service",
+        "bathroom_high_touch_disinfect",
+        "toilet_clean_and_disinfect"
+      ],
+      "recurrence": {
+        "default": "FREQ=DAILY",
+        "intensive": "FREQ=WEEKLY;BYDAY=SU"
+      },
+      "windows": {
+        "quietHours": ["22:00-06:30"],
+        "busyHoursAvoid": ["06:30-08:30", "19:00-21:00"]
+      }
+    },
+    {
+      "zoneId": "entryway",
+      "recommendedSequence": ["trash_and_recycling_service", "entryway_floor_clean"],
+      "recurrence": {
+        "default": "FREQ=DAILY;BYHOUR=20",
+        "intensive": "FREQ=WEEKLY;BYDAY=FR"
+      },
+      "windows": {
+        "quietHours": ["21:00-07:00"],
+        "busyHoursAvoid": ["07:00-08:30", "17:00-19:00"]
+      }
+    },
+    {
+      "zoneId": "laundry_room",
+      "recommendedSequence": ["laundry_hot_sanitize"],
+      "recurrence": {
+        "default": "FREQ=WEEKLY;BYDAY=SA",
+        "intensive": "FREQ=DAILY;INTERVAL=1;COUNT=1"
+      },
+      "windows": {
+        "quietHours": ["22:00-07:00"],
+        "busyHoursAvoid": []
+      }
+    }
+  ],
+  "sequencingRules": {
+    "_comment": "High-level constraints the validator enforces prior to session.build.complete.",
+    "mustPrecede": [
+      { "before": "sanitize_food_prep_surfaces", "after": "kitchen_floor_clean_disinfect" }
+    ],
+    "cannotOverlap": [
+      ["kitchen_floor_clean_disinfect", "entryway_floor_clean"],
+      ["toilet_clean_and_disinfect", "bathroom_high_touch_disinfect"]
+    ],
+    "cooldownMinBetweenSanitizeMin": 5
+  },
+  "resourcePolicies": {
+    "_comment": "How SharedResources are booked during schedules.",
+    "SANITIZER_BUCKET": {
+      "capacity": 1,
+      "rechargeTimeMin": 5,
+      "mergeableTasks": ["sanitize_food_prep_surfaces", "bathroom_high_touch_disinfect", "toilet_clean_and_disinfect", "fridge_spills_spot_sanitize"]
+    },
+    "WORKSPACE": {
+      "capacity": 1,
+      "rechargeTimeMin": 0,
+      "mergeableTasks": ["trash_and_recycling_service"]
+    },
+    "MOP_SET": {
+      "capacity": 1,
+      "rechargeTimeMin": 10,
+      "mergeableTasks": ["kitchen_floor_clean_disinfect", "entryway_floor_clean"]
+    }
+  },
+  "safetyFloors": {
+    "_comment": "SynthesisValidator checks these against planned sessions.",
+    "noMixChemicals": true,
+    "ventilationRequiredFor": ["peracetic_acid_80ppm", "chlorine_50ppm"],
+    "blockFootTrafficDuring": ["kitchen_floor_clean_disinfect", "entryway_floor_clean"],
+    "minDwellHonored": true,
+    "petExclusionDuring": ["kitchen_floor_clean_disinfect", "toilet_clean_and_disinfect"]
+  },
+  "eventTemplates": {
+    "_comment": "Canonical events the scheduler may emit.",
+    "cleaning.session.planned": { "type": "cleaning.session.planned", "ts": "<ISO>", "source": "cleaning.scheduler", "data": { "zoneId": "", "tasks": [], "startISO": "", "endISO": "" } },
+    "cleaning.task.started": { "type": "cleaning.task.started", "ts": "<ISO>", "source": "cleaning.runtime", "data": { "taskId": "", "zoneId": "" } },
+    "cleaning.task.dwell.started": { "type": "cleaning.task.dwell.started", "ts": "<ISO>", "source": "cleaning.runtime", "data": { "taskId": "", "chemistryId": "", "floorSec": 0 } },
+    "cleaning.task.completed": { "type": "cleaning.task.completed", "ts": "<ISO>", "source": "cleaning.runtime", "data": { "taskId": "", "zoneId": "", "durationSec": 0 } }
+  }
+}

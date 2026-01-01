@@ -1,0 +1,132 @@
+{
+  "nodeId": "calculator.storehouseRefill",
+  "label": "Storehouse Refill Planner",
+  "description": "Determines what needs to be refilled in the storehouse based on inventory gaps, planned meals, batch yields, and family goals, then prepares structured outputs for shopping, stocking, and price comparison flows.",
+  "category": "storehouseMeals",
+  "group": "Storehouse & Shopping",
+  "calculatorKey": "StorehouseRefillCalculator",
+  "kind": "calculatorNode",
+  "tags": [
+    "storehouse",
+    "refill",
+    "shopping",
+    "planning",
+    "inventory"
+  ],
+  "inputShape": {
+    "requires": [
+      "householdId",
+      "storehouseSnapshot",
+      "planningHorizonDays"
+    ],
+    "optional": [
+      "plannedMeals",
+      "batchPlans",
+      "minimumParLevels",
+      "safetyStockRules",
+      "priceBookSnapshot",
+      "familyPreferences"
+    ],
+    "contracts": {
+      "householdId": "string",
+      "storehouseSnapshot": "StorehouseSnapshot",
+      "planningHorizonDays": "number",
+      "plannedMeals": "PlannedMeal[]",
+      "batchPlans": "BatchPlan[]",
+      "minimumParLevels": "Record<string, number>",
+      "safetyStockRules": "SafetyStockRule[]",
+      "priceBookSnapshot": "PriceBookEntry[]",
+      "familyPreferences": "HouseholdPreferenceSet"
+    }
+  },
+  "outputShape": {
+    "provides": [
+      "refillLines",
+      "aggregatedRefillSummary",
+      "priorityBaskets",
+      "timelineHints",
+      "hubExportPayload"
+    ],
+    "contracts": {
+      "refillLines": "RefillLine[]",
+      "aggregatedRefillSummary": "StorehouseRefillSummary",
+      "priorityBaskets": "RefillBasket[]",
+      "timelineHints": "RefillTimelineHint[]",
+      "hubExportPayload": "HubPacket | null"
+    }
+  },
+  "ui": {
+    "route": "/planner/storehouse/refill",
+    "primaryActionLabel": "Plan Refill",
+    "secondaryActionLabel": "Review Gaps",
+    "icon": "storehouse",
+    "displayOrder": 50,
+    "visibleInQuickPlanner": true,
+    "supportsInlinePreview": true
+  },
+  "triggers": {
+    "onDemand": true,
+    "auto": [
+      {
+        "eventType": "inventory.snapshot.updated",
+        "reason": "Recompute refill plan when storehouse levels change."
+      },
+      {
+        "eventType": "planner.batchYield.completed",
+        "reason": "Re-evaluate refill needs after large batch sessions are scheduled."
+      },
+      {
+        "eventType": "planner.mealPlan.saved",
+        "reason": "Recompute refill requirements when meal plans change."
+      }
+    ]
+  },
+  "feedsInto": [
+    {
+      "nodeId": "calculator.shoppingListGenerator",
+      "relationship": "downstream",
+      "reason": "Convert refill lines into a structured grocery list."
+    },
+    {
+      "nodeId": "calculator.scanCompareTrust",
+      "relationship": "optional",
+      "reason": "Optimize refill purchases using store price comparisons and coupon cycles."
+    },
+    {
+      "nodeId": "session.shoppingRun",
+      "relationship": "optional",
+      "reason": "Turn the refill plan into a guided shopping session via SessionRunner."
+    },
+    {
+      "nodeId": "session.stockingSession",
+      "relationship": "optional",
+      "reason": "Drive a stocking/put-away session after purchases are complete."
+    }
+  ],
+  "events": {
+    "invoked": "calculator.storehouseRefill.invoked",
+    "completed": "calculator.storehouseRefill.completed",
+    "failed": "calculator.storehouseRefill.failed"
+  },
+  "guards": {
+    "inventory": true,
+    "weather": false,
+    "quietHours": false,
+    "sabbath": false,
+    "deviceBattery": false
+  },
+  "featureFlags": {
+    "requiresFamilyFundMode": false,
+    "supportsHubExport": true
+  },
+  "hubExport": {
+    "enabledWhenFamilyFundMode": true,
+    "packetType": "storehouse.refill.plan",
+    "destination": "hub",
+    "exportEventType": "calculator.storehouseRefill.exported"
+  },
+  "version": "1.0.0",
+  "createdBy": "ssa.codegen",
+  "createdAt": "2025-11-19T00:00:00.000Z",
+  "updatedAt": "2025-11-19T00:00:00.000Z"
+}

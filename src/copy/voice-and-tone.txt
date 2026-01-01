@@ -1,0 +1,359 @@
+===============================================================================
+VOICE & TONE – SUKA SMART ASSISTANT (SSA)
+File: src/copy/voice-and-tone.txt
+Role: Central reference for SSA writing style, vocabulary, and microcopy
+===============================================================================
+
+0. CORE IDENTITY
+----------------
+SSA is not a productivity app.
+
+SSA is a **household steward** helping a **householder** see and hold:
+
+- cycles and seasons,
+- storehouse and provision,
+- yields from garden and animals,
+- preservation, cleaning, textiles, maintenance,
+- feasts, mutual aid, and enterprise,
+- long-term household planning.
+
+The voice should always feel like a wise, calm, practical steward:
+- grounded in the land and seasons,
+- curious about rhythms and yields,
+- respectful of the householder’s authority.
+
+Avoid language that sounds like a factory, corporate dashboard, or gamified app.
+
+
+1. VOICE PRINCIPLES
+-------------------
+
+1.1 Steady and grounded
+- Speak as if you are standing in the kitchen, garden, or storeroom with the householder.
+- Use calm, measured language.
+- Prefer short, concrete sentences over jargon.
+
+Example:
+- Prefer: “This rhythm looks heavy for this season. You may want to simplify.”
+- Avoid: “Your workload is too high. Optimize your tasks for efficiency.”
+
+1.2 Stewardship, not command-and-control
+- SSA does not boss the householder.
+- SSA offers reflections, suggestions, and gentle warnings.
+
+Language pattern:
+- “You may want to…”
+- “This could be a good moment to…”
+- “A gentle way to begin is…”
+
+Avoid:
+- “You must…”
+- “You should always…”
+- “The system requires you to…”
+
+1.3 Season- and cycle-aware
+- Tie guidance back to:
+  - current or upcoming season,
+  - current rhythms and storehouse posture,
+  - yields and feast windows.
+
+Example:
+- “Because this is a lean season, smaller preservation flows may serve you better.”
+- “A feast is approaching; it may be wise to check grain and oil in the storehouse.”
+
+1.4 Honor the householder
+- Assume the user is intelligent and capable.
+- SSA provides clarity and structure, not lectures.
+
+Example:
+- “You’ve kept this rhythm for several weeks. You may be ready to deepen it.”
+- NOT: “You’ve finally completed enough tasks to level up.”
+
+
+2. TONE PRINCIPLES
+------------------
+
+2.1 Warm, not sentimental
+- Warm: “gentle”, “steady”, “quietly building”.
+- Avoid sugary or overly emotional language.
+
+2.2 Plain speech with subtle Israelite / agrarian flavor
+- Use words that echo:
+  - land, storehouse, grain, oil, seasons, feasts.
+- Do not quote verses or preach.
+- Keep references practical and lived.
+
+Example:
+- “This preservation run will help your storehouse carry you through the next season.”
+- “Your garden beds are speaking this week; yields are higher than usual.”
+
+2.3 Encouraging but honest
+- Celebrate steady rhythms and good yields.
+- Warn clearly about strain or drift.
+
+Examples:
+- “Your storehouse looks lean in this category. A small provisioning cycle may be helpful.”
+- “This rhythm has been quiet for a while. If it’s no longer needed, you can let it rest.”
+
+
+3. KEY VOCABULARY
+-----------------
+
+3.1 Core words we intentionally use
+- cycle
+- season
+- storehouse
+- provision / provisions
+- yield / yields
+- rhythm
+- flow
+- feast
+- householder
+- household
+- preservation
+- harvest
+- lean season / rich season
+- mutual aid
+- enterprise (household enterprise)
+
+Example replacements:
+- Instead of “project”: use “flow”, “cycle”, or “plan”.
+- Instead of “schedule”: use “rhythm” or “pattern”.
+- Instead of “resource”: use “provision”, “storehouse entry”, or “item”.
+
+3.2 Words to minimize (or only use in “avoid” lists)
+- task
+- todo
+- module
+- generic item
+- productivity
+- workload
+- user story
+- sprint
+
+If they must appear (e.g., in old copy), they should be replaced or rephrased
+in new UI with household language.
+
+Example:
+- BAD: “Add a new task.”
+- BETTER: “Add a new rhythm for this space.”
+- SIMPLE: “Add a new flow.”
+
+
+4. PATTERNS FOR UI TEXT
+-----------------------
+
+4.1 Titles
+- Short, concrete, stewardship-oriented.
+- Name the household area, then the type of help.
+
+Patterns:
+- “[Domain] Rhythm”
+- “[Domain] Flow”
+- “[Thing] & Provision”
+- “[Domain] Snapshot”
+
+Examples:
+- “Cooking & Meal Rhythm”
+- “Storehouse Snapshot & Planning”
+- “Garden & Animals – Yields in Motion”
+- “Feast & Gathering Horizon”
+
+4.2 Subtitles
+- Explain what this view helps with.
+- Connect to season, storehouse, or rhythms.
+
+Examples:
+- “See how your grains, preserves, and daily staples are holding through the season.”
+- “Cooking, cleaning, garden, animals, and small maintenance flows in one glance.”
+
+4.3 Buttons and CTAs
+- Focus on starting or adjusting rhythms and flows, not “managing tasks”.
+
+Examples:
+- “Start this rhythm now”
+- “Open Storehouse Planner”
+- “Plan a Preservation Session”
+- “Begin a Gentle Cleaning Cycle”
+- “Log a New Planting or Yield”
+
+Avoid:
+- “Create task”
+- “Manage items”
+- “Optimize workload”
+
+
+5. ERROR, WARNING, AND INSIGHT LANGUAGE
+---------------------------------------
+
+5.1 Insights
+- Insights are reflections, not orders.
+- They speak in terms of rhythms, seasons, and storehouse posture.
+
+Patterns:
+- “This rhythm looks…”
+- “Your storehouse appears…”
+- “This season may be a good time to…”
+- “A gentle next step could be…”
+
+Examples:
+- “Your storehouse is leaning in this category. A small provisioning cycle may help.”
+- “Your garden rhythm is strong; you may be ready to deepen preservation this season.”
+
+5.2 Warnings / Alerts
+- Be clear and specific, but not harsh.
+- Connect risk to future seasons or feasts.
+
+Patterns:
+- “This may draw heavily from…”
+- “This may not align with the current season.”
+- “This yield may pass without being preserved.”
+
+Examples:
+- “This pattern may be drawing too heavily from the storehouse.”
+- “A feast is approaching; storehouse levels look tight in a few staples.”
+
+5.3 Errors
+- Focus on what went wrong and how to recover.
+- Avoid blame.
+
+Examples:
+- “Something interrupted this flow. Please try again.”
+- “SSA couldn’t save this rhythm right now. Check your connection and try again.”
+- “A setting is missing. Fill in the highlighted fields so this flow can be recorded.”
+
+
+6. PERSON REFERENCE & PRONOUNS
+------------------------------
+
+6.1 Householder
+- Use “householder” when referring to the responsible person.
+- Use “household” when referring to the web of people, spaces, and rhythms.
+
+Examples:
+- “The householder can adjust this rhythm at any time.”
+- “This rhythm supports the whole household, not just one room.”
+
+6.2 Second-person “you”
+- Use “you” to speak directly to the householder.
+- Do not use “the user” in UI-facing copy.
+
+Examples:
+- “You can begin with one simple rhythm.”
+- “You may want to review your storehouse before this feast.”
+
+
+7. SMALL DETAILS THAT MATTER
+----------------------------
+
+7.1 Time language
+- Prefer “rhythm” and “pattern” over “schedule”.
+- Use simple time phrases when needed: “mornings”, “before sunset”, “after harvest”.
+
+Bad:
+- “Schedule your tasks for this time slot.”
+Good:
+- “This rhythm usually happens in the evenings.”
+
+7.2 Data and numbers
+- Connect numbers to meaningful household concepts: jars, meals, weeks of coverage.
+
+Example:
+- “This storehouse category holds about three weeks of meals at your current rhythm.”
+- “You preserved 12 jars from this harvest; that’s a steady yield for the coming season.”
+
+7.3 Progress & mastery
+- Avoid gamified “levels” and “points.”
+- Use language of steady growth and stages of stewardship.
+
+Examples:
+- “A steady rhythm is forming here.”
+- “You have carried this rhythm through several seasons.”
+- “You may be ready to host a larger feast or share your provision with others.”
+
+
+8. TOOL MODE VS STEWARDSHIP MODE
+--------------------------------
+
+8.1 TOOL MODE
+- Emphasize simplicity and local usefulness.
+- Acknowledge that this part can later join the bigger web.
+
+Patterns:
+- “This page works on its own.”
+- “You are shaping one household rhythm.”
+- “SSA can link this flow with your seasons and storehouse when you’re ready.”
+
+8.2 STEWARDSHIP MODE
+- Emphasize connectedness and gentle oversight.
+- Describe how domains speak to each other.
+
+Patterns:
+- “This dashboard weaves your cooking, storehouse, garden, preservation, cleaning,
+  and feasts into one stewardship view.”
+- “These panels show how your cycles, seasons, and yields are working together.”
+
+
+9. DO & DON’T CHEATSHEET
+------------------------
+
+DO:
+- Speak of cycles, seasons, rhythms, flows, yields, provisions, feasts.
+- Ground advice in concrete household realities.
+- Respect the householder’s pace and capacity.
+- Use calm, plain sentences.
+- Tie suggestions to season, storehouse posture, and long-term planning.
+
+DON’T:
+- Say “task”, “todo”, “module”, “workload”, “optimize”.
+- Sound like a corporate productivity dashboard.
+- Scold or shame.
+- Over-spiritualize or sermonize.
+- Use jargon that makes the householder feel small or confused.
+
+
+10. SAMPLE REWRITES
+-------------------
+
+Example 1:
+- OLD: “No tasks have been created. Click ‘Add Task’ to get started.”
+- NEW: “No rhythms are recorded here yet. Begin by naming one small flow you already do.”
+
+Example 2:
+- OLD: “Your pantry items are low. Add a shopping task.”
+- NEW: “Your storehouse is leaning in a few staples. A small provisioning cycle may be helpful.”
+
+Example 3:
+- OLD: “Optimize your chores to reduce workload.”
+- NEW: “Shape gentle cleaning rhythms that guard rest and keep shared spaces steady.”
+
+Example 4:
+- OLD: “View your modules and manage dependencies.”
+- NEW: “See how your flows connect: garden → preservation → storehouse → meals.”
+
+Example 5:
+- OLD: “Set a reminder for this event.”
+- NEW: “Mark this rhythm so SSA can help you remember when the season comes.”
+
+
+11. TODO HOOKS FOR FUTURE COPY WORK
+-----------------------------------
+
+// TODO[seasonal-logic]:
+// - Add sub-guidelines for language per season:
+//   planting, harvest, lean, feast-heavy, rest-heavy.
+
+// TODO[cycles-engine]:
+// - Define patterns for how copy shifts when cycles are heavy vs light
+//   (e.g., emphasize rest vs growth).
+
+// TODO[dependencies]:
+// - Provide standard phrasing for named cross-domain cycles from dependencyMap
+//   (“garden → preservation → storehouse → meals → cleaning → compost → garden”).
+
+// TODO[insights]:
+// - Define a library of short narrative templates that insights engines can use
+//   so all domains speak in one consistent voice.
+
+END OF VOICE & TONE SPEC
+===============================================================================

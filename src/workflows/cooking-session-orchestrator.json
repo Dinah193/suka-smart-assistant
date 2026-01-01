@@ -1,0 +1,512 @@
+{
+  "name": "Cooking Session Orchestrator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cooking-session",
+        "responseMode": "responseNode",
+        "options": {
+          "binaryData": false
+        }
+      },
+      "id": "Webhook_Trigger",
+      "name": "Webhook (Start Session)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/*\nExpected webhook body (flexible):\n{\n  userId: \"user_123\",\n  title: \"Sunday Batch\",\n  batch: true,\n  startAt?: ISO,\n  recipes: [\n    { id:\"r1\", title:\"Chicken & Broccoli\", portions:5,\n      steps:[\n        { id:\"s1\", text:\"Marinate\", timerMin?: 0 },\n        { id:\"s2\", text:\"Sear 12m\", timerMin: 12 },\n        { id:\"s3\", text:\"Steam broccoli\", timerMin: 6 }\n      ]\n    }\n  ],\n  timers?: [ { recipeId, stepId, label?, minutes } ], // optional explicit list\n  labels?: [ { productName, batchCode?, packedOn? } ],\n  inventory?: [ { name, qty, unit } ]\n}\n*/\n\nconst body = items[0]?.json || {};\n\nfunction normArray(x) { return Array.isArray(x) ? x : (x ? [x] : []); }\nfunction iso(x) { try { return x ? new Date(x).toISOString() : new Date().toISOString(); } catch { return new Date().toISOString(); } }\n\nconst userId = body.userId || null;\nconst title = body.title || 'Cooking Session';\nconst batch = !!body.batch;\nconst startAt = iso(body.startAt);\n\nconst recipes = normArray(body.recipes).map((r, i) => ({\n  id: r.id || `r_${i+1}`,\n  title: r.title || `Recipe ${i+1}`,\n  portions: Number(r.portions || 4),\n  tags: r.tags || [],\n  ingredients: r.ingredients || [],\n  steps: normArray(r.steps).map((s, j) => ({\n    id: s.id || `r${i+1}s${j+1}`,\n    idx: j,\n    text: s.text || `Step ${j+1}`,\n    timerMin: (s.timerMin != null) ? Number(s.timerMin) : null\n  }))\n}));\n\n// Gather timers: explicit list OR derive from step.timerMin\nconst explicitTimers = normArray(body.timers);\nconst derivedTimers = [];\nfor (const r of recipes) {\n  for (const s of (r.steps || [])) {\n    if (s.timerMin && s.timerMin > 0) {\n      derivedTimers.push({ recipeId: r.id, stepId: s.id, label: s.text, minutes: Number(s.timerMin) });\n    }\n  }\n}\n\nconst timers = explicitTimers.length ? explicitTimers : derivedTimers;\nconst labels = normArray(body.labels);\nconst inventory = normArray(body.inventory);\n\nconst apiBase = $env.SUKA_API_BASE || 'http://localhost:4000';\n\nreturn [{ json: { userId, title, batch, startAt, recipes, timers, labels, inventory, apiBase } }];"
+      },
+      "id": "Fn_Normalize",
+      "name": "Function: Normalize Payload",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -740,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{$json.apiBase}}/cooking/sessions",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={\n  \"userId\": $json.userId,\n  \"title\": $json.title,\n  \"batch\": $json.batch,\n  \"startedAt\": $json.startAt,\n  \"recipes\": $json.recipes\n}"
+      },
+      "id": "HTTP_CreateSession",
+      "name": "HTTP: Create Session",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -520,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const resp = items[0]?.json || {};\nconst sessionId = resp.sessionId || resp.id || resp.session?.id || null;\nif (!sessionId) {\n  throw new Error('Backend did not return sessionId from /cooking/sessions');\n}\n// fan out: one item for timers, one for inventory, one for labels, plus a compact context\nconst ctx = $items('Function: Normalize Payload', 0, 0).json;\nreturn [\n  { json: { ...ctx, sessionId } }, // context\n  { json: { ...ctx, sessionId } }, // timers branch\n  { json: { ...ctx, sessionId } }, // inventory branch\n  { json: { ...ctx, sessionId } }  // labels branch\n];"
+      },
+      "id": "Fn_SessionFanout",
+      "name": "Function: Session Fan‑Out",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [],
+          "number": [
+            {
+              "value1": "={{$json.timers.length}}",
+              "operation": "larger"
+            }
+          ]
+        }
+      },
+      "id": "IF_HasTimers",
+      "name": "IF timers > 0",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const out = [];\nfor (const t of ($json.timers || [])) {\n  out.push({ json: {\n    apiBase: $json.apiBase,\n    sessionId: $json.sessionId,\n    userId: $json.userId,\n    timer: {\n      recipeId: t.recipeId,\n      stepId: t.stepId,\n      label: t.label || 'Timer',\n      minutes: Number(t.minutes || 0)\n    }\n  }});\n}\nreturn out.length ? out : [{ json: { skip: true } }];"
+      },
+      "id": "Fn_FanoutTimers",
+      "name": "Function: Fan‑out Timers",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        160,
+        -260
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{$json.apiBase}}/cooking/sessions/{{$json.sessionId}}/timers",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={\n  \"userId\": $json.userId,\n  \"recipeId\": $json.timer.recipeId,\n  \"stepId\": $json.timer.stepId,\n  \"label\": $json.timer.label,\n  \"minutes\": $json.timer.minutes\n}"
+      },
+      "id": "HTTP_StartTimer",
+      "name": "HTTP: Start Timer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        380,
+        -260
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{($json.inventory || []).length}}",
+              "operation": "larger"
+            }
+          ]
+        }
+      },
+      "id": "IF_HasInventory",
+      "name": "IF inventory > 0",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{$json.apiBase}}/inventory/delta",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={\n  \"userId\": $json.userId,\n  \"lines\": $json.inventory\n}"
+      },
+      "id": "HTTP_Inventory",
+      "name": "HTTP: Inventory Delta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        160,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{($json.labels || []).length}}",
+              "operation": "larger"
+            }
+          ]
+        }
+      },
+      "id": "IF_HasLabels",
+      "name": "IF labels > 0",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{$json.apiBase}}/labels/print",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={\n  \"userId\": $json.userId,\n  \"items\": $json.labels,\n  \"templateId\": $json.labelTemplateId || null\n}"
+      },
+      "id": "HTTP_PrintLabels",
+      "name": "HTTP: Print Labels",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        160,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const ctx = $items(\"Function: Session Fan‑Out\", 0, 0).json; // context copy\nconst results = {\n  sessionId: ctx.sessionId,\n  created: true,\n  timersStarted: $items(\"HTTP: Start Timer\", 0, 0)?.length || 0,\n  inventoryApplied: $items(\"HTTP: Inventory Delta\", 0, 0)?.length ? true : false,\n  labelsPrinted: $items(\"HTTP: Print Labels\", 0, 0)?.length ? true : false,\n};\nreturn [{ json: results }];"
+      },
+      "id": "Fn_Summarize",
+      "name": "Function: Summarize",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        420,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "responseBody": "={{$json}}",
+        "responseCode": 200
+      },
+      "id": "Respond_Webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        640,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyWeek",
+              "hour": 9,
+              "minute": 0,
+              "weeksInterval": 1,
+              "weekly": {
+                "days": [
+                  "sunday"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "id": "Cron_Weekly",
+      "name": "Cron (Weekly Batch)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "GET",
+        "url": "={{`${$env.SUKA_API_BASE || 'http://localhost:4000'}/mealplan/batch-plan?days=7`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "HTTP_GetBatchPlan",
+      "name": "HTTP: Get Batch Plan",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -740,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/* Expecting { title, recipes, labels?, inventory?, userId? } */\nconst p = items[0]?.json || {};\nconst userId = p.userId || null;\nconst title = p.title || 'Weekly Batch Session';\nconst batch = true;\nconst recipes = Array.isArray(p.recipes) ? p.recipes : [];\nconst labels = Array.isArray(p.labels) ? p.labels : [];\nconst inventory = Array.isArray(p.inventory) ? p.inventory : [];\nconst apiBase = $env.SUKA_API_BASE || 'http://localhost:4000';\nreturn [{ json: { userId, title, batch, startAt: new Date().toISOString(), recipes, timers: [], labels, inventory, apiBase } }];"
+      },
+      "id": "Fn_PlanToPayload",
+      "name": "Function: Plan → Payload",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "return items; // passthrough to reuse the same create-session flow"
+      },
+      "id": "Fn_Passthrough",
+      "name": "Function: Passthrough",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "Error_Trigger",
+      "name": "On Error (Session Orchestrator)",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const e = items[0].json;\nreturn [{ json: { ok: false, message: e.message || 'Workflow error', node: e.node.name, timestamp: new Date().toISOString() } }];"
+      },
+      "id": "Fn_ErrorFormat",
+      "name": "Function: Format Error",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -740,
+        560
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook (Start Session)": {
+      "main": [
+        [
+          {
+            "node": "Function: Normalize Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Normalize Payload": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Create Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Create Session": {
+      "main": [
+        [
+          {
+            "node": "Function: Session Fan‑Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Session Fan‑Out": {
+      "main": [
+        [
+          {
+            "node": "IF timers > 0",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "IF inventory > 0",
+            "type": "main",
+            "index": 2
+          }
+        ],
+        [
+          {
+            "node": "IF labels > 0",
+            "type": "main",
+            "index": 3
+          }
+        ],
+        [
+          {
+            "node": "Function: Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF timers > 0": {
+      "main": [
+        [
+          {
+            "node": "Function: Fan‑out Timers",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Function: Fan‑out Timers": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Start Timer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF inventory > 0": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Inventory Delta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "IF labels > 0": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Print Labels",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Function: Summarize": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron (Weekly Batch)": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Get Batch Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Get Batch Plan": {
+      "main": [
+        [
+          {
+            "node": "Function: Plan → Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Plan → Payload": {
+      "main": [
+        [
+          {
+            "node": "Function: Passthrough",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Passthrough": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Create Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On Error (Session Orchestrator)": {
+      "main": [
+        [
+          {
+            "node": "Function: Format Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "timezone": "America/Chicago",
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

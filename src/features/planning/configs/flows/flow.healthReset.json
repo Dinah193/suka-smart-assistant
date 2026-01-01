@@ -1,0 +1,370 @@
+{
+  "id": "flow.healthReset",
+  "version": 1,
+  "title": "Structured Health Reset Flow",
+  "description": "Guided pathway to reset household health patterns: baseline metrics, nutrition alignment, kitchen and storehouse reset, movement-friendly routines, and follow-through.",
+  "category": "health",
+  "priority": 0.9,
+  "domainsInvolved": [
+    "storehouse",
+    "cooking",
+    "cleaning",
+    "garden",
+    "animals"
+  ],
+  "objectives": [
+    "Capture a realistic health baseline for the household (weight, energy, key symptoms).",
+    "Align meals, ingredients, and storehouse inventory with updated health goals.",
+    "Reset key environments (kitchen and sleep spaces) to support the reset.",
+    "Increase the proportion of health-aligned meals cooked at home.",
+    "Establish small repeatable routines that maintain the new baseline."
+  ],
+  "entryCriteria": {
+    "description": "When to consider activating this health reset flow.",
+    "triggersAny": [
+      "health.metrics.degraded",
+      "health.energy.lowReported",
+      "health.weightGain.detected",
+      "health.labResults.flagged",
+      "storehouse.junkFoodDensity.high",
+      "user.manualFlowStart.healthReset"
+    ],
+    "supportsManualStart": true,
+    "recommendedMinIntervalDays": 30
+  },
+  "exitCriteria": {
+    "description": "When the health reset is considered complete (for now).",
+    "conditionsAll": [
+      {
+        "metric": "health.complianceScore",
+        "operator": ">=",
+        "value": 0.7
+      },
+      {
+        "metric": "cooking.healthAlignedMealsRatio",
+        "operator": ">=",
+        "value": 0.7
+      },
+      {
+        "metric": "storehouse.junkFoodDensity",
+        "operator": "<=",
+        "value": 0.3
+      }
+    ]
+  },
+  "guards": {
+    "sabbathAware": true,
+    "quietHoursSensitive": true,
+    "weatherAware": true,
+    "inventoryAware": true,
+    "deviceBatteryAware": true
+  },
+  "nowCtaBehavior": {
+    "description": "How the 'Now' button should behave when this flow is active.",
+    "preferredDomains": [
+      "storehouse",
+      "cooking",
+      "cleaning"
+    ],
+    "respectDomainWeights": true,
+    "boostWhenTriggersPresent": [
+      "health.metrics.degraded",
+      "health.energy.lowReported",
+      "storehouse.junkFoodDensity.high"
+    ]
+  },
+  "phaseOrder": [
+    "assessment",
+    "nutrition_alignment",
+    "kitchen_environment_reset",
+    "routine_build",
+    "reflection_and_adjustment"
+  ],
+  "phases": {
+    "assessment": {
+      "id": "assessment",
+      "label": "Baseline Health Assessment",
+      "goal": "Capture a snapshot of current health, eating patterns, and storehouse realities.",
+      "priorityBias": 0.95,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "storehouse"
+      ],
+      "steps": [
+        {
+          "id": "step.assess.healthSnapshot",
+          "label": "Record Health Snapshot",
+          "description": "Log current weight, energy levels, major symptoms, and doctor notes to anchor the reset.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.health.healthSnapshotLogger",
+          "nodeType": "calculator",
+          "sessionTemplateId": "storehouse.sessions.healthSnapshot",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "If no recent health snapshot exists, this should be the first suggestion."
+        },
+        {
+          "id": "step.assess.bmiAndTargets",
+          "label": "Check BMI and Target Range",
+          "description": "Use a BMI or body composition calculator to understand current status and set realistic targets.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.health.bmiCalculator",
+          "nodeType": "calculator",
+          "sessionTemplateId": "storehouse.sessions.bmiReview",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Optional but recommended if weight has shifted or goals have changed."
+        },
+        {
+          "id": "step.assess.macroAndMicros",
+          "label": "Update Macro & Micronutrient Targets",
+          "description": "Review daily macro and micronutrient needs for the household (including hair/skin goals if used).",
+          "domain": "storehouse",
+          "nodeId": "storehouse.meals.macroCalculator",
+          "nodeType": "calculator",
+          "sessionTemplateId": "storehouse.sessions.macroAndMicronutrientTargets",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "These targets will drive which meals and recipes are encouraged in later phases."
+        }
+      ]
+    },
+    "nutrition_alignment": {
+      "id": "nutrition_alignment",
+      "label": "Nutrition & Storehouse Alignment",
+      "goal": "Align the storehouse, recipes, and meal planning with updated health targets.",
+      "priorityBias": 0.93,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "storehouse",
+        "cooking",
+        "garden",
+        "animals"
+      ],
+      "steps": [
+        {
+          "id": "step.nutrition.auditStorehouseHealth",
+          "label": "Audit Storehouse for Health Alignment",
+          "description": "Score current inventory on how well it supports the new health targets (whole foods vs. ultra-processed).",
+          "domain": "storehouse",
+          "nodeId": "storehouse.meals.healthAlignmentAudit",
+          "nodeType": "calculator",
+          "sessionTemplateId": "storehouse.sessions.healthAlignmentAudit",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "High junk density should push this step to the top of the queue."
+        },
+        {
+          "id": "step.nutrition.deprioritizeJunk",
+          "label": "Deprioritize or Re-route Junk Foods",
+          "description": "Flag or reclassify items that work against health goals, and decide what to phase out.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.meals.junkDeprecationPlanner",
+          "nodeType": "planner",
+          "sessionTemplateId": "storehouse.sessions.junkDeprecationPlan",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Can suggest using some items in low-frequency recipes instead of daily snacks."
+        },
+        {
+          "id": "step.nutrition.healthPresetMealPlan",
+          "label": "Create Health-Focused Meal Plan",
+          "description": "Generate a 7–14 day meal plan using health presets (e.g., blood sugar friendly, heart support, hair nutrition).",
+          "domain": "storehouse",
+          "nodeId": "storehouse.meals.healthPresetPlanner",
+          "nodeType": "planner",
+          "sessionTemplateId": "storehouse.sessions.healthPresetMealPlan",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Primary planning step; recommended before any batch cooking sessions."
+        },
+        {
+          "id": "step.nutrition.targetedShopping",
+          "label": "Generate Targeted Health Shopping List",
+          "description": "Create a list focused on adding missing whole foods and healthy fats, not random extras.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.meals.healthShoppingListGenerator",
+          "nodeType": "planner",
+          "sessionTemplateId": "storehouse.sessions.healthShoppingTripPlanner",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Use if budget allows a focused health restock trip."
+        },
+        {
+          "id": "step.nutrition.gardenAndAnimalAlignment",
+          "label": "Align Garden & Animals with Health Goals",
+          "description": "Adjust garden crops and animal stocking to support long-term access to lean proteins, greens, and key micronutrients.",
+          "domain": "garden",
+          "nodeId": "garden.planting.healthAlignmentPlanner",
+          "nodeType": "planner",
+          "sessionTemplateId": "garden.sessions.healthAlignmentPlan",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Optional but powerful if you’re growing or raising part of your own food."
+        }
+      ]
+    },
+    "kitchen_environment_reset": {
+      "id": "kitchen_environment_reset",
+      "label": "Kitchen & Sleep Environment Reset",
+      "goal": "Reset key environments so it’s easier to eat well, rest, and recover.",
+      "priorityBias": 0.9,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "cleaning",
+        "cooking",
+        "storehouse"
+      ],
+      "steps": [
+        {
+          "id": "step.environment.kitchenReset",
+          "label": "Run Kitchen Health Reset Session",
+          "description": "Deep clean counters, stove, fridge, and key tools so healthy cooking feels easier and safer.",
+          "domain": "cleaning",
+          "nodeId": "cleaning.zoneSession.kitchenHealthReset",
+          "nodeType": "session-template",
+          "sessionTemplateId": "cleaning.zoneSession.kitchenHealthReset",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "Strong candidate for 'Now' immediately after health-focused meal planning."
+        },
+        {
+          "id": "step.environment.pantryReorganization",
+          "label": "Reorganize Pantry for Healthy Choices",
+          "description": "Place whole foods and healthy ingredients at eye level; move treats to lower priority zones.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.inventory.pantryReorgPlanner",
+          "nodeType": "planner",
+          "sessionTemplateId": "storehouse.sessions.pantryReorgHealth",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Lightweight step that can ride along with a cleaning session."
+        },
+        {
+          "id": "step.environment.sleepSpaceReset",
+          "label": "Reset Sleep Space",
+          "description": "Clean and declutter sleep areas (linen, dust, lighting) to support better rest and recovery.",
+          "domain": "cleaning",
+          "nodeId": "cleaning.zoneSession.sleepSpaceReset",
+          "nodeType": "session-template",
+          "sessionTemplateId": "cleaning.zoneSession.sleepSpaceReset",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "Suggested when low energy is flagged as a major complaint."
+        }
+      ]
+    },
+    "routine_build": {
+      "id": "routine_build",
+      "label": "Health-Supporting Routine Build",
+      "goal": "Turn the plan into sustainable daily/weekly routines: cooking, movement, and light cleaning.",
+      "priorityBias": 0.88,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "cooking",
+        "cleaning",
+        "storehouse",
+        "garden"
+      ],
+      "steps": [
+        {
+          "id": "step.routines.batchCookingHealth",
+          "label": "Run Health-Focused Batch Cooking Session",
+          "description": "Cook key meals and components (proteins, grains, veggies) so healthy choices are easy on busy days.",
+          "domain": "cooking",
+          "nodeId": "cooking.batchSession.healthPresetRunner",
+          "nodeType": "session-template",
+          "sessionTemplateId": "cooking.batchSession.healthPresetRunner",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "Top candidate for 'Now' when a health-focused meal plan is present."
+        },
+        {
+          "id": "step.routines.lightMovementSessions",
+          "label": "Schedule Light Movement Sessions via Household Tasks",
+          "description": "Use garden work, cleaning, and kitchen prep sessions as structured, low-impact movement blocks.",
+          "domain": "garden",
+          "nodeId": "garden.session.lightMovementPlanner",
+          "nodeType": "planner",
+          "sessionTemplateId": "garden.sessions.lightMovementFromTasks",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Can schedule multiple small movement-friendly sessions across the week."
+        },
+        {
+          "id": "step.routines.dailyKitchenResetLite",
+          "label": "Daily Kitchen Reset Lite",
+          "description": "Add a short, repeatable end-of-day cleaning session to prevent buildup and keep cooking approachable.",
+          "domain": "cleaning",
+          "nodeId": "cleaning.zoneSession.kitchenResetLite",
+          "nodeType": "session-template",
+          "sessionTemplateId": "cleaning.zoneSession.kitchenResetLite",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "Often suggested after evening cooking sessions to protect tomorrow’s momentum."
+        },
+        {
+          "id": "step.routines.habitAnchors",
+          "label": "Set Habit Anchors & Reminders",
+          "description": "Link key health actions (drinking water, prep veggies, stretch) to existing household routines and schedule reminders.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.health.habitAnchorPlanner",
+          "nodeType": "planner",
+          "sessionTemplateId": "storehouse.sessions.habitAnchors",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Small configuration step; increases the value of every future session."
+        }
+      ]
+    },
+    "reflection_and_adjustment": {
+      "id": "reflection_and_adjustment",
+      "label": "Reflection & Adjustment",
+      "goal": "Review progress after a few weeks and adjust recipes, routines, and storehouse patterns.",
+      "priorityBias": 0.83,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "storehouse",
+        "cooking"
+      ],
+      "steps": [
+        {
+          "id": "step.reflect.repeatHealthSnapshot",
+          "label": "Repeat Health Snapshot",
+          "description": "Re-log weight, energy, symptoms, and compare to baseline to see if the reset is working.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.health.healthSnapshotLogger",
+          "nodeType": "calculator",
+          "sessionTemplateId": "storehouse.sessions.healthSnapshotFollowup",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Suggest this after 2–4 weeks of running health reset routines."
+        },
+        {
+          "id": "step.reflect.adjustMealPlan",
+          "label": "Adjust Meal Plan from Feedback",
+          "description": "Tune recipes and meal frequency based on what the household actually enjoyed and tolerated well.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.meals.healthFeedbackPlanner",
+          "nodeType": "planner",
+          "sessionTemplateId": "storehouse.sessions.healthFeedbackMealPlan",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Fine-tune instead of starting over; keeps the reset sustainable."
+        },
+        {
+          "id": "step.reflect.lockInFavorites",
+          "label": "Lock In Health-Friendly Favorites",
+          "description": "Tag favorite recipes and batch sessions as 'health default' to be prioritized in future flows.",
+          "domain": "cooking",
+          "nodeId": "cooking.recipes.healthFavoritesManager",
+          "nodeType": "planner",
+          "sessionTemplateId": "cooking.sessions.healthFavoritesManager",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Encourages repeating the most successful meals rather than chasing novelty."
+        }
+      ]
+    }
+  }
+}

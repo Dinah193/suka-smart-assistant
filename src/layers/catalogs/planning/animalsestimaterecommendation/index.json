@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "id": "catalog.planning.animals_estimate_recommendation.index",
+    "domain": "animals_estimate_recommendation",
+    "kind": "index",
+    "title": "Animal Estimate & Recommendation Patterns",
+    "version": "1.0.0",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial planning patterns for animal recommendations, stocking estimates, feed planning, breeding cycles, and slaughter-to-storage linking."
+      }
+    ]
+  },
+  "patterns": [
+    {
+      "id": "pat.animals.recommendation_household_protein",
+      "path": "./patterns/recommendation_household_protein.json",
+      "tags": [
+        "goal:protein",
+        "time:30-60",
+        "difficulty:low",
+        "mode:recommend"
+      ]
+    },
+    {
+      "id": "pat.animals.stocking_estimate_land_labor",
+      "path": "./patterns/stocking_estimate_land_labor.json",
+      "tags": [
+        "goal:stocking",
+        "time:60-120",
+        "difficulty:medium",
+        "mode:estimate"
+      ]
+    },
+    {
+      "id": "pat.animals.feed_water_plan",
+      "path": "./patterns/feed_water_plan.json",
+      "tags": [
+        "goal:feed",
+        "time:60-180",
+        "difficulty:medium",
+        "mode:plan"
+      ]
+    },
+    {
+      "id": "pat.animals.breeding_cycle_planner",
+      "path": "./patterns/breeding_cycle_planner.json",
+      "tags": [
+        "goal:breeding",
+        "time:60-180",
+        "difficulty:medium",
+        "mode:cycle"
+      ]
+    },
+    {
+      "id": "pat.animals.slaughter_to_storage_pipeline",
+      "path": "./patterns/slaughter_to_storage_pipeline.json",
+      "tags": [
+        "goal:processing",
+        "time:half_day",
+        "difficulty:high",
+        "mode:pipeline"
+      ]
+    }
+  ],
+  "ui": {
+    "defaultFilters": [
+      "goal",
+      "time",
+      "difficulty",
+      "mode"
+    ]
+  }
+}

@@ -1,0 +1,365 @@
+{
+  "$schema": "../../schemas/byproduct.schema.json",
+  "version": "2025-10-31T16:30:00-05:00",
+  "meta": {
+    "id": "bones_stock_base",
+    "title": "Bones → Stock/Base/Broth – Clean Line (User-Selectable)",
+    "description": "Byproduct profile for capturing soup/stock/broth value from bones generated during butchery or meal prep. Does NOT auto-trigger a batch; instead, it surfaces the option for the user to create a broth/stock batch. Feeds storehouse stock planning (soups, stews, sauces), cleaning/sanitizing of large pots and strainers, and garden/compost routing of spent bones/veg scraps.",
+    "source": "suka-smart-assistant",
+    "tags": [
+      "byproduct",
+      "bones",
+      "stock",
+      "broth",
+      "soup-base",
+      "storehouse",
+      "meal-planning",
+      "cleaning",
+      "garden",
+      "butchery",
+      "torah-compliant"
+    ],
+    "torahCompliance": {
+      "uncleanSpeciesExcluded": true,
+      "notes": "Use bones from clean species only (beef, lamb, goat, poultry). Exclude pork/unclean animals. Keep unclean lines physically separate."
+    }
+  },
+  "ui": {
+    "layout": "cards/timeline",
+    "hints": {
+      "primaryCTA": "Create Broth / Stock Batch",
+      "secondaryCTA": "Save as Favorite",
+      "tertiaryCTA": "Plan for Feast / Storehouse",
+      "showSeasonalityBadge": false,
+      "groupBy": [
+        "butcheryBatchId",
+        "stockBatchId"
+      ],
+      "suggestOnly": true
+    },
+    "badges": [
+      { "text": "Byproduct", "color": "sky" },
+      { "text": "Broth/Stock", "color": "amber" },
+      { "text": "User-initiated", "color": "slate" }
+    ]
+  },
+  "orchestration": {
+    "bus": "window.__suka?.eventBus",
+    "emitOnLoad": [
+      "byproduct.curve.loaded",
+      "byproduct.bones.stock.loaded"
+    ],
+    "listen": [
+      "butchery.session.completed",
+      "meal.session.completed",
+      "storehouse.goal.request",
+      "inventory.restock.request",
+      "garden.session.request",
+      "cleaning.session.request"
+    ],
+    "sharedScopes": [
+      "meals",
+      "butchery",
+      "storehouse",
+      "cleaning",
+      "garden",
+      "animals"
+    ]
+  },
+  "engines": {
+    "primary": "byproductEngine",
+    "supports": [
+      "mealPlanEngine",
+      "storehouseGoalEngine",
+      "cleaningSessionEngine",
+      "gardenQueueEngine",
+      "animalSessionEngine"
+    ],
+    "notes": "Engine should surface an ACTION: ‘Make stock from available bones’. It should NOT schedule anything until the user confirms."
+  },
+  "reverse": {
+    "generateFrom": [
+      "storehouse.targets.stock-broth",
+      "mealplan.requirements.stock-broth",
+      "festival.menu.stock-broth",
+      "community.soup-kitchen.batch",
+      "coop-pool.winter-soups",
+      "butchery.plan.batch"
+    ],
+    "strategies": [
+      {
+        "id": "from-storehouse-stock-target",
+        "title": "Suggest stock/broth batches from storehouse stock target",
+        "input": {
+          "litersStockTarget": 40,
+          "avgBatchLiters": 8
+        },
+        "output": {
+          "suggestedBatches": 5,
+          "suggestedBoneWeightKg": 15,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Create 5 stock batches over next 2 weeks",
+              "emitOnUserAccept": [
+                "cooking.session.request",
+                "storehouse.plan.generated"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "from-mealplan-soups",
+        "title": "Suggest stock from soup/stew meal plan usage",
+        "input": {
+          "soupMealsPerWeek": 4,
+          "litersPerSoup": 2
+        },
+        "output": {
+          "requiredWeeklyStockLiters": 8,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Create 1 stock batch for upcoming soups"
+            }
+          ]
+        }
+      },
+      {
+        "id": "from-butchery-bones-available",
+        "title": "Suggest stock batch from current bones in inventory",
+        "input": {
+          "boneWeightKgAvailable": 10
+        },
+        "output": {
+          "estimatedStockLiters": 16,
+          "requiresVegScrapKg": 2,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Use today’s bones to make ~16 L stock"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "byproduct": {
+    "category": "kitchen-base",
+    "subCategory": "broth-stock",
+    "excludeFromMealPlanner": false,
+    "yieldModel": {
+      "type": "clean-bones-veg-scrap",
+      "formula": "boneWeightKg * 1.6",
+      "notes": "1 kg well-roasted bones + aromatics/scraps → about 1.6 L finished stock, depending on reduction."
+    },
+    "examples": [
+      {
+        "label": "5 kg beef bones (clean)",
+        "finishedStockLiters": 8
+      },
+      {
+        "label": "3 kg poultry carcasses",
+        "finishedStockLiters": 4.5
+      }
+    ]
+  },
+  "storehouse": {
+    "targets": {
+      "chicken_stock_liters": 12,
+      "beef_bone_broth_liters": 15,
+      "mixed_soup_base_liters": 10,
+      "winter_soup_reserve_liters": 20
+    },
+    "grocerySectionsInspiration": [
+      "Canned & Jarred Soups",
+      "Stocks & Broths",
+      "Sauces & Gravies",
+      "Meal Starters / Bases",
+      "Freezer Meals"
+    ],
+    "autoPlan": {
+      "enabled": false
+    }
+  },
+  "meals": {
+    "recipes": [
+      {
+        "id": "standard-broth-batch",
+        "title": "Standard Broth/Stock Batch",
+        "linksTo": [
+          "/meals/soups",
+          "/storehouse/stock",
+          "/cleaning/kitchen"
+        ],
+        "emit": "cooking.session.request"
+      },
+      {
+        "id": "sabbath-soup-base",
+        "title": "Sabbath Soup Base (Pre-Feast)",
+        "useWithinHours": 72,
+        "linksTo": [
+          "/calendar/feast-days",
+          "/storehouse/stock"
+        ],
+        "emit": "cooking.session.request"
+      }
+    ],
+    "autoSession": {
+      "everyDays": 0,
+      "emit": []
+    }
+  },
+  "garden": {
+    "applications": [
+      {
+        "id": "spent-bones-to-compost",
+        "title": "Spent Bones to Compost (If Cracked/Small)",
+        "emit": "garden.session.request"
+      },
+      {
+        "id": "veg-scrap-routing",
+        "title": "Veg Scrap Routing From Stock Prep",
+        "emit": "garden.session.request"
+      }
+    ],
+    "notes": "After stock is strained, bones and veg scraps can be routed to compost or other animal feed flows in your system."
+  },
+  "cleaning": {
+    "routines": [
+      {
+        "id": "stock-pot-deep-clean",
+        "title": "Stock Pot / Steam Kettle Deep Clean",
+        "frequency": "PER_RUN",
+        "emit": "cleaning.session.request",
+        "tools": [
+          "degreaser",
+          "hot-water",
+          "brush",
+          "sanitizer"
+        ]
+      },
+      {
+        "id": "strainer-and-jars",
+        "title": "Strainer, Funnels, and Jars Sanitizing",
+        "frequency": "PER_RUN",
+        "emit": "cleaning.session.request"
+      }
+    ],
+    "sabbathGuard": true
+  },
+  "animals": {
+    "acquisition": {
+      "allowedSpecies": [
+        "cattle",
+        "bovine",
+        "sheep",
+        "goat",
+        "poultry"
+      ],
+      "disallowedSpecies": [
+        "pig",
+        "swine"
+      ],
+      "notes": "Bones used for stock must come from clean species. If unclean species is processed, separate run + separate storage, and do a separate byproduct record."
+    },
+    "care": {
+      "emit": [
+        "animal.care.session.request"
+      ]
+    },
+    "butchery": {
+      "notes": "Butchery sessions should flag bone output so this byproduct can SHOW the stock option — but not force it.",
+      "emit": [
+        "butchery.session.request"
+      ]
+    }
+  },
+  "processing": {
+    "steps": [
+      {
+        "step": 1,
+        "id": "collect-clean-bones",
+        "title": "Collect Clean Bones From Butchery/Meal Prep",
+        "emit": [
+          "inventory.restock.request"
+        ]
+      },
+      {
+        "step": 2,
+        "id": "optional-roast-or-parboil",
+        "title": "Optional: Roast or Parboil Bones",
+        "emit": []
+      },
+      {
+        "step": 3,
+        "id": "optional-long-simmer",
+        "title": "Optional: Long Simmer – Stock/Broth",
+        "emit": []
+      },
+      {
+        "step": 4,
+        "id": "optional-strain-and-store",
+        "title": "Optional: Strain, Label, Store",
+        "emit": []
+      }
+    ]
+  },
+  "inventory": {
+    "productId": "byproduct-bones-stock-base",
+    "unit": "liters",
+    "trackLots": true,
+    "shelfLifeDays": 7
+  },
+  "favoriteSessions": [
+    {
+      "id": "fav-broth-after-butchery",
+      "title": "Broth/Stock Batch After Butchery (User Start)",
+      "domain": "meals/broth",
+      "schedule": "",
+      "sabbathGuard": true
+    },
+    {
+      "id": "fav-weekly-stock-day",
+      "title": "Weekly Stock Day (User Start)",
+      "domain": "storehouse/kitchen",
+      "schedule": ""
+    }
+  ],
+  "scheduleTemplates": [
+    {
+      "id": "stock-user-initiated-template",
+      "title": "User-Initiated Stock Day",
+      "rrules": [],
+      "options": {
+        "userMustConfirm": true,
+        "sabbathGuard": true
+      }
+    }
+  ],
+  "userProfiles": {
+    "allowUserOwnedSchedules": true,
+    "allowUserOwnedFavorites": true,
+    "allowExportShare": true,
+    "shareFormats": [
+      "json",
+      "suka-plan",
+      "calendar-rrule"
+    ]
+  },
+  "events": {
+    "emits": [
+      "byproduct.session.request",
+      "cleaning.session.request",
+      "garden.session.request",
+      "inventory.restock.request"
+    ],
+    "consumes": [
+      "butchery.session.completed",
+      "meal.session.completed",
+      "storehouse.targets.changed",
+      "garden.plan.changed"
+    ]
+  }
+}

@@ -1,0 +1,404 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka.local/agents/prompts/reasoner-contracts/stepOrdering.delta.schema.json",
+  "title": "SSA Reasoner – Step Ordering Delta",
+  "description": "Delta-style schema for proposed step reordering within SSA sessions. Used by the Reasoner to suggest re-sequencing, pinning, or parallelizing steps across cooking, cleaning, garden, animals, preservation, and storehouse domains.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "description": "Semantic version for this payload shape.",
+      "default": "1.0.0"
+    },
+    "domains": {
+      "type": "array",
+      "description": "Domains this delta applies to. Typically a subset of ['cooking', 'cleaning', 'garden', 'animals', 'preservation', 'storehouse'].",
+      "items": {
+        "type": "string",
+        "enum": [
+          "cooking",
+          "cleaning",
+          "garden",
+          "animals",
+          "preservation",
+          "storehouse"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when this step ordering delta was generated."
+    },
+    "requestId": {
+      "type": "string",
+      "description": "Optional ID that ties this delta back to a Reasoner request."
+    },
+    "householdId": {
+      "type": "string",
+      "description": "Optional household/profile identifier this delta is scoped to."
+    },
+    "locale": {
+      "type": "string",
+      "description": "BCP-47 locale in which labels and notes are expressed, e.g. 'en-US'.",
+      "default": "en-US"
+    },
+    "reorderings": {
+      "type": "array",
+      "description": "List of individual reordering proposals to add/update/remove.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable identifier for this reordering rule or recommendation. May reference an existing rule for updates."
+          },
+          "status": {
+            "type": "string",
+            "description": "Whether this reordering is newly proposed, already accepted, or deprecated.",
+            "enum": [
+              "proposed",
+              "accepted",
+              "deprecated"
+            ],
+            "default": "proposed"
+          },
+          "operation": {
+            "type": "string",
+            "description": "How this delta should be applied to the step-ordering knowledge.",
+            "enum": [
+              "upsert",
+              "remove"
+            ],
+            "default": "upsert"
+          },
+          "sessionId": {
+            "type": "string",
+            "description": "Target session id whose steps are being reordered. Must match an SSA Session.id."
+          },
+          "sessionDomain": {
+            "type": "string",
+            "description": "Domain of the target session. Helps the engine route the recommendation.",
+            "enum": [
+              "cooking",
+              "cleaning",
+              "garden",
+              "animals",
+              "preservation",
+              "storehouse"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "description": "Short, user-facing label for this reordering, e.g. 'Front-load chopping tasks'."
+          },
+          "originalOrder": {
+            "type": "array",
+            "description": "Original step ordering by step id, as seen when the Reasoner was invoked.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "proposedOrder": {
+            "type": "array",
+            "description": "Proposed new ordering of step ids for this session. Must contain only ids from originalOrder (or the session's step ids) unless introducing isAllowedExtraSteps.",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "changeMagnitude": {
+            "type": "string",
+            "description": "Rough description of how disruptive this reordering is.",
+            "enum": [
+              "minimal",
+              "moderate",
+              "major"
+            ],
+            "default": "minimal"
+          },
+          "confidence": {
+            "type": "number",
+            "description": "0–1 numeric confidence score representing how safe/beneficial this reordering is.",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "drivers": {
+            "type": "object",
+            "description": "Key factors driving this reordering recommendation, normalized to 0–1 where possible.",
+            "additionalProperties": false,
+            "properties": {
+              "prepEfficiency": {
+                "type": "number",
+                "description": "0–1 score for how much this reordering improves prep/logistics efficiency.",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "equipmentUtilization": {
+                "type": "number",
+                "description": "0–1 score for how much this reordering improves equipment utilization (e.g. keeping oven or stove consistently busy).",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "overlapTimersReduction": {
+                "type": "number",
+                "description": "0–1 metric for how much this reordering reduces conflicting timers or complex overlaps.",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "quietHoursCompliance": {
+                "type": "number",
+                "description": "0–1 score for how much this reordering improves compliance with quiet hours (1 = fully compliant).",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "sabbathCompliance": {
+                "type": "number",
+                "description": "0–1 score for how much this reordering improves Sabbath compliance (1 = fully compliant).",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "yieldOrQualityImpact": {
+                "type": "number",
+                "description": "Estimated impact on yield/quality from applying this reordering. Range -1.0 (significant degradation) to 1.0 (significant improvement).",
+                "minimum": -1,
+                "maximum": 1
+              }
+            }
+          },
+          "constraints": {
+            "type": "object",
+            "description": "Ordering constraints that must hold when applying this reordering.",
+            "additionalProperties": false,
+            "properties": {
+              "mustPrecede": {
+                "type": "array",
+                "description": "List of step id pairs [A, B] where A must come before B.",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "mustFollow": {
+                "type": "array",
+                "description": "List of step id pairs [A, B] where A must come after B.",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "pinnedSteps": {
+                "type": "array",
+                "description": "Step ids that must remain in their original position or near it (e.g. Sabbath boundary, critical food-safety step).",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "maxParallelSteps": {
+                "type": "integer",
+                "description": "Soft limit on how many steps should be in-flight concurrently when using this ordering.",
+                "minimum": 1
+              }
+            }
+          },
+          "parallelization": {
+            "type": "object",
+            "description": "Optional grouping and concurrency hints derived from the new ordering.",
+            "additionalProperties": false,
+            "properties": {
+              "parallelGroups": {
+                "type": "array",
+                "description": "Each group represents steps that can safely run in parallel (subject to equipment and attention constraints).",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "groupId": {
+                      "type": "string",
+                      "description": "Identifier for this parallel group."
+                    },
+                    "stepIds": {
+                      "type": "array",
+                      "description": "Step ids that can run in parallel.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "minItems": 2
+                    },
+                    "attentionLoad": {
+                      "type": "number",
+                      "description": "0–1 estimate of how demanding this group is for the user’s attention (1 = highly demanding).",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "equipmentIds": {
+                      "type": "array",
+                      "description": "Optional list of equipment identifiers if tracked by the domain engine.",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "notes": {
+                      "type": "string",
+                      "description": "User-facing note for why these steps are grouped in parallel."
+                    }
+                  },
+                  "required": [
+                    "groupId",
+                    "stepIds"
+                  ]
+                }
+              },
+              "sequentialIsRecommended": {
+                "type": "boolean",
+                "description": "True if the Reasoner recommends running all steps sequentially despite potential parallelism."
+              }
+            }
+          },
+          "guardSummary": {
+            "$ref": "#/$defs/guardSummary"
+          },
+          "notes": {
+            "type": "string",
+            "description": "User-facing explanation of the reordering and its implications, suitable for display in the SessionRunner UI."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when this reordering record was first created."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when this reordering record was last updated."
+          }
+        },
+        "required": [
+          "id",
+          "operation",
+          "sessionId",
+          "proposedOrder"
+        ]
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "domains",
+    "generatedAt",
+    "reorderings"
+  ],
+  "$defs": {
+    "guardResult": {
+      "type": "object",
+      "description": "Result of a single guard evaluation (e.g. Sabbath, weather, inventory, quiet hours, battery).",
+      "additionalProperties": false,
+      "properties": {
+        "guardId": {
+          "type": "string",
+          "description": "Identifier of the guard, e.g. 'sabbath', 'weather', 'inventory', 'quietHours', 'battery'."
+        },
+        "ok": {
+          "type": "boolean",
+          "description": "True if this guard passed; false if it failed or is blocking."
+        },
+        "severity": {
+          "type": "string",
+          "description": "Severity level for a non-ok guard.",
+          "enum": [
+            "info",
+            "warning",
+            "hard-block"
+          ]
+        },
+        "reasonCode": {
+          "type": "string",
+          "description": "Machine-readable code representing the reason (e.g. 'inside-quiet-hours', 'within-sabbath-window')."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable explanation."
+        },
+        "details": {
+          "type": "object",
+          "description": "Guard-specific structured details."
+        },
+        "suggestedAction": {
+          "type": "string",
+          "description": "Suggested next step if this guard is not ok.",
+          "enum": [
+            "proceed",
+            "reschedule",
+            "require-user-confirmation"
+          ]
+        },
+        "checkedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the guard was evaluated."
+        }
+      },
+      "required": [
+        "guardId",
+        "ok"
+      ]
+    },
+    "guardSummary": {
+      "type": "object",
+      "description": "Aggregate summary of multiple guard results for a given session/step ordering.",
+      "additionalProperties": false,
+      "properties": {
+        "okToApply": {
+          "type": "boolean",
+          "description": "True only if all blocking guards passed for this reordering."
+        },
+        "hasWarnings": {
+          "type": "boolean",
+          "description": "True if one or more guards emitted warnings."
+        },
+        "blockingGuards": {
+          "type": "array",
+          "description": "List of guardIds that are currently blocking the reordering.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "warningGuards": {
+          "type": "array",
+          "description": "List of guardIds that are warning-only.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "results": {
+          "type": "array",
+          "description": "Per-guard results used to compute this summary.",
+          "items": {
+            "$ref": "#/$defs/guardResult"
+          }
+        },
+        "checkedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp for the aggregate evaluation."
+        }
+      },
+      "required": [
+        "okToApply",
+        "hasWarnings"
+      ]
+    }
+  }
+}

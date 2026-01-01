@@ -1,0 +1,449 @@
+{
+  "meta": {
+    "id": "lex.cultural.mapping",
+    "domain": "cultural",
+    "version": "1.0.0",
+    "title": "Cultural Mapping Lexicon",
+    "description": "Maps culture-specific terms/phrases to canonical SSA concepts (ingredients, preservation terms, meal categories, optional workflows).",
+    "updatedAt": "2025-12-27",
+    "tags": [
+      "culture",
+      "mapping",
+      "glue"
+    ]
+  },
+  "methods": {
+    "tag.culture.israelite": {
+      "label": "Culture tag: Israelite",
+      "intentTags": [
+        "culture:israelite"
+      ]
+    },
+    "tag.culture.west_african": {
+      "label": "Culture tag: West African",
+      "intentTags": [
+        "culture:west_african"
+      ]
+    },
+    "tag.culture.southern_us": {
+      "label": "Culture tag: Southern US",
+      "intentTags": [
+        "culture:southern_us"
+      ]
+    },
+    "tag.workflow.communal": {
+      "label": "Workflow tag: communal",
+      "intentTags": [
+        "workflow:communal"
+      ]
+    },
+    "tag.workflow.household_steward": {
+      "label": "Workflow tag: household_steward",
+      "intentTags": [
+        "workflow:household_steward"
+      ]
+    },
+    "tag.staple.grain": {
+      "label": "Staple tag: grain",
+      "intentTags": [
+        "staple:grain"
+      ]
+    },
+    "tag.staple.legume": {
+      "label": "Staple tag: legume",
+      "intentTags": [
+        "staple:legume"
+      ]
+    },
+    "tag.staple.tuber": {
+      "label": "Staple tag: tuber",
+      "intentTags": [
+        "staple:tuber"
+      ]
+    },
+    "tag.meal.category.porridge": {
+      "label": "Meal category: porridge",
+      "intentTags": [
+        "meal:porridge"
+      ]
+    },
+    "tag.meal.category.stew": {
+      "label": "Meal category: stew",
+      "intentTags": [
+        "meal:stew"
+      ]
+    },
+    "tag.meal.category.flatbread": {
+      "label": "Meal category: flatbread",
+      "intentTags": [
+        "meal:flatbread"
+      ]
+    },
+    "tag.preserve.ferment": {
+      "label": "Preservation: ferment",
+      "intentTags": [
+        "preserve:ferment"
+      ]
+    },
+    "tag.preserve.dry": {
+      "label": "Preservation: dry",
+      "intentTags": [
+        "preserve:dry"
+      ]
+    },
+    "tag.preserve.freeze": {
+      "label": "Preservation: freeze",
+      "intentTags": [
+        "preserve:freeze"
+      ]
+    },
+    "tag.preserve.cure": {
+      "label": "Preservation: cure",
+      "intentTags": [
+        "preserve:cure"
+      ]
+    },
+    "tag.preserve.canning": {
+      "label": "Preservation: canning",
+      "intentTags": [
+        "preserve:canning"
+      ]
+    },
+    "pref.plan.mode.feast_anchored": {
+      "label": "Preferred planning mode: feast-anchored",
+      "intentTags": [
+        "pref:plan:feastAnchored"
+      ]
+    },
+    "pref.plan.mode.batch_weekly": {
+      "label": "Preferred planning mode: weekly batch",
+      "intentTags": [
+        "pref:plan:batchWeekly"
+      ]
+    }
+  },
+  "synonyms": {
+    "millet": {
+      "methodIds": [
+        "tag.staple.grain"
+      ],
+      "boost": 1.2,
+      "tags": [
+        "ingredient:grain"
+      ]
+    },
+    "sorghum": {
+      "methodIds": [
+        "tag.staple.grain"
+      ],
+      "boost": 1.2,
+      "tags": [
+        "ingredient:grain"
+      ]
+    },
+    "fonio": {
+      "methodIds": [
+        "tag.staple.grain"
+      ],
+      "boost": 1.2,
+      "tags": [
+        "ingredient:grain"
+      ]
+    },
+    "teff": {
+      "methodIds": [
+        "tag.staple.grain"
+      ],
+      "boost": 1.2,
+      "tags": [
+        "ingredient:grain"
+      ]
+    },
+    "cassava": {
+      "methodIds": [
+        "tag.staple.tuber"
+      ],
+      "boost": 1.2,
+      "tags": [
+        "ingredient:tuber"
+      ]
+    },
+    "yuca": {
+      "methodIds": [
+        "tag.staple.tuber"
+      ],
+      "boost": 1.2,
+      "tags": [
+        "ingredient:tuber"
+      ],
+      "notes": "Alias of cassava"
+    },
+    "plantain": {
+      "methodIds": [
+        "tag.staple.tuber"
+      ],
+      "boost": 1.05,
+      "tags": [
+        "ingredient:starch"
+      ]
+    },
+    "black-eyed peas": {
+      "methodIds": [
+        "tag.staple.legume"
+      ],
+      "boost": 1.15,
+      "tags": [
+        "ingredient:legume"
+      ]
+    },
+    "cowpeas": {
+      "methodIds": [
+        "tag.staple.legume"
+      ],
+      "boost": 1.15,
+      "tags": [
+        "ingredient:legume"
+      ]
+    },
+    "okra": {
+      "methodIds": [
+        "tag.meal.category.stew"
+      ],
+      "boost": 0.9,
+      "tags": [
+        "ingredient:veg"
+      ]
+    },
+    "tuwo": {
+      "methodIds": [
+        "tag.meal.category.porridge",
+        "tag.culture.west_african"
+      ],
+      "boost": 1.25,
+      "notes": "Common West African swallow/porridge family"
+    },
+    "fufu": {
+      "methodIds": [
+        "tag.meal.category.porridge",
+        "tag.culture.west_african"
+      ],
+      "boost": 1.25
+    },
+    "ugali": {
+      "methodIds": [
+        "tag.meal.category.porridge"
+      ],
+      "boost": 1.1
+    },
+    "injera": {
+      "methodIds": [
+        "tag.meal.category.flatbread"
+      ],
+      "boost": 1.25,
+      "tags": [
+        "ingredient:teff"
+      ]
+    },
+    "flatbread": {
+      "methodIds": [
+        "tag.meal.category.flatbread"
+      ],
+      "boost": 1.05
+    },
+    "stew": {
+      "methodIds": [
+        "tag.meal.category.stew"
+      ],
+      "boost": 1.0
+    },
+    "soup": {
+      "methodIds": [
+        "tag.meal.category.stew"
+      ],
+      "boost": 0.9
+    },
+    "lacto-ferment": {
+      "methodIds": [
+        "tag.preserve.ferment"
+      ],
+      "boost": 1.25
+    },
+    "ferment": {
+      "methodIds": [
+        "tag.preserve.ferment"
+      ],
+      "boost": 1.15
+    },
+    "souring": {
+      "methodIds": [
+        "tag.preserve.ferment"
+      ],
+      "boost": 1.05
+    },
+    "sun-dry": {
+      "methodIds": [
+        "tag.preserve.dry"
+      ],
+      "boost": 1.2
+    },
+    "air-dry": {
+      "methodIds": [
+        "tag.preserve.dry"
+      ],
+      "boost": 1.15
+    },
+    "smoke": {
+      "methodIds": [
+        "tag.preserve.cure"
+      ],
+      "boost": 1.15,
+      "notes": "Often a curing/smoking family"
+    },
+    "cure": {
+      "methodIds": [
+        "tag.preserve.cure"
+      ],
+      "boost": 1.15
+    },
+    "freeze": {
+      "methodIds": [
+        "tag.preserve.freeze"
+      ],
+      "boost": 1.05
+    },
+    "pressure can": {
+      "methodIds": [
+        "tag.preserve.canning"
+      ],
+      "boost": 1.25
+    },
+    "water bath": {
+      "methodIds": [
+        "tag.preserve.canning"
+      ],
+      "boost": 1.15
+    },
+    "sabbath": {
+      "methodIds": [
+        "tag.culture.israelite",
+        "pref.plan.mode.feast_anchored"
+      ],
+      "boost": 1.1,
+      "tags": [
+        "moed:sabbath"
+      ]
+    },
+    "appointed times": {
+      "methodIds": [
+        "tag.culture.israelite",
+        "pref.plan.mode.feast_anchored"
+      ],
+      "boost": 1.2,
+      "tags": [
+        "moed:feast"
+      ]
+    },
+    "holy days": {
+      "methodIds": [
+        "tag.culture.israelite",
+        "pref.plan.mode.feast_anchored"
+      ],
+      "boost": 1.2
+    },
+    "communal cook": {
+      "methodIds": [
+        "tag.workflow.communal"
+      ],
+      "boost": 1.15,
+      "notes": "Optional; do not assume user preference"
+    },
+    "shared cooking": {
+      "methodIds": [
+        "tag.workflow.communal"
+      ],
+      "boost": 1.1
+    },
+    "household steward": {
+      "methodIds": [
+        "tag.workflow.household_steward"
+      ],
+      "boost": 1.15
+    }
+  },
+  "phrases": [
+    {
+      "text": "plan around appointed times",
+      "methodIds": [
+        "pref.plan.mode.feast_anchored",
+        "tag.culture.israelite"
+      ],
+      "boost": 1.3,
+      "tags": [
+        "pref:plan"
+      ]
+    },
+    {
+      "text": "weekly batch cooking for the household",
+      "methodIds": [
+        "pref.plan.mode.batch_weekly"
+      ],
+      "boost": 1.25,
+      "tags": [
+        "pref:plan"
+      ]
+    },
+    {
+      "text": "communal work day cooking",
+      "methodIds": [
+        "tag.workflow.communal"
+      ],
+      "boost": 1.1,
+      "tags": [
+        "workflow:communal"
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "rule.emit.culture.tags",
+      "when": {
+        "hasMethodIds": [
+          "tag.culture.israelite",
+          "tag.culture.west_african",
+          "tag.culture.southern_us"
+        ]
+      },
+      "then": [
+        {
+          "type": "emitHintTag",
+          "hintTag": "applyCulturalOverlays",
+          "message": "Cultural tags found. Consider applying optional cultural planning overlays."
+        }
+      ]
+    },
+    {
+      "id": "rule.preferred.patterns",
+      "when": {
+        "hasMethodIds": [
+          "pref.plan.mode.feast_anchored",
+          "pref.plan.mode.batch_weekly"
+        ]
+      },
+      "then": [
+        {
+          "type": "emitHintTag",
+          "hintTag": "hasPreferredPlanningMode",
+          "message": "Preferred planning mode detected from phrases; resolver may preselect matching patterns."
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "emitHintTag",
+      "hintTag": "cultureMappingActive",
+      "message": "Culture mapping lexicon active. Emit canonical tags only; never stereotype or force workflows."
+    }
+  ],
+  "signals": []
+}

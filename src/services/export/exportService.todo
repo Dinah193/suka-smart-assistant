@@ -1,0 +1,733 @@
+/* ==========================================================================
+  EXPORT SERVICE (.todo)
+  Purpose: Centralize all "Get it out" actions (PDF, CSV, JSON, ICS, Labels).
+  Design Goals:
+    1) Clear IA (routes + nav)
+    2) Intuitive step-by-step flows
+    3) Consistent design (buttons, cards, states, confirmations)
+    4) Event-driven glue (recipes/inventory/calendar triggers)
+    + Empty states, undo, and "next best action" suggestions.
+
+  How to use:
+    - Keep this .todo in source control. Each TODO is a tracked task.
+    - The code blocks are drop-in JS you can paste into your project files.
+    - Search for "TODO[export]" to implement each step.
+
+  Aliases assumed:
+    "@/components", "@/stores", "@/agents", "@/services", "@/pages", "@/utils"
+========================================================================== */
+
+/* --------------------------------------------------------------------------
+  0) ROUTES & NAV (Clear Information Architecture)
+---------------------------------------------------------------------------- */
+// TODO[export]/routes: Create the Export routes & sidebar entry.
+
+/*
+File: src/pages/export/index.jsx
+*/
+export const EXPORT_ROUTES_TODO = `
+// src/pages/export/index.jsx
+import React from "react";
+import { Outlet } from "react-router-dom";
+import { ExportSidebar } from "@/components/export/ExportSidebar.jsx";
+
+export default function ExportLayout() {
+  return (
+    <div className="grid grid-cols-12 gap-4 p-4">
+      <aside className="col-span-3">
+        <ExportSidebar />
+      </aside>
+      <main className="col-span-9">
+        <Outlet />
+      </main>
+    </div>
+  );
+}
+`;
+
+/*
+File: src/pages/export/routes.jsx
+*/
+export const EXPORT_ROUTES_CONFIG_TODO = `
+// src/pages/export/routes.jsx
+import React from "react";
+import ExportLayout from "./index.jsx";
+import { ExportStart } from "@/components/export/ExportStart.jsx";
+import { ExportPreview } from "@/components/export/ExportPreview.jsx";
+import { ExportHistory } from "@/components/export/ExportHistory.jsx";
+
+export const exportRoutes = {
+  path: "/export",
+  element: <ExportLayout />,
+  children: [
+    { index: true, element: <ExportStart /> },
+    { path: "preview", element: <ExportPreview /> },
+    { path: "history", element: <ExportHistory /> },
+  ],
+};
+`;
+
+/*
+File: src/components/export/ExportSidebar.jsx
+*/
+export const EXPORT_SIDEBAR_TODO = `
+// src/components/export/ExportSidebar.jsx
+import React from "react";
+import { NavLink } from "react-router-dom";
+
+export function ExportSidebar() {
+  const item = (to, label) => (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        \`block px-3 py-2 rounded-xl border mb-2 text-sm \${isActive ? "bg-base-200 border-base-300" : "border-base-200 hover:bg-base-100"}\`
+      }
+    >
+      {label}
+    </NavLink>
+  );
+  return (
+    <nav>
+      <h2 className="text-lg font-semibold mb-3">Export Center</h2>
+      {item("/export", "Start Export")}
+      {item("/export/preview", "Preview & Confirm")}
+      {item("/export/history", "History")}
+    </nav>
+  );
+}
+`;
+
+/* --------------------------------------------------------------------------
+  1) STATE & REGISTRY (Event-driven core + Consistent API)
+---------------------------------------------------------------------------- */
+// TODO[export]/registry: Create a central exporter registry and job state machine.
+
+/*
+File: src/services/export/registry.js
+*/
+export const EXPORT_REGISTRY_TODO = `
+// src/services/export/registry.js
+// Register exporters here: pdf, csv, json, ics, labels, etc.
+
+const exporters = new Map();
+
+/**
+ * registerExporter({ id, label, supports, run })
+ * - id: unique string
+ * - label: user-facing name
+ * - supports: (context) => boolean (e.g., supports mealPlan / inventory / calendar)
+ * - run: async ({ selection, options, signal }) => { blob, filename, mime }
+ */
+export function registerExporter(def) {
+  if (!def?.id || !def?.run) throw new Error("Invalid exporter def");
+  exporters.set(def.id, def);
+}
+
+export function listExporters(context) {
+  return Array.from(exporters.values()).filter((x) =>
+    typeof x.supports === "function" ? x.supports(context) : true
+  );
+}
+
+export async function runExporter(id, args) {
+  const def = exporters.get(id);
+  if (!def) throw new Error(\`Exporter "\${id}" not found\`);
+  return def.run(args);
+}
+`;
+
+/*
+File: src/services/export/jobs.js
+*/
+export const EXPORT_JOBS_TODO = `
+// src/services/export/jobs.js
+// Simple job state machine + undo stack
+
+const JOBS = new Map();
+const UNDO_STACK = []; // command pattern snapshots
+
+export function createJob({ type, selection, options }) {
+  const id = crypto.randomUUID();
+  const job = {
+    id,
+    type,
+    selection,
+    options,
+    status: "draft", // draft -> preparing -> ready -> exporting -> done | error | cancelled
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    history: [],
+    result: null,
+    error: null,
+  };
+  JOBS.set(id, job);
+  return job;
+}
+
+export function updateJob(id, patch) {
+  const job = JOBS.get(id);
+  if (!job) throw new Error("Job not found");
+  const prev = structuredClone(job);
+  Object.assign(job, patch, { updatedAt: Date.now() });
+  job.history.push({ ts: Date.now(), patch });
+  // push undo snapshot
+  UNDO_STACK.push(() => JOBS.set(id, prev));
+  return job;
+}
+
+export function getJob(id) {
+  return JOBS.get(id);
+}
+
+export function listJobs() {
+  return Array.from(JOBS.values()).sort((a, b) => b.createdAt - a.createdAt);
+}
+
+export function undoLast() {
+  const fn = UNDO_STACK.pop();
+  if (fn) fn();
+}
+
+export function clearJobs() {
+  JOBS.clear();
+}
+`;
+
+/* --------------------------------------------------------------------------
+  2) EXPORTERS (PDF, CSV, JSON, ICS, LABELS)
+---------------------------------------------------------------------------- */
+// TODO[export]/exporters: Implement common exporters with consistent UX.
+
+/*
+File: src/services/export/exporters/index.js
+*/
+export const EXPORTERS_INDEX_TODO = `
+// src/services/export/exporters/index.js
+import { registerExporter } from "@/services/export/registry.js";
+import { pdfExporter } from "./pdfExporter.js";
+import { csvExporter } from "./csvExporter.js";
+import { jsonExporter } from "./jsonExporter.js";
+import { icsExporter } from "./icsExporter.js";
+import { labelsExporter } from "./labelsExporter.js";
+
+export function registerDefaultExporters() {
+  registerExporter(pdfExporter);
+  registerExporter(csvExporter);
+  registerExporter(jsonExporter);
+  registerExporter(icsExporter);
+  registerExporter(labelsExporter);
+}
+`;
+
+/*
+File: src/services/export/exporters/pdfExporter.js
+*/
+export const PDF_EXPORTER_TODO = `
+// src/services/export/exporters/pdfExporter.js
+export const pdfExporter = {
+  id: "pdf",
+  label: "PDF Document",
+  supports: (ctx) => !!(ctx?.mealPlan || ctx?.batch || ctx?.inventory || ctx?.labels),
+  async run({ selection, options, signal }) {
+    // Implement your real PDF builder here (e.g., PDFKit, Puppeteer server, or client print)
+    // For now return a Blob placeholder:
+    const content = JSON.stringify({ type: "pdf", selection, options }, null, 2);
+    return {
+      blob: new Blob([content], { type: "application/pdf" }),
+      filename: options?.filename || "export.pdf",
+      mime: "application/pdf",
+    };
+  },
+};
+`;
+
+/*
+File: src/services/export/exporters/csvExporter.js
+*/
+export const CSV_EXPORTER_TODO = `
+// src/services/export/exporters/csvExporter.js
+function toCSV(rows) {
+  if (!rows?.length) return "";
+  const headers = Object.keys(rows[0]);
+  const lines = [
+    headers.join(","),
+    ...rows.map((r) => headers.map((h) => JSON.stringify(r[h] ?? "")).join(",")),
+  ];
+  return lines.join("\\n");
+}
+
+export const csvExporter = {
+  id: "csv",
+  label: "CSV (Spreadsheet)",
+  supports: (ctx) => Array.isArray(ctx?.rows),
+  async run({ selection, options }) {
+    const csv = toCSV(selection?.rows || []);
+    return {
+      blob: new Blob([csv], { type: "text/csv" }),
+      filename: options?.filename || "export.csv",
+      mime: "text/csv",
+    };
+  },
+};
+`;
+
+/*
+File: src/services/export/exporters/jsonExporter.js
+*/
+export const JSON_EXPORTER_TODO = `
+// src/services/export/exporters/jsonExporter.js
+export const jsonExporter = {
+  id: "json",
+  label: "JSON (Raw Data)",
+  supports: () => true,
+  async run({ selection, options }) {
+    const payload = JSON.stringify(selection ?? {}, null, 2);
+    return {
+      blob: new Blob([payload], { type: "application/json" }),
+      filename: options?.filename || "export.json",
+      mime: "application/json",
+    };
+  },
+};
+`;
+
+/*
+File: src/services/export/exporters/icsExporter.js
+*/
+export const ICS_EXPORTER_TODO = `
+// src/services/export/exporters/icsExporter.js
+function buildICS(events=[]) {
+  const head = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Suka//Export//EN",
+  ];
+  const body = events.map((e) => [
+    "BEGIN:VEVENT",
+    \`UID:\${crypto.randomUUID()}@suka\`,
+    \`DTSTAMP:\${new Date().toISOString().replace(/[-:]/g, "").split(".")[0]}Z\`,
+    \`SUMMARY:\${(e.title||"Task").replace(/\\n/g," ")}\`,
+    e.start ? \`DTSTART:\${e.start}\` : "",
+    e.end ? \`DTEND:\${e.end}\` : "",
+    "END:VEVENT",
+  ].filter(Boolean).join("\\n"));
+  const foot = ["END:VCALENDAR"];
+  return [...head, ...body, ...foot].join("\\n");
+}
+
+export const icsExporter = {
+  id: "ics",
+  label: "Calendar (.ics)",
+  supports: (ctx) => Array.isArray(ctx?.calendarEvents),
+  async run({ selection, options }) {
+    const ics = buildICS(selection?.calendarEvents || []);
+    return {
+      blob: new Blob([ics], { type: "text/calendar" }),
+      filename: options?.filename || "schedule.ics",
+      mime: "text/calendar",
+    };
+  },
+};
+`;
+
+/*
+File: src/services/export/exporters/labelsExporter.js
+*/
+export const LABELS_EXPORTER_TODO = `
+// src/services/export/exporters/labelsExporter.js
+// For jar/sausage/cured meats/batch outputs. Returns PDF by default (print-ready).
+export const labelsExporter = {
+  id: "labels",
+  label: "Labels (Print-Ready)",
+  supports: (ctx) => Array.isArray(ctx?.labels),
+  async run({ selection, options }) {
+    const content = JSON.stringify({ type: "labels", labels: selection?.labels }, null, 2);
+    return {
+      blob: new Blob([content], { type: "application/pdf" }),
+      filename: options?.filename || "labels.pdf",
+      mime: "application/pdf",
+    };
+  },
+};
+`;
+
+/* --------------------------------------------------------------------------
+  3) UI SURFACE (Consistent design system + Intuitive flow)
+---------------------------------------------------------------------------- */
+// TODO[export]/ui: Build Start, Preview, History with empty states & confirmations.
+
+/*
+File: src/components/export/ExportStart.jsx
+*/
+export const EXPORT_START_TODO = `
+// src/components/export/ExportStart.jsx
+import React, { useMemo, useState } from "react";
+import { useSelectionContext } from "@/stores/selectionStore.js"; // selected mealPlan/batch/inventory/calendar
+import { listExporters, runExporter } from "@/services/export/registry.js";
+import { createJob, updateJob } from "@/services/export/jobs.js";
+import { useNavigate } from "react-router-dom";
+
+export function ExportStart() {
+  const navigate = useNavigate();
+  const selection = useSelectionContext(); // { mealPlan, batch, rows, calendarEvents, labels }
+  const exporters = useMemo(() => listExporters(selection), [selection]);
+  const [chosen, setChosen] = useState(null);
+  const [filename, setFilename] = useState("");
+
+  const empty = !selection || Object.keys(selection).length === 0;
+
+  if (empty) {
+    return (
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">Nothing to export yet</h3>
+        <p className="mb-4 text-sm opacity-80">
+          Add meals to your plan, queue a batch, select inventory rows, or pick calendar items.
+        </p>
+        <div className="flex gap-2">
+          <a className="btn" href="/tier2/household/meals">Open Meal Planner</a>
+          <a className="btn" href="/tier2/household/meals#batch">Start Batch Cooking</a>
+          <a className="btn" href="/tier2/household/inventory">Review Inventory</a>
+          <a className="btn" href="/calendar">Open Calendar</a>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">Choose format</h3>
+        <div className="grid md:grid-cols-3 gap-3">
+          {exporters.map((x) => (
+            <button
+              key={x.id}
+              onClick={() => setChosen(x.id)}
+              className={\`btn \${chosen===x.id ? "btn-primary" : "btn-outline"}\`}
+            >
+              {x.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">Name your file</h3>
+        <input
+          className="input input-bordered w-full"
+          value={filename}
+          onChange={(e) => setFilename(e.target.value)}
+          placeholder="e.g., week-42-mealplan.pdf"
+        />
+      </div>
+
+      <div className="flex gap-2">
+        <button className="btn btn-outline" onClick={() => navigate("/export/history")}>
+          View History
+        </button>
+        <button
+          className="btn btn-primary"
+          disabled={!chosen}
+          onClick={async () => {
+            const job = createJob({
+              type: chosen,
+              selection,
+              options: { filename: filename?.trim() || undefined },
+            });
+            updateJob(job.id, { status: "preparing" });
+            // Precompute/normalize can go here
+            updateJob(job.id, { status: "ready" });
+            // move to preview
+            sessionStorage.setItem("currentExportJob", job.id);
+            navigate("/export/preview");
+          }}
+        >
+          Continue
+        </button>
+      </div>
+    </div>
+  );
+}
+`;
+
+/*
+File: src/components/export/ExportPreview.jsx
+*/
+export const EXPORT_PREVIEW_TODO = `
+// src/components/export/ExportPreview.jsx
+import React, { useEffect, useMemo, useState } from "react";
+import { getJob, updateJob, undoLast } from "@/services/export/jobs.js";
+import { runExporter } from "@/services/export/registry.js";
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename || "export";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 0);
+}
+
+export function ExportPreview() {
+  const [job, setJob] = useState(null);
+  useEffect(() => {
+    const id = sessionStorage.getItem("currentExportJob");
+    if (!id) return;
+    setJob(getJob(id));
+  }, []);
+
+  const ready = job && job.status === "ready";
+  if (!job) {
+    return (
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">No export in progress</h3>
+        <p className="mb-4 text-sm opacity-80">Start from the Export Center.</p>
+        <a className="btn" href="/export">Go to Export Center</a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">Preview</h3>
+        <p className="text-sm opacity-80 mb-4">
+          Confirm your selection and export format. Use “Undo” to revert any last change.
+        </p>
+        <pre className="bg-base-200 p-3 rounded max-h-64 overflow-auto text-xs">
+{JSON.stringify({ type: job.type, selection: job.selection, options: job.options }, null, 2)}
+        </pre>
+        <div className="flex gap-2 mt-3">
+          <button className="btn btn-outline" onClick={() => undoLast()}>
+            Undo Last Change
+          </button>
+          <button
+            className="btn btn-primary"
+            disabled={!ready}
+            onClick={async () => {
+              try {
+                updateJob(job.id, { status: "exporting" });
+                const out = await runExporter(job.type, {
+                  selection: job.selection,
+                  options: job.options,
+                });
+                updateJob(job.id, { status: "done", result: out, error: null });
+                downloadBlob(out.blob, out.filename);
+                // Suggest next best action:
+                sessionStorage.setItem("lastExportSuggestion",
+                  JSON.stringify({
+                    message: job.type === "ics" ? "Add to your calendar app?" :
+                              job.type === "labels" ? "Print labels now?" :
+                              "Share with family or save to Drive?",
+                    actions: [
+                      { label: "Share to Family", href: "/sharing/family" },
+                      { label: "Open Drive Folder", href: "/files/exports" },
+                      { label: "Back to Planner", href: "/tier2/household/meals" },
+                    ],
+                  })
+                );
+              } catch (e) {
+                updateJob(job.id, { status: "error", error: e?.message || String(e) });
+              }
+              // force refresh
+              setTimeout(() => { location.href = "/export/history"; }, 100);
+            }}
+          >
+            Export Now
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+`;
+
+/*
+File: src/components/export/ExportHistory.jsx
+*/
+export const EXPORT_HISTORY_TODO = `
+// src/components/export/ExportHistory.jsx
+import React, { useEffect, useState } from "react";
+import { listJobs } from "@/services/export/jobs.js";
+
+export function ExportHistory() {
+  const [items, setItems] = useState([]);
+  const [tip, setTip] = useState(null);
+
+  useEffect(() => {
+    setItems(listJobs());
+    const t = sessionStorage.getItem("lastExportSuggestion");
+    if (t) setTip(JSON.parse(t));
+  }, []);
+
+  if (!items.length) {
+    return (
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">No exports yet</h3>
+        <p className="mb-4 text-sm opacity-80">Your exported files will appear here.</p>
+        <a className="btn" href="/export">Start an export</a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {tip && (
+        <div className="alert">
+          <div>
+            <h4 className="font-semibold">Next best action</h4>
+            <p className="text-sm opacity-80">{tip.message}</p>
+          </div>
+          <div className="ml-auto flex gap-2">
+            {tip.actions?.map((a, i) => (
+              <a key={i} className="btn btn-sm" href={a.href}>{a.label}</a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="grid gap-3">
+        {items.map((j) => (
+          <div key={j.id} className="card p-4 border">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="font-semibold">{j.options?.filename || j.type}</div>
+                <div className="text-xs opacity-70">
+                  {new Date(j.createdAt).toLocaleString()} • {j.status}
+                </div>
+              </div>
+              <div className="text-xs opacity-70">#{j.id.slice(0,8)}</div>
+            </div>
+            {j.error && (
+              <div className="text-error text-sm mt-2">Error: {j.error}</div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+`;
+
+/* --------------------------------------------------------------------------
+  4) EVENT-DRIVEN GLUE (recipes/inventory/calendar changes)
+---------------------------------------------------------------------------- */
+// TODO[export]/events: Recompute available exporters when upstream data changes.
+
+/*
+File: src/services/export/hooks.js
+*/
+export const EXPORT_HOOKS_TODO = `
+// src/services/export/hooks.js
+// Listen for app-wide events and refresh selection context
+import { on } from "@/services/automation/runtime"; // your event bus
+import { refreshSelection } from "@/stores/selectionStore.js";
+
+export function registerExportEventGlue() {
+  // Recipes/meal plan updates
+  on("mealplan.created", refreshSelection);
+  on("recipes.updated", refreshSelection);
+  on("batch.started", refreshSelection);
+  on("batch.completed", refreshSelection);
+
+  // Inventory updates
+  on("inventory.updated", refreshSelection);
+  on("storehouse.updated", refreshSelection);
+
+  // Calendar updates
+  on("calendar.synced", refreshSelection);
+  on("calendar.events.updated", refreshSelection);
+
+  // Garden/labels updates (labels exporter)
+  on("labels.updated", refreshSelection);
+}
+`;
+
+/* --------------------------------------------------------------------------
+  5) CONSISTENT DESIGN SYSTEM SURFACE
+---------------------------------------------------------------------------- */
+// TODO[export]/design: Use shared button/card classes; success confirmations are alerts.
+// (Already applied in components via Tailwind/DaisyUI classes like btn, card, alert)
+
+/* --------------------------------------------------------------------------
+  6) PERMISSIONS, ERRORS, ANALYTICS
+---------------------------------------------------------------------------- */
+// TODO[export]/permissions: If exporting sensitive data, gate with role checks.
+// TODO[export]/errors: Standardize error banner in ExportPreview when job.status === "error".
+// TODO[export]/analytics: Emit "export.completed" with { type, duration, size }.
+
+/*
+File: src/services/export/telemetry.js
+*/
+export const EXPORT_TELEMETRY_TODO = `
+// src/services/export/telemetry.js
+import { emit } from "@/services/automation/runtime";
+
+export function trackExportCompleted({ type, durationMs, sizeBytes }) {
+  emit("export.completed", { type, durationMs, sizeBytes, at: Date.now() });
+}
+`;
+
+/* --------------------------------------------------------------------------
+  7) REGISTRATION BOOTSTRAP
+---------------------------------------------------------------------------- */
+// TODO[export]/bootstrap: Register exporters + glue at app startup.
+
+/*
+File: src/services/export/bootstrap.js
+*/
+export const EXPORT_BOOTSTRAP_TODO = `
+// src/services/export/bootstrap.js
+import { registerDefaultExporters } from "@/services/export/exporters/index.js";
+import { registerExportEventGlue } from "@/services/export/hooks.js";
+
+export function bootstrapExportService() {
+  registerDefaultExporters();
+  registerExportEventGlue();
+}
+`;
+
+/* --------------------------------------------------------------------------
+  8) SELECTION STORE CONTRACT (reference)
+---------------------------------------------------------------------------- */
+// TODO[export]/selection: Ensure your selection store provides the shape below.
+
+/*
+File: src/stores/selectionStore.js (reference contract)
+*/
+export const SELECTION_STORE_CONTRACT = `
+// src/stores/selectionStore.js
+// Contract example (implement with your state lib of choice):
+let state = {
+  mealPlan: null,
+  batch: null,
+  rows: null, // array of inventory rows
+  calendarEvents: null,
+  labels: null, // label data for jars/sausages/etc.
+};
+
+export function useSelectionContext() {
+  return state;
+}
+export function refreshSelection() {
+  // derive latest selection from active modules
+}
+`;
+
+/* --------------------------------------------------------------------------
+  9) QA CHECKLIST
+---------------------------------------------------------------------------- */
+// TODO[export]/qa:
+// [ ] ExportStart shows empty state with clear next steps when nothing is selected
+// [ ] ExportStart lists only exporters that support the current selection
+// [ ] Preview allows Undo last change
+// [ ] Export completion triggers download + “next best action” suggestions
+// [ ] History shows recent jobs & errors
+// [ ] Event glue re-computes selection when recipes/inventory/calendar change
+// [ ] Labels exporter appears when labels are present (batch/garden/cured meats)
+// [ ] CSV exporter works for inventory rows
+// [ ] ICS exporter builds calendar file from events
+// [ ] PDF exporter is pluggable with real renderer later
+// [ ] Route /export, /export/preview, /export/history all render correctly
+// [ ] Buttons and cards use consistent design classes
+
+/***** END OF FILE ********************************************************** */

@@ -1,0 +1,615 @@
+{
+  "$id": "https://suka.local/schemas/preservation.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Suka Preservation Profile",
+  "description": "Schema for preservation profiles (canning, dehydrating, fermenting, curing, pressure canning, etc.) that integrate with garden harvest, storehouse planning, meal planning, cleaning/sanitizing, and animal/byproduct routing. Supports reverse-generation, user-owned favorites/schedules, and shared orchestration via window.__suka?.eventBus.",
+  "type": "object",
+  "required": [
+    "version",
+    "meta"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Local/relative path to this schema so VS Code can validate, e.g. ../../schemas/preservation.schema.json"
+    },
+    "version": {
+      "type": "string",
+      "description": "ISO timestamp for versioning, e.g. 2025-10-31T17:55:00-05:00"
+    },
+    "meta": {
+      "type": "object",
+      "required": [
+        "id",
+        "title"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique id for this preservation profile"
+        },
+        "title": {
+          "type": "string",
+          "description": "Human readable title"
+        },
+        "description": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "zone": {
+          "type": "string",
+          "description": "Kitchen/processing zone this profile belongs to, e.g. preserve-canning-kitchen"
+        },
+        "calendar": {
+          "type": "object",
+          "properties": {
+            "hebrewMonthStart": {
+              "type": "string"
+            },
+            "supportsAltStart": {
+              "type": "boolean"
+            },
+            "notes": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": true
+    },
+    "ui": {
+      "type": "object",
+      "description": "UI hints for cards/timeline/badges and CTA buttons",
+      "properties": {
+        "layout": {
+          "type": "string"
+        },
+        "hints": {
+          "type": "object",
+          "properties": {
+            "primaryCTA": {
+              "type": "string"
+            },
+            "secondaryCTA": {
+              "type": "string"
+            },
+            "tertiaryCTA": {
+              "type": "string"
+            },
+            "showSeasonalityBadge": {
+              "type": "boolean"
+            },
+            "groupBy": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "suggestOnly": {
+              "type": "boolean",
+              "description": "If true, engine should only OFFER preservation sessions, not auto-schedule"
+            },
+            "notes": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
+        },
+        "badges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string"
+              },
+              "color": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "orchestration": {
+      "type": "object",
+      "description": "Glue to window.__suka?.eventBus and shared cross-domain scopes.",
+      "properties": {
+        "bus": {
+          "type": "string"
+        },
+        "emitOnLoad": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "listen": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sharedScopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "engines": {
+      "type": "object",
+      "description": "Which engines this profile wants to participate in.",
+      "properties": {
+        "primary": {
+          "type": "string",
+          "description": "Usually preservationEngine"
+        },
+        "supports": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "reverse": {
+      "type": "object",
+      "description": "Reverse generation: storehouse/meal/coop targets → preservation/canning sessions.",
+      "properties": {
+        "generateFrom": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "strategies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "title"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "input": {
+                "type": "object",
+                "description": "Input shape is intentionally open so we can handle garden overflow, feast prep, coop goals, etc."
+              },
+              "output": {
+                "type": "object",
+                "description": "Output can include suggestedSessions, actions, emits, targetQuarts, etc.",
+                "properties": {
+                  "actions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "emitOnUserAccept": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "additionalProperties": true
+                    }
+                  }
+                },
+                "additionalProperties": true
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "preservation": {
+      "type": "object",
+      "description": "Preservation-specific details (method, jar size, sources, batch model).",
+      "properties": {
+        "method": {
+          "type": "string",
+          "description": "e.g. canning | water-bath | pressure-canning | fermenting | dehydrating | curing"
+        },
+        "jarSize": {
+          "type": "string",
+          "description": "e.g. quart, pint, half-gallon"
+        },
+        "zone": {
+          "type": "string",
+          "description": "Which kitchen/processing zone"
+        },
+        "supportedSources": {
+          "type": "array",
+          "description": "Which harvest curves can feed this preservation profile",
+          "items": {
+            "type": "string"
+          }
+        },
+        "batchModel": {
+          "type": "object",
+          "description": "How to estimate output jars from input kg/lbs.",
+          "properties": {
+            "formula": {
+              "type": "string"
+            },
+            "notes": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "storehouse": {
+      "type": "object",
+      "description": "Storehouse stock planner link: preservation → canned items → inventory.",
+      "properties": {
+        "targets": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string",
+              "boolean"
+            ]
+          }
+        },
+        "grocerySectionsInspiration": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "autoPlan": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "emit": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": true
+    },
+    "meals": {
+      "type": "object",
+      "description": "Meal-planning hooks – define recipes/sessions that consume preserved items.",
+      "properties": {
+        "recipes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "title"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "useWithinHours": {
+                "type": "number"
+              },
+              "linksTo": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "emit": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "autoSession": {
+          "type": "object",
+          "properties": {
+            "everyDays": {
+              "type": "number"
+            },
+            "emit": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "garden": {
+      "type": "object",
+      "description": "Garden / harvest integration – prep, routing of scraps, confirm user harvest before canning.",
+      "properties": {
+        "care": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "title"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "emit": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "harvest": {
+          "type": "object",
+          "properties": {
+            "autoSuggest": {
+              "type": "boolean"
+            },
+            "userMustConfirm": {
+              "type": "boolean"
+            },
+            "emitOnConfirm": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": true
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "cleaning": {
+      "type": "object",
+      "description": "Cleaning / sanitizing sessions emitted from preservation runs.",
+      "properties": {
+        "routines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "title"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "frequency": {
+                "type": "string"
+              },
+              "emit": {
+                "type": "string"
+              },
+              "tools": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "sabbathGuard": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "animals": {
+      "type": "object",
+      "description": "Animal routing for scraps / peels / culls from preservation.",
+      "properties": {
+        "routing": {
+          "type": "object",
+          "properties": {
+            "trimmingsAndPeels": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "notes": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": true
+        },
+        "emit": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "inventory": {
+      "type": "object",
+      "description": "Inventory linkage for preserved items.",
+      "properties": {
+        "productId": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "trackLots": {
+          "type": "boolean"
+        },
+        "shelfLifeDays": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": true
+    },
+    "favoriteSessions": {
+      "type": "array",
+      "description": "User + system session templates that can be saved.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "schedule": {
+            "type": "string"
+          },
+          "sabbathGuard": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "scheduleTemplates": {
+      "type": "array",
+      "description": "RRULE-based schedule patterns (weekly canning block, user-confirmed).",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "rrules": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "options": {
+            "type": "object",
+            "properties": {
+              "userMustConfirm": {
+                "type": "boolean"
+              },
+              "sabbathGuard": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "userProfiles": {
+      "type": "object",
+      "description": "Permissions for user-owned favorites/schedules/export.",
+      "properties": {
+        "allowUserOwnedSchedules": {
+          "type": "boolean"
+        },
+        "allowUserOwnedFavorites": {
+          "type": "boolean"
+        },
+        "allowExportShare": {
+          "type": "boolean"
+        },
+        "shareFormats": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "events": {
+      "type": "object",
+      "description": "Events this profile emits/consumes on the shared bus.",
+      "properties": {
+        "emits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "consumes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

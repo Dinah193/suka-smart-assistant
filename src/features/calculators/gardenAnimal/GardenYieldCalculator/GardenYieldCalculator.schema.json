@@ -1,0 +1,565 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "GardenYieldCalculator.schema.json",
+  "title": "Garden Yield Calculator Payload",
+  "description": "Schema describing inputs and outputs for the GardenYieldCalculator. It estimates fresh and preservation yield, harvest load, and storehouse coverage from planting calendar data and crop settings.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "nodeKey": {
+          "type": "string",
+          "enum": ["gardenYield"]
+        },
+        "version": {
+          "type": "string",
+          "description": "Semantic version of the calculator logic."
+        },
+        "source": {
+          "type": "string",
+          "description": "Optional source identifier for the calculator invocation (e.g., which page or feature invoked it)."
+        }
+      },
+      "required": ["nodeKey", "version"]
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "crops": {
+          "type": "array",
+          "description": "Per-crop configuration used to derive yield and harvest load.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cropId": {
+                "type": "string",
+                "description": "Stable identifier for the crop across calculators."
+              },
+              "name": {
+                "type": "string",
+                "description": "Human-readable crop name."
+              },
+              "variety": {
+                "type": "string",
+                "description": "Optional variety name (e.g., 'Roma', 'Blue Lake')."
+              },
+              "bedId": {
+                "type": "string",
+                "description": "Identifier of the bed or growing area where this crop is planted."
+              },
+              "rowFeet": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Total row feet planted for this crop."
+              },
+              "plantsPerFoot": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Planting density in plants per linear foot."
+              },
+              "expectedYieldPerPlant": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Expected yield per plant in the unit specified by yieldUnit."
+              },
+              "yieldUnit": {
+                "type": "string",
+                "description": "Unit for yield (e.g., 'lbs', 'kg', 'bunches', 'heads')."
+              },
+              "successionEnabled": {
+                "type": "boolean",
+                "description": "Whether this crop is planted in multiple successions."
+              },
+              "successionCount": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Number of successions actually planned or planted."
+              },
+              "targetUse": {
+                "type": "string",
+                "enum": ["fresh", "preservation", "mixed", "seed"],
+                "description": "Primary target use for this crop."
+              },
+              "preservationRatio": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Fraction of total yield intended for preservation. Remaining portion is assumed for fresh use."
+              },
+              "notes": {
+                "type": "string",
+                "description": "Free-form notes about yield assumptions for this crop."
+              }
+            },
+            "required": [
+              "cropId",
+              "name",
+              "expectedYieldPerPlant",
+              "yieldUnit"
+            ]
+          }
+        },
+        "plantingWindows": {
+          "type": "array",
+          "description": "Planting windows from the GardenPlantingCalendarCalculator used to time yield and harvest load.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "windowId": {
+                "type": "string"
+              },
+              "cropId": {
+                "type": "string"
+              },
+              "cropName": {
+                "type": "string"
+              },
+              "bedId": {
+                "type": "string"
+              },
+              "startDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "endDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "successionIndex": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "season": {
+                "type": "string"
+              },
+              "flags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "windowId",
+              "cropId",
+              "startDate",
+              "endDate"
+            ]
+          }
+        },
+        "harvestWindows": {
+          "type": "array",
+          "description": "Harvest windows from the GardenPlantingCalendarCalculator used to estimate harvest load and preservation batches.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "windowId": {
+                "type": "string"
+              },
+              "cropId": {
+                "type": "string"
+              },
+              "cropName": {
+                "type": "string"
+              },
+              "bedId": {
+                "type": "string"
+              },
+              "startDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "endDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "targetUse": {
+                "type": "string",
+                "enum": ["fresh", "preservation", "mixed", "seed"]
+              },
+              "alignedFeastDays": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "feastId": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "date": {
+                      "type": "string",
+                      "format": "date"
+                    }
+                  },
+                  "required": ["name", "date"]
+                }
+              }
+            },
+            "required": [
+              "windowId",
+              "cropId",
+              "startDate",
+              "endDate"
+            ]
+          }
+        },
+        "storehouseTargets": {
+          "type": "object",
+          "description": "Optional annual or seasonal targets for storehouse planning.",
+          "additionalProperties": false,
+          "properties": {
+            "year": {
+              "type": "integer"
+            },
+            "targetsByCrop": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "cropId": {
+                    "type": "string"
+                  },
+                  "cropName": {
+                    "type": "string"
+                  },
+                  "targetAmount": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Target preserved amount in the unit specified by unit."
+                  },
+                  "unit": {
+                    "type": "string",
+                    "description": "Unit for the target amount (e.g., 'lbs', 'quarts', 'pints')."
+                  }
+                },
+                "required": [
+                  "cropId",
+                  "targetAmount",
+                  "unit"
+                ]
+              }
+            }
+          }
+        },
+        "assumptions": {
+          "type": "object",
+          "description": "Optional global assumptions that influence yield and harvest load.",
+          "additionalProperties": false,
+          "properties": {
+            "lossFactor": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Fraction of yield expected to be lost to pests, weather, or handling (e.g., 0.2 for 20%)."
+            },
+            "laborHoursPerUnit": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Approximate harvest and handling labor hours per yield unit (e.g., per 10 lbs)."
+            },
+            "batchSizeDefaults": {
+              "type": "object",
+              "description": "Default batch sizes for different preservation methods.",
+              "additionalProperties": false,
+              "properties": {
+                "canning": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "freezing": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "dehydrating": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "fermenting": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "rootCellar": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "unit": {
+                  "type": "string",
+                  "description": "Unit used for all batch sizes (e.g., 'lbs')."
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": ["crops"]
+    },
+    "outputs": {
+      "type": "object",
+      "description": "Derived yield, harvest load, preservation load, and storehouse coverage.",
+      "additionalProperties": false,
+      "properties": {
+        "yieldEstimates": {
+          "type": "array",
+          "description": "Per-crop yield estimates broken down by fresh, preservation, and seed.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cropId": {
+                "type": "string"
+              },
+              "cropName": {
+                "type": "string"
+              },
+              "bedId": {
+                "type": "string"
+              },
+              "totalPlants": {
+                "type": "number",
+                "minimum": 0
+              },
+              "expectedYieldPerPlant": {
+                "type": "number",
+                "minimum": 0
+              },
+              "expectedTotalYield": {
+                "type": "number",
+                "minimum": 0
+              },
+              "yieldUnit": {
+                "type": "string"
+              },
+              "forFresh": {
+                "type": "number",
+                "minimum": 0
+              },
+              "forPreservation": {
+                "type": "number",
+                "minimum": 0
+              },
+              "forSeed": {
+                "type": "number",
+                "minimum": 0
+              },
+              "adjustedForLoss": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Total yield after applying lossFactor assumptions."
+              },
+              "notes": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "cropId",
+              "expectedTotalYield",
+              "yieldUnit"
+            ]
+          }
+        },
+        "harvestLoadByWeek": {
+          "type": "array",
+          "description": "Weekly or bucketed harvest load to help plan labor and logistics.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "weekStartDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "weekEndDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "totalYield": {
+                "type": "number",
+                "minimum": 0
+              },
+              "yieldUnit": {
+                "type": "string"
+              },
+              "estimatedLaborHours": {
+                "type": "number",
+                "minimum": 0
+              },
+              "crops": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "cropId": {
+                      "type": "string"
+                    },
+                    "cropName": {
+                      "type": "string"
+                    },
+                    "yield": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "required": ["cropId", "yield"]
+                }
+              },
+              "notes": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "weekStartDate",
+              "weekEndDate",
+              "totalYield",
+              "yieldUnit"
+            ]
+          }
+        },
+        "preservationLoad": {
+          "type": "array",
+          "description": "Preservation-focused groupings and batch sizes derived from harvest windows and targets.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "batchGroupId": {
+                "type": "string"
+              },
+              "method": {
+                "type": "string",
+                "enum": ["canning", "freezing", "dehydrating", "fermenting", "rootCellar"]
+              },
+              "cropId": {
+                "type": "string"
+              },
+              "cropName": {
+                "type": "string"
+              },
+              "totalForPreservation": {
+                "type": "number",
+                "minimum": 0
+              },
+              "yieldUnit": {
+                "type": "string"
+              },
+              "idealBatchSize": {
+                "type": "number",
+                "minimum": 0
+              },
+              "expectedBatchCount": {
+                "type": "number",
+                "minimum": 0
+              },
+              "linkedHarvestWindows": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "IDs of harvest windows that feed this preservation group."
+              },
+              "notes": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "batchGroupId",
+              "method",
+              "cropId",
+              "totalForPreservation",
+              "yieldUnit"
+            ]
+          }
+        },
+        "storehouseCoverage": {
+          "type": "array",
+          "description": "Coverage metrics comparing expected preserved yield to storehouse targets.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cropId": {
+                "type": "string"
+              },
+              "cropName": {
+                "type": "string"
+              },
+              "targetAmount": {
+                "type": "number",
+                "minimum": 0
+              },
+              "targetUnit": {
+                "type": "string"
+              },
+              "expectedPreservedAmount": {
+                "type": "number",
+                "minimum": 0
+              },
+              "coveragePercent": {
+                "type": "number",
+                "minimum": 0,
+                "description": "ExpectedPreservedAmount / targetAmount * 100, when targetAmount > 0."
+              },
+              "status": {
+                "type": "string",
+                "enum": ["below-target", "meets-target", "exceeds-target"]
+              }
+            },
+            "required": [
+              "cropId",
+              "targetAmount",
+              "targetUnit",
+              "expectedPreservedAmount"
+            ]
+          }
+        },
+        "summary": {
+          "type": "object",
+          "description": "High-level metrics and notes for the garden yield plan.",
+          "additionalProperties": false,
+          "properties": {
+            "totalCrops": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "totalExpectedYield": {
+              "type": "number",
+              "minimum": 0
+            },
+            "yieldUnit": {
+              "type": "string",
+              "description": "Optional dominant or reference unit for totalExpectedYield."
+            },
+            "totalPreservationBatches": {
+              "type": "number",
+              "minimum": 0
+            },
+            "busiestWeekStartDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Start date of the week with the highest harvest load."
+            },
+            "busiestWeekTotalYield": {
+              "type": "number",
+              "minimum": 0
+            },
+            "notes": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": ["context", "inputs"]
+}

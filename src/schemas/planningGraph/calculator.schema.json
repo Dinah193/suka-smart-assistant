@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "calculator.schema.json",
+  "title": "SSA Planning Graph Calculator Meta-Schema",
+  "description": "Meta-schema for SSA planning graph calculator schemas (input/output objects).",
+  "type": "object",
+  "properties": {
+    "input": {
+      "type": "object",
+      "description": "Calculator input payload shape."
+    },
+    "output": {
+      "type": "object",
+      "description": "Calculator output payload shape."
+    }
+  },
+  "required": ["input", "output"],
+  "additionalProperties": true
+}

@@ -1,0 +1,375 @@
+{
+  "meta": {
+    "id": "lex.homestead.domain",
+    "domain": "homestead",
+    "version": "1.0.0",
+    "title": "Homestead Domain Lexicon",
+    "description": "Garden/animals/preservation planning routing vocabulary. Recognizes planting/harvest/butchering/breeding windows and season modes. Links to homestead patterns and session templates.",
+    "updatedAt": "2025-12-27",
+    "tags": [
+      "homestead",
+      "garden",
+      "animals",
+      "season"
+    ]
+  },
+  "methods": {
+    "pat.homestead.spring.start": {
+      "label": "Spring start homestead pattern",
+      "domain": "homestead",
+      "intentTags": [
+        "plan:homestead",
+        "season:spring"
+      ]
+    },
+    "pat.homestead.harvest.push": {
+      "label": "Harvest push homestead pattern",
+      "domain": "homestead",
+      "intentTags": [
+        "plan:homestead",
+        "season:harvest"
+      ]
+    },
+    "pat.homestead.winterize": {
+      "label": "Winterize homestead pattern",
+      "domain": "homestead",
+      "intentTags": [
+        "plan:homestead",
+        "season:winter"
+      ]
+    },
+    "pat.homestead.planting.window": {
+      "label": "Planting window planning pattern",
+      "domain": "homestead",
+      "intentTags": [
+        "plan:homestead",
+        "garden:planting"
+      ]
+    },
+    "pat.homestead.harvest.window": {
+      "label": "Harvest window planning pattern",
+      "domain": "homestead",
+      "intentTags": [
+        "plan:homestead",
+        "garden:harvest"
+      ]
+    },
+    "pat.homestead.breeding.cycle": {
+      "label": "Breeding cycle planning pattern",
+      "domain": "homestead",
+      "intentTags": [
+        "plan:homestead",
+        "animals:breeding"
+      ]
+    },
+    "pat.homestead.butchering.window": {
+      "label": "Butchering window planning pattern",
+      "domain": "homestead",
+      "intentTags": [
+        "plan:homestead",
+        "animals:butchering"
+      ]
+    },
+    "pat.homestead.preservation.run": {
+      "label": "Preservation run planning pattern",
+      "domain": "homestead",
+      "intentTags": [
+        "plan:homestead",
+        "preserve:run"
+      ]
+    },
+    "tpl.garden.session": {
+      "label": "Session template: garden",
+      "domain": "homestead",
+      "intentTags": [
+        "sessionTemplate:garden"
+      ]
+    },
+    "tpl.animals.session": {
+      "label": "Session template: animals",
+      "domain": "homestead",
+      "intentTags": [
+        "sessionTemplate:animals"
+      ]
+    },
+    "tpl.butchery.session": {
+      "label": "Session template: butchery",
+      "domain": "homestead",
+      "intentTags": [
+        "sessionTemplate:butchery"
+      ]
+    },
+    "tpl.preservation.session": {
+      "label": "Session template: preservation",
+      "domain": "homestead",
+      "intentTags": [
+        "sessionTemplate:preservation"
+      ]
+    },
+    "mode.season.spring_start": {
+      "label": "Season mode: spring start",
+      "domain": "homestead",
+      "intentTags": [
+        "seasonMode:spring_start"
+      ]
+    },
+    "mode.season.harvest_push": {
+      "label": "Season mode: harvest push",
+      "domain": "homestead",
+      "intentTags": [
+        "seasonMode:harvest_push"
+      ]
+    },
+    "mode.season.winterize": {
+      "label": "Season mode: winterize",
+      "domain": "homestead",
+      "intentTags": [
+        "seasonMode:winterize"
+      ]
+    }
+  },
+  "synonyms": {
+    "planting": {
+      "methodIds": [
+        "pat.homestead.planting.window",
+        "tpl.garden.session"
+      ],
+      "boost": 1.15
+    },
+    "seed starting": {
+      "methodIds": [
+        "pat.homestead.spring.start",
+        "tpl.garden.session"
+      ],
+      "boost": 1.2
+    },
+    "transplant": {
+      "methodIds": [
+        "pat.homestead.planting.window",
+        "tpl.garden.session"
+      ],
+      "boost": 1.1
+    },
+    "harvest": {
+      "methodIds": [
+        "pat.homestead.harvest.window",
+        "tpl.garden.session"
+      ],
+      "boost": 1.1
+    },
+    "harvest push": {
+      "methodIds": [
+        "pat.homestead.harvest.push",
+        "mode.season.harvest_push"
+      ],
+      "boost": 1.6
+    },
+    "winterize": {
+      "methodIds": [
+        "pat.homestead.winterize",
+        "mode.season.winterize"
+      ],
+      "boost": 1.6
+    },
+    "spring start": {
+      "methodIds": [
+        "pat.homestead.spring.start",
+        "mode.season.spring_start"
+      ],
+      "boost": 1.55
+    },
+    "breeding": {
+      "methodIds": [
+        "pat.homestead.breeding.cycle",
+        "tpl.animals.session"
+      ],
+      "boost": 1.2
+    },
+    "breeding cycle": {
+      "methodIds": [
+        "pat.homestead.breeding.cycle",
+        "tpl.animals.session"
+      ],
+      "boost": 1.55
+    },
+    "kidding": {
+      "methodIds": [
+        "pat.homestead.breeding.cycle",
+        "tpl.animals.session"
+      ],
+      "boost": 1.05
+    },
+    "lambing": {
+      "methodIds": [
+        "pat.homestead.breeding.cycle",
+        "tpl.animals.session"
+      ],
+      "boost": 1.05
+    },
+    "butcher": {
+      "methodIds": [
+        "pat.homestead.butchering.window",
+        "tpl.butchery.session"
+      ],
+      "boost": 1.25
+    },
+    "butchering": {
+      "methodIds": [
+        "pat.homestead.butchering.window",
+        "tpl.butchery.session"
+      ],
+      "boost": 1.25
+    },
+    "processing day": {
+      "methodIds": [
+        "tpl.butchery.session"
+      ],
+      "boost": 1.1
+    },
+    "preservation run": {
+      "methodIds": [
+        "pat.homestead.preservation.run",
+        "tpl.preservation.session"
+      ],
+      "boost": 1.45
+    },
+    "canning day": {
+      "methodIds": [
+        "pat.homestead.preservation.run",
+        "tpl.preservation.session"
+      ],
+      "boost": 1.2
+    },
+    "dehydrating day": {
+      "methodIds": [
+        "pat.homestead.preservation.run",
+        "tpl.preservation.session"
+      ],
+      "boost": 1.15
+    },
+    "freezing day": {
+      "methodIds": [
+        "pat.homestead.preservation.run",
+        "tpl.preservation.session"
+      ],
+      "boost": 1.1
+    }
+  },
+  "phrases": [
+    {
+      "text": "plan the planting window",
+      "methodIds": [
+        "pat.homestead.planting.window"
+      ],
+      "boost": 1.55
+    },
+    {
+      "text": "set up spring start tasks",
+      "methodIds": [
+        "pat.homestead.spring.start",
+        "mode.season.spring_start"
+      ],
+      "boost": 1.55
+    },
+    {
+      "text": "harvest push with preservation run",
+      "methodIds": [
+        "pat.homestead.harvest.push",
+        "pat.homestead.preservation.run"
+      ],
+      "boost": 1.6
+    },
+    {
+      "text": "schedule the butchering window",
+      "methodIds": [
+        "pat.homestead.butchering.window"
+      ],
+      "boost": 1.55
+    },
+    {
+      "text": "plan the breeding cycle",
+      "methodIds": [
+        "pat.homestead.breeding.cycle"
+      ],
+      "boost": 1.55
+    },
+    {
+      "text": "winterize the garden and systems",
+      "methodIds": [
+        "pat.homestead.winterize",
+        "mode.season.winterize"
+      ],
+      "boost": 1.55
+    }
+  ],
+  "rules": [
+    {
+      "id": "rule.homestead.needs.season",
+      "when": {
+        "anyMethods": [
+          "mode.season.spring_start",
+          "mode.season.harvest_push",
+          "mode.season.winterize"
+        ]
+      },
+      "then": [
+        {
+          "type": "emitHintTag",
+          "hintTag": "seasonModeDetected",
+          "message": "Season mode detected; apply seasonal overlays and task templates."
+        }
+      ]
+    },
+    {
+      "id": "rule.homestead.harvest.needs.preservation",
+      "when": {
+        "anyPhrases": [
+          "harvest push"
+        ],
+        "contextAny": [
+          "preserve",
+          "canning",
+          "freeze",
+          "dehydrate",
+          "ferment"
+        ]
+      },
+      "then": [
+        {
+          "type": "emitHintTag",
+          "hintTag": "needsPreservationSession",
+          "message": "Harvest push likely needs a preservation session blueprint."
+        },
+        {
+          "type": "boostMethodKey",
+          "methodKey": "pat.homestead.preservation.run",
+          "amount": 0.5
+        }
+      ]
+    },
+    {
+      "id": "rule.homestead.animals.session",
+      "when": {
+        "anyMethods": [
+          "pat.homestead.breeding.cycle",
+          "pat.homestead.butchering.window"
+        ]
+      },
+      "then": [
+        {
+          "type": "emitHintTag",
+          "hintTag": "needsAnimalSession",
+          "message": "Animal cycle planning detected; attach animals session templates."
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "emitHintTag",
+      "hintTag": "homesteadLexiconActive",
+      "message": "Homestead lexicon active. Route to homestead patterns + session templates."
+    }
+  ],
+  "signals": []
+}

@@ -1,0 +1,566 @@
+{
+  "meta": {
+    "name": "Suka Smart Assistant – Events Catalog",
+    "version": "1.0.0",
+    "generatedAt": "2025-10-29T16:35:00Z",
+    "notes": [
+      "Event names are UPPER_SNAKE_CASE prefixed with EVENT_.",
+      "Payloads are JSON Schema Draft-07 fragments. All timestamps are ISO-8601 strings."
+    ]
+  },
+  "definitions": {
+    "Timestamp": { "type": "string", "format": "date-time" },
+    "ID": { "type": "string", "minLength": 1 },
+    "Money": {
+      "type": "object",
+      "required": ["amount", "currency"],
+      "properties": {
+        "amount": { "type": "number" },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
+      },
+      "additionalProperties": false
+    },
+    "UnitQuantity": {
+      "type": "object",
+      "required": ["value", "unit"],
+      "properties": {
+        "value": { "type": "number" },
+        "unit": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "UserRef": {
+      "type": "object",
+      "required": ["userId"],
+      "properties": {
+        "userId": { "$ref": "#/definitions/ID" },
+        "householdId": { "$ref": "#/definitions/ID" }
+      },
+      "additionalProperties": false
+    },
+    "PlanRef": {
+      "type": "object",
+      "required": ["planId", "domain"],
+      "properties": {
+        "planId": { "$ref": "#/definitions/ID" },
+        "domain": { "type": "string", "enum": ["meals", "cleaning", "garden", "animals", "storehouse", "inventory"] },
+        "title": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "SessionRef": {
+      "type": "object",
+      "required": ["sessionId", "domain"],
+      "properties": {
+        "sessionId": { "$ref": "#/definitions/ID" },
+        "domain": { "type": "string", "enum": ["cooking", "cleaning", "gardening", "animalCare", "inventory"] },
+        "planId": { "$ref": "#/definitions/ID" }
+      },
+      "additionalProperties": false
+    },
+    "ItemRef": {
+      "type": "object",
+      "required": ["sku", "name"],
+      "properties": {
+        "sku": { "type": "string" },
+        "name": { "type": "string" },
+        "brand": { "type": "string" },
+        "barcode": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "EntitlementClaims": {
+      "type": "object",
+      "required": ["source", "tiers", "features"],
+      "properties": {
+        "source": { "type": "string", "enum": ["SVFFH"] },
+        "tiers": { "type": "array", "items": { "type": "string" } },
+        "features": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    }
+  },
+  "events": [
+    {
+      "name": "EVENT_UI_NAVIGATE",
+      "description": "User requests navigation to a route.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["route", "ts"],
+        "properties": {
+          "route": { "type": "string" },
+          "params": { "type": "object" },
+          "ts": { "$ref": "#/definitions/Timestamp" },
+          "by": { "$ref": "#/definitions/UserRef" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/pages/**", "src/components/**"],
+      "listeners": ["src/services/eventBus/**", "src/services/automation/runtime.js"]
+    },
+    {
+      "name": "EVENT_PLAN_CREATED",
+      "description": "A new plan is created in any domain.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["plan", "ts"],
+        "properties": {
+          "plan": { "$ref": "#/definitions/PlanRef" },
+          "favorite": { "type": "boolean" },
+          "ts": { "$ref": "#/definitions/Timestamp" },
+          "by": { "$ref": "#/definitions/UserRef" },
+          "source": { "type": "string", "enum": ["user", "import", "engine"] }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/engines/**", "src/features/**", "src/pages/**"],
+      "listeners": ["src/managers/PlanManager.js", "src/services/automation/runtime.js", "src/services/nba/Orchestrator.js"]
+    },
+    {
+      "name": "EVENT_PLAN_UPDATED",
+      "description": "A plan is updated (items, timing, tags).",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["plan", "patch", "ts"],
+        "properties": {
+          "plan": { "$ref": "#/definitions/PlanRef" },
+          "patch": { "type": "object" },
+          "ts": { "$ref": "#/definitions/Timestamp" },
+          "by": { "$ref": "#/definitions/UserRef" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/features/**", "src/pages/**", "src/engines/**"],
+      "listeners": ["src/managers/PlanManager.js", "src/services/automation/runtime.js"]
+    },
+    {
+      "name": "EVENT_PLAN_DELETED",
+      "description": "A plan is deleted.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["plan", "ts"],
+        "properties": {
+          "plan": { "$ref": "#/definitions/PlanRef" },
+          "ts": { "$ref": "#/definitions/Timestamp" },
+          "by": { "$ref": "#/definitions/UserRef" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/features/**", "src/pages/**"],
+      "listeners": ["src/managers/PlanManager.js"]
+    },
+    {
+      "name": "EVENT_SESSION_START",
+      "description": "Begin a session (cooking, cleaning, gardening, animal care, inventory).",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["session", "ts"],
+        "properties": {
+          "session": { "$ref": "#/definitions/SessionRef" },
+          "scheduledFor": { "$ref": "#/definitions/Timestamp" },
+          "ts": { "$ref": "#/definitions/Timestamp" },
+          "by": { "$ref": "#/definitions/UserRef" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/features/**", "src/pages/**", "src/managers/SessionManager.js"],
+      "listeners": ["src/services/session/SessionRunner.js", "src/services/session/PrepSessionOrchestrator.js", "src/services/session/guards/**"]
+    },
+    {
+      "name": "EVENT_SESSION_PAUSE",
+      "description": "Pause an active session.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["session", "reason", "ts"],
+        "properties": {
+          "session": { "$ref": "#/definitions/SessionRef" },
+          "reason": { "type": "string" },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/managers/SessionManager.js", "src/pages/**"],
+      "listeners": ["src/services/session/SessionRunner.js"]
+    },
+    {
+      "name": "EVENT_SESSION_RESUME",
+      "description": "Resume a paused session.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["session", "ts"],
+        "properties": {
+          "session": { "$ref": "#/definitions/SessionRef" },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/managers/SessionManager.js", "src/pages/**"],
+      "listeners": ["src/services/session/SessionRunner.js"]
+    },
+    {
+      "name": "EVENT_SESSION_STEP",
+      "description": "Advance session to next step; used for MultiTimer and voice prompts.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["session", "stepIndex", "ts"],
+        "properties": {
+          "session": { "$ref": "#/definitions/SessionRef" },
+          "stepIndex": { "type": "integer", "minimum": 0 },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/services/session/SessionRunner.js", "src/features/sessions/MultiTimerPanel/**"],
+      "listeners": ["src/features/sessions/MultiTimerPanel/**", "src/managers/PrepChecklistGenerator.js"]
+    },
+    {
+      "name": "EVENT_SESSION_COMPLETE",
+      "description": "Session completed successfully.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["session", "ts"],
+        "properties": {
+          "session": { "$ref": "#/definitions/SessionRef" },
+          "outcome": { "type": "string", "enum": ["success"] },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/services/session/SessionRunner.js"],
+      "listeners": ["src/managers/InventorySync.js", "src/services/automation/runtime.js", "src/services/nba/Orchestrator.js"]
+    },
+    {
+      "name": "EVENT_SESSION_CANCELLED",
+      "description": "Session cancelled or aborted.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["session", "ts"],
+        "properties": {
+          "session": { "$ref": "#/definitions/SessionRef" },
+          "reason": { "type": "string" },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/services/session/SessionRunner.js", "src/managers/SessionManager.js"],
+      "listeners": ["src/services/automation/runtime.js"]
+    },
+    {
+      "name": "EVENT_AUTOMATION_TICK",
+      "description": "Runtime internal tick; drives schedules and retries.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["ts"],
+        "properties": {
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/services/automation/runtime.js"],
+      "listeners": ["src/services/schedule/RelativeScheduler.js", "src/services/nba/Orchestrator.js"]
+    },
+    {
+      "name": "EVENT_SCHEDULE_CREATED",
+      "description": "A recurring or one-time schedule was created for a plan or session.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["scope", "when", "ts"],
+        "properties": {
+          "scope": { "type": "string", "enum": ["plan", "session"] },
+          "when": { "type": "object" },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/services/schedule/RelativeScheduler.js", "src/pages/**"],
+      "listeners": ["src/engines/calendar/CalendarEngine.js"]
+    },
+    {
+      "name": "EVENT_GUARD_BLOCKED",
+      "description": "Guards blocked an action due to Sabbath, quiet hours, weather, or inventory.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["policy", "context", "ts"],
+        "properties": {
+          "policy": { "type": "string", "enum": ["sabbath", "quietHours", "weather", "inventory"] },
+          "context": { "type": "object" },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/services/session/guards/**"],
+      "listeners": ["src/services/automation/runtime.js", "src/services/nba/Orchestrator.js"]
+    },
+    {
+      "name": "EVENT_CALENDAR_SYNC_REQUESTED",
+      "description": "Request to sync schedules to external calendar.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["range", "ts"],
+        "properties": {
+          "range": { "type": "object", "required": ["from", "to"], "properties": { "from": { "$ref": "#/definitions/Timestamp" }, "to": { "$ref": "#/definitions/Timestamp" } } },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/pages/calendar/**", "src/engines/calendar/CalendarEngine.js"],
+      "listeners": ["src/engines/calendar/CalendarEngine.js"]
+    },
+    {
+      "name": "EVENT_CALENDAR_SYNC_COMPLETE",
+      "description": "External calendar sync finished.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["provider", "status", "ts"],
+        "properties": {
+          "provider": { "type": "string", "enum": ["google"] },
+          "status": { "type": "string", "enum": ["success", "error"] },
+          "error": { "type": "string" },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/engines/calendar/CalendarEngine.js"],
+      "listeners": ["src/pages/calendar/**", "src/services/automation/runtime.js"]
+    },
+    {
+      "name": "EVENT_RECIPE_SCANNED",
+      "description": "A recipe or label image was scanned.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["scanId", "source", "ts"],
+        "properties": {
+          "scanId": { "$ref": "#/definitions/ID" },
+          "source": { "type": "string", "enum": ["camera", "file", "pinterest", "web"] },
+          "imageCount": { "type": "integer", "minimum": 1 },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/features/scan-compare-trust/ui/**"],
+      "listeners": ["src/features/scan-compare-trust/services/workers/ocr.worker.js"]
+    },
+    {
+      "name": "EVENT_SCAN_OCR_COMPLETE",
+      "description": "OCR finished with raw text and candidates.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["scanId", "text", "ts"],
+        "properties": {
+          "scanId": { "$ref": "#/definitions/ID" },
+          "text": { "type": "string" },
+          "candidates": { "type": "array", "items": { "$ref": "#/definitions/ItemRef" } },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/features/scan-compare-trust/services/workers/ocr.worker.js"],
+      "listeners": ["src/features/scan-compare-trust/services/products/ProductResolver.js"]
+    },
+    {
+      "name": "EVENT_PRODUCT_RESOLVED",
+      "description": "ProductResolver matched items across providers.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["scanId", "items", "ts"],
+        "properties": {
+          "scanId": { "$ref": "#/definitions/ID" },
+          "items": { "type": "array", "items": { "$ref": "#/definitions/ItemRef" } },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/features/scan-compare-trust/services/products/ProductResolver.js"],
+      "listeners": [
+        "src/features/scan-compare-trust/services/pricing/PriceComparator.js",
+        "src/features/scan-compare-trust/services/coupons/CouponService.js",
+        "src/features/scan-compare-trust/services/safety/SafetyRules.js"
+      ]
+    },
+    {
+      "name": "EVENT_PRICE_COMPARISON_READY",
+      "description": "PriceComparator produced unit comparisons and totals.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["scanId", "comparisons", "ts"],
+        "properties": {
+          "scanId": { "$ref": "#/definitions/ID" },
+          "comparisons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["item", "unitPrice", "store", "packSize"],
+              "properties": {
+                "item": { "$ref": "#/definitions/ItemRef" },
+                "unitPrice": { "$ref": "#/definitions/Money" },
+                "store": { "type": "string" },
+                "packSize": { "$ref": "#/definitions/UnitQuantity" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/features/scan-compare-trust/services/pricing/PriceComparator.js"],
+      "listeners": ["src/features/scan-compare-trust/managers/PricebookManager.js", "src/features/scan-compare-trust/ui/**"]
+    },
+    {
+      "name": "EVENT_COUPON_LOOKUP_COMPLETE",
+      "description": "Coupons fetched and normalized for items.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["scanId", "coupons", "ts"],
+        "properties": {
+          "scanId": { "$ref": "#/definitions/ID" },
+          "coupons": { "type": "array", "items": { "type": "object" } },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/features/scan-compare-trust/services/coupons/CouponService.js"],
+      "listeners": ["src/features/scan-compare-trust/ui/**", "src/features/scan-compare-trust/managers/PricebookManager.js"]
+    },
+    {
+      "name": "EVENT_SAFETY_FLAGS_READY",
+      "description": "Safety and allergen rule evaluation complete.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["scanId", "flags", "ts"],
+        "properties": {
+          "scanId": { "$ref": "#/definitions/ID" },
+          "flags": { "type": "array", "items": { "type": "string" } },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/features/scan-compare-trust/services/safety/SafetyRules.js"],
+      "listeners": ["src/features/scan-compare-trust/ui/**"]
+    },
+    {
+      "name": "EVENT_PRICEBOOK_UPDATED",
+      "description": "Pricebook learning updated for a brand or store.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["scope", "ts"],
+        "properties": {
+          "scope": { "type": "object" },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/features/scan-compare-trust/managers/PricebookManager.js"],
+      "listeners": ["src/features/meals/RecipeVault/**", "src/services/nba/Orchestrator.js"]
+    },
+    {
+      "name": "EVENT_INVENTORY_UPDATED",
+      "description": "Inventory changed due to session completion or manual adjustment.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["changes", "ts"],
+        "properties": {
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["item", "delta"],
+              "properties": {
+                "item": { "$ref": "#/definitions/ItemRef" },
+                "delta": { "$ref": "#/definitions/UnitQuantity" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "reason": { "type": "string", "enum": ["session", "manual", "scanImport"] },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/managers/InventorySync.js", "src/pages/inventory/**"],
+      "listeners": ["src/stores/useInventory.js", "src/services/nba/Orchestrator.js", "src/engines/storehouse/StorehouseEngine.js"]
+    },
+    {
+      "name": "EVENT_GROCERY_LIST_GENERATED",
+      "description": "Shopping list generated from plans and inventory gaps.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["plan", "items", "ts"],
+        "properties": {
+          "plan": { "$ref": "#/definitions/PlanRef" },
+          "items": { "type": "array", "items": { "$ref": "#/definitions/ItemRef" } },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/features/meals/GroceryListGenerator/**", "src/engines/storehouse/StorehouseEngine.js"],
+      "listeners": ["src/services/export/**", "src/pages/inventory/**"]
+    },
+    {
+      "name": "EVENT_TEMPLATE_IMPORTED",
+      "description": "A plan or session template was imported from a remote market.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["templateId", "target", "ts"],
+        "properties": {
+          "templateId": { "$ref": "#/definitions/ID" },
+          "target": { "type": "string", "enum": ["plan", "session"] },
+          "ts": { "$ref": "#/definitions/Timestamp" },
+          "by": { "$ref": "#/definitions/UserRef" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/services/templates/TemplateConnector.js"],
+      "listeners": ["src/managers/PlanManager.js", "src/managers/SessionManager.js"]
+    },
+    {
+      "name": "EVENT_ENTITLEMENTS_UPDATED",
+      "description": "Entitlement flags changed after SVFFH auth claim verification.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["claims", "ts"],
+        "properties": {
+          "claims": { "$ref": "#/definitions/EntitlementClaims" },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/services/auth/SVFFHClaims.js"],
+      "listeners": ["src/stores/useEntitlementFlags.js", "src/features/coop/**", "src/services/templates/TemplateConnector.js"]
+    },
+    {
+      "name": "EVENT_COOP_GOAL_PROPOSED",
+      "description": "User proposes a co-op goal; gated by entitlements.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["goalId", "domain", "target", "ts"],
+        "properties": {
+          "goalId": { "$ref": "#/definitions/ID" },
+          "domain": { "type": "string", "enum": ["meals", "garden", "animals", "cleaning", "inventory"] },
+          "target": { "type": "object" },
+          "ts": { "$ref": "#/definitions/Timestamp" },
+          "by": { "$ref": "#/definitions/UserRef" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/features/coop/CoOpPlanningUI/**"],
+      "listeners": ["src/engines/coop/CoopPlannerEngine.js"]
+    },
+    {
+      "name": "EVENT_COOP_PLAN_AGGREGATED",
+      "description": "CoopPlannerEngine aggregated household contributions into a collective plan.",
+      "payloadSchema": {
+        "type": "object",
+        "required": ["aggregateId", "domains", "ts"],
+        "properties": {
+          "aggregateId": { "$ref": "#/definitions/ID" },
+          "domains": { "type": "array", "items": { "type": "string" } },
+          "ts": { "$ref": "#/definitions/Timestamp" }
+        },
+        "additionalProperties": false
+      },
+      "emitters": ["src/engines/coop/CoopPlannerEngine.js"],
+      "listeners": ["src/managers/PlanManager.js", "src/pages/home.jsx"]
+    }
+  ]
+}

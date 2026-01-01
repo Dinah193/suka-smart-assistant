@@ -1,0 +1,209 @@
+{
+  "version": "2025-10-31T13:15:00-05:00",
+  "description": "Garden ↔ Animal access matrix for Suka Smart Assistant. Defines which garden beds/plots can be entered by which animals, under what crop conditions, and with what cleaning/safety follow-ups. Used by Animal Planner (goat brush-control, poultry pest-pass), Garden Queue Manager (auto-care sessions), Cleaning (outdoor zone), Storehouse (harvest intake after animals), and Meals (when animals in garden change produce availability). Supports user-owned favorites/schedules and reverse generation.",
+  "meta": {
+    "sourceOfTruth": "scraper",
+    "allowHubOverrides": true,
+    "mergeStrategy": "scraper-wins",
+    "ingestionPipelines": [
+      "scraperService",
+      "importService",
+      "bookmarklet",
+      "linked-accounts"
+    ],
+    "sharedOrchestration": {
+      "emitOnUpdate": true,
+      "reason": "garden-animal-access-update",
+      "channels": [
+        "garden",
+        "animals",
+        "cleaning",
+        "storehouse",
+        "meals"
+      ]
+    },
+    "notes": [
+      "This file is the guardrail that stops goats from eating tender beds unless we explicitly say 'spent-bed' or 'brush-control'.",
+      "We included zone overlap so animals aren’t sent to garden areas whose climate is wrong for them (from breeds.json).",
+      "When we allow out-of-zone access, we generate extra cleaning + extra garden care."
+    ]
+  },
+  "defaults": {
+    "timezone": "America/Chicago",
+    "onMismatch": "allow-with-mitigation",
+    "sabbathGuard": true,
+    "quietHoursGuard": true,
+    "acceptedAnimalZones": ["8a", "8b", "9a"],
+    "acceptedGardenZones": ["8a", "8b", "9a"]
+  },
+  "rules": [
+    {
+      "id": "rule-poultry-on-spent-bed",
+      "gardenBedId": "bed-a-north",
+      "label": "Poultry pass on spent beds",
+      "allowSpecies": ["poultry", "chicken", "duck"],
+      "denySpecies": ["goat", "sheep", "cattle"],
+      "onlyIfCropStageIn": ["spent-bed", "cover-crop", "pest-pressure"],
+      "onlyIfGardenZoneIn": ["8a", "8b", "9a"],
+      "onMismatch": "warn-and-suggest",
+      "suggestAlternates": [
+        {
+          "gardenBedId": "bed-b-shade",
+          "why": "partial sun, lower damage risk"
+        }
+      ],
+      "afterAccessEmit": [
+        "cleaning.garden-bin-sanitize",
+        "garden.care-session.generated"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.pest-pressure.detected",
+          "garden.cover-crop.ready-for-termination"
+        ],
+        "emit": [
+          "animals.poultry-processing.generated"
+        ],
+        "rules": [
+          {
+            "id": "pest-to-poultry",
+            "ifEvent": "garden.pest-pressure.detected",
+            "generate": "animals.poultry-garden-pass"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule-goat-brush-fenceline",
+      "gardenBedId": "perimeter-fenceline",
+      "label": "Goat brush-control along fenceline",
+      "allowSpecies": ["goat"],
+      "denySpecies": ["sheep", "poultry", "cattle"],
+      "onlyIfCropCategoryIn": ["none", "perennial-shrub", "woody"],
+      "onlyIfGardenZoneIn": ["7b", "8a", "8b", "9a"],
+      "mitigation": {
+        "extraCleaningEmit": [
+          "cleaning.outdoor-zone.expected"
+        ],
+        "extraGardenEmit": [
+          "garden.care-session.generated"
+        ],
+        "risks": [
+          "goats may strip bark from young perennials",
+          "hoof traffic may compact wet soil"
+        ],
+        "notes": "If soil moisture is high, delay access or lay down pallets."
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.brush-control.requested",
+          "animals.plan.goat-brush.created"
+        ],
+        "emit": [
+          "animals.plan.goat-brush.created"
+        ]
+      }
+    },
+    {
+      "id": "rule-sheep-mow-aisles",
+      "gardenBedId": "garden-aisles",
+      "label": "Sheep mow garden aisles",
+      "allowSpecies": ["sheep"],
+      "denySpecies": ["goat"],
+      "onlyIfCropStageIn": ["established", "mulched"],
+      "onlyIfGardenZoneIn": ["8a", "8b"],
+      "onMismatch": "allow-with-mitigation",
+      "mitigation": {
+        "extraCleaningEmit": [
+          "cleaning.outdoor-zone.expected"
+        ],
+        "extraStorehouseEmit": [
+          "storehouse.intake.expected"
+        ],
+        "risks": [
+          "sheep may graze low foliage if mulch is thin",
+          "extra parasites if not rotated"
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.mow-aisles.requested"
+        ],
+        "emit": [
+          "animals.plan.fromGarden.generated"
+        ]
+      }
+    },
+    {
+      "id": "rule-no-large-animal-in-soft-beds",
+      "gardenBedId": "raised-beds-soft",
+      "label": "Block large animals from soft raised beds; offer alt",
+      "allowSpecies": [],
+      "denySpecies": ["cattle", "sheep", "goat"],
+      "onlyIfGardenZoneIn": ["8a", "8b", "9a"],
+      "onMismatch": "block-and-suggest",
+      "suggestAlternates": [
+        {
+          "gardenBedId": "perimeter-fenceline",
+          "why": "ground is firm enough for hoofed animals"
+        }
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "animals.butchery.completed"
+        ],
+        "emit": [
+          "cleaning.outdoor-zone.expected"
+        ]
+      }
+    },
+    {
+      "id": "rule-poultry-compost-turn",
+      "gardenBedId": "compost-bay",
+      "label": "Poultry to help compost turn / pest control",
+      "allowSpecies": ["poultry", "chicken"],
+      "denySpecies": ["goat", "sheep", "cattle"],
+      "onlyIfCropCategoryIn": ["compost", "none"],
+      "onlyIfGardenZoneIn": ["7b", "8a", "8b", "9a"],
+      "afterAccessEmit": [
+        "cleaning.garden-bin-sanitize"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.compost.turn.requested",
+          "storehouse.overstock.detected"
+        ],
+        "emit": [
+          "animals.poultry-garden-pass"
+        ]
+      }
+    }
+  ],
+  "userCanSaveFavorites": true,
+  "favoritesTemplate": [
+    {
+      "id": "fav-poultry-pest-pass",
+      "source": "system",
+      "cloneOf": "rule-poultry-on-spent-bed",
+      "label": "My Poultry Pest Pass",
+      "allowUserScheduleOverride": true
+    },
+    {
+      "id": "fav-goat-fenceline",
+      "source": "system",
+      "cloneOf": "rule-goat-brush-fenceline",
+      "label": "My Goat Fenceline Run",
+      "allowUserScheduleOverride": true
+    }
+  ],
+  "userFavoritePolicy": {
+    "maxPerHousehold": 30,
+    "allowCustomSchedule": true,
+    "allowCustomReverseGeneration": true
+  }
+}

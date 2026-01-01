@@ -1,0 +1,393 @@
+{
+  "$schema": "file:///c:/Users/larho/suka-smart-assistant/src/data/schemas/gardenHarvest.schema.json",
+  "version": "2025-10-31T16:45:00-05:00",
+  "meta": {
+    "id": "tomato_hot_strip",
+    "title": "Tomato – Hot Strip Bed (High-Heat, High-Output, Trellised)",
+    "description": "Harvest/yield profile for a hot-strip tomato bed that’s already defined in locationPresets/garden_beds.json as bed-c-hot-strip. Designed to feed: (1) garden planning & care (pruning, trellising, watering), (2) harvest-session generation, (3) storehouse stock planning (sauce, paste, diced, salsa), (4) meal planning (fresh use windows), (5) cleaning/sanitizing of tools/buckets, and (6) animal/byproduct routing (vines → goats/poultry/compost). Supports reverse generation from storehouse tomato targets or co-op pooled goals.",
+    "source": "suka-smart-assistant",
+    "tags": [
+      "garden",
+      "harvest",
+      "tomato",
+      "hot-strip",
+      "storehouse",
+      "meal-planning",
+      "cleaning",
+      "animals",
+      "co-op",
+      "reverse-gen"
+    ],
+    "calendar": {
+      "hebrewMonthStart": "full-moon",
+      "supportsAltStart": true,
+      "notes": "Align harvesting windows with your full-moon month start, not rabbinic crescent, to keep feast-prep weeks in sync."
+    },
+    "locationPreset": "garden_beds/bed-c-hot-strip"
+  },
+  "ui": {
+    "layout": "cards/timeline",
+    "hints": {
+      "primaryCTA": "Create Tomato Harvest Session",
+      "secondaryCTA": "Save as Favorite",
+      "tertiaryCTA": "Reverse-generate From Storehouse Targets",
+      "showSeasonalityBadge": true,
+      "groupBy": [
+        "weekOfSeason",
+        "bedId",
+        "variety"
+      ],
+      "suggestOnly": false,
+      "notes": "Show upcoming harvest windows as color chips like well-executed garden planners (Notion/linear-style cards)."
+    },
+    "badges": [
+      { "text": "Garden", "color": "green" },
+      { "text": "Tomato", "color": "red" },
+      { "text": "Bed C – Hot Strip", "color": "orange" }
+    ]
+  },
+  "orchestration": {
+    "bus": "window.__suka?.eventBus",
+    "emitOnLoad": [
+      "garden.harvest.curve.loaded",
+      "garden.tomato.hot-strip.loaded"
+    ],
+    "listen": [
+      "garden.session.request",
+      "garden.plan.changed",
+      "storehouse.goal.request",
+      "meal.session.request",
+      "cleaning.session.request",
+      "inventory.restock.request",
+      "automation.schedule.request"
+    ],
+    "sharedScopes": [
+      "garden",
+      "storehouse",
+      "meals",
+      "cleaning",
+      "animals"
+    ]
+  },
+  "engines": {
+    "primary": "gardenQueueEngine",
+    "supports": [
+      "storehouseGoalEngine",
+      "mealPlanEngine",
+      "cleaningSessionEngine",
+      "animalSessionEngine"
+    ],
+    "notes": "Garden engine should watch this bed’s phenology (flower → breaker → ripe) and surface harvest sessions. Storehouse engine can say: ‘You have 11 kg ripe in hot strip → want to batch sauce?’"
+  },
+  "reverse": {
+    "generateFrom": [
+      "storehouse.targets.tomato-canned",
+      "storehouse.targets.tomato-sauce",
+      "storehouse.targets.salsa",
+      "mealplan.requirements.fresh-tomato",
+      "coop-pool.tomato",
+      "community.feast-days.tomato",
+      "garden.bed.hot-strip.target"
+    ],
+    "strategies": [
+      {
+        "id": "from-storehouse-sauce-target",
+        "title": "Back into bed harvests from storehouse sauce/paste target",
+        "input": {
+          "tomatoKgTarget": 45,
+          "avgProcessLossPct": 0.2
+        },
+        "output": {
+          "requiredRawTomatoKg": 56,
+          "suggestedHarvestSessions": 3,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Harvest Hot Strip 3x this week for sauce/paste",
+              "emitOnUserAccept": [
+                "garden.session.request"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "from-feast-menu",
+        "title": "Back into harvest from feast/holy-day menu tomatoes",
+        "input": {
+          "recipesNeedingFreshTomatoes": 6,
+          "avgTomatoKgPerRecipe": 1.2
+        },
+        "output": {
+          "requiredFreshTomatoKg": 7.2,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Pick 7 kg from hot strip 3–4 days before feast",
+              "emitOnUserAccept": [
+                "garden.session.request",
+                "meal.session.request"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "from-coop-shared-bed",
+        "title": "Back into harvest from co-op pooled tomato goal",
+        "input": {
+          "coopTomatoKgGoal": 120,
+          "householdSharePct": 0.25
+        },
+        "output": {
+          "householdTomatoKgGoal": 30,
+          "suggestedHarvestSessions": 4,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Contribute 30 kg tomatoes from hot strip to co-op",
+              "emitOnUserAccept": [
+                "garden.session.request",
+                "storehouse.plan.generated"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "curve": {
+    "units": "kg-per-day",
+    "seasonLengthDays": 95,
+    "base": [
+      { "day": 1, "value": 0.2, "stage": "early-set" },
+      { "day": 7, "value": 0.6, "stage": "early-harvest" },
+      { "day": 14, "value": 1.2, "stage": "ramp-up" },
+      { "day": 21, "value": 2.0, "stage": "ramp-up" },
+      { "day": 28, "value": 3.2, "stage": "peak" },
+      { "day": 35, "value": 3.5, "stage": "peak" },
+      { "day": 42, "value": 3.5, "stage": "peak" },
+      { "day": 56, "value": 3.0, "stage": "mid" },
+      { "day": 70, "value": 2.4, "stage": "mid" },
+      { "day": 84, "value": 1.7, "stage": "late" },
+      { "day": 95, "value": 1.0, "stage": "late" }
+    ],
+    "weeklyView": [
+      { "week": 1, "avg": 0.6 },
+      { "week": 2, "avg": 1.4 },
+      { "week": 3, "avg": 2.4 },
+      { "week": 4, "avg": 3.3 },
+      { "week": 5, "avg": 3.5 },
+      { "week": 6, "avg": 3.4 },
+      { "week": 7, "avg": 3.0 },
+      { "week": 8, "avg": 2.5 },
+      { "week": 9, "avg": 1.8 },
+      { "week": 10, "avg": 1.1 },
+      { "week": 11, "avg": 0.7 },
+      { "week": 12, "avg": 0.5 }
+    ],
+    "bed": {
+      "id": "bed-c-hot-strip",
+      "areaSqft": 32,
+      "plantSpacingIn": 18,
+      "rowCount": 1,
+      "trellised": true,
+      "notes": "Yield assumes good trellising + pruning + irrigation in a hot strip."
+    }
+  },
+  "adjustments": {
+    "byClimateZone": [
+      {
+        "zone": "hot-humid",
+        "multiplier": 0.95,
+        "notes": "More disease pressure → slightly lower yield → also trigger tool/trellis cleaning."
+      },
+      {
+        "zone": "hot-dry",
+        "multiplier": 1.02,
+        "notes": "Good irrigation and mulching can slightly boost yield."
+      },
+      {
+        "zone": "cooler-shoulder",
+        "multiplier": 0.9,
+        "notes": "Later ripening → suggest row cover or staggered harvest sessions."
+      }
+    ],
+    "byCareLevel": [
+      {
+        "level": "intensive",
+        "multiplier": 1.1
+      },
+      {
+        "level": "standard",
+        "multiplier": 1.0
+      },
+      {
+        "level": "minimal",
+        "multiplier": 0.85
+      }
+    ]
+  },
+  "storehouse": {
+    "targets": {
+      "tomato_sauce_quarts": 20,
+      "tomato_paste_pints": 8,
+      "diced_tomato_pints": 16,
+      "salsa_pints": 12
+    },
+    "grocerySectionsInspiration": [
+      "Canned Tomatoes & Sauce",
+      "Pasta & Pizza Sauce",
+      "Salsa & Latin",
+      "Meal Starters / Bases",
+      "Freezer Meal Starters"
+    ],
+    "autoPlan": {
+      "enabled": false
+    }
+  },
+  "meals": {
+    "recipes": [
+      {
+        "id": "fresh-tomato-salad",
+        "title": "Fresh Tomato Salad (Use Immediately)",
+        "useWithinHours": 24,
+        "linksTo": [
+          "/meals/lunch",
+          "/inventory/fresh-produce"
+        ]
+      },
+      {
+        "id": "saturday-pasta-sauce",
+        "title": "Pasta Sauce from Hot-Strip Tomatoes",
+        "linksTo": [
+          "/meals/dinner",
+          "/storehouse/tomato"
+        ],
+        "emit": "cooking.session.request"
+      }
+    ],
+    "autoSession": {
+      "everyDays": 2,
+      "emit": [
+        "meal.session.request"
+      ]
+    }
+  },
+  "cleaning": {
+    "routines": [
+      {
+        "id": "harvest-tools-sanitize",
+        "title": "Sanitize Harvest Tools / Buckets",
+        "frequency": "PER_HARVEST",
+        "emit": "cleaning.session.request",
+        "tools": [
+          "sanitizer",
+          "brush",
+          "drying-rack"
+        ]
+      },
+      {
+        "id": "trellis-spot-check",
+        "title": "Trellis / Ties Spot-Clean",
+        "frequency": "WEEKLY",
+        "emit": "cleaning.session.request"
+      }
+    ],
+    "sabbathGuard": true
+  },
+  "garden": {
+    "care": [
+      {
+        "id": "prune-lower-leaves",
+        "title": "Prune Lower Leaves / Improve Airflow",
+        "emit": "garden.session.request"
+      },
+      {
+        "id": "check-drip-lines",
+        "title": "Check Drip Lines / Irrigation for Hot Strip",
+        "emit": "garden.session.request"
+      }
+    ],
+    "harvest": {
+      "autoSuggest": true,
+      "userMustConfirm": true,
+      "emitOnConfirm": [
+        "garden.session.request"
+      ]
+    },
+    "notes": "This entry is hard-linked to bed-c-hot-strip. If user changes layout, regenerate curve with their bed map."
+  },
+  "animals": {
+    "routing": {
+      "spentVines": [
+        "compost",
+        "goat",
+        "poultry"
+      ],
+      "notes": "Do not route diseased vines to animals; send to hot compost only."
+    },
+    "emit": [
+      "animal.care.session.request"
+    ]
+  },
+  "inventory": {
+    "productId": "garden-tomato-hot-strip",
+    "unit": "kg",
+    "trackLots": true,
+    "harvestTag": "hot-strip",
+    "shelfLifeDays": 5
+  },
+  "favoriteSessions": [
+    {
+      "id": "fav-hot-strip-harvest-mw",
+      "title": "Hot Strip Harvest – Mon/Wed",
+      "domain": "garden/harvest",
+      "schedule": "RRULE:FREQ=WEEKLY;BYDAY=MO,WE;BYHOUR=7;BYMINUTE=30;BYSECOND=0",
+      "sabbathGuard": true
+    },
+    {
+      "id": "fav-sauce-processing",
+      "title": "Process Today’s Tomatoes Into Sauce",
+      "domain": "meals/cooking",
+      "schedule": ""
+    }
+  ],
+  "scheduleTemplates": [
+    {
+      "id": "hot-strip-3x-week",
+      "title": "Harvest Hot Strip 3x/Week (Peak)",
+      "rrules": [
+        "RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;BYHOUR=7;BYMINUTE=0;BYSECOND=0"
+      ],
+      "options": {
+        "sabbathGuard": true,
+        "quietHoursGuard": true
+      }
+    }
+  ],
+  "userProfiles": {
+    "allowUserOwnedSchedules": true,
+    "allowUserOwnedFavorites": true,
+    "allowExportShare": true,
+    "shareFormats": [
+      "json",
+      "suka-plan",
+      "calendar-rrule"
+    ]
+  },
+  "events": {
+    "emits": [
+      "garden.session.request",
+      "cleaning.session.request",
+      "meal.session.request",
+      "storehouse.plan.generated",
+      "inventory.restock.request"
+    ],
+    "consumes": [
+      "garden.plan.changed",
+      "storehouse.targets.changed",
+      "meal.session.completed"
+    ]
+  }
+}

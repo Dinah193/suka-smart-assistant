@@ -1,0 +1,551 @@
+===============================================================================
+GARDEN INSIGHTS – DESIGN SPEC
+File: src/intelligence/insights/gardenInsights.txt
+Role: Contract for season-aware, cycle-aware garden insights in SSA
+===============================================================================
+
+0. CONCEPTUAL PURPOSE
+---------------------
+The gardenInsights spec describes how SSA turns **raw garden data**
+(beds, sowings, growth stages, harvest logs, compost flows) into **meaningful
+guidance** for the householder:
+
+- Is the garden rhythm aligned with the current season and upcoming windows?
+- Are garden yields on a path to support the storehouse and meals?
+- Are preservation and animals prepared to receive the yields?
+- Where is the garden quietly drifting off rhythm (too quiet, too late, too much)?
+
+It is NOT UI and NOT a low-level planting calendar.
+It is a **logic contract** that defines:
+
+- Garden insight templates and rules,
+- What data they expect (garden + cross-domain),
+- How to derive scores and narratives,
+- How to emit eventBus events others can respond to.
+
+It must support:
+
+- TOOL MODE:
+  - A single “Garden Insight Viewer / Planner” can run these insights
+    against a local snapshot (e.g., JSON import, manual entry) with no Dexie.
+- STEWARDSHIP MODE:
+  - The full SSA stack can call into this insight layer regularly (or on
+    key garden/season events) and surface guidance in dashboards,
+    SessionRunner, and the Planning Graph.
+
+
+1. STRUCTURE – CONFIG SHAPE & DOMAINS
+-------------------------------------
+Primary domain:
+- garden
+
+Connected domains:
+- seasonality, preservation, storehouse/provisioning, animals, cooking/meals,
+  compost/soil, feasts/events, enterprise (CSA, markets), mutual-aid,
+  dependency map, cycles engine.
+
+Conceptual config shape (JSON-like):
+
+gardenInsightsConfig = {
+  version: "1.0.0",
+  lastUpdatedAt: string,
+  modeHint?: "TOOL" | "STEWARDSHIP",
+
+  // How to interpret raw garden state into postures (quiet, emerging, strong)
+  stateThresholds: GardenStateThresholds,
+
+  // Garden insight templates and rules
+  insightTemplates: GardenInsightTemplate[],
+
+  // Scoring and weighting rules
+  scoring: GardenInsightScoring,
+
+  // Signaling preferences
+  signals: {
+    sendRoutineInsights: boolean,
+    sendSeasonShiftInsights: boolean,
+    sendPlantingWindowInsights: boolean,
+    sendHarvestWindowInsights: boolean,
+    sendRiskAlerts: boolean,
+  },
+
+  metadata?: {
+    householdName?: string,
+    regionProfile?: string,          // influences growing expectations
+  },
+};
+
+
+2. PROPS – DETAILED COMPONENTS
+------------------------------
+
+2.1 GardenStateThresholds
+Defines how to interpret raw bed/plant data into garden “states”.
+
+GardenStateThresholds = {
+  // Per crop family, bed type, or tag thresholds
+  categories: {
+    [gardenCategoryKey: string]: {
+      // e.g., per bed or per area:
+      // planned area vs planted area, sowings vs season window, etc.
+      recommendedBedUtilization: number,    // 0..1
+      minimumPlantingsPerWindow: number,
+      minimumSuccessionsPerSeason?: number,
+    },
+  },
+
+  // Optional global defaults
+  globalDefaults?: {
+    underutilizedThreshold?: number,       // e.g. 0.4 (40% of recommended)
+    strongUtilizationThreshold?: number,   // e.g. 0.8
+  },
+
+  // Interpretation notes:
+  // - “Underutilized”: many beds bare when planting window is open.
+  // - “Overextended”: too many beds planted relative to preservation or
+  //   storehouse readiness, risking waste.
+  // - “On rhythm”: plantings, growth, and harvest logs match seasonal windows.
+
+  // TODO[seasonal-logic]:
+  // - Allow seasonRulesConfig + region profile to adjust recommended
+  //   utilization and successions for cool vs warm seasons.
+
+  notes?: string,
+};
+
+
+2.2 GardenInsightTemplate
+Defines a **pattern** of what to look for and how to describe it.
+
+GardenInsightTemplate = {
+  id: string,                        // e.g. "early-planting-window-quiet",
+                                     //      "harvest-flush-without-preservation",
+                                     //      "garden-overextended-vs-storehouse",
+                                     //      "protein-garden-gap"
+
+  label: string,
+  category:
+    "seasonal" | "planting-window" | "harvest-window" |
+    "yield-flow" | "storehouse-support" | "animal-support" |
+    "soil-and-compost" | "enterprise" | "mutual-aid",
+
+  description?: string,              // narrative of what this insight is about
+
+  // Conditions for when this insight applies
+  conditions: {
+    requiredSeasonIds?: string[],    // from seasonRulesConfig.seasons.id
+    excludedSeasonIds?: string[],
+
+    // Window requirements (derived from seasonRules + garden calendars)
+    plantingWindowRequired?: boolean,
+    harvestWindowRequired?: boolean,
+    preservationWindowRequired?: boolean,
+
+    // Garden posture expectations
+    gardenStates?: {
+      // e.g. underutilized, overextended, balanced
+      posture?: ("quiet" | "underutilized" | "balanced" | "overextended")[],
+      // crop-family-specific conditions
+      categoryPostures?: {
+        [gardenCategoryKey: string]:
+          ("quiet" | "underutilized" | "balanced" | "overextended")[];
+      },
+    },
+
+    // Cross-domain hints (optional)
+    storehouseGrainState?: ("comfortable" | "low" | "critical")[],
+    storehouseFreshProduceState?: ("comfortable" | "low" | "critical")[],
+    animalFeedPressure?: ("low" | "medium" | "high")[],
+    preservationCapacityState?: ("quiet" | "balanced" | "backlogged")[],
+
+    feastWindowNear?: boolean,
+  },
+
+  // How to compute a severity score (0..1)
+  scoringRecipe?: {
+    baseWeight: number,
+    seasonWeight?: number,
+    storehouseWeight?: number,
+    dependencyWeight?: number,       // from dependencyMap impact
+    feastWeight?: number,
+  },
+
+  // Narrative templates
+  narratives: {
+    // Short message
+    summary: {
+      lean?: string,                 // e.g. "Planting window is open, but beds are quiet."
+      flush?: string,                // e.g. "Garden is in a rich harvest rhythm."
+      balanced?: string,             // e.g. "Garden rhythm is aligned with the season."
+    },
+
+    // Longer explanation
+    detail?: string,                 // e.g. "During this early planting window..."
+
+    // Guidance suggestions
+    guidance?: {
+      strengthenPlanting?: string,   // e.g. "Sow cool-season crops in underused beds..."
+      softenPlanting?: string,       // e.g. "Consider reducing new beds to match preservation..."
+      intensifyPreservation?: string,// e.g. "Convert current harvest flush..."
+      redirectToAnimals?: string,    // e.g. "Surplus greens can support animal feed..."
+      considerMutualAid?: string,    // e.g. "Invite allied households to share the harvest..."
+      considerEnterprise?: string,   // e.g. "A small surplus could support a market or CSA..."
+    },
+  },
+
+  // Which domains this insight should be shared with
+  domainsToNotify?: ("garden" | "preservation" | "storehouse" | "animals" |
+                     "cooking" | "feasts" | "enterprise" | "mutual-aid" |
+                     "compost")[],
+
+  // TODO[insights]:
+  // - Curate templates for:
+  //   - early planting window (quiet vs active),
+  //   - mid-season succession rhythm,
+  //   - harvest flush with weak preservation,
+  //   - lean garden rhythm with feast windows approaching,
+  //   - soil fertility / compost loops.
+
+  notes?: string,
+};
+
+
+2.3 GardenInsightScoring
+Defines how to combine multiple garden insights into a coherent set.
+
+GardenInsightScoring = {
+  // Overall posture scoring (0..1) for the garden
+  postureWeights: {
+    seasonalAlignment: number,       // planting/harvest vs windows
+    storehouseSupport: number,       // how well the garden feeds storehouse
+    yieldFlowBalance: number,        // harvest vs preservation vs waste
+    soilHealthHint: number,          // compost & rotation hints
+  },
+
+  limits: {
+    maxInsightsPerRun: number,       // e.g. 5
+    maxImportantPerRun: number,      // e.g. 2
+  },
+
+  severityThresholds: {
+    gentle: number,                  // e.g. 0.25
+    important: number,               // e.g. 0.6
+  },
+
+  // TODO[cycles-engine]:
+  // - Use householdCycles.engine rhythm posture (for garden and related patterns)
+  //   as a factor in seasonalAlignment and yieldFlowBalance.
+
+  notes?: string,
+};
+
+
+2.4 GardenInsightResult (output shape)
+Not part of the config itself, but the **shape of emitted garden insight objects**.
+
+GardenInsightResult = {
+  id: string,                        // unique per run (templateId + hash)
+  templateId: string,
+  severity: "info" | "gentle" | "important",
+  score: number,                     // 0..1
+  category: string,                  // mirrored from template.category
+
+  seasonId?: string,
+  plantingWindowId?: string,
+  harvestWindowId?: string,
+
+  gardenSnapshotRef?: string,        // pointer/hash to snapshot used
+  affectedCategories?: string[],     // e.g. ["cool-season-greens", "root-crops"],
+
+  summary: string,
+  detail?: string,
+  guidance?: {
+    strengthenPlanting?: string,
+    softenPlanting?: string,
+    intensifyPreservation?: string,
+    redirectToAnimals?: string,
+    considerMutualAid?: string,
+    considerEnterprise?: string,
+  },
+
+  domainsToNotify?: string[],
+};
+
+
+3. DATA FLOW – HOW GARDEN INSIGHTS ARE USED
+-------------------------------------------
+
+3.1 TOOL MODE
+In TOOL MODE, a standalone “Garden Insight Viewer / Planner” can:
+
+1) Load:
+   - gardenInsightsConfig (static file),
+   - a garden snapshot (beds, crops, sowing dates, expected harvest, logged harvests),
+   - optional context:
+     - current seasonId,
+     - planting/harvest windows,
+     - simple storehouse statuses (e.g. produce lean/flush).
+
+2) Normalize garden state:
+   - compute bed utilization,
+   - detect planting vs window timing,
+   - estimate upcoming harvest potential vs season stage.
+
+3) Evaluate insightTemplates:
+   - For each template:
+     - check season/window/positional conditions,
+     - compare garden posture vs thresholds,
+     - compute a score via scoringRecipe.
+
+4) Rank and filter:
+   - Apply scoring + limits to produce a small set of insights.
+
+5) Present:
+   - As a set of cards with summary + guidance (e.g., “strengthen planting”,
+     “intensify preservation”).
+
+6) Emit eventBus events using a local or shared emitter.
+
+Typical TOOL MODE event sequence:
+
+- After an evaluation run, emit:
+  - "garden.insights.evaluated"
+  - "garden.insights.generated"
+- Emit one "garden.insight" per insight result.
+
+
+3.2 STEWARDSHIP MODE
+In STEWARDSHIP MODE, gardenInsights become part of **core household guidance**.
+
+Flow:
+
+1) App boot:
+   - Dexie loads:
+     - gardenInsightsConfig,
+     - seasonRulesConfig,
+     - feastCyclesConfig,
+     - dependencyMapConfig.
+   - Garden domain exposes snapshots (beds, crops, plantings, harvest logs).
+   - seasonalIntelligence computes:
+     - current seasonId,
+     - planting/harvest/preservation windows.
+
+2) Triggers for running insights:
+   - On schedule (e.g. weekly or by season milestone),
+   - On key events:
+     - "season.rules.window.open" for planting/harvest,
+     - "garden.harvest.logged",
+     - "garden.beds.updated",
+     - "dependencies.impact.derived" where garden nodes are in focus.
+
+3) Insight engine:
+   - Ingests:
+     - garden snapshot (bed utilization, crop families, sowing and harvest logs),
+     - active seasonId and windows,
+     - storehouse status (fresh produce categories),
+     - preservation capacity status (jars, salt, freezer space),
+     - dependency impacts (garden → preservation → storehouse patterns).
+
+   - Computes:
+     - garden posture: quiet, underutilized, balanced, overextended,
+     - yield flow posture: strong harvest vs weak preservation, etc.
+
+4) Template evaluation:
+   - Check GardenInsightTemplate conditions,
+   - For matching templates:
+     - compute scores and severity,
+     - generate narrative summary + detail + guidance.
+
+5) Emit insight events:
+   - For dashboards, SessionRunner, Planning Graph, and Hub connectors.
+   - Optionally persist last run to Dexie for history and analytics.
+
+6) Downstream domain reactions:
+   - Garden Planner:
+     - suggest sowing or resting, rotation, or cover cropping.
+   - Preservation Planner:
+     - respond to harvest flush with preservation rhythms.
+   - Storehouse Planner:
+     - anticipate produce inflows or warn about lean seasons.
+   - Animal feeds:
+     - adjust use of garden surplus for animal provision.
+   - Mutual-aid / enterprise:
+     - highlight surplus harvest for sharing or selling.
+
+
+4. EVENT TRIGGERS – EVENTBUS CONTRACT
+-------------------------------------
+The garden insight engine (or Viewer in TOOL MODE) must emit events.
+All events follow the SSA eventBus contract:
+
+  { type, ts, source, data }
+
+Where:
+- type: string
+- ts: ISO 8601 timestamp
+- source: "garden.insights.engine" or similar
+- data: structured payload
+
+Recommended event types:
+
+1) Config lifecycle
+   - "garden.insights.config.loaded"
+     data: {
+       version,
+       templateCount,
+     }
+
+   - "garden.insights.config.updated"
+     data: {
+       version,
+       changedBy,                   // "householder" | "system" | "migration"
+       changesSummary,              // e.g. { templatesAdded, thresholdsAdjusted }
+     }
+
+
+2) Evaluation runs
+   - "garden.insights.evaluated"
+     // When templates are evaluated, before filtering
+     data: {
+       runId: string,
+       at: string,
+       seasonId?: string,
+       plantingWindowId?: string,
+       harvestWindowId?: string,
+       evaluatedCount: number,
+       candidateCount: number,
+     }
+
+   - "garden.insights.generated"
+     // When final insight results are produced
+     data: {
+       runId,
+       at: string,
+       seasonId?: string,
+       plantingWindowId?: string,
+       harvestWindowId?: string,
+       postureSummary: {
+         seasonalAlignmentScore: number,
+         storehouseSupportScore: number,
+         yieldFlowBalanceScore: number,
+         soilHealthHintScore: number,
+       },
+       insightCount: number,
+       importantCount: number,
+       insightIds: string[],
+     }
+
+
+3) Individual insights
+   - "garden.insight"
+     data: GardenInsightResult
+
+
+4) Risk and opportunity hooks
+   - "garden.insights.riskAlert"
+     data: {
+       runId,
+       severity: "gentle" | "important",
+       message,
+       riskKind: "missed-planting-window" |
+                 "missed-harvest-window" |
+                 "overextension" |
+                 "lean-season-ahead",
+       affectedCategories?: string[],
+     }
+
+   - "garden.insights.yieldOpportunity"
+     data: {
+       runId,
+       seasonId?: string,
+       opportunityKind: "harvest-flush" | "succession-gap" | "shoulder-season",
+       categoryKeys?: string[],
+       message,
+       suggestedDomains?: string[],   // e.g. ["preservation", "mutual-aid", "enterprise"]
+     }
+
+
+5) Integration with cycles / dependencies
+   - "garden.insights.cycleAlignment"
+     data: {
+       runId,
+       seasonId,
+       alignmentScore: number,
+       misalignedPatterns?: string[], // from dependencyMapConfig.patterns
+       notes?: string,
+     }
+
+   - "garden.insights.dependencyImpact"
+     data: {
+       runId,
+       rootNodeId: string,           // e.g. "garden.beds"
+       impactScore: number,
+       upstreamNodes: string[],
+       downstreamNodes: string[],
+     }
+
+
+5. CONCEPTUAL PURPOSE – HOW GARDEN INSIGHTS FIT THE WEB OF MEANING
+-------------------------------------------------------------------
+Garden insights are the **voice of the soil and beds** within SSA’s web
+of meaning.
+
+They allow SSA to:
+
+- Speak about **planting and harvest cycles**, not isolated chores:
+  - “Planting window is open; beds are quiet.”
+  - “Harvest flush is strong; preservation window is open.”
+
+- Honor the garden as a **source of yield**:
+  - Fresh produce flows into preservation and storehouse,
+  - Surplus and seconds can flow into animals, mutual-aid, or enterprise,
+  - Residues and compost flow back to soil for future cycles.
+
+- Connect **seasons, storehouse, and feasts**:
+  - Planting and harvest rhythms align with seasonRulesConfig.
+  - Storehouse expectations (lean vs flush) shape what “strong garden rhythm”
+    means in each season.
+  - Feast windows illuminate where garden yields can honor appointed times.
+
+- Make **dependencies visible**:
+  - Garden underutilization during planting season flows forward as:
+    - weaker preservation,
+    - lean storehouse,
+    - reduced feast flexibility.
+  - Overextension can be seen as:
+    - harvest beyond preservation capacity,
+    - potential waste if yields are not redirected.
+
+- Support both **TOOL MODE and STEWARDSHIP MODE**:
+  - TOOL MODE:
+    - A single viewer teaches the householder to read garden rhythm and
+      cross-season consequences from a snapshot.
+  - STEWARDSHIP MODE:
+    - Insights quietly watch the garden through the year, surfacing gentle
+      prompts when rhythms drift or yields present opportunities.
+
+Explicit TODO HOOKS:
+- TODO[seasonal-logic]:
+  - Wire garden insight conditions and thresholds to seasonRulesConfig and
+    planting/harvest windows so expectations change across cool/warm seasons
+    and region profiles.
+
+- TODO[cycles-engine]:
+  - Integrate householdCycles.engine rhythm metrics (garden domain) into
+    GardenInsightScoring so insights reference cycle strength, not only counts.
+
+- TODO[dependencies]:
+  - Consume dependencyMapConfig to weight insights where garden nodes
+    are central in high-priority patterns (e.g., garden → preservation → storehouse).
+
+- TODO[insights]:
+  - Build a curated library of GardenInsightTemplate entries for:
+    - early planting windows,
+    - successional planting,
+    - mid-season course corrections,
+    - harvest and preservation balance,
+    - soil fertility and compost rhythms,
+    - feast-season gardens (special crops for appointed times).
+
+END OF SPEC
+===============================================================================

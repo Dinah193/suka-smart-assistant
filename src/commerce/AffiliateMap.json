@@ -1,0 +1,248 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "2025-11-02T00:00:00-06:00",
+  "description": "Affiliate map for Suka Smart Assistant (SSA). Prioritizes Suka Village Family Fund Hub (SVFFH) businesses when familyFundMode=true, but SSA can run standalone.",
+  "priorityOrder": [
+    "hub", 
+    "local", 
+    "affiliate", 
+    "fallback"
+  ],
+  "defaultPartner": {
+    "id": "fallback:any-store",
+    "name": "Acquire from any store / co-op / market",
+    "type": "fallback",
+    "commission": 0,
+    "active": true
+  },
+  "partners": [
+    {
+      "id": "hub:butchery",
+      "name": "SVFFH – Community Butchery & Meat Processing",
+      "type": "hub",
+      "commission": 0.12,
+      "active": true,
+      "region": "us-south"
+    },
+    {
+      "id": "hub:garden-nursery",
+      "name": "SVFFH – Sacred Village Nursery & Seed Co.",
+      "type": "hub",
+      "commission": 0.1,
+      "active": true
+    },
+    {
+      "id": "hub:household-services",
+      "name": "SVFFH – Household / Cleaning / Meal Prep Services",
+      "type": "hub",
+      "commission": 0.1,
+      "active": true
+    },
+    {
+      "id": "hub:storehouse-supplier",
+      "name": "SVFFH – Storehouse Stock & Long-term Pantry",
+      "type": "hub",
+      "commission": 0.08,
+      "active": true
+    },
+    {
+      "id": "local:agrarian-market",
+      "name": "Local Agrarian Market / Farmer Collective",
+      "type": "local",
+      "commission": 0.05,
+      "active": true
+    },
+    {
+      "id": "aff:thrive-market",
+      "name": "Affiliate – Thrive Market",
+      "type": "affiliate",
+      "commission": 0.04,
+      "active": true
+    },
+    {
+      "id": "aff:instacart",
+      "name": "Affiliate – Instacart / Same-day",
+      "type": "affiliate",
+      "commission": 0.03,
+      "active": true
+    },
+    {
+      "id": "aff:butcherbox",
+      "name": "Affiliate – ButcherBox (fallback for meat)",
+      "type": "affiliate",
+      "commission": 0.04,
+      "active": true
+    }
+  ],
+  "categoryMap": {
+    "meat-lamb": [
+      "hub:butchery",
+      "aff:butcherbox",
+      "local:agrarian-market",
+      "fallback:any-store"
+    ],
+    "meat-goat": [
+      "hub:butchery",
+      "local:agrarian-market",
+      "aff:butcherbox",
+      "fallback:any-store"
+    ],
+    "meat-beef": [
+      "hub:butchery",
+      "aff:butcherbox",
+      "local:agrarian-market",
+      "fallback:any-store"
+    ],
+    "meat-poultry": [
+      "hub:butchery",
+      "local:agrarian-market",
+      "aff:instacart",
+      "fallback:any-store"
+    ],
+    "garden-seed": [
+      "hub:garden-nursery",
+      "local:agrarian-market",
+      "aff:instacart",
+      "fallback:any-store"
+    ],
+    "garden-tools": [
+      "hub:garden-nursery",
+      "local:agrarian-market",
+      "fallback:any-store"
+    ],
+    "storehouse-staples": [
+      "hub:storehouse-supplier",
+      "local:agrarian-market",
+      "aff:thrive-market",
+      "fallback:any-store"
+    ],
+    "cleaning-supplies": [
+      "hub:household-services",
+      "aff:instacart",
+      "fallback:any-store"
+    ],
+    "meal-prep-services": [
+      "hub:household-services",
+      "fallback:any-store"
+    ],
+    "preservation-equipment": [
+      "hub:storehouse-supplier",
+      "local:agrarian-market",
+      "fallback:any-store"
+    ]
+  },
+  "itemMap": {
+    "lamb-shoulder": {
+      "sku": "lamb-shoulder",
+      "name": "Lamb Shoulder",
+      "category": "meat-lamb",
+      "partners": [
+        "hub:butchery",
+        "aff:butcherbox",
+        "fallback:any-store"
+      ]
+    },
+    "goat-leg": {
+      "sku": "goat-leg",
+      "name": "Goat Leg",
+      "category": "meat-goat",
+      "partners": [
+        "hub:butchery",
+        "local:agrarian-market",
+        "fallback:any-store"
+      ]
+    },
+    "katahdin-sheep": {
+      "sku": "katahdin-sheep",
+      "name": "Katahdin Sheep (live / processing)",
+      "category": "meat-lamb",
+      "partners": [
+        "hub:butchery",
+        "local:agrarian-market"
+      ]
+    },
+    "heirloom-collard-seed": {
+      "sku": "heirloom-collard-seed",
+      "name": "Heirloom Collard Green Seed",
+      "category": "garden-seed",
+      "partners": [
+        "hub:garden-nursery",
+        "local:agrarian-market"
+      ]
+    },
+    "heirloom-tomato-seed": {
+      "sku": "heirloom-tomato-seed",
+      "name": "Heirloom Tomato Seed",
+      "category": "garden-seed",
+      "partners": [
+        "hub:garden-nursery",
+        "local:agrarian-market",
+        "fallback:any-store"
+      ]
+    },
+    "pressure-canner": {
+      "sku": "pressure-canner",
+      "name": "Pressure Canner",
+      "category": "preservation-equipment",
+      "partners": [
+        "hub:storehouse-supplier",
+        "fallback:any-store"
+      ]
+    },
+    "canning-lids-wide-mouth": {
+      "sku": "canning-lids-wide-mouth",
+      "name": "Canning Lids – Wide Mouth",
+      "category": "preservation-equipment",
+      "partners": [
+        "hub:storehouse-supplier",
+        "aff:thrive-market",
+        "fallback:any-store"
+      ]
+    },
+    "wheat-berries-50lb": {
+      "sku": "wheat-berries-50lb",
+      "name": "Wheat Berries – 50 lb",
+      "category": "storehouse-staples",
+      "partners": [
+        "hub:storehouse-supplier",
+        "local:agrarian-market",
+        "aff:thrive-market",
+        "fallback:any-store"
+      ]
+    },
+    "olive-oil-bulk": {
+      "sku": "olive-oil-bulk",
+      "name": "Olive Oil – Bulk",
+      "category": "storehouse-staples",
+      "partners": [
+        "hub:storehouse-supplier",
+        "aff:thrive-market",
+        "fallback:any-store"
+      ]
+    },
+    "cleaning-base-castile": {
+      "sku": "cleaning-base-castile",
+      "name": "Castile Soap – Cleaning Base",
+      "category": "cleaning-supplies",
+      "partners": [
+        "hub:household-services",
+        "aff:instacart",
+        "fallback:any-store"
+      ]
+    },
+    "meal-prep-weekly": {
+      "sku": "meal-prep-weekly",
+      "name": "Weekly Meal Prep Service (SSA compatible)",
+      "category": "meal-prep-services",
+      "partners": [
+        "hub:household-services"
+      ]
+    }
+  },
+  "rules": {
+    "whenNoExactItem": "useCategory",
+    "whenNoCategory": "useDefault",
+    "enableHubFirst": true,
+    "autofillFromCommerceTriggerEngine": true
+  }
+}

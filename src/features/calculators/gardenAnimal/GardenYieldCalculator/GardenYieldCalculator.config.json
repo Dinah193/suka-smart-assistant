@@ -1,0 +1,65 @@
+{
+  "$schema": "../../../../schemas/planningGraph/nodes.schema.json",
+  "id": "gardenYield",
+  "kind": "calculator-node",
+  "nodeKey": "gardenYield",
+  "label": "Garden Yield & Harvest Load",
+  "description": "Estimates fresh and preservation yield from the garden based on planting calendar outputs, crop settings, and household/storehouse targets.",
+  "domain": "garden",
+  "calculatorKey": "GardenYieldCalculator",
+  "version": "1.0.0",
+  "enabled": true,
+  "tags": [
+    "garden",
+    "yield",
+    "harvest-load",
+    "preservation",
+    "storehouse",
+    "planning-graph"
+  ],
+
+  "inputs": {
+    "requires": [
+      "gardenPlantingCalendar.outputs.plantingWindows",
+      "gardenPlantingCalendar.outputs.harvestWindows",
+      "gardenPlantingCalendar.outputs.summary",
+      "gardenLayoutPlanner.outputs.beds?        // optional: bed dimensions and density guidance",
+      "storehouseTargets.outputs.annualTargets? // optional: annual crop targets for storehouse"
+    ]
+  },
+
+  "outputs": {
+    "provides": [
+      "yieldEstimates          // per-crop yield estimates (fresh vs preservation)",
+      "harvestLoadByWeek       // weekly or bucketed harvest load for labor/logistics",
+      "preservationLoad        // preservation-focused harvest groupings and batch sizes",
+      "storehouseCoverage      // coverage vs storehouse targets",
+      "summary                 // high-level metrics and notes"
+    ]
+  },
+
+  "events": {
+    "emits": [
+      "planningGraph.node.computed",
+      "garden.yield.updated",
+      "storehouse.demand.derived"
+    ],
+    "listensTo": [
+      "garden.plantingCalendar.updated",
+      "inventory.updated",
+      "session.completed"
+    ]
+  },
+
+  "nextSuggestions": {
+    "primary": [
+      "preservationQueuePlanner",
+      "storehouseMealsPlanner"
+    ],
+    "secondary": [
+      "FreezerSpaceCalculator",
+      "waterUseEstimator",
+      "familyFundExport.gardenYield"
+    ]
+  }
+}

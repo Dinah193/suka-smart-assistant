@@ -1,0 +1,428 @@
+{
+  "id": "stability.scoring.config",
+  "version": 1,
+  "description": "Config for mapping normalized [0,1] stability metrics to letter grades, severity levels, and human-readable labels. Used by dashboards, Now CTA helpers, and flow recommendations.",
+  "scale": {
+    "min": 0,
+    "max": 1
+  },
+  "globalThresholds": {
+    "letterGrades": [
+      {
+        "grade": "A",
+        "min": 0.9,
+        "max": 1,
+        "label": "Stable",
+        "description": "Things are running smoothly. Maintain existing habits and occasionally review for improvement."
+      },
+      {
+        "grade": "B",
+        "min": 0.75,
+        "max": 0.9,
+        "label": "Mostly Stable",
+        "description": "Generally stable with a few mild pressure points. A focused session now and then will keep things balanced."
+      },
+      {
+        "grade": "C",
+        "min": 0.6,
+        "max": 0.75,
+        "label": "Borderline",
+        "description": "Noticeable friction. Aim a stabilization session here soon to prevent drift toward overwhelm."
+      },
+      {
+        "grade": "D",
+        "min": 0.35,
+        "max": 0.6,
+        "label": "Unstable",
+        "description": "Household systems are under strain. Prioritize this domain for upcoming sessions or flows."
+      },
+      {
+        "grade": "F",
+        "min": 0,
+        "max": 0.35,
+        "label": "Critical",
+        "description": "High stress or backlog. Recommend activating a dedicated stabilization flow or multi-session plan."
+      }
+    ],
+    "severityBands": [
+      {
+        "severity": "ok",
+        "min": 0.75,
+        "max": 1,
+        "color": "green",
+        "label": "OK"
+      },
+      {
+        "severity": "watch",
+        "min": 0.6,
+        "max": 0.75,
+        "color": "yellow",
+        "label": "Watch"
+      },
+      {
+        "severity": "warning",
+        "min": 0.35,
+        "max": 0.6,
+        "color": "orange",
+        "label": "Warning"
+      },
+      {
+        "severity": "critical",
+        "min": 0,
+        "max": 0.35,
+        "color": "red",
+        "label": "Critical"
+      }
+    ]
+  },
+  "domainOverrides": {
+    "cooking": {
+      "label": "Meals & Cooking",
+      "weightHint": "high",
+      "notes": "Cooking swings quickly with daily life; slight instability is normal so thresholds are a bit forgiving.",
+      "letterGrades": [
+        {
+          "grade": "A",
+          "min": 0.88,
+          "max": 1,
+          "label": "Meals Stable",
+          "description": "Meals are predictable and mostly on-plan. Batch cooking and planning are working well."
+        },
+        {
+          "grade": "B",
+          "min": 0.75,
+          "max": 0.88,
+          "label": "Mostly Stable",
+          "description": "Minor hiccups (last-minute meals or gaps), but overall you are feeding the household well."
+        },
+        {
+          "grade": "C",
+          "min": 0.6,
+          "max": 0.75,
+          "label": "Borderline",
+          "description": "Frequent last-minute scrambling. A batch cooking or meal planning session will help."
+        },
+        {
+          "grade": "D",
+          "min": 0.35,
+          "max": 0.6,
+          "label": "Unstable",
+          "description": "Families may be relying on convenience food or skipping meals. Strong candidate for food stabilization flows."
+        },
+        {
+          "grade": "F",
+          "min": 0,
+          "max": 0.35,
+          "label": "Critical",
+          "description": "Feeding the household feels chaotic or unsafe. Recommend running a multi-step stabilization flow."
+        }
+      ]
+    },
+    "cleaning": {
+      "label": "Cleaning & Order",
+      "weightHint": "high",
+      "notes": "Visual clutter strongly impacts emotional stability; emphasize earlier warnings.",
+      "severityBands": [
+        {
+          "severity": "ok",
+          "min": 0.8,
+          "max": 1,
+          "color": "green",
+          "label": "Comfortable"
+        },
+        {
+          "severity": "watch",
+          "min": 0.65,
+          "max": 0.8,
+          "color": "yellow",
+          "label": "Clutter Rising"
+        },
+        {
+          "severity": "warning",
+          "min": 0.4,
+          "max": 0.65,
+          "color": "orange",
+          "label": "Overwhelming"
+        },
+        {
+          "severity": "critical",
+          "min": 0,
+          "max": 0.4,
+          "color": "red",
+          "label": "Crisis"
+        }
+      ]
+    },
+    "garden": {
+      "label": "Garden & Land",
+      "weightHint": "medium",
+      "notes": "Garden stress is seasonal; instability is more tolerable outside active seasons.",
+      "letterGrades": [
+        {
+          "grade": "A",
+          "min": 0.9,
+          "max": 1,
+          "label": "Aligned",
+          "description": "Beds, calendar, and maintenance are aligned. Garden work feels purposeful."
+        },
+        {
+          "grade": "B",
+          "min": 0.75,
+          "max": 0.9,
+          "label": "Mostly Aligned",
+          "description": "Some weeds or backlog, but plans and harvests are mostly on track."
+        },
+        {
+          "grade": "C",
+          "min": 0.5,
+          "max": 0.75,
+          "label": "Lagging",
+          "description": "Weeds, missed dates, or unlogged harvests. A maintenance or harvest-logging session will help."
+        },
+        {
+          "grade": "D",
+          "min": 0.3,
+          "max": 0.5,
+          "label": "Struggling",
+          "description": "Garden feels more like guilt than joy. Recommend a short reset session and revisiting goals."
+        },
+        {
+          "grade": "F",
+          "min": 0,
+          "max": 0.3,
+          "label": "Abandoned",
+          "description": "The garden may be largely unmaintained. Consider a season wrap-up or gentle restart flow."
+        }
+      ]
+    },
+    "storehouse": {
+      "label": "Storehouse & Inventory",
+      "weightHint": "very-high",
+      "notes": "Food, supplies, and reserves are foundational; low scores strongly impact overall stability.",
+      "severityBands": [
+        {
+          "severity": "ok",
+          "min": 0.85,
+          "max": 1,
+          "color": "green",
+          "label": "Well Stocked"
+        },
+        {
+          "severity": "watch",
+          "min": 0.7,
+          "max": 0.85,
+          "color": "yellow",
+          "label": "Thinning"
+        },
+        {
+          "severity": "warning",
+          "min": 0.45,
+          "max": 0.7,
+          "color": "orange",
+          "label": "Low"
+        },
+        {
+          "severity": "critical",
+          "min": 0,
+          "max": 0.45,
+          "color": "red",
+          "label": "Very Low"
+        }
+      ]
+    },
+    "animals": {
+      "label": "Animals & Livestock",
+      "weightHint": "medium",
+      "notes": "Animal care has ethical and safety implications; emphasize warnings on low care metrics.",
+      "letterGrades": [
+        {
+          "grade": "A",
+          "min": 0.9,
+          "max": 1,
+          "label": "Well Cared For",
+          "description": "Feed, water, shelter, and health routines are consistent."
+        },
+        {
+          "grade": "B",
+          "min": 0.75,
+          "max": 0.9,
+          "label": "Generally Cared For",
+          "description": "Care is solid with minor lapses. A routine checkup session can tighten things up."
+        },
+        {
+          "grade": "C",
+          "min": 0.6,
+          "max": 0.75,
+          "label": "Inconsistent",
+          "description": "Care routines are sometimes rushed or missed. Schedule a dedicated animal care session."
+        },
+        {
+          "grade": "D",
+          "min": 0.4,
+          "max": 0.6,
+          "label": "At Risk",
+          "description": "Backlogs in cleaning, feed, or health checks. High priority for stabilization."
+        },
+        {
+          "grade": "F",
+          "min": 0,
+          "max": 0.4,
+          "label": "Critical",
+          "description": "Animal welfare may be compromised. Strongly recommend immediate care sessions."
+        }
+      ]
+    },
+    "preservation": {
+      "label": "Preservation & Processing",
+      "weightHint": "medium",
+      "notes": "This domain buffers food stability; instability is heavily tied to season and harvest.",
+      "letterGrades": [
+        {
+          "grade": "A",
+          "min": 0.9,
+          "max": 1,
+          "label": "Preservation On Track",
+          "description": "Backlog is low; upcoming harvests have matching preservation sessions scheduled."
+        },
+        {
+          "grade": "B",
+          "min": 0.75,
+          "max": 0.9,
+          "label": "Mostly On Track",
+          "description": "Some items waiting, but risk of spoilage is low."
+        },
+        {
+          "grade": "C",
+          "min": 0.6,
+          "max": 0.75,
+          "label": "Backlogged",
+          "description": "Noticeable queue of items to process. Recommend a focused preservation session."
+        },
+        {
+          "grade": "D",
+          "min": 0.35,
+          "max": 0.6,
+          "label": "Spoilage Risk",
+          "description": "High risk of food going to waste. Strong candidate for a batch preservation session."
+        },
+        {
+          "grade": "F",
+          "min": 0,
+          "max": 0.35,
+          "label": "High Loss",
+          "description": "Frequent spoilage or missed opportunities. Consider running a food stabilization flow."
+        }
+      ]
+    }
+  },
+  "metricMappings": {
+    "overallIndex": {
+      "label": "Household Stability",
+      "describe": true,
+      "showLetterGrade": true,
+      "showSeverity": true,
+      "tooltips": {
+        "high": "Your systems are working together. Keep building gentle habits.",
+        "medium": "Some domains are starting to strain. A small reset will help.",
+        "low": "Multiple domains feel heavy. Activate a stabilization flow or choose one key session to run."
+      }
+    },
+    "domains": {
+      "cooking": {
+        "label": "Meals & Cooking",
+        "metrics": {
+          "mealCoverageRatio": {
+            "label": "Meal Coverage",
+            "description": "How many planned meals are actually delivered per week.",
+            "invert": false
+          },
+          "lastMinuteMealsRatio": {
+            "label": "Last-Minute Meals",
+            "description": "Share of meals thrown together at the last minute.",
+            "invert": true
+          },
+          "batchSessionFreshness": {
+            "label": "Batch Sessions Freshness",
+            "description": "How recently a supportive batch-cooking session was run.",
+            "invert": false
+          }
+        }
+      },
+      "cleaning": {
+        "label": "Cleaning & Order",
+        "metrics": {
+          "zoneCoverageRatio": {
+            "label": "Zones Covered",
+            "description": "Portion of key zones cleaned within the desired interval.",
+            "invert": false
+          },
+          "clutterBacklogRatio": {
+            "label": "Clutter Backlog",
+            "description": "Share of zones flagged as cluttered or overdue.",
+            "invert": true
+          }
+        }
+      },
+      "garden": {
+        "label": "Garden & Land",
+        "metrics": {
+          "bedsPreparedRatio": {
+            "label": "Beds Prepared",
+            "description": "How many planned beds are prepared for the current season.",
+            "invert": false
+          },
+          "missedTaskRatio": {
+            "label": "Missed Tasks",
+            "description": "Proportion of scheduled garden tasks that were missed.",
+            "invert": true
+          }
+        }
+      },
+      "storehouse": {
+        "label": "Storehouse & Inventory",
+        "metrics": {
+          "criticalItemsCoverage": {
+            "label": "Critical Items Covered",
+            "description": "Coverage of key staple items compared to targets.",
+            "invert": false
+          },
+          "stockOutRisk": {
+            "label": "Stockout Risk",
+            "description": "Risk-weighted chance of running out of important items soon.",
+            "invert": true
+          }
+        }
+      },
+      "animals": {
+        "label": "Animals & Livestock",
+        "metrics": {
+          "careRoutineCompletion": {
+            "label": "Care Routines",
+            "description": "Completion of daily and weekly animal care routines.",
+            "invert": false
+          },
+          "overdueHealthChecks": {
+            "label": "Overdue Health Checks",
+            "description": "Ratio of overdue health or maintenance checks.",
+            "invert": true
+          }
+        }
+      },
+      "preservation": {
+        "label": "Preservation & Processing",
+        "metrics": {
+          "backlogRatio": {
+            "label": "Preservation Backlog",
+            "description": "Share of items waiting to be processed.",
+            "invert": true
+          },
+          "plannedSessionCoverage": {
+            "label": "Planned Sessions",
+            "description": "Coverage of preservation needs by scheduled sessions.",
+            "invert": false
+          }
+        }
+      }
+    }
+  }
+}

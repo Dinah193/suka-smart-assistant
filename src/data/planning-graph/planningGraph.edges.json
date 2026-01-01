@@ -1,0 +1,629 @@
+{
+  "$schema": "../../schemas/planningGraph/edges.schema.json",
+  "id": "planningGraphEdges",
+  "graphId": "planningGraph",
+  "label": "Planning Graph Edges",
+  "version": "1.0.0",
+  "updatedAt": "2025-11-26T00:00:00.000Z",
+  "edges": [
+    {
+      "id": "macroRequirementCalculator->storehouseMealsPlanner",
+      "from": "macroRequirementCalculator",
+      "to": "storehouseMealsPlanner",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "dailyMacros",
+        "into": "dailyMacros"
+      }
+    },
+    {
+      "id": "macroRequirementCalculator->householdStabilityCalculator",
+      "from": "macroRequirementCalculator",
+      "to": "householdStabilityCalculator",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "dailyMacros",
+        "into": "foodSecurity"
+      }
+    },
+
+    {
+      "id": "micronutrientRequirementCalculator->storehouseMealsPlanner",
+      "from": "micronutrientRequirementCalculator",
+      "to": "storehouseMealsPlanner",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "dailyMicronutrients",
+        "into": "dailyMicronutrients"
+      }
+    },
+    {
+      "id": "micronutrientRequirementCalculator->householdStabilityCalculator",
+      "from": "micronutrientRequirementCalculator",
+      "to": "householdStabilityCalculator",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "dailyMicronutrients",
+        "into": "healthSecurity"
+      }
+    },
+
+    {
+      "id": "meatBreakdownCalculator->storehouseMealsPlanner",
+      "from": "meatBreakdownCalculator",
+      "to": "storehouseMealsPlanner",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "cutWeights",
+        "into": "animalProducts"
+      }
+    },
+    {
+      "id": "meatBreakdownCalculator->freezerSpaceCalculator",
+      "from": "meatBreakdownCalculator",
+      "to": "freezerSpaceCalculator",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "cutWeights",
+        "into": "items"
+      }
+    },
+    {
+      "id": "meatBreakdownCalculator->butcheryWeightCalculator",
+      "from": "meatBreakdownCalculator",
+      "to": "butcheryWeightCalculator",
+      "relation": "cross-link",
+      "weight": 0.5,
+      "meta": {
+        "notes": "Optional refinement loop between breakdown and weight profiles"
+      }
+    },
+
+    {
+      "id": "fermentationDurationCalculator->storehouseMealsPlanner",
+      "from": "fermentationDurationCalculator",
+      "to": "storehouseMealsPlanner",
+      "relation": "feeds-into",
+      "weight": 0.7,
+      "meta": {
+        "via": "checkpoints",
+        "into": "preservationTimingHints"
+      }
+    },
+    {
+      "id": "fermentationDurationCalculator->preservationPlanner",
+      "from": "fermentationDurationCalculator",
+      "to": "preservationPlanner",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "targetRangeDays",
+        "into": "fermentationWindows"
+      }
+    },
+
+    {
+      "id": "freezerSpaceCalculator->storehouseMealsPlanner",
+      "from": "freezerSpaceCalculator",
+      "to": "storehouseMealsPlanner",
+      "relation": "feeds-into",
+      "weight": 0.8,
+      "meta": {
+        "via": "remainingCuFt",
+        "into": "storageConstraints"
+      }
+    },
+    {
+      "id": "freezerSpaceCalculator->householdStabilityCalculator",
+      "from": "freezerSpaceCalculator",
+      "to": "householdStabilityCalculator",
+      "relation": "feeds-into",
+      "weight": 0.6,
+      "meta": {
+        "via": "capacityPct",
+        "into": "foodSecurity"
+      }
+    },
+
+    {
+      "id": "gardenPlantingCalendarCalculator->gardenPlanner",
+      "from": "gardenPlantingCalendarCalculator",
+      "to": "gardenPlanner",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "sowIndoor/transplant/directSow",
+        "into": "plantingCalendar"
+      }
+    },
+    {
+      "id": "gardenPlantingCalendarCalculator->storehouseMealsPlanner",
+      "from": "gardenPlantingCalendarCalculator",
+      "to": "storehouseMealsPlanner",
+      "relation": "cross-link",
+      "weight": 0.4,
+      "meta": {
+        "notes": "Future harvest timing hints into storehouse planning"
+      }
+    },
+
+    {
+      "id": "gardenYieldCalculator->storehouseMealsPlanner",
+      "from": "gardenYieldCalculator",
+      "to": "storehouseMealsPlanner",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "expectedHarvestWeight",
+        "into": "gardenYield"
+      }
+    },
+    {
+      "id": "gardenYieldCalculator->householdStabilityCalculator",
+      "from": "gardenYieldCalculator",
+      "to": "householdStabilityCalculator",
+      "relation": "feeds-into",
+      "weight": 0.7,
+      "meta": {
+        "via": "expectedHarvestWeight",
+        "into": "foodSecurity"
+      }
+    },
+
+    {
+      "id": "soilAmendmentCalculator->gardenPlanner",
+      "from": "soilAmendmentCalculator",
+      "to": "gardenPlanner",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "amendmentPlan",
+        "into": "soilAmendmentPlan"
+      }
+    },
+
+    {
+      "id": "irrigationCalculator->gardenPlanner",
+      "from": "irrigationCalculator",
+      "to": "gardenPlanner",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "schedule",
+        "into": "irrigationSchedule"
+      }
+    },
+
+    {
+      "id": "seedViabilityCalculator->gardenPlanner",
+      "from": "seedViabilityCalculator",
+      "to": "gardenPlanner",
+      "relation": "feeds-into",
+      "weight": 0.9,
+      "meta": {
+        "via": "viabilityPct",
+        "into": "seedViability"
+      }
+    },
+
+    {
+      "id": "animalFeedCalculator->animalPlanner",
+      "from": "animalFeedCalculator",
+      "to": "animalPlanner",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "monthlyFeedRequirement",
+        "into": "animalFeedRequirement"
+      }
+    },
+    {
+      "id": "animalFeedCalculator->storehouseMealsPlanner",
+      "from": "animalFeedCalculator",
+      "to": "storehouseMealsPlanner",
+      "relation": "cross-link",
+      "weight": 0.5,
+      "meta": {
+        "notes": "Grain/hay consumption impact on storehouse inventory"
+      }
+    },
+
+    {
+      "id": "butcheryWeightCalculator->meatBreakdownCalculator",
+      "from": "butcheryWeightCalculator",
+      "to": "meatBreakdownCalculator",
+      "relation": "feeds-into",
+      "weight": 0.9,
+      "meta": {
+        "via": "retailWeight",
+        "into": "liveWeight/yieldProfile",
+        "notes": "Refines breakdown inputs"
+      }
+    },
+    {
+      "id": "butcheryWeightCalculator->storehouseMealsPlanner",
+      "from": "butcheryWeightCalculator",
+      "to": "storehouseMealsPlanner",
+      "relation": "feeds-into",
+      "weight": 0.8,
+      "meta": {
+        "via": "retailWeight",
+        "into": "animalProducts"
+      }
+    },
+
+    {
+      "id": "hebrewMonthStartCalculator->feastDayAlignmentCalculator",
+      "from": "hebrewMonthStartCalculator",
+      "to": "feastDayAlignmentCalculator",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "monthStartDate",
+        "into": "monthStarts"
+      }
+    },
+    {
+      "id": "hebrewMonthStartCalculator->scripturalYearLengthCalculator",
+      "from": "hebrewMonthStartCalculator",
+      "to": "scripturalYearLengthCalculator",
+      "relation": "feeds-into",
+      "weight": 0.9,
+      "meta": {
+        "via": "monthStartDate",
+        "into": "monthStarts"
+      }
+    },
+    {
+      "id": "hebrewMonthStartCalculator->calendarPlanner",
+      "from": "hebrewMonthStartCalculator",
+      "to": "calendarPlanner",
+      "relation": "feeds-into",
+      "weight": 0.8,
+      "meta": {
+        "via": "monthStartDate",
+        "into": "monthStarts"
+      }
+    },
+
+    {
+      "id": "feastDayAlignmentCalculator->calendarPlanner",
+      "from": "feastDayAlignmentCalculator",
+      "to": "calendarPlanner",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "feastDates",
+        "into": "feastDates"
+      }
+    },
+    {
+      "id": "feastDayAlignmentCalculator->biblicalOfferingCalculator",
+      "from": "feastDayAlignmentCalculator",
+      "to": "biblicalOfferingCalculator",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "feastDates",
+        "into": "feastSchedule"
+      }
+    },
+    {
+      "id": "feastDayAlignmentCalculator->storehouseMealsPlanner",
+      "from": "feastDayAlignmentCalculator",
+      "to": "storehouseMealsPlanner",
+      "relation": "cross-link",
+      "weight": 0.7,
+      "meta": {
+        "notes": "Feast-driven special meal planning"
+      }
+    },
+
+    {
+      "id": "scripturalYearLengthCalculator->calendarPlanner",
+      "from": "scripturalYearLengthCalculator",
+      "to": "calendarPlanner",
+      "relation": "feeds-into",
+      "weight": 0.8,
+      "meta": {
+        "via": "yearLengthDays",
+        "into": "yearLength"
+      }
+    },
+
+    {
+      "id": "biblicalOfferingCalculator->storehouseMealsPlanner",
+      "from": "biblicalOfferingCalculator",
+      "to": "storehouseMealsPlanner",
+      "relation": "feeds-into",
+      "weight": 0.8,
+      "meta": {
+        "via": "offeringPlan",
+        "into": "offeringRelatedMeals"
+      }
+    },
+    {
+      "id": "biblicalOfferingCalculator->householdStabilityCalculator",
+      "from": "biblicalOfferingCalculator",
+      "to": "householdStabilityCalculator",
+      "relation": "feeds-into",
+      "weight": 0.5,
+      "meta": {
+        "via": "offeringPlan",
+        "into": "incomeSecurity",
+        "notes": "Tithes/offerings as part of stability view"
+      }
+    },
+
+    {
+      "id": "householdStabilityCalculator->stabilityEngine",
+      "from": "householdStabilityCalculator",
+      "to": "stabilityEngine",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "stabilityScore",
+        "into": "dimensions"
+      }
+    },
+    {
+      "id": "householdStabilityCalculator->stabilityDashboardModule",
+      "from": "householdStabilityCalculator",
+      "to": "stabilityDashboardModule",
+      "relation": "feeds-into",
+      "weight": 0.9,
+      "meta": {
+        "via": "dimensionBreakdown",
+        "into": "stabilityScoreResult"
+      }
+    },
+    {
+      "id": "householdStabilityCalculator->nextStepsEngine",
+      "from": "householdStabilityCalculator",
+      "to": "nextStepsEngine",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "dimensionBreakdown",
+        "into": "stabilityScoreResult"
+      }
+    },
+
+    {
+      "id": "storehouseMealsPlanner->sessionRecommender",
+      "from": "storehouseMealsPlanner",
+      "to": "sessionRecommender",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "storehouseMealPlan",
+        "into": "storehousePlan"
+      }
+    },
+    {
+      "id": "storehouseMealsPlanner->nextStepsEngine",
+      "from": "storehouseMealsPlanner",
+      "to": "nextStepsEngine",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "storehouseMealPlan",
+        "into": "plannerOutputs"
+      }
+    },
+
+    {
+      "id": "gardenPlanner->storehouseMealsPlanner",
+      "from": "gardenPlanner",
+      "to": "storehouseMealsPlanner",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "gardenSeasonPlan",
+        "into": "gardenYield"
+      }
+    },
+    {
+      "id": "gardenPlanner->nextStepsEngine",
+      "from": "gardenPlanner",
+      "to": "nextStepsEngine",
+      "relation": "feeds-into",
+      "weight": 0.9,
+      "meta": {
+        "via": "gardenSeasonPlan",
+        "into": "plannerOutputs"
+      }
+    },
+
+    {
+      "id": "animalPlanner->storehouseMealsPlanner",
+      "from": "animalPlanner",
+      "to": "storehouseMealsPlanner",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "animalSeasonPlan",
+        "into": "animalProducts"
+      }
+    },
+    {
+      "id": "animalPlanner->nextStepsEngine",
+      "from": "animalPlanner",
+      "to": "nextStepsEngine",
+      "relation": "feeds-into",
+      "weight": 0.9,
+      "meta": {
+        "via": "animalSeasonPlan",
+        "into": "plannerOutputs"
+      }
+    },
+
+    {
+      "id": "preservationPlanner->sessionRecommender",
+      "from": "preservationPlanner",
+      "to": "sessionRecommender",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "preservationSessions",
+        "into": "preservationPlan"
+      }
+    },
+    {
+      "id": "preservationPlanner->storehouseMealsPlanner",
+      "from": "preservationPlanner",
+      "to": "storehouseMealsPlanner",
+      "relation": "feeds-into",
+      "weight": 0.8,
+      "meta": {
+        "via": "preservationSessions",
+        "into": "preservedInventory"
+      }
+    },
+
+    {
+      "id": "calendarPlanner->storehouseMealsPlanner",
+      "from": "calendarPlanner",
+      "to": "storehouseMealsPlanner",
+      "relation": "feeds-into",
+      "weight": 0.8,
+      "meta": {
+        "via": "calendarEvents",
+        "into": "calendarEvents"
+      }
+    },
+    {
+      "id": "calendarPlanner->nextStepsEngine",
+      "from": "calendarPlanner",
+      "to": "nextStepsEngine",
+      "relation": "feeds-into",
+      "weight": 0.8,
+      "meta": {
+        "via": "calendarEvents",
+        "into": "plannerOutputs"
+      }
+    },
+
+    {
+      "id": "stabilityEngine->stabilityDashboardModule",
+      "from": "stabilityEngine",
+      "to": "stabilityDashboardModule",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "stabilityScoreResult",
+        "into": "stabilityScoreResult"
+      }
+    },
+    {
+      "id": "stabilityEngine->nextStepsEngine",
+      "from": "stabilityEngine",
+      "to": "nextStepsEngine",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "stabilityScoreResult",
+        "into": "stabilityScoreResult"
+      }
+    },
+
+    {
+      "id": "stabilityDashboardModule->nextStepsEngine",
+      "from": "stabilityDashboardModule",
+      "to": "nextStepsEngine",
+      "relation": "cross-link",
+      "weight": 0.7,
+      "meta": {
+        "notes": "UI-driven hints feed back into recommendations"
+      }
+    },
+
+    {
+      "id": "sessionRecommender->nextStepsEngine",
+      "from": "sessionRecommender",
+      "to": "nextStepsEngine",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "sessionCandidates",
+        "into": "sessionCandidates"
+      }
+    },
+
+    {
+      "id": "nextStepsEngine->planningFlowEngine",
+      "from": "nextStepsEngine",
+      "to": "planningFlowEngine",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "nextSteps",
+        "into": "nextSteps"
+      }
+    },
+
+    {
+      "id": "planningGraphLoader->planningGraphQueries",
+      "from": "planningGraphLoader",
+      "to": "planningGraphQueries",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "graph",
+        "into": "graph"
+      }
+    },
+    {
+      "id": "planningGraphLoader->planningFlowEngine",
+      "from": "planningGraphLoader",
+      "to": "planningFlowEngine",
+      "relation": "feeds-into",
+      "weight": 0.9,
+      "meta": {
+        "via": "graph",
+        "into": "graph"
+      }
+    },
+
+    {
+      "id": "planningGraphQueries->planningFlowEngine",
+      "from": "planningGraphQueries",
+      "to": "planningFlowEngine",
+      "relation": "feeds-into",
+      "weight": 1,
+      "meta": {
+        "via": "queryApi",
+        "into": "queryApi"
+      }
+    },
+    {
+      "id": "planningGraphQueries->nextStepsEngine",
+      "from": "planningGraphQueries",
+      "to": "nextStepsEngine",
+      "relation": "cross-link",
+      "weight": 0.6,
+      "meta": {
+        "notes": "Query helpers available for recommendation logic"
+      }
+    },
+
+    {
+      "id": "planningFlowEngine->sessionRecommender",
+      "from": "planningFlowEngine",
+      "to": "sessionRecommender",
+      "relation": "feeds-into",
+      "weight": 0.9,
+      "meta": {
+        "via": "scheduledRuns",
+        "into": "sessionCandidates",
+        "notes": "Planned runs refine which sessions are suggested 'Now'"
+      }
+    }
+  ]
+}

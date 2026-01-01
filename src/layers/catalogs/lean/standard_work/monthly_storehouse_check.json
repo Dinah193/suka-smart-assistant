@@ -1,0 +1,133 @@
+{
+  "id": "lean.sw.monthly_storehouse_check",
+  "domain": "lean",
+  "kind": "standard_work",
+  "title": "Standard Work: Monthly Storehouse Check",
+  "intentTags": [
+    "lean:standard_work"
+  ],
+  "inputs": [
+    {
+      "key": "timeBudgetMinutes",
+      "label": "Time budget (minutes)",
+      "type": "number"
+    },
+    {
+      "key": "householdSize",
+      "label": "Household size",
+      "type": "number",
+      "default": 4
+    },
+    {
+      "key": "inventorySnapshot",
+      "label": "Inventory snapshot",
+      "type": "object"
+    },
+    {
+      "key": "quietHours",
+      "label": "Quiet hours / Sabbath guard",
+      "type": "object",
+      "default": {
+        "enabled": false
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "key": "sessionBlueprintSteps",
+      "label": "Convertible session steps",
+      "type": "array",
+      "required": true
+    }
+  ],
+  "constraints": [
+    "definitionOfDoneRequired",
+    "timeboxesRequired",
+    "convertibleToSessionSteps"
+  ],
+  "steps": [
+    {
+      "id": "convert",
+      "title": "Convert to session blueprint steps",
+      "template": "tpl.lean.standardWork.toSession",
+      "domain": "lean",
+      "hints": [
+        "emitHintTag:convertToSession"
+      ]
+    }
+  ],
+  "kpis": [
+    {
+      "key": "completionRate",
+      "label": "Completion rate",
+      "direction": "up",
+      "unit": "%"
+    },
+    {
+      "key": "timeVariance",
+      "label": "Time variance",
+      "direction": "down",
+      "unit": "%"
+    }
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial Lean Six Sigma catalog."
+      }
+    ]
+  },
+  "standardWork": {
+    "steps": [
+      {
+        "id": "sw.step.cycle",
+        "title": "Cycle count (selected zones)",
+        "timeboxMin": 45,
+        "definitionOfDone": "Counts recorded for selected zones; deltas identified.",
+        "sessionTemplate": "tpl.storehouse.cycle.count",
+        "domain": "storehouse"
+      },
+      {
+        "id": "sw.step.fifo",
+        "title": "FIFO rotation plan",
+        "timeboxMin": 20,
+        "definitionOfDone": "Rotation actions produced; labels updated; near-expiry items flagged.",
+        "sessionTemplate": "tpl.storehouse.rotation.plan",
+        "domain": "storehouse"
+      },
+      {
+        "id": "sw.step.par",
+        "title": "Par levels refresh",
+        "timeboxMin": 15,
+        "definitionOfDone": "Par levels updated for top items; reorder thresholds set.",
+        "sessionTemplate": "tpl.storehouse.par.compute",
+        "domain": "storehouse"
+      },
+      {
+        "id": "sw.step.risk",
+        "title": "Spoilage/surplus risk scan",
+        "timeboxMin": 10,
+        "definitionOfDone": "At-risk items flagged; preservation triggers suggested if needed.",
+        "sessionTemplate": "tpl.inventory.risk.scan",
+        "domain": "storehouse"
+      },
+      {
+        "id": "sw.step.actions",
+        "title": "Commit actions",
+        "timeboxMin": 10,
+        "definitionOfDone": "Reorder + rotation actions committed to the system.",
+        "sessionTemplate": "tpl.actions.commit",
+        "domain": "lean"
+      }
+    ]
+  },
+  "links": {
+    "affectsPatterns": [
+      "pat.storehouse.monthly_cycle_count",
+      "pat.storehouse.root_cellar_optimizer"
+    ]
+  }
+}

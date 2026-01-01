@@ -1,0 +1,1006 @@
+{
+  "_meta": {
+    "table": "cleaning.supplies",
+    "description": "Cleaning supplies + safety reference for SSA. Used by cleaning sessions, storehouse planning (grocery sections), animal areas, and homemade product sessions.",
+    "version": 1,
+    "updatedAt": "2025-11-18T00:00:00.000Z",
+    "domains": ["cleaning", "storehouse", "animals", "garden", "health"]
+  },
+  "schema": {
+    "id": "string",
+    "commonName": "string",
+    "category": "string",
+    "form": "string",
+    "phRange": "string|null",
+    "isConcentrate": "boolean",
+    "safeSurfaces": ["string"],
+    "cautionSurfaces": ["string"],
+    "unsafeSurfaces": ["string"],
+    "notWith": ["string"],
+    "ppe": {
+      "gloves": "boolean",
+      "eyeProtection": "boolean",
+      "mask": "boolean",
+      "ventilation": "boolean"
+    },
+    "hazardTags": ["string"],
+    "storehouseHints": {
+      "grocerySections": ["string"],
+      "stockNotes": "string"
+    },
+    "homemadeHints": {
+      "canUseInHomemade": "boolean",
+      "simpleRecipeHint": "string"
+    },
+    "domainsUse": {
+      "kitchen": ["string"],
+      "bathroom": ["string"],
+      "floors": ["string"],
+      "laundry": ["string"],
+      "dusting": ["string"],
+      "animals": ["string"],
+      "garden": ["string"]
+    },
+    "sessionHints": {
+      "cleaningSessions": ["string"],
+      "storehouseSessions": ["string"]
+    },
+    "notes": "string",
+    "tags": ["string"]
+  },
+  "rows": [
+    {
+      "id": "white_vinegar_5pct",
+      "commonName": "White Vinegar (5% Acidity)",
+      "category": "acidic_cleaner",
+      "form": "liquid",
+      "phRange": "2–3",
+      "isConcentrate": false,
+      "safeSurfaces": [
+        "glass",
+        "stainless_steel",
+        "ceramic_tile",
+        "some_plastic",
+        "washer_drum",
+        "fridge_interior"
+      ],
+      "cautionSurfaces": [
+        "sealed_hardwood",
+        "laminate_flooring"
+      ],
+      "unsafeSurfaces": [
+        "natural_stone_granite",
+        "marble",
+        "limestone",
+        "concrete_unsealed"
+      ],
+      "notWith": [
+        "bleach",
+        "strong_acids",
+        "strong_bases"
+      ],
+      "ppe": {
+        "gloves": true,
+        "eyeProtection": false,
+        "mask": false,
+        "ventilation": false
+      },
+      "hazardTags": [
+        "irritant_mild",
+        "acidic",
+        "eco_friendly"
+      ],
+      "storehouseHints": {
+        "grocerySections": [
+          "household+cleaning",
+          "pantry+baking"
+        ],
+        "stockNotes": "Multi-use staple. Keep a few gallons on hand for glass, descaling, laundry rinse, and homemade cleaners."
+      },
+      "homemadeHints": {
+        "canUseInHomemade": true,
+        "simpleRecipeHint": "1 part vinegar + 1 part water + optional citrus peels for an all-purpose spray (avoid on natural stone)."
+      },
+      "domainsUse": {
+        "kitchen": [
+          "degrease_stovetop",
+          "descale_kettle",
+          "wipe_inside_fridge"
+        ],
+        "bathroom": [
+          "soap_scum_softener",
+          "mirror_cleaner"
+        ],
+        "floors": [
+          "tile_mop_solution_small_amount_in_water"
+        ],
+        "laundry": [
+          "fabric_softener_alternative",
+          "odor_removal_pre_soak"
+        ],
+        "dusting": [
+          "glass_and_shiny_surfaces"
+        ],
+        "animals": [
+          "empty_kennel_deodorizing_rinse_keep_animals_away_until_dry"
+        ],
+        "garden": [
+          "scale_buildup_removal_on_tools_not_on_plants"
+        ]
+      },
+      "sessionHints": {
+        "cleaningSessions": [
+          "kitchen_daily_reset_glass_and_stainless",
+          "bathroom_weekly_mirror_and_glass",
+          "laundry_odor_reset_batch"
+        ],
+        "storehouseSessions": [
+          "storehouse_check_vinegar_level_for_cleaning_and_pickling"
+        ]
+      },
+      "notes": "Acidic and versatile. Great for glass and descaling but should be kept off natural stone and some finishes.",
+      "tags": [
+        "multi_use",
+        "natural",
+        "smell_strong"
+      ]
+    },
+    {
+      "id": "baking_soda",
+      "commonName": "Baking Soda",
+      "category": "mild_abrasive",
+      "form": "powder",
+      "phRange": "8–9",
+      "isConcentrate": false,
+      "safeSurfaces": [
+        "stainless_steel",
+        "porcelain_sink",
+        "ceramic_tile",
+        "oven_interior_cool"
+      ],
+      "cautionSurfaces": [
+        "nonstick_coatings",
+        "soft_plastics"
+      ],
+      "unsafeSurfaces": [],
+      "notWith": [
+        "strong_acids_large_quantities",
+        "aluminum_long_soak"
+      ],
+      "ppe": {
+        "gloves": false,
+        "eyeProtection": false,
+        "mask": false,
+        "ventilation": false
+      },
+      "hazardTags": [
+        "eco_friendly"
+      ],
+      "storehouseHints": {
+        "grocerySections": [
+          "pantry+baking",
+          "household+cleaning"
+        ],
+        "stockNotes": "Keep at least one bulk bag for cleaning, odor control, and baking. Store dry and sealed."
+      },
+      "homemadeHints": {
+        "canUseInHomemade": true,
+        "simpleRecipeHint": "Sprinkle on damp sponge or mix with a little dish soap for a soft scrub paste."
+      },
+      "domainsUse": {
+        "kitchen": [
+          "sink_scrub",
+          "stovetop_scrub",
+          "fridge_odor_absorber_box"
+        ],
+        "bathroom": [
+          "tub_and_tile_scrub",
+          "toilet_bowl_boost_before_brushing"
+        ],
+        "floors": [],
+        "laundry": [
+          "odor_booster_in_wash",
+          "carpet_deodorizer_before_vacuuming"
+        ],
+        "dusting": [],
+        "animals": [
+          "odor_control_in_litter_boxes_keep_animals_out_while_cleaning"
+        ],
+        "garden": [
+          "odor_control_in_compost_small_amounts"
+        ]
+      },
+      "sessionHints": {
+        "cleaningSessions": [
+          "kitchen_sink_scrub_reset",
+          "bathroom_tub_scrub_session",
+          "carpet_odor_refresh_session"
+        ],
+        "storehouseSessions": [
+          "storehouse_bulk_baking_soda_check_for_cleaning_and_baking"
+        ]
+      },
+      "notes": "Gentle abrasive and deodorizer. Pairs well with dish soap for soft scrub tasks.",
+      "tags": [
+        "deodorizer",
+        "soft_scrub",
+        "pantry_staple"
+      ]
+    },
+    {
+      "id": "castile_soap_liquid",
+      "commonName": "Liquid Castile Soap",
+      "category": "all_purpose_soap",
+      "form": "liquid",
+      "phRange": "9–10",
+      "isConcentrate": true,
+      "safeSurfaces": [
+        "most_sealed_surfaces",
+        "tile",
+        "porcelain",
+        "laminate",
+        "painted_walls_spot_test"
+      ],
+      "cautionSurfaces": [
+        "unfinished_wood",
+        "waxed_floors"
+      ],
+      "unsafeSurfaces": [],
+      "notWith": [
+        "vinegar_same_solution",
+        "strong_acids"
+      ],
+      "ppe": {
+        "gloves": false,
+        "eyeProtection": false,
+        "mask": false,
+        "ventilation": false
+      },
+      "hazardTags": [
+        "eco_friendly",
+        "soap_based"
+      ],
+      "storehouseHints": {
+        "grocerySections": [
+          "household+cleaning",
+          "personalCare"
+        ],
+        "stockNotes": "Highly concentrated. A single bottle can cover many cleaning and body-care recipes; store sealed and labeled."
+      },
+      "homemadeHints": {
+        "canUseInHomemade": true,
+        "simpleRecipeHint": "Mix a small squirt in a spray bottle of water for gentle all-purpose cleaner; add vinegar separately as a rinse if needed."
+      },
+      "domainsUse": {
+        "kitchen": [
+          "countertop_cleaner",
+          "cabinet_wipe_down"
+        ],
+        "bathroom": [
+          "sink_and_counter_cleaner",
+          "gentle_tub_cleaner"
+        ],
+        "floors": [
+          "diluted_mop_solution_for_tile_and_vinyl"
+        ],
+        "laundry": [
+          "emergency_laundry_soap_booster",
+          "hand_wash_items"
+        ],
+        "dusting": [
+          "damp_cloth_for_sticky_surfaces"
+        ],
+        "animals": [
+          "diluted_for_kennel_and_crate_wash_rinse_thoroughly_before_animals_return"
+        ],
+        "garden": [
+          "tool_cleaning_bucket_not_as_pesticide"
+        ]
+      },
+      "sessionHints": {
+        "cleaningSessions": [
+          "whole_house_all_purpose_wipe_down",
+          "daily_bathroom_counter_reset"
+        ],
+        "storehouseSessions": [
+          "storehouse_check_castile_soap_for_cleaning_and_body_use"
+        ]
+      },
+      "notes": "Versatile and concentrated. Good base for a single-soap household system.",
+      "tags": [
+        "multi_room",
+        "concentrate",
+        "low_toxicity"
+      ]
+    },
+    {
+      "id": "dish_soap",
+      "commonName": "Dish Soap (Handwashing)",
+      "category": "degreaser",
+      "form": "liquid",
+      "phRange": "7–9",
+      "isConcentrate": false,
+      "safeSurfaces": [
+        "dishes",
+        "glass",
+        "stainless_steel",
+        "most_countertops"
+      ],
+      "cautionSurfaces": [
+        "natural_wood_oiled",
+        "waxed_furniture"
+      ],
+      "unsafeSurfaces": [],
+      "notWith": [
+        "bleach"
+      ],
+      "ppe": {
+        "gloves": false,
+        "eyeProtection": false,
+        "mask": false,
+        "ventilation": false
+      },
+      "hazardTags": [
+        "irritant_mild"
+      ],
+      "storehouseHints": {
+        "grocerySections": [
+          "household+cleaning"
+        ],
+        "stockNotes": "Keep enough for both dishes and greasy cleaning tasks (stovetop, vent hood)."
+      },
+      "homemadeHints": {
+        "canUseInHomemade": true,
+        "simpleRecipeHint": "Combine with baking soda for a simple paste to scrub pans, ovens, and greasy spots."
+      },
+      "domainsUse": {
+        "kitchen": [
+          "hand_dishes",
+          "grease_cutting_on_stovetop_and_hood"
+        ],
+        "bathroom": [
+          "emergency_soap_scum_cleaner_with_baking_soda"
+        ],
+        "floors": [],
+        "laundry": [
+          "spot_treat_grease_stains_before_wash"
+        ],
+        "dusting": [],
+        "animals": [
+          "do_not_use_directly_on_animals",
+          "can_help_cut_grease_on_feed_buckets_rinse_well"
+        ],
+        "garden": [
+          "washing_pots_and_trays_before_seed_starting"
+        ]
+      },
+      "sessionHints": {
+        "cleaningSessions": [
+          "kitchen_grease_cutting_session",
+          "oven_and_pan_soft_scrub_session"
+        ],
+        "storehouseSessions": [
+          "storehouse_dish_soap_and_scrub_check"
+        ]
+      },
+      "notes": "Everyday degreaser. Use with caution on skin if hands are sensitive (consider gloves).",
+      "tags": [
+        "degreaser",
+        "kitchen_essential"
+      ]
+    },
+    {
+      "id": "oxygen_bleach",
+      "commonName": "Oxygen Bleach (Sodium Percarbonate)",
+      "category": "whitener_stain_remover",
+      "form": "powder",
+      "phRange": "10–11",
+      "isConcentrate": true,
+      "safeSurfaces": [
+        "white_fabric",
+        "colorfast_fabric",
+        "grout",
+        "some_outdoor_surfaces"
+      ],
+      "cautionSurfaces": [
+        "delicate_fabrics_wool_silk",
+        "dark_fabrics_color_test_first"
+      ],
+      "unsafeSurfaces": [
+        "wool",
+        "silk"
+      ],
+      "notWith": [
+        "chlorine_bleach",
+        "strong_acids"
+      ],
+      "ppe": {
+        "gloves": true,
+        "eyeProtection": true,
+        "mask": false,
+        "ventilation": false
+      },
+      "hazardTags": [
+        "oxidizer",
+        "irritant"
+      ],
+      "storehouseHints": {
+        "grocerySections": [
+          "laundry",
+          "household+cleaning"
+        ],
+        "stockNotes": "Good alternative to chlorine bleach for whitening and stain removal in laundry and some grout cleaning tasks."
+      },
+      "homemadeHints": {
+        "canUseInHomemade": true,
+        "simpleRecipeHint": "Use in a labeled jar; dissolve in warm water before adding to laundry or soaking heavily soiled items."
+      },
+      "domainsUse": {
+        "kitchen": [
+          "deep_clean_white_sink_or_stained_mugs_color_safe_test"
+        ],
+        "bathroom": [
+          "grout_whitening_session",
+          "towel_refresh_soak"
+        ],
+        "floors": [],
+        "laundry": [
+          "whitening_whites",
+          "stain_soak_for_linens"
+        ],
+        "dusting": [],
+        "animals": [
+          "deep_clean_heavily_soiled_blankets_rinse_thoroughly_before_use"
+        ],
+        "garden": [
+          "stain_removal_on_garden_textiles"
+        ]
+      },
+      "sessionHints": {
+        "cleaningSessions": [
+          "towel_and_linen_whitening_batch",
+          "bathroom_grout_refresh_session"
+        ],
+        "storehouseSessions": [
+          "storehouse_check_for_oxygen_bleach_laundry_and_grout_use"
+        ]
+      },
+      "notes": "Color-safe alternative to chlorine bleach in many cases but still an oxidizer. Always label clearly and keep away from children.",
+      "tags": [
+        "laundry_booster",
+        "grout_whitener"
+      ]
+    },
+    {
+      "id": "chlorine_bleach",
+      "commonName": "Chlorine Bleach",
+      "category": "disinfectant_whitener",
+      "form": "liquid",
+      "phRange": "11–13",
+      "isConcentrate": true,
+      "safeSurfaces": [
+        "white_cotton",
+        "hard_nonporous_surfaces"
+      ],
+      "cautionSurfaces": [
+        "some_plastics",
+        "stainless_steel_long_contact",
+        "septic_systems"
+      ],
+      "unsafeSurfaces": [
+        "colored_fabrics",
+        "wood",
+        "stone"
+      ],
+      "notWith": [
+        "ammonia",
+        "vinegar",
+        "acids",
+        "other_disinfectants"
+      ],
+      "ppe": {
+        "gloves": true,
+        "eyeProtection": true,
+        "mask": true,
+        "ventilation": true
+      },
+      "hazardTags": [
+        "corrosive",
+        "toxic_gas_risk",
+        "strong_oxidizer"
+      ],
+      "storehouseHints": {
+        "grocerySections": [
+          "household+cleaning",
+          "laundry"
+        ],
+        "stockNotes": "Store cool, upright, and away from acids and ammonia. Use mainly for sanitation tasks where absolutely needed."
+      },
+      "homemadeHints": {
+        "canUseInHomemade": false,
+        "simpleRecipeHint": "Do not mix with homemade cleaners or other chemicals; use alone in carefully measured dilutions only."
+      },
+      "domainsUse": {
+        "kitchen": [
+          "sanitizing_cutting_boards_in_rare_cases",
+          "sanitizing_sinks_after_raw_meat_work"
+        ],
+        "bathroom": [
+          "disinfecting_toilet_and_shower_in_high_illness_situations"
+        ],
+        "floors": [],
+        "laundry": [
+          "whitening_heavy_soil_whites_only"
+        ],
+        "dusting": [],
+        "animals": [
+          "disinfecting_kennels_and_pens_when_needed_keep_animals_away_and_rinse_well"
+        ],
+        "garden": [
+          "disinfection_of_pots_only_rinse_thoroughly_before_use"
+        ]
+      },
+      "sessionHints": {
+        "cleaningSessions": [
+          "sickness_protocol_bathroom_disinfection_session",
+          "occasional_kennel_disinfection_protocol"
+        ],
+        "storehouseSessions": [
+          "storehouse_bleach_quantity_and_expiry_check_reserved_for_emergency_sanitation"
+        ]
+      },
+      "notes": "Powerful disinfectant with significant safety risks. Never mix with ammonia or acids; always ensure strong ventilation.",
+      "tags": [
+        "emergency_use_only",
+        "high_caution"
+      ]
+    },
+    {
+      "id": "hydrogen_peroxide_3pct",
+      "commonName": "Hydrogen Peroxide (3%)",
+      "category": "disinfectant_oxidizer",
+      "form": "liquid",
+      "phRange": "4–5",
+      "isConcentrate": false,
+      "safeSurfaces": [
+        "light_colored_hard_surfaces",
+        "cutting_boards_plastic",
+        "bathroom_surfaces"
+      ],
+      "cautionSurfaces": [
+        "dark_fabrics",
+        "unsealed_wood"
+      ],
+      "unsafeSurfaces": [],
+      "notWith": [
+        "vinegar_same_container",
+        "chlorine_bleach",
+        "strong_reducers"
+      ],
+      "ppe": {
+        "gloves": false,
+        "eyeProtection": false,
+        "mask": false,
+        "ventilation": false
+      },
+      "hazardTags": [
+        "oxidizer_mild"
+      ],
+      "storehouseHints": {
+        "grocerySections": [
+          "health",
+          "household+cleaning"
+        ],
+        "stockNotes": "Store in original dark bottle; breaks down over time. Good for stain treating and light disinfection."
+      },
+      "homemadeHints": {
+        "canUseInHomemade": true,
+        "simpleRecipeHint": "Use plain or diluted in labeled spray bottles for cutting boards and light-colored surfaces; avoid mixing with other chemicals."
+      },
+      "domainsUse": {
+        "kitchen": [
+          "cutting_board_disinfection_after_meat",
+          "light_stain_removal_on_light_fabrics"
+        ],
+        "bathroom": [
+          "grout_spot_whitening_small_areas",
+          "toothbrush_holder_disinfection"
+        ],
+        "floors": [],
+        "laundry": [
+          "spot_treat_blood_like_stains_light_fabrics"
+        ],
+        "dusting": [],
+        "animals": [
+          "never_use_without_veterinary_guidance_ingestion_warning",
+          "spot_clean_blood_from_surfaces_rinse_well"
+        ],
+        "garden": []
+      },
+      "sessionHints": {
+        "cleaningSessions": [
+          "cutting_board_disinfection_after_butchery_session",
+          "light_grout_touch_up"
+        ],
+        "storehouseSessions": [
+          "storehouse_check_peroxide_dates_for_first_aid_and_cleaning"
+        ]
+      },
+      "notes": "Mild oxidizer used for light disinfection and stain removal. Keep separate from vinegar and bleach.",
+      "tags": [
+        "multi_use",
+        "light_whitener"
+      ]
+    },
+    {
+      "id": "neutral_floor_cleaner",
+      "commonName": "Neutral pH Floor Cleaner",
+      "category": "floor_cleaner",
+      "form": "liquid_concentrate",
+      "phRange": "6–8",
+      "isConcentrate": true,
+      "safeSurfaces": [
+        "sealed_hardwood",
+        "laminate",
+        "vinyl",
+        "tile"
+      ],
+      "cautionSurfaces": [
+        "unfinished_wood"
+      ],
+      "unsafeSurfaces": [],
+      "notWith": [
+        "bleach",
+        "ammonia"
+      ],
+      "ppe": {
+        "gloves": false,
+        "eyeProtection": false,
+        "mask": false,
+        "ventilation": false
+      },
+      "hazardTags": [
+        "low_toxicity"
+      ],
+      "storehouseHints": {
+        "grocerySections": [
+          "household+cleaning"
+        ],
+        "stockNotes": "Choose one neutral cleaner that works across most floors to keep the system simple."
+      },
+      "homemadeHints": {
+        "canUseInHomemade": false,
+        "simpleRecipeHint": "If making your own, use very small amounts of gentle soap, but many households benefit from one reliable commercial neutral cleaner."
+      },
+      "domainsUse": {
+        "kitchen": [
+          "floor_mopping_after_cooking_sessions"
+        ],
+        "bathroom": [
+          "floor_mopping_in_bathroom_and_hallways"
+        ],
+        "floors": [
+          "whole_house_floor_reset_session"
+        ],
+        "laundry": [],
+        "dusting": [],
+        "animals": [
+          "mop_animal_room_or_mudroom_keep_pets_off_until_dry"
+        ],
+        "garden": [
+          "wash_in_mudroom_floor_after_garden_days"
+        ]
+      },
+      "sessionHints": {
+        "cleaningSessions": [
+          "weekly_floor_reset_session",
+          "post_batch_cooking_floor_clean_up"
+        ],
+        "storehouseSessions": [
+          "storehouse_floor_cleaner_level_check"
+        ]
+      },
+      "notes": "Designed to clean without stripping finishes or leaving sticky residue.",
+      "tags": [
+        "floor_system",
+        "whole_house"
+      ]
+    },
+    {
+      "id": "glass_cleaner_alcohol_based",
+      "commonName": "Glass Cleaner (Alcohol-Based)",
+      "category": "glass_cleaner",
+      "form": "spray",
+      "phRange": "6–8",
+      "isConcentrate": false,
+      "safeSurfaces": [
+        "glass",
+        "mirrors",
+        "some_shiny_metal",
+        "screen_exteriors_follow_labels"
+      ],
+      "cautionSurfaces": [
+        "tinted_windows",
+        "sensitive_screens"
+      ],
+      "unsafeSurfaces": [
+        "unsealed_wood"
+      ],
+      "notWith": [
+        "bleach",
+        "ammonia_low_quality_mix"
+      ],
+      "ppe": {
+        "gloves": false,
+        "eyeProtection": false,
+        "mask": false,
+        "ventilation": true
+      },
+      "hazardTags": [
+        "flammable",
+        "irritant_mild"
+      ],
+      "storehouseHints": {
+        "grocerySections": [
+          "household+cleaning"
+        ],
+        "stockNotes": "One bottle can serve windows, mirrors, and stainless front panels. Keep away from open flames."
+      },
+      "homemadeHints": {
+        "canUseInHomemade": false,
+        "simpleRecipeHint": "Comparable effect can often be achieved with vinegar + water + small amount of alcohol if you prefer DIY."
+      },
+      "domainsUse": {
+        "kitchen": [
+          "window_and_stainless_fronts_spot_cleaning"
+        ],
+        "bathroom": [
+          "mirror_daily_spray",
+          "chrome_tap_shine"
+        ],
+        "floors": [],
+        "laundry": [],
+        "dusting": [
+          "small_glass_decor_items"
+        ],
+        "animals": [
+          "glass_doors_and_barriers_fingerprints_paw_prints"
+        ],
+        "garden": [
+          "glass_door_and_greenhouse_windows_outside_only"
+        ]
+      },
+      "sessionHints": {
+        "cleaningSessions": [
+          "weekly_glass_and_mirrors_session",
+          "company_is_coming_quick_shine_session"
+        ],
+        "storehouseSessions": [
+          "storehouse_glass_cleaner_level_check"
+        ]
+      },
+      "notes": "Fast-drying and streak-minimizing. Ventilate in small bathrooms.",
+      "tags": [
+        "shiny_surfaces",
+        "quick_win"
+      ]
+    },
+    {
+      "id": "disinfecting_surface_spray",
+      "commonName": "Disinfecting Surface Spray",
+      "category": "disinfectant_ready_to_use",
+      "form": "spray",
+      "phRange": "varies_label",
+      "isConcentrate": false,
+      "safeSurfaces": [
+        "hard_nonporous_surfaces"
+      ],
+      "cautionSurfaces": [
+        "food_contact_surfaces_rinse_if_label_requires"
+      ],
+      "unsafeSurfaces": [
+        "unfinished_wood",
+        "porous_stone"
+      ],
+      "notWith": [
+        "bleach",
+        "ammonia"
+      ],
+      "ppe": {
+        "gloves": true,
+        "eyeProtection": false,
+        "mask": false,
+        "ventilation": true
+      },
+      "hazardTags": [
+        "disinfectant",
+        "irritant"
+      ],
+      "storehouseHints": {
+        "grocerySections": [
+          "household+cleaning"
+        ],
+        "stockNotes": "Reserve for sickness protocols, raw meat areas, and high-risk messes rather than everyday cleaning."
+      },
+      "homemadeHints": {
+        "canUseInHomemade": false,
+        "simpleRecipeHint": "Follow manufacturer instructions; do not mix with other cleaners."
+      },
+      "domainsUse": {
+        "kitchen": [
+          "post_raw_meat_area_disinfection_when_needed"
+        ],
+        "bathroom": [
+          "high_touch_disinfection_during_illness"
+        ],
+        "floors": [],
+        "laundry": [],
+        "dusting": [
+          "high_touch_switches_and_handles_during_illness"
+        ],
+        "animals": [
+          "spot_disinfection_for_crates_and_accident_areas_rinse_if_label_requires"
+        ],
+        "garden": []
+      },
+      "sessionHints": {
+        "cleaningSessions": [
+          "sickness_protocol_high_touch_disinfection",
+          "post_butchery_counter_and_handle_disinfection"
+        ],
+        "storehouseSessions": [
+          "storehouse_disinfectant_stock_for_emergency_use"
+        ]
+      },
+      "notes": "Use when true disinfection is needed; read and follow label contact time.",
+      "tags": [
+        "sickness_protocol",
+        "high_touch_areas"
+      ]
+    },
+    {
+      "id": "enzyme_cleaner",
+      "commonName": "Enzyme Cleaner",
+      "category": "enzyme_deodorizer",
+      "form": "liquid",
+      "phRange": "6–8",
+      "isConcentrate": false,
+      "safeSurfaces": [
+        "most_hard_surfaces",
+        "washable_fabrics"
+      ],
+      "cautionSurfaces": [
+        "delicate_fabrics_test",
+        "natural_stone_follow_label"
+      ],
+      "unsafeSurfaces": [],
+      "notWith": [
+        "disinfectants_same_area_same_time",
+        "chlorine_bleach"
+      ],
+      "ppe": {
+        "gloves": false,
+        "eyeProtection": false,
+        "mask": false,
+        "ventilation": false
+      },
+      "hazardTags": [
+        "odor_control"
+      ],
+      "storehouseHints": {
+        "grocerySections": [
+          "laundry",
+          "household+cleaning",
+          "pet_care_if_applicable"
+        ],
+        "stockNotes": "Very useful for pet accidents, laundry odors, and prepping animal bedding for wash."
+      },
+      "homemadeHints": {
+        "canUseInHomemade": false,
+        "simpleRecipeHint": "Ready-to-use; combine with good mechanical cleaning and rinse for best results."
+      },
+      "domainsUse": {
+        "kitchen": [
+          "food_spill_odor_control_on_fabric_surfaces"
+        ],
+        "bathroom": [
+          "urine_odor_treatment_around_toilet"
+        ],
+        "floors": [
+          "spot_clean_pet_accidents_on_hard_floors"
+        ],
+        "laundry": [
+          "pre_soak_for_smelly_towels_and_sports_clothes"
+        ],
+        "dusting": [],
+        "animals": [
+          "pet_accident_cleanup_on_floors_and_bedding_pre_treat_before_wash"
+        ],
+        "garden": []
+      },
+      "sessionHints": {
+        "cleaningSessions": [
+          "pet_accident_cleanup_protocol",
+          "smelly_laundry_reset_batch_session"
+        ],
+        "storehouseSessions": [
+          "storehouse_enzyme_cleaner_check_for_pet_and_laundry_use"
+        ]
+      },
+      "notes": "Targets organic stains and odors, especially from urine and food. Often needs dwell time.",
+      "tags": [
+        "animals",
+        "odor_management"
+      ]
+    },
+    {
+      "id": "furniture_polish_oil_based",
+      "commonName": "Furniture Polish (Oil-Based or Homemade)",
+      "category": "polish_conditioner",
+      "form": "spray_or_cloth_applied",
+      "phRange": null,
+      "isConcentrate": false,
+      "safeSurfaces": [
+        "finished_wood_furniture",
+        "trim"
+      ],
+      "cautionSurfaces": [
+        "floors_slip_risk"
+      ],
+      "unsafeSurfaces": [
+        "unfinished_wood",
+        "food_contact_surfaces"
+      ],
+      "notWith": [
+        "water_heavy_cleaners",
+        "abrasive_scrubs"
+      ],
+      "ppe": {
+        "gloves": false,
+        "eyeProtection": false,
+        "mask": false,
+        "ventilation": false
+      },
+      "hazardTags": [
+        "slip_risk_if_on_floor"
+      ],
+      "storehouseHints": {
+        "grocerySections": [
+          "household+cleaning"
+        ],
+        "stockNotes": "Can be commercial or homemade (oil + small amount of wax/essential oil). Store away from heat."
+      },
+      "homemadeHints": {
+        "canUseInHomemade": true,
+        "simpleRecipeHint": "Small amount of olive oil + a little beeswax in a jar for hand-applied polish; label clearly and keep away from food prep."
+      },
+      "domainsUse": {
+        "kitchen": [
+          "wood_cabinet_front_touch_up_not_handled_areas_often"
+        ],
+        "bathroom": [],
+        "floors": [],
+        "laundry": [],
+        "dusting": [
+          "occasional_conditional_dusting_of_wood_furniture"
+        ],
+        "animals": [],
+        "garden": []
+      },
+      "sessionHints": {
+        "cleaningSessions": [
+          "monthly_furniture_polish_session",
+          "holiday_guest_prep_polish_session"
+        ],
+        "storehouseSessions": [
+          "storehouse_check_polish_and_cloths_for_dusting"
+        ]
+      },
+      "notes": "For shine and conditioning on sealed wood. Use sparingly to avoid build-up.",
+      "tags": [
+        "dusting_system",
+        "appearance_boost"
+      ]
+    }
+  ]
+}

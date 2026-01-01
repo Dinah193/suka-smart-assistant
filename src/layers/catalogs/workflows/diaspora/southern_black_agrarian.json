@@ -1,0 +1,264 @@
+{
+  "id": "wf.diaspora.southern_black_agrarian",
+  "domain": "workflow",
+  "kind": "workflow_overlay",
+  "title": "Southern Black Agrarian Rhythm (Opt-in Overlay)",
+  "intentTags": [
+    "overlay:workflow",
+    "culture:southern_black_agrarian",
+    "group:diaspora"
+  ],
+  "inputs": [
+    {
+      "key": "enabled",
+      "label": "Enabled (opt-in)",
+      "type": "boolean",
+      "required": true,
+      "default": false,
+      "notes": "Overlays must be explicitly enabled by user/household."
+    },
+    {
+      "key": "householdMode",
+      "label": "Household mode",
+      "type": "string",
+      "default": "default",
+      "notes": "Examples: default, communal, travel, recovery."
+    },
+    {
+      "key": "dietaryLaws",
+      "label": "Dietary laws / household rules",
+      "type": "object",
+      "default": {},
+      "notes": "Merged with household prefs; overlay never overrides hard constraints."
+    },
+    {
+      "key": "quietHours",
+      "label": "Quiet hours / Sabbath guard",
+      "type": "object",
+      "default": {
+        "enabled": false
+      }
+    },
+    {
+      "key": "season",
+      "label": "Season",
+      "type": "string"
+    }
+  ],
+  "outputs": [
+    {
+      "key": "tagOverlays",
+      "label": "Canonical tags to apply",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "patternBiases",
+      "label": "Pattern bias suggestions",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "constraintOverlays",
+      "label": "Constraint overlays (soft)",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "uiOverlays",
+      "label": "UI label/order defaults",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "roleDefaults",
+      "label": "Role-based defaults (optional)",
+      "type": "object",
+      "default": {}
+    }
+  ],
+  "constraints": [
+    "optInOnly",
+    "neverStereotype",
+    "userEditable",
+    "respectDietaryLaws",
+    "respectQuietHours"
+  ],
+  "steps": [
+    {
+      "id": "overlay.apply",
+      "title": "Apply workflow overlay",
+      "template": "tpl.workflow.overlay.apply",
+      "domain": "workflow",
+      "params": {
+        "cultureTag": "culture:southern_black_agrarian",
+        "mergeMode": "soft"
+      },
+      "hints": [
+        "emitHintTag:applyWorkflowOverlay"
+      ]
+    }
+  ],
+  "kpis": [
+    {
+      "key": "adoptionRate",
+      "label": "Overlay adoption rate",
+      "direction": "up",
+      "unit": "%",
+      "notes": "How often households keep overlay enabled."
+    },
+    {
+      "key": "overrideEdits",
+      "label": "User edits vs defaults",
+      "direction": "down",
+      "unit": "count",
+      "notes": "High edits may indicate defaults need tuning."
+    }
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial workflow overlay catalog (opt-in, non-stereotyped)."
+      }
+    ],
+    "tags": [
+      "culture:southern_black_agrarian",
+      "group:diaspora"
+    ],
+    "family": "workflows"
+  },
+  "workflow": {
+    "preferredStaples": {
+      "canonicalTags": [
+        "grain",
+        "greens",
+        "legume",
+        "root_crop",
+        "smoke_flavor_optional"
+      ],
+      "examples": [
+        {
+          "tag": "staple:greens",
+          "examples": [
+            "collards",
+            "mustard greens",
+            "turnip greens",
+            "cabbage (substitute)"
+          ]
+        },
+        {
+          "tag": "staple:legume",
+          "examples": [
+            "peas/beans",
+            "lentils"
+          ]
+        }
+      ],
+      "notes": "SSA should treat these as staple categories; households choose specific ingredients."
+    },
+    "mealRhythms": {
+      "canonicalTags": [
+        "batch_sunday_optional",
+        "community_sharing_optional",
+        "leftovers_bias"
+      ],
+      "defaults": {
+        "weeklyCadence": {
+          "batchCookDay": "Sun (optional)"
+        },
+        "structure": [
+          "staple",
+          "greens",
+          "protein_optional"
+        ],
+        "leftoversNights": 2
+      },
+      "notes": "Bias toward using leftovers intentionally and consolidating effort."
+    },
+    "preservationEmphasis": {
+      "canonicalTags": [
+        "canning_optional",
+        "freezing",
+        "smoking_optional",
+        "pickling_optional"
+      ],
+      "defaults": {
+        "prioritize": [
+          "freezing"
+        ],
+        "secondary": [
+          "canning_optional",
+          "pickling_optional"
+        ]
+      },
+      "notes": "Preservation methods are optional; SSA suggests based on equipment and time."
+    },
+    "valuePriorities": {
+      "canonicalTags": [
+        "thrift",
+        "stewardship",
+        "sharing_optional",
+        "skill_transfer_optional"
+      ],
+      "defaults": {
+        "thriftMode": "on",
+        "sharingMode": "optional"
+      },
+      "notes": "Prioritize low waste, fewer trips, and durable provisioning."
+    },
+    "notes": "All fields are suggestions. Users can disable any default and replace with their own."
+  },
+  "outputs_default": {
+    "tagOverlays": [
+      "staple:grain",
+      "staple:greens",
+      "value:thrift",
+      "preservation:freezing",
+      "value:skill_transfer_optional",
+      "rhythm:batch_sunday_optional",
+      "preservation:pickling_optional",
+      "rhythm:leftovers_bias",
+      "preservation:canning_optional",
+      "staple:legume",
+      "staple:root_crop",
+      "preservation:smoking_optional",
+      "staple:smoke_flavor_optional",
+      "rhythm:community_sharing_optional",
+      "value:stewardship",
+      "value:sharing_optional"
+    ],
+    "patternBiases": {
+      "favor": {
+        "pat.meals.weekly_batch": 1.12,
+        "pat.storehouse.weekly_restock": 1.08,
+        "pat.storehouse.monthly_cycle_count": 1.06
+      },
+      "avoid": {
+        "pat.meals.daily_fresh": 0.96
+      },
+      "notes": "Biases are advisory; resolvers may downrank/boost patterns, not block unless user also sets a hard constraint.",
+      "emitHintTags": [
+        "workflow:leftovers_bias"
+      ]
+    },
+    "constraintOverlays": {
+      "soft": {
+        "preferBatchSessions": true,
+        "maxNewRecipesPerWeek": 2
+      },
+      "hard": {}
+    },
+    "uiOverlays": {
+      "labels": {},
+      "ordering": {},
+      "defaults": {
+        "shoppingGroupBy": "department_then_staples",
+        "showSharingToggle": true
+      }
+    },
+    "roleDefaults": {}
+  }
+}

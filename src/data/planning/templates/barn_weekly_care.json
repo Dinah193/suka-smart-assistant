@@ -1,0 +1,490 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:suka:templates:barn_weekly_care",
+  "title": "Barn — Weekly Care",
+  "description": "AM/PM chore clusters for the week with daily feed/water, egg collection, milking sequences, and weekly hygiene checks. Species- and zone-aware, with ventilation and re-entry safety baked in.",
+  "x-domain": "animals",
+  "x-version": "1.0.0",
+  "template": true,
+  "id": "barnplan:template-weekly-care",
+  "householdId": "{{HOUSEHOLD_ID}}",
+  "farmId": "{{FARM_ID}}",
+  "period": {
+    "start": "{{START_ISO}}",
+    "end": "{{END_ISO}}"
+  },
+  "settings": {
+    "timezone": "{{TIMEZONE||America/New_York}}",
+    "dayparts": ["pre_dawn","morning","midday","afternoon","evening"],
+    "quietHours": { "startHour": 21, "endHour": 6 },
+    "withholdGuard": true
+  },
+  "notes": [
+    "Daily AM/PM clusters are short and repeatable. Weekly hygiene is grouped midweek.",
+    "Milking sequence is udder_prep → milking → teat_dip. Keep times consistent.",
+    "Tasks that need ventilation include re-entry buffers to keep people/animals safe."
+  ],
+  "tasks": [
+    {
+      "id": "task:d1-am-feed",
+      "title": "AM Feed (All Pens)",
+      "kind": "care",
+      "vocabTaskId": "task:feed",
+      "scheduledAt": "{{D1}}T11:00:00Z",
+      "durationMin": 15,
+      "zoneId": "barn",
+      "species": ["goat","sheep","pig","rabbit","chicken","duck"],
+      "resources": { "feed": { "items": [{ "name": "ration", "amount": "as_needed" }] } }
+    },
+    {
+      "id": "task:d1-am-water",
+      "title": "AM Water Check & Top-Up",
+      "kind": "care",
+      "vocabTaskId": "task:water_check",
+      "scheduledAt": "{{D1}}T11:20:00Z",
+      "durationMin": 10,
+      "zoneId": "barn",
+      "species": ["all"],
+      "dependencies": ["task:d1-am-feed"]
+    },
+    {
+      "id": "task:d1-am-eggs",
+      "title": "Collect Eggs",
+      "kind": "care",
+      "vocabTaskId": "task:nest_collect",
+      "scheduledAt": "{{D1}}T11:35:00Z",
+      "durationMin": 6,
+      "zoneId": "coop",
+      "species": ["chicken","duck"]
+    },
+    {
+      "id": "task:d1-am-udder",
+      "title": "Udder Prep",
+      "kind": "care",
+      "vocabTaskId": "task:udder_prep",
+      "scheduledAt": "{{D1}}T10:45:00Z",
+      "durationMin": 5,
+      "zoneId": "barn",
+      "species": ["goat","cow","sheep"]
+    },
+    {
+      "id": "task:d1-am-milk",
+      "title": "Milking",
+      "kind": "care",
+      "vocabTaskId": "task:milking",
+      "scheduledAt": "{{D1}}T10:55:00Z",
+      "durationMin": 25,
+      "zoneId": "barn",
+      "species": ["goat","cow","sheep"],
+      "dependencies": ["task:d1-am-udder"]
+    },
+    {
+      "id": "task:d1-am-teat",
+      "title": "Teat Dip (Post)",
+      "kind": "care",
+      "vocabTaskId": "task:teat_dip",
+      "scheduledAt": "{{D1}}T11:25:00Z",
+      "durationMin": 3,
+      "zoneId": "barn",
+      "species": ["goat","cow","sheep"],
+      "dependencies": ["task:d1-am-milk"]
+    },
+    {
+      "id": "task:d1-pm-feed",
+      "title": "PM Feed (All Pens)",
+      "kind": "care",
+      "vocabTaskId": "task:feed",
+      "scheduledAt": "{{D1}}T22:30:00Z",
+      "durationMin": 15,
+      "zoneId": "barn",
+      "species": ["goat","sheep","pig","rabbit","chicken","duck"]
+    },
+    {
+      "id": "task:d1-pm-water",
+      "title": "PM Water Check",
+      "kind": "care",
+      "vocabTaskId": "task:water_check",
+      "scheduledAt": "{{D1}}T22:45:00Z",
+      "durationMin": 8,
+      "zoneId": "barn",
+      "species": ["all"],
+      "dependencies": ["task:d1-pm-feed"]
+    },
+    {
+      "id": "task:d1-pm-milk-udder",
+      "title": "Udder Prep (PM)",
+      "kind": "care",
+      "vocabTaskId": "task:udder_prep",
+      "scheduledAt": "{{D1}}T22:00:00Z",
+      "durationMin": 5,
+      "zoneId": "barn",
+      "species": ["goat","cow","sheep"]
+    },
+    {
+      "id": "task:d1-pm-milk",
+      "title": "Milking (PM)",
+      "kind": "care",
+      "vocabTaskId": "task:milking",
+      "scheduledAt": "{{D1}}T22:10:00Z",
+      "durationMin": 25,
+      "zoneId": "barn",
+      "species": ["goat","cow","sheep"],
+      "dependencies": ["task:d1-pm-milk-udder"]
+    },
+    {
+      "id": "task:d1-pm-teat",
+      "title": "Teat Dip (PM)",
+      "kind": "care",
+      "vocabTaskId": "task:teat_dip",
+      "scheduledAt": "{{D1}}T22:40:00Z",
+      "durationMin": 3,
+      "zoneId": "barn",
+      "species": ["goat","cow","sheep"],
+      "dependencies": ["task:d1-pm-milk"]
+    },
+
+    {
+      "id": "task:d2-am-feed",
+      "title": "AM Feed (All Pens)",
+      "kind": "care",
+      "vocabTaskId": "task:feed",
+      "scheduledAt": "{{D2}}T11:00:00Z",
+      "durationMin": 15,
+      "zoneId": "barn",
+      "species": ["goat","sheep","pig","rabbit","chicken","duck"]
+    },
+    {
+      "id": "task:d2-am-water",
+      "title": "AM Water Check & Top-Up",
+      "kind": "care",
+      "vocabTaskId": "task:water_check",
+      "scheduledAt": "{{D2}}T11:20:00Z",
+      "durationMin": 10,
+      "zoneId": "barn",
+      "species": ["all"],
+      "dependencies": ["task:d2-am-feed"]
+    },
+    {
+      "id": "task:d2-am-eggs",
+      "title": "Collect Eggs",
+      "kind": "care",
+      "vocabTaskId": "task:nest_collect",
+      "scheduledAt": "{{D2}}T11:35:00Z",
+      "durationMin": 6,
+      "zoneId": "coop",
+      "species": ["chicken","duck"]
+    },
+    {
+      "id": "task:d2-hygiene-muck",
+      "title": "Muck Out — Small Pens",
+      "kind": "cleaning",
+      "vocabTaskId": "task:muck_out",
+      "scheduledAt": "{{D2}}T15:00:00Z",
+      "durationMin": 30,
+      "zoneId": "pen",
+      "species": ["goat","sheep","rabbit","pig"]
+    },
+    {
+      "id": "task:d2-hygiene-bedding",
+      "title": "Lay Fresh Bedding",
+      "kind": "care",
+      "vocabTaskId": "task:fresh_bedding",
+      "scheduledAt": "{{D2}}T15:35:00Z",
+      "durationMin": 12,
+      "zoneId": "pen",
+      "species": ["all"],
+      "dependencies": ["task:d2-hygiene-muck"]
+    },
+
+    {
+      "id": "task:d3-am-feed",
+      "title": "AM Feed (All Pens)",
+      "kind": "care",
+      "vocabTaskId": "task:feed",
+      "scheduledAt": "{{D3}}T11:00:00Z",
+      "durationMin": 15,
+      "zoneId": "barn",
+      "species": ["goat","sheep","pig","rabbit","chicken","duck"]
+    },
+    {
+      "id": "task:d3-am-water",
+      "title": "AM Water Check & Top-Up",
+      "kind": "care",
+      "vocabTaskId": "task:water_check",
+      "scheduledAt": "{{D3}}T11:20:00Z",
+      "durationMin": 10,
+      "zoneId": "barn",
+      "species": ["all"],
+      "dependencies": ["task:d3-am-feed"]
+    },
+    {
+      "id": "task:d3-am-eggs",
+      "title": "Collect Eggs",
+      "kind": "care",
+      "vocabTaskId": "task:nest_collect",
+      "scheduledAt": "{{D3}}T11:35:00Z",
+      "durationMin": 6,
+      "zoneId": "coop",
+      "species": ["chicken","duck"]
+    },
+    {
+      "id": "task:d3-weekly-fence",
+      "title": "Fence Check/Repair Sweep",
+      "kind": "maintenance",
+      "vocabTaskId": "task:fence_repair",
+      "scheduledAt": "{{D3}}T15:00:00Z",
+      "durationMin": 25,
+      "zoneId": "pasture",
+      "species": ["all"]
+    },
+
+    {
+      "id": "task:d4-am-feed",
+      "title": "AM Feed (All Pens)",
+      "kind": "care",
+      "vocabTaskId": "task:feed",
+      "scheduledAt": "{{D4}}T11:00:00Z",
+      "durationMin": 15,
+      "zoneId": "barn",
+      "species": ["goat","sheep","pig","rabbit","chicken","duck"]
+    },
+    {
+      "id": "task:d4-am-water",
+      "title": "AM Water Check & Top-Up",
+      "kind": "care",
+      "vocabTaskId": "task:water_check",
+      "scheduledAt": "{{D4}}T11:20:00Z",
+      "durationMin": 10,
+      "zoneId": "barn",
+      "species": ["all"],
+      "dependencies": ["task:d4-am-feed"]
+    },
+    {
+      "id": "task:d4-am-eggs",
+      "title": "Collect Eggs",
+      "kind": "care",
+      "vocabTaskId": "task:nest_collect",
+      "scheduledAt": "{{D4}}T11:35:00Z",
+      "durationMin": 6,
+      "zoneId": "coop",
+      "species": ["chicken","duck"]
+    },
+    {
+      "id": "task:d4-weekly-health",
+      "title": "Weekly Health Check",
+      "kind": "care",
+      "vocabTaskId": "task:health_check",
+      "scheduledAt": "{{D4}}T15:00:00Z",
+      "durationMin": 20,
+      "zoneId": "pen",
+      "species": ["all"]
+    },
+
+    {
+      "id": "task:d5-am-feed",
+      "title": "AM Feed (All Pens)",
+      "kind": "care",
+      "vocabTaskId": "task:feed",
+      "scheduledAt": "{{D5}}T11:00:00Z",
+      "durationMin": 15,
+      "zoneId": "barn",
+      "species": ["goat","sheep","pig","rabbit","chicken","duck"]
+    },
+    {
+      "id": "task:d5-am-water",
+      "title": "AM Water Check & Top-Up",
+      "kind": "care",
+      "vocabTaskId": "task:water_check",
+      "scheduledAt": "{{D5}}T11:20:00Z",
+      "durationMin": 10,
+      "zoneId": "barn",
+      "species": ["all"],
+      "dependencies": ["task:d5-am-feed"]
+    },
+    {
+      "id": "task:d5-am-eggs",
+      "title": "Collect Eggs",
+      "kind": "care",
+      "vocabTaskId": "task:nest_collect",
+      "scheduledAt": "{{D5}}T11:35:00Z",
+      "durationMin": 6,
+      "zoneId": "coop",
+      "species": ["chicken","duck"]
+    },
+    {
+      "id": "task:d5-sanitation",
+      "title": "Sanitize Housing/Equipment (Coop/Barn)",
+      "kind": "cleaning",
+      "vocabTaskId": "task:sanitize_area",
+      "scheduledAt": "{{D5}}T15:00:00Z",
+      "durationMin": 20,
+      "zoneId": "coop",
+      "species": ["all"],
+      "ventilation": { "required": true, "reentryOffsetMin": 60 }
+    },
+    {
+      "id": "task:d5-bedding",
+      "title": "Lay Fresh Bedding (After Dry)",
+      "kind": "care",
+      "vocabTaskId": "task:fresh_bedding",
+      "scheduledAt": "{{D5}}T16:15:00Z",
+      "durationMin": 12,
+      "zoneId": "coop",
+      "species": ["chicken","duck"],
+      "dependencies": ["task:d5-sanitation"]
+    },
+
+    {
+      "id": "task:d6-am-feed",
+      "title": "AM Feed (All Pens)",
+      "kind": "care",
+      "vocabTaskId": "task:feed",
+      "scheduledAt": "{{D6}}T11:00:00Z",
+      "durationMin": 15,
+      "zoneId": "barn",
+      "species": ["goat","sheep","pig","rabbit","chicken","duck"]
+    },
+    {
+      "id": "task:d6-am-water",
+      "title": "AM Water Check & Top-Up",
+      "kind": "care",
+      "vocabTaskId": "task:water_check",
+      "scheduledAt": "{{D6}}T11:20:00Z",
+      "durationMin": 10,
+      "zoneId": "barn",
+      "species": ["all"],
+      "dependencies": ["task:d6-am-feed"]
+    },
+    {
+      "id": "task:d6-am-eggs",
+      "title": "Collect Eggs",
+      "kind": "care",
+      "vocabTaskId": "task:nest_collect",
+      "scheduledAt": "{{D6}}T11:35:00Z",
+      "durationMin": 6,
+      "zoneId": "coop",
+      "species": ["chicken","duck"]
+    },
+    {
+      "id": "task:d6-nest-refresh",
+      "title": "Refresh Nesting Material",
+      "kind": "care",
+      "vocabTaskId": "task:nest_refresh",
+      "scheduledAt": "{{D6}}T15:00:00Z",
+      "durationMin": 10,
+      "zoneId": "coop",
+      "species": ["chicken","duck"]
+    },
+
+    {
+      "id": "task:d7-am-feed",
+      "title": "AM Feed (All Pens)",
+      "kind": "care",
+      "vocabTaskId": "task:feed",
+      "scheduledAt": "{{D7}}T11:00:00Z",
+      "durationMin": 15,
+      "zoneId": "barn",
+      "species": ["goat","sheep","pig","rabbit","chicken","duck"]
+    },
+    {
+      "id": "task:d7-am-water",
+      "title": "AM Water Check & Top-Up",
+      "kind": "care",
+      "vocabTaskId": "task:water_check",
+      "scheduledAt": "{{D7}}T11:20:00Z",
+      "durationMin": 10,
+      "zoneId": "barn",
+      "species": ["all"],
+      "dependencies": ["task:d7-am-feed"]
+    },
+    {
+      "id": "task:d7-am-eggs",
+      "title": "Collect Eggs",
+      "kind": "care",
+      "vocabTaskId": "task:nest_collect",
+      "scheduledAt": "{{D7}}T11:35:00Z",
+      "durationMin": 6,
+      "zoneId": "coop",
+      "species": ["chicken","duck"]
+    },
+    {
+      "id": "task:d7-opt-deworm",
+      "title": "Deworm (If Scheduled)",
+      "kind": "care",
+      "vocabTaskId": "task:deworm",
+      "scheduledAt": "{{D7}}T15:00:00Z",
+      "durationMin": 8,
+      "zoneId": "chute",
+      "species": ["goat","sheep","cow"],
+      "optional": true,
+      "withhold": { "product": "meat", "days": 14 }
+    },
+    {
+      "id": "task:d7-opt-move-pasture",
+      "title": "Rotate/Move Pasture",
+      "kind": "care",
+      "vocabTaskId": "task:move_pasture",
+      "scheduledAt": "{{D7}}T15:20:00Z",
+      "durationMin": 15,
+      "zoneId": "pasture",
+      "species": ["goat","sheep","cow"],
+      "optional": true,
+      "dependencies": ["task:d7-opt-deworm"]
+    },
+    {
+      "id": "task:d7-pm-feed",
+      "title": "PM Feed (All Pens)",
+      "kind": "care",
+      "vocabTaskId": "task:feed",
+      "scheduledAt": "{{D7}}T22:30:00Z",
+      "durationMin": 15,
+      "zoneId": "barn",
+      "species": ["goat","sheep","pig","rabbit","chicken","duck"]
+    },
+    {
+      "id": "task:d7-pm-water",
+      "title": "PM Water Check",
+      "kind": "care",
+      "vocabTaskId": "task:water_check",
+      "scheduledAt": "{{D7}}T22:45:00Z",
+      "durationMin": 8,
+      "zoneId": "barn",
+      "species": ["all"],
+      "dependencies": ["task:d7-pm-feed"]
+    }
+  ],
+  "placeholders": {
+    "D1": "{{DAY_OFFSET 0 from {{START_ISO}}}}",
+    "D2": "{{DAY_OFFSET 1 from {{START_ISO}}}}",
+    "D3": "{{DAY_OFFSET 2 from {{START_ISO}}}}",
+    "D4": "{{DAY_OFFSET 3 from {{START_ISO}}}}",
+    "D5": "{{DAY_OFFSET 4 from {{START_ISO}}}}",
+    "D6": "{{DAY_OFFSET 5 from {{START_ISO}}}}",
+    "D7": "{{DAY_OFFSET 6 from {{START_ISO}}}}"
+  },
+  "supplyHints": [
+    "ration",
+    "dairy_ration",
+    "mineral_block",
+    "salt_block",
+    "bedding_straw",
+    "disinfectant",
+    "footbath_solution",
+    "pre_dip",
+    "post_dip"
+  ],
+  "ui": {
+    "suggestedBuckets": [
+      { "label": "Daily AM Chores", "taskIds": ["task:d1-am-udder","task:d1-am-milk","task:d1-am-teat","task:d1-am-feed","task:d1-am-water","task:d1-am-eggs"] },
+      { "label": "Daily PM Chores", "taskIds": ["task:d1-pm-milk-udder","task:d1-pm-milk","task:d1-pm-teat","task:d1-pm-feed","task:d1-pm-water"] },
+      { "label": "Tue Hygiene", "taskIds": ["task:d2-hygiene-muck","task:d2-hygiene-bedding"] },
+      { "label": "Wed Infrastructure", "taskIds": ["task:d3-weekly-fence"] },
+      { "label": "Thu Health", "taskIds": ["task:d4-weekly-health"] },
+      { "label": "Fri Sanitation", "taskIds": ["task:d5-sanitation","task:d5-bedding"] },
+      { "label": "Sat Coop Care", "taskIds": ["task:d6-nest-refresh"] },
+      { "label": "Sun Optional", "taskIds": ["task:d7-opt-deworm","task:d7-opt-move-pasture"] }
+    ],
+    "icon": "cow",
+    "accent": "amber"
+  }
+}

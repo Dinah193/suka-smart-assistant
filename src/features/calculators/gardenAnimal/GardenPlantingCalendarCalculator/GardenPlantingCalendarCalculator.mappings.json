@@ -1,0 +1,172 @@
+{
+  "inputs": {
+    "nodeKey": "gardenPlantingCalendar",
+    "description": "Maps planting and harvest windows (including feast-day alignments) into downstream garden layout, soil, irrigation, yield, and preservation planning nodes.",
+    "enabled": true,
+    "edges": [
+      {
+        "fromNodeKey": "gardenPlantingCalendar",
+        "toNodeKey": "gardenLayoutPlanner",
+        "relationship": "feeds",
+        "reason": "Use planting windows to reserve beds, avoid overcrowding, and stagger successions across the garden layout.",
+        "tags": ["garden", "layout", "beds", "succession"],
+        "conditions": {
+          "outputs.plantingWindows.length.gt": 0
+        },
+        "nextSteps": [
+          {
+            "action": "reserveBedsForPlantings",
+            "priority": "high",
+            "inputs": [
+              "outputs.plantingWindows[*].bedId",
+              "outputs.plantingWindows[*].startDate",
+              "outputs.plantingWindows[*].endDate",
+              "outputs.plantingWindows[*].cropName"
+            ],
+            "notes": "For planting windows without a bedId, mark them as 'unassigned' so the layout planner can suggest a bed."
+          }
+        ]
+      },
+      {
+        "fromNodeKey": "gardenPlantingCalendar",
+        "toNodeKey": "irrigationPlanner",
+        "relationship": "feeds",
+        "reason": "Translate planting and harvest events into pre- and post-planting irrigation runs, plus dry-down periods where needed.",
+        "tags": ["irrigation", "watering", "scheduling"],
+        "conditions": {
+          "outputs.calendarEvents[?(@.kind=='planting')].length.gt": 0
+        },
+        "nextSteps": [
+          {
+            "action": "scheduleWateringTasks",
+            "priority": "medium",
+            "inputs": [
+              "outputs.calendarEvents[*].date",
+              "outputs.calendarEvents[*].kind",
+              "outputs.calendarEvents[*].bedId"
+            ],
+            "notes": "For each planting event, schedule a 'water in planting' irrigation block within 0 to 1 day after planting."
+          }
+        ]
+      },
+      {
+        "fromNodeKey": "gardenPlantingCalendar",
+        "toNodeKey": "soilHealthTracker",
+        "relationship": "feeds",
+        "reason": "Use succession and season patterns from planting windows to flag beds that risk nutrient depletion or need cover crops.",
+        "tags": ["soil", "rotation", "cover-crops"],
+        "conditions": {
+          "outputs.plantingWindows[?(@.successionIndex>0)].length.gt": 0
+        },
+        "nextSteps": [
+          {
+            "action": "analyzeBedLoad",
+            "priority": "medium",
+            "inputs": [
+              "outputs.plantingWindows[*].bedId",
+              "outputs.plantingWindows[*].successionIndex",
+              "outputs.plantingWindows[*].season",
+              "outputs.plantingWindows[*].cropName"
+            ],
+            "notes": "If successionIndex for a bed exceeds 2 in a single season, flag for soil amendment or future cover crop rotation."
+          }
+        ]
+      },
+      {
+        "fromNodeKey": "gardenPlantingCalendar",
+        "toNodeKey": "yieldEstimator",
+        "relationship": "feeds",
+        "reason": "Combine crop maturity and number of windows to estimate weekly harvest load over the season.",
+        "tags": ["yield", "forecast", "harvest-load"],
+        "conditions": {
+          "outputs.harvestWindows.length.gt": 0
+        },
+        "nextSteps": [
+          {
+            "action": "estimateWeeklyYieldTimeline",
+            "priority": "high",
+            "inputs": [
+              "outputs.harvestWindows[*].cropName",
+              "outputs.harvestWindows[*].startDate",
+              "outputs.harvestWindows[*].endDate",
+              "outputs.harvestWindows[*].targetUse",
+              "outputs.harvestWindows[*].bedId"
+            ],
+            "notes": "Use the span between startDate and endDate to approximate harvest spread, then aggregate by week for dashboard charts."
+          }
+        ]
+      },
+      {
+        "fromNodeKey": "gardenPlantingCalendar",
+        "toNodeKey": "preservationQueuePlanner",
+        "relationship": "feeds",
+        "reason": "When harvest windows target preservation, push those windows into the preservation queue to plan canning, dehydrating, or freezing sessions.",
+        "tags": ["preservation", "storehouse", "sessions"],
+        "conditions": {
+          "outputs.harvestWindows[?(@.targetUse=='preservation' || @.targetUse=='mixed')].length.gt": 0
+        },
+        "nextSteps": [
+          {
+            "action": "createPreservationBatches",
+            "priority": "high",
+            "inputs": [
+              "outputs.harvestWindows[*].cropName",
+              "outputs.harvestWindows[*].startDate",
+              "outputs.harvestWindows[*].endDate",
+              "outputs.harvestWindows[*].targetUse",
+              "outputs.harvestWindows[*].alignedFeastDays"
+            ],
+            "notes": "For harvest windows aligned with feast days, prioritize earlier preservation sessions so food is ready before the feast."
+          }
+        ]
+      },
+      {
+        "fromNodeKey": "gardenPlantingCalendar",
+        "toNodeKey": "sessionSuggestions.garden",
+        "relationship": "feeds",
+        "reason": "Convert near-term planting and harvest windows into suggested garden sessions for the SessionRunner.",
+        "tags": ["sessions", "garden", "automation"],
+        "conditions": {
+          "outputs.calendarEvents.length.gt": 0
+        },
+        "nextSteps": [
+          {
+            "action": "suggestGardenSessions",
+            "priority": "high",
+            "inputs": [
+              "outputs.calendarEvents[*].date",
+              "outputs.calendarEvents[*].kind",
+              "outputs.calendarEvents[*].title",
+              "outputs.calendarEvents[*].cropId",
+              "outputs.calendarEvents[*].bedId"
+            ],
+            "notes": "Filter events within the next 7 days as 'Now' candidates for the garden domain page button."
+          }
+        ]
+      },
+      {
+        "fromNodeKey": "gardenPlantingCalendar",
+        "toNodeKey": "waterUseEstimator",
+        "relationship": "feeds",
+        "reason": "Use planting density over time to estimate expected irrigation water needs by week or month.",
+        "tags": ["water", "irrigation", "sustainability"],
+        "conditions": {
+          "outputs.plantingWindows.length.gt": 0
+        },
+        "nextSteps": [
+          {
+            "action": "estimateIrrigationNeeds",
+            "priority": "low",
+            "inputs": [
+              "outputs.plantingWindows[*].cropName",
+              "outputs.plantingWindows[*].startDate",
+              "outputs.plantingWindows[*].endDate",
+              "outputs.plantingWindows[*].season"
+            ],
+            "notes": "This can power water budgeting widgets or alerts during drought or water-restriction periods."
+          }
+        ]
+      }
+    ]
+  }
+}

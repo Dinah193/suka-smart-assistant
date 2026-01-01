@@ -1,0 +1,286 @@
+{
+  "$id": "https://schemas.suka.smart/resource.room.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SSA Resource — Room / Zone",
+  "description": "Canonical room/zone resource for Suka Smart Assistant (SSA). Rooms constrain scheduling and execution (imports → intelligence → automation). Includes scheduling constraints, availability/quiet hours, and an occupancy calendar used by the planner.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "kind", "createdAt", "availability"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable room/zone id (ULID/UUID or household-scoped key).",
+      "pattern": "^[A-Za-z0-9_.:-]{3,}$"
+    },
+
+    "name": {
+      "type": "string",
+      "description": "Human label (e.g., 'Kitchen', 'Garage Bay A', 'North Garden Bed').",
+      "minLength": 1,
+      "maxLength": 120
+    },
+
+    "kind": {
+      "type": "string",
+      "description": "Functional zone type for scheduling heuristics.",
+      "enum": [
+        "kitchen",
+        "pantry",
+        "dining",
+        "bathroom",
+        "laundry",
+        "bedroom",
+        "living",
+        "garage",
+        "workshop",
+        "garden",
+        "animal_shelter",
+        "storage",
+        "outdoor",
+        "other"
+      ]
+    },
+
+    "parentId": {
+      "type": "string",
+      "description": "Optional parent zone for hierarchical layouts (e.g., 'garden' → 'north_bed').",
+      "pattern": "^[A-Za-z0-9_.:-]{3,}$"
+    },
+
+    "geo": {
+      "type": "object",
+      "description": "Optional geospatial/placement hints.",
+      "additionalProperties": false,
+      "properties": {
+        "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+        "lng": { "type": "number", "minimum": -180, "maximum": 180 },
+        "elevationM": { "type": "number" }
+      }
+    },
+
+    "capabilities": {
+      "type": "object",
+      "description": "Ambient capabilities that affect session placement.",
+      "additionalProperties": false,
+      "properties": {
+        "waterSafe": { "type": "boolean", "description": "Suitable for wet work / mopping." },
+        "foodSafe": { "type": "boolean", "description": "Suitable for food-prep surfaces." },
+        "ventilated": { "type": "boolean" },
+        "powerCircuits": {
+          "type": "array",
+          "description": "Circuit identifiers for power-aware scheduling.",
+          "items": { "type": "string", "maxLength": 48, "pattern": "^[A-Za-z0-9_.:-]+$" }
+        }
+      }
+    },
+
+    "constraints": {
+      "type": "object",
+      "description": "Scheduling constraints and policies for this room.",
+      "additionalProperties": false,
+      "properties": {
+        "maxOccupancy": { "type": "integer", "minimum": 1 },
+        "separationRules": {
+          "type": "array",
+          "description": "Mutual exclusion tags (e.g., 'raw_meat' cannot overlap 'salad_prep').",
+          "items": { "type": "string", "pattern": "^[a-z0-9._-]{2,}$" }
+        },
+        "allowedRoles": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z0-9._-]+$" }
+        },
+        "disallowedRoles": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z0-9._-]+$" }
+        },
+        "noisePolicy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "level": { "type": "string", "enum": ["silent", "quiet", "normal", "loud"] },
+            "notes": { "type": "string", "maxLength": 240 }
+          }
+        },
+        "heatPolicy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "allowHighHeat": { "type": "boolean" },
+            "ventilationRequired": { "type": "boolean" }
+          }
+        },
+        "hazards": {
+          "type": "array",
+          "description": "Ambient hazards present in the room (e.g., chemicals, blades).",
+          "items": { "type": "string", "maxLength": 64 }
+        }
+      }
+    },
+
+    "availability": {
+      "type": "object",
+      "description": "Operational availability windows (quiet hours, blackout, exceptions).",
+      "additionalProperties": false,
+      "properties": {
+        "timezone": { "type": "string", "maxLength": 64 },
+        "quietHours": {
+          "type": "array",
+          "description": "Recurring quiet windows; planner should de-prioritize noisy sessions.",
+          "items": { "$ref": "#/definitions/timeWindow" }
+        },
+        "blackout": {
+          "type": "array",
+          "description": "Hard disallow windows (sleep zones, HOA rules, maintenance).",
+          "items": { "$ref": "#/definitions/timeWindow" }
+        },
+        "exceptions": {
+          "type": "array",
+          "description": "One-off overrides (party, guests). Exceptions win on overlap.",
+          "items": { "$ref": "#/definitions/timeWindow" }
+        }
+      },
+      "required": ["quietHours"],
+      "default": { "quietHours": [] }
+    },
+
+    "occupancyCalendar": {
+      "type": "array",
+      "description": "Busy/held intervals for the room (human occupancy, sessions, holds).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{4,}$" },
+          "title": { "type": "string", "maxLength": 160 },
+          "start": { "type": "string", "format": "date-time" },
+          "end": { "type": "string", "format": "date-time" },
+          "source": { "type": "string", "enum": ["session", "manual", "import", "external", "maintenance"] },
+          "sessionId": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{8,}$" },
+          "rrule": { "type": "string", "maxLength": 512 },
+          "hard": { "type": "boolean", "description": "If true, planner must not schedule during this hold." },
+          "tags": { "type": "array", "items": { "type": "string", "pattern": "^[a-z0-9._-]+$" } }
+        },
+        "required": ["start", "end", "source"]
+      }
+    },
+
+    "safety": {
+      "type": "object",
+      "description": "Safety profile used for matching (PPE, cleaning requirements).",
+      "additionalProperties": false,
+      "properties": {
+        "ppeRequired": { "type": "array", "items": { "type": "string", "maxLength": 64 } },
+        "cleaningAfterUse": { "type": "boolean" },
+        "allergenZones": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 48 }
+        }
+      }
+    },
+
+    "tags": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "maxLength": 48, "pattern": "^[a-z0-9._-]+$" }
+    },
+
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+
+    "meta": {
+      "type": "object",
+      "description": "Forward-compatible extension bucket.",
+      "additionalProperties": true
+    }
+  },
+
+  "definitions": {
+    "timeWindow": {
+      "type": "object",
+      "description": "Recurring or one-off time window.",
+      "additionalProperties": false,
+      "properties": {
+        "label": { "type": "string", "maxLength": 120 },
+        "start": { "type": "string", "format": "date-time", "description": "Use for one-off windows." },
+        "end": { "type": "string", "format": "date-time" },
+        "rrule": { "type": "string", "maxLength": 512, "description": "RFC 5545 RRULE string for recurring windows." },
+        "byDay": {
+          "type": "array",
+          "description": "Simple weekly recurrence helper (0=Sun … 6=Sat). Use RRULE for complex cases.",
+          "items": { "type": "integer", "minimum": 0, "maximum": 6 }
+        },
+        "timeOfDay": {
+          "type": "object",
+          "description": "Daily local-time window, ignoring date.",
+          "additionalProperties": false,
+          "properties": {
+            "start": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" },
+            "end": { "type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$" }
+          }
+        },
+        "hard": {
+          "type": "boolean",
+          "description": "If true, planner must not schedule here (blackout). False indicates a soft quiet window.",
+          "default": false
+        }
+      },
+      "anyOf": [
+        { "required": ["rrule"] },
+        { "required": ["start", "end"] },
+        { "required": ["byDay", "timeOfDay"] }
+      ]
+    }
+  },
+
+  "examples": [
+    {
+      "id": "room.kitchen",
+      "name": "Kitchen",
+      "kind": "kitchen",
+      "capabilities": { "foodSafe": true, "ventilated": true, "powerCircuits": ["ckt-kitchen-1"] },
+      "constraints": {
+        "maxOccupancy": 3,
+        "separationRules": ["raw_meat", "salad_prep"],
+        "noisePolicy": { "level": "normal" },
+        "heatPolicy": { "allowHighHeat": true, "ventilationRequired": true }
+      },
+      "availability": {
+        "timezone": "America/Chicago",
+        "quietHours": [{ "label": "Night Quiet", "byDay": [0,1,2,3,4,5,6], "timeOfDay": { "start": "22:00", "end": "06:00" } }],
+        "blackout": [],
+        "exceptions": [{ "label": "Holiday Cooking", "start": "2025-12-24T18:00:00.000Z", "end": "2025-12-25T04:00:00.000Z" }]
+      },
+      "occupancyCalendar": [
+        {
+          "id": "hold-oven-clean",
+          "title": "Oven Self-Clean",
+          "start": "2025-11-10T01:00:00.000Z",
+          "end": "2025-11-10T04:00:00.000Z",
+          "source": "maintenance",
+          "hard": true,
+          "tags": ["heat", "fumes"]
+        }
+      ],
+      "tags": ["food", "prep"],
+      "createdAt": "2025-09-01T12:00:00.000Z",
+      "updatedAt": "2025-11-08T13:12:00.000Z"
+    },
+    {
+      "id": "zone.garden.north_bed",
+      "name": "Garden — North Bed",
+      "kind": "garden",
+      "availability": {
+        "timezone": "America/Chicago",
+        "quietHours": [{ "label": "Early Morning Quiet", "byDay": [0,1,2,3,4,5,6], "timeOfDay": { "start": "05:00", "end": "07:00" } }],
+        "blackout": []
+      },
+      "constraints": {
+        "maxOccupancy": 2,
+        "allowedRoles": ["gardener"],
+        "hazards": ["tools", "soil_allergens"]
+      },
+      "occupancyCalendar": [],
+      "createdAt": "2025-08-10T10:00:00.000Z",
+      "updatedAt": "2025-11-08T13:12:00.000Z"
+    }
+  ]
+}

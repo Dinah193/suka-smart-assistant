@@ -1,0 +1,258 @@
+{
+  "version": "2025-10-31T13:05:00-05:00",
+  "description": "Garden processing / outdoor wash areas for Suka Smart Assistant. These are the places harvests get staged, washed, trimmed, and then routed to storehouse sections (produce, ferments, freezer) or to meal/preservation sessions. Cleaning, garden, storehouse, meals, and animals can all target these areas. Supports user-owned favorites/schedules and reverse generation when harvest/butchery/import events happen.",
+  "meta": {
+    "sourceOfTruth": "scraper",
+    "allowHubOverrides": true,
+    "mergeStrategy": "scraper-wins",
+    "ingestionPipelines": [
+      "scraperService",
+      "importService",
+      "bookmarklet",
+      "linked-accounts"
+    ],
+    "sharedOrchestration": {
+      "emitOnUpdate": true,
+      "reason": "garden-processing-presets-update",
+      "channels": [
+        "garden",
+        "cleaning",
+        "storehouse",
+        "meals",
+        "animals"
+      ]
+    },
+    "notes": [
+      "Use these IDs in central_garden_templates.json when a template needs a wash/sanitize step.",
+      "Cleaning routines like 'cleaning.garden-bin-sanitize' and 'cleaning.storehouse-harvest-sanitize' should read from here.",
+      "When harvests come in from out-of-zone crops (allowed-with-mitigation), we can bump the cleaning cadence on this area."
+    ]
+  },
+  "defaults": {
+    "timezone": "America/Chicago",
+    "sabbathGuard": true,
+    "quietHoursGuard": true,
+    "onMismatch": "allow-with-mitigation",
+    "supportsReverseGeneration": true,
+    "climate": {
+      "zone": "8b",
+      "heatTolerance": "high",
+      "humidityTolerance": "high"
+    }
+  },
+  "areas": [
+    {
+      "id": "garden-wash-station-1",
+      "label": "Garden Wash Station – North",
+      "location": "north-yard",
+      "kind": "outdoor-sink",
+      "priority": 1,
+      "sabbathAllowed": false,
+      "quietHoursAllowed": true,
+      "waterAvailable": true,
+      "covered": true,
+      "drainage": "good",
+      "supports": [
+        "garden.harvest.processing",
+        "garden.care-session",
+        "storehouse.intake.from-garden",
+        "cleaning.garden-bin-sanitize"
+      ],
+      "targetStorehouseSections": [
+        "produce",
+        "ferments"
+      ],
+      "acceptedGardenZones": ["8a", "8b", "9a"],
+      "rejectedGardenZones": ["6", "7a"],
+      "onMismatch": "allow-with-mitigation",
+      "mitigation": {
+        "extraCleaningEmit": [
+          "cleaning.garden-bin-sanitize"
+        ],
+        "extraCareEmit": [
+          "garden.care-session.generated"
+        ],
+        "risks": [
+          "higher pathogen load from out-of-zone crop",
+          "longer drying time in humid conditions"
+        ]
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.harvest.logged",
+          "storehouse.intake.from-garden",
+          "animals.butchery.completed"
+        ],
+        "emit": [
+          "cleaning.garden-bin-sanitize"
+        ],
+        "rules": [
+          {
+            "id": "harvest-to-clean",
+            "ifEvent": "garden.harvest.logged",
+            "generate": "cleaning.garden-bin-sanitize"
+          },
+          {
+            "id": "butchery-to-hose-down",
+            "ifEvent": "animals.butchery.completed",
+            "generate": "cleaning.outdoor-zone.expected"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "shower-head",
+        "group": "outdoor"
+      }
+    },
+    {
+      "id": "garden-trim-table-2",
+      "label": "Garden Trim & Pack Table – East",
+      "location": "east-garden-edge",
+      "kind": "processing-table",
+      "priority": 2,
+      "sabbathAllowed": false,
+      "quietHoursAllowed": true,
+      "waterAvailable": false,
+      "covered": false,
+      "supports": [
+        "garden.harvest.trimming",
+        "storehouse.intake.from-garden",
+        "meals.batch-cooking.fromHarvest"
+      ],
+      "targetStorehouseSections": [
+        "produce",
+        "freezer"
+      ],
+      "acceptedGardenZones": ["8a", "8b"],
+      "onMismatch": "warn-and-suggest",
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.harvest.logged",
+          "meals.batch-cooking.completed"
+        ],
+        "emit": [
+          "cleaning.garden-bin-sanitize"
+        ],
+        "rules": [
+          {
+            "id": "batch-cook-to-trim-clean",
+            "ifEvent": "meals.batch-cooking.completed",
+            "generate": "cleaning.after-cooking-session"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "table-cells",
+        "group": "outdoor"
+      }
+    },
+    {
+      "id": "post-harvest-sanitize-pad",
+      "label": "Post-Harvest Sanitize Pad",
+      "location": "side-yard",
+      "kind": "sanitize-pad",
+      "priority": 1,
+      "sabbathAllowed": false,
+      "quietHoursAllowed": false,
+      "waterAvailable": true,
+      "covered": false,
+      "supports": [
+        "cleaning.garden-bin-sanitize",
+        "cleaning.storehouse-harvest-sanitize",
+        "storehouse.intake.expected"
+      ],
+      "targetStorehouseSections": [
+        "produce",
+        "baking"
+      ],
+      "acceptedGardenZones": ["7b", "8a", "8b", "9a"],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.harvest.logged",
+          "storehouse.intake.expected"
+        ],
+        "emit": [
+          "cleaning.storehouse-harvest-sanitize"
+        ]
+      },
+      "uiHints": {
+        "icon": "sparkles",
+        "group": "utility"
+      }
+    },
+    {
+      "id": "animal-crossover-rinse",
+      "label": "Animal/Garden Crossover Rinse Area",
+      "location": "near-animal-processing-bay",
+      "kind": "rinse-station",
+      "priority": 3,
+      "sabbathAllowed": false,
+      "quietHoursAllowed": false,
+      "waterAvailable": true,
+      "supports": [
+        "animals.care-session",
+        "animals.butchery",
+        "garden.tools-sanitize",
+        "cleaning.outdoor-zone.expected"
+      ],
+      "targetStorehouseSections": [
+        "produce",
+        "meat"
+      ],
+      "acceptedGardenZones": ["8a", "8b", "9a"],
+      "onMismatch": "allow-with-mitigation",
+      "mitigation": {
+        "extraCleaningEmit": [
+          "cleaning.processing-area.requested"
+        ],
+        "extraNotes": "If animals were processed here, sanitize BEFORE produce comes through."
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "animals.butchery.completed",
+          "garden.harvest.logged"
+        ],
+        "emit": [
+          "cleaning.processing-area.requested"
+        ],
+        "rules": [
+          {
+            "id": "animal-first-then-garden",
+            "ifEvent": "animals.butchery.completed",
+            "generate": "cleaning.processing-area.requested"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "droplets",
+        "group": "outdoor"
+      }
+    }
+  ],
+  "userCanSaveFavorites": true,
+  "favoritesTemplate": [
+    {
+      "id": "fav-garden-wash-quick",
+      "source": "system",
+      "cloneOf": "garden-wash-station-1",
+      "label": "My Quick Harvest Wash",
+      "allowUserScheduleOverride": true
+    },
+    {
+      "id": "fav-post-harvest-sanitize",
+      "source": "system",
+      "cloneOf": "post-harvest-sanitize-pad",
+      "label": "My Post-Harvest Sanitize",
+      "allowUserScheduleOverride": true
+    }
+  ],
+  "userFavoritePolicy": {
+    "maxPerHousehold": 30,
+    "allowCustomSchedule": true,
+    "allowCustomReverseGeneration": true
+  }
+}

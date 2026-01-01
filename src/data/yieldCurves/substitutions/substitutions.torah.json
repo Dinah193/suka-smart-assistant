@@ -1,0 +1,385 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "2025-10-31T20:25:00-05:00",
+  "description": "Clean, Torah-appropriate substitutions for Suka Smart Assistant. Feeds meal, cleaning, garden, storehouse, and animal/butchery engines. Supports reverse generation and user favorites.",
+  "meta": {
+    "sourceFile": "src/data/yieldCurves/substitutions/substitutions.torah.json",
+    "schemaSource": "draft-07 (public)",
+    "compatibleEngines": [
+      "mealPlanEngine",
+      "cookingSessionEngine",
+      "storehouseGoalEngine",
+      "gardenQueueEngine",
+      "cleaningPlanEngine",
+      "animalSessionEngine"
+    ],
+    "supportsReverseGeneration": true,
+    "supportsUserFavorites": true,
+    "uiHints": {
+      "groupOrder": [
+        "meat-unclean-to-clean",
+        "meat-processed-to-clean",
+        "fat-oil",
+        "broth-stock-base",
+        "seafood",
+        "storehouse-grocery",
+        "garden-seed",
+        "animal-care-butchery",
+        "cleaning-household"
+      ]
+    }
+  },
+  "defaults": {
+    "targetCulture": "torah",
+    "preferredCleanMeat": "lamb",
+    "preferredCleanFat": "beef-tallow"
+  },
+  "scopes": [
+    "meals",
+    "storehouse",
+    "garden",
+    "animals",
+    "cleaning",
+    "processing-butchery",
+    "preservation"
+  ],
+  "profiles": {
+    "household-default": {
+      "id": "profile:household-default",
+      "label": "Household default (clean only)",
+      "preferredMeats": [
+        "lamb",
+        "goat",
+        "beef",
+        "venison"
+      ],
+      "disallow": [
+        "pork",
+        "ham",
+        "bacon",
+        "shellfish",
+        "pancetta"
+      ]
+    }
+  },
+  "substitutions": [
+    {
+      "id": "meat:pork-to-lamb",
+      "domain": "meals",
+      "category": "meat-unclean-to-clean",
+      "from": [
+        "pork",
+        "pork-chops",
+        "pork-loin",
+        "pork-roast"
+      ],
+      "to": [
+        {
+          "item": "lamb",
+          "ratio": 1.0,
+          "yieldCurveRef": "src/data/yieldCurves/meat/sheep_katahdin.json"
+        },
+        {
+          "item": "goat",
+          "ratio": 0.95,
+          "yieldCurveRef": "src/data/yieldCurves/meat/goat_kiko.json"
+        },
+        {
+          "item": "beef-brangus",
+          "ratio": 1.1,
+          "yieldCurveRef": "src/data/yieldCurves/meat/beef_brangus.json"
+        }
+      ],
+      "reverseGeneration": {
+        "allowReverse": true,
+        "originals": [
+          "pork"
+        ],
+        "note": "Only for export/share to non-Torah households."
+      }
+    },
+    {
+      "id": "meat:ham-to-smoked-lamb",
+      "domain": "meals",
+      "category": "meat-processed-to-clean",
+      "from": [
+        "ham",
+        "honey-baked-ham",
+        "smoked-ham-hock"
+      ],
+      "to": [
+        {
+          "item": "smoked-lamb-shoulder",
+          "ratio": 1.0
+        },
+        {
+          "item": "smoked-beef-shank",
+          "ratio": 1.05
+        }
+      ],
+      "processing": {
+        "required": true,
+        "queues": [
+          "cookingSessionEngine:smoke",
+          "storehouseGoalEngine:preserve"
+        ]
+      },
+      "reverseGeneration": {
+        "allowReverse": true,
+        "originals": [
+          "ham"
+        ]
+      }
+    },
+    {
+      "id": "meat:bacon-to-lamb-beef-bacon",
+      "domain": "meals",
+      "category": "meat-processed-to-clean",
+      "from": [
+        "bacon",
+        "pork-bacon"
+      ],
+      "to": [
+        {
+          "item": "lamb-bacon",
+          "ratio": 1.0,
+          "yieldCurveRef": "src/data/yieldCurves/meat/sheep_katahdin.json"
+        },
+        {
+          "item": "beef-bacon",
+          "ratio": 1.0,
+          "yieldCurveRef": "src/data/yieldCurves/meat/beef_brangus.json"
+        }
+      ],
+      "storehouseMapping": {
+        "aisle": "Refrigerated/Breakfast",
+        "preserveOptions": [
+          "freeze",
+          "cure",
+          "smoke"
+        ]
+      },
+      "reverseGeneration": {
+        "allowReverse": true,
+        "originals": [
+          "bacon"
+        ]
+      }
+    },
+    {
+      "id": "seafood:shellfish-to-fish",
+      "domain": "meals",
+      "category": "seafood",
+      "from": [
+        "shrimp",
+        "crab",
+        "lobster",
+        "scallops",
+        "oysters"
+      ],
+      "to": [
+        {
+          "item": "cod",
+          "ratio": 1.0
+        },
+        {
+          "item": "tilapia",
+          "ratio": 1.0
+        },
+        {
+          "item": "pollock",
+          "ratio": 1.0
+        }
+      ]
+    },
+    {
+      "id": "fat:lard-to-tallow",
+      "domain": "meals",
+      "category": "fat-oil",
+      "from": [
+        "lard",
+        "shortening-mixed"
+      ],
+      "to": [
+        {
+          "item": "beef-tallow",
+          "ratio": 1.0
+        },
+        {
+          "item": "lamb-tallow",
+          "ratio": 1.0
+        },
+        {
+          "item": "olive-oil",
+          "ratio": 0.9
+        }
+      ],
+      "storehouseMapping": {
+        "aisle": "Oils & Fats"
+      }
+    },
+    {
+      "id": "broth:ham-hock-to-smoked-lamb-bone",
+      "domain": "meals",
+      "category": "broth-stock-base",
+      "from": [
+        "ham-hock",
+        "smoked-pork-bone"
+      ],
+      "to": [
+        {
+          "item": "smoked-lamb-bone",
+          "ratio": 1.0
+        },
+        {
+          "item": "smoked-beef-bone",
+          "ratio": 1.0
+        }
+      ]
+    },
+    {
+      "id": "storehouse:pancetta-to-smoked-lamb-cubes",
+      "domain": "storehouse",
+      "category": "storehouse-grocery",
+      "from": [
+        "pancetta"
+      ],
+      "to": [
+        {
+          "item": "smoked-lamb-cubes",
+          "ratio": 1.0
+        }
+      ],
+      "grouping": {
+        "grocerySection": "Meat & Charcuterie",
+        "suggestedPreservation": [
+          "vac-seal",
+          "freeze"
+        ]
+      }
+    },
+    {
+      "id": "garden:seed-mix-to-clean-seeds",
+      "domain": "garden",
+      "category": "garden-seed",
+      "from": [
+        "culinary-mixes-with-unclean-additives"
+      ],
+      "to": [
+        {
+          "item": "pure-coriander-seed",
+          "ratio": 1.0
+        },
+        {
+          "item": "pure-cumin-seed",
+          "ratio": 1.0
+        }
+      ]
+    },
+    {
+      "id": "animals:non-torah-to-torah-livestock",
+      "domain": "animals",
+      "category": "animal-care-butchery",
+      "from": [
+        "swine",
+        "boar",
+        "wild-pig"
+      ],
+      "to": [
+        {
+          "item": "sheep",
+          "ratio": 1.0,
+          "yieldCurveRef": "src/data/yieldCurves/meat/sheep_katahdin.json"
+        },
+        {
+          "item": "goat",
+          "ratio": 1.0,
+          "yieldCurveRef": "src/data/yieldCurves/meat/goat_kiko.json"
+        },
+        {
+          "item": "cattle",
+          "ratio": 1.0,
+          "yieldCurveRef": "src/data/yieldCurves/meat/beef_brangus.json"
+        }
+      ],
+      "butchery": {
+        "usdaFacility": true,
+        "torahCompliant": true
+      }
+    },
+    {
+      "id": "cleaning:unclear-animal-to-vinegar-castile-borax",
+      "domain": "cleaning",
+      "category": "cleaning-household",
+      "from": [
+        "animal-derived-enzymatic-cleaner-uncertain-source"
+      ],
+      "to": [
+        {
+          "item": "vinegar",
+          "ratio": 1.0
+        },
+        {
+          "item": "castile-soap",
+          "ratio": 1.0
+        },
+        {
+          "item": "borax",
+          "ratio": 1.0
+        }
+      ]
+    }
+  ],
+  "reverseGeneration": {
+    "enabled": true,
+    "strategy": "per-item",
+    "blockedOriginals": [
+      "pork",
+      "ham",
+      "bacon",
+      "shellfish",
+      "pancetta"
+    ]
+  },
+  "userOverrides": {
+    "description": "User or household specific substitutions.",
+    "favorites": [
+      {
+        "substitutionId": "meat:bacon-to-lamb-beef-bacon",
+        "label": "Always use lamb bacon in my recipes",
+        "householdId": "HOUSEHOLD_DEFAULT"
+      }
+    ],
+    "custom": []
+  },
+  "integration": {
+    "importRouter": {
+      "listenFor": [
+        "import.recipe.detected",
+        "import.gardenPlan.detected",
+        "import.cleaningPlan.detected",
+        "import.storehouseGoal.detected",
+        "import.animalCarePlan.detected"
+      ],
+      "applySubstitutionsOn": [
+        "recipe.ingredients",
+        "storehouse.goals.items",
+        "garden.plan.seedList",
+        "cleaning.plan.supplies",
+        "animal.care.scheduledFeeds"
+      ]
+    },
+    "automationRuntime": {
+      "onEvent": "automation.schedule.request",
+      "actions": [
+        "validate-substitutions",
+        "apply-household-overrides",
+        "emit-cleaned-session"
+      ],
+      "emit": [
+        "session.created.cleaned",
+        "session.shared.cleaned"
+      ]
+    }
+  }
+}

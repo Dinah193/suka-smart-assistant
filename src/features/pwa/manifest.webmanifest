@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+  "name": "Suka Smart Assistant",
+  "short_name": "Suka",
+  "description": "Household, meals, cleaning, garden planning, garden care, harvest, animals (acquisition/care/butchery), storehouse stock planning, and Scan • Compare • Trust in one app.",
+  "id": "/",
+  "start_url": "/?pwa=1",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/suka-72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/suka-96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/suka-128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/suka-144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/suka-152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/suka-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/suka-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New import",
+      "short_name": "Import",
+      "description": "Import recipe / Pinterest / cleaning / garden / storehouse / animal",
+      "url": "/import?from=pwa-shortcut"
+    },
+    {
+      "name": "My favorites",
+      "short_name": "Favorites",
+      "description": "Open your saved sessions, schedules & imported plans",
+      "url": "/import/favorites"
+    },
+    {
+      "name": "Batch & sessions",
+      "short_name": "Sessions",
+      "description": "Batch cooking, cleaning, garden, animal, butchery",
+      "url": "/tier2/household/meals?view=batch-sessions"
+    },
+    {
+      "name": "Storehouse planner",
+      "short_name": "Storehouse",
+      "description": "Plan storehouse by grocery sections",
+      "url": "/tier2/household/storehouse?view=planner"
+    }
+  ],
+  "share_target": {
+    "action": "/import/share-capture",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "files",
+          "accept": [
+            "text/*",
+            "image/*",
+            "application/json",
+            "application/pdf"
+          ]
+        }
+      ]
+    }
+  },
+  "screenshots": [
+    {
+      "src": "/screenshots/suka-dashboard.png",
+      "type": "image/png",
+      "sizes": "1280x720"
+    },
+    {
+      "src": "/screenshots/suka-import.png",
+      "type": "image/png",
+      "sizes": "1280x720"
+    },
+    {
+      "src": "/screenshots/suka-storehouse.png",
+      "type": "image/png",
+      "sizes": "1280x720"
+    }
+  ],
+  "categories": [
+    "productivity",
+    "utilities",
+    "shopping",
+    "education"
+  ],
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://suka.local/manifest.webmanifest"
+    }
+  ],
+  "prefer_related_applications": false,
+  "suka": {
+    "integration": "core-pwa",
+    "tiers": [
+      "tier1-individual",
+      "tier2-household",
+      "tier3-community",
+      "tier4-enterprise"
+    ],
+    "features": {
+      "saveUserFavorites": true,
+      "attachSchedule": true,
+      "reverseGeneration": true,
+      "sharedOrchestration": true,
+      "importSources": [
+        "bookmarklet",
+        "pwa-share-target",
+        "scan-compare-trust",
+        "pinterest",
+        "file",
+        "social-recipe",
+        "garden-site",
+        "cleaning-blog",
+        "grocery-circular",
+        "livestock-listing",
+        "butchery-post"
+      ],
+      "importTypes": [
+        "recipe",
+        "mealPlan",
+        "cleaningPlan",
+        "gardenPlan",
+        "gardenCare",
+        "harvestPlan",
+        "storehouseGoal",
+        "storehouseStock",
+        "animalAcquisition",
+        "animalPlan",
+        "butcherySession",
+        "inventoryUpdate",
+        "generic"
+      ]
+    },
+    "defaults": {
+      "autoOpenPreview": true,
+      "autoSaveFavorite": false,
+      "autoSchedule": false,
+      "autoScheduleRule": "once+5min",
+      "reverseMeta": {
+        "shareTarget": "family-fund-hub",
+        "includeShare": true,
+        "format": "json",
+        "reverseFromId": null
+      },
+      "sessionTemplates": {
+        "cleaningPlan": {
+          "kind": "cleaning",
+          "recurring": "weekly"
+        },
+        "gardenCare": {
+          "kind": "garden-care",
+          "recurring": "2x/week"
+        },
+        "harvestPlan": {
+          "kind": "garden-harvest",
+          "recurring": null
+        },
+        "storehouseStock": {
+          "kind": "storehouse-restock",
+          "recurring": "weekly"
+        },
+        "butcherySession": {
+          "kind": "butchery",
+          "recurring": null
+        },
+        "animalAcquisition": {
+          "kind": "inventory-sync",
+          "recurring": null
+        }
+      }
+    },
+    "events": {
+      "emit": [
+        "import.queue.enqueue",
+        "import.preview.open",
+        "automation.schedule.request",
+        "import.pwa-share.received"
+      ],
+      "listen": [
+        "import.settings.changed",
+        "import.queue.updated",
+        "automation.schedule.updated"
+      ]
+    },
+    "notes": "Mobile/desktop share → /import/share-capture → ImportNormalizer → dispatch import.queue.enqueue; keep user-owned favorites and schedules."
+  }
+}

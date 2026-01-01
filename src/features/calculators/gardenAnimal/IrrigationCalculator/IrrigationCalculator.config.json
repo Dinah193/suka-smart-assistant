@@ -1,0 +1,35 @@
+{
+  "id": "IrrigationCalculator",
+  "kind": "calculator",
+  "label": "Irrigation Planner",
+  "description": "Calculates irrigation needs and schedules for each bed/zone based on crops, soil, and weather context.",
+  "domain": "garden",
+  "category": "gardenAnimal",
+  "tags": [
+    "garden",
+    "irrigation",
+    "water-planning",
+    "sessions",
+    "planning-graph"
+  ],
+  "inputs": [
+    "GardenPlantingCalendarCalculator.outputs.bedPlantings",
+    "GardenPlantingCalendarCalculator.outputs.frostWindows",
+    "GardenYieldCalculator.outputs.yieldTargets",
+    "GardenYieldCalculator.outputs.harvestWindows",
+    "SoilAmendmentCalculator.outputs.soilStabilityTrend",
+    "SoilAmendmentCalculator.outputs.bedConstraints",
+    "weather.forecast.daily",
+    "weather.forecast.extremes",
+    "userOverrides.irrigationPreferences"
+  ],
+  "outputs": [
+    "irrigationSchedule.perBed",
+    "irrigationSchedule.perZone",
+    "waterRequirements.perCrop",
+    "waterRequirements.perWeek",
+    "irrigationSessions.prepared",
+    "alerts.droughtRisk",
+    "alerts.overwaterRisk"
+  ]
+}

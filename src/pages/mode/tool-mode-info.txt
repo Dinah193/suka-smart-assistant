@@ -1,0 +1,410 @@
+===============================================================================
+TOOL MODE INFO PAGE – SSA “WEB OF MEANING”
+File: src/pages/mode/tool-mode-info.txt
+Role: Copy spec for the “What is Tool Mode?” / mode-explainer page
+===============================================================================
+
+0. CONCEPTUAL PURPOSE
+---------------------
+This file defines the **UI copy** for a page that explains TOOL MODE:
+
+- What Tool Mode is in SSA.
+- How it relates to Stewardship Mode.
+- Why a householder might want to stay in Tool Mode for a while.
+- How Tool Mode still honors cycles, seasons, and the storehouse.
+
+Tone:
+- Calm, reassuring, practical.
+- No pressure to “upgrade” to Stewardship Mode.
+- Household, not productivity.
+
+The page should work as:
+- A stand-alone info page reachable from headers/footers or “Mode” links.
+- A contextual overlay or side panel from banners like “Mode: Tool Only”.
+
+
+1. PAGE TITLE & HERO
+--------------------
+
+[PAGE.TITLE]
+"Tool Mode – Working with One Flow at a Time"
+
+[PAGE.SUBTITLE]
+"Shape individual household rhythms at your own pace. SSA can weave them
+into a wider stewardship view when you’re ready."
+
+[PAGE.HERO.TAGLINE]
+"You don’t have to map the whole house to begin. One rhythm is enough."
+
+[PAGE.HERO.BODY]
+"In Tool Mode, each page works on its own. You can set up a cooking flow,
+a storehouse snapshot, a garden bed plan, or a cleaning cycle without
+connecting everything together yet. SSA still remembers seasons, yields,
+and provisions, but it lets you focus on the one area that needs your
+hands today."
+
+[PAGE.HERO.CTA_PRIMARY]
+"Start with a single household flow"
+
+[PAGE.HERO.CTA_SECONDARY]
+"See how Tool Mode differs from Stewardship Mode"
+
+
+2. SECTION: WHAT IS TOOL MODE?
+------------------------------
+
+[SECTION.WHAT_IS_TOOL_MODE.TITLE]
+"What is Tool Mode?"
+
+[SECTION.WHAT_IS_TOOL_MODE.BODY]
+"Tool Mode is SSA’s way of honoring your current capacity. Instead of asking
+you to design a whole stewardship system at once, it lets you work with one
+tool, one flow, or one household area at a time.
+
+In Tool Mode, you might:
+
+- shape a cooking & meal rhythm,
+- log your storehouse provisions,
+- map a simple garden bed plan,
+- define a cleaning & care cycle for one room,
+- plan a single feast or gathering.
+
+Each of these stands on its own and is fully useful. SSA quietly keeps your
+data in structures that can later be woven into the broader household story."
+
+[SECTION.WHAT_IS_TOOL_MODE.KEY_POINT_1.TITLE]
+"One flow at a time"
+
+[SECTION.WHAT_IS_TOOL_MODE.KEY_POINT_1.BODY]
+"You focus on the rhythm in front of you: a meal pattern, a preservation session,
+a room’s cleaning cycle. The page is not cluttered with other domains."
+
+[SECTION.WHAT_IS_TOOL_MODE.KEY_POINT_2.TITLE]
+"Season-aware, even when simple"
+
+[SECTION.WHAT_IS_TOOL_MODE.KEY_POINT_2.BODY]
+"Tool Mode can still show season hints and feast windows. You don’t have to
+plan them; SSA simply reminds you of the time you are working in."
+
+[SECTION.WHAT_IS_TOOL_MODE.KEY_POINT_3.TITLE]
+"Ready to be woven later"
+
+[SECTION.WHAT_IS_TOOL_MODE.KEY_POINT_3.BODY]
+"Even in Tool Mode, your flows are saved in a way that can be connected to
+storehouse, garden, animals, and feasts when you choose to step into
+Stewardship Mode."
+
+
+3. SECTION: WHY START IN TOOL MODE?
+-----------------------------------
+
+[SECTION.WHY_START.TITLE]
+"Why would a householder start in Tool Mode?"
+
+[SECTION.WHY_START.BODY]
+"Households are often busy, stretched, or rebuilding. Tool Mode respects that.
+It lets you begin with what your hands already touch: meals, dishes, laundry,
+a bed, or the nearest shelf in the storehouse."
+
+[SECTION.WHY_START.REASON_1.TITLE]
+"To stay focused"
+
+[SECTION.WHY_START.REASON_1.BODY]
+"Instead of seeing every domain at once, Tool Mode lets you stay with one
+area until it feels steady: a cooking rhythm, a cleaning flow, a garden bed."
+
+[SECTION.WHY_START.REASON_2.TITLE]
+"To avoid overwhelm"
+
+[SECTION.WHY_START.REASON_2.BODY]
+"You do not need to map the entire household structure to gain benefit.
+You can begin with one small rhythm and grow as life allows."
+
+[SECTION.WHY_START.REASON_3.TITLE]
+"To build trust slowly"
+
+[SECTION.WHY_START.REASON_3.BODY]
+"As you use one tool and see how SSA handles your rhythms, seasons, and
+storehouse information, you can decide if and when to connect more areas."
+
+[SECTION.WHY_START.CALM_NOTE]
+"It is completely acceptable for a householder to live in Tool Mode for a long
+time. Stewardship Mode is an invitation, not a requirement."
+
+
+4. SECTION: HOW TOOL MODE STILL HONORS CYCLES, SEASONS, & STOREHOUSE
+--------------------------------------------------------------------
+
+[SECTION.HOW_HONORS.TITLE]
+"How Tool Mode still honors cycles, seasons, and the storehouse"
+
+[SECTION.HOW_HONORS.BODY]
+"Even when you work with only one tool, SSA does not forget that your life
+moves in cycles and seasons."
+
+[SECTION.HOW_HONORS.POINT_1.TITLE]
+"Cycles and rhythms"
+
+[SECTION.HOW_HONORS.POINT_1.BODY]
+"Each tool lets you describe how often a rhythm appears: daily, weekly,
+seasonal, or as a one-time flow. SSA can use this to notice steady patterns
+and gentle drifts over time."
+
+[SECTION.HOW_HONORS.POINT_2.TITLE]
+"Season context"
+
+[SECTION.HOW_HONORS.POINT_2.BODY]
+"If you provide your region and calendar basics, Tool Mode can show simple
+season cues: planting windows, lean seasons, or feast approaches. These are
+gentle hints, not orders."
+
+[SECTION.HOW_HONORS.POINT_3.TITLE]
+"Storehouse direction"
+
+[SECTION.HOW_HONORS.POINT_3.BODY]
+"Even a single flow can be marked as:
+
+- drawing from the storehouse,
+- feeding into the storehouse,
+- or supporting the house indirectly.
+
+This helps SSA understand how your flows relate to provision, even if you
+never visit the full Stewardship overview."
+
+
+5. SECTION: TOOL MODE VS STEWARDSHIP MODE (COMPARISON)
+------------------------------------------------------
+
+[SECTION.COMPARISON.TITLE]
+"Tool Mode and Stewardship Mode – how they differ"
+
+[SECTION.COMPARISON.SUBTITLE]
+"Two ways of walking with SSA: one for working locally, one for seeing the web."
+
+[SECTION.COMPARISON.TABLE.HEADER.LEFT]
+"Tool Mode"
+
+[SECTION.COMPARISON.TABLE.HEADER.RIGHT]
+"Stewardship Mode"
+
+[SECTION.COMPARISON.ROW_1.LEFT_TITLE]
+"Focus"
+
+[SECTION.COMPARISON.ROW_1.LEFT_BODY]
+"One tool, one flow, one household area at a time."
+
+[SECTION.COMPARISON.ROW_1.RIGHT_BODY]
+"Multiple domains – cooking, storehouse, garden, preservation, cleaning, feasts –
+seen together in one overview."
+
+[SECTION.COMPARISON.ROW_2.LEFT_TITLE]
+"View"
+
+[SECTION.COMPARISON.ROW_2.LEFT_BODY]
+"Simple, focused pages: plan meals, log storehouse, map one rhythm."
+
+[SECTION.COMPARISON.ROW_2.RIGHT_BODY]
+"Dashboards that show cycles, seasons, yields, and storehouse posture across the household."
+
+[SECTION.COMPARISON.ROW_3.LEFT_TITLE]
+"Season & cycle awareness"
+
+[SECTION.COMPARISON.ROW_3.LEFT_BODY]
+"Light hints: rhythm frequency, basic season windows, feast reminders near the tool."
+
+[SECTION.COMPARISON.ROW_3.RIGHT_BODY]
+"Deeper views: seasonal windows, dependency patterns, and stewardship insights."
+
+[SECTION.COMPARISON.ROW_4.LEFT_TITLE]
+"Storehouse connection"
+
+[SECTION.COMPARISON.ROW_4.LEFT_BODY]
+"Flows can be marked as drawing from or feeding into the storehouse, but you
+stay within the single tool."
+
+[SECTION.COMPARISON.ROW_4.RIGHT_BODY]
+"Storehouse posture and coverage are visible across domains and seasons, with insights and alerts."
+
+[SECTION.COMPARISON.ROW_5.LEFT_TITLE]
+"Who might prefer this"
+
+[SECTION.COMPARISON.ROW_5.LEFT_BODY]
+"Householders who want to start gently, focus on one rhythm, or are in a busy or
+rebuilding season."
+
+[SECTION.COMPARISON.ROW_5.RIGHT_BODY]
+"Householders who are ready to see how garden, animals, preservation, meals, and
+cleaning all speak to each other."
+
+
+6. SECTION: EXAMPLES OF TOOL MODE IN ACTION
+-------------------------------------------
+
+[SECTION.EXAMPLES.TITLE]
+"Examples of Tool Mode in action"
+
+[SECTION.EXAMPLES.BODY]
+"Here are a few ways a householder might use Tool Mode without stepping into
+full Stewardship Mode yet."
+
+[SECTION.EXAMPLES.EXAMPLE_1.TITLE]
+"Example 1 – Weeknight meal rhythm"
+
+[SECTION.EXAMPLES.EXAMPLE_1.BODY]
+"You open the Cooking & Meal Rhythm tool and shape a simple flow:
+
+- three dinners you can repeat weekly,
+- a note that this draws from grain, beans, and frozen vegetables,
+- a time window: evenings on weekdays.
+
+You use SessionRunner to walk through cooking steps when you need them.
+You do not have to connect this to the garden or storehouse yet."
+
+[SECTION.EXAMPLES.EXAMPLE_2.TITLE]
+"Example 2 – Storehouse snapshot"
+
+[SECTION.EXAMPLES.EXAMPLE_2.BODY]
+"You open the Storehouse Snapshot & Planning tool and record what you have
+in grains, beans, oil, and sweeteners. SSA estimates how many weeks of meals
+this might support at your current rhythm. You don’t have to run any other
+tools to benefit from this clarity."
+
+[SECTION.EXAMPLES.EXAMPLE_3.TITLE]
+"Example 3 – One room, one cleaning cycle"
+
+[SECTION.EXAMPLES.EXAMPLE_3.BODY]
+"You open the Cleaning & Care Cycle tool and focus on a single room:
+the kitchen or the main bathroom. You lay out a gentle rhythm that fits your
+energy for this season. You do not need to design a whole-house cleaning plan."
+
+[SECTION.EXAMPLES.EXAMPLE_4.TITLE]
+"Example 4 – A single feast"
+
+[SECTION.EXAMPLES.EXAMPLE_4.BODY]
+"You open the Feast & Gathering Planner and shape one feast:
+
+- approximate date,
+- menu ideas,
+- how heavily it will draw from the storehouse.
+
+SSA can remind you as the feast approaches, even if you never turn on
+the full Stewardship overview."
+
+
+7. SECTION: WHEN MIGHT YOU CONSIDER STEWARDSHIP MODE?
+-----------------------------------------------------
+
+[SECTION.WHEN_STEWARDSHIP.TITLE]
+"When might you consider Stewardship Mode?"
+
+[SECTION.WHEN_STEWARDSHIP.BODY]
+"Stewardship Mode becomes helpful when you start to wonder how your different
+flows are speaking to each other."
+
+[SECTION.WHEN_STEWARDSHIP.SIGN_1.TITLE]
+"You feel many rhythms forming"
+
+[SECTION.WHEN_STEWARDSHIP.SIGN_1.BODY]
+"If you have several cooking flows, garden plans, preservation sessions, and
+cleaning cycles, it may be time to see them together."
+
+[SECTION.WHEN_STEWARDSHIP.SIGN_2.TITLE]
+"You want to guard the storehouse more intentionally"
+
+[SECTION.WHEN_STEWARDSHIP.SIGN_2.BODY]
+"When you want to see how feasts, daily meals, enterprise, and mutual aid are
+drawing from provision, Stewardship Mode can show where the storehouse leans."
+
+[SECTION.WHEN_STEWARDSHIP.SIGN_3.TITLE]
+"You want insights across domains"
+
+[SECTION.WHEN_STEWARDSHIP.SIGN_3.BODY]
+"Stewardship Mode lets SSA say things like: ‘Your garden and storehouse patterns
+suggest this is a good season for a small preservation flow,’ or ‘This enterprise
+cycle may be pulling heavily from your storehouse before a feast.’"
+
+
+8. SECTION: FAQ SNIPPETS
+------------------------
+
+[SECTION.FAQ.TITLE]
+"Questions about Tool Mode"
+
+[SECTION.FAQ.Q1.QUESTION]
+"Do I lose anything by staying in Tool Mode?"
+
+[SECTION.FAQ.Q1.ANSWER]
+"No. Your flows, rhythms, and snapshots are fully useful on their own.
+SSA stores them in a way that can be connected later if you choose Stewardship Mode."
+
+[SECTION.FAQ.Q2.QUESTION]
+"Can I switch between modes?"
+
+[SECTION.FAQ.Q2.ANSWER]
+"Yes. Mode is about how SSA presents information to you. Your underlying household
+data remains the same. You can move between Tool Mode and Stewardship Mode as
+your season of life changes."
+
+[SECTION.FAQ.Q3.QUESTION]
+"Do I have to set up every domain to use Tool Mode?"
+
+[SECTION.FAQ.Q3.ANSWER]
+"No. You can use just one tool for as long as you like. For example, you could
+use only the Cooking & Meal Rhythm tool or only the Storehouse Snapshot tool."
+
+[SECTION.FAQ.Q4.QUESTION]
+"Does Tool Mode still use sessions and timers?"
+
+[SECTION.FAQ.Q4.ANSWER]
+"Yes. You can still start a SessionRunner cycle from within a tool to walk
+through a flow step by step with timers, cues, and checkpoints."
+
+[SECTION.FAQ.Q5.QUESTION]
+"Is Tool Mode less ‘serious’ than Stewardship Mode?"
+
+[SECTION.FAQ.Q5.ANSWER]
+"Not at all. It’s simply a different way of walking: one step, one rhythm,
+one area at a time. Some households may live in Tool Mode for years and that
+is completely valid."
+
+
+9. CLOSING CALL-TO-ACTION
+-------------------------
+
+[SECTION.CLOSING.TITLE]
+"Begin where your hands already are"
+
+[SECTION.CLOSING.BODY]
+"Whether you are planning a single feast, shaping a weeknight meal rhythm,
+or logging your first storehouse snapshot, Tool Mode lets you start gently.
+SSA will remember what you build and is ready to weave it into a wider
+stewardship view whenever your season allows."
+
+[SECTION.CLOSING.CTA_PRIMARY]
+"Open a tool and shape one rhythm"
+
+[SECTION.CLOSING.CTA_SECONDARY]
+"Learn about Stewardship Mode"
+
+
+10. TODO HOOKS FOR FUTURE INTEGRATION
+-------------------------------------
+
+// TODO[links]:
+// - Link CTA buttons to actual Tool Mode pages (cooking, storehouse, garden,
+//   cleaning, feasts) and to the Stewardship Mode info page.
+
+// TODO[seasonal-logic]:
+// - Optionally tailor this page’s helper text based on the current season
+//   (e.g., more examples for planting vs lean season vs feast season).
+
+// TODO[insights]:
+// - Add dynamic “Example insights you could see later” section when
+//   insights engines are active, using real sample data.
+
+// TODO[progression]:
+// - Optionally surface gentle hints like “You have several flows in multiple
+//   domains; Stewardship Mode may help” only when progression thresholds are met.
+
+END OF TOOL MODE INFO PAGE SPEC
+===============================================================================

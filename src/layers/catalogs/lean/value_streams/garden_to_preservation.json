@@ -1,0 +1,254 @@
+{
+  "id": "lean.vs.garden_to_preservation",
+  "domain": "lean",
+  "kind": "value_stream",
+  "title": "Value Stream: Garden Yield → Preservation",
+  "intentTags": [
+    "lean:value_stream"
+  ],
+  "inputs": [
+    {
+      "key": "demandModelRef",
+      "label": "Demand model ref",
+      "type": "string"
+    },
+    {
+      "key": "inventorySnapshot",
+      "label": "Inventory snapshot",
+      "type": "object"
+    },
+    {
+      "key": "season",
+      "label": "Season",
+      "type": "string"
+    },
+    {
+      "key": "householdSize",
+      "label": "Household size",
+      "type": "number",
+      "default": 4
+    }
+  ],
+  "outputs": [
+    {
+      "key": "stageMetrics",
+      "label": "Stage metrics",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "bottlenecks",
+      "label": "Detected bottlenecks",
+      "type": "array",
+      "required": true
+    }
+  ],
+  "constraints": [
+    "measureFirst",
+    "respectQuietHours",
+    "nonPunitiveMetrics"
+  ],
+  "steps": [],
+  "kpis": [
+    {
+      "key": "leadTime",
+      "label": "Total lead time",
+      "direction": "down",
+      "unit": "min"
+    },
+    {
+      "key": "touchTime",
+      "label": "Total touch time",
+      "direction": "down",
+      "unit": "min"
+    },
+    {
+      "key": "firstPassYield",
+      "label": "First-pass yield",
+      "direction": "up",
+      "unit": "%"
+    },
+    {
+      "key": "reworkRate",
+      "label": "Rework rate",
+      "direction": "down",
+      "unit": "%"
+    }
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial Lean Six Sigma catalog."
+      }
+    ]
+  },
+  "valueStream": {
+    "stages": [
+      {
+        "id": "stage_harvest_signal",
+        "title": "Harvest Signal + Forecast",
+        "inputs": [
+          "season",
+          "gardenPlan"
+        ],
+        "outputs": [
+          "yieldForecast"
+        ],
+        "commonDelays": [
+          "missing_forecast",
+          "weather_window_uncertainty"
+        ],
+        "kpis": [
+          {
+            "key": "forecastAccuracy",
+            "label": "Forecast accuracy",
+            "direction": "up",
+            "unit": "%"
+          },
+          {
+            "key": "missedHarvestWindows",
+            "label": "Missed harvest windows",
+            "direction": "down",
+            "unit": "count"
+          }
+        ]
+      },
+      {
+        "id": "stage_sort_grade",
+        "title": "Sort + Grade",
+        "inputs": [
+          "harvestedProduce"
+        ],
+        "outputs": [
+          "useFresh",
+          "preserveNow",
+          "storehouseHold"
+        ],
+        "commonDelays": [
+          "no_sort_station",
+          "insufficient_containers"
+        ],
+        "kpis": [
+          {
+            "key": "sortTime",
+            "label": "Sort time",
+            "direction": "down",
+            "unit": "min"
+          },
+          {
+            "key": "damageRate",
+            "label": "Damage rate",
+            "direction": "down",
+            "unit": "%"
+          }
+        ]
+      },
+      {
+        "id": "stage_select_method",
+        "title": "Select Preservation Method",
+        "inputs": [
+          "preserveNow",
+          "equipment"
+        ],
+        "outputs": [
+          "preservationPlan"
+        ],
+        "commonDelays": [
+          "equipment_unavailable",
+          "unclear_priorities"
+        ],
+        "kpis": [
+          {
+            "key": "methodSelectionTime",
+            "label": "Method selection time",
+            "direction": "down",
+            "unit": "min"
+          }
+        ]
+      },
+      {
+        "id": "stage_preserve",
+        "title": "Preserve",
+        "inputs": [
+          "preservationPlan"
+        ],
+        "outputs": [
+          "preservedGoods"
+        ],
+        "commonDelays": [
+          "batch_size_too_large",
+          "waiting_for_jars_space"
+        ],
+        "kpis": [
+          {
+            "key": "firstPassYield",
+            "label": "First-pass yield",
+            "direction": "up",
+            "unit": "%"
+          },
+          {
+            "key": "reworkRate",
+            "label": "Rework rate",
+            "direction": "down",
+            "unit": "%"
+          }
+        ]
+      },
+      {
+        "id": "stage_store_label",
+        "title": "Store + Label + Update Inventory",
+        "inputs": [
+          "preservedGoods"
+        ],
+        "outputs": [
+          "updatedInventory",
+          "storageAssignments"
+        ],
+        "commonDelays": [
+          "missing_labels",
+          "no_storage_space"
+        ],
+        "kpis": [
+          {
+            "key": "labelCompliance",
+            "label": "Label compliance",
+            "direction": "up",
+            "unit": "%"
+          },
+          {
+            "key": "timeToShelve",
+            "label": "Time to shelve",
+            "direction": "down",
+            "unit": "min"
+          }
+        ]
+      }
+    ],
+    "commonDelays": [
+      "handoff_wait",
+      "missing_inputs",
+      "equipment_unavailable"
+    ],
+    "handoffs": [
+      "household",
+      "storehouse",
+      "garden",
+      "animals",
+      "preservation"
+    ]
+  },
+  "links": {
+    "affectsPatterns": [
+      "pat.homestead.garden_led",
+      "pat.meals.preservation_first",
+      "pat.storehouse.root_cellar_optimizer"
+    ],
+    "suggestsStandardWork": [
+      "lean.sw.seasonal_preservation_push"
+    ],
+    "taktModelRef": "lean.takt.household_meal_takt"
+  }
+}

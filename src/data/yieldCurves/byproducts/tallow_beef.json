@@ -1,0 +1,350 @@
+{
+  "$schema": "../../schemas/byproduct.schema.json",
+  "version": "2025-10-31T16:05:00-05:00",
+  "meta": {
+    "id": "tallow_beef",
+    "title": "Tallow – Beef (Rendered Fat Curves → Storehouse Oils/Condiments)",
+    "description": "Byproduct profile for capturing, rendering, and storing beef fat as tallow from clean, Torah-acceptable slaughter/butchery sessions. Excludes fat from around the kidneys/suet line. Feeds storehouse stock planning (cooking fats, soapmaking, candle fuel), cleaning/sanitation sessions for rendering equipment, garden/compost routing for scraps, and reverse-generation (how much tallow you need → how many beef animals / trim weight you must process).",
+    "source": "suka-smart-assistant",
+    "tags": [
+      "byproduct",
+      "tallow",
+      "beef",
+      "bovine",
+      "storehouse",
+      "cooking-fat",
+      "soapmaking",
+      "candle",
+      "butchery",
+      "torah-compliant"
+    ],
+    "torahCompliance": {
+      "uncleanSpeciesExcluded": true,
+      "notes": "Use only from clean species (bovine). EXCLUDE kidney/suet fat per your standard. Keep lines separate from pork/unclean."
+    }
+  },
+  "ui": {
+    "layout": "cards/timeline",
+    "hints": {
+      "primaryCTA": "Generate Tallow Rendering Session",
+      "secondaryCTA": "Save as Favorite",
+      "tertiaryCTA": "Reverse-generate from Storehouse Oils Target",
+      "showSeasonalityBadge": false,
+      "groupBy": [
+        "butcheryBatchId",
+        "renderStep"
+      ]
+    },
+    "badges": [
+      { "text": "Byproduct", "color": "amber" },
+      { "text": "Cooking Fat", "color": "yellow" },
+      { "text": "Torah-compliant", "color": "emerald" }
+    ]
+  },
+  "orchestration": {
+    "bus": "window.__suka?.eventBus",
+    "emitOnLoad": [
+      "byproduct.curve.loaded",
+      "byproduct.tallow.loaded"
+    ],
+    "listen": [
+      "butchery.session.completed",
+      "butchery.session.request",
+      "storehouse.goal.request",
+      "garden.session.request",
+      "cleaning.session.request",
+      "automation.schedule.request",
+      "inventory.restock.request"
+    ],
+    "sharedScopes": [
+      "animals",
+      "butchery",
+      "storehouse",
+      "meals",
+      "cleaning",
+      "garden"
+    ]
+  },
+  "engines": {
+    "primary": "byproductEngine",
+    "supports": [
+      "storehouseGoalEngine",
+      "mealPlanEngine",
+      "cleaningSessionEngine",
+      "gardenQueueEngine",
+      "animalSessionEngine"
+    ],
+    "notes": "When beef butchery is done, suggest ‘Render Tallow Now’ with cleaning pre/post. Also able to reverse from storehouse cooking-fat target → request more rendering → request more butchery."
+  },
+  "reverse": {
+    "generateFrom": [
+      "storehouse.targets.cooking-fats",
+      "storehouse.targets.soapmaking",
+      "storehouse.targets.candle-fuel",
+      "community.cooking-fat-pool",
+      "butchery.plan.batch"
+    ],
+    "strategies": [
+      {
+        "id": "from-storehouse-cooking-fat-target",
+        "title": "Back into rendering sessions from cooking-fats target",
+        "input": {
+          "tallowKgNeeded": 30,
+          "preferredJarSizeKg": 1
+        },
+        "output": {
+          "renderSessions": 3,
+          "expectedTallowPerSessionKg": 10,
+          "emit": [
+            "automation.schedule.request",
+            "storehouse.plan.generated"
+          ]
+        }
+      },
+      {
+        "id": "from-soapmaking-batch",
+        "title": "Back into tallow from soapmaking / salve batches",
+        "input": {
+          "soapBatchesPerMonth": 2,
+          "tallowPerBatchKg": 3
+        },
+        "output": {
+          "requiredMonthlyTallowKg": 6,
+          "suggestedRenderSessions": 1,
+          "emit": [
+            "cleaning.session.request",
+            "storehouse.plan.generated"
+          ]
+        }
+      },
+      {
+        "id": "from-butchery-batch",
+        "title": "Back into tallow from planned beef butchery",
+        "input": {
+          "headCount": 2,
+          "avgDressedWeightKg": 260
+        },
+        "output": {
+          "estimatedRawFatKg": 36,
+          "usableTrimFatKg": 25,
+          "renderedTallowKg": 17,
+          "emit": [
+            "cleaning.session.request",
+            "inventory.restock.request"
+          ]
+        }
+      }
+    ]
+  },
+  "byproduct": {
+    "category": "cooking-fat",
+    "subCategory": "tallow-beef",
+    "excludeFromMealPlanner": false,
+    "yieldModel": {
+      "type": "bovine-trim-fat-no-suet",
+      "formula": "trimFatKg * 0.7",
+      "notes": "We are excluding kidney/suet fat. Average trim/render fat yields ~70% finished, clean tallow."
+    },
+    "examples": [
+      {
+        "label": "Single beef with good trim (no kidney/suet)",
+        "trimFatKg": 25,
+        "renderedTallowKg": 17.5
+      },
+      {
+        "label": "Small quartered beef order",
+        "trimFatKg": 8,
+        "renderedTallowKg": 5.6
+      }
+    ]
+  },
+  "storehouse": {
+    "targets": {
+      "cooking_tallow_kg": 20,
+      "soapmaking_tallow_kg": 6,
+      "candle_tallow_kg": 4,
+      "community_trade_bucket_kg": 5
+    },
+    "grocerySectionsInspiration": [
+      "Oils & Cooking Fats",
+      "Condiments & Sauces (tallow mayo/ghee-adjacent)",
+      "Prepared / Pantry Staples",
+      "Homestead / Soapmaking",
+      "Emergency / Candle & Fuel"
+    ],
+    "autoPlan": {
+      "enabled": true,
+      "emit": [
+        "storehouse.plan.generated",
+        "inventory.restock.request"
+      ]
+    }
+  },
+  "meals": {
+    "recipes": [
+      {
+        "id": "tallow-roast-veg",
+        "title": "Roasted Vegetables in Tallow",
+        "linksTo": [
+          "/meals/dinner",
+          "/inventory/fats",
+          "/garden/harvest"
+        ]
+      },
+      {
+        "id": "tallow-fry-day",
+        "title": "Tallow Fry Session",
+        "emit": "cooking.session.request"
+      }
+    ],
+    "autoSession": {
+      "everyDays": 7,
+      "emit": [
+        "meal.session.request",
+        "automation.schedule.request"
+      ]
+    }
+  },
+  "garden": {
+    "notes": "Tallow itself is not the garden input, but rendered scraps / non-food-grade portions can be routed to compost or to soapmaking water. This ties butchery to garden clean-up.",
+    "emit": [
+      "garden.session.request"
+    ]
+  },
+  "cleaning": {
+    "routines": [
+      {
+        "id": "render-station-post-run",
+        "title": "Rendering Station – Post Run Degrease",
+        "frequency": "PER_RUN",
+        "emit": "cleaning.session.request",
+        "tools": [
+          "degreaser",
+          "hot-water",
+          "towels"
+        ]
+      },
+      {
+        "id": "stockpots-weekly",
+        "title": "Rendering Pots/Dehydrator Weekly Deep Clean",
+        "frequency": "WEEKLY",
+        "emit": "cleaning.session.request"
+      }
+    ],
+    "sabbathGuard": true
+  },
+  "animals": {
+    "acquisition": {
+      "allowedSpecies": [
+        "cattle",
+        "bovine"
+      ],
+      "disallowedSpecies": [
+        "pig",
+        "swine"
+      ],
+      "notes": "Torah-compliant tallow line: no pork/unclean fats in this stream. If you process mixed species, run separate days and trigger extra cleaning."
+    },
+    "care": {
+      "emit": [
+        "animal.care.session.request"
+      ]
+    },
+    "butchery": {
+      "notes": "Add ‘fat trim separation (no kidney/suet)’ as a required step before rendering.",
+      "emit": [
+        "butchery.session.request"
+      ]
+    }
+  },
+  "processing": {
+    "steps": [
+      {
+        "step": 1,
+        "id": "trim-fat",
+        "title": "Separate renderable fat (exclude kidney/suet)",
+        "emit": [
+          "cleaning.session.request"
+        ]
+      },
+      {
+        "step": 2,
+        "id": "low-and-slow-render",
+        "title": "Render Fat Low & Slow",
+        "emit": [
+          "automation.schedule.request"
+        ]
+      },
+      {
+        "step": 3,
+        "id": "filter-and-jar",
+        "title": "Filter, Jar, Label",
+        "emit": [
+          "inventory.restock.request",
+          "storehouse.plan.generated"
+        ]
+      }
+    ]
+  },
+  "inventory": {
+    "productId": "byproduct-tallow-beef",
+    "unit": "kg",
+    "trackLots": true,
+    "shelfLifeDays": 365
+  },
+  "favoriteSessions": [
+    {
+      "id": "fav-render-after-beef",
+      "title": "Render Tallow After Beef Butchery",
+      "domain": "butchery/byproduct",
+      "schedule": "RRULE:FREQ=DAILY;BYHOUR=16;BYMINUTE=0;BYSECOND=0",
+      "sabbathGuard": true
+    },
+    {
+      "id": "fav-weekly-tallow-storehouse",
+      "title": "Weekly Tallow → Storehouse & Labeling",
+      "domain": "storehouse/byproduct",
+      "schedule": "RRULE:FREQ=WEEKLY;BYDAY=MO;BYHOUR=11;BYMINUTE=0;BYSECOND=0"
+    }
+  ],
+  "scheduleTemplates": [
+    {
+      "id": "tallow-after-each-butchery",
+      "title": "After Each Beef Butchery → Render + Clean",
+      "rrules": [
+        "RRULE:FREQ=DAILY"
+      ],
+      "options": {
+        "triggerEvents": [
+          "butchery.session.completed"
+        ],
+        "sabbathGuard": true
+      }
+    }
+  ],
+  "userProfiles": {
+    "allowUserOwnedSchedules": true,
+    "allowUserOwnedFavorites": true,
+    "allowExportShare": true,
+    "shareFormats": [
+      "json",
+      "suka-plan",
+      "calendar-rrule"
+    ]
+  },
+  "events": {
+    "emits": [
+      "byproduct.session.request",
+      "automation.schedule.request",
+      "storehouse.plan.generated",
+      "garden.session.request",
+      "cleaning.session.request",
+      "inventory.restock.request"
+    ],
+    "consumes": [
+      "butchery.session.completed",
+      "storehouse.targets.changed",
+      "garden.plan.changed"
+    ]
+  }
+}

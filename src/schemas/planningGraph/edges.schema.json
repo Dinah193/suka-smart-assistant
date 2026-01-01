@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "planningGraph.edges.schema.json",
+  "title": "Planning Graph Edges Schema",
+  "description": "Schema for Planning Graph edge definitions used by SSA Planning Graph.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "graphId", "label", "version", "updatedAt", "edges"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional JSON Schema URI for this document."
+    },
+    "id": {
+      "type": "string",
+      "description": "Identifier for this edge set document (e.g., 'planningGraphEdges')."
+    },
+    "graphId": {
+      "type": "string",
+      "description": "Logical ID of the graph this edge list belongs to (e.g., 'planningGraph')."
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable label for this edge set."
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version string for this edge definition document (e.g., '1.0.0')."
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp for when this edge document was last updated."
+    },
+    "edges": {
+      "type": "array",
+      "description": "List of directed edges between Planning Graph nodes.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "from", "to", "relation", "weight"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique edge identifier, usually 'from->to'."
+          },
+          "from": {
+            "type": "string",
+            "description": "Source node ID (must match a node.id in planningGraph.nodes.json)."
+          },
+          "to": {
+            "type": "string",
+            "description": "Target node ID (must match a node.id in planningGraph.nodes.json)."
+          },
+          "relation": {
+            "type": "string",
+            "description": "Relationship type between nodes.",
+            "enum": [
+              "feeds-into",
+              "cross-link"
+            ]
+          },
+          "weight": {
+            "type": "number",
+            "description": "Relative importance/strength of this edge for flow and recommendation logic."
+          },
+          "meta": {
+            "type": "object",
+            "description": "Free-form metadata for this edge, such as mapping outputs to inputs or notes.",
+            "additionalProperties": true,
+            "properties": {
+              "via": {
+                "type": "string",
+                "description": "Optional: name of the output field on the source node."
+              },
+              "into": {
+                "type": "string",
+                "description": "Optional: name of the input field on the target node."
+              },
+              "notes": {
+                "type": "string",
+                "description": "Optional: human-readable notes about this edge."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

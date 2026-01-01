@@ -1,0 +1,160 @@
+{
+  "provider": "aldi",
+  "circularId": "aldi-2025-10-week44",
+  "title": "ALDI Weekly Ad • Week of Oct 27 – Nov 2, 2025",
+  "period": { "fromISO": "2025-10-27T05:00:00Z", "toISO": "2025-11-02T23:59:59Z" },
+  "meta": {
+    "source": "api",
+    "downloadedAtISO": "2025-10-27T15:30:00Z",
+    "timezone": "America/New_York",
+    "notes": "Fixture for adapter + OCR flow; map to pricebook + cycle analyzer."
+  },
+
+  "storeScope": [
+    { "storeId": "aldi-0123", "name": "ALDI #123" }
+  ],
+
+  "userContext": {
+    "pinnedSchedules": [
+      { "type": "schedule", "id": "sched-grocery-wed", "name": "Wednesday Grocery Run" }
+    ]
+  },
+
+  "items": [
+    {
+      "sku": "A-12345",
+      "upc": "012345678905",
+      "title": "Friendly Farms Whole Milk 1 gal",
+      "brand": "Friendly Farms",
+      "categoryPath": ["Grocery", "Dairy", "Milk"],
+      "package": { "quantity": 1, "unit": "gal", "normalized": { "quantity": 3785.41, "unit": "ml" } },
+      "price": { "amount": 3.29, "currency": "USD" },
+      "unitPrice": { "unit": "per_l", "amount": 0.87 },
+      "channel": "in_store",
+      "promo": {
+        "type": "weekly_ad",
+        "tags": ["Everyday Low Price"],
+        "limitPerCustomer": 4,
+        "mixAndMatchGroup": "dairy-core"
+      },
+      "candidateCoupons": [
+        { "id": "cpn-abc123", "group": "mfg" },
+        { "id": "cpn-milk-unitcap-025perL", "group": "store" }
+      ],
+      "cycleHints": { "pattern": "weekly" },
+      "images": [
+        "https://fixtures.suka.local/img/aldi/milk-1gal-front.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Friendly Farms", "Whole Milk", "1 GAL"],
+        "regex": "Milk\\s*1\\s*gal"
+      }
+    },
+
+    {
+      "sku": "A-55678",
+      "upc": "041693000868",
+      "title": "Beefsteak Tomato Seeds",
+      "brand": "Garden Classics",
+      "categoryPath": ["Garden", "Seeds", "Vegetables"],
+      "package": { "quantity": 1, "unit": "pk", "normalized": { "quantity": 1, "unit": "ct" } },
+      "price": { "amount": 0.99, "currency": "USD" },
+      "channel": "in_store",
+      "promo": {
+        "type": "seasonal_clearance",
+        "tags": ["End of Season", "Limited Stock"]
+      },
+      "candidateCoupons": [
+        { "id": "cpn-seeds-fall-BOGOF", "group": "store", "activeDuringWeek": false }
+      ],
+      "cycleHints": { "pattern": "seasonal" },
+      "images": [
+        "https://fixtures.suka.local/img/aldi/seeds-beefsteak.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Beefsteak", "Tomato Seeds"],
+        "regex": "Tomato\\s*Seeds"
+      }
+    },
+
+    {
+      "sku": "A-90111",
+      "title": "Baker's Corner All-Purpose Flour 10 lb",
+      "brand": "Baker's Corner",
+      "categoryPath": ["Grocery", "Baking", "Flour"],
+      "package": { "quantity": 10, "unit": "lb", "normalized": { "quantity": 4535.92, "unit": "g" } },
+      "price": { "amount": 4.99, "currency": "USD" },
+      "unitPrice": { "unit": "per_g", "amount": 0.0011 },
+      "channel": "in_store",
+      "promo": {
+        "type": "weekly_ad",
+        "tags": ["Holiday Baking"],
+        "limitPerCustomer": 2
+      },
+      "candidateCoupons": [],
+      "cycleHints": { "pattern": "seasonal" },
+      "images": [
+        "https://fixtures.suka.local/img/aldi/flour-10lb.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["All-Purpose Flour", "10 LB"],
+        "regex": "Flour\\s*10\\s*lb"
+      }
+    },
+
+    {
+      "sku": "A-33421",
+      "title": "Frozen Waffles 24 ct",
+      "brand": "Homestead",
+      "categoryPath": ["Grocery", "Frozen", "Breakfast"],
+      "package": { "quantity": 24, "unit": "ct", "normalized": { "quantity": 24, "unit": "ct" } },
+      "price": { "amount": 7.99, "currency": "USD" },
+      "unitPrice": { "unit": "per_ct", "amount": 0.333 },
+      "channel": "in_store",
+      "promo": {
+        "type": "weekly_ad",
+        "tags": ["Family Size", "Freezer Staple"],
+        "mixAndMatchGroup": "frozen-breakfast"
+      },
+      "candidateCoupons": [
+        { "id": "cpn-waff-20pct", "group": "store", "provider": "sams", "note": "Cross-store test; should not match for ALDI." }
+      ],
+      "cycleHints": { "pattern": "biweekly" },
+      "images": [
+        "https://fixtures.suka.local/img/aldi/waffles-24ct.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Waffles", "24 ct"],
+        "regex": "Waffles\\s*24"
+      }
+    },
+
+    {
+      "sku": "A-48002",
+      "upc": "001111222233",
+      "title": "SparkleClean Dish Soap 24 oz",
+      "brand": "SparkleClean",
+      "categoryPath": ["Household", "Cleaning", "Dish Soap"],
+      "package": { "quantity": 24, "unit": "oz", "normalized": { "quantity": 709.76, "unit": "ml" } },
+      "price": { "amount": 2.49, "currency": "USD" },
+      "unitPrice": { "unit": "per_ml", "amount": 0.0035 },
+      "channel": "in_store",
+      "promo": {
+        "type": "weekly_ad",
+        "tags": ["Household Essentials"]
+      },
+      "candidateCoupons": [
+        { "id": "cpn-house-1off5", "group": "basket", "threshold": { "amount": 5, "currency": "USD" } }
+      ],
+      "cycleHints": { "pattern": "monthly" },
+      "images": [
+        "https://fixtures.suka.local/img/aldi/dish-soap-24oz.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Dish Soap", "24 oz"],
+        "regex": "Dish\\s*Soap\\s*24\\s*oz"
+      },
+      "trustFlags": ["contains_sls", "fragrance"]
+    }
+  ]
+}

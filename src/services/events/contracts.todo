@@ -1,0 +1,221 @@
+{
+  "version": "1.0.0",
+  "module": "contracts",
+  "title": "Contracts & Agreements",
+  "ia": {
+    "nav": [
+      { "key": "contracts.home", "label": "Contracts", "icon": "FileText", "path": "/contracts", "placement": "primary" },
+      { "key": "contracts.templates", "label": "Templates", "icon": "Layers", "path": "/contracts/templates", "placement": "secondary" },
+      { "key": "contracts.drafts", "label": "Drafts", "icon": "DraftingCompass", "path": "/contracts/drafts", "placement": "secondary", "badgeFrom": "state.counts.drafts" },
+      { "key": "contracts.shared", "label": "Shared", "icon": "Users", "path": "/contracts/shared", "placement": "secondary" },
+      { "key": "contracts.settings", "label": "Settings", "icon": "Settings", "path": "/contracts/settings", "placement": "utility" }
+    ],
+    "routes": [
+      { "path": "/contracts", "component": "@/pages/contracts/ContractsHome.jsx", "title": "Contracts", "auth": "member" },
+      { "path": "/contracts/templates", "component": "@/pages/contracts/Templates.jsx", "title": "Contract Templates", "auth": "member" },
+      { "path": "/contracts/drafts", "component": "@/pages/contracts/Drafts.jsx", "title": "Drafts", "auth": "member" },
+      { "path": "/contracts/shared", "component": "@/pages/contracts/Shared.jsx", "title": "Shared Contracts", "auth": "member" },
+      { "path": "/contracts/:id", "component": "@/pages/contracts/ContractEditor.jsx", "title": "Edit Contract", "auth": "member" },
+      { "path": "/contracts/settings", "component": "@/pages/contracts/Settings.jsx", "title": "Contracts Settings", "auth": "admin" }
+    ]
+  },
+  "designSystem": {
+    "tokens": {
+      "radius": "1rem",
+      "elevation": { "card": "shadow-lg", "modal": "shadow-2xl" },
+      "gap": { "sm": "0.5rem", "md": "1rem", "lg": "1.5rem" }
+    },
+    "components": {
+      "button": {
+        "base": "btn btn-md rounded-2xl",
+        "variants": {
+          "primary": "btn-primary",
+          "secondary": "btn-secondary",
+          "ghost": "btn-ghost",
+          "danger": "btn-error"
+        },
+        "states": { "loading": "loading", "disabled": "btn-disabled", "success": "btn-success" }
+      },
+      "card": { "base": "rounded-2xl border border-base-200 bg-base-100 shadow-lg p-4" },
+      "empty": { "base": "text-base-content/60 flex flex-col items-center justify-center gap-2 p-8" },
+      "toast": { "success": "alert alert-success", "error": "alert alert-error", "info": "alert alert-info" },
+      "confirm": { "modal": "modal modal-open", "panel": "modal-box rounded-2xl" }
+    }
+  },
+  "emptyStates": {
+    "contracts.home": {
+      "title": "No contracts yet",
+      "subtitle": "Start from a template or generate one from your current plans.",
+      "primaryAction": { "label": "New Contract", "action": "ui.createContractFromTemplate" },
+      "secondary": [
+        { "label": "Browse Templates", "action": "ui.goto", "to": "/contracts/templates" },
+        { "label": "Generate From Meal Plan", "action": "flow.generate.contract.meal-support" }
+      ]
+    },
+    "contracts.templates": {
+      "title": "No templates loaded",
+      "subtitle": "Add community, family, or system templates.",
+      "primaryAction": { "label": "Import Templates", "action": "ui.openTemplateImporter" }
+    },
+    "contracts.drafts": {
+      "title": "No drafts in progress",
+      "subtitle": "Your in-progress contracts will appear here.",
+      "primaryAction": { "label": "Create Draft", "action": "ui.createBlankContract" }
+    }
+  },
+  "undo": {
+    "ttlMs": 120000,
+    "actions": {
+      "contracts.create": { "undoEvent": "contracts.deleted", "ui": { "label": "Contract created", "undoLabel": "Undo create" } },
+      "contracts.delete": { "undoEvent": "contracts.restored", "ui": { "label": "Contract deleted", "undoLabel": "Undo delete" } },
+      "contracts.share": { "undoEvent": "contracts.share.revoke", "ui": { "label": "Shared with others", "undoLabel": "Undo share" } },
+      "contracts.publish": { "undoEvent": "contracts.unpublish", "ui": { "label": "Published", "undoLabel": "Undo publish" } }
+    }
+  },
+  "nextBestAction": {
+    "afterSuccess": [
+      { "when": "event == 'contracts.create.success'", "actions": [{ "type": "ui.suggest", "title": "Add Signers", "desc": "Invite family or community members to sign", "cta": { "label": "Add signers", "action": "ui.openSignerPanel" } }, { "type": "ui.suggest", "title": "Set Review Deadline", "desc": "Keep things moving with a due date", "cta": { "label": "Set deadline", "action": "ui.openDeadlinePicker" } }] },
+      { "when": "event == 'contracts.publish.success'", "actions": [{ "type": "ui.suggest", "title": "Notify Stakeholders", "desc": "Send a copy to relevant agents and people", "cta": { "label": "Notify now", "action": "flow.notifyStakeholders" } }] },
+      { "when": "event == 'contracts.sign.success' && context.missingSigners > 0", "actions": [{ "type": "ui.suggest", "title": "Remind remaining signers", "desc": "Automated reminder to pending signers", "cta": { "label": "Send reminders", "action": "flow.sendSignerReminders" } }] }
+    ]
+  },
+  "sharing": {
+    "modes": [
+      { "key": "private", "label": "Private (household only)" },
+      { "key": "family", "label": "Family Sharing", "desc": "Select households in the family network" },
+      { "key": "community", "label": "Community Planning", "desc": "Share to select circles/roles" }
+    ],
+    "capabilities": {
+      "coPlan": true,
+      "roleScopes": ["Householder", "Agrarian", "Cook", "Cleaner", "AnimalKeeper", "Gardener", "Finance", "Defense"],
+      "permissions": ["view", "comment", "edit", "sign", "publish", "revoke"]
+    },
+    "defaults": { "mode": "family", "permissions": ["view", "comment"] }
+  },
+  "forecasting": {
+    "autoNotifyAgrarian": true,
+    "channels": ["inbox", "email"],
+    "payloads": [
+      { "source": "meal.plan", "topic": "garden.plan.forecasted", "include": ["produceDemand", "herbsDemand", "grainDemand", "preservationQueue"] },
+      { "source": "batch.cooking", "topic": "animal.plan.forecasted", "include": ["offalUsage", "fatRenderNeeds", "sausageRuns", "cureSchedules"] },
+      { "source": "cleaning.routines", "topic": "cleaning.plan.forecasted", "include": ["supplyNeeds", "wasteSchedule", "waterUseWindows"] }
+    ]
+  },
+  "flows": [
+    {
+      "key": "flow.generate.contract.meal-support",
+      "label": "Generate Meal Support Contract",
+      "steps": [
+        { "type": "collect", "id": "context", "fields": ["householdId", "timeframe", "targetMealsPerWeek"] },
+        { "type": "fetch", "id": "mealData", "from": "MealPlanStore.getByHousehold", "argsFrom": "context" },
+        { "type": "transform", "id": "requirements", "fn": "Contracts.mappers.mealSupportRequirements(mealData)" },
+        { "type": "create", "id": "contractDraft", "template": "family/meal-support.v1", "dataFrom": "requirements" },
+        { "type": "emit", "event": "contracts.create", "payloadFrom": "contractDraft" },
+        { "type": "ui", "id": "openEditor", "action": "ui.openContractEditor", "argsFrom": "contractDraft" }
+      ],
+      "successEvent": "contracts.create.success",
+      "failureEvent": "contracts.create.error"
+    },
+    {
+      "key": "flow.generate.contract-animal-care",
+      "label": "Generate Animal Care Contract",
+      "steps": [
+        { "type": "collect", "id": "context", "fields": ["householdId", "species", "seasonRange"] },
+        { "type": "fetch", "id": "animalData", "from": "AnimalStore.requirementsForSeason", "argsFrom": "context" },
+        { "type": "create", "id": "contractDraft", "template": "family/animal-care.v1", "dataFrom": "animalData" },
+        { "type": "emit", "event": "contracts.create", "payloadFrom": "contractDraft" },
+        { "type": "ui", "action": "ui.openContractEditor", "argsFrom": "contractDraft" }
+      ]
+    },
+    {
+      "key": "flow.contract.publish",
+      "label": "Publish Contract",
+      "confirm": { "title": "Publish contract?", "body": "All signers will be notified.", "confirmLabel": "Publish" },
+      "steps": [
+        { "type": "validate", "id": "signers", "fn": "Contracts.validators.hasSigners" },
+        { "type": "emit", "event": "contracts.publish.requested" },
+        { "type": "persist", "id": "save", "fn": "Contracts.publish" },
+        { "type": "emit", "event": "contracts.publish.success" },
+        { "type": "toast", "style": "success", "message": "Contract published" }
+      ],
+      "undoKey": "contracts.publish"
+    },
+    {
+      "key": "flow.notifyStakeholders",
+      "label": "Notify Stakeholders",
+      "steps": [
+        { "type": "gather", "id": "targets", "fn": "Contracts.stakeholders.resolveTargets" },
+        { "type": "send", "id": "dispatch", "fn": "Notification.send", "argsFrom": "targets" },
+        { "type": "emit", "event": "contracts.notify.sent" },
+        { "type": "toast", "style": "info", "message": "Stakeholders notified" }
+      ]
+    },
+    {
+      "key": "flow.sendSignerReminders",
+      "label": "Send Signer Reminders",
+      "steps": [
+        { "type": "gather", "id": "pending", "fn": "Contracts.signers.pending" },
+        { "type": "send", "id": "remind", "fn": "Notification.remindSigners", "argsFrom": "pending" },
+        { "type": "emit", "event": "contracts.signers.reminded" },
+        { "type": "toast", "style": "info", "message": "Reminders sent" }
+      ]
+    }
+  ],
+  "events": {
+    "listen": [
+      { "on": "recipes.consolidated", "do": [{ "type": "ui.badge.bump", "key": "contracts.drafts" }, { "type": "suggest", "flow": "flow.generate.contract.meal-support" }] },
+      { "on": "inventory.updated", "do": [{ "type": "compute", "fn": "Contracts.impact.inventory" }, { "type": "ui.toast", "style": "info", "message": "Inventory updated — consider publishing a supply contract" }] },
+      { "on": "calendar.synced", "do": [{ "type": "refresh", "target": "ContractsHome.widgets.deadlines" }] },
+      { "on": "mealplan.created", "do": [{ "type": "suggest", "flow": "flow.generate.contract.meal-support" }, { "type": "emit", "event": "garden.plan.forecasted" }] },
+      { "on": "batch.started", "do": [{ "type": "emit", "event": "animal.plan.forecasted" }] },
+      { "on": "garden.plan.forecasted", "do": [{ "type": "notify", "role": "Agrarian", "channel": "inbox" }] },
+      { "on": "animal.plan.forecasted", "do": [{ "type": "notify", "role": "Agrarian", "channel": "inbox" }] },
+      { "on": "cleaning.plan.forecasted", "do": [{ "type": "notify", "role": "Cleaner", "channel": "inbox" }] }
+    ],
+    "emitOnUI": [
+      { "ui": "ContractsEditor.Save", "emit": "contracts.save.requested" },
+      { "ui": "ContractsEditor.Share", "emit": "contracts.share.requested" },
+      { "ui": "ContractsEditor.Publish", "emit": "contracts.publish.requested" },
+      { "ui": "ContractsEditor.Delete", "emit": "contracts.delete.requested" }
+    ]
+  },
+  "uiGlue": {
+    "widgets": [
+      { "key": "ContractsHome.widgets.deadlines", "source": "Contracts.deadlines.upcoming", "refreshOn": ["calendar.synced", "contracts.publish.success", "contracts.sign.success"] },
+      { "key": "ContractsHome.widgets.draftCount", "source": "Contracts.counts.drafts", "refreshOn": ["contracts.create.success", "contracts.delete.success", "contracts.publish.success"] }
+    ],
+    "badges": [
+      { "navKey": "contracts.drafts", "from": "Contracts.counts.drafts" },
+      { "navKey": "contracts.shared", "from": "Contracts.counts.shared" }
+    ]
+  },
+  "guards": {
+    "prePublish": [
+      "Contracts.validators.hasTitle",
+      "Contracts.validators.hasAtLeastOneClause",
+      "Contracts.validators.hasSigners",
+      "Contracts.validators.hasEffectiveDate"
+    ],
+    "preShare": ["Contracts.validators.hasTitle"]
+  },
+  "templates": [
+    { "id": "family/meal-support.v1", "label": "Meal Support (Family)", "category": "Family", "agents": ["mealPlanningAgent"], "placeholders": ["householdName", "timeframe", "mealsPerWeek", "shoppingAndPreservationDuties", "budgetLimits", "reviewCadence"] },
+    { "id": "family/animal-care.v1", "label": "Animal Care & Outputs", "category": "Family", "agents": ["animalAgent", "preservationAgent"], "placeholders": ["species", "careSchedule", "butcheryWindows", "outputs", "sharedLabor"] },
+    { "id": "community/garden-coop.v1", "label": "Garden Co-op Planning", "category": "Community", "agents": ["gardenAgent"], "placeholders": ["zones", "cropPlan", "laborShares", "harvestShares", "preservationRotations"] },
+    { "id": "household/cleaning-rotation.v1", "label": "Cleaning Rotation", "category": "Household", "agents": ["cleaningAgent"], "placeholders": ["areas", "cadence", "supplyList", "auditDay"] }
+  ],
+  "metrics": {
+    "kpis": [
+      { "id": "contracts.timeToSign", "label": "Time to Full Signature", "source": "Contracts.metrics.timeToSign" },
+      { "id": "contracts.onTimeRate", "label": "On-Time Execution Rate", "source": "Contracts.metrics.onTimeRate" }
+    ]
+  },
+  "accessibility": {
+    "aria": true,
+    "keyboardShortcuts": [
+      { "keys": ["Ctrl", "Shift", "N"], "action": "ui.createBlankContract" },
+      { "keys": ["Ctrl", "S"], "action": "ui.saveContract" }
+    ]
+  },
+  "autosave": { "enabled": true, "debounceMs": 1200, "emit": "contracts.autosave" }
+}

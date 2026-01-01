@@ -1,0 +1,274 @@
+{
+  "id": "soul-weeknights-pack",
+  "title": "Soul Weeknights: Quick & Cozy",
+  "description": "A Soul-Food-forward weeknight pack: fast mains, bright sides, and optional craft workflows (ferments, wine musts, non-pork bacon/sausage) to level up future meals.",
+  "tags": [
+    "collection",
+    "diet:no-pork",
+    "speed:weeknight",
+    "prep:pantry-first",
+    "palette:soul-food"
+  ],
+  "flavor_profile": [
+    "Soul Food",
+    "Caribbean",
+    "West African",
+    "Cajun",
+    "Creole",
+    "BBQ",
+    "Herb-Garlic",
+    "Citrus-Chili",
+    "Pantry-First",
+    "Garden-Fresh"
+  ],
+  "meta": {
+    "curation_notes": "Favor 30-minute builds, sheet-pan/one-pot patterns, and big flavor with minimal cleanup. Pair with rice, grits, or greens.",
+    "craft_opportunities": [
+      "Non-pork bacon (beef/turkey)",
+      "Home sausage (beef/turkey/chicken)",
+      "Ferments (pepper mash, quick kraut)",
+      "Small-batch wine must"
+    ]
+  },
+  "items": [
+    {
+      "id": "caribbean-sheet-pan-chicken-pineapple",
+      "title": "Caribbean Sheet-Pan Chicken with Pineapple & Peppers",
+      "description": "Sweet-heat glaze, roasted peppers and onion. Serve with coconut rice or greens.",
+      "flavor_profile": ["Caribbean", "Citrus-Chili", "Pantry-First"],
+      "tags": ["flavor:Caribbean", "protein:chicken", "sheet-pan", "time:30-min"],
+      "ingredients": [
+        "1.5 lb chicken thighs",
+        "1 cup pineapple chunks (fresh or canned, drained)",
+        "1 red bell pepper, sliced",
+        "1 small red onion, wedges",
+        "2 tbsp jerk seasoning or Caribbean spice blend",
+        "2 tbsp oil",
+        "1 tbsp lime juice",
+        "Salt, to taste"
+      ],
+      "steps": [
+        "Heat oven to 425°F / 220°C.",
+        "Toss chicken, pineapple, pepper, and onion with oil, jerk seasoning, salt, and lime juice.",
+        "Roast 20–25 min until chicken is done and edges caramelize. Rest 5 min."
+      ],
+      "images": []
+    },
+    {
+      "id": "west-african-peanut-stew-quick",
+      "title": "Quick West African Peanut Stew (Weeknight)",
+      "description": "Creamy, cozy peanut-tomato base with greens; weeknight-speed shortcut.",
+      "flavor_profile": ["West African", "Herb-Garlic"],
+      "tags": ["flavor:West African", "stew", "time:30-min", "veg:greens"],
+      "ingredients": [
+        "1 tbsp oil",
+        "1 small onion, diced",
+        "2 cloves garlic, minced",
+        "2 tbsp tomato paste",
+        "1/2 cup peanut butter",
+        "3 cups broth or water",
+        "2 cups chopped greens (spinach/kale)",
+        "1 cup cooked chicken or beans (optional)",
+        "Salt, chili flakes to taste"
+      ],
+      "steps": [
+        "Sauté onion and garlic in oil 2–3 min.",
+        "Stir in tomato paste; cook 1 min.",
+        "Whisk in peanut butter and broth; simmer 8–10 min.",
+        "Add greens (and protein if using) and simmer 3–5 min; season."
+      ],
+      "images": []
+    },
+    {
+      "id": "cajun-shrimp-grits-lean",
+      "title": "Cajun Shrimp & Weeknight Grits",
+      "description": "Spiced shrimp over creamy quick-grits; weeknight friendly.",
+      "flavor_profile": ["Cajun", "Soul Food"],
+      "tags": ["flavor:Cajun", "protein:shrimp", "grain:grits", "time:25-min"],
+      "ingredients": [
+        "1 lb shrimp, peeled",
+        "2 tsp Cajun seasoning",
+        "1 tbsp oil",
+        "3/4 cup quick grits",
+        "3 cups water or broth",
+        "1 tbsp butter (optional)",
+        "Salt, pepper"
+      ],
+      "steps": [
+        "Cook grits per package with water/broth; finish with butter, salt, pepper.",
+        "Toss shrimp with Cajun seasoning; sear in oil 2–3 min until just done.",
+        "Serve shrimp over grits; add green onions or lemon if desired."
+      ],
+      "images": []
+    },
+    {
+      "id": "creole-red-beans-rice-quick",
+      "title": "Creole Red Beans & Rice (Quick Skillet)",
+      "description": "Shortcut skillet with canned beans; smoky spices (no pork).",
+      "flavor_profile": ["Creole", "Pantry-First"],
+      "tags": ["flavor:Creole", "beans", "grain:rice", "time:30-min", "diet:no-pork"],
+      "ingredients": [
+        "1 tbsp oil",
+        "1 small onion, diced",
+        "1 celery stalk, diced",
+        "1/2 green bell pepper, diced",
+        "2 cloves garlic, minced",
+        "1 tsp smoked paprika",
+        "1 tsp Creole seasoning",
+        "2 cans red beans, drained",
+        "1 cup broth or water",
+        "3 cups cooked rice",
+        "Salt, hot sauce to taste"
+      ],
+      "steps": [
+        "Sauté onion, celery, pepper in oil 4–5 min; add garlic 30 sec.",
+        "Add paprika, Creole seasoning; toast 30 sec.",
+        "Stir in beans and liquid; simmer 8–10 min to thicken; season.",
+        "Serve over hot rice with hot sauce."
+      ],
+      "images": []
+    },
+    {
+      "id": "bbq-sheet-pan-meatballs-turkey",
+      "title": "BBQ Sheet-Pan Turkey Meatballs with Slaw",
+      "description": "Oven meatballs tossed in BBQ glaze; crunchy slaw to finish.",
+      "flavor_profile": ["BBQ", "Herb-Garlic"],
+      "tags": ["flavor:BBQ", "protein:turkey", "sheet-pan", "time:30-min"],
+      "ingredients": [
+        "1 lb ground turkey",
+        "1/3 cup breadcrumbs (or oats)",
+        "1 egg",
+        "1 tsp garlic powder",
+        "1/2 tsp onion powder",
+        "Salt, pepper",
+        "1/2 cup BBQ sauce",
+        "4 cups slaw mix",
+        "2 tbsp mayo or vinaigrette"
+      ],
+      "steps": [
+        "Heat oven to 425°F / 220°C. Mix turkey, crumbs, egg, garlic/onion powder, salt, pepper.",
+        "Scoop onto sheet; bake 12–15 min.",
+        "Toss hot meatballs with BBQ sauce; dress slaw and serve."
+      ],
+      "images": []
+    },
+    {
+      "id": "citrus-chili-salmon-tray-bake",
+      "title": "Citrus-Chili Salmon & Veg Tray-Bake",
+      "description": "Bright, zesty; sheet-pan veggies roast alongside.",
+      "flavor_profile": ["Citrus-Chili", "Garden-Fresh"],
+      "tags": ["flavor:Citrus-Chili", "protein:salmon", "sheet-pan", "time:22-min"],
+      "ingredients": [
+        "4 salmon portions",
+        "1 lb asparagus or green beans",
+        "1 tbsp oil",
+        "Zest + juice of 1 lime or orange",
+        "1 tsp chili flakes",
+        "Salt, pepper"
+      ],
+      "steps": [
+        "Heat oven to 425°F / 220°C; toss veg with oil, salt; start 8 min.",
+        "Push veg aside; add salmon. Mix zest/juice with chili flakes; brush on salmon.",
+        "Bake 10–12 min until salmon flakes."
+      ],
+      "images": []
+    },
+    {
+      "id": "garlic-herb-chicken-quick",
+      "title": "Herb-Garlic Skillet Chicken with Greens",
+      "description": "Seared chicken, quick pan sauce, handful of greens to finish.",
+      "flavor_profile": ["Herb-Garlic", "Garden-Fresh"],
+      "tags": ["flavor:Herb-Garlic", "protein:chicken", "skillet", "time:20-min"],
+      "ingredients": [
+        "1 lb chicken cutlets",
+        "2 tsp herb blend (parsley/thyme/oregano)",
+        "2 cloves garlic, minced",
+        "1 tbsp oil",
+        "1/2 cup broth",
+        "2 cups spinach or mixed greens",
+        "Salt, pepper"
+      ],
+      "steps": [
+        "Season chicken with herbs, salt, pepper; sear in oil 2–3 min/side.",
+        "Add garlic; deglaze with broth; simmer 2–3 min.",
+        "Fold in greens to wilt; serve."
+      ],
+      "images": []
+    },
+
+    {
+      "id": "non-pork-bacon-bits-turkey",
+      "title": "Quick Turkey “Bacon” Bits (No Pork)",
+      "description": "Smoky turkey bits for salads, beans, and grits.",
+      "flavor_profile": ["BBQ", "Pantry-First"],
+      "tags": ["craft", "non-pork", "flavor:BBQ", "time:15-min"],
+      "ingredients": [
+        "8 oz turkey slices or ground turkey",
+        "1 tsp smoked paprika",
+        "1/2 tsp garlic powder",
+        "1 tsp soy sauce or coconut aminos",
+        "1 tsp oil"
+      ],
+      "steps": [
+        "Dice or crumble turkey; cook in oil until crisp.",
+        "Season with smoked paprika, garlic, and soy/aminos; cook 1–2 min to coat."
+      ],
+      "images": []
+    },
+    {
+      "id": "simple-beef-breakfast-sausage",
+      "title": "Simple Beef Breakfast Sausage (No Pork)",
+      "description": "Herb-forward patties; freezer-friendly.",
+      "flavor_profile": ["Herb-Garlic", "Soul Food"],
+      "tags": ["craft", "non-pork", "sausage", "freezer"],
+      "ingredients": [
+        "1 lb ground beef (or turkey/chicken)",
+        "1 tsp rubbed sage",
+        "1 tsp garlic powder",
+        "1/2 tsp thyme",
+        "1/2 tsp black pepper",
+        "1 tsp salt",
+        "1/2 tsp maple or brown sugar (optional)"
+      ],
+      "steps": [
+        "Mix seasonings into meat; form small patties.",
+        "Pan-sear 2–3 min/side; cool and freeze, or serve."
+      ],
+      "images": []
+    },
+    {
+      "id": "pepper-mash-ferment-starter",
+      "title": "Pepper Mash Ferment (Starter Jar)",
+      "description": "Begin a small jar of chili mash to power future sauces.",
+      "flavor_profile": ["Citrus-Chili"],
+      "tags": ["craft", "ferment", "pantry"],
+      "ingredients": [
+        "1 cup chopped chilies",
+        "3/4 tsp salt",
+        "Splash of vinegar (optional)"
+      ],
+      "steps": [
+        "Mash chilies with salt; pack into clean jar.",
+        "Loosely cover; burp daily; ferment 5–7 days to taste."
+      ],
+      "images": []
+    },
+    {
+      "id": "backyard-wine-must-small-batch",
+      "title": "Backyard Wine Must (Small-Batch)",
+      "description": "A tiny must for cooking/wine vinegar pathways later.",
+      "flavor_profile": ["Soul Food"],
+      "tags": ["craft", "winemaking", "pantry"],
+      "ingredients": [
+        "2 cups crushed fruit or juice",
+        "1–2 tbsp sugar (if fruit is tart)",
+        "Pinch of wine yeast (optional)"
+      ],
+      "steps": [
+        "Combine in sanitized jar; fit airlock or loose lid.",
+        "Ferment cool & dark 3–7 days until active; use for sauces or continue to wine."
+      ],
+      "images": []
+    }
+  ]
+}

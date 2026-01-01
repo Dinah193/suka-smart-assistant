@@ -1,0 +1,505 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Batch Yield Calculator Schema",
+  "description": "Schema for recipe and batch inputs and yield-related outputs (servings, containers, inventory deltas, labels, and per-portion nutrition) for the Batch Yield Calculator in Suka Smart Assistant.",
+  "type": "object",
+  "properties": {
+    "input": {
+      "type": "object",
+      "description": "Inputs describing the recipe, desired batch scale, portioning preferences, containers, and storehouse context.",
+      "properties": {
+        "unitSystem": {
+          "type": "string",
+          "enum": ["imperial", "metric"],
+          "default": "imperial",
+          "description": "Preferred unit system for weight and volume calculations."
+        },
+        "recipeDefinition": {
+          "type": "object",
+          "description": "Base recipe definition as stored in the Recipe Vault or imported from a source.",
+          "properties": {
+            "recipeId": {
+              "type": "string",
+              "description": "Stable ID of the recipe in the Recipe Vault or import registry."
+            },
+            "title": {
+              "type": "string",
+              "description": "Human-friendly recipe name."
+            },
+            "baseYield": {
+              "type": "object",
+              "description": "Original recipe yield description, used as the scaling reference.",
+              "properties": {
+                "servings": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Number of servings the base recipe is written for."
+                },
+                "servingSizeGrams": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Approximate grams per serving in the base recipe, if known."
+                },
+                "panSizeDescriptor": {
+                  "type": "string",
+                  "description": "Optional description of pan or tray size used in the base recipe (for casseroles, sheet pans, etc.)."
+                }
+              },
+              "required": ["servings"]
+            },
+            "ingredients": {
+              "type": "array",
+              "description": "List of ingredients for the base recipe, each with quantity, unit, and optional link to storehouse inventory.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "lineId": {
+                    "type": "string",
+                    "description": "Stable local ID for this ingredient line."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Ingredient name as shown to the user."
+                  },
+                  "quantity": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Base quantity of the ingredient."
+                  },
+                  "unit": {
+                    "type": "string",
+                    "description": "Unit of measure for the ingredient (g, oz, cup, tbsp, ml, etc.)."
+                  },
+                  "inventoryItemId": {
+                    "type": "string",
+                    "description": "Optional ID mapping this ingredient to a storehouse inventory item."
+                  }
+                },
+                "required": ["lineId", "name", "quantity", "unit"]
+              }
+            }
+          },
+          "required": ["recipeId", "title", "baseYield", "ingredients"]
+        },
+        "batchScalingTarget": {
+          "type": "object",
+          "description": "Target describing how large the batch should be compared to the base recipe.",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": ["servings", "containers", "scaleFactor"],
+              "default": "servings",
+              "description": "Scaling mode: desired servings, desired containers, or direct scale factor."
+            },
+            "targetServings": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Desired total number of servings when mode is 'servings'."
+            },
+            "targetContainers": {
+              "type": "array",
+              "description": "Desired containers and counts when mode is 'containers'.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "containerTypeId": {
+                    "type": "string",
+                    "description": "ID of the container type (e.g., quart jar, half-pan)."
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Number of containers to fill of this type."
+                  }
+                },
+                "required": ["containerTypeId", "count"]
+              }
+            },
+            "scaleFactor": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Multiplier applied to the base recipe (e.g., 2 for double batch) when mode is 'scaleFactor'."
+            }
+          },
+          "required": ["mode"]
+        },
+        "portioningPreferences": {
+          "type": "object",
+          "description": "Household-level preferences that influence portion sizing and distribution.",
+          "properties": {
+            "defaultServingSizeGrams": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Preferred serving size in grams for the household."
+            },
+            "childServingFraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.5,
+              "description": "Fraction of an adult serving for children (e.g., 0.5 for half portions)."
+            },
+            "elderServingFraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1.5,
+              "default": 0.75,
+              "description": "Fraction of an adult serving for elders."
+            },
+            "portionRoundingMode": {
+              "type": "string",
+              "enum": ["floor", "ceil", "nearest"],
+              "default": "floor",
+              "description": "Rounding behavior for computed portions."
+            },
+            "portionDistribution": {
+              "type": "object",
+              "description": "Optional distribution of portions between ready-to-eat and preserved.",
+              "properties": {
+                "readyToEatServings": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Desired servings set aside for immediate or near-term eating."
+                },
+                "preservedServings": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Desired servings to be placed into containers and stored in the storehouse."
+                }
+              }
+            }
+          }
+        },
+        "containerCatalog": {
+          "type": "array",
+          "description": "Available containers the household has on hand for this batch.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "containerTypeId": {
+                "type": "string",
+                "description": "ID of this container type (used in mappings and session planners)."
+              },
+              "label": {
+                "type": "string",
+                "description": "Human-readable label, such as 'Quart Jar' or '9x13 Pan'."
+              },
+              "approxVolumeMl": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Approximate volume capacity in milliliters."
+              },
+              "approxFoodWeightGrams": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Approximate weight of food in grams when filled to the typical level."
+              },
+              "maxFillFraction": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Maximum fraction to fill this container for safety or quality (e.g., 0.9)."
+              },
+              "preferredPreservationMethod": {
+                "type": "string",
+                "description": "Default or likely preservation method when this container is used (e.g., 'freezer', 'water-bath', 'pressure-can')."
+              }
+            },
+            "required": ["containerTypeId", "label"]
+          }
+        },
+        "storehouseInventorySnapshot": {
+          "type": "object",
+          "description": "Snapshot of relevant storehouse inventory items, used for ingredient availability and produced items.",
+          "properties": {
+            "items": {
+              "type": "array",
+              "description": "Subset of inventory items relevant to this batch, usually linked to recipe ingredients.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "inventoryItemId": {
+                    "type": "string",
+                    "description": "ID of the storehouse inventory item."
+                  },
+                  "label": {
+                    "type": "string",
+                    "description": "Short description of the item."
+                  },
+                  "quantity": {
+                    "type": "number",
+                    "description": "Quantity on hand."
+                  },
+                  "unit": {
+                    "type": "string",
+                    "description": "Unit for quantity (g, oz, lb, kg, each, etc.)."
+                  },
+                  "location": {
+                    "type": "string",
+                    "description": "Storage location (pantry, freezer, root cellar, etc.)."
+                  }
+                },
+                "required": ["inventoryItemId", "label"]
+              }
+            }
+          }
+        },
+        "macroTargets": {
+          "type": "object",
+          "description": "Optional macro-nutrient targets used for per-portion nutrition hints.",
+          "properties": {
+            "caloriesPerDay": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Target calories per day for the person or household average."
+            },
+            "proteinGramsPerDay": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Target protein grams per day."
+            },
+            "fatGramsPerDay": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Target fat grams per day."
+            },
+            "carbGramsPerDay": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Target carbohydrate grams per day."
+            }
+          }
+        },
+        "hairSupportTargets": {
+          "type": "object",
+          "description": "Optional hair-supporting nutrient profile from the Black hair nutrition calculator.",
+          "properties": {
+            "hairSupportScoreTarget": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Target score for hair-supporting nutrients for a typical day."
+            },
+            "keyNutrients": {
+              "type": "array",
+              "description": "List of priority nutrients to support hair health (e.g., protein, iron, zinc).",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "required": ["unitSystem", "recipeDefinition", "batchScalingTarget"]
+    },
+    "output": {
+      "type": "object",
+      "description": "Outputs produced by the Batch Yield Calculator, used for planning, storehouse updates, and labels.",
+      "properties": {
+        "batchPortionYield": {
+          "type": "object",
+          "description": "Normalized yield of the batch in servings and grams.",
+          "properties": {
+            "totalServings": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Total computed servings for the full batch."
+            },
+            "servingSizeGrams": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Estimated grams per serving in the scaled batch."
+            },
+            "readyToEatServings": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Servings allocated for near-term or immediate consumption."
+            },
+            "preservedServings": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Servings allocated for preserved containers in the storehouse."
+            }
+          },
+          "required": ["totalServings"]
+        },
+        "batchContainerPlan": {
+          "type": "array",
+          "description": "Plan describing how the cooked batch is distributed into containers.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "containerTypeId": {
+                "type": "string",
+                "description": "ID of the container type (matching containerCatalog)."
+              },
+              "label": {
+                "type": "string",
+                "description": "Human-friendly label for this container type."
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Number of containers to be filled."
+              },
+              "estimatedServingsPerContainer": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Estimated servings contained in each unit of this container type."
+              },
+              "fillFraction": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Expected fill level relative to maximum safe volume."
+              },
+              "preservationMethod": {
+                "type": "string",
+                "description": "Planned method of preservation for this container group (freezer, root cellar, water-bath, pressure-can, etc.)."
+              },
+              "storageLocation": {
+                "type": "string",
+                "description": "Where these containers will live (freezer, pantry, fridge, root cellar, etc.)."
+              }
+            },
+            "required": ["containerTypeId", "label", "count"]
+          }
+        },
+        "batchInventoryDelta": {
+          "type": "object",
+          "description": "Inventory changes implied by the batch: ingredients consumed and preserved items created.",
+          "properties": {
+            "ingredientsConsumed": {
+              "type": "array",
+              "description": "Inventory consumption lines for ingredients used in this batch.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "inventoryItemId": {
+                    "type": "string",
+                    "description": "ID of the consumed inventory item."
+                  },
+                  "quantityChange": {
+                    "type": "number",
+                    "description": "Negative quantity representing how much of the item is used."
+                  },
+                  "unit": {
+                    "type": "string",
+                    "description": "Unit for the quantity change."
+                  }
+                },
+                "required": ["inventoryItemId", "quantityChange", "unit"]
+              }
+            },
+            "itemsProduced": {
+              "type": "array",
+              "description": "New or updated inventory items created by this batch (containers and preserved units).",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "inventoryItemId": {
+                    "type": "string",
+                    "description": "ID for the resulting item (existing or to be created)."
+                  },
+                  "label": {
+                    "type": "string",
+                    "description": "Friendly label for the preserved item."
+                  },
+                  "quantityChange": {
+                    "type": "number",
+                    "description": "Positive quantity representing items added."
+                  },
+                  "unit": {
+                    "type": "string",
+                    "description": "Unit for the quantity change (each, jar, pan, etc.)."
+                  },
+                  "location": {
+                    "type": "string",
+                    "description": "Target storage location for this produced item."
+                  }
+                },
+                "required": ["inventoryItemId", "label", "quantityChange", "unit"]
+              }
+            }
+          }
+        },
+        "batchLabelingHints": {
+          "type": "object",
+          "description": "Convenience outputs for label printing and handwriting, including name, dates, and notes.",
+          "properties": {
+            "primaryLabel": {
+              "type": "string",
+              "description": "Primary label line, usually the recipe or dish name."
+            },
+            "secondaryLabel": {
+              "type": "string",
+              "description": "Secondary label line, such as variant, spice profile, or diet tags."
+            },
+            "preparedOn": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Timestamp for when the batch is prepared or expected to be finished."
+            },
+            "useByDate": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Suggested 'use by' or 'best by' date based on preservation method and household rules."
+            },
+            "labelLines": {
+              "type": "array",
+              "description": "Pre-composed label lines ready to send to the label printer or write on tape.",
+              "items": {
+                "type": "string"
+              }
+            },
+            "notes": {
+              "type": "string",
+              "description": "Free-text notes, including reheat instructions or serving suggestions."
+            }
+          }
+        },
+        "batchNutritionPerPortion": {
+          "type": "object",
+          "description": "Per-portion nutrition estimates for the scaled batch, used to connect with macro and hair nutrition targets.",
+          "properties": {
+            "caloriesPerServing": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Estimated calories per serving."
+            },
+            "proteinGramsPerServing": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Estimated protein grams per serving."
+            },
+            "fatGramsPerServing": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Estimated fat grams per serving."
+            },
+            "carbGramsPerServing": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Estimated carbohydrate grams per serving."
+            },
+            "hairSupportScorePerServing": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Relative score indicating how supportive each serving is for hair-oriented nutrient targets."
+            },
+            "flags": {
+              "type": "array",
+              "description": "Optional flags or notes about how this batch aligns with macro and hair-support targets.",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "required": ["batchPortionYield"]
+    }
+  },
+  "required": ["input", "output"]
+}

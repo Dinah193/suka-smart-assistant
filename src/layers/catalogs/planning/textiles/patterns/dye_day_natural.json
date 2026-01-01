@@ -1,0 +1,293 @@
+{
+  "id": "pat.textiles.dye_day_natural",
+  "domain": "textiles",
+  "kind": "planning_pattern",
+  "title": "Natural Dye Day",
+  "intentTags": [
+    "intent:dye",
+    "mode:dye",
+    "workflow:batching"
+  ],
+  "description": "Plan a natural dye day: scouring, dye bath, rinse, dry, and log recipes.",
+  "inputs": [
+    {
+      "key": "householdSize",
+      "type": "number",
+      "label": "Household size",
+      "required": false,
+      "default": 4,
+      "min": 1,
+      "max": 30
+    },
+    {
+      "key": "timeBudgetMin",
+      "type": "number",
+      "label": "Time budget (minutes)",
+      "required": false,
+      "default": 120,
+      "min": 30,
+      "max": 960
+    },
+    {
+      "key": "equipment",
+      "type": "multiselect",
+      "label": "Equipment",
+      "required": false,
+      "options": [
+        "needle_thread",
+        "machine_basic",
+        "machine_serger",
+        "loom",
+        "spindle",
+        "dye_pots",
+        "iron"
+      ]
+    },
+    {
+      "key": "fiberPreferences",
+      "type": "multiselect",
+      "label": "Fiber preferences",
+      "required": false,
+      "options": [
+        "cotton",
+        "linen",
+        "wool",
+        "hemp",
+        "silk",
+        "synthetic"
+      ],
+      "default": [
+        "cotton",
+        "linen"
+      ]
+    },
+    {
+      "key": "budgetCap",
+      "type": "number",
+      "label": "Budget cap ($)",
+      "required": false,
+      "default": 0,
+      "min": 0,
+      "max": 5000
+    },
+    {
+      "key": "items",
+      "type": "multiselect",
+      "label": "Items involved",
+      "required": false,
+      "options": [
+        "shirts",
+        "pants",
+        "dresses",
+        "headwraps",
+        "aprons",
+        "blankets",
+        "children_clothes",
+        "workwear"
+      ]
+    },
+    {
+      "key": "skillLevel",
+      "type": "select",
+      "label": "Skill level",
+      "required": false,
+      "default": "beginner",
+      "options": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "type": "planStructure",
+      "notes": "Dye session + recipe log."
+    }
+  ],
+  "constraints": [
+    {
+      "type": "safety",
+      "tag": "constraint:safety",
+      "notes": "Heat, dyes, sharp tools—surface safety checks."
+    },
+    {
+      "type": "time",
+      "tag": "constraint:time_budget",
+      "notes": "Respect time caps; propose splitting sessions."
+    }
+  ],
+  "requires": [
+    {
+      "type": "inventory",
+      "tag": "needsTextileInventory",
+      "optional": true
+    }
+  ],
+  "produces": [
+    {
+      "type": "session",
+      "domain": "textiles",
+      "title": "Natural Dye Day Session"
+    }
+  ],
+  "steps": [
+    {
+      "id": "prep",
+      "title": "Prep fabrics + safety setup",
+      "kind": "template",
+      "timeboxMin": 20
+    },
+    {
+      "id": "scour",
+      "title": "Scour/clean fabrics",
+      "kind": "template",
+      "timeboxMin": 30
+    },
+    {
+      "id": "dye",
+      "title": "Dye bath batch",
+      "kind": "template",
+      "timeboxMin": 90,
+      "timers": [
+        {
+          "label": "Dye bath",
+          "seconds": 3600
+        }
+      ]
+    },
+    {
+      "id": "rinse",
+      "title": "Rinse + dry window",
+      "kind": "template",
+      "timeboxMin": 30
+    },
+    {
+      "id": "log",
+      "title": "Log dye recipe + repeatability notes",
+      "kind": "template",
+      "timeboxMin": 15
+    }
+  ],
+  "kpis": [
+    {
+      "key": "color_repeatability",
+      "label": "Color repeatability",
+      "unit": "score",
+      "target": "Trend up"
+    },
+    {
+      "key": "rework",
+      "label": "Re-dye needed",
+      "unit": "%",
+      "target": "≤10%"
+    }
+  ],
+  "lean": {
+    "wasteTargets": [
+      "defects",
+      "overprocessing"
+    ],
+    "countermeasures": [
+      {
+        "waste": "defects",
+        "do": "Test swatches first; label baths clearly."
+      }
+    ]
+  },
+  "ui": {
+    "form": {
+      "fields": [
+        {
+          "key": "householdSize",
+          "type": "number",
+          "label": "Household size",
+          "required": false,
+          "default": 4,
+          "min": 1,
+          "max": 30
+        },
+        {
+          "key": "timeBudgetMin",
+          "type": "number",
+          "label": "Time budget (minutes)",
+          "required": false,
+          "default": 120,
+          "min": 30,
+          "max": 960
+        },
+        {
+          "key": "equipment",
+          "type": "multiselect",
+          "label": "Equipment",
+          "required": false,
+          "options": [
+            "needle_thread",
+            "machine_basic",
+            "machine_serger",
+            "loom",
+            "spindle",
+            "dye_pots",
+            "iron"
+          ]
+        },
+        {
+          "key": "fiberPreferences",
+          "type": "multiselect",
+          "label": "Fiber preferences",
+          "required": false,
+          "options": [
+            "cotton",
+            "linen",
+            "wool",
+            "hemp",
+            "silk",
+            "synthetic"
+          ],
+          "default": [
+            "cotton",
+            "linen"
+          ]
+        },
+        {
+          "key": "budgetCap",
+          "type": "number",
+          "label": "Budget cap ($)",
+          "required": false,
+          "default": 0,
+          "min": 0,
+          "max": 5000
+        },
+        {
+          "key": "dyeSource",
+          "type": "multiselect",
+          "label": "Dye sources",
+          "options": [
+            "indigo_like",
+            "hibiscus_like",
+            "onion_skins_like",
+            "iron_black",
+            "turmeric_like"
+          ]
+        }
+      ]
+    },
+    "help": {
+      "title": "Dye Day",
+      "intro": "Batch dyes safely and log recipes.",
+      "tips": [
+        "Test swatches.",
+        "Plan drying time."
+      ]
+    }
+  },
+  "links": {
+    "storehousePatterns": [
+      "pat.storehouse.monthly_cycle_count"
+    ],
+    "homesteadPatterns": [
+      "pat.homestead.mixed_subsistence"
+    ]
+  },
+  "variants": []
+}

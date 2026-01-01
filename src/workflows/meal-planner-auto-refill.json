@@ -1,0 +1,457 @@
+{
+  "name": "Meal Planner: Auto Refill",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "meal-planner/refill",
+        "responseMode": "responseNode",
+        "options": {
+          "binaryData": false
+        }
+      },
+      "id": "Webhook_Refill",
+      "name": "Webhook (Auto Refill)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyWeek",
+              "hour": 10,
+              "minute": 0,
+              "weeksInterval": 1,
+              "weekly": {
+                "days": [
+                  "thursday"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "id": "Cron_Weekly",
+      "name": "Cron (Weekly Refill)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "startDate",
+              "value": "={{new Date().toISOString().slice(0,10)}}"
+            },
+            {
+              "name": "days",
+              "value": "7"
+            },
+            {
+              "name": "timezone",
+              "value": "America/Chicago"
+            }
+          ],
+          "number": [
+            {
+              "name": "budgetWeekly",
+              "value": 0
+            }
+          ],
+          "boolean": [
+            {
+              "name": "auto",
+              "value": true
+            }
+          ]
+        }
+      },
+      "id": "Set_Defaults",
+      "name": "Set Defaults (Cron)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        -1000,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/*\nInbound (from webhook) is optional:\n{\n  userId?: string,\n  startDate?: 'YYYY-MM-DD',\n  days?: number,\n  demand?: [{ name, qty, unit, needBy? }],\n  inventory?: { [name]: { qty, unit, min?, reorderTo? } } | [{ name, qty, unit, ... }],\n  vendors?: [...],\n  budget?: { weekly?, hardCap? },\n  preferVendors?: [id]\n}\n*/\nconst b = items[0]?.json || {};\nconst apiBase = $env.SUKA_API_BASE || 'http://localhost:4000';\n\nfunction toMapInventory(inv){\n  if (!inv) return {};\n  if (Array.isArray(inv)) {\n    const m = {};\n    for (const it of inv) m[String(it.name || '').toLowerCase()] = { qty: Number(it.qty||0), unit: it.unit || '', min: it.min, reorderTo: it.reorderTo };\n    return m;\n  }\n  return inv;\n}\n\nconst startDate = b.startDate || new Date().toISOString().slice(0,10);\nconst days = Math.max(1, Math.min(60, Number(b.days || 7)));\nconst userId = b.userId || null;\n\nreturn [{ json: {\n  apiBase,\n  userId,\n  startDate,\n  days,\n  budget: b.budget || { weekly: Number(b.budgetWeekly || 0) || undefined },\n  preferVendors: Array.isArray(b.preferVendors) ? b.preferVendors : [],\n  demandIn: Array.isArray(b.demand) ? b.demand : null,\n  inventoryIn: toMapInventory(b.inventory) || null,\n  vendorsIn: Array.isArray(b.vendors) ? b.vendors : null\n} }];"
+      },
+      "id": "Fn_Normalize",
+      "name": "Function: Normalize Input",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -1000,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "GET",
+        "url": "={{`${$json.apiBase}/mealplan/grocery-list?days=${$json.days}&start=${$json.startDate}`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000,
+          "ignoreResponseCode": true
+        }
+      },
+      "id": "HTTP_GetDemand",
+      "name": "HTTP: Get Grocery List",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -800,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "GET",
+        "url": "={{`${$json.apiBase}/inventory/snapshot`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000,
+          "ignoreResponseCode": true
+        }
+      },
+      "id": "HTTP_GetInventory",
+      "name": "HTTP: Get Inventory",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -800,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "GET",
+        "url": "={{`${$json.apiBase}/vendors/catalog`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000,
+          "ignoreResponseCode": true
+        }
+      },
+      "id": "HTTP_GetVendors",
+      "name": "HTTP: Get Vendors/Catalog",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -800,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/* Merge provided + fetched data into one planning request */\nfunction arr(x){ return Array.isArray(x) ? x : []; }\nfunction toInvMap(obj){\n  if (!obj) return {};\n  if (Array.isArray(obj)) { const m = {}; obj.forEach(o => m[String(o.name||'').toLowerCase()] = { qty: Number(o.qty||0), unit: o.unit||'' }); return m; }\n  return obj;\n}\n\nconst ctx = $json;\nconst demandFetched = $items('HTTP: Get Grocery List', 0, 0)[0]?.json || [];\nconst invFetched = $items('HTTP: Get Inventory', 0, 0)[0]?.json || {};\nconst vendorsFetched = $items('HTTP: Get Vendors/Catalog', 0, 0)[0]?.json || [];\n\nconst demand = ctx.demandIn || arr(demandFetched);\nconst inventory = ctx.inventoryIn || toInvMap(invFetched);\nconst vendors = ctx.vendorsIn || arr(vendorsFetched);\n\nreturn [{ json: { ...ctx, demand, inventory, vendors } }];"
+      },
+      "id": "Fn_MergeInputs",
+      "name": "Function: Merge Inputs",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{`${$json.apiBase}/procurement/plan`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000,
+          "ignoreResponseCode": true
+        },
+        "bodyParametersJson": "={\n  \"demand\": $json.demand,\n  \"inventory\": $json.inventory,\n  \"vendors\": $json.vendors,\n  \"opts\": { \"startDate\": $json.startDate, \"sabbathAware\": true, \"budget\": $json.budget, \"preferVendors\": $json.preferVendors }\n}"
+      },
+      "id": "HTTP_Plan",
+      "name": "HTTP: Plan Procurement (server)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -400,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/* If server plan succeeded, pass it through; else build a minimal fallback plan */\nfunction ok(resp){ return resp && (resp.statusCode ? (resp.statusCode>=200 && resp.statusCode<300) : true); }\nconst apiPlan = $items('HTTP: Plan Procurement (server)', 0, 0)[0]?.json;\nconst apiOk = ok($items('HTTP: Plan Procurement (server)', 0, 0)[0]);\n\nif (apiOk && apiPlan && Array.isArray(apiPlan.purchaseOrders) && apiPlan.purchaseOrders.length) {\n  return [{ json: { plan: apiPlan, used: 'server' } }];\n}\n\n// ---- Fallback planner (very simple) ----\nconst ctx = $json;\nconst demand = Array.isArray(ctx.demand) ? ctx.demand : [];\nconst inv = ctx.inventory || {};\n\n// 1) Aggregate demand by name\nconst map = new Map();\nfor (const d of demand) {\n  const key = String(d.name||'').toLowerCase();\n  const cur = map.get(key) || { name: d.name, unit: d.unit || '', qty: 0 };\n  cur.qty += Number(d.qty || 0);\n  map.set(key, cur);\n}\n// 2) Subtract simple inventory\nfor (const [k, v] of Object.entries(inv || {})) {\n  const rec = map.get(k);\n  if (!rec) continue;\n  const onHand = Number(v.qty || 0);\n  rec.qty = Math.max(0, rec.qty - onHand);\n}\nconst needs = [...map.values()].filter(x => x.qty > 0);\n\n// 3) Create one PO per (fake) vendor bucket (all to Local Grocer)\nconst orderDate = new Date();\nconst delivery = new Date(Date.now() + 2*24*3600*1000);\nconst po = {\n  id: `po_${Date.now()}`,\n  vendorId: 'local_grocer',\n  vendorName: 'Local Grocer',\n  orderDate: orderDate.toISOString(),\n  estDeliveryDate: delivery.toISOString(),\n  items: needs.map(n => ({ sku: null, name: n.name, qty: n.qty, unit: n.unit || '', packQty: 1, packs: 1, unitPrice: 0, extPrice: 0, needBy: ctx.startDate })),\n  shipping: 0,\n  subtotal: 0,\n  total: 0\n};\n\nconst plan = { purchaseOrders: needs.length ? [po] : [], backorders: [], substitutions: [], tasks: [], summary: { spend: 0, items: needs.length, vendors: needs.length ? 1 : 0, weekBuckets: [] } };\nreturn [{ json: { plan, used: 'fallback' } }];"
+      },
+      "id": "Fn_FallbackPlan",
+      "name": "Function: Use Server Plan or Fallback",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/* Convert POs to concrete tasks (place order + receive) */\nconst ctx = $items('Function: Merge Inputs', 0, 0)[0].json;\nconst plan = $json.plan || {};\nconst pos = Array.isArray(plan.purchaseOrders) ? plan.purchaseOrders : [];\nconst tasks = [];\nfor (const po of pos) {\n  tasks.push({\n    title: `Place order: ${po.vendorName}`,\n    category: 'procurement',\n    labels: ['purchase','auto-refill', po.vendorId || 'vendor'],\n    priority: 2,\n    due: po.orderDate,\n    meta: { vendorId: po.vendorId, poId: po.id, items: po.items }\n  });\n  tasks.push({\n    title: `Receive & stock: ${po.vendorName}`,\n    category: 'inventory',\n    labels: ['receiving','auto-refill', po.vendorId || 'vendor'],\n    priority: 2,\n    due: po.estDeliveryDate,\n    meta: { vendorId: po.vendorId, poId: po.id, items: po.items }\n  });\n}\nreturn tasks.length ? tasks.map(t => ({ json: { ...t, userId: ctx.userId, apiBase: ctx.apiBase } })) : [{ json: { skip: true, apiBase: ctx.apiBase } }];"
+      },
+      "id": "Fn_POtoTasks",
+      "name": "Function: POs → Tasks",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        20,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{`${$json.apiBase}/automations/tasks`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={{$json}}"
+      },
+      "id": "HTTP_CreateTask",
+      "name": "HTTP: Create Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        240,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/* Build a compact response summary for webhook or logs */\nconst used = ($items('Function: Use Server Plan or Fallback', 0, 0)[0]?.json?.used) || 'unknown';\nconst plan = ($items('Function: Use Server Plan or Fallback', 0, 0)[0]?.json?.plan) || { summary: {} };\nconst created = ($items('HTTP: Create Task', 0, 0) || []).length;\nreturn [{ json: { ok: true, planner: used, purchaseOrders: (plan.purchaseOrders||[]).length, tasksCreated: created, summary: plan.summary || {} } }];"
+      },
+      "id": "Fn_Summary",
+      "name": "Function: Summary",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        460,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "responseBody": "={{$json}}",
+        "responseCode": 200
+      },
+      "id": "Respond_Webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        680,
+        -20
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "Error_Trigger",
+      "name": "On Error (Auto Refill)",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const e = items[0].json;\nreturn [{ json: { ok: false, message: e.message || 'Workflow error', node: e.node?.name, timestamp: new Date().toISOString() } }];"
+      },
+      "id": "Fn_ErrorFormat",
+      "name": "Function: Format Error",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -980,
+        560
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook (Auto Refill)": {
+      "main": [
+        [
+          {
+            "node": "Function: Normalize Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron (Weekly Refill)": {
+      "main": [
+        [
+          {
+            "node": "Set Defaults (Cron)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Defaults (Cron)": {
+      "main": [
+        [
+          {
+            "node": "Function: Normalize Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Normalize Input": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Get Grocery List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Get Grocery List": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Get Inventory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Get Inventory": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Get Vendors/Catalog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Get Vendors/Catalog": {
+      "main": [
+        [
+          {
+            "node": "Function: Merge Inputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Merge Inputs": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Plan Procurement (server)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Plan Procurement (server)": {
+      "main": [
+        [
+          {
+            "node": "Function: Use Server Plan or Fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Use Server Plan or Fallback": {
+      "main": [
+        [
+          {
+            "node": "Function: POs → Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: POs → Tasks": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Create Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Summary": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Create Task": {
+      "main": [
+        [
+          {
+            "node": "Function: Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On Error (Auto Refill)": {
+      "main": [
+        [
+          {
+            "node": "Function: Format Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "timezone": "America/Chicago",
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

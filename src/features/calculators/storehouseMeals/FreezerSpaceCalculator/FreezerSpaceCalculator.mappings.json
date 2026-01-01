@@ -1,0 +1,192 @@
+{
+  "$schema": "../../../../schemas/planningGraph/mappings.schema.json",
+  "version": "v1.0.0",
+  "nodeId": "PG_NODE_FREEZER_SPACE_CALCULATOR",
+  "calculatorId": "FreezerSpaceCalculator",
+
+  "mappings": [
+    {
+      "id": "freezer_overflow_to_preservation",
+      "label": "Overflow items → preservation suggestions",
+      "description": "When there is not enough freezer capacity, route overflow items into preservation flows (canning, dehydrating, fermenting).",
+      "when": {
+        "outputPath": "fitReport.overflowItems",
+        "operator": "lengthGreaterThan",
+        "value": 0
+      },
+      "next": [
+        {
+          "targetNodeId": "PG_NODE_PRESERVATION_SUITE",
+          "intent": "preserve_overflow",
+          "payloadMap": {
+            "householdId": "inputs.householdId",
+            "overflowItems": "outputs.fitReport.overflowItems",
+            "reason": "outputs.fitReport.reason"
+          },
+          "hints": {
+            "preferredMethods": [
+              "pressure_canning",
+              "water_bath_canning",
+              "dehydrating",
+              "fermentation"
+            ],
+            "note": "Suggest canning or dehydrating items that do not strictly require freezing (e.g., stewing meat, bones for broth, some vegetables)."
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "freezer_capacity_tight_suggest_batch_cooking",
+      "label": "Tight capacity → batch cook + eat-down",
+      "description": "When free space is low but not fully exhausted, suggest a batch-cooking session to eat down the freezer and free capacity.",
+      "when": {
+        "outputPath": "totals.utilizationPct",
+        "operator": "greaterThan",
+        "value": 85
+      },
+      "next": [
+        {
+          "targetNodeId": "PG_NODE_BATCH_COOKING_PLANNER",
+          "intent": "eat_down_freezer",
+          "payloadMap": {
+            "householdId": "inputs.householdId",
+            "freezerTargets": "outputs.volumeUsage",
+            "fitReport": "outputs.fitReport"
+          },
+          "hints": {
+            "sessionKind": "freezer_eat_down",
+            "description": "Prioritize oldest items and those with highest volume for upcoming batch cooking sessions.",
+            "selectionRule": {
+              "sortBy": "oldestFirst",
+              "thenBy": "largestVolumeFirst"
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "underutilized_freezer_suggest_bulk_purchase",
+      "label": "Underutilized freezer → stock-up suggestions",
+      "description": "When there is ample free space, suggest bulk purchases or upcoming butchery events if animals/meat are planned.",
+      "when": {
+        "outputPath": "totals.utilizationPct",
+        "operator": "lessThan",
+        "value": 40
+      },
+      "next": [
+        {
+          "targetNodeId": "PG_NODE_STOREHOUSE_STOCK_PLANNER",
+          "intent": "fill_freezer_capacity",
+          "payloadMap": {
+            "householdId": "inputs.householdId",
+            "freeSpaceLiters": "outputs.totals.freeLiters",
+            "freezerBreakdown": "outputs.volumeUsage"
+          },
+          "hints": {
+            "note": "Highlight meats and staples that are regularly used in batch cooking to take advantage of empty freezer space.",
+            "tieInto": [
+              "PG_NODE_MEAT_BREAKDOWN_CALCULATOR",
+              "PG_NODE_BATCH_COOKING_PLANNER"
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "link_overflow_to_meat_breakdown",
+      "label": "Overflow meat cuts → alternative plans",
+      "description": "If overflow items are meat cuts, route them back into meat breakdown and preservation planners to re-classify (canned, shelf-stable, etc.).",
+      "when": {
+        "outputPath": "fitReport.overflowItems",
+        "operator": "anyMatchTag",
+        "value": "meat"
+      },
+      "next": [
+        {
+          "targetNodeId": "PG_NODE_MEAT_BREAKDOWN_CALCULATOR",
+          "intent": "reclassify_cuts_for_shelf_stable_methods",
+          "payloadMap": {
+            "householdId": "inputs.householdId",
+            "meatItems": "outputs.fitReport.overflowItems"
+          },
+          "hints": {
+            "note": "Suggest canning broth, stews, or ground meat instead of freezing all cuts.",
+            "preferredMethods": [
+              "pressure_canning",
+              "rendering_fat",
+              "jerky_or_dried_meat"
+            ]
+          }
+        },
+        {
+          "targetNodeId": "PG_NODE_PRESERVATION_SUITE",
+          "intent": "schedule_non_freezer_preservation_for_meat",
+          "payloadMap": {
+            "householdId": "inputs.householdId",
+            "items": "outputs.fitReport.overflowItems"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "freezer_layout_sync_to_storehouse",
+      "label": "Freezer zones → storehouse layout",
+      "description": "Synchronize suggested freezer layout zones with storehouse inventory zones for easier retrieval and planning.",
+      "when": {
+        "outputPath": "suggestedLayout",
+        "operator": "exists",
+        "value": true
+      },
+      "next": [
+        {
+          "targetNodeId": "PG_NODE_STOREHOUSE_STOCK_PLANNER",
+          "intent": "update_freezer_zones",
+          "payloadMap": {
+            "householdId": "inputs.householdId",
+            "freezerLayouts": "outputs.suggestedLayout"
+          },
+          "hints": {
+            "zoneNamingRule": "by_meat_type_then_meal_use",
+            "examples": [
+              "Beef – Ground & Stew",
+              "Chicken – Whole & Parts",
+              "Mixed – Soups, Stews, Leftovers"
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "capacity_summary_to_sessions",
+      "label": "Capacity summary → guidance sessions",
+      "description": "Expose capacity and warnings as guidance sessions in the SessionRunner (e.g., freezer re-org, labeling, culling old items).",
+      "when": {
+        "outputPath": "sessionSuggestions",
+        "operator": "lengthGreaterThan",
+        "value": 0
+      },
+      "next": [
+        {
+          "targetNodeId": "PG_NODE_SESSION_RUNTIME",
+          "intent": "freezer_guidance",
+          "payloadMap": {
+            "householdId": "inputs.householdId",
+            "sessionHints": "outputs.sessionSuggestions",
+            "freezerUsage": "outputs.volumeUsage",
+            "warnings": "outputs.fitReport.warnings"
+          },
+          "hints": {
+            "domain": "storehouse",
+            "nowButtonLabel": "Run Freezer Session Now",
+            "note": "SessionRunner should highlight which items are blocking capacity and recommend actions (cook, can, dehydrate)."
+          }
+        }
+      ]
+    }
+  ]
+}

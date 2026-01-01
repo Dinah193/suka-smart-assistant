@@ -1,0 +1,465 @@
+{
+  "id": "flow.gardenSeasonSetup",
+  "version": 1,
+  "title": "Garden Season Setup Flow",
+  "description": "Step-by-step flow for starting a garden season: assess site and beds, plan crops around household needs, schedule planting and maintenance sessions, and connect harvests to storehouse and preservation.",
+  "category": "garden",
+  "priority": 0.92,
+  "domainsInvolved": [
+    "garden",
+    "storehouse",
+    "animals",
+    "preservation",
+    "cooking",
+    "cleaning"
+  ],
+  "objectives": [
+    "Assess garden space, soil condition, and available beds/containers.",
+    "Align garden plans with storehouse gaps, feast plans, and health goals.",
+    "Create a realistic planting calendar and seed-starting schedule.",
+    "Prepare irrigation, tools, and paths to reduce friction once the season starts.",
+    "Connect harvest logging to storehouse inventory, preservation, and meal planning."
+  ],
+  "entryCriteria": {
+    "description": "When to consider activating this garden season setup flow.",
+    "triggersAny": [
+      "calendar.gardenSeason.approaching",
+      "weather.lastExpectedFrost.approaching",
+      "storehouse.gardenGoal.set",
+      "user.manualFlowStart.gardenSeasonSetup"
+    ],
+    "daysBeforeSeasonRecommended": 60,
+    "supportsManualStart": true
+  },
+  "exitCriteria": {
+    "description": "When garden season setup is considered complete for this cycle.",
+    "conditionsAll": [
+      {
+        "metric": "garden.planCoverageRatio",
+        "operator": ">=",
+        "value": 0.85
+      },
+      {
+        "metric": "garden.bedsPreparedRatio",
+        "operator": ">=",
+        "value": 0.9
+      },
+      {
+        "metric": "garden.plantingCalendar.configured",
+        "operator": "==",
+        "value": 1
+      }
+    ]
+  },
+  "guards": {
+    "sabbathAware": true,
+    "quietHoursSensitive": true,
+    "weatherAware": true,
+    "inventoryAware": true,
+    "deviceBatteryAware": true
+  },
+  "nowCtaBehavior": {
+    "description": "How the 'Now' button should behave when this flow is active.",
+    "preferredDomains": [
+      "garden",
+      "storehouse"
+    ],
+    "respectDomainWeights": true,
+    "boostWhenTriggersPresent": [
+      "calendar.gardenSeason.approaching",
+      "weather.clearDay.available",
+      "garden.beds.unpreparedDetected"
+    ]
+  },
+  "phaseOrder": [
+    "vision_and_constraints",
+    "bed_mapping_and_soil_prep",
+    "crop_planning_and_calendar",
+    "seed_starting_and_early_tasks",
+    "season_maintenance_and_harvest_link"
+  ],
+  "phases": {
+    "vision_and_constraints": {
+      "id": "vision_and_constraints",
+      "label": "Vision & Constraints",
+      "goal": "Clarify goals for the garden season, including what to grow and why, based on household needs and limits.",
+      "priorityBias": 0.94,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "storehouse",
+        "garden"
+      ],
+      "steps": [
+        {
+          "id": "step.vision.householdGoals",
+          "label": "Define Household Garden Goals",
+          "description": "Capture your main reasons for gardening this season: food security, specific crops, children’s learning, herbs, or flowers.",
+          "domain": "storehouse",
+          "nodeId": "garden.planning.householdGoals",
+          "nodeType": "planner",
+          "sessionTemplateId": "garden.sessions.householdGoalPlanner",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "If goals aren’t defined, suggest this first so later decisions stay grounded."
+        },
+        {
+          "id": "step.vision.constraints",
+          "label": "Set Garden Constraints",
+          "description": "Document time, budget, water access, sunlight, and physical limitations that shape what’s realistic.",
+          "domain": "garden",
+          "nodeId": "garden.planning.constraintsPlanner",
+          "nodeType": "planner",
+          "sessionTemplateId": "garden.sessions.constraintsPlanner",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Helps keep the plan doable instead of overwhelming."
+        },
+        {
+          "id": "step.vision.storehouseGaps",
+          "label": "Review Storehouse Gaps & Targets",
+          "description": "Identify which foods you want the garden to supply or supplement, based on storehouse gaps and health goals.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.garden.gapReview",
+          "nodeType": "calculator",
+          "sessionTemplateId": "storehouse.sessions.gardenGapReview",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Aligns garden plans with actual household needs, not just seed catalogs."
+        }
+      ]
+    },
+    "bed_mapping_and_soil_prep": {
+      "id": "bed_mapping_and_soil_prep",
+      "label": "Bed Mapping & Soil Prep",
+      "goal": "Understand the physical layout, map beds/containers, and plan soil improvements before planting.",
+      "priorityBias": 0.93,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "garden",
+        "cleaning",
+        "animals"
+      ],
+      "steps": [
+        {
+          "id": "step.beds.mapSpaces",
+          "label": "Map Garden Beds & Containers",
+          "description": "Record each bed, container, or row: size, sun exposure, and access so planning tools can place crops accurately.",
+          "domain": "garden",
+          "nodeId": "garden.mapping.bedMapper",
+          "nodeType": "planner",
+          "sessionTemplateId": "garden.sessions.bedMapper",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Essential early step; unlocks location-aware planning."
+        },
+        {
+          "id": "step.beds.soilAssessment",
+          "label": "Assess Soil Condition",
+          "description": "Capture soil type, drainage, and any test results (pH, organic matter) for each main zone.",
+          "domain": "garden",
+          "nodeId": "garden.soil.assessment",
+          "nodeType": "calculator",
+          "sessionTemplateId": "garden.sessions.soilAssessment",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Suggested after mapping beds; informs crop choices and amendments."
+        },
+        {
+          "id": "step.beds.amendmentPlanner",
+          "label": "Plan Soil Amendments & Compost",
+          "description": "Decide which beds need compost, manure, cover crops, or mineral amendments, and in what order.",
+          "domain": "garden",
+          "nodeId": "garden.soil.amendmentPlanner",
+          "nodeType": "planner",
+          "sessionTemplateId": "garden.sessions.amendmentPlanner",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Helps schedule amendment sessions before planting windows open."
+        },
+        {
+          "id": "step.beds.soilPrepSession",
+          "label": "Run Soil Prep Session",
+          "description": "Use a guided work session to clear debris, spread compost/amendments, and shape beds.",
+          "domain": "garden",
+          "nodeId": "garden.session.soilPrep",
+          "nodeType": "session-template",
+          "sessionTemplateId": "garden.session.soilPrep",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "On a clear-weather day, this should be a top 'Now' option."
+        },
+        {
+          "id": "step.beds.pathAndToolCleanup",
+          "label": "Clear Paths & Organize Tools",
+          "description": "Run a short cleaning/organization session for garden paths, gates, and tool areas.",
+          "domain": "cleaning",
+          "nodeId": "cleaning.zoneSession.gardenPathsAndTools",
+          "nodeType": "session-template",
+          "sessionTemplateId": "cleaning.zoneSession.gardenPathsAndTools",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "Keeps future garden work sessions smoother and safer."
+        },
+        {
+          "id": "step.beds.animalFertilizerPlanning",
+          "label": "Plan Animal-Based Fertility Inputs",
+          "description": "If you keep animals, decide how and when to use manure or bedding safely for soil fertility.",
+          "domain": "animals",
+          "nodeId": "animals.garden.fertilityPlanner",
+          "nodeType": "planner",
+          "sessionTemplateId": "animals.sessions.gardenFertilityPlanner",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Connects animal care routines to garden health while respecting safety intervals."
+        }
+      ]
+    },
+    "crop_planning_and_calendar": {
+      "id": "crop_planning_and_calendar",
+      "label": "Crop Planning & Calendar",
+      "goal": "Choose crops, varieties, and placements; then generate a planting and succession calendar.",
+      "priorityBias": 0.95,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "garden",
+        "storehouse",
+        "preservation",
+        "cooking"
+      ],
+      "steps": [
+        {
+          "id": "step.crops.selectCrops",
+          "label": "Select Crops & Varieties",
+          "description": "Pick which crops and varieties to grow based on taste, storage, preservation, and health priorities.",
+          "domain": "garden",
+          "nodeId": "garden.planning.cropSelector",
+          "nodeType": "planner",
+          "sessionTemplateId": "garden.sessions.cropSelector",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Appears once goals, constraints, and storehouse gaps are known."
+        },
+        {
+          "id": "step.crops.layoutPlanner",
+          "label": "Create Garden Layout Plan",
+          "description": "Place crops into specific beds/containers with spacing, companion planting, and rotation in mind.",
+          "domain": "garden",
+          "nodeId": "garden.planning.layoutPlanner",
+          "nodeType": "planner",
+          "sessionTemplateId": "garden.sessions.layoutPlanner",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Unlocks location-aware planting sessions later."
+        },
+        {
+          "id": "step.crops.plantingCalendar",
+          "label": "Generate Planting & Succession Calendar",
+          "description": "Turn frost dates and crop preferences into a schedule for seed starting, transplanting, and direct sowing.",
+          "domain": "garden",
+          "nodeId": "garden.planning.plantingCalendar",
+          "nodeType": "calculator",
+          "sessionTemplateId": "garden.sessions.plantingCalendar",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Critical step; drives which planting sessions the 'Now' button surfaces."
+        },
+        {
+          "id": "step.crops.harvestTargets",
+          "label": "Set Harvest & Preservation Targets",
+          "description": "Decide which crops are for fresh eating, which for preservation, and rough target quantities.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.garden.harvestTargets",
+          "nodeType": "planner",
+          "sessionTemplateId": "storehouse.sessions.harvestTargets",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Enables better links to preservation and storehouse calculators later."
+        },
+        {
+          "id": "step.crops.preservationAlignment",
+          "label": "Align Crops with Preservation Plans",
+          "description": "Match crops and harvest windows to canning, dehydrating, and freezing sessions so you’re ready when abundance hits.",
+          "domain": "preservation",
+          "nodeId": "preservation.garden.alignmentPlanner",
+          "nodeType": "planner",
+          "sessionTemplateId": "preservation.sessions.gardenAlignmentPlanner",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Optional but powerful if you rely on preserved foods for off-season eating."
+        },
+        {
+          "id": "step.crops.cookingUseIdeas",
+          "label": "Link Garden Crops to Recipes",
+          "description": "Connect planned crops to favorite recipes and cooking sessions so harvest suggestions are practical.",
+          "domain": "cooking",
+          "nodeId": "cooking.recipes.gardenLinker",
+          "nodeType": "planner",
+          "sessionTemplateId": "cooking.sessions.gardenRecipeLinker",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Helps the app suggest ways to use garden produce rather than letting it languish."
+        }
+      ]
+    },
+    "seed_starting_and_early_tasks": {
+      "id": "seed_starting_and_early_tasks",
+      "label": "Seed Starting & Early Tasks",
+      "goal": "Guide initial hands-on work: seed starting, early direct sowing, irrigation checks, and protection.",
+      "priorityBias": 0.96,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "garden",
+        "cleaning"
+      ],
+      "steps": [
+        {
+          "id": "step.early.seedStartingSetup",
+          "label": "Set Up Seed Starting Area",
+          "description": "Prepare shelves, trays, labels, and lights (if used) for indoor or sheltered seed starting.",
+          "domain": "garden",
+          "nodeId": "garden.session.seedStartingSetup",
+          "nodeType": "session-template",
+          "sessionTemplateId": "garden.session.seedStartingSetup",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "Suggested before the first seed-starting date in the planting calendar."
+        },
+        {
+          "id": "step.early.seedStartingSession",
+          "label": "Run Seed Starting Session",
+          "description": "Follow a guided session to start seeds according to the calendar and layout plan.",
+          "domain": "garden",
+          "nodeId": "garden.session.seedStarting",
+          "nodeType": "session-template",
+          "sessionTemplateId": "garden.session.seedStarting",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "On seed-start dates, this should be a top 'Now' option."
+        },
+        {
+          "id": "step.early.directSowSession",
+          "label": "Run Early Direct-Sow Session",
+          "description": "Use a guided work session for hardy crops that can be sown directly once soil is workable.",
+          "domain": "garden",
+          "nodeId": "garden.session.earlyDirectSow",
+          "nodeType": "session-template",
+          "sessionTemplateId": "garden.session.earlyDirectSow",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "Shown when weather and soil conditions meet early sowing rules."
+        },
+        {
+          "id": "step.early.irrigationAndMulchCheck",
+          "label": "Check Irrigation & Mulch",
+          "description": "Walk beds and verify hoses, drip lines, watering cans, and mulch are ready or noted for improvement.",
+          "domain": "garden",
+          "nodeId": "garden.session.irrigationAndMulchCheck",
+          "nodeType": "session-template",
+          "sessionTemplateId": "garden.session.irrigationAndMulchCheck",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "Good 'Now' option when you have a small time window and fair weather."
+        },
+        {
+          "id": "step.early.pottingAreaCleanup",
+          "label": "Cleanup Potting & Work Areas",
+          "description": "Use a brief cleaning session to keep potting benches, greenhouses, or porches tidy and pleasant.",
+          "domain": "cleaning",
+          "nodeId": "cleaning.zoneSession.gardenPottingArea",
+          "nodeType": "session-template",
+          "sessionTemplateId": "cleaning.zoneSession.gardenPottingArea",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "Useful after messy seed-starting or potting sessions."
+        }
+      ]
+    },
+    "season_maintenance_and_harvest_link": {
+      "id": "season_maintenance_and_harvest_link",
+      "label": "Season Maintenance & Harvest Link",
+      "goal": "Establish maintenance loops and connect harvest logging to storehouse, preservation, and cooking sessions.",
+      "priorityBias": 0.9,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "garden",
+        "storehouse",
+        "preservation",
+        "cooking"
+      ],
+      "steps": [
+        {
+          "id": "step.maintenance.recurringGardenSessions",
+          "label": "Schedule Recurring Garden Work Sessions",
+          "description": "Create recurring sessions for weeding, watering, staking, and pest checks across the season.",
+          "domain": "garden",
+          "nodeId": "garden.session.maintenanceScheduler",
+          "nodeType": "planner",
+          "sessionTemplateId": "garden.sessions.maintenanceScheduler",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Transforms random garden chores into predictable sessions."
+        },
+        {
+          "id": "step.maintenance.harvestLoggingConfig",
+          "label": "Configure Harvest Logging & Sync",
+          "description": "Ensure harvest logging automatically updates storehouse inventory and triggers preservation suggestions.",
+          "domain": "garden",
+          "nodeId": "garden.harvest.logger",
+          "nodeType": "calculator",
+          "sessionTemplateId": "garden.sessions.harvestLoggingSetup",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "One-time or occasional setup; increases automation across the season."
+        },
+        {
+          "id": "step.maintenance.harvestToStorehouse",
+          "label": "Run Harvest Intake Session",
+          "description": "Use a guided intake session to weigh or count harvested items and add them to the storehouse.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.inventory.harvestIntake",
+          "nodeType": "session-template",
+          "sessionTemplateId": "storehouse.inventory.harvestIntake",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "Suggested on heavy harvest days so nothing gets lost or forgotten."
+        },
+        {
+          "id": "step.maintenance.harvestPreservationSession",
+          "label": "Run Harvest Preservation Session",
+          "description": "Launch canning, freezing, or dehydrating sessions when harvest volume or spoilage risk is high.",
+          "domain": "preservation",
+          "nodeId": "preservation.session.gardenHarvest",
+          "nodeType": "session-template",
+          "sessionTemplateId": "preservation.session.gardenHarvest",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "Top 'Now' candidate when the system detects high harvest backlog."
+        },
+        {
+          "id": "step.maintenance.harvestToCookingIdeas",
+          "label": "Suggest Recipes for Fresh Harvest",
+          "description": "Open a panel or session showing recipes and batch cooking options using today’s harvest.",
+          "domain": "cooking",
+          "nodeId": "cooking.recipes.fromHarvest",
+          "nodeType": "planner",
+          "sessionTemplateId": "cooking.sessions.fromHarvestSuggestions",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Great follow-up after harvest intake for same-day or next-day meals."
+        },
+        {
+          "id": "step.maintenance.endOfSeasonNotes",
+          "label": "Capture Season Notes & Lessons",
+          "description": "At the end of the season, record what grew well, what failed, and what to adjust next year.",
+          "domain": "garden",
+          "nodeId": "garden.planning.seasonJournal",
+          "nodeType": "planner",
+          "sessionTemplateId": "garden.sessions.seasonJournal",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Helps each new season setup become smarter than the last."
+        }
+      ]
+    }
+  }
+}

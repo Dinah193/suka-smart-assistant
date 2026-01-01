@@ -1,0 +1,568 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "2025-10-31T13:55:00-05:00",
+  "description": "Meat yield curve for hair sheep – Katahdin. Built for Suka Smart Assistant so that lamb/mutton butchery → storehouse → meal planner → garden → cleaning → reverse generation all talk to each other. Katahdin chosen because you already have it in your business context (sheep + butchery + blood meal) and it’s a low-maintenance, meat-forward, parasite-aware breed.",
+  "__notes": [
+    "This follows the same multi-domain pattern as beef_brangus.json, beef_senepol.json, and cattle_dexter.json so your ImportService / ImportNormalizer can treat all yieldCurves uniformly.",
+    "Because sheep → smaller carcass, this file is more preservation- and feast-friendly, and to match your Torah-compliant context, there is no unclean cross-contamination.",
+    "Reverse generation is especially useful here: if your meal planner or feast calendar says ‘we need lamb for Feast day on X’, this file gives the runtime enough info to generate an animal plan + butchery session + cleaning + garden sides.",
+    "User favorites: users can save their preferred cut mix (more ground vs more roasts vs more stew) in Dexie; they don’t edit this file directly."
+  ],
+  "animal": {
+    "species": "sheep",
+    "breed": "Katahdin",
+    "class": "lamb/mutton",
+    "hair_sheep": true,
+    "typical_live_weight_lbs": [90, 110, 130, 150],
+    "default_live_weight_lbs": 120,
+    "live_to_hanging_yield_pct": 0.5,
+    "hanging_to_carcass_yield_pct": 0.72,
+    "default_hanging_days": 3,
+    "butchery_style_default": "whole-carcass-or-halves",
+    "butchery_supported_styles": [
+      "whole-carcass-or-halves",
+      "roasts + ground",
+      "stew-heavy",
+      "bbq/smoking",
+      "halal/torah-compliant-no-unclean-cross-contamination"
+    ],
+    "torah_compliant_profile": {
+      "allow_unclean_animals": false,
+      "separate_tools_required": true,
+      "separate_surfaces_required": true,
+      "blood_draining_required": true,
+      "notes": "Pairs with your USDA/Torah facility design (no pork; separate tables; sheep-specific cleaning)."
+    }
+  },
+  "yield_model": {
+    "formula_hint": "carcass = live_weight * live_to_hanging_yield_pct * hanging_to_carcass_yield_pct",
+    "example": {
+      "live_weight_lbs": 120,
+      "live_to_hanging_yield_pct": 0.5,
+      "hanging_to_carcass_yield_pct": 0.72,
+      "calculated_hanging_weight_lbs": 60,
+      "calculated_carcass_weight_lbs": 43.2
+    },
+    "primal_breakdown_pct": {
+      "leg": 0.28,
+      "shoulder": 0.22,
+      "loin": 0.12,
+      "breast_flap": 0.08,
+      "neck_shank_trim": 0.12,
+      "fat_bones_other": 0.18
+    },
+    "retail_cut_defaults": [
+      {
+        "cut_id": "lamb_leg_whole",
+        "label": "Lamb Leg (Whole or Half)",
+        "source_primals": ["leg"],
+        "default_pct_of_carcass": 0.15,
+        "storehouse_section_hint": "Meat → Lamb → Roasts / Feast",
+        "mealplanner_tags": [
+          "feast",
+          "holy-day",
+          "sabbath",
+          "special-occasion"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "marinate-freeze"],
+        "cleaning_profile_ref": "sheep_meat_sanitation"
+      },
+      {
+        "cut_id": "lamb_shoulder_roast",
+        "label": "Lamb Shoulder Roast",
+        "source_primals": ["shoulder"],
+        "default_pct_of_carcass": 0.13,
+        "storehouse_section_hint": "Meat → Lamb → Roasts",
+        "mealplanner_tags": [
+          "slow-roast",
+          "Mediterranean",
+          "Middle-Eastern"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "sheep_meat_sanitation"
+      },
+      {
+        "cut_id": "lamb_chops",
+        "label": "Lamb Chops / Loin",
+        "source_primals": ["loin"],
+        "default_pct_of_carcass": 0.1,
+        "storehouse_section_hint": "Meat → Lamb → Chops",
+        "mealplanner_tags": [
+          "grill",
+          "pan-sear",
+          "date-night"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["vac-seal", "freeze"],
+        "cleaning_profile_ref": "sheep_meat_sanitation"
+      },
+      {
+        "cut_id": "lamb_stew_cubes",
+        "label": "Lamb Stew / Tagine Cubes",
+        "source_primals": ["shoulder", "neck_shank_trim"],
+        "default_pct_of_carcass": 0.12,
+        "storehouse_section_hint": "Meat → Lamb → Stew / Tagine",
+        "mealplanner_tags": [
+          "tagine",
+          "curry",
+          "okra-lamb",
+          "pepper-soup",
+          "ramadan-style-stews"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "pressure-can"],
+        "cleaning_profile_ref": "sheep_meat_sanitation"
+      },
+      {
+        "cut_id": "lamb_ground",
+        "label": "Ground Lamb",
+        "source_primals": ["shoulder", "breast_flap", "trim"],
+        "default_pct_of_carcass": 0.14,
+        "storehouse_section_hint": "Meat → Lamb → Ground / Kebab",
+        "mealplanner_tags": [
+          "kebab",
+          "kofta",
+          "meatballs",
+          "Mediterranean-bowls"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "sheep_meat_sanitation"
+      },
+      {
+        "cut_id": "lamb_bones",
+        "label": "Lamb Bones (Stock / Broth)",
+        "source_primals": ["fat_bones_other"],
+        "default_pct_of_carcass": 0.06,
+        "storehouse_section_hint": "Meat → Bones / Broth Base",
+        "mealplanner_tags": [
+          "broth",
+          "bone-soup"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "roast-then-freeze"],
+        "cleaning_profile_ref": "sheep_meat_sanitation"
+      },
+      {
+        "cut_id": "lamb_organs",
+        "label": "Lamb Organs (liver, heart, kidney)",
+        "source_primals": ["offal"],
+        "default_pct_of_carcass": 0.02,
+        "storehouse_section_hint": "Meat → Lamb → Organs",
+        "mealplanner_tags": [
+          "nutrient-dense",
+          "traditional",
+          "dog-food"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "sheep_meat_sanitation"
+      }
+    ]
+  },
+  "storehouse_mapping": {
+    "purpose": "Map Katahdin lamb/mutton output → storehouse goals → inventory execution.",
+    "sections": [
+      {
+        "id": "STH-LAMB-FRESH",
+        "label": "Meat → Lamb → Fresh / Chilled",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "lamb_leg_whole",
+          "lamb_shoulder_roast",
+          "lamb_chops"
+        ],
+        "grocery_inspo": [
+          "Mediterranean groceries – lamb",
+          "Halal butchers – fresh lamb"
+        ]
+      },
+      {
+        "id": "STH-LAMB-FROZEN",
+        "label": "Meat → Lamb → Frozen",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "lamb_stew_cubes",
+          "lamb_ground",
+          "lamb_bones"
+        ],
+        "grocery_inspo": [
+          "Costco – frozen lamb",
+          "Restaurant supply – frozen lamb legs"
+        ]
+      },
+      {
+        "id": "STH-LAMB-PRESERVED",
+        "label": "Meat → Lamb → Preserved / Canned / Smoked",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "lamb_stew_cubes",
+          "lamb_bones"
+        ],
+        "grocery_inspo": [
+          "North African pantry",
+          "Middle Eastern dried meats"
+        ]
+      }
+    ],
+    "reverse_generation_rules": [
+      {
+        "id": "RG-FEAST-LAMB",
+        "when_event": "mealplanner.requests.meat.lamb.feast",
+        "action": "estimate feast portions → map to lamb legs + shoulders → map to live sheep → emit automation.schedule.request (butchery + cleaning + storehouse)",
+        "notes": "Use for Sukkot / Hanukkah-style feasts (your 2025-10-30 Hanukkah research)."
+      },
+      {
+        "id": "RG-STOREHOUSE-LAMB",
+        "when_event": "storehouse.goal.short.lamb-ground",
+        "action": "trigger animal.acquisition.plan('sheep-katahdin') and lamb-butchery.session.generate"
+      }
+    ]
+  },
+  "meal_planner_hooks": {
+    "default_meal_templates": [
+      {
+        "id": "mt-lamb-feast-leg",
+        "label": "Lamb Feast – Leg + Garden Sides",
+        "uses_cuts": [
+          {
+            "cut_id": "lamb_leg_whole",
+            "qty_lb": 5
+          }
+        ],
+        "suggested_sides": [
+          "roasted root veg",
+          "flatbreads",
+          "fermented veg",
+          "garden salad"
+        ],
+        "garden_suggestions": [
+          "carrot",
+          "beet",
+          "garlic",
+          "onion",
+          "lettuce",
+          "herbs (mint, rosemary)"
+        ],
+        "cleaning_profiles": [
+          "sheep_meat_sanitation",
+          "oven_tray_deep_clean"
+        ]
+      },
+      {
+        "id": "mt-lamb-tagine",
+        "label": "Lamb Tagine / Stew",
+        "uses_cuts": [
+          {
+            "cut_id": "lamb_stew_cubes",
+            "qty_lb": 2
+          }
+        ],
+        "suggested_sides": [
+          "couscous",
+          "rice",
+          "flatbread"
+        ],
+        "garden_suggestions": [
+          "tomato",
+          "onion",
+          "chickpea (if grown/stocked)",
+          "pepper"
+        ],
+        "cleaning_profiles": [
+          "sheep_meat_sanitation"
+        ]
+      },
+      {
+        "id": "mt-lamb-ground-kebab",
+        "label": "Ground Lamb Kebab Bowls",
+        "uses_cuts": [
+          {
+            "cut_id": "lamb_ground",
+            "qty_lb": 1.5
+          }
+        ],
+        "suggested_sides": [
+          "rice",
+          "salad",
+          "pita"
+        ],
+        "garden_suggestions": [
+          "cucumber",
+          "tomato",
+          "greens",
+          "herbs"
+        ],
+        "cleaning_profiles": [
+          "sheep_meat_sanitation"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "can_generate_animal_plan": true,
+      "handler_event": "animal.plan.requested",
+      "notes": "When a feast day meal plan is locked, emit this so the Animals module can line up sheep on the correct date and schedule cleaning."
+    }
+  },
+  "garden_integration": {
+    "purpose": "Connect lamb-heavy meal plans to herbs, roots, and salad crops that typically accompany lamb in Afro-Mediterranean/Middle Eastern dishes.",
+    "crops_to_recommend": [
+      {
+        "crop": "garlic",
+        "use_case": "marinades for lamb legs and shoulders",
+        "harvest_window": "mid-summer",
+        "preservation": ["dry", "powder"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "onion",
+        "use_case": "tagine base, stew base",
+        "harvest_window": "late summer",
+        "preservation": ["cure", "store dry"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "carrot",
+        "use_case": "roasted sides for feasts",
+        "harvest_window": "spring-fall",
+        "preservation": ["pressure can", "dehydrate"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "herbs_mint_rosemary",
+        "use_case": "classic lamb pairings",
+        "harvest_window": "warm season",
+        "preservation": ["dry", "freeze"],
+        "cleaning_profile_ref": "garden_light"
+      },
+      {
+        "crop": "leafy_greens",
+        "use_case": "fresh salad with lamb/kebab",
+        "harvest_window": "cool seasons",
+        "preservation": ["blanch-freeze"],
+        "cleaning_profile_ref": "garden_light"
+      }
+    ],
+    "reverse_generation": {
+      "when_meat_menu_fixed_event": "garden.plan.adjust.requested",
+      "notes": "If user schedules several lamb feasts in fall, ask garden to ensure fall carrots, garlic in storage, and herbs are dried."
+    }
+  },
+  "animal_care_and_butchery": {
+    "pre_slaughter_care_checklist": [
+      "fasting_window_8hr",
+      "clean_water_available",
+      "low_stress_handling",
+      "inspect_for_disease",
+      "torah_compliant_tools_ready"
+    ],
+    "butchery_session_template": {
+      "id": "butchery-session-sheep-katahdin",
+      "label": "Katahdin – Household Lamb Butchery",
+      "estimated_duration_hours": 2,
+      "roles_needed": [
+        "primary-butcher",
+        "assistant",
+        "sanitation-runner"
+      ],
+      "outputs": [
+        "whole_or_halves",
+        "retail_cuts",
+        "bones",
+        "offal",
+        "fat_for_rendering"
+      ],
+      "emits_events": [
+        "inventory.add.requested",
+        "storehouse.update.requested",
+        "cleaning.plan.requested",
+        "mealplan.refresh.requested",
+        "garden.plan.adjust.requested"
+      ],
+      "scheduling": {
+        "supports_user_favorites": true,
+        "supports_recurring": true,
+        "supports_coop_mode": true,
+        "coop_mode_notes": "Multiple households can bring sheep and share knives/tables → Cleaning module must schedule a bigger sanitation job."
+      }
+    },
+    "cleaning_after_butchery": {
+      "cleaning_profile_id": "sheep_meat_sanitation",
+      "label": "Post-Lamb Butchery Sanitation",
+      "tasks": [
+        "bag offal / byproducts for compost/render/blood-meal line",
+        "wash tables, knives, tubs",
+        "sanitize with torah-safe cleaner",
+        "mop floor",
+        "launder aprons/towels"
+      ],
+      "emits_events": [
+        "cleaning.log.added",
+        "inventory.cleaning-supplies.decrement"
+      ]
+    }
+  },
+  "cleaning_integration": {
+    "profiles": [
+      {
+        "id": "sheep_meat_sanitation",
+        "label": "Sheep / Lamb – Meat Sanitation",
+        "zone": "Kitchen / Butchery Area",
+        "supplies": [
+          "hot_water",
+          "food_safe_disinfectant",
+          "scrub_brush",
+          "mop_bucket",
+          "laundry_detergent"
+        ]
+      },
+      {
+        "id": "meat_standard_sanitation",
+        "label": "Meat – Standard Sanitation",
+        "zone": "Kitchen",
+        "supplies": [
+          "dish_soap",
+          "surface_spray",
+          "towels"
+        ]
+      },
+      {
+        "id": "garden_root",
+        "label": "Garden Root Veg Cleanup",
+        "zone": "Utility / Outdoor Sink",
+        "supplies": [
+          "hose",
+          "brush",
+          "drain_screens"
+        ]
+      },
+      {
+        "id": "garden_light",
+        "label": "Garden Light Wash",
+        "zone": "Kitchen",
+        "supplies": [
+          "sink_sanitizer",
+          "drying_rack"
+        ]
+      },
+      {
+        "id": "oven_tray_deep_clean",
+        "label": "Oven/Tray Deep Clean (post-feast-lamb)",
+        "zone": "Kitchen",
+        "supplies": [
+          "degreaser",
+          "scrub_pad"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "when_butchery_scheduled_event": "cleaning.session.auto-created",
+      "when_feast_lamb_event": "cleaning.session.suggested"
+    }
+  },
+  "scheduling_and_favorites": {
+    "can_be_favorited": true,
+    "favorite_key": "yieldcurve:meat:sheep_katahdin",
+    "suggested_schedules": [
+      {
+        "id": "sched-lamb-spring-feast",
+        "label": "Lamb – Spring Feast Cycle",
+        "rule": "FREQ=YEARLY;BYMONTH=4;BYDAY=SU;BYSETPOS=1",
+        "creates": [
+          "butchery-session-sheep-katahdin",
+          "cleaning:sheep_meat_sanitation",
+          "storehouse:update",
+          "mealplan:refresh",
+          "garden.plan.adjust.requested"
+        ]
+      },
+      {
+        "id": "sched-lamb-quarter",
+        "label": "Lamb Every Quarter",
+        "rule": "FREQ=MONTHLY;INTERVAL=3;BYDAY=SA;BYSETPOS=1",
+        "creates": [
+          "butchery-session-sheep-katahdin"
+        ]
+      }
+    ],
+    "shared_orchestration": {
+      "event_bus_path": "window.__suka.eventBus",
+      "events_emitted": [
+        "yieldcurve.loaded",
+        "yieldcurve.butchery.session.generated",
+        "storehouse.goal.derived",
+        "cleaning.session.derived",
+        "mealplan.refresh.requested",
+        "garden.plan.adjust.requested"
+      ],
+      "events_listened_for": [
+        "automation.schedule.request",
+        "mealplanner.menu.locked",
+        "storehouse.goal.short",
+        "garden.plan.adjust.requested"
+      ]
+    }
+  },
+  "reverse_generation": {
+    "enabled": true,
+    "scenarios": [
+      {
+        "id": "RG-LAMB-01",
+        "source": "meal-planner",
+        "input_example": {
+          "lamb_feast_servings": 15,
+          "lamb_stew_meals": 4
+        },
+        "output_example": {
+          "required_carcass_lb": 90,
+          "required_live_sheep": 2,
+          "suggested_date": "next-feast-window",
+          "auto_cleaning_sessions": [
+            "sheep_meat_sanitation"
+          ]
+        }
+      },
+      {
+        "id": "RG-LAMB-02",
+        "source": "storehouse",
+        "input_example": {
+          "target_section": "STH-LAMB-FROZEN",
+          "target_lb": 60
+        },
+        "output_example": {
+          "required_carcass_lb": 90,
+          "required_live_sheep": 2,
+          "notes": "2 Katahdin at ~43 lb carcass each ≈ 86 lb, round up to 2 for simplicity."
+        }
+      }
+    ],
+    "notes": "UI should show 'Generate Lamb Butchery Day' and 'Generate Feast Lamb Kit' based on these."
+  },
+  "user_overrides_placeholder": {
+    "explanation": "User-specific data belongs in Dexie/local DB, not in this JSON.",
+    "keys": [
+      "animal.live_to_hanging_yield_pct",
+      "animal.hanging_to_carcass_yield_pct",
+      "yield_model.retail_cut_defaults",
+      "scheduling_and_favorites.suggested_schedules"
+    ]
+  },
+  "interop": {
+    "import_sources_supported": [
+      "csv-butchery-yields",
+      "google-sheets-yields",
+      "extension.capture.butchery",
+      "pinterest-board-to-planner",
+      "recipe-site-lamb-detector"
+    ],
+    "export_targets_supported": [
+      "household.storehouse",
+      "household.inventory",
+      "community.coop-planner",
+      "family-fund.hub",
+      "pdf-labels"
+    ]
+  }
+}

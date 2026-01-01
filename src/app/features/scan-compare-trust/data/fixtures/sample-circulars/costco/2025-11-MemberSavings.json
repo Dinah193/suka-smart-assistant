@@ -1,0 +1,226 @@
+{
+  "provider": "costco",
+  "circularId": "costco-2025-11-membersavings",
+  "title": "Costco Member-Only Savings • Nov 1 – Nov 24, 2025",
+  "period": { "fromISO": "2025-11-01T05:00:00Z", "toISO": "2025-11-24T23:59:59Z" },
+  "meta": {
+    "source": "pdf_ocr",
+    "downloadedAtISO": "2025-11-01T09:10:00Z",
+    "timezone": "America/New_York",
+    "notes": "Fixture: holiday pantry + household focus; warehouse-only pricing."
+  },
+
+  "storeScope": [
+    { "storeId": "costco-0791", "name": "Costco #791" }
+  ],
+
+  "userContext": {
+    "pinnedSchedules": [
+      { "type": "schedule", "id": "sched-grocery-wed", "name": "Wednesday Grocery Run" }
+    ]
+  },
+
+  "items": [
+    {
+      "sku": "C-EVOO-2L",
+      "title": "Extra Virgin Olive Oil — 2L",
+      "brand": "Kirkland Signature",
+      "categoryPath": ["Grocery", "Pantry", "Oils"],
+      "package": { "quantity": 2, "unit": "l", "normalized": { "quantity": 2000, "unit": "ml" } },
+      "price": { "amount": 13.99, "currency": "USD" },
+      "unitPrice": { "unit": "per_l", "amount": 6.995 },
+      "channel": "in_store",
+      "promo": {
+        "type": "member_instant_savings",
+        "tags": ["Pantry Essentials", "Holiday Cooking"]
+      },
+      "candidateCoupons": [],
+      "cycleHints": { "pattern": "monthly" },
+      "images": [
+        "https://fixtures.suka.local/img/costco/evoo-2l.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Extra Virgin Olive Oil", "2L"],
+        "regex": "Olive\\s*Oil\\s*2L"
+      }
+    },
+
+    {
+      "sku": "C-BUTR-4LB",
+      "title": "Salted Butter — 4 lb (Quarters)",
+      "brand": "Kirkland Signature",
+      "categoryPath": ["Grocery", "Dairy", "Butter"],
+      "package": { "quantity": 4, "unit": "lb", "normalized": { "quantity": 1814.37, "unit": "g" } },
+      "price": { "amount": 12.49, "currency": "USD" },
+      "unitPrice": { "unit": "per_g", "amount": 0.0069 },
+      "channel": "in_store",
+      "promo": {
+        "type": "member_instant_savings",
+        "tags": ["Holiday Baking"],
+        "limitPerCustomer": 2
+      },
+      "candidateCoupons": [],
+      "cycleHints": { "pattern": "seasonal" },
+      "images": [
+        "https://fixtures.suka.local/img/costco/butter-4lb.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Butter", "4 LB", "Quarters"],
+        "regex": "Butter\\s*4\\s*lb"
+      }
+    },
+
+    {
+      "sku": "C-APF-25LB",
+      "title": "All-Purpose Flour — 25 lb",
+      "brand": "Kirkland Signature",
+      "categoryPath": ["Grocery", "Baking", "Flour"],
+      "package": { "quantity": 25, "unit": "lb", "normalized": { "quantity": 11339.81, "unit": "g" } },
+      "price": { "amount": 11.99, "currency": "USD" },
+      "unitPrice": { "unit": "per_g", "amount": 0.00106 },
+      "channel": "in_store",
+      "promo": {
+        "type": "member_instant_savings",
+        "tags": ["Holiday Baking", "Bulk"],
+        "limitPerCustomer": 1
+      },
+      "candidateCoupons": [],
+      "cycleHints": { "pattern": "seasonal" },
+      "images": [
+        "https://fixtures.suka.local/img/costco/flour-25lb.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["All-Purpose Flour", "25 LB"],
+        "regex": "Flour\\s*25\\s*lb"
+      }
+    },
+
+    {
+      "sku": "C-ML-001",
+      "upc": "085239000715",
+      "title": "Lamb Breakfast Sausage — 16 oz",
+      "brand": "Butcher’s Table",
+      "categoryPath": ["Grocery", "Meat", "Lamb"],
+      "package": { "quantity": 16, "unit": "oz", "normalized": { "quantity": 453.59, "unit": "g" } },
+      "price": { "amount": 8.29, "currency": "USD" },
+      "unitPrice": { "unit": "per_g", "amount": 0.0183 },
+      "channel": "in_store",
+      "promo": {
+        "type": "member_instant_savings",
+        "tags": ["Member Savings", "Meat"],
+        "limitPerCustomer": 5
+      },
+      "candidateCoupons": [
+        { "id": "cpn-lamb-2off", "group": "store", "activeDuringWeek": false, "note": "Oct coupon expired 10/31; ensure simulator rejects." }
+      ],
+      "cycleHints": { "pattern": "monthly" },
+      "images": [
+        "https://fixtures.suka.local/img/costco/lamb-sausage-16oz.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Lamb Breakfast Sausage", "16 OZ"],
+        "regex": "Lamb\\s*Breakfast\\s*Sausage"
+      }
+    },
+
+    {
+      "sku": "C-PAPR-TWL-12",
+      "title": "Paper Towels — 12 Mega Rolls",
+      "brand": "Kirkland Signature",
+      "categoryPath": ["Household", "Paper", "Paper Towels"],
+      "package": { "quantity": 12, "unit": "ct", "normalized": { "quantity": 12, "unit": "ct" } },
+      "price": { "amount": 21.99, "currency": "USD" },
+      "unitPrice": { "unit": "per_ct", "amount": 1.8325 },
+      "channel": "in_store",
+      "promo": {
+        "type": "member_instant_savings",
+        "tags": ["Bulk", "Warehouse Only"],
+        "limitPerCustomer": 1
+      },
+      "candidateCoupons": [],
+      "cycleHints": { "pattern": "monthly" },
+      "images": [
+        "https://fixtures.suka.local/img/costco/kirkland-paper-towels-12.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Paper Towels", "12 Mega Rolls"],
+        "regex": "Paper\\s*Towels\\s*12"
+      }
+    },
+
+    {
+      "sku": "C-PARCH-2PK",
+      "title": "Parchment Paper — 2 Pack",
+      "brand": "Kirkland Signature",
+      "categoryPath": ["Household", "Kitchen", "Food Storage & Wraps"],
+      "package": { "quantity": 2, "unit": "ct", "normalized": { "quantity": 2, "unit": "ct" } },
+      "price": { "amount": 11.49, "currency": "USD" },
+      "unitPrice": { "unit": "per_ct", "amount": 5.745 },
+      "channel": "in_store",
+      "promo": {
+        "type": "member_instant_savings",
+        "tags": ["Holiday Baking", "Kitchen"]
+      },
+      "candidateCoupons": [],
+      "cycleHints": { "pattern": "seasonal" },
+      "images": [
+        "https://fixtures.suka.local/img/costco/parchment-2pk.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Parchment Paper", "2 Pack"],
+        "regex": "Parchment\\s*Paper"
+      }
+    },
+
+    {
+      "sku": "C-FRZN-WAFF-60",
+      "title": "Frozen Waffles — 60 ct Club Pack",
+      "brand": "Homestead",
+      "categoryPath": ["Grocery", "Frozen", "Breakfast"],
+      "package": { "quantity": 60, "unit": "ct", "normalized": { "quantity": 60, "unit": "ct" } },
+      "price": { "amount": 18.99, "currency": "USD" },
+      "unitPrice": { "unit": "per_ct", "amount": 0.3165 },
+      "channel": "in_store",
+      "promo": {
+        "type": "member_instant_savings",
+        "tags": ["Club Pack", "Freezer Staple"],
+        "mixAndMatchGroup": "frozen-breakfast"
+      },
+      "candidateCoupons": [
+        { "id": "cpn-waff-20pct", "group": "store", "provider": "sams", "note": "Cross-retailer; should not apply at Costco." }
+      ],
+      "cycleHints": { "pattern": "biweekly" },
+      "images": [
+        "https://fixtures.suka.local/img/costco/frozen-waffles-60ct.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Frozen Waffles", "60 CT"],
+        "regex": "Waffles\\s*60"
+      }
+    },
+
+    {
+      "sku": "C-ROTIS-CHICK",
+      "title": "Rotisserie Chicken",
+      "brand": "Kirkland Signature",
+      "categoryPath": ["Grocery", "Prepared Foods", "Rotisserie"],
+      "package": { "quantity": 1, "unit": "ct", "normalized": { "quantity": 1, "unit": "ct" } },
+      "price": { "amount": 4.99, "currency": "USD" },
+      "unitPrice": { "unit": "per_ct", "amount": 4.99 },
+      "channel": "in_store",
+      "promo": {
+        "type": "everyday_price",
+        "tags": ["Warehouse Staple"]
+      },
+      "candidateCoupons": [],
+      "cycleHints": { "pattern": "irregular" },
+      "images": [
+        "https://fixtures.suka.local/img/costco/rotisserie-chicken.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Rotisserie Chicken"],
+        "regex": "Rotisserie\\s*Chicken"
+      }
+    }
+  ]
+}

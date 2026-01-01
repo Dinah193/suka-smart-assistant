@@ -1,0 +1,246 @@
+{
+  "version": "1.0.0",
+  "updatedAt": "2025-10-20T22:45:00Z",
+  "template": {
+    "id": "tpl_5day_quick_lunches_v1",
+    "title": "5-Day Quick Lunches",
+    "subtitle": "Fast, light, repeat-smart, and grocery-friendly",
+    "timezone": "America/Chicago",
+    "status": "planned",
+    "description": "Generates five weekday lunches that are quick to prep (≤20m active), easy to scale, and diverse across protein and cuisine. Prioritizes no-cook or reheat-friendly items when Sabbath guard is active.",
+    "dateRange": {
+      "lengthDays": 5,
+      "startPolicy": "next-weekday",
+      "allowWeekend": false
+    },
+    "constraints": {
+      "peopleCount": 4,
+      "budget": { "currency": "USD", "maxPerDay": 15 },
+      "dietaryFlags": [],
+      "excludeAllergens": [],
+      "applianceAvailability": ["stovetop", "oven", "instant-pot", "air-fryer"],
+      "timeWindows": [
+        { "daysOfWeek": ["Mon", "Tue", "Wed", "Thu", "Fri"], "from": "11:30", "to": "13:30" }
+      ],
+      "fastingRules": { "mode": "none" },
+      "nutritionTargets": { "kcalPerDay": 2000, "protein_g": 100, "carbs_g": 200, "fat_g": 70 },
+      "sabbathGuard": { "enabled": true, "windows": [], "policy": "defer" }
+    },
+    "groceryOptions": {
+      "storeSelector": "default",
+      "includeHave": false,
+      "collapseDuplicates": true,
+      "allowSubstitutions": true,
+      "householdItems": true
+    },
+    "selection": {
+      "globalFilters": {
+        "courseAnyOf": ["lunch", "salad", "sandwich", "soup", "freezer-meal"],
+        "effortAnyOf": ["very-easy", "easy"],
+        "maxActiveMinutes": 20,
+        "maxTotalMinutes": 40,
+        "disallowAppliancesAnyOf": ["pressure_canner", "smoker"],
+        "preferSabbathFriendly": true
+      },
+      "diversity": {
+        "minUniqueCuisines": 3,
+        "proteinRotation": {
+          "maxRepeatPer5": 2,
+          "buckets": {
+            "poultry": ["chicken", "turkey"],
+            "red-meat": ["beef", "lamb", "goat"],
+            "seafood": ["fish", "shrimp", "tuna"],
+            "veg": ["tofu", "tempeh", "beans", "lentils", "egg"],
+            "deli": ["cold-cuts"]
+          }
+        },
+        "avoidSameCuisineOnConsecutiveDays": true
+      },
+      "fallbacks": {
+        "noCook": ["salad", "sandwich", "dip", "condiment", "preserve"],
+        "reheatFriendly": ["freezer-meal", "soup", "stew"]
+      }
+    },
+    "slots": [
+      {
+        "id": "slot_d0_lunch",
+        "relativeDate": { "offsetDays": 0 },
+        "mealType": "lunch",
+        "status": "planned",
+        "servings": 4,
+        "strategy": {
+          "preferCourse": ["salad", "sandwich", "lunch"],
+          "preferCuisines": ["mediterranean", "mexican", "american-classic", "japanese", "west-african"],
+          "rules": [
+            { "id": "max-active-20", "where": "recipe.time.prepMinutes + recipe.steps[*].duration.activeMinutes <= 20" },
+            { "id": "gear-simple", "where": "count(resources where kind in ['appliance','tool']) <= 3" }
+          ]
+        },
+        "notes": "Kick off with greens or handhelds."
+      },
+      {
+        "id": "slot_d1_lunch",
+        "relativeDate": { "offsetDays": 1 },
+        "mealType": "lunch",
+        "status": "planned",
+        "servings": 4,
+        "strategy": {
+          "preferCourse": ["soup", "lunch", "sandwich"],
+          "preferCuisines": ["thai", "italian", "korean", "caribbean"],
+          "rules": [
+            { "id": "one-pot-or-cold", "where": "tags contains 'one-pot' OR course in ['salad','sandwich']" }
+          ]
+        }
+      },
+      {
+        "id": "slot_d2_lunch",
+        "relativeDate": { "offsetDays": 2 },
+        "mealType": "lunch",
+        "status": "planned",
+        "servings": 4,
+        "strategy": {
+          "preferCourse": ["lunch", "salad"],
+          "preferCuisines": ["greek", "levantine", "mediterranean", "mexican"],
+          "rules": [
+            { "id": "grain-bowl-boost", "where": "tags contains 'grain-bowl' OR title ~ /bowl/i" }
+          ]
+        }
+      },
+      {
+        "id": "slot_d3_lunch",
+        "relativeDate": { "offsetDays": 3 },
+        "mealType": "lunch",
+        "status": "planned",
+        "servings": 4,
+        "strategy": {
+          "preferCourse": ["sandwich", "lunch", "soup"],
+          "preferCuisines": ["japanese", "american-classic", "vietnamese", "tex-mex"],
+          "rules": [
+            { "id": "batch-friendly", "where": "classifiers.tags contains 'freezer-meal' OR ingredients.length <= 10" }
+          ]
+        }
+      },
+      {
+        "id": "slot_d4_lunch",
+        "relativeDate": { "offsetDays": 4 },
+        "mealType": "lunch",
+        "status": "planned",
+        "servings": 4,
+        "strategy": {
+          "preferCourse": ["freezer-meal", "salad", "sandwich", "lunch"],
+          "preferCuisines": ["mexican", "italian", "mediterranean", "southern-us"],
+          "rules": [
+            { "id": "friday-sabbath-tilt", "where": "sabbathGuardActive(date) ? course in ['freezer-meal','salad','sandwich'] : true" }
+          ]
+        },
+        "notes": "Lean no-cook/reheat for pre-Sabbath."
+      }
+    ],
+    "automation": {
+      "emit": [
+        { "on": "plan-created", "topic": "planner.template.created", "payload": { "templateId": "tpl_5day_quick_lunches_v1" } },
+        { "on": "slot-prep-due", "topic": "meal.prep.reminder" },
+        { "on": "shopping-generated", "topic": "grocery.list.ready" }
+      ]
+    },
+    "x-uxHints": {
+      "pinPanels": ["Collect", "Decide", "Plan", "GroceryList"],
+      "primaryPanel": "Plan",
+      "badges": ["Quick", "Lunch", "≤20m Active"]
+    }
+  },
+  "render": {
+    "planFromTemplate": {
+      "mapToMealPlan": true,
+      "resolveDatesFromStart": true,
+      "hebrewCalendar": { "enable": true }
+    },
+    "groceryList": {
+      "generateOnCreate": true,
+      "mergeUnitsStrategy": "smart"
+    }
+  },
+  "examples": [
+    {
+      "preview": {
+        "plan": {
+          "id": "mealplan_quick_lunches_example",
+          "createdAt": "2025-10-20T22:45:00Z",
+          "updatedAt": "2025-10-20T22:45:00Z",
+          "ownerTier": "tier2",
+          "title": "Quick Lunches – 5 Days",
+          "subtitle": "Auto-generated from template",
+          "timezone": "America/Chicago",
+          "status": "planned",
+          "dateRange": { "start": "2025-10-27", "end": "2025-10-31" },
+          "constraints": {
+            "peopleCount": 4,
+            "budget": { "currency": "USD", "maxPerDay": 15 },
+            "dietaryFlags": [],
+            "excludeAllergens": [],
+            "applianceAvailability": ["stovetop", "oven", "instant-pot", "air-fryer"],
+            "timeWindows": [
+              { "daysOfWeek": ["Mon", "Tue", "Wed", "Thu", "Fri"], "from": "11:30", "to": "13:30" }
+            ],
+            "fastingRules": { "mode": "none" },
+            "nutritionTargets": { "kcalPerDay": 2000, "protein_g": 100, "carbs_g": 200, "fat_g": 70 },
+            "sabbathGuard": { "enabled": true, "windows": [], "policy": "defer" }
+          },
+          "groceryOptions": {
+            "storeSelector": "default",
+            "includeHave": false,
+            "collapseDuplicates": true,
+            "allowSubstitutions": true,
+            "householdItems": true
+          },
+          "slots": [
+            {
+              "id": "slot_2025-10-27_lunch",
+              "date": "2025-10-27",
+              "mealType": "lunch",
+              "status": "planned",
+              "labels": ["Quick"],
+              "recipeRef": { "recipeId": "rec_greek_chicken_bowl", "versionId": "v2", "servings": 4 },
+              "notes": "Mediterranean grain bowl; prep tzatziki night before."
+            },
+            {
+              "id": "slot_2025-10-28_lunch",
+              "date": "2025-10-28",
+              "mealType": "lunch",
+              "status": "planned",
+              "labels": ["Quick"],
+              "recipeRef": { "recipeId": "rec_tomato_basil_soup_quick", "versionId": "v1", "servings": 4 },
+              "notes": "Serve with toast or leftover flatbread."
+            },
+            {
+              "id": "slot_2025-10-29_lunch",
+              "date": "2025-10-29",
+              "mealType": "lunch",
+              "status": "planned",
+              "labels": ["Quick"],
+              "recipeRef": { "recipeId": "rec_mex_tuna_wrap", "versionId": "v3", "servings": 4 }
+            },
+            {
+              "id": "slot_2025-10-30_lunch",
+              "date": "2025-10-30",
+              "mealType": "lunch",
+              "status": "planned",
+              "labels": ["Quick"],
+              "recipeRef": { "recipeId": "rec_jap_teriyaki_rice_bowl_15m", "versionId": "v1", "servings": 4 }
+            },
+            {
+              "id": "slot_2025-10-31_lunch",
+              "date": "2025-10-31",
+              "mealType": "lunch",
+              "status": "planned",
+              "labels": ["Quick", "No-Cook"],
+              "recipeRef": { "recipeId": "rec_cold_platter", "versionId": "v3", "servings": 4 },
+              "sabbathSensitive": false,
+              "notes": "Cold platter before Sabbath; no-cook."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

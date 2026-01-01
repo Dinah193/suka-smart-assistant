@@ -1,0 +1,90 @@
+{
+  "id": "workflow.us.urban_apartment_efficiency",
+  "domain": "workflows",
+  "kind": "workflow_overlay",
+  "title": "Urban Apartment Efficiency (USA)",
+  "tags": [
+    "region:usa",
+    "mode:urban",
+    "values:efficiency",
+    "constraints:space_cap"
+  ],
+  "description": "Space- and time-efficient rhythm: small-batch cooking, strict FIFO, and low-equipment preservation.",
+  "optIn": true,
+  "editable": true,
+  "valuePriorities": [
+    "efficiency",
+    "space_saving",
+    "cost_control"
+  ],
+  "defaults": {
+    "preferredStaples": [
+      "staple:grain",
+      "staple:beans",
+      "staple:freezer_friendly"
+    ],
+    "mealRhythm": [
+      "cook_small:daily",
+      "batch_prep:short"
+    ],
+    "preservationEmphasis": [
+      "freezing",
+      "fermentation_optional",
+      "dehydration_optional"
+    ],
+    "valuePriorities": [
+      "efficiency",
+      "space_saving",
+      "cost_control"
+    ]
+  },
+  "ordering": {
+    "planningOrder": [
+      "space_check",
+      "inventory_snapshot",
+      "meal_plan",
+      "micro_preservation"
+    ]
+  },
+  "naming": {
+    "sessionPrefixes": {
+      "meals": "City Meals",
+      "storehouse": "Small-Space Storehouse"
+    }
+  },
+  "constraints": {
+    "defaults": [
+      "constraint:space_cap"
+    ],
+    "caps": {
+      "freezer": "strict",
+      "pantry": "strict"
+    }
+  },
+  "uiOverlays": {
+    "form": {
+      "defaults": {
+        "timeBudgetMin": 90,
+        "equipmentLevel": "limited"
+      }
+    }
+  },
+  "preferredDefaultPatterns": {
+    "meals": [
+      "pat.meals.daily_fresh",
+      "pat.meals.weekly_batch"
+    ],
+    "storehouse": [
+      "pat.storehouse.monthly_cycle_count",
+      "pat.storehouse.weekly_restock"
+    ],
+    "preservation": [
+      "pat.preservation.surplus_triage",
+      "pat.preservation.fermentation_first"
+    ]
+  },
+  "notes": [
+    "This overlay provides defaults and ordering, not mandatory rules.",
+    "All role defaults are optional and user-editable."
+  ]
+}

@@ -1,0 +1,158 @@
+{
+  "metadata": {
+    "name": "CookingTimingTables",
+    "version": "1.0.0",
+    "updatedAt": "2025-11-10T00:00:00.000Z",
+    "units": "metric",
+    "notes": "Baselines intended for synthesis/lead-time estimation. Engines should adjust for altitude, appliance performance, batch size, thickness, and preferences."
+  },
+
+  "boil": {
+    "_comment": "Baseline boil/blanch/simmer times at sea level (100°C). Use altitudeAdjust.deltaMinPer300m to increase times.",
+    "altitudeAdjust": { "deltaMinPer300m": 1 },
+    "waterBoilPointC": 100,
+    "eggs": {
+      "soft": { "minutes": 6, "start": "boiling", "cool": "ice-bath-2m" },
+      "medium": { "minutes": 8, "start": "boiling", "cool": "ice-bath-3m" },
+      "hard": { "minutes": 11, "start": "boiling", "cool": "ice-bath-5m" }
+    },
+    "pasta": {
+      "_comment": "Use package guidance if present; otherwise these ranges",
+      "spaghetti": { "min": 9, "max": 11 },
+      "penne": { "min": 10, "max": 12 },
+      "fusilli": { "min": 10, "max": 12 },
+      "lasagna_no_boil": { "min": 5, "max": 6 }
+    },
+    "rice_absorption": {
+      "white_long_grain": { "simmerMin": 12, "restCoveredMin": 10, "ratio": "1:1.8" },
+      "jasmine": { "simmerMin": 10, "restCoveredMin": 10, "ratio": "1:1.6" },
+      "basmati": { "simmerMin": 12, "restCoveredMin": 10, "ratio": "1:1.7" },
+      "brown": { "simmerMin": 35, "restCoveredMin": 10, "ratio": "1:2.2" }
+    },
+    "legumes_parboil": {
+      "chickpeas": { "minutes": 10 },
+      "black_beans": { "minutes": 10 },
+      "kidney_beans": { "minutes": 15 }
+    },
+    "vegetables_blanch": {
+      "_comment": "For freezing or peeling; shock in ice bath equal to blanch time",
+      "green_beans": { "minutes": 3 },
+      "broccoli_florets": { "minutes": 2 },
+      "carrots_sliced": { "minutes": 2 },
+      "peas": { "minutes": 1.5 },
+      "tomatoes_peel": { "minutes": 0.75 }
+    },
+    "potatoes": {
+      "whole_small": { "minutes": 15 },
+      "chunks_3cm": { "minutes": 12 }
+    },
+    "simmer_stews": {
+      "_comment": "Unpressurized stovetop gentle simmer",
+      "beef_stew": { "min": 90, "max": 150 },
+      "chicken_soup": { "min": 60, "max": 90 }
+    }
+  },
+
+  "preheatProfiles": {
+    "_comment": "Approximate warm-up characteristics for common appliances.",
+    "electric_conventional": { "cPerMin": 6, "stabilityLagMin": 2 },
+    "gas_conventional": { "cPerMin": 7, "stabilityLagMin": 1 },
+    "convection_fan": { "cPerMin": 8, "stabilityLagMin": 1, "fanEquivOffsetC": -10 },
+    "air_fryer": { "cPerMin": 10, "stabilityLagMin": 0, "basketPreheatMin": 2 },
+    "pizza_steel": { "cPerMin": 5, "stabilityLagMin": 15, "holdAtTargetMin": 15 }
+  },
+
+  "restTimes": {
+    "_comment": "Carryover cooking; tent loosely with foil unless noted.",
+    "steak_2to3cm": { "min": 5, "max": 10 },
+    "roast_beef_1to2kg": { "min": 15, "max": 25 },
+    "roast_chicken_1.5kg": { "min": 10, "max": 15 },
+    "pork_loin_1kg": { "min": 10, "max": 15 },
+    "bread_loaf_medium": { "min": 60, "max": 90, "note": "Cool on rack before slicing" }
+  },
+
+  "donenessTemps": {
+    "_comment": "Target internal temperatures. Verify local food safety guidance.",
+    "units": "°C_and_°F",
+    "beef_steak": {
+      "rare": { "C": 50, "F": 122 },
+      "medium_rare": { "C": 54, "F": 129 },
+      "medium": { "C": 57, "F": 135 },
+      "medium_well": { "C": 63, "F": 145 },
+      "well": { "C": 68, "F": 154 }
+    },
+    "ground_beef": { "safeMin": { "C": 71, "F": 160 } },
+    "chicken_breast": { "safeMin": { "C": 74, "F": 165 } },
+    "chicken_thigh": { "tenderTarget": { "C": 82, "F": 180 } },
+    "pork_chops": { "juicyTarget": { "C": 63, "F": 145 }, "restMin": 3 },
+    "lamb_leg": { "medium": { "C": 63, "F": 145 } },
+    "salmon": { "medium": { "C": 52, "F": 125 } },
+    "white_fish": { "flakeTarget": { "C": 52, "F": 125 } },
+    "turkey_breast": { "safeMin": { "C": 74, "F": 165 } },
+    "bread_done": { "crumbSet": { "C": 93, "F": 200 } },
+    "custard_set": { "silky": { "C": 80, "F": 176 } }
+  },
+
+  "beansSoak": {
+    "_comment": "Ambient 20–22°C; quick-soak reduces total by ~25%. Pressure-cookers further reduce cook times.",
+    "chickpeas": { "hours": 8 },
+    "black_beans": { "hours": 8 },
+    "kidney_beans": { "hours": 10 },
+    "pinto_beans": { "hours": 8 },
+    "lentils_brown": { "hours": 0, "note": "optional; 2h for softer texture" },
+    "lentils_green": { "hours": 0 }
+  },
+
+  "pressureCooker": {
+    "_comment": "Instant Pot/electric pressure baseline after full pressure achieved.",
+    "conversionFactors": {
+      "stovetopSimmerToPressure": 0.35
+    },
+    "examples": {
+      "chickpeas_unsoaked": { "pressureMin": 45, "naturalReleaseMin": 15 },
+      "chickpeas_soaked": { "pressureMin": 20, "naturalReleaseMin": 10 },
+      "beef_stew_cubes": { "pressureMin": 35, "naturalReleaseMin": 10 }
+    }
+  },
+
+  "techniqueTimes": {
+    "_comment": "Generalized techniques. Engines may select by item.method and thickness/mass.",
+    "autolyse": [
+      { "minHydrationPct": 60, "maxHydrationPct": 70, "minutes": 20 },
+      { "minHydrationPct": 71, "maxHydrationPct": 85, "minutes": 30 }
+    ],
+    "dry_brine_poultry": { "perKgMin": 360, "min": 360, "max": 1440 },
+    "marinate_general": { "thin_protein_min": 30, "thick_protein_min": 120 },
+    "reverse_sear_steak": { "ovenLowC": 95, "toTargetDeltaC": 5, "searMin": 2 },
+    "confiting_duck_legs": { "ovenC": 120, "minutes": 150 },
+    "tempering_chocolate": {
+      "dark": { "meltC": 45, "seedToC": 31 },
+      "milk": { "meltC": 45, "seedToC": 30 },
+      "white": { "meltC": 43, "seedToC": 29 }
+    },
+    "ceviche": { "acidHoldMinPerCm": 25, "min": 20, "max": 60 },
+    "parboil_potatoes_roast": { "minutes": 8 },
+    "steam_buns": { "minutes": 12 },
+    "yogurt_incubation": { "C": 43, "hours": 8 }
+  },
+
+  "baking": {
+    "_comment": "Typical bake windows; verify by color/internal temp.",
+    "cookies_drop": { "C": 175, "min": 10, "max": 13 },
+    "muffins_standard": { "C": 190, "min": 16, "max": 20 },
+    "banana_bread_loaf": { "C": 175, "min": 55, "max": 70, "donenessC": 93 },
+    "pizza_stone_home_oven": { "C": 260, "min": 7, "max": 10 }
+  },
+
+  "fish_thickness_rule": {
+    "_comment": "General rule: ~10 minutes per 2.5cm thickness at 200°C oven or gentle pan roast.",
+    "per2.5cmMin": 10,
+    "ovenC": 200
+  },
+
+  "safety": {
+    "_comment": "Minimum hot-holding and cooling guidelines used by planners.",
+    "hotHoldingMinC": 60,
+    "coolingWindow": { "to21CWithinH": 2, "to5CWithinH": 4 }
+  }
+}

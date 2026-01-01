@@ -1,0 +1,484 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka.local/contracts/coupon.contract.json",
+  "title": "Suka • Coupon / Offer",
+  "description": "Canonical coupon/offer record for Scan • Compare • Trust. Provider-agnostic; supports stacking rules, thresholds, exclusions, and schedule windows.",
+  "type": "object",
+  "additionalProperties": false,
+
+  "required": ["contractVersion", "id", "scope", "title", "validity", "applicability", "benefit", "stacking"],
+
+  "properties": {
+    "contractVersion": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Schema semver."
+    },
+
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9\\-]{8,}$",
+      "description": "Stable ID (e.g., sha256-12 of provider+externalId)."
+    },
+
+    "externalId": {
+      "type": "string",
+      "description": "Provider's coupon/offer ID (clip ID, PLU, promo code, etc.)."
+    },
+
+    "title": { "type": "string", "minLength": 1 },
+    "subtitle": { "type": "string" },
+    "description": { "type": "string" },
+
+    "scope": {
+      "type": "string",
+      "enum": ["manufacturer", "store", "category", "basket", "shipping"],
+      "description": "Primary owner/scope of discount."
+    },
+
+    "provider": {
+      "type": "string",
+      "description": "The adapter/provider this originated from (e.g., aldi, sams, costco, coupons_com, catalina)."
+    },
+
+    "channels": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["in_store","pickup","delivery","online"] },
+      "description": "Where this coupon can be redeemed. Empty/omitted = any."
+    },
+
+    "stores": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/StoreRef" },
+      "description": "Restrict to specific stores if provided."
+    },
+
+    "tags": { "type": "array", "items": { "type": "string" } },
+
+    "images": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/ImageRef" }
+    },
+
+    "validity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fromISO", "toISO"],
+      "properties": {
+        "fromISO": { "type": "string", "format": "date-time" },
+        "toISO": { "type": "string", "format": "date-time" },
+        "daysOfWeek": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0, "maximum": 6 },
+          "description": "0=Sun … 6=Sat. If present, only valid on these days."
+        },
+        "timeOfDay": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "start": { "type": "string", "pattern": "^\\d{2}:\\d{2}$", "description": "HH:mm local" },
+            "end": { "type": "string", "pattern": "^\\d{2}:\\d{2}$", "description": "HH:mm local" }
+          }
+        }
+      }
+    },
+
+    "redemption": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "method": { "type": "string", "enum": ["auto","clip","barcode","code","paper","loyalty"] },
+        "code": { "type": "string", "description": "Promo code or PLU if applicable." },
+        "barcode": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "format": { "type": "string", "enum": ["UPC-A","EAN-13","Code128","QR","Other"] },
+            "payload": { "type": "string" }
+          }
+        },
+        "loyaltyProgram": { "type": "string" },
+        "clipUrl": { "type": "string", "format": "uri" }
+      }
+    },
+
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "perTransaction": { "type": "number", "minimum": 1 },
+        "perCustomer": { "type": "number", "minimum": 1 },
+        "perDay": { "type": "number", "minimum": 1 },
+        "perHousehold": { "type": "number", "minimum": 1 },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "applicability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["include"],
+      "properties": {
+        "include": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/ProductSelector" },
+          "minItems": 1,
+          "description": "What products/categories this coupon applies to."
+        },
+        "exclude": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/ProductSelector" },
+          "description": "Exclusions override includes (size/variant/brand/category)."
+        },
+        "mixAndMatch": { "type": "boolean", "description": "If true, different items within the include set can combine to meet triggers." }
+      }
+    },
+
+    "triggers": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Conditions to activate discount; all specified triggers must be satisfied (logical AND).",
+      "properties": {
+        "minQuantity": { "type": "number", "minimum": 1 },
+        "minSpend": { "$ref": "#/definitions/Money" },
+        "buyXGetY": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["buyQty", "getQty"],
+          "properties": {
+            "buyQty": { "type": "number", "minimum": 1 },
+            "getQty": { "type": "number", "minimum": 1 },
+            "getPrice": { "type": "string", "enum": ["free","discounted"] },
+            "appliesTo": { "type": "string", "enum": ["same","cheapest","most_expensive","specific"], "description": "Which items are free/discounted." },
+            "specificSelector": { "$ref": "#/definitions/ProductSelector" }
+          }
+        }
+      }
+    },
+
+    "benefit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string", "enum": ["amount_off","percent_off","unit_price","bogo","basket_amount_off","basket_percent_off","shipping_amount_off","shipping_percent_off"] },
+        "value": { "type": "number", "description": "Discount value. For percent_off, 0..100; for amount_off, currency amount." },
+        "currency": { "type": "string", "minLength": 3, "maxLength": 3, "description": "ISO 4217. Required when type is *_amount_off or unit_price." },
+        "unitPriceCap": { "type": "number", "description": "If unit_price type sets a target unit price (e.g., 'Pay $0.25/oz')." },
+        "maxRedemptionValue": { "type": "number", "description": "Cap the benefit value for this coupon instance." },
+        "rounding": { "type": "string", "enum": ["nearest_cent","truncate","floor","ceil"], "description": "How discount rounds." }
+      }
+    },
+
+    "stacking": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["group", "behavior"],
+      "properties": {
+        "group": { "type": "string", "description": "Stack group (e.g., 'mfg', 'store', 'category', 'basket', provider-defined)." },
+        "behavior": { "type": "string", "enum": ["exclusive","stackable","stackable_if_different_group","stackable_if_different_scope"] },
+        "priority": { "type": "integer", "description": "Higher = applied earlier when multiple stackable; used for best-price simulation." },
+        "cannotCombineWith": { "type": "array", "items": { "type": "string" }, "description": "List of coupon IDs or groups that cannot combine." }
+      }
+    },
+
+    "feesAndTaxes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "affectsTaxableBase": { "type": "string", "enum": ["pre_tax","post_tax","unknown"], "description": "Whether discount applies before or after tax." },
+        "excludesDeposits": { "type": "boolean", "description": "If true, bottle deposits/bag fees are not discounted." }
+      }
+    },
+
+    "cycleHints": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Optional learning written by CycleAnalyzer.",
+      "properties": {
+        "pattern": { "type": "string", "enum": ["weekly","biweekly","monthly","seasonal","irregular"] },
+        "lastObservedISO": { "type": "string", "format": "date-time" },
+        "nextExpectedISO": { "type": "string", "format": "date-time" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "matching": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Evidence that ties this coupon to products/categories.",
+      "properties": {
+        "strategy": { "type": "string", "enum": ["barcode","title_fuzzy","ocr_semantic","provider_hint","taxonomy","hybrid"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "evidence": { "type": "array", "items": { "$ref": "#/definitions/MatchEvidence" } }
+      }
+    },
+
+    "sourceAttribution": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Attribution" },
+      "description": "Feeds SourceAttribution.jsx"
+    },
+
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "createdBy": { "type": "string" },
+        "createdAtISO": { "type": "string", "format": "date-time" },
+        "updatedAtISO": { "type": "string", "format": "date-time" },
+        "providers": { "type": "array", "items": { "$ref": "#/definitions/ProviderAttribution" } }
+      }
+    },
+
+    "trust": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "reasons": { "type": "array", "items": { "type": "string" } },
+        "lastEvaluatedISO": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "userContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Per-user/household overlay for saving favorites and attaching schedules.",
+      "properties": {
+        "isFavorite": { "type": "boolean" },
+        "notes": { "type": "string" },
+        "pinnedSchedules": { "type": "array", "items": { "$ref": "#/definitions/ScheduleRef" } }
+      }
+    }
+  },
+
+  "definitions": {
+    "Money": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amount", "currency"],
+      "properties": {
+        "amount": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "minLength": 3, "maxLength": 3 }
+      }
+    },
+
+    "StoreRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["storeId"],
+      "properties": {
+        "storeId": { "type": "string" },
+        "name": { "type": "string" },
+        "distanceKm": { "type": "number", "minimum": 0 }
+      }
+    },
+
+    "ImageRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url"],
+      "properties": {
+        "url": { "type": "string", "format": "uri" },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "type": { "type": "string", "enum": ["ad","shelf","product","app_screenshot","other"] }
+      }
+    },
+
+    "ProductSelector": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Flexible product match expression (any provided fields must match). Multiple selectors in include[] are ORed.",
+      "properties": {
+        "identifiers": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "gtins": { "type": "array", "items": { "type": "string" } },
+            "upcs": { "type": "array", "items": { "type": "string" } },
+            "eans": { "type": "array", "items": { "type": "string" } },
+            "providerSkus": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/ProviderSku" }
+            }
+          }
+        },
+        "brand": { "type": "string" },
+        "titleContains": { "type": "array", "items": { "type": "string" } },
+        "categoryPath": { "type": "array", "items": { "type": "string" }, "description": "Normalized taxonomy path prefix to match." },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "package": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "minQty": { "type": "number", "minimum": 0 },
+            "maxQty": { "type": "number", "minimum": 0 },
+            "unit": { "type": "string" },
+            "variant": { "type": "string", "description": "Flavor/roast/scent/size variant text filter." }
+          }
+        }
+      }
+    },
+
+    "ProviderSku": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "sku"],
+      "properties": {
+        "provider": { "type": "string" },
+        "sku": { "type": "string" }
+      }
+    },
+
+    "MatchEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "enum": ["barcode","title","ocr","provider_field","taxonomy"] },
+        "value": { "type": "string" },
+        "score": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "Attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider": { "type": "string" },
+        "fields": { "type": "array", "items": { "type": "string" } },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "ProviderAttribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider": { "type": "string" },
+        "fetchedISO": { "type": "string", "format": "date-time" },
+        "docId": { "type": "string" },
+        "link": { "type": "string", "format": "uri" }
+      }
+    },
+
+    "ScheduleRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "type": "string", "enum": ["session","schedule"] },
+        "id": { "type": "string" },
+        "name": { "type": "string" }
+      }
+    }
+  },
+
+  "examples": [
+    {
+      "contractVersion": "1.0.0",
+      "id": "cpn-abc123",
+      "externalId": "MFG-7654321",
+      "title": "$1.00 OFF 2 Friendly Farms Milk (1 Gallon)",
+      "scope": "manufacturer",
+      "provider": "coupons_com",
+      "channels": ["in_store","pickup","delivery"],
+      "stores": [{ "storeId": "aldi-0123", "name": "ALDI #123" }],
+      "tags": ["mfg","dairy","buy_more_save_more"],
+      "validity": {
+        "fromISO": "2025-10-27T05:00:00Z",
+        "toISO": "2025-11-10T04:59:59Z",
+        "daysOfWeek": [0,1,2,3,4,5,6]
+      },
+      "redemption": {
+        "method": "clip",
+        "loyaltyProgram": "ALDI",
+        "clipUrl": "https://example.com/clip/abc123"
+      },
+      "limits": { "perTransaction": 2, "perCustomer": 4 },
+      "applicability": {
+        "include": [
+          {
+            "brand": "Friendly Farms",
+            "categoryPath": ["Grocery","Dairy","Milk"],
+            "package": { "minQty": 3780, "unit": "ml" }
+          }
+        ],
+        "exclude": [
+          { "titleContains": ["lactose free"] }
+        ],
+        "mixAndMatch": true
+      },
+      "triggers": {
+        "minQuantity": 2
+      },
+      "benefit": {
+        "type": "amount_off",
+        "value": 1.0,
+        "currency": "USD",
+        "maxRedemptionValue": 1.0,
+        "rounding": "nearest_cent"
+      },
+      "stacking": {
+        "group": "mfg",
+        "behavior": "exclusive",
+        "priority": 50,
+        "cannotCombineWith": ["group:other_mfg"]
+      },
+      "feesAndTaxes": {
+        "affectsTaxableBase": "pre_tax",
+        "excludesDeposits": true
+      },
+      "cycleHints": {
+        "pattern": "monthly",
+        "lastObservedISO": "2025-09-29T05:00:00Z",
+        "nextExpectedISO": "2025-11-24T05:00:00Z",
+        "confidence": 0.65
+      },
+      "matching": {
+        "strategy": "taxonomy",
+        "confidence": 0.9,
+        "evidence": [{ "type": "taxonomy", "value": "Dairy/Milk", "score": 0.9 }]
+      },
+      "sourceAttribution": [
+        { "provider": "coupons_com", "fields": ["title","validity","benefit"], "confidence": 0.95 }
+      ],
+      "provenance": {
+        "createdBy": "CouponService:ingest",
+        "createdAtISO": "2025-10-27T17:00:00Z",
+        "updatedAtISO": "2025-10-27T17:00:00Z",
+        "providers": [
+          { "provider": "coupons_com", "fetchedISO": "2025-10-27T16:59:30Z", "docId": "7654321" }
+        ]
+      },
+      "trust": { "score": 0.92, "reasons": ["official source"], "lastEvaluatedISO": "2025-10-27T17:01:00Z" },
+      "userContext": {
+        "isFavorite": true,
+        "notes": "Use when gallon < $3.50",
+        "pinnedSchedules": [{ "type": "schedule", "id": "sched-grocery-wed", "name": "Wednesday Grocery Run" }]
+      }
+    },
+
+    {
+      "contractVersion": "1.0.0",
+      "id": "cpn-store-bogo-001",
+      "title": "BOGO 50% OFF Cereal (Mix & Match)",
+      "scope": "store",
+      "provider": "sams",
+      "channels": ["in_store","pickup"],
+      "validity": { "fromISO": "2025-10-25T05:00:00Z", "toISO": "2025-10-31T23:59:59Z" },
+      "applicability": {
+        "include": [
+          { "categoryPath": ["Grocery","Breakfast & Cereal","Cereal"] }
+        ],
+        "mixAndMatch": true
+      },
+      "triggers": {
+        "buyXGetY": { "buyQty": 1, "getQty": 1, "getPrice": "discounted", "appliesTo": "cheapest" }
+      },
+      "benefit": { "type": "percent_off", "value": 50 },
+      "stacking": { "group": "store", "behavior": "stackable_if_different_group", "priority": 30 }
+    }
+  ]
+}

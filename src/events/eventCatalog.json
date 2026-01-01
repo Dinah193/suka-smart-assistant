@@ -1,0 +1,372 @@
+{
+  "version": "2025-11-02T13:00:00-06:00",
+  "description": "Master list of SSA events. All SSA modules should emit events using the common envelope { \"type\", \"ts\", \"source\", \"data\" }. This catalog is used by the automation runtime, import stack, session engines, and (optionally) the Hub exporter when familyFundMode=true.",
+  "envelope": {
+    "type": "string (required) — must match one of events[].id below",
+    "ts": "string (required, ISO 8601) — when the event was emitted",
+    "source": "string (required) — emitter name or module path, e.g. \"features/import/ImportService\"",
+    "data": "object (required) — event-specific payload, see events[].dataShape"
+  },
+  "events": [
+    {
+      "id": "system.heartbeat",
+      "domain": "system",
+      "category": "telemetry",
+      "description": "Periodic signal that SSA is alive and the event bus is working.",
+      "dataShape": {
+        "uptimeMs": "number",
+        "version": "string",
+        "features": "array of strings — enabled feature flags"
+      },
+      "hubEligible": false
+    },
+    {
+      "id": "system.error",
+      "domain": "system",
+      "category": "telemetry",
+      "description": "Emitted when a subsystem throws or returns an error that should be visible to automation/logging.",
+      "dataShape": {
+        "errorCode": "string",
+        "message": "string",
+        "stack": "string | null",
+        "context": "object — anything useful, e.g. incoming payload"
+      },
+      "hubEligible": false
+    },
+    {
+      "id": "user.settings.updated",
+      "domain": "user",
+      "category": "settings",
+      "description": "A user changed SSA preferences — import behavior, guards, dashboards, or scheduling rules.",
+      "dataShape": {
+        "userId": "string | null",
+        "changes": "object — flat or nested",
+        "source": "string — UI component or API caller"
+      },
+      "hubEligible": false
+    },
+    {
+      "id": "user.favorite.saved",
+      "domain": "user",
+      "category": "preferences",
+      "description": "A user saved a session, schedule, or plan as a favorite to reuse later.",
+      "dataShape": {
+        "favoriteType": "string — e.g. meal-session, cleaning-session, garden-plan, import-template",
+        "favoriteId": "string",
+        "entityRef": "object — pointer to the origin entity",
+        "labels": "array of strings"
+      },
+      "hubEligible": false
+    },
+
+    {
+      "id": "import.received",
+      "domain": "import",
+      "category": "ingest",
+      "description": "Raw import has arrived from any source (browser share, iOS shortcut, bookmarklet, file upload, connected site).",
+      "dataShape": {
+        "importId": "string",
+        "sourceKind": "string — e.g. ios.shortcut, web.share, bookmarklet, csv.upload, pdf.upload",
+        "raw": "object | string — original payload",
+        "hint": "string | null — user/domain hint about data type, e.g. 'garden/seed', 'cleaning/routine'"
+      },
+      "hubEligible": false
+    },
+    {
+      "id": "import.normalized",
+      "domain": "import",
+      "category": "ingest",
+      "description": "Import was successfully normalized into SSA’s internal structure (recipe, cleaning, garden, animal, storehouse).",
+      "dataShape": {
+        "importId": "string",
+        "normalizedType": "string — recipe | cleaning-plan | garden-plan | animal-plan | storehouse-plan | howto",
+        "normalizedPayload": "object — SSA internal representation",
+        "intelligence": "object — extracted context: ingredients/methods/equipment/seasonality"
+      },
+      "hubEligible": false
+    },
+    {
+      "id": "import.parsed",
+      "domain": "import",
+      "category": "ingest",
+      "description": "High-level signal for listeners: an import has been parsed and is ready to be linked to inventory/storehouse and to generate sessions.",
+      "dataShape": {
+        "importId": "string",
+        "parsedType": "string — recipe | cleaning | garden | animal | storehouse | preservation | howto",
+        "contextIntelId": "string | null — reference to stored context intelligence record",
+        "linkHints": "object — e.g. { inventory: [...], storehouse: [...], garden: [...] }"
+      },
+      "hubEligible": false
+    },
+    {
+      "id": "import.failed",
+      "domain": "import",
+      "category": "ingest",
+      "description": "Import could not be parsed or normalized. Good place for UI to show error and for retry logic.",
+      "dataShape": {
+        "importId": "string | null",
+        "reason": "string",
+        "raw": "object | string",
+        "retriable": "boolean"
+      },
+      "hubEligible": false
+    },
+
+    {
+      "id": "context.intelligence.created",
+      "domain": "intelligence",
+      "category": "derivation",
+      "description": "Context intelligence has been derived from an import (ingredients, methods, equipment, seasonality, cuisine).",
+      "dataShape": {
+        "intelId": "string",
+        "sourceImportId": "string",
+        "intelType": "string — ingredients | methods | equipment | seasonality | cuisine",
+        "intel": "object — actual extracted intel"
+      },
+      "hubEligible": false
+    },
+
+    {
+      "id": "inventory.updated",
+      "domain": "inventory",
+      "category": "state-change",
+      "description": "Inventory has been updated — quantities adjusted, new item added, or metadata changed.",
+      "dataShape": {
+        "itemId": "string",
+        "changeType": "string — add | adjust | remove | consume | produce",
+        "delta": "number | object — numeric diff or full diff",
+        "after": "object — full inventory item state",
+        "reason": "string — e.g. 'import.linked', 'recipe.executed', 'garden.harvest.logged'"
+      },
+      "hubEligible": true
+    },
+    {
+      "id": "inventory.shortage.detected",
+      "domain": "inventory",
+      "category": "insight",
+      "description": "Inventory rule engine detected a shortage and recommends a path: garden → animal → storehouse → grocery.",
+      "dataShape": {
+        "itemId": "string",
+        "itemName": "string",
+        "currentQty": "number",
+        "requiredQty": "number",
+        "suggestedRoutes": "array — e.g. ['garden.plan', 'animal.acquire', 'storehouse.restock', 'shopping.add']"
+      },
+      "hubEligible": true
+    },
+
+    {
+      "id": "meal.session.generated",
+      "domain": "meals",
+      "category": "session",
+      "description": "A cooking/meal session has been generated from a recipe or import.",
+      "dataShape": {
+        "sessionId": "string",
+        "sourceImportId": "string | null",
+        "recipes": "array of recipe refs",
+        "inventoryLinks": "array — inventory item ids or suggested subs",
+        "schedule": "object — when SSA thinks it should be cooked"
+      },
+      "hubEligible": true
+    },
+    {
+      "id": "meal.executed",
+      "domain": "meals",
+      "category": "session",
+      "description": "A meal was actually cooked/executed; inventory should already be decremented by the session engine.",
+      "dataShape": {
+        "sessionId": "string",
+        "recipes": "array of recipe refs",
+        "inventoryDeltas": "array — what was consumed",
+        "notes": "string | null"
+      },
+      "hubEligible": true
+    },
+
+    {
+      "id": "cleaning.session.generated",
+      "domain": "cleaning",
+      "category": "session",
+      "description": "A cleaning/decluttering session has been generated from an import (Pinterest routine, blog routine, YT how-to) or from templates.",
+      "dataShape": {
+        "sessionId": "string",
+        "zones": "array — rooms/areas",
+        "tasks": "array — ordered steps",
+        "estimatedDurationMin": "number",
+        "sourceImportId": "string | null"
+      },
+      "hubEligible": true
+    },
+    {
+      "id": "cleaning.executed",
+      "domain": "cleaning",
+      "category": "session",
+      "description": "Cleaning session marked as done — helpful for household analytics and for exporting to Hub if needed.",
+      "dataShape": {
+        "sessionId": "string",
+        "zones": "array",
+        "completedTasks": "array",
+        "durationMin": "number | null"
+      },
+      "hubEligible": true
+    },
+
+    {
+      "id": "garden.plan.generated",
+      "domain": "garden",
+      "category": "plan",
+      "description": "A garden plan/work session was created from import (seed packet) or from inventory shortage signals.",
+      "dataShape": {
+        "planId": "string",
+        "sourceImportId": "string | null",
+        "crops": "array — with variety, bed, season",
+        "tasks": "array — sow, transplant, water, fertilize, harvest",
+        "schedule": "object — calendar-aligned"
+      },
+      "hubEligible": true
+    },
+    {
+      "id": "garden.harvest.logged",
+      "domain": "garden",
+      "category": "harvest",
+      "description": "Garden harvest was logged, typically feeding into inventory/storehouse and triggering preservation.",
+      "dataShape": {
+        "harvestId": "string",
+        "crop": "string",
+        "quantity": "number",
+        "unit": "string",
+        "inventoryItemId": "string | null",
+        "preservationSuggested": "boolean"
+      },
+      "hubEligible": true
+    },
+
+    {
+      "id": "animal.plan.generated",
+      "domain": "animals",
+      "category": "plan",
+      "description": "Animal acquisition/care/butchery plan was generated from an import or storehouse shortage.",
+      "dataShape": {
+        "planId": "string",
+        "sourceImportId": "string | null",
+        "species": "string",
+        "actions": "array — acquire, feed, breed, butcher, process",
+        "schedule": "object"
+      },
+      "hubEligible": true
+    },
+    {
+      "id": "animal.butchery.logged",
+      "domain": "animals",
+      "category": "production",
+      "description": "An animal butchery event was logged; this can produce multiple inventory/storehouse items.",
+      "dataShape": {
+        "butcheryId": "string",
+        "species": "string",
+        "yieldCurveId": "string | null",
+        "cuts": "array — individual products",
+        "inventoryUpdates": "array — itemId + qty",
+        "byproducts": "array — e.g. blood meal, tallow",
+        "notes": "string | null"
+      },
+      "hubEligible": true
+    },
+
+    {
+      "id": "preservation.completed",
+      "domain": "preservation",
+      "category": "session",
+      "description": "A preservation session (canning, drying, fermenting, freezing, curing, distilling) has completed and updated inventory/storehouse.",
+      "dataShape": {
+        "sessionId": "string",
+        "method": "string — can, dehydrate, ferment, freeze, cure, distill",
+        "inputs": "array — inventory items used",
+        "outputs": "array — inventory/storehouse items created",
+        "notes": "string | null"
+      },
+      "hubEligible": true
+    },
+
+    {
+      "id": "automation.schedule.request",
+      "domain": "automation",
+      "category": "request",
+      "description": "Any module can ask the automation runtime to schedule a session/plan; the runtime will apply guards (Sabbath, quiet hours, weather).",
+      "dataShape": {
+        "requestedBy": "string — module or user",
+        "target": "string — e.g. 'meals', 'cleaning', 'garden', 'animals', 'preservation'",
+        "payload": "object — session/plan content",
+        "constraints": "object — sabbathGuard, quietHoursGuard, weatherGuard, priority"
+      },
+      "hubEligible": false
+    },
+    {
+      "id": "automation.task.created",
+      "domain": "automation",
+      "category": "task",
+      "description": "Automation runtime accepted a request and turned it into a task.",
+      "dataShape": {
+        "taskId": "string",
+        "target": "string",
+        "runAt": "string (ISO)",
+        "sourceEvent": "string"
+      },
+      "hubEligible": false
+    },
+    {
+      "id": "automation.task.executed",
+      "domain": "automation",
+      "category": "task",
+      "description": "Automation runtime executed a scheduled task.",
+      "dataShape": {
+        "taskId": "string",
+        "result": "string — success | skipped | failed",
+        "guard": "string | null — which guard prevented execution (if any)"
+      },
+      "hubEligible": false
+    },
+
+    {
+      "id": "hub.export.requested",
+      "domain": "hub",
+      "category": "sync",
+      "description": "SSA has familyFundMode=true and is requesting to export a payload to the Hub.",
+      "dataShape": {
+        "exportId": "string",
+        "eventRef": "string — original event id that triggered this export",
+        "payload": "object — hub-formatted packet"
+      },
+      "hubEligible": false
+    },
+    {
+      "id": "hub.export.succeeded",
+      "domain": "hub",
+      "category": "sync",
+      "description": "Hub export was delivered successfully.",
+      "dataShape": {
+        "exportId": "string",
+        "responseMeta": "object"
+      },
+      "hubEligible": false
+    },
+    {
+      "id": "hub.export.failed",
+      "domain": "hub",
+      "category": "sync",
+      "description": "Hub export failed; SSA should fail silently for the user, but we keep telemetry.",
+      "dataShape": {
+        "exportId": "string",
+        "reason": "string",
+        "attempts": "number"
+      },
+      "hubEligible": false
+    }
+  ],
+  "notes": [
+    "1. All emitters should use the common envelope: { type, ts: new Date().toISOString(), source, data }.",
+    "2. If a module changes household data (inventory, storehouse, sessions), it SHOULD check featureFlags.familyFundMode and, if true, emit hub.export.requested with the original event as payload.",
+    "3. New domains should add their events here so the automation runtime and UI dashboards can discover them dynamically.",
+    "4. This file is intentionally flat JSON so it can be loaded in both browser and service-worker contexts.",
+    "5. If you still want schema validation, create a local file at src/schemas/eventCatalog.schema.json and point $schema to \"./src/schemas/eventCatalog.schema.json\"."
+  ]
+}

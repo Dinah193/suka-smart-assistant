@@ -1,0 +1,230 @@
+{
+  "version": "2025-10-31T14:05:00-05:00",
+  "description": "Shared mismatch policies for Suka Smart Assistant location presets. Reuse these in garden_beds.json, garden_animal_access.json, animal_facilities.json, preservation_zones.json, seasonal_structures.json, and routes_and_paths.json so you don’t repeat logic. Policies tell the UI what to do when the user picks an out-of-zone plant/animal/location, and how to automatically generate extra cleaning/garden/storehouse tasks to make it safe.",
+  "meta": {
+    "sourceOfTruth": "local",
+    "allowHubOverrides": true,
+    "mergeStrategy": "hub-wins",
+    "sharedOrchestration": {
+      "emitOnUpdate": true,
+      "reason": "mismatch-policies-update",
+      "channels": [
+        "garden",
+        "animals",
+        "cleaning",
+        "storehouse",
+        "meals",
+        "ui"
+      ]
+    },
+    "notes": [
+      "Use policyId, not raw inline policy, in your location presets where possible.",
+      "If scraper/import finds a site-specific rule (ex: for a certain seed supplier), we can map it to one of these by code.",
+      "All policies support user favorites so a household can say, ‘Yes, I accept the extra work for this plant/animal.’"
+    ]
+  },
+  "defaults": {
+    "timezone": "America/Chicago"
+  },
+  "policies": [
+    {
+      "id": "warn-and-suggest",
+      "label": "Warn & Suggest Alternates",
+      "description": "Let the user do it, but tell them it’s not ideal. Show 2–4 better choices that match zone/species/facility, and add a small cleaning/garden follow-up.",
+      "uiBehavior": {
+        "type": "modal",
+        "showAlternates": true,
+        "highlightRisks": true,
+        "allowProceed": true
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "emit": [
+          "cleaning.outdoor-zone.expected"
+        ]
+      },
+      "extraTasks": [
+        {
+          "on": "proceed",
+          "emit": "cleaning.outdoor-zone.expected",
+          "why": "out-of-zone or risky choice needs extra sanitation"
+        }
+      ],
+      "notes": [
+        "Best for out-of-season plant in a slightly warmer zone.",
+        "Best for goats in light garden areas when you *really* wanted poultry.",
+        "Best for using a feast/sukkot structure outside its main months when weather is still ok."
+      ]
+    },
+    {
+      "id": "block-and-suggest",
+      "label": "Block & Suggest Alternates",
+      "description": "Too risky to run here: wrong climate, wrong facility, or would contaminate harvest zone. Don’t allow proceed, but show safer alternates the user can swap in.",
+      "uiBehavior": {
+        "type": "banner",
+        "showAlternates": true,
+        "allowProceed": false
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "emit": [
+          "garden.care-session.generated"
+        ]
+      },
+      "extraTasks": [
+        {
+          "on": "blocked",
+          "emit": "garden.care-session.generated",
+          "why": "we tried to put the wrong animal/plant here; run care to restore bed"
+        }
+      ],
+      "notes": [
+        "Use this for big-hoof animals on soft raised beds.",
+        "Use this when user tries to process cattle in small outdoor bay not rated for large animals.",
+        "Use this when user tries to store meat in a non-cold preservation zone."
+      ]
+    },
+    {
+      "id": "allow-with-mitigation",
+      "label": "Allow with Mitigation",
+      "description": "Let the user do the risky thing but auto-attach work: cleaning, storehouse buffer, water, shade, pest control. This is your main ‘graceful degradation’ policy.",
+      "uiBehavior": {
+        "type": "modal",
+        "showAlternates": true,
+        "allowProceed": true,
+        "showExtraResources": true
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "emit": [
+          "cleaning.processing-area.requested",
+          "storehouse.water-buffer.requested"
+        ]
+      },
+      "extraTasks": [
+        {
+          "on": "proceed",
+          "emit": "cleaning.processing-area.requested",
+          "why": "risk of contaminants or pests"
+        },
+        {
+          "on": "proceed",
+          "emit": "storehouse.water-buffer.requested",
+          "qty": 20,
+          "unit": "gal",
+          "why": "out-of-zone animals/crops usually need more water"
+        }
+      ],
+      "notes": [
+        "Use this for heat-sensitive animals in hot zone (add shade/mister).",
+        "Use this for cool-weather crops in 8b (add shade cloth + extra water).",
+        "Use this for running poultry tractors closer to garden than recommended (add cleaning)."
+      ]
+    },
+    {
+      "id": "sabbath-guarded-block",
+      "label": "Sabbath Guarded – Block",
+      "description": "Respect sabbathGuard and do not run heavy/risky sessions during Sabbath. Offer to reschedule to prep day, and still keep reverse-gen chain intact.",
+      "uiBehavior": {
+        "type": "banner",
+        "allowProceed": false,
+        "reschedulePrompt": true,
+        "suggestPrepDay": "FRI"
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "emit": [
+          "cleaning.sabbath-prep.requested"
+        ]
+      },
+      "extraTasks": [
+        {
+          "on": "blocked",
+          "emit": "cleaning.sabbath-prep.requested",
+          "why": "move work to prep window"
+        }
+      ],
+      "notes": [
+        "Use this when a user tries to run butchery or hot canning on Sabbath.",
+        "Use this when the user tries to do heavy outdoor cleaning during Sabbath."
+      ]
+    },
+    {
+      "id": "quiet-hours-defer",
+      "label": "Quiet Hours – Defer",
+      "description": "User can do it, but noises/odors/vibration make it a quiet-hours violation. Offer to run at next available slot (automation/runtime decides).",
+      "uiBehavior": {
+        "type": "inline-warning",
+        "allowProceed": true,
+        "reschedulePrompt": true
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "emit": [
+          "automation.schedule.request"
+        ]
+      },
+      "extraTasks": [
+        {
+          "on": "proceed",
+          "emit": "cleaning.session.created",
+          "why": "quick tidy for disturbed area"
+        }
+      ],
+      "notes": [
+        "Use this for dehydrator on porch at midnight.",
+        "Use this for loud poultry processing when people are sleeping."
+      ]
+    },
+    {
+      "id": "hub-policy-strict",
+      "label": "Hub Policy – Strict Compliance",
+      "description": "When the Suka Village Family Fund Hub says ‘no’, households must use hub-provided alternates. All out-of-band attempts are logged.",
+      "uiBehavior": {
+        "type": "modal",
+        "allowProceed": false,
+        "showAlternates": true,
+        "showHubMessage": true
+      },
+      "reverseGeneration": {
+        "enabled": true,
+        "emit": [
+          "hub.policy.violation.logged"
+        ]
+      },
+      "extraTasks": [
+        {
+          "on": "blocked",
+          "emit": "hub.policy.violation.logged",
+          "why": "household attempted non-compliant plant/animal/location"
+        }
+      ],
+      "notes": [
+        "Use this for high-value shared greenhouses, walk-in freezers, co-op animal facilities.",
+        "Use this for seasonal structures that the hub centrally manages (feast/tent areas)."
+      ]
+    }
+  ],
+  "userCanSaveFavorites": true,
+  "favoritesTemplate": [
+    {
+      "id": "fav-allow-mitigation",
+      "source": "system",
+      "cloneOf": "allow-with-mitigation",
+      "label": "My ‘I’ll do the extra work’ Policy",
+      "allowUserScheduleOverride": true
+    },
+    {
+      "id": "fav-warn-first",
+      "source": "system",
+      "cloneOf": "warn-and-suggest",
+      "label": "My ‘Warn me first’ Policy",
+      "allowUserScheduleOverride": true
+    }
+  ],
+  "userFavoritePolicy": {
+    "maxPerHousehold": 25,
+    "allowCustomSchedule": true,
+    "allowCustomReverseGeneration": true
+  }
+}

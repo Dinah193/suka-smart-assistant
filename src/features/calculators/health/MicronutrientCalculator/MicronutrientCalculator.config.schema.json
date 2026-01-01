@@ -1,0 +1,338 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka-smart-assistant.local/schemas/health/MicronutrientCalculator.config.schema.json",
+  "title": "MicronutrientCalculatorConfig",
+  "description": "Schema for Micronutrient Calculator node configuration and Planning Graph metadata.",
+  "type": "object",
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional local schema reference for editor tooling."
+    },
+
+    "calculatorId": {
+      "type": "string",
+      "description": "Internal calculator id (e.g., 'health.micronutrients')."
+    },
+    "nodeId": {
+      "type": "string",
+      "description": "Planning Graph node id for this calculator (e.g., 'pg.health.micronutrientCalculator')."
+    },
+    "domain": {
+      "type": "string",
+      "description": "Top-level SSA domain (e.g., 'health', 'meals', 'storehouse')."
+    },
+    "category": {
+      "type": "string",
+      "description": "Sub-category or grouping within the domain (e.g., 'nutrition')."
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable label for the calculator."
+    },
+    "shortLabel": {
+      "type": "string",
+      "description": "Optional abbreviated label for compact UIs."
+    },
+    "description": {
+      "type": "string",
+      "description": "Long-form description of what this calculator does and where it fits."
+    },
+    "tags": {
+      "type": "array",
+      "description": "Tag list for search and grouping in the Planning Graph explorer.",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "paths": {
+      "type": "object",
+      "description": "Relative file paths for this calculator's main artifacts.",
+      "additionalProperties": false,
+      "properties": {
+        "schema": {
+          "type": "string",
+          "description": "Path to the calculator input/output JSON schema."
+        },
+        "shim": {
+          "type": "string",
+          "description": "Path to the pure calculation shim module."
+        },
+        "view": {
+          "type": "string",
+          "description": "Path to the React view component."
+        },
+        "hooks": {
+          "type": "string",
+          "description": "Path to the React hooks module."
+        },
+        "mappings": {
+          "type": "string",
+          "description": "Path to Planning Graph mappings for this calculator."
+        },
+        "readme": {
+          "type": "string",
+          "description": "Path to local documentation for this calculator."
+        }
+      },
+      "required": ["schema", "shim", "view", "hooks", "mappings"]
+    },
+
+    "planningGraph": {
+      "type": "object",
+      "description": "Metadata describing how this calculator participates in the Planning Graph.",
+      "additionalProperties": false,
+      "properties": {
+        "group": {
+          "type": "string",
+          "description": "Logical group (e.g., 'health')."
+        },
+        "graphLabel": {
+          "type": "string",
+          "description": "Label displayed in Planning Graph visualizations."
+        },
+        "graphDescription": {
+          "type": "string",
+          "description": "Description of this node's role in the graph."
+        },
+        "nodeType": {
+          "type": "string",
+          "description": "Type of node (e.g., 'calculator', 'module')."
+        },
+        "priority": {
+          "type": "number",
+          "description": "Priority / ordering hint for Planning Graph UIs."
+        },
+        "inputsFrom": {
+          "type": "array",
+          "description": "List of node ids that provide inputs to this calculator.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "feedsInto": {
+          "type": "array",
+          "description": "List of node ids that consume this calculator's outputs.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "edgeHints": {
+          "type": "object",
+          "description": "Optional descriptive hints for graph edges.",
+          "additionalProperties": false,
+          "properties": {
+            "from": {
+              "type": "object",
+              "description": "Hints for incoming edges: key = nodeId, value = description string.",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "to": {
+              "type": "object",
+              "description": "Hints for outgoing edges: key = nodeId, value = description string.",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "required": ["group", "graphLabel", "graphDescription", "nodeType"]
+    },
+
+    "defaults": {
+      "type": "object",
+      "description": "Default configuration values for the calculator.",
+      "additionalProperties": false,
+      "properties": {
+        "unitSystem": {
+          "type": "string",
+          "description": "Default unit system (e.g., 'imperial', 'metric', 'mixed')."
+        },
+        "rounding": {
+          "type": "object",
+          "description": "Rounding preferences for nutrient displays.",
+          "additionalProperties": false,
+          "properties": {
+            "gramsDecimals": {
+              "type": "number"
+            },
+            "milligramsDecimals": {
+              "type": "number"
+            },
+            "microgramsDecimals": {
+              "type": "number"
+            }
+          }
+        },
+        "profile": {
+          "type": "object",
+          "description": "Default profile assumptions (age, sex, weight, pregnancy/lactation).",
+          "additionalProperties": false,
+          "properties": {
+            "sex": {
+              "type": "string",
+              "description": "Default sex value ('female', 'male', 'other', 'unspecified')."
+            },
+            "ageYears": {
+              "type": "number",
+              "description": "Default age in years."
+            },
+            "weight": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "description": "Weight value."
+                },
+                "unit": {
+                  "type": "string",
+                  "description": "Weight unit (e.g., 'lb', 'kg')."
+                }
+              }
+            },
+            "pregnancyStatus": {
+              "type": "string",
+              "description": "Pregnancy status (e.g., 'none', 'trimester1', ...)."
+            },
+            "lactationStatus": {
+              "type": "string",
+              "description": "Lactation status (e.g., 'none', 'exclusive', 'partial')."
+            }
+          }
+        },
+        "healthFocus": {
+          "type": "object",
+          "description": "Which health focus flags are enabled by default.",
+          "additionalProperties": false,
+          "properties": {
+            "boneHealth": { "type": "boolean" },
+            "bloodHealth": { "type": "boolean" },
+            "immuneSupport": { "type": "boolean" },
+            "heartHealth": { "type": "boolean" },
+            "brainHealth": { "type": "boolean" },
+            "metabolicHealth": { "type": "boolean" }
+          }
+        },
+        "ssaIntegration": {
+          "type": "object",
+          "description": "Integration defaults for how this calculator participates in SSA flows.",
+          "additionalProperties": false,
+          "properties": {
+            "autosaveProfile": {
+              "type": "boolean",
+              "description": "Whether to autosave profile-related inputs."
+            },
+            "allowLinkToMealPlanner": {
+              "type": "boolean",
+              "description": "Whether Planning Graph can offer a direct link to meal planner."
+            },
+            "allowLinkToInventoryGaps": {
+              "type": "boolean",
+              "description": "Whether Planning Graph can link to inventory/storehouse 'nutrition gaps' view."
+            }
+          }
+        }
+      }
+    },
+
+    "ui": {
+      "type": "object",
+      "description": "UI-specific hints for theming and access.",
+      "additionalProperties": false,
+      "properties": {
+        "icon": {
+          "type": "string",
+          "description": "Icon name or token for this calculator."
+        },
+        "primaryColorToken": {
+          "type": "string",
+          "description": "Primary theme color token."
+        },
+        "accentColorToken": {
+          "type": "string",
+          "description": "Accent theme color token."
+        },
+        "showNowButton": {
+          "type": "boolean",
+          "description": "Whether to show a primary 'Now' CTA."
+        },
+        "nowButtonLabel": {
+          "type": "string",
+          "description": "Label for the 'Now' CTA."
+        },
+        "sectionTitle": {
+          "type": "string",
+          "description": "Title shown in health sections."
+        },
+        "sectionSubtitle": {
+          "type": "string",
+          "description": "Subtitle / helper text for the section."
+        },
+        "showInHealthDashboard": {
+          "type": "boolean",
+          "description": "Whether to surface this calculator on the main health dashboard."
+        },
+        "showInPlanningGraphExplorer": {
+          "type": "boolean",
+          "description": "Whether to show this node in the Planning Graph explorer UI."
+        },
+        "quickAccessHotkey": {
+          "type": "string",
+          "description": "Optional hotkey hint for focusing/launching this calculator."
+        }
+      }
+    },
+
+    "integration": {
+      "type": "object",
+      "description": "Feature flags for how this calculator integrates with SSA subsystems.",
+      "additionalProperties": false,
+      "properties": {
+        "supportsPlanningGraph": {
+          "type": "boolean",
+          "description": "Whether this calculator participates in Planning Graph flows."
+        },
+        "supportsSessions": {
+          "type": "boolean",
+          "description": "Whether this calculator can spawn or influence sessions."
+        },
+        "supportsHouseholdProfiles": {
+          "type": "boolean",
+          "description": "Whether this calculator uses or updates household profile data."
+        },
+        "supportsHouseholdMembers": {
+          "type": "boolean",
+          "description": "Whether this calculator can be run per household member."
+        },
+        "sessionDomain": {
+          "type": ["string", "null"],
+          "description": "If supportsSessions is true, the domain of sessions this calculator can influence (e.g. 'meals', 'health')."
+        },
+        "emitEvents": {
+          "type": "object",
+          "description": "Mapping of logical event types to eventBus type strings.",
+          "additionalProperties": false,
+          "properties": {
+            "calculated": {
+              "type": "string",
+              "description": "Event type emitted when micronutrients are calculated."
+            },
+            "appliedNow": {
+              "type": "string",
+              "description": "Event type emitted when the 'Now' flow is triggered."
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "required": ["calculatorId", "nodeId", "domain", "label", "paths", "planningGraph"]
+}

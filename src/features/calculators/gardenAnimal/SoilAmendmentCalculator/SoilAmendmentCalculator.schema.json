@@ -1,0 +1,388 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "schemas/calculators/gardenAnimal/SoilAmendmentCalculator.schema.json",
+  "title": "SoilAmendmentCalculatorPayload",
+  "description": "Schema describing inputs (soil characteristics, layout, crop plans) and outputs (amendment recommendations and prep sessions) for the SoilAmendmentCalculator shim.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "context": {
+      "type": "object",
+      "description": "Calculator and planning-graph context metadata.",
+      "additionalProperties": false,
+      "properties": {
+        "nodeKey": {
+          "type": "string",
+          "description": "Planning graph node key, e.g. 'garden.soilAmendment'."
+        },
+        "version": {
+          "type": "string",
+          "description": "Semantic version of the calculator payload contract."
+        },
+        "runId": {
+          "type": "string",
+          "description": "Optional unique identifier for this calculator run."
+        }
+      },
+      "required": ["nodeKey", "version"]
+    },
+
+    "inputs": {
+      "type": "object",
+      "description": "Inputs used to compute per-bed soil amendments and related sessions.",
+      "additionalProperties": false,
+      "properties": {
+        "soilProfile": {
+          "type": "object",
+          "description": "High-level soil characteristics per bed or zone.",
+          "additionalProperties": false,
+          "properties": {
+            "defaultTexture": {
+              "type": "string",
+              "description": "Optional default soil texture for the garden.",
+              "enum": ["sand", "loam", "clay", "sandy-loam", "clay-loam", "silt-loam", "unknown"]
+            },
+            "beds": {
+              "type": "array",
+              "description": "Per-bed soil characteristics and constraints.",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "bedId": {
+                    "type": "string",
+                    "description": "Stable identifier for the bed, container, or zone."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Human-friendly bed name."
+                  },
+                  "texture": {
+                    "type": "string",
+                    "description": "Soil texture for this bed.",
+                    "enum": ["sand", "loam", "clay", "sandy-loam", "clay-loam", "silt-loam", "unknown"]
+                  },
+                  "organicMatterPct": {
+                    "type": "number",
+                    "description": "Estimated organic matter percentage (0–100).",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "drainage": {
+                    "type": "string",
+                    "description": "Observed drainage pattern for this bed.",
+                    "enum": ["fast", "moderate", "slow", "poor", "unknown"]
+                  },
+                  "notes": {
+                    "type": "string",
+                    "description": "Free-form notes about soil condition, compaction, or history."
+                  }
+                },
+                "required": ["bedId"]
+              }
+            }
+          },
+          "required": []
+        },
+
+        "soilTests": {
+          "type": "array",
+          "description": "Soil test results from lab or at-home kits, used to compute nutrient requirements.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "testId": {
+                "type": "string",
+                "description": "Unique identifier for this soil test record."
+              },
+              "bedId": {
+                "type": "string",
+                "description": "Bed identifier that this test applies to (or 'global' if garden-wide)."
+              },
+              "takenAt": {
+                "type": "string",
+                "format": "date",
+                "description": "Date when the soil sample was taken."
+              },
+              "ph": {
+                "type": "number",
+                "description": "Measured soil pH."
+              },
+              "nPpm": {
+                "type": "number",
+                "description": "Nitrogen level (ppm) or rating translated into numeric scale."
+              },
+              "pPpm": {
+                "type": "number",
+                "description": "Phosphorus level (ppm) or rating translated into numeric scale."
+              },
+              "kPpm": {
+                "type": "number",
+                "description": "Potassium level (ppm) or rating translated into numeric scale."
+              },
+              "caPpm": {
+                "type": "number",
+                "description": "Calcium level (ppm), optional."
+              },
+              "mgPpm": {
+                "type": "number",
+                "description": "Magnesium level (ppm), optional."
+              },
+              "recommendationNotes": {
+                "type": "string",
+                "description": "Any qualitative recommendations included in the soil test report."
+              }
+            },
+            "required": ["testId", "bedId"]
+          }
+        },
+
+        "targetFertility": {
+          "type": "object",
+          "description": "Target fertility ranges used to compute amendment requirements.",
+          "additionalProperties": false,
+          "properties": {
+            "phMin": {
+              "type": "number",
+              "description": "Minimum acceptable pH for the target crop mix."
+            },
+            "phMax": {
+              "type": "number",
+              "description": "Maximum acceptable pH for the target crop mix."
+            },
+            "nMin": {
+              "type": "number",
+              "description": "Minimum nitrogen level (ppm or equivalent scale)."
+            },
+            "nMax": {
+              "type": "number",
+              "description": "Maximum nitrogen level."
+            },
+            "pMin": {
+              "type": "number",
+              "description": "Minimum phosphorus level."
+            },
+            "pMax": {
+              "type": "number",
+              "description": "Maximum phosphorus level."
+            },
+            "kMin": {
+              "type": "number",
+              "description": "Minimum potassium level."
+            },
+            "kMax": {
+              "type": "number",
+              "description": "Maximum potassium level."
+            }
+          },
+          "required": []
+        },
+
+        "plantingPlan": {
+          "type": "array",
+          "description": "Optional planting windows from GardenPlantingCalendarCalculator, used to weight beds and crops.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "windowId": {
+                "type": "string",
+                "description": "Identifier of the planting window."
+              },
+              "bedId": {
+                "type": "string",
+                "description": "Target bed for this planting window."
+              },
+              "cropId": {
+                "type": "string",
+                "description": "Crop identifier for this window."
+              },
+              "cropName": {
+                "type": "string",
+                "description": "Human-readable crop name."
+              },
+              "startDate": {
+                "type": "string",
+                "format": "date",
+                "description": "Start of recommended planting period."
+              },
+              "endDate": {
+                "type": "string",
+                "format": "date",
+                "description": "End of recommended planting period."
+              }
+            },
+            "required": ["windowId", "bedId"]
+          }
+        },
+
+        "gardenLayout": {
+          "type": "object",
+          "description": "Garden beds or containers where amendments will be applied.",
+          "additionalProperties": false,
+          "properties": {
+            "beds": {
+              "type": "array",
+              "description": "List of beds, containers, or zones with dimensions.",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "bedId": {
+                    "type": "string",
+                    "description": "Unique identifier for the bed."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Display name for the bed."
+                  },
+                  "areaSqFt": {
+                    "type": "number",
+                    "description": "Approximate growing area in square feet."
+                  },
+                  "depthInches": {
+                    "type": "number",
+                    "description": "Approximate cultivation depth used for amendment calculations."
+                  }
+                },
+                "required": ["bedId"]
+              }
+            }
+          },
+          "required": []
+        },
+
+        "householdProfile": {
+          "type": "object",
+          "description": "Optional household profile context (for cost, labor, or familyFund integration).",
+          "additionalProperties": true
+        }
+      },
+      "required": ["soilProfile"]
+    },
+
+    "outputs": {
+      "type": ["object", "null"],
+      "description": "Derived soil amendment recommendations and related garden sessions.",
+      "additionalProperties": false,
+      "properties": {
+        "amendmentPlan": {
+          "type": "array",
+          "description": "Per-bed amendment recommendations by material and amount.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "planId": {
+                "type": "string",
+                "description": "Unique id for this amendment plan row."
+              },
+              "bedId": {
+                "type": "string",
+                "description": "Bed that this amendment applies to."
+              },
+              "materialId": {
+                "type": "string",
+                "description": "Internal id or SKU for the amendment material (e.g., 'compost', 'lime')."
+              },
+              "materialName": {
+                "type": "string",
+                "description": "Human-friendly name of the amendment material."
+              },
+              "ratePerSqFt": {
+                "type": "number",
+                "description": "Rate of application per square foot (e.g., pounds per sq ft)."
+              },
+              "totalAmount": {
+                "type": "number",
+                "description": "Total amount of this material required for the bed (in materialUnit)."
+              },
+              "materialUnit": {
+                "type": "string",
+                "description": "Unit for totalAmount and rate, e.g. 'lb', 'kg', 'cu_ft', 'cu_yd'."
+              },
+              "priority": {
+                "type": "string",
+                "description": "Priority or severity of this amendment.",
+                "enum": ["critical", "high", "medium", "low"]
+              },
+              "reason": {
+                "type": "string",
+                "description": "Short explanation (e.g., 'pH too low', 'low phosphorus')."
+              }
+            },
+            "required": ["planId", "bedId", "materialName", "totalAmount"]
+          }
+        },
+
+        "amendmentSessions": {
+          "type": "array",
+          "description": "Pre-built garden sessions for SessionRunner, focused on soil prep and amendment application.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sessionId": {
+                "type": "string",
+                "description": "SSA session id that can be passed directly into SessionRunner."
+              },
+              "bedId": {
+                "type": "string",
+                "description": "Target bed for this session."
+              },
+              "title": {
+                "type": "string",
+                "description": "Short label for the amendment session."
+              },
+              "plannedDate": {
+                "type": "string",
+                "format": "date",
+                "description": "Suggested date for the amendment session (optional)."
+              },
+              "estimatedDurationSec": {
+                "type": "number",
+                "description": "Estimated duration of the session in seconds."
+              }
+            },
+            "required": ["sessionId", "title"]
+          }
+        },
+
+        "amendmentSummary": {
+          "type": "object",
+          "description": "Summary metrics for UX and planning graph flows.",
+          "additionalProperties": false,
+          "properties": {
+            "totalBeds": {
+              "type": "integer",
+              "description": "Number of beds included in the amendment plan.",
+              "minimum": 0
+            },
+            "totalMaterials": {
+              "type": "integer",
+              "description": "Number of distinct amendment materials required.",
+              "minimum": 0
+            },
+            "totalSessions": {
+              "type": "integer",
+              "description": "Number of generated amendment sessions.",
+              "minimum": 0
+            },
+            "estimatedTotalLaborMinutes": {
+              "type": "number",
+              "description": "Approximate total labor time for all amendment sessions in minutes."
+            },
+            "notes": {
+              "type": "string",
+              "description": "Free-form notes or warnings (e.g., 'Delay nitrogen-heavy amendments before direct seeding')."
+            }
+          },
+          "required": []
+        }
+      },
+      "required": []
+    }
+  },
+  "required": ["context", "inputs"]
+}

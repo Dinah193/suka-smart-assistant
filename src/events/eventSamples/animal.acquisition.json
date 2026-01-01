@@ -1,0 +1,236 @@
+{
+  "description": "Sample SSA event envelope for `animal.acquisition`. Use this when the household acquires a new animal (purchase, barter, birth/litter, rescue) and you want it to flow into: 1) animal planner/care schedules, 2) feed/inventory projections, 3) future butchery/yield curves, 4) (optional) Hub export for community livestock visibility. This sits BETWEEN intelligence → automation: the acquisition is an intelligence-worthy change, and automation can now schedule care/butchery.",
+  "envelopeShape": {
+    "type": "animal.acquisition",
+    "ts": "2025-11-02T13:50:00.000Z",
+    "source": "domain/animals/AnimalSessionEngine",
+    "data": {
+      "acquisitionId": "acq_xxxxxxxx",
+      "method": "purchase | barter | birth | transfer | rescue",
+      "species": "sheep | goat | chicken | duck | cow | rabbit | turkey | other",
+      "breed": "string | null",
+      "quantity": 1,
+      "ageCategory": "adult | juvenile | lamb | kid | chick | poult | calf | other",
+      "intendedUse": [
+        "breeding",
+        "milk",
+        "meat",
+        "wool",
+        "eggs",
+        "training"
+      ],
+      "sourceInfo": {
+        "from": "string — farm, person, market",
+        "cost": "number | null",
+        "currency": "USD | OMER | SILVER | null"
+      },
+      "linkHints": {
+        "inventory": [
+          "starter_feed",
+          "hay",
+          "mineral_block"
+        ],
+        "storehouse": [
+          "salt",
+          "preservation_salt"
+        ],
+        "butcheryPlan": null
+      }
+    }
+  },
+  "samples": [
+    {
+      "label": "Purchased 2 Katahdin ewes (your sheep/butchery-friendly case)",
+      "event": {
+        "type": "animal.acquisition",
+        "ts": "2025-11-02T13:50:00.000Z",
+        "source": "domain/animals/AnimalSessionEngine",
+        "data": {
+          "acquisitionId": "acq_sheep_katahdin_2025_11_02",
+          "method": "purchase",
+          "species": "sheep",
+          "breed": "Katahdin",
+          "quantity": 2,
+          "ageCategory": "adult",
+          "intendedUse": [
+            "breeding",
+            "meat",
+            "wool"
+          ],
+          "sourceInfo": {
+            "from": "Neighboring homestead",
+            "cost": 220,
+            "currency": "USD"
+          },
+          "linkHints": {
+            "inventory": [
+              {
+                "name": "sheep_pellet_feed",
+                "normalized": "feed_sheep_pellet",
+                "qty": 40,
+                "unit": "lb"
+              },
+              {
+                "name": "hay_square_bale",
+                "normalized": "hay_square_bale",
+                "qty": 1,
+                "unit": "bale"
+              },
+              {
+                "name": "mineral_block_sheep",
+                "normalized": "mineral_block_sheep"
+              }
+            ],
+            "storehouse": [
+              {
+                "name": "preservation_salt",
+                "minLevel": 1
+              }
+            ],
+            "butcheryPlan": null
+          }
+        }
+      }
+    },
+    {
+      "label": "Bartered 1 young buck (for future breeding + meat)",
+      "event": {
+        "type": "animal.acquisition",
+        "ts": "2025-11-02T13:52:30.000Z",
+        "source": "domain/animals/AnimalSessionEngine",
+        "data": {
+          "acquisitionId": "acq_goat_buck_barter_2025_11_02",
+          "method": "barter",
+          "species": "goat",
+          "breed": "Kiko",
+          "quantity": 1,
+          "ageCategory": "juvenile",
+          "intendedUse": [
+            "breeding",
+            "meat"
+          ],
+          "sourceInfo": {
+            "from": "Local co-op family",
+            "cost": 0,
+            "currency": "OMER"
+          },
+          "linkHints": {
+            "inventory": [
+              {
+                "name": "goat_dairy_feed",
+                "normalized": "feed_goat_dairy",
+                "qty": 25,
+                "unit": "lb"
+              }
+            ],
+            "storehouse": [],
+            "butcheryPlan": {
+              "yieldCurveId": "goat_kiko.json",
+              "timeline": "when breeding cycle is complete",
+              "byproducts": [
+                "blood_meal",
+                "tallow"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "label": "Hatched 15 meat chicks (integration with your yieldCurves/meat/*)",
+      "event": {
+        "type": "animal.acquisition",
+        "ts": "2025-11-02T13:54:10.000Z",
+        "source": "domain/animals/AnimalSessionEngine",
+        "data": {
+          "acquisitionId": "acq_chicken_meat_batch_2025_11_02",
+          "method": "birth",
+          "species": "chicken",
+          "breed": "Ranger",
+          "quantity": 15,
+          "ageCategory": "chick",
+          "intendedUse": [
+            "meat"
+          ],
+          "sourceInfo": {
+            "from": "On-farm incubator",
+            "cost": 0,
+            "currency": "USD"
+          },
+          "linkHints": {
+            "inventory": [
+              {
+                "name": "chick_starter_feed",
+                "normalized": "feed_chick_starter",
+                "qty": 20,
+                "unit": "lb"
+              },
+              {
+                "name": "brooder_bedding",
+                "normalized": "brooder_bedding"
+              }
+            ],
+            "storehouse": [
+              {
+                "name": "grain_mash",
+                "minLevel": 1
+              }
+            ],
+            "butcheryPlan": {
+              "yieldCurveId": "chicken_ranger.json",
+              "timeline": "8 weeks",
+              "notes": "Run through butchery session engine → emit animal.butchery.logged → emit inventory.updated for each cut."
+            }
+          }
+        }
+      }
+    },
+    {
+      "label": "Transfer from another SSA household in the Hub (should export when familyFundMode=true)",
+      "event": {
+        "type": "animal.acquisition",
+        "ts": "2025-11-02T13:55:55.000Z",
+        "source": "domain/animals/AnimalSessionEngine",
+        "data": {
+          "acquisitionId": "acq_duck_muscovy_transfer_2025_11_02",
+          "method": "transfer",
+          "species": "duck",
+          "breed": "Muscovy",
+          "quantity": 4,
+          "ageCategory": "adult",
+          "intendedUse": [
+            "meat",
+            "breeding"
+          ],
+          "sourceInfo": {
+            "from": "Household:SVFFH-Delta-09",
+            "cost": 0,
+            "currency": "USD"
+          },
+          "linkHints": {
+            "inventory": [
+              {
+                "name": "duck_waterer_maintenance",
+                "normalized": "duck_waterer_maintenance"
+              }
+            ],
+            "storehouse": [],
+            "butcheryPlan": {
+              "yieldCurveId": "duck_muscovy.json",
+              "timeline": "on-demand",
+              "notes": "Use your dynamic dehydrate/porch/preservation flows for byproducts."
+            }
+          }
+        }
+      }
+    }
+  ],
+  "notes": [
+    "1. This event is upstream of your butchery logs. A future `animal.butchery.logged` should reference acquisitionId so you can trace yield vs. purchase/barter cost.",
+    "2. Automation should listen for `animal.acquisition` and create: feed schedule, health checks, breeding cycles, and optional butchery sessions.",
+    "3. If featureFlags.familyFundMode=true, a listener (see src/events/eventMappers.js) can map this to a Hub-friendly packet like `hub:animal.acquisition` so cooperatives see livestock availability.",
+    "4. Keep JSON-only (no $schema) so VS Code doesn’t complain.",
+    "5. `linkHints` is modeled like your import-based link hints: it’s the connective tissue to inventory, storehouse, and future domain actions.",
+    "6. You can add more methods later: `loan`, `foster`, `community-share` for your Susu/Family Fund livestock programs."
+  ]
+}

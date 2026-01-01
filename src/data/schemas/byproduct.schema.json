@@ -1,0 +1,148 @@
+{
+  "$id": "https://suka.local/schemas/byproduct.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Suka Byproduct Schema",
+  "description": "Schema for byproducts created from butchery/processing runs (e.g. blood meal, bone meal). Must integrate with garden, storehouse, cleaning, and automation.",
+  "type": "object",
+  "required": [
+    "version",
+    "meta"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "meta": {
+      "type": "object",
+      "required": [
+        "id",
+        "title"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "torahCompliance": {
+          "type": "object",
+          "properties": {
+            "uncleanSpeciesExcluded": {
+              "type": "boolean"
+            },
+            "notes": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": true
+    },
+    "ui": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "orchestration": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "engines": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "reverse": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "byproduct": {
+      "type": "object",
+      "properties": {
+        "category": { "type": "string" },
+        "subCategory": { "type": "string" },
+        "excludeFromMealPlanner": { "type": "boolean" },
+        "yieldModel": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string" },
+            "formula": { "type": "string" },
+            "dryingRetention": { "type": "number" },
+            "notes": { "type": "string" }
+          },
+          "additionalProperties": true
+        },
+        "examples": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "storehouse": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "garden": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "cleaning": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "animals": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "processing": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "inventory": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "favoriteSessions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "scheduleTemplates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "userProfiles": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "events": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

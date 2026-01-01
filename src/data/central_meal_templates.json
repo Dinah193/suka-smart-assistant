@@ -1,0 +1,458 @@
+{
+  "version": "2025-10-31T11:55:00-05:00",
+  "description": "CENTRAL: Torah-friendly meals, batch stews & breads, family meal cycles for Suka Smart Assistant. Auto-fed by scrapers/ingestors (recipe imports, Pinterest-to-Planner, Allrecipes-style pages, YouTube/TikTok cooking pulls), with hub override for Torah/culture-specific rules (no pork, no shellfish, no dairy+meat combos when household requires). Feeds MealPlanEngine, Cooking Session Engine, Storehouse goals, Garden reverse planning, Cleaning (post-cook), and Animal provisioning (reverse from meal proteins).",
+  "meta": {
+    "sourceOfTruth": "scraper",
+    "lastIngestedAt": "2025-10-31T11:55:00-05:00",
+    "ingestionPipelines": [
+      "scraperService",
+      "importService",
+      "bookmarklet",
+      "linked-accounts",
+      "scan-compare-trust"
+    ],
+    "mergeStrategy": "scraper-wins",
+    "allowHubOverrides": true,
+    "overrideFields": [
+      "torahConstraints",
+      "servingProfiles",
+      "batchProfiles",
+      "storehouseLinks"
+    ],
+    "sharedOrchestration": {
+      "emitOnUpdate": true,
+      "reason": "scraper-update",
+      "channels": [
+        "meals",
+        "storehouse",
+        "cleaning",
+        "garden",
+        "animals"
+      ]
+    },
+    "notes": [
+      "This is the central meal library the UI reads for suggestions and batch-cook plans.",
+      "Households can clone meals into their own library and save their own favorite meal sessions and schedules.",
+      "Reverse generation is enabled so low storehouse items or harvest events can produce meals automatically."
+    ]
+  },
+  "defaults": {
+    "timezone": "America/Chicago",
+    "portionsPerHousehold": 4,
+    "supportsBatchCooking": true,
+    "supportsCleaning": true,
+    "emitCleaningOnComplete": true
+  },
+  "mealTemplates": [
+    {
+      "id": "meal-lamb-stew-torah",
+      "label": "Torah-Friendly Lamb Stew (Root Veg)",
+      "mealType": "dinner",
+      "protein": "lamb",
+      "torahConstraints": {
+        "noPork": true,
+        "noShellfish": true,
+        "allowDairyWithThisMeal": false
+      },
+      "servings": 6,
+      "ingredients": [
+        {
+          "name": "lamb shoulder, cubed",
+          "qty": 2,
+          "unit": "lb",
+          "storehouseLink": "meat-lamb",
+          "reverseGeneration": {
+            "enabled": true,
+            "rules": [
+              {
+                "id": "lamb-missing",
+                "ifMissingFromStorehouse": true,
+                "generate": "animals.plan.fromMeals.generated",
+                "emit": [
+                  "animals.plan.fromMeals.generated",
+                  "storehouse.intake.expected"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "carrots, chopped",
+          "qty": 4,
+          "unit": "pcs",
+          "storehouseLink": "root-cellar-carrot",
+          "gardenLink": "carrot",
+          "reverseGeneration": {
+            "enabled": true,
+            "rules": [
+              {
+                "id": "carrot-missing",
+                "ifMissingFromStorehouse": true,
+                "generate": "garden.plan.fromStorehouse.requested",
+                "emit": [
+                  "garden.plan.fromStorehouse.requested"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "potatoes, cubed",
+          "qty": 3,
+          "unit": "pcs",
+          "storehouseLink": "root-cellar-potato"
+        },
+        {
+          "name": "onion",
+          "qty": 1,
+          "unit": "pc",
+          "storehouseLink": "produce"
+        },
+        {
+          "name": "stock/broth (lamb or beef)",
+          "qty": 4,
+          "unit": "cup",
+          "storehouseLink": "broth"
+        }
+      ],
+      "instructions": [
+        "Brown lamb in heavy pot.",
+        "Add aromatics and root veg.",
+        "Add broth, simmer until tender.",
+        "Season to taste with Torah-friendly seasonings.",
+        "Serve with flatbread or millet bread."
+      ],
+      "batchProfiles": [
+        {
+          "id": "batch-2x",
+          "label": "Double Batch (Freeze Half)",
+          "multiplier": 2,
+          "storehouseOutput": [
+            {
+              "item": "frozen-lamb-stew",
+              "qty": 1,
+              "unit": "gallon-bag"
+            }
+          ],
+          "emit": [
+            "storehouse.intake.expected",
+            "cleaning.after-cooking.requested"
+          ]
+        }
+      ],
+      "cleaning": {
+        "onCompleteEmit": [
+          "cleaning.session.created",
+          "cleaning.after-batch-cooking.requested"
+        ]
+      },
+      "storehouseLinks": [
+        "meat-lamb",
+        "root-cellar-carrot",
+        "root-cellar-potato"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "storehouse.root.low",
+          "animals.butchery.completed"
+        ],
+        "rules": [
+          {
+            "id": "root-low-generate-stew",
+            "ifEvent": "storehouse.root.low",
+            "generate": "meal.lamb-stew-root",
+            "emit": [
+              "meals.plan.fromStorehouse.requested"
+            ]
+          },
+          {
+            "id": "butchery-complete-generate-stew",
+            "ifEvent": "animals.butchery.completed",
+            "generate": "meal.lamb-stew-root",
+            "emit": [
+              "meals.plan.fromAnimals.requested",
+              "storehouse.intake.expected"
+            ]
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "bowl-hot",
+        "group": "torah-core",
+        "color": "rose"
+      }
+    },
+    {
+      "id": "meal-goat-curry-torah",
+      "label": "Torah-Friendly Goat Curry (Coconut)",
+      "mealType": "dinner",
+      "protein": "goat",
+      "torahConstraints": {
+        "noPork": true,
+        "noShellfish": true,
+        "allowDairyWithThisMeal": true
+      },
+      "servings": 6,
+      "ingredients": [
+        {
+          "name": "goat meat, cubed",
+          "qty": 2,
+          "unit": "lb",
+          "storehouseLink": "meat-goat",
+          "reverseGeneration": {
+            "enabled": true,
+            "rules": [
+              {
+                "id": "goat-missing",
+                "ifMissingFromStorehouse": true,
+                "generate": "animals.plan.fromMeals.generated",
+                "emit": [
+                  "animals.plan.fromMeals.generated",
+                  "storehouse.intake.expected"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "coconut milk",
+          "qty": 2,
+          "unit": "can",
+          "storehouseLink": "coconut-milk"
+        },
+        {
+          "name": "onion",
+          "qty": 1,
+          "unit": "pc",
+          "storehouseLink": "produce"
+        },
+        {
+          "name": "garlic",
+          "qty": 4,
+          "unit": "clove"
+        },
+        {
+          "name": "curry blend (Torah-friendly)",
+          "qty": 3,
+          "unit": "tbsp"
+        }
+      ],
+      "instructions": [
+        "Sear goat meat.",
+        "Add aromatics.",
+        "Add coconut milk and curry blend.",
+        "Simmer until tender.",
+        "Serve with rice or millet."
+      ],
+      "batchProfiles": [
+        {
+          "id": "batch-prep-kit",
+          "label": "Prep Kit (Chopped + Bagged)",
+          "multiplier": 1,
+          "storehouseOutput": [
+            {
+              "item": "goat-curry-prep-kit",
+              "qty": 2,
+              "unit": "meal-kit"
+            }
+          ],
+          "emit": [
+            "storehouse.intake.expected"
+          ]
+        }
+      ],
+      "cleaning": {
+        "onCompleteEmit": [
+          "cleaning.session.created"
+        ]
+      },
+      "storehouseLinks": [
+        "meat-goat",
+        "dry-goods",
+        "produce"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "storehouse.spice.low",
+          "storehouse.meat-goat.low"
+        ],
+        "rules": [
+          {
+            "id": "spice-low",
+            "ifEvent": "storehouse.spice.low",
+            "generate": "storehouse.spice-restock",
+            "emit": [
+              "storehouse.provision.requested",
+              "cleaning.storehouse-visibility-pass"
+            ]
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "bowl-rice",
+        "group": "torah-core",
+        "color": "amber"
+      }
+    },
+    {
+      "id": "meal-batch-bread-millet",
+      "label": "Batch Bread – Millet / Ancient Grain",
+      "mealType": "bread",
+      "protein": null,
+      "torahConstraints": {
+        "noPork": true,
+        "noShellfish": true
+      },
+      "servings": 8,
+      "ingredients": [
+        {
+          "name": "millet flour",
+          "qty": 6,
+          "unit": "cup",
+          "storehouseLink": "baking"
+        },
+        {
+          "name": "water",
+          "qty": 2.5,
+          "unit": "cup"
+        },
+        {
+          "name": "salt",
+          "qty": 2,
+          "unit": "tsp"
+        }
+      ],
+      "instructions": [
+        "Mix dry ingredients.",
+        "Add water until dough forms.",
+        "Rest, shape, and bake.",
+        "Package for storehouse."
+      ],
+      "batchProfiles": [
+        {
+          "id": "batch-4-loaves",
+          "label": "4-Loaf Sabbath Prep",
+          "multiplier": 4,
+          "storehouseOutput": [
+            {
+              "item": "millet-bread",
+              "qty": 4,
+              "unit": "loaf"
+            }
+          ],
+          "emit": [
+            "storehouse.intake.expected",
+            "cleaning.sabbath-prep.requested"
+          ]
+        }
+      ],
+      "cleaning": {
+        "onCompleteEmit": [
+          "cleaning.session.created"
+        ]
+      },
+      "storehouseLinks": [
+        "baking"
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "calendar.feast.upcoming",
+          "meals.sabbath-cooking.planned"
+        ],
+        "rules": [
+          {
+            "id": "feast-to-bread",
+            "ifEvent": "calendar.feast.upcoming",
+            "generate": "meal.batch-bread",
+            "emit": [
+              "meals.plan.fromFeast.requested"
+            ]
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "loaf",
+        "group": "breads",
+        "color": "yellow"
+      }
+    },
+    {
+      "id": "meal-family-cycle-7day",
+      "label": "Family Meal Cycle – 7 Day Torah-Friendly",
+      "mealType": "plan",
+      "torahConstraints": {
+        "noPork": true,
+        "noShellfish": true
+      },
+      "days": [
+        {
+          "day": 1,
+          "meal": "meal-lamb-stew-torah"
+        },
+        {
+          "day": 2,
+          "meal": "meal-goat-curry-torah"
+        },
+        {
+          "day": 3,
+          "meal": "meal-batch-bread-millet"
+        },
+        {
+          "day": 4,
+          "meal": "meal-lamb-stew-torah"
+        },
+        {
+          "day": 5,
+          "meal": "meal-goat-curry-torah"
+        },
+        {
+          "day": 6,
+          "meal": "meal-batch-bread-millet"
+        },
+        {
+          "day": 7,
+          "meal": "meal-lamb-stew-torah"
+        }
+      ],
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "storehouse.visibility.logged",
+          "garden.harvest.logged",
+          "animals.butchery.completed"
+        ],
+        "rules": [
+          {
+            "id": "harvest-to-cycle",
+            "ifEvent": "garden.harvest.logged",
+            "generate": "meals.plan.update-with-harvest",
+            "emit": [
+              "meals.plan.fromHarvest.requested"
+            ]
+          }
+        ]
+      },
+      "cleaning": {
+        "onCompleteEmit": [
+          "cleaning.daily-core.requested"
+        ]
+      },
+      "userCanSaveAsFavorite": true,
+      "uiHints": {
+        "icon": "calendar-week",
+        "group": "cycles",
+        "color": "violet"
+      }
+    }
+  ],
+  "userCanSaveFavorites": true,
+  "userFavoritePolicy": {
+    "maxPerHousehold": 80,
+    "allowCustomSchedule": true,
+    "allowCustomBatchProfiles": true,
+    "allowCustomTorahConstraints": true
+  }
+}

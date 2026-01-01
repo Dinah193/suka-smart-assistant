@@ -1,0 +1,513 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "2025-10-31T14:35:00-05:00",
+  "description": "Meat yield curve for pasture / freedom / 'color' meat chickens – Ranger / Freedom Ranger. Designed for Suka Smart Assistant multi-domain flow: flock acquisition → grow-out → butchery day → storehouse stock planning (with grocery-section inspo) → meal planning (whole, parted, broth, batch cook) → garden planning/care/harvest (feed + soup veg) → cleaning/sanitation (poultry) → reverse generation (from storehouse/meal/feast). Users can save favorite sessions & schedules in Dexie; this JSON defines system defaults.",
+  "__notes": [
+    "Ranger-type birds are a common homestead alternative to Cornish X; they dress a bit smaller and slower, but more flavorful, and often better suited for warm zones you mentioned.",
+    "We keep naming/layout consistent with goat/sheep/cattle yieldCurves so ImportService.js can load them all and present one ImportPreview modal.",
+    "Reverse generation is important for chicken because users often plan ‘I want 24 whole birds in the freezer’ OR ‘I need 16 parted packs + 5 broth bags’ → we convert to live bird count + butchery day + cleaning."
+  ],
+  "animal": {
+    "species": "chicken",
+    "breed": "Ranger",
+    "class": "poultry",
+    "pasture_suitable": true,
+    "typical_live_weight_lbs": [4.5, 5, 5.5, 6],
+    "default_live_weight_lbs": 5.25,
+    "live_to_dressed_yield_pct": 0.72,
+    "dressed_to_cut_yield_pct": 0.9,
+    "default_chill_hours": 0.5,
+    "butchery_style_default": "whole-bird",
+    "butchery_supported_styles": [
+      "whole-bird",
+      "parted-8pc",
+      "bone-in-breast + thighs + drumsticks",
+      "stock-pack / broth-pack",
+      "poultry-torah-compliant-no-unclean-cross-contamination"
+    ],
+    "torah_compliant_profile": {
+      "allow_unclean_animals": false,
+      "separate_tools_required": true,
+      "separate_surfaces_required": true,
+      "blood_draining_required": true,
+      "notes": "Schedule poultry sanitation after butchery and keep it separate from red-meat sanitation."
+    }
+  },
+  "yield_model": {
+    "formula_hint": "dressed = live_weight * live_to_dressed_yield_pct; cut_weight = dressed * dressed_to_cut_yield_pct",
+    "example": {
+      "live_weight_lbs": 5.25,
+      "live_to_dressed_yield_pct": 0.72,
+      "dressed_to_cut_yield_pct": 0.9,
+      "calculated_dressed_weight_lbs": 3.78,
+      "calculated_cut_weight_lbs": 3.40
+    },
+    "cut_profile_defaults": [
+      {
+        "cut_id": "chicken_whole_ranger",
+        "label": "Whole Ranger Bird",
+        "default_pct_of_dressed": 0.65,
+        "storehouse_section_hint": "Meat → Poultry → Whole Birds",
+        "mealplanner_tags": [
+          "roast-chicken",
+          "shabbat/sabbath",
+          "batch-cook"
+        ],
+        "inventory_unit": "bird",
+        "preservation": ["freeze", "brine-freeze"],
+        "cleaning_profile_ref": "poultry_sanitation"
+      },
+      {
+        "cut_id": "chicken_parts_ranger",
+        "label": "Parted – Thigh/Drum/Breast/Wing",
+        "default_pct_of_dressed": 0.3,
+        "storehouse_section_hint": "Meat → Poultry → Parts",
+        "mealplanner_tags": [
+          "fried-chicken",
+          "grill",
+          "sheet-pan"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "vac-seal"],
+        "cleaning_profile_ref": "poultry_sanitation"
+      },
+      {
+        "cut_id": "chicken_stock_bones",
+        "label": "Stock / Broth Bones + Feet",
+        "default_pct_of_dressed": 0.05,
+        "storehouse_section_hint": "Meat → Poultry → Stock Pack",
+        "mealplanner_tags": [
+          "broth",
+          "soup",
+          "stew"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "poultry_sanitation"
+      },
+      {
+        "cut_id": "chicken_organs",
+        "label": "Giblets (liver, heart, gizzard)",
+        "default_pct_of_dressed": 0.01,
+        "storehouse_section_hint": "Meat → Poultry → Organs",
+        "mealplanner_tags": [
+          "gravy",
+          "dog-food",
+          "nutrient-dense"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "poultry_sanitation"
+      }
+    ]
+  },
+  "storehouse_mapping": {
+    "purpose": "Map Ranger chicken butchery output → storehouse goals → inventory execution (freezer, chilled, canned broth).",
+    "sections": [
+      {
+        "id": "STH-POULTRY-WHOLE",
+        "label": "Meat → Poultry → Whole Birds",
+        "target_inventory_unit": "bird",
+        "auto_replenish_from": [
+          "chicken_whole_ranger"
+        ],
+        "grocery_inspo": [
+          "Costco → whole chicken twin pack",
+          "Aldi → small whole chicken",
+          "Halal grocer → whole bird"
+        ]
+      },
+      {
+        "id": "STH-POULTRY-PARTS",
+        "label": "Meat → Poultry → Parts",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "chicken_parts_ranger"
+        ],
+        "grocery_inspo": [
+          "Walmart → Value pack thighs/drums",
+          "Trader Joe’s → air-chilled parts"
+        ]
+      },
+      {
+        "id": "STH-POULTRY-STOCK",
+        "label": "Meat → Poultry → Stock / Broth Base",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "chicken_stock_bones"
+        ],
+        "grocery_inspo": [
+          "Whole Foods → broth kits",
+          "Asian markets → backs/necks/feet"
+        ]
+      },
+      {
+        "id": "STH-POULTRY-ORGANS",
+        "label": "Meat → Poultry → Organs",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "chicken_organs"
+        ],
+        "grocery_inspo": [
+          "Ethnic markets → gizzards/hearts"
+        ]
+      }
+    ],
+    "reverse_generation_rules": [
+      {
+        "id": "RG-CHICKEN-WHOLE",
+        "when_event": "storehouse.goal.short.whole-chickens",
+        "action": "calc required whole birds → map to live ranger birds → emit automation.schedule.request (poultry-butchery + cleaning + mealplan.refresh)",
+        "notes": "If storehouse says ‘we want 18 whole birds’ we figure 18 live birds + 1 butchery day."
+      },
+      {
+        "id": "RG-CHICKEN-PARTS",
+        "when_event": "storehouse.goal.short.chicken-parts",
+        "action": "calc required parts → back-calc to birds → emit automation.schedule.request"
+      }
+    ]
+  },
+  "meal_planner_hooks": {
+    "default_meal_templates": [
+      {
+        "id": "mt-ranger-roast",
+        "label": "Roast Ranger Chicken + Garden Veg",
+        "uses_cuts": [
+          {
+            "cut_id": "chicken_whole_ranger",
+            "qty_birds": 1
+          }
+        ],
+        "suggested_sides": [
+          "roasted carrots",
+          "potatoes or sweet potatoes",
+          "greens"
+        ],
+        "garden_suggestions": [
+          "carrot",
+          "onion",
+          "garlic",
+          "greens",
+          "rosemary/thyme"
+        ],
+        "cleaning_profiles": [
+          "poultry_sanitation",
+          "oven_tray_deep_clean"
+        ]
+      },
+      {
+        "id": "mt-ranger-soup",
+        "label": "Chicken Soup / Broth Batch",
+        "uses_cuts": [
+          {
+            "cut_id": "chicken_stock_bones",
+            "qty_lb": 2
+          }
+        ],
+        "suggested_sides": [
+          "bread",
+          "rice",
+          "noodles"
+        ],
+        "garden_suggestions": [
+          "celery",
+          "carrot",
+          "onion",
+          "parsley"
+        ],
+        "cleaning_profiles": [
+          "poultry_sanitation"
+        ]
+      },
+      {
+        "id": "mt-ranger-parts",
+        "label": "Parts → Fry/Grill Sheet Pan",
+        "uses_cuts": [
+          {
+            "cut_id": "chicken_parts_ranger",
+            "qty_lb": 3
+          }
+        ],
+        "suggested_sides": [
+          "salad",
+          "fermented veg",
+          "fries"
+        ],
+        "garden_suggestions": [
+          "lettuce",
+          "tomato",
+          "cucumber"
+        ],
+        "cleaning_profiles": [
+          "poultry_sanitation",
+          "sheetpan_clean"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "can_generate_animal_plan": true,
+      "handler_event": "animal.plan.requested",
+      "notes": "If user locks in ‘4 roast chickens’ and ‘2 soup batches’ in a month, emit this so Animals/Poultry planner can propose ‘raise 8 ranger birds’ with a butchery day 8–10 weeks ahead."
+    }
+  },
+  "garden_integration": {
+    "purpose": "Tie poultry-heavy menus to easy-to-grow vegetable/herb sides (carrot, onion, garlic, celery, greens, herbs) that make chicken meals complete.",
+    "crops_to_recommend": [
+      {
+        "crop": "carrot",
+        "use_case": "roast sides, soup base",
+        "harvest_window": "spring-fall (succession)",
+        "preservation": ["pressure can", "dehydrate"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "onion",
+        "use_case": "soup base, roast pans",
+        "harvest_window": "late summer",
+        "preservation": ["cure", "store dry"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "garlic",
+        "use_case": "roast marinades, broth flavor",
+        "harvest_window": "mid-summer",
+        "preservation": ["dry", "powder"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "celery",
+        "use_case": "soup/broth base",
+        "harvest_window": "cool season",
+        "preservation": ["freeze", "dehydrate"],
+        "cleaning_profile_ref": "garden_light"
+      },
+      {
+        "crop": "greens",
+        "use_case": "side for roast chicken",
+        "harvest_window": "cool seasons",
+        "preservation": ["blanch-freeze"],
+        "cleaning_profile_ref": "garden_light"
+      }
+    ],
+    "reverse_generation": {
+      "when_meat_menu_fixed_event": "garden.plan.adjust.requested",
+      "notes": "If meal plan has weekly roast chicken + weekly chicken soup, garden planner should schedule onion/celery/carrot successions and add harvest reminders to calendar."
+    }
+  },
+  "animal_care_and_butchery": {
+    "pre_slaughter_care_checklist": [
+      "12hr feed withdrawal",
+      "clean water available until 2hr before",
+      "shade/low-stress holding",
+      "inspect for disease",
+      "torah_compliant_tools_ready"
+    ],
+    "butchery_session_template": {
+      "id": "butchery-session-chicken-ranger",
+      "label": "Ranger Chicken – Poultry Processing Day",
+      "estimated_duration_hours": 3,
+      "scales_with_bird_count": true,
+      "roles_needed": [
+        "scalder/plucker",
+        "eviscerator",
+        "chill-station",
+        "sanitation-runner"
+      ],
+      "outputs": [
+        "whole_birds",
+        "parted_birds",
+        "stock_packs",
+        "organs",
+        "feathers (compost or disposal)"
+      ],
+      "emits_events": [
+        "inventory.add.requested",
+        "storehouse.update.requested",
+        "cleaning.plan.requested",
+        "mealplan.refresh.requested",
+        "garden.plan.adjust.requested"
+      ],
+      "scheduling": {
+        "supports_user_favorites": true,
+        "supports_recurring": true,
+        "supports_coop_mode": true,
+        "coop_mode_notes": "Co-op / family fund members can bring their own ranger birds to the same setup. Cleaning module must schedule BIG poultry sanitation after."
+      }
+    },
+    "cleaning_after_butchery": {
+      "cleaning_profile_id": "poultry_sanitation",
+      "label": "Post-Poultry Processing Sanitation",
+      "tasks": [
+        "collect feathers and offal for compost/render/blood-meal line",
+        "wash scalders, pluckers, evisceration tables",
+        "sanitize with poultry-safe, torah-safe cleaner",
+        "mop floor / drains",
+        "launder aprons/towels"
+      ],
+      "emits_events": [
+        "cleaning.log.added",
+        "inventory.cleaning-supplies.decrement"
+      ]
+    }
+  },
+  "cleaning_integration": {
+    "profiles": [
+      {
+        "id": "poultry_sanitation",
+        "label": "Poultry – Heavy Sanitation",
+        "zone": "Processing / Kitchen",
+        "supplies": [
+          "hot_water",
+          "poultry-safe_disinfectant",
+          "scrub_brush",
+          "mop_bucket",
+          "laundry_detergent"
+        ]
+      },
+      {
+        "id": "garden_root",
+        "label": "Garden Root Veg Cleanup",
+        "zone": "Utility / Outdoor Sink",
+        "supplies": [
+          "hose",
+          "brush",
+          "drain_screens"
+        ]
+      },
+      {
+        "id": "garden_light",
+        "label": "Garden Light Wash",
+        "zone": "Kitchen",
+        "supplies": [
+          "sink_sanitizer",
+          "drying_rack"
+        ]
+      },
+      {
+        "id": "sheetpan_clean",
+        "label": "Sheet Pan / Roast Tray Clean",
+        "zone": "Kitchen",
+        "supplies": [
+          "degreaser",
+          "scrub_pad"
+        ]
+      },
+      {
+        "id": "oven_tray_deep_clean",
+        "label": "Oven/Tray Deep Clean (post-roast chicken)",
+        "zone": "Kitchen",
+        "supplies": [
+          "oven_cleaner",
+          "scrub_pad"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "when_butchery_scheduled_event": "cleaning.session.auto-created",
+      "when_roast_chicken_event": "cleaning.session.suggested"
+    }
+  },
+  "scheduling_and_favorites": {
+    "can_be_favorited": true,
+    "favorite_key": "yieldcurve:meat:chicken_ranger",
+    "suggested_schedules": [
+      {
+        "id": "sched-ranger-growout-8wk",
+        "label": "Ranger Grow-Out → Butchery Every 8 Weeks",
+        "rule": "FREQ=MONTHLY;INTERVAL=2;BYDAY=SA;BYSETPOS=2",
+        "creates": [
+          "butchery-session-chicken-ranger",
+          "cleaning:poultry_sanitation",
+          "storehouse:update",
+          "mealplan:refresh",
+          "garden.plan.adjust.requested"
+        ]
+      },
+      {
+        "id": "sched-ranger-quarter",
+        "label": "Ranger Poultry Day – Quarterly",
+        "rule": "FREQ=MONTHLY;INTERVAL=3;BYDAY=SA;BYSETPOS=1",
+        "creates": [
+          "butchery-session-chicken-ranger"
+        ]
+      }
+    ],
+    "shared_orchestration": {
+      "event_bus_path": "window.__suka.eventBus",
+      "events_emitted": [
+        "yieldcurve.loaded",
+        "yieldcurve.butchery.session.generated",
+        "storehouse.goal.derived",
+        "cleaning.session.derived",
+        "mealplan.refresh.requested",
+        "garden.plan.adjust.requested"
+      ],
+      "events_listened_for": [
+        "automation.schedule.request",
+        "mealplanner.menu.locked",
+        "storehouse.goal.short",
+        "garden.plan.adjust.requested"
+      ]
+    }
+  },
+  "reverse_generation": {
+    "enabled": true,
+    "scenarios": [
+      {
+        "id": "RG-CHICKEN-01",
+        "source": "meal-planner",
+        "input_example": {
+          "roast_chicken_meals": 4,
+          "chicken_soup_batches": 2,
+          "parts_meals": 2
+        },
+        "output_example": {
+          "required_dressed_birds": 8,
+          "required_live_birds": 8,
+          "suggested_date": "next-available-poultry-day",
+          "auto_cleaning_sessions": [
+            "poultry_sanitation"
+          ]
+        }
+      },
+      {
+        "id": "RG-CHICKEN-02",
+        "source": "storehouse",
+        "input_example": {
+          "target_section": "STH-POULTRY-WHOLE",
+          "target_birds": 24
+        },
+        "output_example": {
+          "required_dressed_birds": 24,
+          "required_live_birds": 24,
+          "notes": "multipliers can be used if your live-to-dressed yield differs."
+        }
+      }
+    ],
+    "notes": "UI should show ‘Generate Poultry Day’ + ‘Schedule Poultry Sanitation’ + ‘Adjust Garden for Soup Veg’ based on these."
+  },
+  "user_overrides_placeholder": {
+    "explanation": "User-specific edits (more parts, fewer whole birds, different grow-out interval) should be saved in Dexie/local DB, not here.",
+    "keys": [
+      "animal.live_to_dressed_yield_pct",
+      "yield_model.cut_profile_defaults",
+      "scheduling_and_favorites.suggested_schedules"
+    ]
+  },
+  "interop": {
+    "import_sources_supported": [
+      "csv-poultry-yields",
+      "google-sheets-yields",
+      "extension.capture.poultry",
+      "pinterest-board-to-planner",
+      "recipe-site-chicken-detector"
+    ],
+    "export_targets_supported": [
+      "household.storehouse",
+      "household.inventory",
+      "community.coop-planner",
+      "family-fund.hub",
+      "pdf-labels"
+    ]
+  }
+}

@@ -1,0 +1,248 @@
+{
+  "id": "garden.plan.estimate",
+  "version": "1.0.0",
+  "kind": "template",
+  "description": "Estimate a seasonal garden plan (beds, crops, irrigation, compost) and generate a dated schedule that can be mapped to the Household Calendar.",
+  "tags": ["garden", "planning", "calendar", "inventory"],
+  "inputs": {
+    "type": "object",
+    "required": ["householdSize", "land", "climate"],
+    "properties": {
+      "householdSize": { "type": "number", "minimum": 1, "default": 4 },
+      "land": {
+        "type": "object",
+        "required": ["acres"],
+        "properties": { "acres": { "type": "number", "minimum": 0, "default": 0.25 } }
+      },
+      "climate": {
+        "type": "object",
+        "required": ["usdaZone"],
+        "properties": {
+          "usdaZone": { "type": "string", "default": "6b" },
+          "lastFrost": { "type": "string", "format": "date", "nullable": true },
+          "firstFrost": { "type": "string", "format": "date", "nullable": true }
+        }
+      },
+      "waterAccess": { "type": "string", "enum": ["hose", "drip", "rain", "limited"], "default": "hose" },
+      "soilType": { "type": "string", "enum": ["loam", "sand", "clay", "rocky", "unknown"], "default": "loam" },
+      "outputs": {
+        "type": "array",
+        "items": { "type": "string", "enum": ["veg", "fruit", "herbs", "storage", "flowers"] },
+        "default": ["veg", "fruit", "herbs"]
+      },
+      "constraints": { "type": "string", "default": "" },
+      "notes": { "type": "string", "default": "" },
+      "today": { "type": "string", "format": "date", "nullable": true }
+    }
+  },
+  "defaults": {
+    "spacingInches": {
+      "Tomatoes": 24,
+      "Peppers": 18,
+      "Lettuce": 10,
+      "Kale": 16,
+      "Cucumber": 12,
+      "Basil": 12,
+      "Parsley": 8
+    },
+    "yieldsPerPlant": {
+      "Tomatoes": 8,
+      "Peppers": 5,
+      "Lettuce": 1,
+      "Kale": 1,
+      "Cucumber": 6,
+      "Basil": 0.5,
+      "Parsley": 0.5
+    },
+    "perPersonWeeklyVegLb": 5,
+    "targetSeasonWeeks": 16,
+    "bedDefaults": { "bedWidthFt": 3, "pathWidthFt": 1.5 }
+  },
+  "logic": {
+    "engine": "rule-or-llm",
+    "rule": {
+      "explain": "Heuristics to size beds and crop counts from land size and household size; build a simple date schedule relative to last/first frost or today.",
+      "steps": [
+        "Compute total plantable area sqft: acres * 43560 * 0.35 (assume 35% of lot is bed area; adjust if constraints mention HOA/shade).",
+        "Determine number of 10ft beds of width 3ft from area.",
+        "Prioritize crops from requested outputs: if 'veg' include tomatoes/lettuce/kale/cucumber; if 'herbs' include basil/parsley; if 'fruit' reserve bed for berries (note-only).",
+        "Estimate plants per bed from spacing. Derive plant counts per crop scaled by household size.",
+        "Create 2–4 beds with names and crop lists with {name, qty}.",
+        "Irrigation recommendation: 'drip' if waterAccess = 'drip' else 'hose'; if 'limited' suggest mulch & deep watering every 3–4 days.",
+        "Compost note from soilType: clay → add coarse compost + gypsum; sand → add compost + biochar; loam → light compost top-up.",
+        "Derive schedule dates:\n- Planting: lastFrost + 7 days (or today if missing).\n- Care: staking/pruning 2 weeks after planting.\n- Harvest: lettuce 3–4 weeks; cucumbers 5–6; tomatoes 8–10.\nCreate objects {date, title, kind}.",
+        "Map schedule into calendar events: {title, date, color:'#34d399', source:'garden'}; keep same date strings (YYYY-MM-DD)."
+      ],
+      "returns": {
+        "type": "object",
+        "properties": {
+          "plan": {
+            "type": "object",
+            "properties": {
+              "beds": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "areaSqft": { "type": "number" },
+                    "crops": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string" },
+                          "qty": { "type": "number" },
+                          "successions": { "type": "number", "nullable": true }
+                        },
+                        "required": ["name", "qty"]
+                      }
+                    }
+                  },
+                  "required": ["name", "crops"]
+                }
+              },
+              "irrigation": { "type": "string" },
+              "compost": { "type": "string" },
+              "schedule": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "date": { "type": "string", "format": "date" },
+                    "title": { "type": "string" },
+                    "kind": { "type": "string", "enum": ["plant", "care", "harvest", "prep", "other"] }
+                  },
+                  "required": ["date", "title"]
+                }
+              },
+              "meta": {
+                "type": "object",
+                "properties": {
+                  "householdSize": { "type": "number" },
+                  "land": { "type": "object" },
+                  "climate": { "type": "object" },
+                  "soilType": { "type": "string" },
+                  "outputs": { "type": "array" },
+                  "constraints": { "type": "string" }
+                }
+              }
+            },
+            "required": ["beds", "schedule"]
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": { "type": "string" },
+                "date": { "type": "string", "format": "date" },
+                "color": { "type": "string" },
+                "source": { "type": "string", "enum": ["garden"] }
+              },
+              "required": ["title", "date"]
+            }
+          }
+        },
+        "required": ["plan"]
+      }
+    },
+    "llm": {
+      "when": "Use if rule engine is disabled or inputs are insufficient (e.g., unknown zone and no frost dates).",
+      "model": "planner/garden-v1",
+      "temperature": 0.2,
+      "systemPrompt": "You are a garden planning assistant. Produce a compact, structured JSON object for a small homestead garden plan that includes beds, irrigation, compost guidance, a schedule of dated actions, and a parallel list of schedule items mapped to calendar events. Dates must be ISO YYYY-MM-DD. Keep event titles short.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "plan": { "$ref": "#/logic/rule/returns/properties/plan" },
+          "events": { "$ref": "#/logic/rule/returns/properties/events" }
+        },
+        "required": ["plan"]
+      },
+      "fewShot": [
+        {
+          "input": {
+            "householdSize": 4,
+            "land": { "acres": 0.25 },
+            "climate": { "usdaZone": "6b", "lastFrost": "2025-04-20" },
+            "waterAccess": "hose",
+            "soilType": "loam",
+            "outputs": ["veg", "herbs"],
+            "constraints": "deer pressure"
+          },
+          "output": {
+            "plan": {
+              "beds": [
+                {
+                  "name": "North Bed",
+                  "areaSqft": 100,
+                  "crops": [{ "name": "Tomatoes", "qty": 6 }, { "name": "Basil", "qty": 8 }]
+                },
+                {
+                  "name": "Herb Strip",
+                  "areaSqft": 30,
+                  "crops": [{ "name": "Parsley", "qty": 6 }]
+                }
+              ],
+              "irrigation": "hose",
+              "compost": "Top dress 1\" compost; add fencing for deer.",
+              "schedule": [
+                { "date": "2025-04-27", "title": "Plant Basil", "kind": "plant" },
+                { "date": "2025-05-04", "title": "Stake Tomatoes", "kind": "care" },
+                { "date": "2025-06-15", "title": "Harvest Lettuce", "kind": "harvest" }
+              ],
+              "meta": { "householdSize": 4, "soilType": "loam", "outputs": ["veg", "herbs"] }
+            },
+            "events": [
+              { "title": "Garden • Plant Basil", "date": "2025-04-27", "color": "#34d399", "source": "garden" },
+              { "title": "Garden • Stake Tomatoes", "date": "2025-05-04", "color": "#34d399", "source": "garden" },
+              { "title": "Garden • Harvest Lettuce", "date": "2025-06-15", "color": "#34d399", "source": "garden" }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "outputs": {
+    "type": "object",
+    "properties": {
+      "plan": { "$ref": "#/logic/rule/returns/properties/plan" },
+      "events": { "$ref": "#/logic/rule/returns/properties/events" }
+    },
+    "required": ["plan"]
+  },
+  "post": {
+    "calendarMapping": {
+      "enabled": true,
+      "eventSource": "garden",
+      "path": "$.events",
+      "fallbackFromSchedule": {
+        "enabled": true,
+        "schedulePath": "$.plan.schedule",
+        "map": { "title": "Garden • {{title}}", "date": "{{date}}", "color": "#34d399", "source": "garden" }
+      }
+    },
+    "inventorySignals": {
+      "enabled": true,
+      "notes": "Optionally emit estimated yields to inventory once harvest dates arrive."
+    }
+  },
+  "tests": [
+    {
+      "name": "Basic zone plan",
+      "input": {
+        "householdSize": 4,
+        "land": { "acres": 0.25 },
+        "climate": { "usdaZone": "6b", "lastFrost": "2025-04-20" },
+        "waterAccess": "hose",
+        "soilType": "loam",
+        "outputs": ["veg", "herbs"]
+      },
+      "expect": {
+        "hasPlanBeds": true,
+        "hasDates": true
+      }
+    }
+  ]
+}

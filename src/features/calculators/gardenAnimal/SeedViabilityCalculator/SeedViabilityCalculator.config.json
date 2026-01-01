@@ -1,0 +1,157 @@
+{
+  "$schema": "../../../../schemas/planningGraph/nodes.schema.json",
+
+  "nodeKey": "seedViabilityCalculator",
+  "id": "seedViabilityCalculator",
+  "kind": "calculator-node",
+  "label": "Seed Viability",
+  "description": "Evaluate seed lot viability, germination strength, and replacement timing so garden, irrigation, and yield plans stay realistic.",
+  "domain": "garden",
+  "version": "1.0.0",
+
+  "tags": [
+    "garden",
+    "seeds",
+    "viability",
+    "germination",
+    "planning-graph",
+    "storehouse-linked"
+  ],
+
+  "inputs": {},
+
+  "outputs": {
+    "description": "Per-lot viability scores, adjusted sowing rates, and replacement flags used across the Planning Graph."
+  },
+
+  "ui": {
+    "component": "./SeedViabilityCalculator.view.jsx",
+    "title": "Seed Viability Calculator",
+    "icon": "sprout",
+    "sections": [
+      {
+        "id": "seedLots",
+        "label": "Seed Lots & Details",
+        "description": "Enter crop, variety, year, and storage details for each seed lot."
+      },
+      {
+        "id": "storageProfile",
+        "label": "Storage Conditions",
+        "description": "Capture how and where seeds are stored (cool, dark, dry, etc.)."
+      },
+      {
+        "id": "germinationTests",
+        "label": "Germination Tests",
+        "description": "Optional quick tests to refine viability estimates."
+      },
+      {
+        "id": "results",
+        "label": "Results & Recommendations",
+        "description": "Review viability scores, sowing multipliers, and replacement timing."
+      }
+    ],
+    "actions": [
+      {
+        "id": "runCalculation",
+        "label": "Run Viability Check",
+        "intent": "calculate"
+      },
+      {
+        "id": "createGerminationSession",
+        "label": "Create Germination Test Session",
+        "intent": "create-session"
+      },
+      {
+        "id": "pushToPlanningGraph",
+        "label": "Apply to Garden & Storehouse Plans",
+        "intent": "propagate"
+      }
+    ]
+  },
+
+  "sessions": {
+    "domain": "garden",
+    "defaultSourceType": "gardenPlan",
+    "sessionTemplates": [
+      {
+        "id": "seed-viability-germination-test",
+        "label": "Quick Germination Test",
+        "description": "Run a paper towel or tray-based germination test on selected lots.",
+        "source": {
+          "type": "gardenPlan",
+          "refKind": "seedLots"
+        },
+        "stepHints": [
+          "Gather labeled samples from each seed lot.",
+          "Prepare moist paper towel or starter tray.",
+          "Label each group clearly.",
+          "Record germinated seeds over several days in SSA."
+        ],
+        "blockers": [
+          "quietHours",
+          "sabbath"
+        ]
+      },
+      {
+        "id": "seed-viability-sorting-session",
+        "label": "Sort & Cull Seed Lots",
+        "description": "Use viability results to keep, separate, or cull lots before planting season.",
+        "source": {
+          "type": "manual",
+          "refKind": "seedLots"
+        },
+        "stepHints": [
+          "Separate seed lots by viability status.",
+          "Mark low-viability lots for heavy sowing or culling.",
+          "Update SSA with which lots you will keep or replace."
+        ],
+        "blockers": [
+          "quietHours"
+        ]
+      }
+    ]
+  },
+
+  "mappings": {
+    "file": "./SeedViabilityCalculator.mappings.json",
+    "description": "Next Steps mapping to Garden Yield, Storehouse, and Irrigation planning flows."
+  },
+
+  "guards": {
+    "default": [
+      "sabbath",
+      "quietHours"
+    ],
+    "notes": "Sessions spawned from this node should respect Sabbath and quiet hour constraints when scheduling hands-on work."
+  },
+
+  "diagnostics": {
+    "severity": "info",
+    "notes": [
+      "If no storage data is available, default assumptions are conservative.",
+      "Very old lots may still be used at higher sow rates, but marked as high risk.",
+      "Replace critical crops (staples) sooner than minor experimentals when viability is low."
+    ]
+  },
+
+  "planningGraph": {
+    "role": "upstream-quality-node",
+    "feedsInto": [
+      "gardenYieldCalculator",
+      "gardenPlanner",
+      "storehousePlanner",
+      "irrigationCalculator"
+    ],
+    "receivesFrom": [
+      "storehouseGoals",
+      "gardenLayout",
+      "seedInventory"
+    ],
+    "nextBestActions": [
+      "Plan germination test sessions for low-confidence lots.",
+      "Increase sow rate for medium viability lots in key beds.",
+      "Schedule seed replacement purchases before critical planting windows."
+    ],
+    "notes": "Seed viability quality is a foundational input for realistic yield expectations, irrigation planning, and storehouse stocking goals."
+  }
+}

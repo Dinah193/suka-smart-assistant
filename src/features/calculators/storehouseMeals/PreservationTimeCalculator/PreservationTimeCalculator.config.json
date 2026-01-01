@@ -1,0 +1,111 @@
+{
+  "$schema": "../../../../schemas/planningGraph/nodes.schema.json",
+  "id": "PreservationTimeCalculator.node",
+  "nodeKey": "preservationTimeCalculator",
+  "version": "1.0.0",
+  "kind": "calculator-node",
+  "domain": "preservation",
+  "label": "Preservation Time Calculator",
+  "description": "Node config for the Preservation Time Calculator in the Planning Graph, helping SSA decide how long different foods can be safely stored under various preservation methods.",
+
+  "inputs": {
+    "requires": [
+      "PreservationMethod",
+      "FoodType",
+      "ContainerType",
+      "Headspace",
+      "AmbientConditions"
+    ],
+    "optional": [
+      "Altitude",
+      "BrineStrength",
+      "SugarContent",
+      "AcidityLevel",
+      "HouseholdRiskTolerance"
+    ]
+  },
+
+  "outputs": {
+    "provides": [
+      "RecommendedProcessingTime",
+      "RecommendedStorageTime",
+      "RiskBand",
+      "PreservationSafetyNotes",
+      "PreservationSessionTemplate"
+    ],
+    "description": "Outputs include recommended processing and storage times plus risk bands and a ready-to-run preservation session template for the SessionRunner."
+  },
+
+  "ui": {
+    "group": "Storehouse & Preservation",
+    "icon": "clock",
+    "route": "/ssa/calculators/storehouse-meals/preservation-time",
+    "supportsSessionRunner": true,
+    "defaultModalSize": "lg",
+    "nowCtaLabel": "Check preservation time now",
+    "tags": [
+      "preservation",
+      "storehouse",
+      "safety",
+      "batchCooking",
+      "planningGraph"
+    ]
+  },
+
+  "sessionTemplate": {
+    "domain": "preservation",
+    "title": "Review preservation time & safety",
+    "sourceType": "manual",
+    "steps": [
+      {
+        "title": "Confirm preservation details",
+        "desc": "Review the food type, method, container, and conditions the SSA used to calculate your preservation time. Adjust any details that don’t match what you’re actually doing.",
+        "durationSec": 300,
+        "blockers": ["inventory", "equipment"],
+        "metadata": {
+          "tempTargetF": 0,
+          "donenessCue": "timer",
+          "cueNotes": "This is a planning/safety review step only; no live processing yet."
+        }
+      },
+      {
+        "title": "Apply recommended processing time",
+        "desc": "Follow the recommended processing time for your method (e.g., pressure canning, water bath, dehydrating). Make sure all equipment is ready and calibrated before you begin.",
+        "durationSec": 900,
+        "blockers": ["equipment", "quietHours", "sabbath"],
+        "metadata": {
+          "tempTargetF": 0,
+          "donenessCue": "timer",
+          "cueNotes": "Use this with a full preservation session that includes temperature and venting guidance."
+        }
+      },
+      {
+        "title": "Label and store with confidence",
+        "desc": "Label each container with contents, date, method, and recommended ‘use by’ window based on the calculated storage time.",
+        "durationSec": 600,
+        "blockers": ["inventory"],
+        "metadata": {
+          "tempTargetF": 0,
+          "donenessCue": "timer",
+          "cueNotes": "This step supports storehouse organization and future meal planning."
+        }
+      }
+    ]
+  },
+
+  "logic": {
+    "shimFile": "PreservationTimeCalculator.shim.js",
+    "schemaFile": "PreservationTimeCalculator.schema.json",
+    "description": "Shim and schema wiring for the Preservation Time Calculator; shim runs calculations and can emit a preservation-oriented session into the SessionRunner."
+  },
+
+  "hooks": {
+    "file": "PreservationTimeCalculator.hooks.js",
+    "description": "React hooks that connect preservation-time results into storehouse, batch cooking, and inventory planning flows."
+  },
+
+  "next": {
+    "mappingsFile": "PreservationTimeCalculator.mappings.json",
+    "description": "Next-step mappings to move from preservation-time insights into batch sessions, storehouse labeling sessions, and garden/animal planning where relevant."
+  }
+}

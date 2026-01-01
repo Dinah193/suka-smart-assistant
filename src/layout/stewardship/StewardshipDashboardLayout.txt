@@ -1,0 +1,480 @@
+===============================================================================
+STEWARDERSHIP DASHBOARD LAYOUT – UI COPY & LABELS
+File: src/layout/stewardship/StewardshipDashboardLayout.txt
+Role: Shared language + labels for the main “Household Stewardship” dashboard
+===============================================================================
+
+0. CONCEPTUAL PURPOSE
+---------------------
+This file defines **UI strings / labels / microcopy** for the Stewardship
+Dashboard layout.
+
+The layout must:
+
+- Present SSA as a **household steward**, not a productivity app.
+- Speak in terms of **cycles, seasons, storehouse, yields, provisions,
+  rhythms, feasts, householder, flows**.
+- Work in:
+  - TOOL MODE: a single-domain user just using one planner or calculator.
+  - STEWARDSHIP MODE: a householder seeing cross-domain patterns.
+
+It is **not** code. It is a copy + label reference so React components can
+pull from a consistent “web of meaning” vocabulary later.
+
+
+1. GLOBAL & HEADER TEXT
+-----------------------
+
+[GLOBAL.APP_TITLE]
+" Suka Smart Assistant – Household Steward "
+
+[GLOBAL.TAGLINE_PRIMARY]
+"Hold your household rhythms, seasons, and storehouse in one stewarding view."
+
+[GLOBAL.TAGLINE_SECONDARY]
+"See your cycles, honor your seasons, steady your provision."
+
+[HEADER.TITLE]
+"Household Stewardship Overview"
+
+[HEADER.SUBTITLE.TOOL_MODE]
+"Today’s view focuses on a single flow. You can still see how it fits your seasons and storehouse."
+
+[HEADER.SUBTITLE.STEWARDSHIP_MODE]
+"These panels show how your household cycles, seasons, and yields are working together."
+
+[HEADER.HOUSEHOLDER_LABEL]
+"Householder:"
+
+[HEADER.SEASON_LABEL]
+"Current Season:"
+
+[HEADER.SEASON_HELP]
+"Seasons guide the pace of planting, preserving, feasting, and storehouse use."
+
+[HEADER.LAST_UPDATED_LABEL]
+"Stewardship snapshot refreshed:"
+
+[HEADER.CTA_VIEW_CALENDAR]
+"Open Season & Feast Calendar"
+
+[HEADER.CTA_VIEW_SESSIONS]
+"View Active Sessions & Rhythms"
+
+[HEADER.MODE_INDICATOR.TOOL]
+"Mode: Tool Only (local rhythms)"
+
+[HEADER.MODE_INDICATOR.STEWARDSHIP]
+"Mode: Connected Stewardship (cross-domain rhythms)"
+
+
+2. MAIN GRID SECTIONS – TITLES & DESCRIPTIONS
+---------------------------------------------
+
+These are the top-level cards/sections on the Stewardship Dashboard.
+
+[SECTION.STOREHOUSE_OVERVIEW.TITLE]
+"Storehouse & Provisions"
+
+[SECTION.STOREHOUSE_OVERVIEW.SUBTITLE]
+"See how your grains, preserves, and daily staples are holding through the season."
+
+[SECTION.STOREHOUSE_OVERVIEW.EMPTY]
+"No storehouse records yet. Begin by logging what you already have on hand."
+
+[SECTION.STOREHOUSE_OVERVIEW.CTA_PRIMARY]
+"Open Storehouse Planner"
+
+[SECTION.STOREHOUSE_OVERVIEW.CTA_SECONDARY]
+"Log Today’s Additions & Draws"
+
+[SECTION.STOREHOUSE_OVERVIEW.TOOLTIP]
+"Your storehouse is the memory of past cycles. It carries you through lean seasons and prepares you for feasts."
+
+
+[SECTION.RHYTHMS_THIS_WEEK.TITLE]
+"Household Rhythms This Week"
+
+[SECTION.RHYTHMS_THIS_WEEK.SUBTITLE]
+"Cooking, cleaning, garden, animals, and small maintenance flows in one glance."
+
+[SECTION.RHYTHMS_THIS_WEEK.EMPTY]
+"Weekly rhythms are quiet. Start a simple, steady cycle to anchor this week."
+
+[SECTION.RHYTHMS_THIS_WEEK.CTA_PRIMARY]
+"Plan This Week’s Core Rhythms"
+
+[SECTION.RHYTHMS_THIS_WEEK.CTA_SECONDARY]
+"Start a New Session Now"
+
+[SECTION.RHYTHMS_THIS_WEEK.TOOLTIP]
+"Rhythms are repeated flows of care – meals, cleaning, tending the garden, checking the storehouse – that hold the house steady."
+
+
+[SECTION.SEASON_WINDOW.TITLE]
+"Current Season Window"
+
+[SECTION.SEASON_WINDOW.SUBTITLE]
+"Planting, preserving, and feast windows that are open or approaching."
+
+[SECTION.SEASON_WINDOW.EMPTY]
+"No seasonal windows are active yet. As soon as your calendar and region settings are set, windows will appear here."
+
+[SECTION.SEASON_WINDOW.CTA_PRIMARY]
+"Review Season Rules & Windows"
+
+[SECTION.SEASON_WINDOW.CTA_SECONDARY]
+"Align Household Plans to This Season"
+
+[SECTION.SEASON_WINDOW.TOOLTIP]
+"Season windows highlight what is wise to start, continue, or gently pause in this part of the year."
+
+
+[SECTION.FEAST_HORIZON.TITLE]
+"Feast & Gathering Horizon"
+
+[SECTION.FEAST_HORIZON.SUBTITLE]
+"Upcoming sabbaths, appointed feasts, and key household gatherings."
+
+[SECTION.FEAST_HORIZON.EMPTY]
+"No upcoming feasts or gatherings are mapped yet. Add your first feast to begin aligning menus and storehouse."
+
+[SECTION.FEAST_HORIZON.CTA_PRIMARY]
+"Open Feast & Gathering Planner"
+
+[SECTION.FEAST_HORIZON.CTA_SECONDARY]
+"Sketch a Simple Feast Rhythm"
+
+[SECTION.FEAST_HORIZON.TOOLTIP]
+"Feasts and gatherings are high points in the household cycle. They draw from the storehouse and reveal the strength of your rhythms."
+
+
+[SECTION.GARDEN_ANIMALS.TITLE]
+"Garden & Animals – Yields in Motion"
+
+[SECTION.GARDEN_ANIMALS.SUBTITLE]
+"Which beds, flocks, and herds are quiet, emerging, or yielding this season."
+
+[SECTION.GARDEN_ANIMALS.EMPTY]
+"No garden or animal records yet. Start by recording your growing spaces or flocks."
+
+[SECTION.GARDEN_ANIMALS.CTA_PRIMARY]
+"Open Garden & Animals Planner"
+
+[SECTION.GARDEN_ANIMALS.CTA_SECONDARY]
+"Log a New Planting or Yield"
+
+[SECTION.GARDEN_ANIMALS.TOOLTIP]
+"The garden and animals speak through their yields. This view shows their rhythm relative to the season and your storehouse needs."
+
+
+[SECTION.PRESERVATION_FLOW.TITLE]
+"Preservation & Long-Term Provision"
+
+[SECTION.PRESERVATION_FLOW.SUBTITLE]
+"Canning, drying, freezing, curing, and fermenting flows that feed the storehouse."
+
+[SECTION.PRESERVATION_FLOW.EMPTY]
+"No preservation flows are active. When a harvest or bulk purchase arrives, this panel will help you choose a preservation rhythm."
+
+[SECTION.PRESERVATION_FLOW.CTA_PRIMARY]
+"Plan a Preservation Session"
+
+[SECTION.PRESERVATION_FLOW.CTA_SECONDARY]
+"See Recent Preservation Yields"
+
+[SECTION.PRESERVATION_FLOW.TOOLTIP]
+"Preservation turns today’s abundance into tomorrow’s security. It connects garden, animals, and storehouse across seasons."
+
+
+[SECTION.CLEANING_CARE.TITLE]
+"Cleaning, Care, & Rest"
+
+[SECTION.CLEANING_CARE.SUBTITLE]
+"Daily and weekly care cycles for the home, laundry, and shared spaces."
+
+[SECTION.CLEANING_CARE.EMPTY]
+"No care rhythms mapped yet. Start with one room or one small daily cycle."
+
+[SECTION.CLEANING_CARE.CTA_PRIMARY]
+"Open Home Care & Cleaning Planner"
+
+[SECTION.CLEANING_CARE.CTA_SECONDARY]
+"Begin a Gentle Cleaning Cycle"
+
+[SECTION.CLEANING_CARE.TOOLTIP]
+"Cleaning and care rhythms guard rest and dignity in the home. They are part of provision, not an afterthought."
+
+
+[SECTION.ENTERPRISE_MUTUAL_AID.TITLE]
+"Mutual Aid & Household Enterprise"
+
+[SECTION.ENTERPRISE_MUTUAL_AID.SUBTITLE]
+"How your household shares, trades, and builds income without starving the storehouse."
+
+[SECTION.ENTERPRISE_MUTUAL_AID.EMPTY]
+"No mutual aid or enterprise flows recorded yet. Start by naming one area where your household supports others or offers a service."
+
+[SECTION.ENTERPRISE_MUTUAL_AID.CTA_PRIMARY]
+"Open Mutual Aid & Enterprise Planner"
+
+[SECTION.ENTERPRISE_MUTUAL_AID.CTA_SECONDARY]
+"Record a Shared Provision or Sale"
+
+[SECTION.ENTERPRISE_MUTUAL_AID.TOOLTIP]
+"Mutual aid and enterprise extend the household outward. They should flow from surplus and wisdom, not from depletion."
+
+
+3. INSIGHTS & ALERT STRINGS
+---------------------------
+
+[INSIGHTS.SECTION_TITLE]
+"Stewardship Insights"
+
+[INSIGHTS.SECTION_SUBTITLE]
+"Short reflections drawn from your cycles, seasons, yields, and storehouse posture."
+
+[INSIGHTS.EMPTY]
+"SSA is still learning your rhythms. As you log meals, yields, and sessions, gentle insights will appear here."
+
+[INSIGHTS.ITEM_TAG.GENTLE]
+"gentle nudge"
+
+[INSIGHTS.ITEM_TAG.IMPORTANT]
+"important note"
+
+[INSIGHTS.CTA_VIEW_ALL]
+"View All Insights & History"
+
+[INSIGHTS.TOOLTIP]
+"Insights are reflections, not commands. They help you see where rhythms and yields are strong, quiet, or drifting."
+
+
+[ALERTS.SECTION_TITLE]
+"Rhythm Checks"
+
+[ALERTS.SECTION_SUBTITLE]
+"Places where a cycle may be drifting from the season or storehouse posture."
+
+[ALERTS.EMPTY]
+"No rhythm checks at this time. Your household appears steady relative to the current season snapshot."
+
+[ALERTS.ITEM_LABEL.SEASON_MISMATCH]
+"This rhythm may not match the current season."
+
+[ALERTS.ITEM_LABEL.STOREHOUSE_STRAIN]
+"This pattern may be drawing too heavily from the storehouse."
+
+[ALERTS.ITEM_LABEL.MISSED_YIELD]
+"Recent yields may be passing by without being welcomed into meals or preservation."
+
+[ALERTS.CTA_REVIEW]
+"Review & Adjust This Rhythm"
+
+[ALERTS.TOOLTIP]
+"Rhythm checks are there to protect you from quiet drift: seasons shifting without the household noticing."
+
+
+4. TOOL MODE VS STEWARDSHIP MODE – MICRO COPY
+---------------------------------------------
+
+[MODE.BANNER.TOOL.TITLE]
+"You are viewing a single flow."
+
+[MODE.BANNER.TOOL.BODY]
+"This panel works on its own. When you are ready, SSA can link it to your seasons, storehouse, and other household rhythms."
+
+[MODE.BANNER.TOOL.CTA]
+"Learn how this flow connects to the wider household"
+
+[MODE.BANNER.STEWARDSHIP.TITLE]
+"Connected stewardship is active."
+
+[MODE.BANNER.STEWARDSHIP.BODY]
+"This dashboard weaves together your cooking, storehouse, garden, preservation, cleaning, and feasts into one stewardship view."
+
+[MODE.BANNER.STEWARDSHIP.CTA]
+"Adjust which domains appear in this overview"
+
+
+5. SESSION & FLOW REFERENCES (FOR SESSIONRUNNER HOOKS)
+------------------------------------------------------
+
+These strings describe active flows/sessions in stewardship language.
+
+[SESSIONS.PANEL_TITLE]
+"Active Rhythms & Sessions"
+
+[SESSIONS.PANEL_SUBTITLE]
+"Cycles currently in motion – cooking, cleaning, preserving, tending."
+
+[SESSIONS.EMPTY]
+"No active sessions. Start a rhythm that fits this moment and season."
+
+[SESSIONS.TAG.COOKING]
+"Cooking cycle"
+
+[SESSIONS.TAG.CLEANING]
+"Cleaning & care cycle"
+
+[SESSIONS.TAG.GARDEN]
+"Garden tending cycle"
+
+[SESSIONS.TAG.ANIMALS]
+"Animals & flock care cycle"
+
+[SESSIONS.TAG.PRESERVATION]
+"Preservation cycle"
+
+[SESSIONS.TAG.FEAST]
+"Feast preparation cycle"
+
+[SESSIONS.FIELD.TIME_REMAINING]
+"Time remaining in this rhythm:"
+
+[SESSIONS.CTA_RESUME]
+"Rejoin this cycle"
+
+[SESSIONS.CTA_START_NEW]
+"Start a New Rhythm"
+
+[SESSIONS.TOOLTIP]
+"Sessions are focused slices of a rhythm. They help you move through a cycle without losing sight of the bigger season."
+
+
+6. SIDEBAR NAVIGATION LABELS – STEWARDSHIP-FRIENDLY
+---------------------------------------------------
+
+[SIDEBAR.SECTION_TITLE.HOME]
+"Stewardship Home"
+
+[SIDEBAR.LINK.DASHBOARD]
+"Overview – Seasons, Rhythms, Storehouse"
+
+[SIDEBAR.LINK.COOKING]
+"Cooking & Meals Rhythm"
+
+[SIDEBAR.LINK.STOREHOUSE]
+"Storehouse & Provision Planning"
+
+[SIDEBAR.LINK.GARDEN_ANIMALS]
+"Garden, Flocks, & Herds"
+
+[SIDEBAR.LINK.PRESERVATION]
+"Preservation Flows"
+
+[SIDEBAR.LINK.CLEANING]
+"Home Care & Cleaning Rhythms"
+
+[SIDEBAR.LINK.FEASTS]
+"Feasts, Sabbaths, & Gatherings"
+
+[SIDEBAR.LINK.MUTUAL_AID]
+"Mutual Aid & Enterprise"
+
+[SIDEBAR.LINK.SEASONS]
+"Seasons & Appointed Times"
+
+[SIDEBAR.LINK.SETTINGS]
+"Householder & Household Settings"
+
+
+7. EMPTY STATE & ONBOARDING LANGUAGE
+------------------------------------
+
+[ONBOARDING.WELCOME_TITLE]
+"Welcome, householder."
+
+[ONBOARDING.WELCOME_BODY]
+"Suka Smart Assistant is here to help you see and steady your household:
+your cycles, your seasons, and your storehouse. You can begin with one
+small rhythm and grow over time."
+
+[ONBOARDING.CTA_START_SIMPLE]
+"Start with a Simple Rhythm"
+
+[ONBOARDING.CTA_START_STOREHOUSE]
+"Begin with a Storehouse Snapshot"
+
+[ONBOARDING.CTA_START_SEASONS]
+"Define Your Seasons & Feasts"
+
+[ONBOARDING.TOOLTIP]
+"You do not need to fill everything at once. Choose one area – meals,
+cleaning, garden, or storehouse – and let SSA learn your rhythms gradually."
+
+
+8. FOOTER & CONTEXTUAL LANGUAGE
+-------------------------------
+
+[FOOTER.TAGLINE]
+"Steady rhythms. Honest seasons. A watched storehouse."
+
+[FOOTER.LINK.DOCS]
+"Learn how SSA understands cycles, seasons, and the storehouse."
+
+[FOOTER.LINK.FEEDBACK]
+"Share how your household uses these rhythms."
+
+[FOOTER.LINK.PRIVACY]
+"Stewardship & Data Care"
+
+
+9. EXAMPLE SHORT NOTIFICATIONS (TOASTS / BANNERS)
+-------------------------------------------------
+
+[NOTIFY.SEASON_SHIFT.TITLE]
+"Season has shifted."
+
+[NOTIFY.SEASON_SHIFT.BODY]
+"Your active rhythms may need a gentle adjustment to match this new season."
+
+[NOTIFY.FEAST_APPROACHING.TITLE]
+"A feast is approaching."
+
+[NOTIFY.FEAST_APPROACHING.BODY]
+"Review your storehouse and meal rhythms to welcome this feast without strain."
+
+[NOTIFY.STOREHOUSE_LOW.TITLE]
+"Storehouse is leaning."
+
+[NOTIFY.STOREHOUSE_LOW.BODY]
+"One or more categories are dipping below your comfort line. Consider a small provisioning cycle."
+
+[NOTIFY.YIELD_FLUSH.TITLE]
+"A yield flush is here."
+
+[NOTIFY.YIELD_FLUSH.BODY]
+"Garden or animal yields are rich this week. A preservation or sharing rhythm may be timely."
+
+[NOTIFY.RHYTHM_STRONG.TITLE]
+"A steady rhythm is forming."
+
+[NOTIFY.RHYTHM_STRONG.BODY]
+"SSA sees a consistent cycle in this area. You may be ready to gently build on it."
+
+
+10. TODO HOOKS FOR FUTURE INTEGRATION
+-------------------------------------
+
+// TODO[seasonal-logic]:
+// - Bind SEASON_WINDOW, FEAST_HORIZON, and NOTIFY.SEASON_SHIFT strings to
+//   dynamic seasonRulesConfig so copy can be tuned per season type
+//   (planting, harvest, lean, feast-heavy).
+
+// TODO[cycles-engine]:
+// - Use householdCycles.engine posture to adapt RHYTHMS_THIS_WEEK and
+//   SESSIONS copy (e.g., emphasize rest when cycles are heavy).
+
+// TODO[dependencies]:
+// - Allow insights and alerts labels to name cross-domain patterns more
+//   explicitly, once dependencyMap is fully wired
+//   (e.g., “Garden → Preservation → Storehouse cycle is quiet this season.”).
+
+// TODO[insights]:
+// - Provide additional narrative templates that combine gardenInsights,
+//   storehouseInsights, cookingInsights, and feastInsights into one
+//   short paragraph for the Stewardship Insights panel.
+
+END OF UI COPY SPEC
+===============================================================================

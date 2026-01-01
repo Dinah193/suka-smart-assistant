@@ -1,0 +1,402 @@
+{
+  "id": "pat.preservation.seasonal_push",
+  "domain": "preservation",
+  "kind": "planning_pattern",
+  "title": "Seasonal Preservation Push",
+  "intentTags": [
+    "intent:preserve",
+    "mode:seasonal",
+    "season:*",
+    "workflow:high_throughput"
+  ],
+  "description": "Plan a high-throughput seasonal push (harvest peak) with station-based standard work and capacity planning.",
+  "inputs": [
+    {
+      "key": "dietaryLaws",
+      "type": "multiselect",
+      "label": "Dietary laws",
+      "required": false,
+      "options": [
+        "no_pork",
+        "no_shellfish",
+        "halal_like",
+        "kosher_like",
+        "none"
+      ],
+      "default": [
+        "no_pork"
+      ]
+    },
+    {
+      "key": "householdSize",
+      "type": "number",
+      "label": "Household size",
+      "required": true,
+      "default": 4,
+      "min": 1,
+      "max": 30
+    },
+    {
+      "key": "inventorySnapshot",
+      "type": "select",
+      "label": "Inventory snapshot",
+      "required": false,
+      "default": "recommended",
+      "options": [
+        "missing",
+        "recommended",
+        "required"
+      ]
+    },
+    {
+      "key": "surplusItems",
+      "type": "multiselect",
+      "label": "Surplus items (tags)",
+      "required": false,
+      "options": [
+        "produce:leafy",
+        "produce:fruit",
+        "produce:root",
+        "meat:raw",
+        "dairy:raw",
+        "grain:bulk",
+        "beans:bulk"
+      ]
+    },
+    {
+      "key": "timeBudgetMin",
+      "type": "number",
+      "label": "Time budget (minutes)",
+      "required": false,
+      "default": 120,
+      "min": 30,
+      "max": 960
+    },
+    {
+      "key": "equipmentLevel",
+      "type": "select",
+      "label": "Equipment level",
+      "required": false,
+      "default": "standard",
+      "options": [
+        "limited",
+        "standard",
+        "advanced",
+        "fermentation"
+      ]
+    },
+    {
+      "key": "storageZones",
+      "type": "multiselect",
+      "label": "Storage zones available",
+      "required": false,
+      "options": [
+        "pantry",
+        "cold",
+        "frozen",
+        "root_cellar",
+        "fermentation_room",
+        "dehydration",
+        "smokehouse"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "type": "planStructure",
+      "notes": "Multi-session blueprint(s) for staged seasonal pushes."
+    },
+    {
+      "type": "session",
+      "domain": "storehouse",
+      "notes": "Optional follow-on session: Winter reserve / buffer build."
+    }
+  ],
+  "constraints": [
+    {
+      "type": "quietHours",
+      "tag": "constraint:quiet_hours",
+      "notes": "Avoid loud equipment during quiet hours/Sabbath."
+    },
+    {
+      "type": "foodSafety",
+      "tag": "constraint:food_safety",
+      "notes": "Prefer safe methods; surface warnings instead of silent changes."
+    },
+    {
+      "type": "budget",
+      "tag": "constraint:budget",
+      "notes": "Respect jar/lid/packaging budget caps if provided."
+    }
+  ],
+  "requires": [
+    {
+      "type": "inventory",
+      "tag": "needsInventorySnapshot",
+      "optional": true
+    },
+    {
+      "type": "calendar",
+      "tag": "seasonalTags",
+      "optional": true
+    }
+  ],
+  "produces": [
+    {
+      "type": "session",
+      "domain": "preservation",
+      "title": "Seasonal Preservation Push Session"
+    },
+    {
+      "type": "inventoryMove",
+      "notes": "Placeholder inventory moves emitted per method batch."
+    },
+    {
+      "type": "shoppingDelta",
+      "notes": "Packaging & supply deltas (jars, lids, salt, vinegar, bags)."
+    }
+  ],
+  "steps": [
+    {
+      "id": "scope",
+      "title": "Scope yield + capacity",
+      "kind": "template",
+      "timeboxMin": 25,
+      "voice": {
+        "speakOnStart": true,
+        "prompt": "Estimate harvest yield, labor hours, and storage capacity. Choose the preservation mix."
+      },
+      "ui": {
+        "fields": [
+          "timeBudgetMin",
+          "storageZones"
+        ],
+        "chips": [
+          "yield_forecast",
+          "capacity"
+        ]
+      }
+    },
+    {
+      "id": "stations",
+      "title": "Set up stations (wash/cut/process/cool/store)",
+      "kind": "template",
+      "timeboxMin": 40,
+      "voice": {
+        "speakOnStart": false,
+        "prompt": "Assign station owners; use standard work to reduce defects."
+      },
+      "ui": {
+        "help": "Culture overlay can rename roles without hard-coding stereotypes."
+      }
+    },
+    {
+      "id": "run",
+      "title": "Run takt-based batches",
+      "kind": "template",
+      "timeboxMin": 240,
+      "voice": {
+        "speakOnStart": false,
+        "prompt": "Run batches on a cadence; avoid overproduction beyond storage constraints."
+      },
+      "ui": {
+        "chips": [
+          "takt",
+          "wip_limit"
+        ],
+        "fields": [
+          "householdSize"
+        ]
+      }
+    },
+    {
+      "id": "stow",
+      "title": "Stow by zone + update buffers",
+      "kind": "template",
+      "timeboxMin": 35,
+      "inventoryMoves": [
+        {
+          "type": "placeholder",
+          "from": "processing",
+          "to": "root_cellar|pantry|frozen",
+          "itemTag": "preserved:*"
+        }
+      ],
+      "ui": {
+        "chips": [
+          "buffers",
+          "fifo"
+        ]
+      }
+    },
+    {
+      "id": "review",
+      "title": "Review KPIs + next push schedule",
+      "kind": "template",
+      "timeboxMin": 20,
+      "voice": {
+        "speakOnStart": true,
+        "prompt": "Note bottlenecks and defects. Adjust next push plan."
+      }
+    }
+  ],
+  "kpis": [
+    {
+      "key": "throughput",
+      "label": "Throughput",
+      "unit": "batches/day",
+      "target": "Set by takt model"
+    },
+    {
+      "key": "defect_rate",
+      "label": "Defect rate (seal/quality)",
+      "unit": "%",
+      "target": "≤2%"
+    },
+    {
+      "key": "spoilage_prevented",
+      "label": "Spoilage prevented",
+      "unit": "lbs",
+      "target": "Trend up"
+    }
+  ],
+  "lean": {
+    "wasteTargets": [
+      "waiting",
+      "overproduction",
+      "inventory",
+      "defects"
+    ],
+    "countermeasures": [
+      {
+        "waste": "waiting",
+        "do": "Parallelize prep + processing; pre-stage ice baths and containers."
+      },
+      {
+        "waste": "overproduction",
+        "do": "Cap batch size to storage capacity; enforce WIP limits."
+      },
+      {
+        "waste": "defects",
+        "do": "Use definition-of-done checks at each station."
+      }
+    ],
+    "standardWorkRefs": [
+      "std.preservation.seasonal_preservation_push"
+    ],
+    "taktModelRef": "takt.household_meal_takt"
+  },
+  "ui": {
+    "form": {
+      "fields": [
+        {
+          "key": "householdSize",
+          "type": "number",
+          "label": "Household size",
+          "required": true,
+          "default": 4,
+          "min": 1,
+          "max": 30
+        },
+        {
+          "key": "inventorySnapshot",
+          "type": "select",
+          "label": "Inventory snapshot",
+          "required": false,
+          "default": "recommended",
+          "options": [
+            "missing",
+            "recommended",
+            "required"
+          ]
+        },
+        {
+          "key": "surplusItems",
+          "type": "multiselect",
+          "label": "Surplus items (tags)",
+          "required": false,
+          "options": [
+            "produce:leafy",
+            "produce:fruit",
+            "produce:root",
+            "meat:raw",
+            "dairy:raw",
+            "grain:bulk",
+            "beans:bulk"
+          ]
+        },
+        {
+          "key": "timeBudgetMin",
+          "type": "number",
+          "label": "Time budget (minutes)",
+          "required": false,
+          "default": 120,
+          "min": 30,
+          "max": 960
+        },
+        {
+          "key": "equipmentLevel",
+          "type": "select",
+          "label": "Equipment level",
+          "required": false,
+          "default": "standard",
+          "options": [
+            "limited",
+            "standard",
+            "advanced",
+            "fermentation"
+          ]
+        },
+        {
+          "key": "storageZones",
+          "type": "multiselect",
+          "label": "Storage zones available",
+          "required": false,
+          "options": [
+            "pantry",
+            "cold",
+            "frozen",
+            "root_cellar",
+            "fermentation_room",
+            "dehydration",
+            "smokehouse"
+          ]
+        },
+        {
+          "key": "laborHours",
+          "type": "number",
+          "label": "Labor hours available",
+          "default": 6,
+          "min": 1,
+          "max": 48
+        }
+      ]
+    },
+    "chips": [
+      {
+        "key": "mode",
+        "label": "Seasonal Push",
+        "tag": "mode:seasonal"
+      }
+    ],
+    "help": {
+      "title": "Seasonal Preservation Push",
+      "intro": "A station-based push for harvest peaks.",
+      "tips": [
+        "Use WIP limits.",
+        "Keep a bottleneck log.",
+        "Schedule a storehouse buffer session after."
+      ]
+    }
+  },
+  "links": {
+    "storehousePatterns": [
+      "pat.storehouse.root_cellar_optimizer",
+      "pat.storehouse.monthly_cycle_count"
+    ],
+    "mealPatterns": [
+      "pat.meals.preservation_first"
+    ]
+  },
+  "variants": []
+}

@@ -1,0 +1,722 @@
+{
+  "version": "2025.11.30-1",
+  "updatedAt": "2025-11-30T00:00:00Z",
+  "description": "Central feature switches + gradual rollouts for Suka Smart Assistant (SSA). SSA-first, Hub-optional. Includes high-level toggles: import-all-domains, familyFundMode, analytics, commerce, verboseEvents, allowLLM, debugAgents, and SessionRunner background shims + guards.",
+  "defaults": {
+    "toggles": {
+      "import-all-domains": true,
+      "familyFundMode": false,
+      "analytics": true,
+      "commerce": false,
+      "verboseEvents": false,
+      "allowLLM": false,
+      "debugAgents": false,
+
+      "session-runner": true,
+      "session-background-shims": true,
+      "session-wake-lock": true,
+      "session-notifications": true,
+      "session-picture-in-picture": true,
+      "session-media-session": true,
+      "session-tts": true
+    },
+    "familyFundMode": false,
+    "verboseEvents": false,
+    "allowLLM": false,
+    "debugAgents": false,
+    "hubExport": {
+      "enabled": true,
+      "onDataChange": true,
+      "queueIfOffline": true
+    },
+    "enableScanCompareTrust": true,
+    "enableCoupons": true,
+    "enablePriceCompare": true,
+    "enableRecallsCheck": true,
+    "enableIngredientsCheck": true,
+    "allowUserFavorites": true,
+    "allowUserSchedules": true,
+    "sabbathGuard": {
+      "enabled": true,
+      "startHint": "Fri 18:00",
+      "endHint": "Sat 21:00"
+    },
+    "quietHours": [
+      22,
+      7
+    ],
+
+    "sessionRunner": {
+      "enabled": true,
+      "backgroundShims": true,
+      "wakeLock": true,
+      "notifications": true,
+      "pictureInPicture": true,
+      "mediaSession": true,
+      "textToSpeech": true,
+      "checkpointIntervalSec": 10,
+      "autoResume": true,
+      "guards": {
+        "sabbath": {
+          "enabled": true
+        },
+        "quietHours": {
+          "enabled": true
+        },
+        "weather": {
+          "enabled": true
+        },
+        "inventory": {
+          "enabled": true
+        },
+        "battery": {
+          "enabled": false
+        }
+      }
+    },
+
+    "scan": {
+      "ui": {
+        "sheet": "compact",
+        "haptics": true,
+        "voice": true
+      },
+      "camera": {
+        "mode": "barcode+ocr",
+        "torch": false
+      },
+      "defaultProviders": {
+        "sams": true,
+        "costco": true,
+        "aldi": true
+      },
+      "defaultChecks": {
+        "recalls": true,
+        "ingredients": true,
+        "coupons": true,
+        "priceCompare": true
+      },
+      "sessions": {
+        "maxRecent": 20,
+        "autoSave": true
+      }
+    },
+    "coupons": {
+      "providers": {
+        "sams": {
+          "enabled": true
+        },
+        "costco": {
+          "enabled": true
+        },
+        "aldi": {
+          "enabled": true
+        }
+      },
+      "stacking": {
+        "enabled": true,
+        "maxPerItem": 3
+      },
+      "cycleAnalyzer": {
+        "enabled": true,
+        "learnWindowDays": 120
+      },
+      "schedules": {
+        "refreshDailyId": "automation/schedules/coupons.refresh.daily.json",
+        "cyclesLearnWeeklyId": "automation/schedules/cycles.learn.weekly.json"
+      }
+    },
+    "import": {
+      "enabled": true,
+      "sources": {
+        "bookmarklet": true,
+        "fileUpload": true,
+        "linkedAccounts": true,
+        "scanCompareTrust": true,
+        "pinterestToPlanner": true,
+        "gardenSeedPlan": true,
+        "cleaningPlan": true,
+        "storehouseStock": true,
+        "animalPlanReverse": true,
+        "preservationPlan": true,
+        "videoHowTo": true
+      },
+      "ui": {
+        "showImportLanding": true,
+        "showImportPreview": true,
+        "showImportSettings": true
+      },
+      "sessions": {
+        "allowUserFavorites": true,
+        "allowUserSchedules": true
+      },
+      "intelligence": {
+        "ingredientPatterns": true,
+        "equipment": true,
+        "seasonality": true,
+        "methods": true
+      }
+    },
+    "cleaning": {
+      "enabled": true,
+      "engines": {
+        "cleaningSessionEngine": true,
+        "declutterEngine": true,
+        "zoneRoutineEngine": true
+      },
+      "imports": {
+        "fromPinterest": true,
+        "fromScanCompareTrust": false,
+        "fromCSV": true,
+        "fromVideo": true
+      },
+      "ui": {
+        "showDashboardWidget": true,
+        "showSessionPlanner": true,
+        "showTemplates": true
+      },
+      "allowUserFavorites": true,
+      "allowUserSchedules": true,
+      "sabbathAware": true,
+      "quietHoursAware": true
+    },
+    "garden": {
+      "enabled": true,
+      "engines": {
+        "gardenPlanEngine": true,
+        "gardenQueueEngine": true,
+        "careAndHarvestEngine": true
+      },
+      "imports": {
+        "fromSeedSites": true,
+        "fromBookmarklet": true,
+        "fromCSV": true,
+        "fromVideo": true
+      },
+      "ui": {
+        "showDashboardWidget": true,
+        "showSeasonalView": true,
+        "showCareAndHarvestTabs": true
+      },
+      "allowUserFavorites": true,
+      "allowUserSchedules": true,
+      "collab": {
+        "enabled": true,
+        "coOpPlanning": true,
+        "shareablePlans": true
+      },
+      "sabbathAware": true,
+      "quietHoursAware": true
+    },
+    "storehouse": {
+      "enabled": true,
+      "engines": {
+        "storehouseGoalEngine": true,
+        "storehouseStockPlanner": true
+      },
+      "imports": {
+        "fromGrocerySections": true,
+        "fromShoppingLists": true,
+        "fromMealPlans": true
+      },
+      "ui": {
+        "showGrocerySectionInspiration": true,
+        "showPantryTargets": true,
+        "showRotationNeeds": true
+      },
+      "allowUserFavorites": true,
+      "allowUserSchedules": true,
+      "coOp": {
+        "enabled": true,
+        "linkedHouseholds": true,
+        "bulkBuyEvents": true
+      },
+      "reverseGeneration": {
+        "toGarden": true,
+        "toAnimals": true
+      }
+    },
+    "meals": {
+      "enabled": true,
+      "engines": {
+        "mealPlanEngine": true,
+        "cookingSessionEngine": true
+      },
+      "imports": {
+        "fromAllrecipes": true,
+        "fromLoveAndLemons": true,
+        "fromTikTok": true,
+        "fromYouTube": true,
+        "fromFacebook": true,
+        "fromPinterestBoards": true
+      },
+      "ui": {
+        "showRecipeConsolidator": true,
+        "showMealPlanner": true,
+        "showBatchCookingAccordion": true
+      },
+      "allowUserFavorites": true,
+      "allowUserSchedules": true,
+      "reverseGeneration": {
+        "toAnimalPlanner": true,
+        "toStorehouse": true,
+        "toShoppingList": true,
+        "toPreservation": true
+      }
+    },
+    "animals": {
+      "enabled": true,
+      "engines": {
+        "animalPlannerEngine": true,
+        "animalCareEngine": true,
+        "butcherySessionEngine": true
+      },
+      "imports": {
+        "fromRecipesReverse": true,
+        "fromBreedLibraries": true,
+        "fromLocalMarkets": true,
+        "fromVideo": true
+      },
+      "ui": {
+        "showDashboardWidget": true,
+        "showBreedSuggestions": true,
+        "showAcquisitionPlanner": true,
+        "showButcheryLog": true
+      },
+      "allowUserFavorites": true,
+      "allowUserSchedules": true,
+      "reverseDirection": {
+        "generateAnimalPlanFromRecipes": true
+      },
+      "geoAwareBreeds": {
+        "enabled": true,
+        "defaultSource": "usda-zone-ish",
+        "fallback": "general-hardy-breeds"
+      }
+    },
+    "preservation": {
+      "enabled": true,
+      "engines": {
+        "preservationPlannerEngine": true,
+        "preservationSessionEngine": true
+      },
+      "imports": {
+        "fromMealPlans": true,
+        "fromStorehouseRotation": true,
+        "fromGardenHarvests": true,
+        "fromVideo": true
+      },
+      "ui": {
+        "showDashboardWidget": true,
+        "showMethodsTabs": true,
+        "showBatchSessions": true
+      },
+      "allowUserFavorites": true,
+      "allowUserSchedules": true,
+      "reverseGeneration": {
+        "toStorehouse": true,
+        "toMeals": true
+      }
+    },
+    "analytics": {
+      "enabled": true,
+      "collectSessionStats": true,
+      "collectImportStats": true,
+      "collectErrorEvents": true
+    },
+    "commerce": {
+      "enabled": false,
+      "buyLists": false,
+      "preferredVendors": [],
+      "allowAffiliateLinks": false
+    },
+    "gating": {
+      "hubOnly": [
+        "scan.compare.bulkPriceAudit",
+        "scan.trust.supplierTrace",
+        "coupons.partnerPerks",
+        "storehouse.sharedStockPool",
+        "garden.coOpPlanningBoard",
+        "animals.sharedButcherySchedule",
+        "preservation.sharedBatchBoard"
+      ],
+      "visibleInNonHub": {
+        "scan.basic": true,
+        "scan.compare": true,
+        "scan.trust": true,
+        "meals.basic": true,
+        "cleaning.basic": true,
+        "garden.basic": true,
+        "storehouse.basic": true,
+        "animals.basic": true,
+        "preservation.basic": true
+      }
+    },
+    "rollouts": {
+      "enableScanCompareTrust": {
+        "percent": 100,
+        "allowlist": []
+      },
+      "enableCoupons": {
+        "percent": 100,
+        "allowlist": []
+      },
+      "enableRecallsCheck": {
+        "percent": 100,
+        "allowlist": []
+      },
+      "enableIngredientsCheck": {
+        "percent": 100,
+        "allowlist": []
+      },
+      "enablePriceCompare": {
+        "percent": 100,
+        "allowlist": []
+      },
+      "scan.trust.supplierTrace": {
+        "percent": 15,
+        "allowlist": []
+      },
+      "scan.compare.bulkPriceAudit": {
+        "percent": 25,
+        "allowlist": []
+      },
+      "coupons.partnerPerks": {
+        "percent": 10,
+        "allowlist": []
+      },
+      "cleaning.zoneRoutineEngine": {
+        "percent": 100,
+        "allowlist": []
+      },
+      "garden.careAndHarvestEngine": {
+        "percent": 100,
+        "allowlist": []
+      },
+      "storehouse.storehouseStockPlanner": {
+        "percent": 100,
+        "allowlist": []
+      },
+      "animals.butcherySessionEngine": {
+        "percent": 100,
+        "allowlist": []
+      },
+      "preservation.preservationSessionEngine": {
+        "percent": 100,
+        "allowlist": []
+      },
+
+      "session.runner.wakeLock": {
+        "percent": 100,
+        "allowlist": []
+      },
+      "session.runner.notifications": {
+        "percent": 100,
+        "allowlist": []
+      },
+      "session.runner.pictureInPicture": {
+        "percent": 80,
+        "allowlist": []
+      },
+      "session.runner.mediaSession": {
+        "percent": 100,
+        "allowlist": []
+      },
+      "session.runner.tts": {
+        "percent": 100,
+        "allowlist": []
+      },
+      "session.runner.backgroundShims": {
+        "percent": 100,
+        "allowlist": []
+      }
+    },
+    "runtimeHints": {
+      "events": [
+        "scan.favorite.apply",
+        "session.saved.favorite",
+        "schedule.saved",
+        "grocerylist.generate.requested",
+        "coupons.check.requested",
+        "nba.suggested",
+        "cleaning.session.generate.requested",
+        "garden.plan.generate.requested",
+        "garden.care.schedule.requested",
+        "storehouse.stockPlan.generate.requested",
+        "meals.plan.generate.requested",
+        "animals.plan.generate.requested",
+        "animals.fromRecipes.generate.requested",
+        "preservation.plan.generate.requested",
+        "preservation.session.generate.requested",
+        "import.payload.detected",
+        "import.payload.normalized",
+        "import.session.saved",
+        "inventory.updated",
+        "inventory.shortage.detected",
+        "garden.harvest.logged",
+        "preservation.completed",
+        "meal.executed",
+
+        "session.started",
+        "session.step.changed",
+        "session.paused",
+        "session.resumed",
+        "session.completed",
+        "session.aborted",
+        "session.exported",
+
+        "agent.invocation.requested",
+        "agent.invocation.started",
+        "agent.invocation.completed",
+        "agent.invocation.failed",
+        "agent.cache.hit",
+        "agent.cache.miss",
+        "agent.shim.health"
+      ],
+      "domains": [
+        "scan",
+        "meals",
+        "coupons",
+        "inventory",
+        "cleaning",
+        "garden",
+        "storehouse",
+        "animals",
+        "preservation",
+        "import",
+        "analytics",
+        "commerce",
+        "session",
+        "agent"
+      ],
+      "sharedBus": true,
+      "domChannel": "window.__suka?.eventBus",
+      "payloadShape": {
+        "type": "string",
+        "ts": "ISO-8601",
+        "source": "string",
+        "data": "object"
+      }
+    }
+  },
+  "rules": [
+    {
+      "name": "Hub-only features visible only in Suka Village Family Fund Hub",
+      "if": {
+        "context.tier": "hub"
+      },
+      "set": {
+        "toggles.familyFundMode": true,
+        "familyFundMode": true,
+        "gating.visibleInNonHub.scan.compare": true,
+        "gating.visibleInNonHub.scan.trust": true,
+        "storehouse.sharedStockPool": true,
+        "garden.coOpPlanningBoard": true,
+        "animals.sharedButcherySchedule": true,
+        "preservation.sharedBatchBoard": true,
+        "commerce.enabled": true
+      }
+    },
+    {
+      "name": "Non-hub hides hubOnly items",
+      "if": {
+        "context.tier": {
+          "$ne": "hub"
+        }
+      },
+      "set": {
+        "toggles.familyFundMode": false,
+        "familyFundMode": false,
+        "gating.visibleInNonHub.scan.compare": true,
+        "gating.visibleInNonHub.scan.trust": true
+      }
+    },
+    {
+      "name": "Admins and Testers get full access",
+      "if": {
+        "context.role": {
+          "$in": [
+            "admin",
+            "tester"
+          ]
+        }
+      },
+      "set": {
+        "toggles.import-all-domains": true,
+        "toggles.analytics": true,
+        "toggles.commerce": true,
+        "familyFundMode": true,
+        "rollouts.scan.trust.supplierTrace.percent": 100,
+        "rollouts.scan.compare.bulkPriceAudit.percent": 100,
+        "rollouts.coupons.partnerPerks.percent": 100,
+        "rollouts.cleaning.zoneRoutineEngine.percent": 100,
+        "rollouts.garden.careAndHarvestEngine.percent": 100,
+        "rollouts.storehouse.storehouseStockPlanner.percent": 100,
+        "rollouts.animals.butcherySessionEngine.percent": 100,
+        "rollouts.preservation.preservationSessionEngine.percent": 100,
+
+        "rollouts.session.runner.wakeLock.percent": 100,
+        "rollouts.session.runner.notifications.percent": 100,
+        "rollouts.session.runner.pictureInPicture.percent": 100,
+        "rollouts.session.runner.mediaSession.percent": 100,
+        "rollouts.session.runner.tts.percent": 100,
+        "rollouts.session.runner.backgroundShims.percent": 100
+      }
+    },
+    {
+      "name": "Sabbath guard off for demo booths",
+      "if": {
+        "context.deviceProfile": "kiosk-demo"
+      },
+      "set": {
+        "sabbathGuard.enabled": false
+      }
+    }
+  ],
+  "environments": {
+    "development": {
+      "verboseEvents": true,
+      "enableScanCompareTrust": true,
+      "enableCoupons": true,
+      "allowLLM": true,
+      "debugAgents": true,
+
+      "sessionRunner": {
+        "enabled": true,
+        "backgroundShims": true,
+        "wakeLock": true,
+        "notifications": true,
+        "pictureInPicture": true,
+        "mediaSession": true,
+        "textToSpeech": true
+      },
+
+      "cleaning": {
+        "enabled": true
+      },
+      "garden": {
+        "enabled": true
+      },
+      "storehouse": {
+        "enabled": true
+      },
+      "meals": {
+        "enabled": true
+      },
+      "animals": {
+        "enabled": true
+      },
+      "preservation": {
+        "enabled": true
+      },
+      "import": {
+        "enabled": true
+      },
+      "analytics": {
+        "enabled": true
+      },
+      "commerce": {
+        "enabled": false
+      },
+      "rollouts": {
+        "scan.trust.supplierTrace": {
+          "percent": 100,
+          "allowlist": []
+        },
+        "scan.compare.bulkPriceAudit": {
+          "percent": 100,
+          "allowlist": []
+        },
+        "session.runner.pictureInPicture": {
+          "percent": 100,
+          "allowlist": []
+        }
+      },
+      "scan": {
+        "ui": {
+          "haptics": false
+        }
+      }
+    },
+    "staging": {
+      "verboseEvents": false,
+      "enableScanCompareTrust": true,
+      "enableCoupons": true,
+      "allowLLM": true,
+      "debugAgents": true,
+
+      "sessionRunner": {
+        "enabled": true,
+        "backgroundShims": true,
+        "wakeLock": true,
+        "notifications": true,
+        "pictureInPicture": true,
+        "mediaSession": true,
+        "textToSpeech": true
+      },
+
+      "analytics": {
+        "enabled": true
+      },
+      "commerce": {
+        "enabled": false
+      },
+      "rollouts": {
+        "scan.trust.supplierTrace": {
+          "percent": 50,
+          "allowlist": []
+        },
+        "scan.compare.bulkPriceAudit": {
+          "percent": 60,
+          "allowlist": []
+        },
+        "session.runner.pictureInPicture": {
+          "percent": 75,
+          "allowlist": []
+        }
+      }
+    },
+    "production": {
+      "verboseEvents": false,
+      "enableScanCompareTrust": true,
+      "enableCoupons": true,
+      "allowLLM": true,
+      "debugAgents": false,
+
+      "sessionRunner": {
+        "enabled": true,
+        "backgroundShims": true,
+        "wakeLock": true,
+        "notifications": true,
+        "pictureInPicture": true,
+        "mediaSession": true,
+        "textToSpeech": true
+      },
+
+      "analytics": {
+        "enabled": true
+      },
+      "commerce": {
+        "enabled": false
+      },
+      "rollouts": {
+        "scan.trust.supplierTrace": {
+          "percent": 15,
+          "allowlist": []
+        },
+        "scan.compare.bulkPriceAudit": {
+          "percent": 25,
+          "allowlist": []
+        },
+        "coupons.partnerPerks": {
+          "percent": 10,
+          "allowlist": []
+        },
+        "session.runner.pictureInPicture": {
+          "percent": 60,
+          "allowlist": []
+        }
+      }
+    }
+  }
+}

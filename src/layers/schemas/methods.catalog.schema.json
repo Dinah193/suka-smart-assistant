@@ -1,0 +1,252 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "methods.catalog.schema.json",
+  "title": "SSA Methods Catalog Schema",
+  "description": "Compatibility-first schema for SSA fixed-method catalogs used by Layer Spine (method_maps -> blueprints). Supports modern catalog roots and multiple legacy shapes. Intentionally permissive to prevent VS Code false-positive errors across existing catalogs. ✅ Includes Shopping-mode method compatibility (scan/receipt/commit/pricing/coupons/recalls/ingredients/sponsored placement).",
+  "anyOf": [
+    { "$ref": "#/$defs/ObjectCatalogRoot" },
+    { "$ref": "#/$defs/ArrayOfMethodsRoot" }
+  ],
+  "$defs": {
+    "NonEmptyString": { "type": "string", "minLength": 1 },
+
+    "LooseString": {
+      "description": "Accept legacy number/bool/null where some files stored scalar metadata.",
+      "oneOf": [
+        { "type": "string" },
+        { "type": "number" },
+        { "type": "boolean" },
+        { "type": "null" }
+      ]
+    },
+
+    "LooseTimestamp": {
+      "description": "Accept ISO strings or legacy numeric timestamps/counters.",
+      "oneOf": [{ "type": "string" }, { "type": "number" }, { "type": "null" }]
+    },
+
+    "StringArray": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+
+    "Resource": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["doc", "url", "video", "book", "internal"]
+        },
+        "label": { "$ref": "#/$defs/NonEmptyString" },
+        "ref": { "type": "string" }
+      }
+    },
+
+    "ResourceArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Resource" }
+    },
+
+    "Step": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "#/$defs/LooseString" },
+        "key": { "$ref": "#/$defs/LooseString" },
+
+        "title": { "type": "string" },
+
+        "text": { "type": "string" },
+        "instruction": { "type": "string" },
+        "notes": { "type": "string" },
+
+        "kind": { "type": "string" },
+
+        "type": {
+          "type": "string",
+          "description": "SSA/UI step type (NOT JSON Schema primitive type). Examples: prep, cook, rest, timer, safety, check, cue, scan, compare, coupon, recall, ingredients, receipt, reconcile, commit, sponsored, transparency, etc."
+        },
+
+        "durationSec": { "type": "number" },
+        "timerSec": { "type": "number" },
+
+        "tags": { "$ref": "#/$defs/StringArray" },
+        "resources": { "$ref": "#/$defs/ResourceArray" },
+
+        "inputs": { "type": "object", "additionalProperties": true },
+        "outputs": { "type": "object", "additionalProperties": true },
+
+        "conditions": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Optional conditional logic for step applicability."
+        }
+      }
+    },
+
+    "StepsArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Step" }
+    },
+
+    "Variant": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "key": { "$ref": "#/$defs/LooseString" },
+        "title": { "type": "string", "minLength": 1 },
+        "notes": { "$ref": "#/$defs/StringArray" },
+        "overrides": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Variant-specific overrides (steps, inputs, temps, timings, warnings, shopping rules, eligibility, caps, etc.)"
+        }
+      }
+    },
+
+    "VariantsArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Variant" }
+    },
+
+    "Method": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/LooseString",
+          "description": "Optional explicit method id."
+        },
+        "key": {
+          "$ref": "#/$defs/LooseString",
+          "description": "Optional key; often same as id."
+        },
+
+        "domain": {
+          "type": "string",
+          "description": "Optional domain (cooking/cleaning/preservation/shopping/etc.)."
+        },
+
+        "intent": {
+          "type": "string",
+          "description": "Optional intent route this method supports (e.g., shopping.scan, shopping.receipt.commit)."
+        },
+
+        "title": { "type": "string" },
+        "name": { "type": "string" },
+        "label": { "type": "string" },
+
+        "description": { "type": "string" },
+        "summary": { "type": "string" },
+
+        "tags": { "$ref": "#/$defs/StringArray" },
+
+        "steps": { "$ref": "#/$defs/StepsArray" },
+
+        "inputs": { "type": "object", "additionalProperties": true },
+        "outputs": { "type": "object", "additionalProperties": true },
+
+        "warnings": { "$ref": "#/$defs/StringArray" },
+        "notes": { "$ref": "#/$defs/StringArray" },
+
+        "resources": { "$ref": "#/$defs/ResourceArray" },
+        "variants": { "$ref": "#/$defs/VariantsArray" },
+
+        "requiresReceipt": {
+          "type": "boolean",
+          "description": "Shopping-only: if true, the method is gated and must not commit household inventory until a receipt artifact is provided."
+        },
+
+        "commitPolicy": {
+          "type": "string",
+          "description": "Optional policy hint for downstream builders (e.g., 'block_until_receipt', 'allow_staging_only', 'commit_on_receipt')."
+        },
+
+        "shopping": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Optional shopping metadata: stores/upc/coupon/recall/ingredients rules, transparency caps, etc."
+        },
+
+        "sponsored": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Optional sponsored placement rules/metadata. Use with transparency controls (why shown, caps, disclosure text)."
+        },
+
+        "version": { "$ref": "#/$defs/LooseTimestamp" },
+        "updatedAt": { "$ref": "#/$defs/LooseTimestamp" },
+        "createdAt": { "$ref": "#/$defs/LooseTimestamp" }
+      },
+      "description": "A single SSA fixed method definition. Intentionally does not require id/domain/steps to avoid breaking existing catalogs."
+    },
+
+    "MethodsArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Method" }
+    },
+
+    "MethodsMap": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/Method" },
+      "description": "A dictionary of methods keyed by method id."
+    },
+
+    "CatalogMetaObject": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "id": { "$ref": "#/$defs/LooseString" },
+        "key": { "$ref": "#/$defs/LooseString" },
+        "domain": { "$ref": "#/$defs/LooseString" },
+        "title": { "$ref": "#/$defs/LooseString" },
+        "description": { "$ref": "#/$defs/LooseString" },
+        "version": { "$ref": "#/$defs/LooseTimestamp" },
+        "updatedAt": { "$ref": "#/$defs/LooseTimestamp" }
+      }
+    },
+
+    "CatalogMeta": {
+      "description": "Meta may be an object (modern) or a scalar string/number (legacy).",
+      "oneOf": [
+        { "$ref": "#/$defs/CatalogMetaObject" },
+        { "$ref": "#/$defs/LooseString" }
+      ]
+    },
+
+    "ObjectCatalogRoot": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "$schema": { "type": "string" },
+
+        "meta": { "$ref": "#/$defs/CatalogMeta" },
+        "catalog": { "$ref": "#/$defs/CatalogMeta" },
+
+        "methods": {
+          "oneOf": [
+            { "$ref": "#/$defs/MethodsArray" },
+            { "$ref": "#/$defs/MethodsMap" }
+          ]
+        },
+
+        "items": { "$ref": "#/$defs/MethodsArray" },
+
+        "entries": {
+          "oneOf": [
+            { "$ref": "#/$defs/MethodsArray" },
+            { "$ref": "#/$defs/MethodsMap" }
+          ]
+        }
+      },
+      "description": "Unified object root that tolerates modern {methods} and legacy {items}/{entries} without requiring any of them (prevents VS Code false-positives)."
+    },
+
+    "ArrayOfMethodsRoot": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Method" },
+      "description": "Ultra-legacy: the file itself is just an array of methods."
+    }
+  }
+}

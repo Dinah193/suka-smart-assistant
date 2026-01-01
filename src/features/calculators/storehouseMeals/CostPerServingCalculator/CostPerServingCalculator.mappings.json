@@ -1,0 +1,230 @@
+{
+  "$schema": "../../../../schemas/planningGraph/mappings.schema.json",
+  "id": "CostPerServingCalculator.mappings",
+  "nodeKey": "costPerServingCalculator",
+  "version": "1.0.0",
+  "kind": "calculator-mappings",
+  "description": "Next steps mapping for using cost-per-serving insights (including Black hair nutrition value per dollar) to drive budget-friendly recipe and refill choices.",
+  "nextSteps": [
+    {
+      "key": "optimizeRecipesForBudget",
+      "label": "Pick budget-friendly recipes",
+      "description": "Use cost-per-serving and hair nutrient value per dollar to highlight recipes that fit the household budget and Black hair nutrition goals.",
+      "targetNodeKey": "mealPlanner",
+      "action": "openPlannerWithCostFilters",
+      "conditions": {
+        "requires": ["CostPerServingResult", "MealPlanDraft"],
+        "minItems": 1
+      },
+      "sessionTemplate": {
+        "domain": "storehouse",
+        "title": "Choose budget-friendly recipes",
+        "sourceType": "manual",
+        "steps": [
+          {
+            "title": "Review top-value recipes",
+            "desc": "Browse recipes ranked by price per serving and hair-supportive nutrients per dollar. Pin the ones you want to keep in rotation.",
+            "durationSec": 600,
+            "blockers": ["inventory"],
+            "metadata": {
+              "tempTargetF": 0,
+              "donenessCue": "timer",
+              "cueNotes": "Planning-only step; no cooking temperature required."
+            }
+          }
+        ]
+      },
+      "uiHints": {
+        "ctaLabel": "Use in meal plan",
+        "icon": "sparkles",
+        "priority": 1
+      }
+    },
+    {
+      "key": "chooseBestRefillOptions",
+      "label": "Choose refill options",
+      "description": "Send low-cost, high-value items to the Storehouse Refill calculator to decide how to restock within budget.",
+      "targetNodeKey": "storehouseRefillCalculator",
+      "action": "openRefillWithCandidateItems",
+      "conditions": {
+        "requires": ["CostPerServingResult"],
+        "filter": {
+          "inventoryStatus": ["low", "belowTarget"]
+        }
+      },
+      "sessionTemplate": {
+        "domain": "storehouse",
+        "title": "Plan storehouse refills",
+        "sourceType": "manual",
+        "steps": [
+          {
+            "title": "Review refill suggestions",
+            "desc": "Look at low and under-target items, sorted by cost per serving and hair nutrient value per dollar. Mark which ones to refill this cycle.",
+            "durationSec": 480,
+            "blockers": ["inventory"],
+            "metadata": {
+              "tempTargetF": 0,
+              "donenessCue": "timer",
+              "cueNotes": "Use this step to decide what to refill now versus later."
+            }
+          }
+        ]
+      },
+      "uiHints": {
+        "ctaLabel": "Plan refills",
+        "icon": "refresh-cw",
+        "priority": 2
+      }
+    },
+    {
+      "key": "scheduleBatchCooking",
+      "label": "Schedule batch cooking with best-value items",
+      "description": "Send selected budget-friendly recipes to the Batch Yield calculator and create a batch cooking session that stretches the budget.",
+      "targetNodeKey": "batchYieldCalculator",
+      "action": "createBatchFromHighValueRecipes",
+      "conditions": {
+        "requires": ["CostPerServingResult", "RecipeList"],
+        "filter": {
+          "maxPricePerServing": "budgetCap",
+          "minHairNutrientScorePerDollar": 0.5
+        }
+      },
+      "sessionTemplate": {
+        "domain": "cooking",
+        "title": "Batch cook budget-friendly meals",
+        "sourceType": "recipe",
+        "steps": [
+          {
+            "title": "Confirm batch recipes",
+            "desc": "Confirm which low-cost, high-value recipes you want to cook in a single batch session.",
+            "durationSec": 420,
+            "blockers": ["inventory", "equipment"],
+            "metadata": {
+              "tempTargetF": 0,
+              "donenessCue": "timer",
+              "cueNotes": "Use this step to verify you have ingredients and pans ready."
+            }
+          }
+        ]
+      },
+      "uiHints": {
+        "ctaLabel": "Batch cook these",
+        "icon": "layers",
+        "priority": 3
+      }
+    },
+    {
+      "key": "sendToShoppingList",
+      "label": "Send choices to shopping list",
+      "description": "Create or update a shopping list containing the best-value items and their target refill quantities.",
+      "targetNodeKey": "groceryListGenerator",
+      "action": "pushBestValueItemsToList",
+      "conditions": {
+        "requires": ["CostPerServingResult"],
+        "filter": {
+          "status": ["plannedRefill", "notInStock"]
+        }
+      },
+      "sessionTemplate": {
+        "domain": "storehouse",
+        "title": "Build a budget-friendly shopping list",
+        "sourceType": "manual",
+        "steps": [
+          {
+            "title": "Review list before shopping",
+            "desc": "Check the suggested items, remove anything you do not need this trip, and lock in quantities based on your budget.",
+            "durationSec": 300,
+            "blockers": [],
+            "metadata": {
+              "tempTargetF": 0,
+              "donenessCue": "timer",
+              "cueNotes": "Use this step to double-check your budget before shopping."
+            }
+          }
+        ]
+      },
+      "uiHints": {
+        "ctaLabel": "Create shopping list",
+        "icon": "shopping-cart",
+        "priority": 4
+      }
+    },
+    {
+      "key": "plantForHighValueItems",
+      "label": "Plan garden for expensive staples",
+      "description": "Identify items that are expensive in the store but hair- and health-supportive, and pass them to the Garden Planner as candidates to grow at home.",
+      "targetNodeKey": "gardenPlanner",
+      "action": "suggestCropsFromHighStoreCost",
+      "conditions": {
+        "requires": ["CostPerServingResult"],
+        "filter": {
+          "pricePerServing": {
+            "compare": "aboveHouseholdThreshold",
+            "field": "pricePerServing"
+          },
+          "hairNutrientScorePerDollar": {
+            "compare": "atLeast",
+            "value": 0.4
+          }
+        }
+      },
+      "sessionTemplate": {
+        "domain": "garden",
+        "title": "Plan garden to offset pricey foods",
+        "sourceType": "manual",
+        "steps": [
+          {
+            "title": "Select crops to grow",
+            "desc": "Pick which high-cost, high-nutrition items you want to grow in your garden to lower long-term costs.",
+            "durationSec": 600,
+            "blockers": ["weather"],
+            "metadata": {
+              "tempTargetF": 0,
+              "donenessCue": "timer",
+              "cueNotes": "Consider growing herbs, greens, and other Black hair-supportive foods that are pricey in stores."
+            }
+          }
+        ]
+      },
+      "uiHints": {
+        "ctaLabel": "Plan garden",
+        "icon": "leaf",
+        "priority": 5
+      }
+    },
+    {
+      "key": "refineByBlackHairNutrition",
+      "label": "Filter by Black hair nutrition value",
+      "description": "Send items to the Black Hair Nutrition calculator for deeper analysis of hair-supportive nutrients per dollar.",
+      "targetNodeKey": "blackHairNutritionCalculator",
+      "action": "openHairNutritionViewFromCost",
+      "conditions": {
+        "requires": ["CostPerServingResult"],
+        "minItems": 1
+      },
+      "sessionTemplate": {
+        "domain": "storehouse",
+        "title": "Focus on Black hair nutrition value",
+        "sourceType": "manual",
+        "steps": [
+          {
+            "title": "Prioritize hair-supportive foods",
+            "desc": "Review which items provide the best nutrients for Black hair growth and retention per dollar, and pin them as household staples.",
+            "durationSec": 480,
+            "blockers": [],
+            "metadata": {
+              "tempTargetF": 0,
+              "donenessCue": "timer",
+              "cueNotes": "This step is for nutritional planning only."
+            }
+          }
+        ]
+      },
+      "uiHints": {
+        "ctaLabel": "See hair value",
+        "icon": "activity",
+        "priority": 6
+      }
+    }
+  ]
+}

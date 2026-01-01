@@ -1,0 +1,6855 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "catalog": "ssa.fixedMethods",
+  "domain": "cooking",
+  "catalogVersion": 2,
+  "updatedAt": "2025-12-27T00:00:00Z",
+  "notes": [
+    "Expanded fixed method catalog for SSA Cooking (L2).",
+    "Designed for interactive UIs: parameters are form-ready; steps include sensory and safety cues.",
+    "IDs are stable. Add new methods instead of renaming existing methodKeys."
+  ],
+  "ui": {
+    "defaultUnits": {
+      "temperature": "F",
+      "weight": "lb",
+      "volume": "cup",
+      "length": "inch"
+    },
+    "difficultyScale": [
+      "easy",
+      "medium",
+      "hard"
+    ],
+    "donenessScale": [
+      "rare",
+      "medium_rare",
+      "medium",
+      "medium_well",
+      "well_done"
+    ],
+    "icons": {
+      "heat_dry": "🔥",
+      "heat_wet": "🍲",
+      "smoke": "💨",
+      "knife": "🔪",
+      "mix": "🥣",
+      "bake": "🧁",
+      "grill": "🍖",
+      "steam": "♨️",
+      "fry": "🍟",
+      "ferment": "🧫",
+      "pressure": "🧯",
+      "chill": "❄️",
+      "timer": "⏱️"
+    }
+  },
+  "shared": {
+    "globals": {
+      "restingGuidance": [
+        "Resting helps juices redistribute; larger cuts need longer rest.",
+        "Carryover cooking can raise internal temp by ~5–15°F depending on size and method."
+      ],
+      "coreSafety": {
+        "handWash": "Wash hands after handling raw meat/eggs/seafood.",
+        "crossContamination": "Use separate boards/knives for raw proteins and ready-to-eat foods.",
+        "chill": "Refrigerate perishables within 2 hours (1 hour if >90°F).",
+        "reheat": "Reheat leftovers until steaming hot; stir soups/sauces while reheating."
+      },
+      "usdaInternalTempsF": {
+        "poultry_all": 165,
+        "ground_meat": 160,
+        "whole_cuts_beef_pork_lamb": 145,
+        "fish": 145,
+        "leftovers_reheat": 165
+      }
+    },
+    "cueLexicon": {
+      "sizzle": "Audible sizzle indicates surface moisture evaporating and browning starting.",
+      "fond": "Brown bits on pan = flavor base; deglaze with liquid.",
+      "nappe": "Sauce coats back of spoon; finger drawn through leaves clean line.",
+      "al_dente": "Tender with slight core bite; not mushy.",
+      "steam_release": "Food releases naturally from pan/grill once browned."
+    }
+  },
+  "methods": [
+    {
+      "methodKey": "heat.dry.roast_oven",
+      "title": "Oven Roasting (Dry Heat)",
+      "category": "heat_dry",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 20,
+        "max": 240
+      },
+      "defaultEquipment": [
+        "oven",
+        "sheet_pan_or_roasting_pan",
+        "rack_optional",
+        "thermometer_optional"
+      ],
+      "bestFor": [
+        "whole cuts",
+        "vegetables",
+        "sheet-pan meals"
+      ],
+      "cuisineTags": [
+        "global",
+        "western",
+        "holiday"
+      ],
+      "parameters": [
+        {
+          "key": "ovenTempF",
+          "label": "Oven Temperature",
+          "type": "number",
+          "unit": "F",
+          "default": 400,
+          "min": 250,
+          "max": 500,
+          "step": 5,
+          "ui": {
+            "control": "slider"
+          }
+        },
+        {
+          "key": "useRack",
+          "label": "Use a Rack",
+          "type": "boolean",
+          "default": true,
+          "ui": {
+            "control": "toggle",
+            "help": "Improves airflow and crisping underneath."
+          }
+        },
+        {
+          "key": "restMinutes",
+          "label": "Rest Time",
+          "type": "number",
+          "unit": "min",
+          "default": 10,
+          "min": 0,
+          "max": 45,
+          "step": 1,
+          "ui": {
+            "control": "stepper"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Preheat & Position Rack",
+          "kind": "setup",
+          "estimatedMinutes": 5,
+          "cues": {
+            "visual": [
+              "Oven fully preheated."
+            ]
+          }
+        },
+        {
+          "id": "prep_2",
+          "title": "Pat Dry, Oil & Season",
+          "kind": "prep",
+          "estimatedMinutes": 5,
+          "cues": {
+            "visual": [
+              "Even coating; no wet sheen."
+            ],
+            "tips": [
+              "Dry surface browns better than steaming."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Roast & Rotate Pan",
+          "kind": "cook",
+          "estimatedMinutes": 30,
+          "cues": {
+            "visual": [
+              "Edges brown; rendered fat collects."
+            ],
+            "tips": [
+              "Rotate halfway for even color."
+            ]
+          }
+        },
+        {
+          "id": "check_1",
+          "title": "Check Doneness (Thermometer or Cues)",
+          "kind": "check",
+          "estimatedMinutes": 3,
+          "cues": {
+            "texture": [
+              "Fork-tender veg; desired spring-back for meats."
+            ]
+          }
+        },
+        {
+          "id": "rest_1",
+          "title": "Rest",
+          "kind": "rest",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": [
+              "Tent loosely with foil to protect crust."
+            ]
+          }
+        }
+      ],
+      "donenessGuides": [
+        {
+          "protein": "steak_beef_lamb",
+          "targetsF": {
+            "rare": 125,
+            "medium_rare": 135,
+            "medium": 145,
+            "medium_well": 155,
+            "well_done": 165
+          },
+          "cueNotes": [
+            "Rare=very soft; medium=springy; well=firm.",
+            "Medium-rare warm red center; medium pink center."
+          ]
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.roast_spit",
+      "title": "Rotisserie / Spit Roasting",
+      "category": "heat_dry",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 60,
+        "max": 240
+      },
+      "defaultEquipment": [
+        "rotisserie_or_spit",
+        "drip_pan",
+        "thermometer_optional"
+      ],
+      "bestFor": [
+        "whole poultry",
+        "porchetta",
+        "shawarma-style roasts"
+      ],
+      "cuisineTags": [
+        "global",
+        "middle_east",
+        "latin",
+        "bbq"
+      ],
+      "parameters": [
+        {
+          "key": "heatTempF",
+          "label": "Cook Temperature",
+          "type": "number",
+          "unit": "F",
+          "default": 375,
+          "min": 300,
+          "max": 475,
+          "step": 5,
+          "ui": {
+            "control": "slider"
+          }
+        },
+        {
+          "key": "baste",
+          "label": "Baste During Cook",
+          "type": "boolean",
+          "default": true,
+          "ui": {
+            "control": "toggle",
+            "help": "Basting improves color and moisture."
+          }
+        },
+        {
+          "key": "restMinutes",
+          "label": "Rest Time",
+          "type": "number",
+          "unit": "min",
+          "default": 15,
+          "min": 0,
+          "max": 45,
+          "step": 1,
+          "ui": {
+            "control": "stepper"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "truss_1",
+          "title": "Truss/Secure to Spit",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "visual": [
+              "No wobble; balanced rotation."
+            ],
+            "tips": [
+              "Balance prevents motor strain and uneven cooking."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Roast Rotating",
+          "kind": "cook",
+          "estimatedMinutes": 90,
+          "cues": {
+            "visual": [
+              "Even browning all around."
+            ],
+            "sound": [
+              "Steady sizzle from dripping fat."
+            ]
+          }
+        },
+        {
+          "id": "check_1",
+          "title": "Check Internal Temp",
+          "kind": "check",
+          "estimatedMinutes": 5,
+          "cues": {
+            "safety": [
+              "Use poultry internal temp guidance."
+            ]
+          }
+        },
+        {
+          "id": "rest_1",
+          "title": "Rest & Carve",
+          "kind": "rest",
+          "estimatedMinutes": 15,
+          "cues": {
+            "tips": [
+              "Carve across grain; keep juices on board."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.broil",
+      "title": "Broiling (Top Heat)",
+      "category": "heat_dry",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 3,
+        "max": 25
+      },
+      "defaultEquipment": [
+        "broiler",
+        "sheet_pan",
+        "rack_optional"
+      ],
+      "bestFor": [
+        "finishing",
+        "melting/char",
+        "thin cuts"
+      ],
+      "cuisineTags": [
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "rackPosition",
+          "label": "Rack Position",
+          "type": "enum",
+          "default": "top_third",
+          "options": [
+            "top",
+            "top_third",
+            "middle"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        },
+        {
+          "key": "distanceIn",
+          "label": "Distance from Element",
+          "type": "number",
+          "unit": "inch",
+          "default": 4,
+          "min": 1,
+          "max": 8,
+          "step": 1,
+          "ui": {
+            "control": "stepper"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Preheat Broiler & Pan",
+          "kind": "setup",
+          "estimatedMinutes": 5,
+          "cues": {
+            "visual": [
+              "Broiler on; pan hot."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Broil & Watch Closely",
+          "kind": "cook",
+          "estimatedMinutes": 5,
+          "cues": {
+            "visual": [
+              "Fast browning; edges blister."
+            ],
+            "tips": [
+              "Rotate pan for even char."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Rest/Serve",
+          "kind": "finish",
+          "estimatedMinutes": 2,
+          "cues": {
+            "tips": [
+              "Carryover continues briefly after broil."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.grill.direct",
+      "title": "Direct Grilling (Hot & Fast)",
+      "category": "grill",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 4,
+        "max": 40
+      },
+      "defaultEquipment": [
+        "grill_gas_or_charcoal",
+        "tongs",
+        "instant_read_thermometer_optional"
+      ],
+      "bestFor": [
+        "steaks",
+        "chops",
+        "burgers",
+        "quick vegetables"
+      ],
+      "cuisineTags": [
+        "global",
+        "bbq"
+      ],
+      "parameters": [
+        {
+          "key": "heatLevel",
+          "label": "Heat Level",
+          "type": "enum",
+          "default": "high",
+          "options": [
+            "medium",
+            "medium_high",
+            "high"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        },
+        {
+          "key": "lidClosed",
+          "label": "Close Lid",
+          "type": "boolean",
+          "default": true,
+          "ui": {
+            "control": "toggle"
+          }
+        },
+        {
+          "key": "flipIntervalMin",
+          "label": "Flip Interval",
+          "type": "number",
+          "unit": "min",
+          "default": 2,
+          "min": 1,
+          "max": 10,
+          "step": 1,
+          "ui": {
+            "control": "stepper"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Preheat & Clean Grates",
+          "kind": "setup",
+          "estimatedMinutes": 10,
+          "cues": {
+            "visual": [
+              "Grates very hot; hand test 2–3 seconds."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Sear First Side",
+          "kind": "cook",
+          "estimatedMinutes": 3,
+          "cues": {
+            "sound": [
+              "Strong sizzle on contact."
+            ],
+            "tips": [
+              "Wait for natural release before flipping."
+            ]
+          }
+        },
+        {
+          "id": "cook_2",
+          "title": "Flip & Finish",
+          "kind": "cook",
+          "estimatedMinutes": 3,
+          "cues": {
+            "visual": [
+              "Browning deepens; fat renders."
+            ],
+            "tips": [
+              "Move to cooler zone on flare-ups."
+            ]
+          }
+        },
+        {
+          "id": "check_1",
+          "title": "Check Doneness & Rest",
+          "kind": "check",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": [
+              "Rest steaks/chops 5–10 min."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.grill.indirect",
+      "title": "Indirect Grilling (Roast on Grill)",
+      "category": "grill",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 25,
+        "max": 180
+      },
+      "defaultEquipment": [
+        "grill_with_lid",
+        "drip_pan_optional",
+        "thermometer_optional"
+      ],
+      "bestFor": [
+        "whole chicken",
+        "thick chops",
+        "roasts"
+      ],
+      "cuisineTags": [
+        "global",
+        "bbq"
+      ],
+      "parameters": [
+        {
+          "key": "grillTempF",
+          "label": "Grill Temp",
+          "type": "number",
+          "unit": "F",
+          "default": 350,
+          "min": 275,
+          "max": 450,
+          "step": 5,
+          "ui": {
+            "control": "slider"
+          }
+        },
+        {
+          "key": "twoZoneFire",
+          "label": "Two-Zone Setup",
+          "type": "boolean",
+          "default": true,
+          "ui": {
+            "control": "toggle",
+            "help": "Hot side + cool side improves control."
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "setup_1",
+          "title": "Set Up Two-Zone Fire",
+          "kind": "setup",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": [
+              "Keep coals/burners on one side; food on the other."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Cook Indirect with Lid",
+          "kind": "cook",
+          "estimatedMinutes": 45,
+          "cues": {
+            "visual": [
+              "Gentle smoke; even browning."
+            ],
+            "tips": [
+              "Turn occasionally for even color."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Optional Sear Finish",
+          "kind": "finish",
+          "estimatedMinutes": 5,
+          "cues": {
+            "visual": [
+              "Crust forms quickly over hot zone."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.smoke.low_slow_bbq",
+      "title": "Low-and-Slow Smoking (BBQ)",
+      "category": "smoke",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 180,
+        "max": 960
+      },
+      "defaultEquipment": [
+        "smoker_or_grill_indirect",
+        "wood_chunks_or_pellets",
+        "thermometer",
+        "water_pan_optional"
+      ],
+      "bestFor": [
+        "brisket",
+        "pork shoulder",
+        "ribs",
+        "whole poultry"
+      ],
+      "cuisineTags": [
+        "bbq_american",
+        "global_smoke"
+      ],
+      "parameters": [
+        {
+          "key": "pitTempF",
+          "label": "Pit Temperature",
+          "type": "number",
+          "unit": "F",
+          "default": 250,
+          "min": 200,
+          "max": 325,
+          "step": 5,
+          "ui": {
+            "control": "slider"
+          }
+        },
+        {
+          "key": "woodType",
+          "label": "Wood Type",
+          "type": "enum",
+          "default": "oak",
+          "options": [
+            "oak",
+            "hickory",
+            "pecan",
+            "apple",
+            "cherry",
+            "mesquite",
+            "maple"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        },
+        {
+          "key": "wrapAtF",
+          "label": "Wrap At Internal Temp (optional)",
+          "type": "number",
+          "unit": "F",
+          "default": 165,
+          "min": 140,
+          "max": 190,
+          "step": 1,
+          "ui": {
+            "control": "stepper",
+            "help": "Wrap to push through stall; butcher paper keeps bark better than foil."
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Season (Dry Rub)",
+          "kind": "prep",
+          "estimatedMinutes": 15,
+          "cues": {
+            "tips": [
+              "Pat dry; apply rub evenly."
+            ]
+          }
+        },
+        {
+          "id": "setup_1",
+          "title": "Stabilize Pit Temp",
+          "kind": "setup",
+          "estimatedMinutes": 20,
+          "cues": {
+            "visual": [
+              "Thin blue smoke; temp steady."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Smoke Until Bark Sets",
+          "kind": "cook",
+          "estimatedMinutes": 180,
+          "cues": {
+            "visual": [
+              "Bark dark and dry-set."
+            ]
+          }
+        },
+        {
+          "id": "cook_2",
+          "title": "Optional Wrap",
+          "kind": "cook",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": [
+              "Wrap later for stronger bark."
+            ]
+          }
+        },
+        {
+          "id": "check_1",
+          "title": "Finish by Tenderness (Probe Test)",
+          "kind": "check",
+          "estimatedMinutes": 120,
+          "cues": {
+            "texture": [
+              "Probe like warm butter."
+            ]
+          }
+        },
+        {
+          "id": "rest_1",
+          "title": "Rest/Hold",
+          "kind": "rest",
+          "estimatedMinutes": 30,
+          "cues": {
+            "tips": [
+              "Hold wrapped for better slicing."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.smoke.hot_smoke",
+      "title": "Hot Smoking (Faster Smoke)",
+      "category": "smoke",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 30,
+        "max": 180
+      },
+      "defaultEquipment": [
+        "smoker_or_grill",
+        "wood",
+        "thermometer_optional"
+      ],
+      "bestFor": [
+        "fish",
+        "chicken pieces",
+        "sausages"
+      ],
+      "cuisineTags": [
+        "global_smoke"
+      ],
+      "parameters": [
+        {
+          "key": "pitTempF",
+          "label": "Pit Temperature",
+          "type": "number",
+          "unit": "F",
+          "default": 325,
+          "min": 250,
+          "max": 400,
+          "step": 5,
+          "ui": {
+            "control": "slider"
+          }
+        },
+        {
+          "key": "woodType",
+          "label": "Wood Type",
+          "type": "enum",
+          "default": "apple",
+          "options": [
+            "apple",
+            "cherry",
+            "oak",
+            "hickory",
+            "maple",
+            "pecan",
+            "alder"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Dry/Season & Preheat",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": [
+              "Drier surfaces take smoke better."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Smoke Until Done",
+          "kind": "cook",
+          "estimatedMinutes": 60,
+          "cues": {
+            "visual": [
+              "Color sets; surface dries slightly."
+            ]
+          }
+        },
+        {
+          "id": "check_1",
+          "title": "Check Doneness",
+          "kind": "check",
+          "estimatedMinutes": 5,
+          "cues": {
+            "safety": [
+              "Use appropriate internal temp targets."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.bake_casserole",
+      "title": "Casserole Baking",
+      "category": "bake",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 30,
+        "max": 120
+      },
+      "defaultEquipment": [
+        "oven",
+        "baking_dish"
+      ],
+      "bestFor": [
+        "one-dish meals",
+        "gratins",
+        "baked pasta"
+      ],
+      "cuisineTags": [
+        "global",
+        "comfort_food"
+      ],
+      "parameters": [
+        {
+          "key": "bakeTempF",
+          "label": "Bake Temp",
+          "type": "number",
+          "unit": "F",
+          "default": 375,
+          "min": 300,
+          "max": 450,
+          "step": 5,
+          "ui": {
+            "control": "slider"
+          }
+        },
+        {
+          "key": "coverFirst",
+          "label": "Cover First Half",
+          "type": "boolean",
+          "default": true,
+          "ui": {
+            "control": "toggle",
+            "help": "Cover to cook through; uncover to brown."
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Assemble Dish",
+          "kind": "prep",
+          "estimatedMinutes": 15,
+          "cues": {
+            "visual": [
+              "Even layer thickness."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Bake Covered (if using)",
+          "kind": "cook",
+          "estimatedMinutes": 30,
+          "cues": {
+            "visual": [
+              "Bubbling at edges."
+            ]
+          }
+        },
+        {
+          "id": "cook_2",
+          "title": "Uncover & Brown",
+          "kind": "cook",
+          "estimatedMinutes": 15,
+          "cues": {
+            "visual": [
+              "Top golden and crisp."
+            ]
+          }
+        },
+        {
+          "id": "rest_1",
+          "title": "Rest & Serve",
+          "kind": "rest",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": [
+              "Sets structure for cleaner slices."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.bake_pizza",
+      "title": "Pizza Baking (Stone/Steel)",
+      "category": "bake",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 10,
+        "max": 60
+      },
+      "defaultEquipment": [
+        "oven",
+        "pizza_stone_or_steel",
+        "peel_optional"
+      ],
+      "bestFor": [
+        "pizza",
+        "flatbreads"
+      ],
+      "cuisineTags": [
+        "italian",
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "stonePreheatMin",
+          "label": "Stone Preheat Time",
+          "type": "number",
+          "unit": "min",
+          "default": 45,
+          "min": 20,
+          "max": 90,
+          "step": 5,
+          "ui": {
+            "control": "stepper"
+          }
+        },
+        {
+          "key": "bakeTempF",
+          "label": "Bake Temp",
+          "type": "number",
+          "unit": "F",
+          "default": 500,
+          "min": 450,
+          "max": 550,
+          "step": 5,
+          "ui": {
+            "control": "slider"
+          }
+        },
+        {
+          "key": "style",
+          "label": "Style",
+          "type": "enum",
+          "default": "neapolitanish",
+          "options": [
+            "neapolitanish",
+            "new_york",
+            "pan"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "setup_1",
+          "title": "Preheat Stone/Steel Thoroughly",
+          "kind": "setup",
+          "estimatedMinutes": 45,
+          "cues": {
+            "tips": [
+              "Long preheat = crisp bottom."
+            ]
+          }
+        },
+        {
+          "id": "prep_1",
+          "title": "Stretch Dough & Top Lightly",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": [
+              "Too much sauce/toppings can sog the center."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Bake Until Spotted & Set",
+          "kind": "cook",
+          "estimatedMinutes": 8,
+          "cues": {
+            "visual": [
+              "Leopard spotting; cheese melts; rim browned."
+            ]
+          }
+        },
+        {
+          "id": "rest_1",
+          "title": "Rest Briefly & Slice",
+          "kind": "rest",
+          "estimatedMinutes": 2,
+          "cues": {
+            "tips": [
+              "Short rest prevents topping slide-off."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.wet.braise",
+      "title": "Braising (Sear + Covered Simmer)",
+      "category": "heat_wet",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 60,
+        "max": 300
+      },
+      "defaultEquipment": [
+        "dutch_oven_or_braiser",
+        "stovetop_or_oven",
+        "lid"
+      ],
+      "bestFor": [
+        "tough cuts",
+        "stews",
+        "pot roast",
+        "oxtails"
+      ],
+      "cuisineTags": [
+        "global",
+        "comfort_food"
+      ],
+      "parameters": [
+        {
+          "key": "liquidLevel",
+          "label": "Liquid Level",
+          "type": "enum",
+          "default": "one_third",
+          "options": [
+            "one_quarter",
+            "one_third",
+            "half"
+          ],
+          "ui": {
+            "control": "segmented",
+            "help": "Classic braise uses partial submersion; stew uses full submersion."
+          }
+        },
+        {
+          "key": "ovenTempF",
+          "label": "Oven Temp (if oven braise)",
+          "type": "number",
+          "unit": "F",
+          "default": 325,
+          "min": 250,
+          "max": 375,
+          "step": 5,
+          "ui": {
+            "control": "slider"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Sear for Color",
+          "kind": "cook",
+          "estimatedMinutes": 12,
+          "cues": {
+            "visual": [
+              "Deep brown crust; not black."
+            ],
+            "tips": [
+              "Sear in batches."
+            ]
+          }
+        },
+        {
+          "id": "flavor_1",
+          "title": "Aromatics + Deglaze Fond",
+          "kind": "cook",
+          "estimatedMinutes": 8,
+          "cues": {
+            "visual": [
+              "Fond dissolves; pan bottom clean-ish."
+            ]
+          }
+        },
+        {
+          "id": "braise_1",
+          "title": "Cover & Cook Low",
+          "kind": "cook",
+          "estimatedMinutes": 120,
+          "cues": {
+            "sound": [
+              "Barely bubbling."
+            ],
+            "tips": [
+              "Avoid boiling—keeps meat tender."
+            ]
+          }
+        },
+        {
+          "id": "check_1",
+          "title": "Check Tenderness",
+          "kind": "check",
+          "estimatedMinutes": 5,
+          "cues": {
+            "texture": [
+              "Fork slides in; collagen feels silky when done."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Reduce/Adjust Sauce",
+          "kind": "cook",
+          "estimatedMinutes": 10,
+          "cues": {
+            "visual": [
+              "Nappe sauce; glossy."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.wet.simmer_soup_stew",
+      "title": "Simmering Soup/Stew",
+      "category": "heat_wet",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 20,
+        "max": 240
+      },
+      "defaultEquipment": [
+        "pot",
+        "spoon",
+        "lid_optional"
+      ],
+      "bestFor": [
+        "soups",
+        "stews",
+        "stocks",
+        "chili"
+      ],
+      "cuisineTags": [
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "simmerStrength",
+          "label": "Simmer Strength",
+          "type": "enum",
+          "default": "gentle",
+          "options": [
+            "gentle",
+            "steady"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        },
+        {
+          "key": "lid",
+          "label": "Cover",
+          "type": "enum",
+          "default": "partial",
+          "options": [
+            "off",
+            "partial",
+            "on"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Build Flavor Base",
+          "kind": "cook",
+          "estimatedMinutes": 10,
+          "cues": {
+            "visual": [
+              "Aromatics softened; spices bloom."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Add Liquid & Simmer",
+          "kind": "cook",
+          "estimatedMinutes": 60,
+          "cues": {
+            "visual": [
+              "Small bubbles; not rolling boil."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Balance (Salt/Acid/Heat)",
+          "kind": "finish",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": [
+              "A splash of acid brightens heavy stews."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.wet.boil_pasta",
+      "title": "Boiling Pasta (Salted Water)",
+      "category": "heat_wet",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 8,
+        "max": 25
+      },
+      "defaultEquipment": [
+        "pot",
+        "strainer"
+      ],
+      "bestFor": [
+        "pasta",
+        "noodles"
+      ],
+      "cuisineTags": [
+        "italian",
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "saltTbspPerQuart",
+          "label": "Salt Rate",
+          "type": "number",
+          "unit": "tbsp",
+          "default": 1,
+          "min": 0,
+          "max": 3,
+          "step": 0.25,
+          "ui": {
+            "control": "stepper",
+            "help": "Salt the water to season pasta internally."
+          }
+        },
+        {
+          "key": "finishMethod",
+          "label": "Finish",
+          "type": "enum",
+          "default": "pan_finish",
+          "options": [
+            "drain_and_sauce",
+            "pan_finish",
+            "bake_finish"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "setup_1",
+          "title": "Boil Water & Salt",
+          "kind": "setup",
+          "estimatedMinutes": 10,
+          "cues": {
+            "visual": [
+              "Rolling boil; salt dissolves."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Cook to Al Dente",
+          "kind": "cook",
+          "estimatedMinutes": 10,
+          "cues": {
+            "texture": [
+              "Tender with slight core bite."
+            ],
+            "tips": [
+              "Stir early to prevent sticking."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Finish in Sauce (Recommended)",
+          "kind": "finish",
+          "estimatedMinutes": 5,
+          "cues": {
+            "visual": [
+              "Sauce clings; glossy emulsion."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.wet.blanch_shock",
+      "title": "Blanch & Shock (Set Color)",
+      "category": "heat_wet",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 3,
+        "max": 20
+      },
+      "defaultEquipment": [
+        "pot",
+        "ice_bath",
+        "strainer"
+      ],
+      "bestFor": [
+        "greens",
+        "vegetables",
+        "peeling tomatoes"
+      ],
+      "cuisineTags": [
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "shock",
+          "label": "Ice Shock",
+          "type": "enum",
+          "default": "yes",
+          "options": [
+            "yes",
+            "no"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "setup_1",
+          "title": "Boil Water + Prep Ice Bath",
+          "kind": "setup",
+          "estimatedMinutes": 8,
+          "cues": {
+            "tips": [
+              "Ice bath stops cooking and locks color."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Blanch Briefly",
+          "kind": "cook",
+          "estimatedMinutes": 2,
+          "cues": {
+            "visual": [
+              "Color brightens quickly."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Shock, Drain, Dry",
+          "kind": "finish",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": [
+              "Dry well before sautéing for better browning."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.wet.steam",
+      "title": "Steaming",
+      "category": "steam",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 5,
+        "max": 45
+      },
+      "defaultEquipment": [
+        "steamer_basket_or_rack",
+        "pot_with_lid"
+      ],
+      "bestFor": [
+        "vegetables",
+        "fish",
+        "dumplings"
+      ],
+      "cuisineTags": [
+        "global",
+        "east_asian"
+      ],
+      "parameters": [
+        {
+          "key": "steamIntensity",
+          "label": "Steam Intensity",
+          "type": "enum",
+          "default": "strong",
+          "options": [
+            "gentle",
+            "strong"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "setup_1",
+          "title": "Bring Water to Steam",
+          "kind": "setup",
+          "estimatedMinutes": 5,
+          "cues": {
+            "visual": [
+              "Strong steam visible."
+            ],
+            "tips": [
+              "Water should not touch food."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Steam Until Tender",
+          "kind": "cook",
+          "estimatedMinutes": 10,
+          "cues": {
+            "visual": [
+              "Veg bright; fish opaque/flaky."
+            ],
+            "texture": [
+              "Crisp-tender veg; dumplings glossy."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.wet.poach",
+      "title": "Poaching (Gentle in Liquid)",
+      "category": "heat_wet",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 5,
+        "max": 45
+      },
+      "defaultEquipment": [
+        "pot_or_skillet",
+        "thermometer_optional"
+      ],
+      "bestFor": [
+        "eggs",
+        "fish",
+        "chicken breast",
+        "fruit"
+      ],
+      "cuisineTags": [
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "poachTempF",
+          "label": "Liquid Temp",
+          "type": "number",
+          "unit": "F",
+          "default": 175,
+          "min": 140,
+          "max": 205,
+          "step": 1,
+          "ui": {
+            "control": "slider",
+            "help": "Aim below simmer—tiny bubbles, not boiling."
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "setup_1",
+          "title": "Heat Liquid to Gentle Poach",
+          "kind": "setup",
+          "estimatedMinutes": 8,
+          "cues": {
+            "visual": [
+              "Tiny bubbles at edges; surface trembles."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Add Food & Maintain Heat",
+          "kind": "cook",
+          "estimatedMinutes": 12,
+          "cues": {
+            "visual": [
+              "Egg whites set; fish opaque."
+            ],
+            "tips": [
+              "Lower heat if bubbling increases."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.wet.pressure_cook",
+      "title": "Pressure Cooking (Instant Pot)",
+      "category": "pressure",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 20,
+        "max": 120
+      },
+      "defaultEquipment": [
+        "pressure_cooker",
+        "trivet_optional"
+      ],
+      "bestFor": [
+        "beans",
+        "stews",
+        "tough cuts fast",
+        "stock"
+      ],
+      "cuisineTags": [
+        "modern",
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "pressureLevel",
+          "label": "Pressure Level",
+          "type": "enum",
+          "default": "high",
+          "options": [
+            "low",
+            "high"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        },
+        {
+          "key": "releaseMethod",
+          "label": "Release Method",
+          "type": "enum",
+          "default": "natural_10min",
+          "options": [
+            "quick",
+            "natural",
+            "natural_10min"
+          ],
+          "ui": {
+            "control": "dropdown",
+            "help": "Natural release helps tenderness and prevents starchy spurts."
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Add Ingredients + Minimum Liquid",
+          "kind": "prep",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": [
+              "Scrape bottom to avoid burn warning."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Pressurize & Cook",
+          "kind": "cook",
+          "estimatedMinutes": 30,
+          "cues": {
+            "tips": [
+              "Timer starts after pressure reached."
+            ]
+          }
+        },
+        {
+          "id": "release_1",
+          "title": "Release Safely",
+          "kind": "check",
+          "estimatedMinutes": 10,
+          "cues": {
+            "visual": [
+              "Float drops; lid opens easily."
+            ],
+            "safety": [
+              "Keep hands away from steam."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Reduce/Season",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "visual": [
+              "Sauce thickens; flavors balanced."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.wet.sous_vide",
+      "title": "Sous Vide (Precision + Sear)",
+      "category": "heat_wet",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 60,
+        "max": 1440
+      },
+      "defaultEquipment": [
+        "immersion_circulator",
+        "bags",
+        "container",
+        "skillet_for_sear"
+      ],
+      "bestFor": [
+        "steaks",
+        "chicken breast",
+        "pork chops",
+        "egg bites"
+      ],
+      "cuisineTags": [
+        "modern"
+      ],
+      "parameters": [
+        {
+          "key": "bathTempF",
+          "label": "Bath Temp",
+          "type": "number",
+          "unit": "F",
+          "default": 137,
+          "min": 120,
+          "max": 185,
+          "step": 1,
+          "ui": {
+            "control": "slider"
+          }
+        },
+        {
+          "key": "bathTimeMinutes",
+          "label": "Bath Time",
+          "type": "number",
+          "unit": "min",
+          "default": 120,
+          "min": 30,
+          "max": 1440,
+          "step": 5,
+          "ui": {
+            "control": "stepper"
+          }
+        },
+        {
+          "key": "searSecondsPerSide",
+          "label": "Sear Time/Side",
+          "type": "number",
+          "unit": "sec",
+          "default": 45,
+          "min": 15,
+          "max": 120,
+          "step": 5,
+          "ui": {
+            "control": "stepper"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Season & Bag",
+          "kind": "prep",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": [
+              "Remove air; ensure full submersion."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Cook in Bath",
+          "kind": "cook",
+          "estimatedMinutes": 120,
+          "cues": {
+            "visual": [
+              "Temp stable; bag submerged."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Dry Surface & Sear Hard",
+          "kind": "finish",
+          "estimatedMinutes": 6,
+          "cues": {
+            "visual": [
+              "Deep brown quickly; interior unchanged."
+            ],
+            "tips": [
+              "Pat very dry; very hot pan."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.wet.confit",
+      "title": "Confit (Low Cook in Fat)",
+      "category": "heat_wet",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 90,
+        "max": 600
+      },
+      "defaultEquipment": [
+        "pot_or_dutch_oven",
+        "fat_oil",
+        "thermometer_optional"
+      ],
+      "bestFor": [
+        "duck legs",
+        "garlic",
+        "root veg"
+      ],
+      "cuisineTags": [
+        "french",
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "cookTempF",
+          "label": "Cook Temp",
+          "type": "number",
+          "unit": "F",
+          "default": 225,
+          "min": 180,
+          "max": 275,
+          "step": 5,
+          "ui": {
+            "control": "slider"
+          }
+        },
+        {
+          "key": "fatType",
+          "label": "Fat",
+          "type": "enum",
+          "default": "duck_fat",
+          "options": [
+            "duck_fat",
+            "ghee",
+            "olive_oil",
+            "tallow"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Salt Cure (Optional)",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": [
+              "Salt cure improves seasoning and texture."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Submerge in Fat & Cook Low",
+          "kind": "cook",
+          "estimatedMinutes": 180,
+          "cues": {
+            "visual": [
+              "Gentle bubbles; food tender."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Crisp Finish (Optional)",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "visual": [
+              "Skin/crust crisps; golden."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.fry.deep_fry",
+      "title": "Deep Frying",
+      "category": "fry",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 5,
+        "max": 60
+      },
+      "defaultEquipment": [
+        "deep_pot_or_fryer",
+        "thermometer",
+        "spider_or_tongs",
+        "rack"
+      ],
+      "bestFor": [
+        "chicken",
+        "fish",
+        "fries",
+        "dough"
+      ],
+      "cuisineTags": [
+        "global",
+        "street_food"
+      ],
+      "parameters": [
+        {
+          "key": "oilTempF",
+          "label": "Oil Temp",
+          "type": "number",
+          "unit": "F",
+          "default": 350,
+          "min": 300,
+          "max": 400,
+          "step": 5,
+          "ui": {
+            "control": "slider"
+          }
+        },
+        {
+          "key": "coating",
+          "label": "Coating",
+          "type": "enum",
+          "default": "breaded",
+          "options": [
+            "none",
+            "breaded",
+            "battered"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "setup_1",
+          "title": "Heat Oil & Set Rack",
+          "kind": "setup",
+          "estimatedMinutes": 10,
+          "cues": {
+            "visual": [
+              "Oil at temp; test piece sizzles steadily."
+            ]
+          }
+        },
+        {
+          "id": "prep_1",
+          "title": "Dry Food & Coat",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": [
+              "Rest breading so it adheres."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Fry in Batches",
+          "kind": "cook",
+          "estimatedMinutes": 8,
+          "cues": {
+            "visual": [
+              "Golden; bubbles reduce near finish."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Drain & Season",
+          "kind": "finish",
+          "estimatedMinutes": 3,
+          "cues": {
+            "tips": [
+              "Salt immediately while hot."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.fry.shallow_fry",
+      "title": "Shallow Frying",
+      "category": "fry",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 5,
+        "max": 30
+      },
+      "defaultEquipment": [
+        "skillet",
+        "tongs",
+        "thermometer_optional"
+      ],
+      "bestFor": [
+        "cutlets",
+        "latkes",
+        "fritters"
+      ],
+      "cuisineTags": [
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "oilDepthIn",
+          "label": "Oil Depth",
+          "type": "number",
+          "unit": "inch",
+          "default": 0.25,
+          "min": 0.1,
+          "max": 1.0,
+          "step": 0.05,
+          "ui": {
+            "control": "stepper"
+          }
+        },
+        {
+          "key": "oilTempF",
+          "label": "Oil Temp",
+          "type": "number",
+          "unit": "F",
+          "default": 350,
+          "min": 300,
+          "max": 375,
+          "step": 5,
+          "ui": {
+            "control": "slider"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "setup_1",
+          "title": "Heat Shallow Oil",
+          "kind": "setup",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": [
+              "Oil should shimmer; small breadcrumb sizzles."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Fry One Side Then Flip",
+          "kind": "cook",
+          "estimatedMinutes": 6,
+          "cues": {
+            "visual": [
+              "Golden crust forms; edges set."
+            ],
+            "tips": [
+              "Avoid crowding pan."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Drain & Keep Warm",
+          "kind": "finish",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": [
+              "Drain on rack for crispness."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.fry.stir_fry",
+      "title": "Stir Fry (High Heat, Quick)",
+      "category": "heat_dry",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 6,
+        "max": 25
+      },
+      "defaultEquipment": [
+        "wok_or_large_skillet",
+        "spatula"
+      ],
+      "bestFor": [
+        "thin proteins",
+        "veg",
+        "noodles"
+      ],
+      "cuisineTags": [
+        "east_asian",
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "batching",
+          "label": "Cook in Batches",
+          "type": "boolean",
+          "default": true,
+          "ui": {
+            "control": "toggle",
+            "help": "Overcrowding steams food and reduces browning."
+          }
+        },
+        {
+          "key": "sauceTiming",
+          "label": "Sauce Timing",
+          "type": "enum",
+          "default": "end",
+          "options": [
+            "mid",
+            "end"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Mise en Place (Everything Ready)",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": [
+              "Cook moves fast—prep first."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Sear Protein",
+          "kind": "cook",
+          "estimatedMinutes": 4,
+          "cues": {
+            "visual": [
+              "Edges brown; slight char."
+            ],
+            "sound": [
+              "Sharp sizzling."
+            ]
+          }
+        },
+        {
+          "id": "cook_2",
+          "title": "Flash Cook Veg",
+          "kind": "cook",
+          "estimatedMinutes": 3,
+          "cues": {
+            "visual": [
+              "Bright, crisp-tender."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Sauce, Toss & Serve",
+          "kind": "finish",
+          "estimatedMinutes": 2,
+          "cues": {
+            "visual": [
+              "Sauce glosses; thickens fast."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.bake_bread_lean",
+      "title": "Lean Bread Baking (Yeast)",
+      "category": "bake",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 180,
+        "max": 720
+      },
+      "defaultEquipment": [
+        "mixing_bowl",
+        "oven",
+        "baking_stone_or_sheet",
+        "steam_option"
+      ],
+      "bestFor": [
+        "boules",
+        "batards",
+        "rolls"
+      ],
+      "cuisineTags": [
+        "global",
+        "artisan"
+      ],
+      "parameters": [
+        {
+          "key": "hydrationPercent",
+          "label": "Hydration",
+          "type": "number",
+          "unit": "% ",
+          "default": 70,
+          "min": 55,
+          "max": 85,
+          "step": 1,
+          "ui": {
+            "control": "slider"
+          }
+        },
+        {
+          "key": "proofStyle",
+          "label": "Proofing",
+          "type": "enum",
+          "default": "room_temp",
+          "options": [
+            "room_temp",
+            "cold_retard"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        },
+        {
+          "key": "bakeTempF",
+          "label": "Bake Temp",
+          "type": "number",
+          "unit": "F",
+          "default": 475,
+          "min": 400,
+          "max": 525,
+          "step": 5,
+          "ui": {
+            "control": "slider"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "mix_1",
+          "title": "Mix Dough",
+          "kind": "prep",
+          "estimatedMinutes": 15,
+          "cues": {
+            "texture": [
+              "Shaggy to cohesive."
+            ]
+          }
+        },
+        {
+          "id": "bulk_1",
+          "title": "Bulk Ferment + Folds",
+          "kind": "cook",
+          "estimatedMinutes": 120,
+          "cues": {
+            "visual": [
+              "Dough expands; surface smoother."
+            ]
+          }
+        },
+        {
+          "id": "shape_1",
+          "title": "Shape & Proof",
+          "kind": "prep",
+          "estimatedMinutes": 90,
+          "cues": {
+            "visual": [
+              "Poke springs back slowly."
+            ]
+          }
+        },
+        {
+          "id": "bake_1",
+          "title": "Score & Bake with Steam",
+          "kind": "cook",
+          "estimatedMinutes": 35,
+          "cues": {
+            "visual": [
+              "Oven spring early; crust deepens color."
+            ],
+            "sound": [
+              "Crackling while cooling."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.bake_bread_sourdough",
+      "title": "Sourdough Bread (Natural Leaven)",
+      "category": "bake",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 360,
+        "max": 1440
+      },
+      "defaultEquipment": [
+        "mixing_bowl",
+        "oven",
+        "dutch_oven_optional",
+        "scale_optional"
+      ],
+      "bestFor": [
+        "country loaves",
+        "boules"
+      ],
+      "cuisineTags": [
+        "global",
+        "artisan"
+      ],
+      "parameters": [
+        {
+          "key": "starterPercent",
+          "label": "Starter %",
+          "type": "number",
+          "unit": "% ",
+          "default": 20,
+          "min": 5,
+          "max": 40,
+          "step": 1,
+          "ui": {
+            "control": "slider"
+          }
+        },
+        {
+          "key": "bulkHours",
+          "label": "Bulk Hours",
+          "type": "number",
+          "unit": "hr",
+          "default": 5,
+          "min": 2,
+          "max": 12,
+          "step": 0.5,
+          "ui": {
+            "control": "stepper"
+          }
+        },
+        {
+          "key": "coldRetard",
+          "label": "Cold Retard",
+          "type": "enum",
+          "default": "yes",
+          "options": [
+            "yes",
+            "no"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Build/Feed Starter (If Needed)",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": [
+              "Starter should be bubbly and active."
+            ]
+          }
+        },
+        {
+          "id": "mix_1",
+          "title": "Mix & Autolyse",
+          "kind": "prep",
+          "estimatedMinutes": 30,
+          "cues": {
+            "tips": [
+              "Autolyse improves gluten and extensibility."
+            ]
+          }
+        },
+        {
+          "id": "bulk_1",
+          "title": "Bulk + Folds",
+          "kind": "cook",
+          "estimatedMinutes": 300,
+          "cues": {
+            "visual": [
+              "Airy dough; smoother surface."
+            ]
+          }
+        },
+        {
+          "id": "bake_1",
+          "title": "Bake (Covered then Uncovered)",
+          "kind": "cook",
+          "estimatedMinutes": 45,
+          "cues": {
+            "visual": [
+              "Ear forms; crust deep and blistered."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.bake_cake_creaming",
+      "title": "Cake (Creaming Method)",
+      "category": "bake",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 45,
+        "max": 120
+      },
+      "defaultEquipment": [
+        "mixer_optional",
+        "bowls",
+        "oven",
+        "cake_pan"
+      ],
+      "bestFor": [
+        "butter cakes",
+        "cupcakes"
+      ],
+      "cuisineTags": [
+        "global",
+        "western"
+      ],
+      "parameters": [
+        {
+          "key": "panType",
+          "label": "Pan Type",
+          "type": "enum",
+          "default": "round_9in",
+          "options": [
+            "round_9in",
+            "sheet",
+            "cupcakes",
+            "bundt"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        },
+        {
+          "key": "bakeTempF",
+          "label": "Bake Temp",
+          "type": "number",
+          "unit": "F",
+          "default": 350,
+          "min": 300,
+          "max": 375,
+          "step": 5,
+          "ui": {
+            "control": "slider"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Cream Butter + Sugar",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "visual": [
+              "Lightened, fluffy mixture."
+            ]
+          }
+        },
+        {
+          "id": "prep_2",
+          "title": "Add Eggs, Then Dry/Wet Alternating",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": [
+              "Avoid overmixing after flour."
+            ]
+          }
+        },
+        {
+          "id": "bake_1",
+          "title": "Bake Until Set",
+          "kind": "cook",
+          "estimatedMinutes": 30,
+          "cues": {
+            "visual": [
+              "Top springs back; tester comes out clean-ish."
+            ]
+          }
+        },
+        {
+          "id": "cool_1",
+          "title": "Cool Before Frosting",
+          "kind": "rest",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": [
+              "Warm cakes melt frosting."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.bake_cookies_drop",
+      "title": "Drop Cookies",
+      "category": "bake",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 15,
+        "max": 45
+      },
+      "defaultEquipment": [
+        "bowls",
+        "sheet_pan",
+        "oven"
+      ],
+      "bestFor": [
+        "chocolate chip",
+        "oatmeal cookies"
+      ],
+      "cuisineTags": [
+        "global",
+        "western"
+      ],
+      "parameters": [
+        {
+          "key": "chewiness",
+          "label": "Texture Goal",
+          "type": "enum",
+          "default": "chewy",
+          "options": [
+            "chewy",
+            "balanced",
+            "crisp"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        },
+        {
+          "key": "bakeTempF",
+          "label": "Bake Temp",
+          "type": "number",
+          "unit": "F",
+          "default": 350,
+          "min": 300,
+          "max": 375,
+          "step": 5,
+          "ui": {
+            "control": "slider"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "mix_1",
+          "title": "Mix Dough",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": [
+              "Chill dough for thicker cookies."
+            ]
+          }
+        },
+        {
+          "id": "bake_1",
+          "title": "Bake Until Edges Set",
+          "kind": "cook",
+          "estimatedMinutes": 12,
+          "cues": {
+            "visual": [
+              "Edges golden; center still soft."
+            ]
+          }
+        },
+        {
+          "id": "rest_1",
+          "title": "Cool on Tray Briefly",
+          "kind": "rest",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": [
+              "Carryover finishes center."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.bake_pie_crust",
+      "title": "Pie Crust (Flaky)",
+      "category": "bake",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 30,
+        "max": 180
+      },
+      "defaultEquipment": [
+        "bowl",
+        "pastry_cutter",
+        "rolling_pin",
+        "oven"
+      ],
+      "bestFor": [
+        "pies",
+        "tarts"
+      ],
+      "cuisineTags": [
+        "global",
+        "western"
+      ],
+      "parameters": [
+        {
+          "key": "fat",
+          "label": "Fat",
+          "type": "enum",
+          "default": "butter",
+          "options": [
+            "butter",
+            "shortening",
+            "lard",
+            "mix"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        },
+        {
+          "key": "blindBake",
+          "label": "Blind Bake",
+          "type": "enum",
+          "default": "no",
+          "options": [
+            "no",
+            "partial",
+            "full"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Cut Fat into Flour",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "visual": [
+              "Pea-size bits; some flat shards."
+            ]
+          }
+        },
+        {
+          "id": "prep_2",
+          "title": "Add Ice Water & Bring Together",
+          "kind": "prep",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": [
+              "Stop when it holds—overworking toughens."
+            ]
+          }
+        },
+        {
+          "id": "rest_1",
+          "title": "Chill Dough",
+          "kind": "rest",
+          "estimatedMinutes": 45,
+          "cues": {
+            "tips": [
+              "Chill relaxes gluten and firms fat."
+            ]
+          }
+        },
+        {
+          "id": "bake_1",
+          "title": "Roll, Shape, Bake",
+          "kind": "cook",
+          "estimatedMinutes": 30,
+          "cues": {
+            "visual": [
+              "Golden edges; flaky layers."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.france.stock.brown_stock",
+      "title": "Brown Stock (Roast Bones + Simmer)",
+      "category": "heat_wet",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 240,
+        "max": 900
+      },
+      "defaultEquipment": [
+        "oven",
+        "stock_pot",
+        "strainer"
+      ],
+      "bestFor": [
+        "beef stock",
+        "lamb stock",
+        "dark sauces"
+      ],
+      "cuisineTags": [
+        "french",
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "simmerHours",
+          "label": "Simmer Time",
+          "type": "number",
+          "unit": "hr",
+          "default": 8,
+          "min": 2,
+          "max": 18,
+          "step": 1,
+          "ui": {
+            "control": "stepper"
+          }
+        },
+        {
+          "key": "roastBones",
+          "label": "Roast Bones First",
+          "type": "boolean",
+          "default": true,
+          "ui": {
+            "control": "toggle"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "roast_1",
+          "title": "Roast Bones & Aromatics",
+          "kind": "cook",
+          "estimatedMinutes": 45,
+          "cues": {
+            "visual": [
+              "Deep brown; not black."
+            ],
+            "tips": [
+              "Color = flavor."
+            ]
+          }
+        },
+        {
+          "id": "simmer_1",
+          "title": "Simmer Gently & Skim",
+          "kind": "cook",
+          "estimatedMinutes": 480,
+          "cues": {
+            "visual": [
+              "Small bubbles; scum skimmed."
+            ]
+          }
+        },
+        {
+          "id": "strain_1",
+          "title": "Strain & Chill",
+          "kind": "finish",
+          "estimatedMinutes": 30,
+          "cues": {
+            "tips": [
+              "Chill quickly; remove fat cap for cleaner stock."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.france.stock.white_stock",
+      "title": "White Stock (No Roast)",
+      "category": "heat_wet",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 120,
+        "max": 480
+      },
+      "defaultEquipment": [
+        "stock_pot",
+        "strainer"
+      ],
+      "bestFor": [
+        "chicken stock",
+        "fish fumet"
+      ],
+      "cuisineTags": [
+        "french",
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "simmerHours",
+          "label": "Simmer Time",
+          "type": "number",
+          "unit": "hr",
+          "default": 4,
+          "min": 1,
+          "max": 8,
+          "step": 0.5,
+          "ui": {
+            "control": "stepper"
+          }
+        },
+        {
+          "key": "style",
+          "label": "Style",
+          "type": "enum",
+          "default": "chicken",
+          "options": [
+            "chicken",
+            "fish",
+            "vegetable"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "simmer_1",
+          "title": "Simmer Gently",
+          "kind": "cook",
+          "estimatedMinutes": 240,
+          "cues": {
+            "visual": [
+              "Clearer stock; minimal boiling."
+            ]
+          }
+        },
+        {
+          "id": "strain_1",
+          "title": "Strain & Cool",
+          "kind": "finish",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": [
+              "Cool quickly for safety."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.france.sauce.pan_sauce",
+      "title": "Pan Sauce (Deglaze + Emulsify)",
+      "category": "heat_dry",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 6,
+        "max": 20
+      },
+      "defaultEquipment": [
+        "skillet",
+        "whisk_optional"
+      ],
+      "bestFor": [
+        "steak/chicken/fish pan sauces"
+      ],
+      "cuisineTags": [
+        "french",
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "deglazeLiquid",
+          "label": "Deglaze Liquid",
+          "type": "enum",
+          "default": "stock",
+          "options": [
+            "stock",
+            "wine",
+            "vinegar",
+            "water"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        },
+        {
+          "key": "finishFat",
+          "label": "Finish Fat",
+          "type": "enum",
+          "default": "butter",
+          "options": [
+            "butter",
+            "cream",
+            "olive_oil",
+            "none"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "deglaze_1",
+          "title": "Deglaze Fond",
+          "kind": "cook",
+          "estimatedMinutes": 2,
+          "cues": {
+            "visual": [
+              "Fond lifts; bubbles loosen bits."
+            ]
+          }
+        },
+        {
+          "id": "reduce_1",
+          "title": "Reduce",
+          "kind": "cook",
+          "estimatedMinutes": 4,
+          "cues": {
+            "visual": [
+              "Bubbles slow; thickens."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Finish Off Heat",
+          "kind": "finish",
+          "estimatedMinutes": 2,
+          "cues": {
+            "visual": [
+              "Glossy nappe."
+            ],
+            "tips": [
+              "Cold butter off heat for shine."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.global.sauce.emulsion_mayo",
+      "title": "Mayo/Aioli Emulsion",
+      "category": "mix",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 5,
+        "max": 20
+      },
+      "defaultEquipment": [
+        "bowl",
+        "whisk_or_blender"
+      ],
+      "bestFor": [
+        "mayo",
+        "aioli",
+        "dressings"
+      ],
+      "cuisineTags": [
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "method",
+          "label": "Method",
+          "type": "enum",
+          "default": "whisk",
+          "options": [
+            "whisk",
+            "immersion_blender"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        },
+        {
+          "key": "acid",
+          "label": "Acid",
+          "type": "enum",
+          "default": "lemon",
+          "options": [
+            "lemon",
+            "vinegar",
+            "lime"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "start_1",
+          "title": "Start Emulsion Slowly",
+          "kind": "prep",
+          "estimatedMinutes": 3,
+          "cues": {
+            "visual": [
+              "Thickens early; turns pale."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Season & Adjust",
+          "kind": "finish",
+          "estimatedMinutes": 2,
+          "cues": {
+            "tips": [
+              "Thin with water/acid; thicken with more oil."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.indian.tandoori_roast",
+      "title": "Tandoori Roasting",
+      "category": "heat_dry",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 20,
+        "max": 120
+      },
+      "defaultEquipment": [
+        "tandoor_or_hot_oven",
+        "skewers_optional",
+        "drip_pan"
+      ],
+      "bestFor": [
+        "chicken",
+        "lamb",
+        "fish",
+        "paneer",
+        "veg"
+      ],
+      "cuisineTags": [
+        "south_asian",
+        "cuisine_specific"
+      ],
+      "parameters": [
+        {
+          "key": "marinadeHours",
+          "label": "Marinade Time",
+          "type": "number",
+          "unit": "hr",
+          "default": 8,
+          "min": 0,
+          "max": 48,
+          "step": 1,
+          "ui": {
+            "control": "stepper"
+          }
+        },
+        {
+          "key": "cookTempF",
+          "label": "Cook Temp",
+          "type": "number",
+          "unit": "F",
+          "default": 475,
+          "min": 400,
+          "max": 550,
+          "step": 5,
+          "ui": {
+            "control": "slider"
+          }
+        },
+        {
+          "key": "finishChar",
+          "label": "Char Finish",
+          "type": "boolean",
+          "default": true,
+          "ui": {
+            "control": "toggle"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "marinade_1",
+          "title": "Marinate (Yogurt + Spices)",
+          "kind": "prep",
+          "estimatedMinutes": 15,
+          "cues": {
+            "visual": [
+              "Thick coat; slashes filled."
+            ],
+            "tips": [
+              "Slash thicker pieces for even cook."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Roast Hot; Rotate",
+          "kind": "cook",
+          "estimatedMinutes": 25,
+          "cues": {
+            "visual": [
+              "Edges char; surface dries."
+            ],
+            "tips": [
+              "Use drip pan in oven."
+            ]
+          }
+        },
+        {
+          "id": "check_1",
+          "title": "Check Doneness; Rest",
+          "kind": "check",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": [
+              "Finish with lemon + ghee/butter."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.indian.biryani_dum",
+      "title": "Biryani Dum Cooking (Layer + Steam Seal)",
+      "category": "heat_wet",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 60,
+        "max": 180
+      },
+      "defaultEquipment": [
+        "heavy_pot_with_lid",
+        "foil_or_dough_seal_optional"
+      ],
+      "bestFor": [
+        "biryani",
+        "dum rice dishes"
+      ],
+      "cuisineTags": [
+        "south_asian",
+        "cuisine_specific"
+      ],
+      "parameters": [
+        {
+          "key": "seal",
+          "label": "Seal Pot",
+          "type": "enum",
+          "default": "foil",
+          "options": [
+            "foil",
+            "dough",
+            "tight_lid"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        },
+        {
+          "key": "riceStage",
+          "label": "Rice Parboil",
+          "type": "enum",
+          "default": "70_percent",
+          "options": [
+            "60_percent",
+            "70_percent",
+            "80_percent"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Parboil Rice",
+          "kind": "cook",
+          "estimatedMinutes": 10,
+          "cues": {
+            "texture": [
+              "Grain bends but not fully cooked."
+            ]
+          }
+        },
+        {
+          "id": "layer_1",
+          "title": "Layer Rice + Masala",
+          "kind": "prep",
+          "estimatedMinutes": 15,
+          "cues": {
+            "visual": [
+              "Even layers; aromatics scattered."
+            ]
+          }
+        },
+        {
+          "id": "dum_1",
+          "title": "Dum Steam Cook Sealed",
+          "kind": "cook",
+          "estimatedMinutes": 35,
+          "cues": {
+            "sound": [
+              "Gentle hiss/steam."
+            ],
+            "tips": [
+              "Low heat to prevent bottom burn."
+            ]
+          }
+        },
+        {
+          "id": "rest_1",
+          "title": "Rest & Fluff",
+          "kind": "rest",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": [
+              "Rest lets steam equalize; fluff gently."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.middle_east.tagine_braise",
+      "title": "Tagine-Style Braise",
+      "category": "heat_wet",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 60,
+        "max": 240
+      },
+      "defaultEquipment": [
+        "tagine_or_dutch_oven",
+        "lid"
+      ],
+      "bestFor": [
+        "lamb",
+        "chicken",
+        "veg",
+        "dried fruit stews"
+      ],
+      "cuisineTags": [
+        "middle_east",
+        "cuisine_specific"
+      ],
+      "parameters": [
+        {
+          "key": "sweetSavory",
+          "label": "Sweet/Savory",
+          "type": "enum",
+          "default": "balanced",
+          "options": [
+            "savory",
+            "balanced",
+            "sweet"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        },
+        {
+          "key": "liquidAmount",
+          "label": "Liquid Amount",
+          "type": "enum",
+          "default": "low",
+          "options": [
+            "low",
+            "medium"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Season with Warm Spices",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "aroma": [
+              "Fragrant spices bloom."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Cook Covered Low",
+          "kind": "cook",
+          "estimatedMinutes": 90,
+          "cues": {
+            "visual": [
+              "Gentle bubbling; sauce thickens."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Finish with Herbs/Acid",
+          "kind": "finish",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": [
+              "Preserved lemon/olive brine brightens."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.west_africa.jollof_one_pot",
+      "title": "Jollof One-Pot Rice",
+      "category": "heat_wet",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 35,
+        "max": 90
+      },
+      "defaultEquipment": [
+        "heavy_pot_with_lid",
+        "blender_optional"
+      ],
+      "bestFor": [
+        "party rice",
+        "one-pot meals"
+      ],
+      "cuisineTags": [
+        "west_african",
+        "cuisine_specific"
+      ],
+      "parameters": [
+        {
+          "key": "smokyBottom",
+          "label": "Smoky Bottom (Party Jollof)",
+          "type": "boolean",
+          "default": false,
+          "ui": {
+            "control": "toggle"
+          }
+        },
+        {
+          "key": "riceType",
+          "label": "Rice Type",
+          "type": "enum",
+          "default": "parboiled_long_grain",
+          "options": [
+            "parboiled_long_grain",
+            "basmati",
+            "jasmine"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "base_1",
+          "title": "Reduce Pepper-Tomato Base",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "visual": [
+              "Oil separates; raw sharpness gone."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Add Rice + Stock; Cook Covered",
+          "kind": "cook",
+          "estimatedMinutes": 25,
+          "cues": {
+            "tips": [
+              "Stir minimal to avoid mush."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Steam-Finish & Fluff",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "texture": [
+              "Grains separate; tender."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.japan.ramen_build",
+      "title": "Ramen Build (Broth + Tare + Aroma Oil)",
+      "category": "heat_wet",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 180,
+        "max": 720
+      },
+      "defaultEquipment": [
+        "pot",
+        "strainer",
+        "containers"
+      ],
+      "bestFor": [
+        "ramen"
+      ],
+      "cuisineTags": [
+        "east_asian",
+        "cuisine_specific"
+      ],
+      "parameters": [
+        {
+          "key": "brothStyle",
+          "label": "Broth Style",
+          "type": "enum",
+          "default": "shoyu_chicken",
+          "options": [
+            "shoyu_chicken",
+            "miso_pork",
+            "tonkotsu",
+            "shio_seafood"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        },
+        {
+          "key": "tareSalt",
+          "label": "Tare Saltiness",
+          "type": "enum",
+          "default": "standard",
+          "options": [
+            "mild",
+            "standard",
+            "salty"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "broth_1",
+          "title": "Simmer/Boil Broth Base",
+          "kind": "cook",
+          "estimatedMinutes": 240,
+          "cues": {
+            "tips": [
+              "Low simmer for clear; hard boil for tonkotsu emulsify."
+            ]
+          }
+        },
+        {
+          "id": "tare_1",
+          "title": "Make Tare Concentrate",
+          "kind": "prep",
+          "estimatedMinutes": 15,
+          "cues": {
+            "tips": [
+              "Tare goes in bowl first for control."
+            ]
+          }
+        },
+        {
+          "id": "assemble_1",
+          "title": "Assemble Bowls",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "visual": [
+              "Noodles glossy; broth very hot."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.korea.kimchi_jjigae",
+      "title": "Kimchi Jjigae",
+      "category": "heat_wet",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 25,
+        "max": 75
+      },
+      "defaultEquipment": [
+        "pot",
+        "spoon"
+      ],
+      "bestFor": [
+        "stew"
+      ],
+      "cuisineTags": [
+        "korean",
+        "cuisine_specific"
+      ],
+      "parameters": [
+        {
+          "key": "kimchiAge",
+          "label": "Kimchi Age",
+          "type": "enum",
+          "default": "fermented",
+          "options": [
+            "fresh",
+            "fermented",
+            "very_sour"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        },
+        {
+          "key": "spice",
+          "label": "Spice Level",
+          "type": "enum",
+          "default": "medium",
+          "options": [
+            "mild",
+            "medium",
+            "hot"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "cook_1",
+          "title": "Sauté Kimchi & Aromatics",
+          "kind": "cook",
+          "estimatedMinutes": 8,
+          "cues": {
+            "visual": [
+              "Edges caramelize."
+            ]
+          }
+        },
+        {
+          "id": "cook_2",
+          "title": "Add Stock + Protein; Simmer",
+          "kind": "cook",
+          "estimatedMinutes": 25,
+          "cues": {
+            "tips": [
+              "Add tofu and scallions near end."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.mexico.birria_braise",
+      "title": "Birria Braise",
+      "category": "heat_wet",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 120,
+        "max": 360
+      },
+      "defaultEquipment": [
+        "pot_or_dutch_oven",
+        "blender",
+        "strainer_optional"
+      ],
+      "bestFor": [
+        "goat",
+        "beef",
+        "lamb"
+      ],
+      "cuisineTags": [
+        "mexican",
+        "cuisine_specific"
+      ],
+      "parameters": [
+        {
+          "key": "protein",
+          "label": "Protein",
+          "type": "enum",
+          "default": "goat",
+          "options": [
+            "goat",
+            "beef",
+            "lamb"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        },
+        {
+          "key": "consome",
+          "label": "Consomé Style",
+          "type": "enum",
+          "default": "rustic",
+          "options": [
+            "rustic",
+            "strained"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "chile_1",
+          "title": "Toast/Soak Chiles; Blend",
+          "kind": "prep",
+          "estimatedMinutes": 25,
+          "cues": {
+            "tips": [
+              "Strain for smoother sauce."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Braise Until Shreddable",
+          "kind": "cook",
+          "estimatedMinutes": 180,
+          "cues": {
+            "texture": [
+              "Meat pulls apart easily."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.china.red_braise_hongshao",
+      "title": "Red Braise (Hong Shao)",
+      "category": "heat_wet",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 45,
+        "max": 180
+      },
+      "defaultEquipment": [
+        "pot_or_wok",
+        "lid"
+      ],
+      "bestFor": [
+        "pork belly",
+        "chicken",
+        "tofu"
+      ],
+      "cuisineTags": [
+        "chinese",
+        "cuisine_specific"
+      ],
+      "parameters": [
+        {
+          "key": "sweetness",
+          "label": "Sweetness",
+          "type": "enum",
+          "default": "standard",
+          "options": [
+            "light",
+            "standard",
+            "sweet"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "sear_1",
+          "title": "Sear + Aromatics",
+          "kind": "cook",
+          "estimatedMinutes": 10,
+          "cues": {
+            "visual": [
+              "Color develops; fond forms."
+            ]
+          }
+        },
+        {
+          "id": "braise_1",
+          "title": "Braise in Soy Mix",
+          "kind": "cook",
+          "estimatedMinutes": 60,
+          "cues": {
+            "visual": [
+              "Sauce reduces to glossy glaze."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.thai.curry_method",
+      "title": "Thai Curry (Paste Bloom + Coconut Simmer)",
+      "category": "heat_wet",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 20,
+        "max": 60
+      },
+      "defaultEquipment": [
+        "pot_or_wok"
+      ],
+      "bestFor": [
+        "curries",
+        "soups"
+      ],
+      "cuisineTags": [
+        "thai",
+        "cuisine_specific"
+      ],
+      "parameters": [
+        {
+          "key": "curryType",
+          "label": "Curry Type",
+          "type": "enum",
+          "default": "red",
+          "options": [
+            "red",
+            "green",
+            "yellow",
+            "panang",
+            "massaman"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        },
+        {
+          "key": "coconut",
+          "label": "Coconut Milk",
+          "type": "enum",
+          "default": "full_fat",
+          "options": [
+            "full_fat",
+            "light",
+            "mixed"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "bloom_1",
+          "title": "Bloom Paste in Fat",
+          "kind": "cook",
+          "estimatedMinutes": 4,
+          "cues": {
+            "aroma": [
+              "Fragrant; raw note fades."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Add Coconut + Protein; Simmer",
+          "kind": "cook",
+          "estimatedMinutes": 15,
+          "cues": {
+            "tips": [
+              "Add veg by cook time."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Balance Seasoning",
+          "kind": "finish",
+          "estimatedMinutes": 3,
+          "cues": {
+            "tips": [
+              "Salt+sweet+acid+herbs."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.caribbean.jerk_method",
+      "title": "Jerk Method",
+      "category": "smoke",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 45,
+        "max": 240
+      },
+      "defaultEquipment": [
+        "grill_or_smoker",
+        "thermometer_optional"
+      ],
+      "bestFor": [
+        "chicken",
+        "pork"
+      ],
+      "cuisineTags": [
+        "caribbean",
+        "cuisine_specific"
+      ],
+      "parameters": [
+        {
+          "key": "marinadeHours",
+          "label": "Marinade Time",
+          "type": "number",
+          "unit": "hr",
+          "default": 12,
+          "min": 0,
+          "max": 48,
+          "step": 1,
+          "ui": {
+            "control": "stepper"
+          }
+        },
+        {
+          "key": "heatStyle",
+          "label": "Heat Style",
+          "type": "enum",
+          "default": "indirect_then_sear",
+          "options": [
+            "direct",
+            "indirect_then_sear",
+            "smoke_then_sear"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Marinate (Allspice/Thyme/Hot Pepper)",
+          "kind": "prep",
+          "estimatedMinutes": 15,
+          "cues": {
+            "tips": [
+              "Wear gloves for hot peppers."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Cook Indirect/Smoke",
+          "kind": "cook",
+          "estimatedMinutes": 60,
+          "cues": {
+            "visual": [
+              "Color deepens; edges darken."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Brief Direct Char + Rest",
+          "kind": "finish",
+          "estimatedMinutes": 12,
+          "cues": {
+            "tips": [
+              "Finish with lime for brightness."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.ethiopia.doro_wat",
+      "title": "Doro Wat-Style Stew",
+      "category": "heat_wet",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 90,
+        "max": 240
+      },
+      "defaultEquipment": [
+        "pot",
+        "spoon"
+      ],
+      "bestFor": [
+        "chicken stew"
+      ],
+      "cuisineTags": [
+        "ethiopian",
+        "cuisine_specific"
+      ],
+      "parameters": [
+        {
+          "key": "onionCookdown",
+          "label": "Onion Cookdown",
+          "type": "enum",
+          "default": "deep",
+          "options": [
+            "medium",
+            "deep",
+            "very_deep"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "cook_1",
+          "title": "Cook Down Onions",
+          "kind": "cook",
+          "estimatedMinutes": 40,
+          "cues": {
+            "visual": [
+              "Jammy; sweet; reduced heavily."
+            ]
+          }
+        },
+        {
+          "id": "cook_2",
+          "title": "Bloom Spices & Add Fat",
+          "kind": "cook",
+          "estimatedMinutes": 5,
+          "cues": {
+            "aroma": [
+              "Spices fragrant; not burnt."
+            ]
+          }
+        },
+        {
+          "id": "cook_3",
+          "title": "Braise Chicken",
+          "kind": "cook",
+          "estimatedMinutes": 60,
+          "cues": {
+            "visual": [
+              "Sauce thick; oil sheen."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.sauté",
+      "title": "Sautéing (Quick Pan Cook)",
+      "category": "heat_dry",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 5,
+        "max": 25
+      },
+      "defaultEquipment": [
+        "skillet",
+        "spatula"
+      ],
+      "bestFor": [
+        "veg",
+        "thin proteins"
+      ],
+      "cuisineTags": [
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "heat",
+          "label": "Heat",
+          "type": "enum",
+          "default": "medium_high",
+          "options": [
+            "medium",
+            "medium_high",
+            "high"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        },
+        {
+          "key": "deglaze",
+          "label": "Deglaze After",
+          "type": "boolean",
+          "default": false,
+          "ui": {
+            "control": "toggle"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Prep ingredients evenly",
+          "kind": "prep",
+          "estimatedMinutes": 8,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "cook_2",
+          "title": "Cook quickly, stir/toss",
+          "kind": "cook",
+          "estimatedMinutes": 8,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "finish_3",
+          "title": "Season and serve",
+          "kind": "finish",
+          "estimatedMinutes": 2,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.sweat",
+      "title": "Sweating Aromatics (No Browning)",
+      "category": "heat_dry",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 5,
+        "max": 20
+      },
+      "defaultEquipment": [
+        "pot_or_skillet",
+        "lid_optional"
+      ],
+      "bestFor": [
+        "onions",
+        "garlic",
+        "mirepoix"
+      ],
+      "cuisineTags": [
+        "french",
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "lid",
+          "label": "Cover",
+          "type": "enum",
+          "default": "on",
+          "options": [
+            "on",
+            "partial",
+            "off"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Slice aromatics evenly",
+          "kind": "prep",
+          "estimatedMinutes": 6,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "cook_2",
+          "title": "Cook low until translucent",
+          "kind": "cook",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "finish_3",
+          "title": "Proceed to next step",
+          "kind": "finish",
+          "estimatedMinutes": 1,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.caramelize_onions",
+      "title": "Caramelizing Onions",
+      "category": "heat_dry",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 20,
+        "max": 90
+      },
+      "defaultEquipment": [
+        "skillet"
+      ],
+      "bestFor": [
+        "onions",
+        "bases"
+      ],
+      "cuisineTags": [
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "speed",
+          "label": "Speed",
+          "type": "enum",
+          "default": "slow",
+          "options": [
+            "slow",
+            "medium"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        },
+        {
+          "key": "deglaze",
+          "label": "Deglaze fond",
+          "type": "boolean",
+          "default": true,
+          "ui": {
+            "control": "toggle"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Slice onions",
+          "kind": "prep",
+          "estimatedMinutes": 8,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "cook_2",
+          "title": "Cook slowly, stir often",
+          "kind": "cook",
+          "estimatedMinutes": 45,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "finish_3",
+          "title": "Deglaze and use",
+          "kind": "finish",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.wet.rice_absorption",
+      "title": "Rice Absorption Method",
+      "category": "heat_wet",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 15,
+        "max": 45
+      },
+      "defaultEquipment": [
+        "pot_with_lid"
+      ],
+      "bestFor": [
+        "white rice",
+        "pilaf"
+      ],
+      "cuisineTags": [
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "rice",
+          "label": "Rice Type",
+          "type": "enum",
+          "default": "long_grain",
+          "options": [
+            "long_grain",
+            "basmati",
+            "jasmine",
+            "short_grain"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        },
+        {
+          "key": "rinse",
+          "label": "Rinse",
+          "type": "enum",
+          "default": "yes",
+          "options": [
+            "yes",
+            "no"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Rinse (optional) and measure water",
+          "kind": "prep",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "cook_2",
+          "title": "Simmer covered",
+          "kind": "cook",
+          "estimatedMinutes": 18,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "rest_3",
+          "title": "Rest then fluff",
+          "kind": "rest",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.wet.rice_pilaf",
+      "title": "Pilaf Method (Toast + Simmer)",
+      "category": "heat_wet",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 20,
+        "max": 60
+      },
+      "defaultEquipment": [
+        "pot_with_lid"
+      ],
+      "bestFor": [
+        "pilaf",
+        "flavored rice"
+      ],
+      "cuisineTags": [
+        "middle_east",
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "toast",
+          "label": "Toast rice in fat",
+          "type": "boolean",
+          "default": true,
+          "ui": {
+            "control": "toggle"
+          }
+        },
+        {
+          "key": "liquid",
+          "label": "Liquid",
+          "type": "enum",
+          "default": "stock",
+          "options": [
+            "water",
+            "stock",
+            "coconut"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "cook_1",
+          "title": "Toast aromatics and rice",
+          "kind": "cook",
+          "estimatedMinutes": 8,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "cook2_2",
+          "title": "Add hot liquid; simmer covered",
+          "kind": "cook",
+          "estimatedMinutes": 18,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "rest_3",
+          "title": "Rest then fluff",
+          "kind": "rest",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.wet.beans_soak_simmer",
+      "title": "Beans (Soak + Simmer)",
+      "category": "heat_wet",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 60,
+        "max": 480
+      },
+      "defaultEquipment": [
+        "pot",
+        "strainer"
+      ],
+      "bestFor": [
+        "dry beans"
+      ],
+      "cuisineTags": [
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "soak",
+          "label": "Soak",
+          "type": "enum",
+          "default": "overnight",
+          "options": [
+            "none",
+            "quick",
+            "overnight"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        },
+        {
+          "key": "saltEarly",
+          "label": "Salt early",
+          "type": "boolean",
+          "default": false,
+          "ui": {
+            "control": "toggle",
+            "help": "Salt later if you prefer firmer skins; early salting can improve flavor."
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Rinse/soak beans",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "cook_2",
+          "title": "Simmer gently",
+          "kind": "cook",
+          "estimatedMinutes": 120,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "finish_3",
+          "title": "Season and cool",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.wet.beans_pressure",
+      "title": "Beans (Pressure Cooker)",
+      "category": "pressure",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 25,
+        "max": 120
+      },
+      "defaultEquipment": [
+        "pressure_cooker"
+      ],
+      "bestFor": [
+        "dry beans fast"
+      ],
+      "cuisineTags": [
+        "modern",
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "beanType",
+          "label": "Bean Type",
+          "type": "enum",
+          "default": "pinto",
+          "options": [
+            "pinto",
+            "black",
+            "kidney",
+            "chickpea",
+            "navy",
+            "lentil"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        },
+        {
+          "key": "release",
+          "label": "Release",
+          "type": "enum",
+          "default": "natural",
+          "options": [
+            "natural",
+            "natural_10min",
+            "quick"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Rinse beans; add liquid",
+          "kind": "prep",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "cook_2",
+          "title": "Pressure cook",
+          "kind": "cook",
+          "estimatedMinutes": 35,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "finish_3",
+          "title": "Release and season",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.egg_scramble",
+      "title": "Scrambled Eggs (Soft to Firm)",
+      "category": "heat_dry",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 5,
+        "max": 15
+      },
+      "defaultEquipment": [
+        "nonstick_or_skillet",
+        "spatula"
+      ],
+      "bestFor": [
+        "eggs"
+      ],
+      "cuisineTags": [
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "style",
+          "label": "Style",
+          "type": "enum",
+          "default": "soft",
+          "options": [
+            "soft",
+            "custardy",
+            "firm"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        },
+        {
+          "key": "heat",
+          "label": "Heat",
+          "type": "enum",
+          "default": "low",
+          "options": [
+            "low",
+            "medium_low",
+            "medium"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Whisk eggs; season",
+          "kind": "prep",
+          "estimatedMinutes": 2,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "cook_2",
+          "title": "Cook, stirring to desired curd",
+          "kind": "cook",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "finish_3",
+          "title": "Remove slightly early",
+          "kind": "finish",
+          "estimatedMinutes": 1,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.egg_omelet",
+      "title": "Omelet (French/American)",
+      "category": "heat_dry",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 6,
+        "max": 20
+      },
+      "defaultEquipment": [
+        "skillet",
+        "spatula"
+      ],
+      "bestFor": [
+        "eggs"
+      ],
+      "cuisineTags": [
+        "french",
+        "american",
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "style",
+          "label": "Style",
+          "type": "enum",
+          "default": "french",
+          "options": [
+            "french",
+            "american"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        },
+        {
+          "key": "fillings",
+          "label": "Fillings",
+          "type": "enum",
+          "default": "minimal",
+          "options": [
+            "none",
+            "minimal",
+            "loaded"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Beat eggs; prep fillings",
+          "kind": "prep",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "cook_2",
+          "title": "Cook and shape omelet",
+          "kind": "cook",
+          "estimatedMinutes": 6,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "finish_3",
+          "title": "Fold/roll; serve",
+          "kind": "finish",
+          "estimatedMinutes": 2,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.wet.egg_poached",
+      "title": "Poached Eggs",
+      "category": "heat_wet",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 4,
+        "max": 20
+      },
+      "defaultEquipment": [
+        "pot",
+        "slotted_spoon"
+      ],
+      "bestFor": [
+        "eggs"
+      ],
+      "cuisineTags": [
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "vortex",
+          "label": "Water Vortex",
+          "type": "enum",
+          "default": "no",
+          "options": [
+            "no",
+            "yes"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        },
+        {
+          "key": "vinegar",
+          "label": "Add Vinegar",
+          "type": "enum",
+          "default": "optional",
+          "options": [
+            "no",
+            "optional",
+            "yes"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "setup_1",
+          "title": "Heat water below simmer",
+          "kind": "setup",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "cook_2",
+          "title": "Slip eggs; poach",
+          "kind": "cook",
+          "estimatedMinutes": 4,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "finish_3",
+          "title": "Drain and serve",
+          "kind": "finish",
+          "estimatedMinutes": 1,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "heat.dry.sear_reverse",
+      "title": "Reverse Sear (Low then Sear)",
+      "category": "heat_dry",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 30,
+        "max": 180
+      },
+      "defaultEquipment": [
+        "oven_or_smoker",
+        "skillet",
+        "thermometer_optional"
+      ],
+      "bestFor": [
+        "thick steaks",
+        "roasts"
+      ],
+      "cuisineTags": [
+        "bbq",
+        "modern"
+      ],
+      "parameters": [
+        {
+          "key": "lowTempF",
+          "label": "Low Cook Temp",
+          "type": "number",
+          "unit": "F",
+          "default": 250,
+          "min": 200,
+          "max": 300,
+          "step": 5,
+          "ui": {
+            "control": "slider"
+          }
+        },
+        {
+          "key": "searTemp",
+          "label": "Sear Pan Heat (F proxy)",
+          "type": "number",
+          "unit": "F",
+          "default": 500,
+          "min": 400,
+          "max": 600,
+          "step": 5,
+          "ui": {
+            "control": "slider"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "cook1_1",
+          "title": "Cook low until near target",
+          "kind": "cook",
+          "estimatedMinutes": 45,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "rest_2",
+          "title": "Rest briefly",
+          "kind": "rest",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "cook2_3",
+          "title": "Sear hard for crust",
+          "kind": "cook",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.vietnam.pho_broth",
+      "title": "Phở Broth Method (Char + Long Simmer)",
+      "category": "heat_wet",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 240,
+        "max": 900
+      },
+      "defaultEquipment": [
+        "pot",
+        "strainer"
+      ],
+      "bestFor": [
+        "beef/chicken broth noodles"
+      ],
+      "cuisineTags": [
+        "vietnamese"
+      ],
+      "parameters": [
+        {
+          "key": "style",
+          "label": "Style",
+          "type": "enum",
+          "default": "bo",
+          "options": [
+            "bo",
+            "ga"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        },
+        {
+          "key": "simmerHours",
+          "label": "Simmer Hours",
+          "type": "number",
+          "unit": "hr",
+          "default": 6,
+          "min": 2,
+          "max": 12,
+          "step": 1,
+          "ui": {
+            "control": "stepper"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "step_1",
+          "title": "Char aromatics (ginger/onion)",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_2",
+          "title": "Simmer bones gently; skim",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_3",
+          "title": "Strain; season; assemble bowls",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.china.dumplings_jiaozi",
+      "title": "Jiaozi Dumplings (Fill + Wrap + Boil/Pan-fry)",
+      "category": "heat_wet",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 45,
+        "max": 150
+      },
+      "defaultEquipment": [
+        "bowl",
+        "wrappers",
+        "pot_or_pan"
+      ],
+      "bestFor": [
+        "dumplings"
+      ],
+      "cuisineTags": [
+        "chinese"
+      ],
+      "parameters": [
+        {
+          "key": "cook",
+          "label": "Cook Method",
+          "type": "enum",
+          "default": "boil",
+          "options": [
+            "boil",
+            "steam",
+            "potsticker"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        },
+        {
+          "key": "batchFreeze",
+          "label": "Freeze extras",
+          "type": "boolean",
+          "default": true,
+          "ui": {
+            "control": "toggle"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "step_1",
+          "title": "Mix filling",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_2",
+          "title": "Wrap dumplings",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_3",
+          "title": "Cook by chosen method",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.china.potstickers",
+      "title": "Potstickers (Fry + Steam + Crisp)",
+      "category": "fry",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 20,
+        "max": 60
+      },
+      "defaultEquipment": [
+        "skillet_with_lid"
+      ],
+      "bestFor": [
+        "dumplings"
+      ],
+      "cuisineTags": [
+        "chinese"
+      ],
+      "parameters": [
+        {
+          "key": "waterAddTbsp",
+          "label": "Steam Water Add",
+          "type": "number",
+          "unit": "tbsp",
+          "default": 6,
+          "min": 2,
+          "max": 12,
+          "step": 1,
+          "ui": {
+            "control": "stepper"
+          }
+        },
+        {
+          "key": "crispSkirt",
+          "label": "Crisp Skirt",
+          "type": "boolean",
+          "default": false,
+          "ui": {
+            "control": "toggle"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "step_1",
+          "title": "Brown bottoms",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_2",
+          "title": "Add water, cover to steam",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_3",
+          "title": "Uncover to crisp",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.japan.tempura",
+      "title": "Tempura (Cold Batter + Fry)",
+      "category": "fry",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 25,
+        "max": 90
+      },
+      "defaultEquipment": [
+        "bowl",
+        "deep_pot",
+        "thermometer"
+      ],
+      "bestFor": [
+        "shrimp",
+        "veg"
+      ],
+      "cuisineTags": [
+        "japanese"
+      ],
+      "parameters": [
+        {
+          "key": "batter",
+          "label": "Batter Style",
+          "type": "enum",
+          "default": "light",
+          "options": [
+            "light",
+            "standard"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        },
+        {
+          "key": "oilTempF",
+          "label": "Oil Temp",
+          "type": "number",
+          "unit": "F",
+          "default": 350,
+          "min": 325,
+          "max": 375,
+          "step": 5,
+          "ui": {
+            "control": "slider"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "step_1",
+          "title": "Chill batter components",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_2",
+          "title": "Coat lightly",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_3",
+          "title": "Fry quickly; drain",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.japan.teriyaki_glaze",
+      "title": "Teriyaki Glaze (Reduce + Coat)",
+      "category": "heat_dry",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 10,
+        "max": 25
+      },
+      "defaultEquipment": [
+        "skillet"
+      ],
+      "bestFor": [
+        "chicken",
+        "salmon"
+      ],
+      "cuisineTags": [
+        "japanese"
+      ],
+      "parameters": [
+        {
+          "key": "thickness",
+          "label": "Glaze Thickness",
+          "type": "enum",
+          "default": "standard",
+          "options": [
+            "light",
+            "standard",
+            "thick"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "step_1",
+          "title": "Sear protein",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_2",
+          "title": "Reduce sauce to syrupy",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_3",
+          "title": "Coat and serve",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.korea.bulgogi_pan_grill",
+      "title": "Bulgogi (Marinate + High Heat)",
+      "category": "heat_dry",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 20,
+        "max": 90
+      },
+      "defaultEquipment": [
+        "skillet_or_grill"
+      ],
+      "bestFor": [
+        "beef",
+        "chicken"
+      ],
+      "cuisineTags": [
+        "korean"
+      ],
+      "parameters": [
+        {
+          "key": "marinadeHours",
+          "label": "Marinade Hours",
+          "type": "number",
+          "unit": "hr",
+          "default": 4,
+          "min": 0,
+          "max": 24,
+          "step": 1,
+          "ui": {
+            "control": "stepper"
+          }
+        },
+        {
+          "key": "cook",
+          "label": "Cook",
+          "type": "enum",
+          "default": "skillet",
+          "options": [
+            "skillet",
+            "grill"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "step_1",
+          "title": "Marinate thin slices",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_2",
+          "title": "Cook hot and fast",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_3",
+          "title": "Serve with fresh herbs/veg",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.thai.pad_thai",
+      "title": "Pad Thai (Soak Noodles + Wok Toss)",
+      "category": "heat_dry",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 20,
+        "max": 60
+      },
+      "defaultEquipment": [
+        "wok_or_skillet"
+      ],
+      "bestFor": [
+        "noodles"
+      ],
+      "cuisineTags": [
+        "thai"
+      ],
+      "parameters": [
+        {
+          "key": "noodle",
+          "label": "Noodle Width",
+          "type": "enum",
+          "default": "medium",
+          "options": [
+            "thin",
+            "medium",
+            "wide"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "step_1",
+          "title": "Soak noodles",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_2",
+          "title": "Stir-fry aromatics + protein",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_3",
+          "title": "Add noodles + sauce; finish with lime",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.india.dal_tadka",
+      "title": "Dal Tadka (Simmer Lentils + Spiced Tempering)",
+      "category": "heat_wet",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 25,
+        "max": 90
+      },
+      "defaultEquipment": [
+        "pot",
+        "small_pan"
+      ],
+      "bestFor": [
+        "lentils"
+      ],
+      "cuisineTags": [
+        "south_asian"
+      ],
+      "parameters": [
+        {
+          "key": "lentil",
+          "label": "Lentil",
+          "type": "enum",
+          "default": "red",
+          "options": [
+            "red",
+            "yellow",
+            "toor",
+            "moong"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        },
+        {
+          "key": "tadka",
+          "label": "Add tempering",
+          "type": "boolean",
+          "default": true,
+          "ui": {
+            "control": "toggle"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "step_1",
+          "title": "Simmer lentils until soft",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_2",
+          "title": "Make tempering (tadka)",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_3",
+          "title": "Combine; finish with herbs",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.middle_east.hummus",
+      "title": "Hummus (Cook Chickpeas + Emulsify)",
+      "category": "mix",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 30,
+        "max": 180
+      },
+      "defaultEquipment": [
+        "blender",
+        "pot_optional"
+      ],
+      "bestFor": [
+        "dip"
+      ],
+      "cuisineTags": [
+        "middle_east"
+      ],
+      "parameters": [
+        {
+          "key": "chickpea",
+          "label": "Chickpeas",
+          "type": "enum",
+          "default": "canned",
+          "options": [
+            "canned",
+            "dried"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        },
+        {
+          "key": "texture",
+          "label": "Texture",
+          "type": "enum",
+          "default": "smooth",
+          "options": [
+            "rustic",
+            "smooth",
+            "ultra_smooth"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "step_1",
+          "title": "Cook chickpeas (if dried)",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_2",
+          "title": "Blend with tahini/acid",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_3",
+          "title": "Adjust texture and seasoning",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.italy.pasta_cacio_e_pepe",
+      "title": "Cacio e Pepe (Starch Emulsion)",
+      "category": "heat_dry",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 12,
+        "max": 30
+      },
+      "defaultEquipment": [
+        "pot",
+        "pan"
+      ],
+      "bestFor": [
+        "pasta"
+      ],
+      "cuisineTags": [
+        "italian"
+      ],
+      "parameters": [
+        {
+          "key": "pepper",
+          "label": "Pepper Toast",
+          "type": "enum",
+          "default": "yes",
+          "options": [
+            "yes",
+            "no"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "step_1",
+          "title": "Toast pepper",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_2",
+          "title": "Cook pasta al dente",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_3",
+          "title": "Emulsify cheese with starchy water",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.italy.pasta_alla_vodka",
+      "title": "Vodka Sauce Method",
+      "category": "heat_wet",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 20,
+        "max": 60
+      },
+      "defaultEquipment": [
+        "pan"
+      ],
+      "bestFor": [
+        "pasta sauce"
+      ],
+      "cuisineTags": [
+        "italian_american"
+      ],
+      "parameters": [
+        {
+          "key": "cream",
+          "label": "Cream",
+          "type": "enum",
+          "default": "yes",
+          "options": [
+            "no",
+            "yes"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "step_1",
+          "title": "Sauté aromatics",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_2",
+          "title": "Reduce tomato + vodka",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_3",
+          "title": "Add cream; toss pasta",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.france.bechamel",
+      "title": "Béchamel (Roux + Milk)",
+      "category": "heat_wet",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 10,
+        "max": 30
+      },
+      "defaultEquipment": [
+        "saucepan",
+        "whisk"
+      ],
+      "bestFor": [
+        "white sauce"
+      ],
+      "cuisineTags": [
+        "french"
+      ],
+      "parameters": [
+        {
+          "key": "thickness",
+          "label": "Thickness",
+          "type": "enum",
+          "default": "medium",
+          "options": [
+            "thin",
+            "medium",
+            "thick"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "step_1",
+          "title": "Make blond roux",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_2",
+          "title": "Whisk in warm milk",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_3",
+          "title": "Simmer to desired thickness",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.france.hollandaise",
+      "title": "Hollandaise (Warm Emulsion)",
+      "category": "mix",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 8,
+        "max": 25
+      },
+      "defaultEquipment": [
+        "bowl",
+        "whisk",
+        "double_boiler_optional"
+      ],
+      "bestFor": [
+        "eggs sauce"
+      ],
+      "cuisineTags": [
+        "french"
+      ],
+      "parameters": [
+        {
+          "key": "method",
+          "label": "Method",
+          "type": "enum",
+          "default": "whisk",
+          "options": [
+            "whisk",
+            "blender"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "step_1",
+          "title": "Warm yolks gently",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_2",
+          "title": "Emulsify butter",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_3",
+          "title": "Season with acid and salt",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.usa.southern.gumbo",
+      "title": "Gumbo (Dark Roux + Simmer)",
+      "category": "heat_wet",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 60,
+        "max": 240
+      },
+      "defaultEquipment": [
+        "pot",
+        "whisk"
+      ],
+      "bestFor": [
+        "gumbo"
+      ],
+      "cuisineTags": [
+        "american_southern"
+      ],
+      "parameters": [
+        {
+          "key": "roux",
+          "label": "Roux Color",
+          "type": "enum",
+          "default": "dark",
+          "options": [
+            "medium",
+            "dark",
+            "very_dark"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        },
+        {
+          "key": "protein",
+          "label": "Protein",
+          "type": "enum",
+          "default": "chicken_sausage",
+          "options": [
+            "chicken_sausage",
+            "seafood",
+            "duck_sausage"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "step_1",
+          "title": "Make roux carefully",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_2",
+          "title": "Add trinity and stock",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_3",
+          "title": "Simmer; finish with okra/filé",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.usa.southern.bbq_ribs",
+      "title": "BBQ Ribs (Smoke + Wrap Optional)",
+      "category": "smoke",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 180,
+        "max": 540
+      },
+      "defaultEquipment": [
+        "smoker",
+        "thermometer_optional"
+      ],
+      "bestFor": [
+        "ribs"
+      ],
+      "cuisineTags": [
+        "bbq_american"
+      ],
+      "parameters": [
+        {
+          "key": "wrap",
+          "label": "Wrap",
+          "type": "enum",
+          "default": "optional",
+          "options": [
+            "no",
+            "optional",
+            "yes"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "step_1",
+          "title": "Season and smoke",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_2",
+          "title": "Optional wrap to tenderize",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_3",
+          "title": "Glaze and set sauce",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.caribbean.curry_goat",
+      "title": "Caribbean Curry Goat (Marinate + Braise)",
+      "category": "heat_wet",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 90,
+        "max": 300
+      },
+      "defaultEquipment": [
+        "pot"
+      ],
+      "bestFor": [
+        "goat"
+      ],
+      "cuisineTags": [
+        "caribbean"
+      ],
+      "parameters": [
+        {
+          "key": "marinadeHours",
+          "label": "Marinade Hours",
+          "type": "number",
+          "unit": "hr",
+          "default": 8,
+          "min": 0,
+          "max": 48,
+          "step": 1,
+          "ui": {
+            "control": "stepper"
+          }
+        },
+        {
+          "key": "heat",
+          "label": "Heat",
+          "type": "enum",
+          "default": "medium",
+          "options": [
+            "mild",
+            "medium",
+            "hot"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "step_1",
+          "title": "Marinate goat",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_2",
+          "title": "Brown spices and meat",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_3",
+          "title": "Braise until tender",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.west_africa.suya_grill",
+      "title": "Suya (Peanut Spice Rub + Grill)",
+      "category": "grill",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 20,
+        "max": 120
+      },
+      "defaultEquipment": [
+        "grill_or_broiler",
+        "skewers_optional"
+      ],
+      "bestFor": [
+        "beef",
+        "chicken"
+      ],
+      "cuisineTags": [
+        "west_african"
+      ],
+      "parameters": [
+        {
+          "key": "heat",
+          "label": "Heat",
+          "type": "enum",
+          "default": "hot",
+          "options": [
+            "medium",
+            "hot"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "step_1",
+          "title": "Coat with suya spice",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_2",
+          "title": "Grill quickly",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_3",
+          "title": "Finish with onion/tomato",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.north_africa.couscous_steam",
+      "title": "Couscous Steaming (Fluff + Steam)",
+      "category": "steam",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 20,
+        "max": 90
+      },
+      "defaultEquipment": [
+        "steamer",
+        "bowl"
+      ],
+      "bestFor": [
+        "couscous"
+      ],
+      "cuisineTags": [
+        "north_african"
+      ],
+      "parameters": [
+        {
+          "key": "type",
+          "label": "Couscous Type",
+          "type": "enum",
+          "default": "medium",
+          "options": [
+            "fine",
+            "medium",
+            "large"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "step_1",
+          "title": "Hydrate grains",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_2",
+          "title": "Steam and fluff",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_3",
+          "title": "Repeat to desired tenderness",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.middle_east.shawarma_roast",
+      "title": "Shawarma Method (Marinate + Roast/Slice)",
+      "category": "heat_dry",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 60,
+        "max": 240
+      },
+      "defaultEquipment": [
+        "oven_or_rotisserie",
+        "knife"
+      ],
+      "bestFor": [
+        "chicken",
+        "lamb",
+        "beef"
+      ],
+      "cuisineTags": [
+        "middle_east"
+      ],
+      "parameters": [
+        {
+          "key": "marinadeHours",
+          "label": "Marinade Hours",
+          "type": "number",
+          "unit": "hr",
+          "default": 8,
+          "min": 0,
+          "max": 48,
+          "step": 1,
+          "ui": {
+            "control": "stepper"
+          }
+        },
+        {
+          "key": "cook",
+          "label": "Cook Method",
+          "type": "enum",
+          "default": "oven_stack",
+          "options": [
+            "oven_stack",
+            "rotisserie"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "step_1",
+          "title": "Marinate",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_2",
+          "title": "Roast until browned",
+          "kind": "cook",
+          "estimatedMinutes": 20,
+          "cues": {
+            "tips": []
+          }
+        },
+        {
+          "id": "step_3",
+          "title": "Slice thin; crisp slices briefly",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": []
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "preserve.cure.dry_brine",
+      "title": "Dry Brine (Salt-Only Cure)",
+      "category": "prep",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 15,
+        "max": 2880
+      },
+      "defaultEquipment": [
+        "container",
+        "fridge"
+      ],
+      "bestFor": [
+        "poultry",
+        "steaks",
+        "pork chops"
+      ],
+      "cuisineTags": [
+        "global",
+        "modern"
+      ],
+      "parameters": [
+        {
+          "key": "hours",
+          "label": "Cure Time",
+          "type": "number",
+          "unit": "hr",
+          "default": 12,
+          "min": 0,
+          "max": 72,
+          "step": 1,
+          "ui": {
+            "control": "stepper"
+          }
+        },
+        {
+          "key": "uncovered",
+          "label": "Uncovered in Fridge",
+          "type": "enum",
+          "default": "yes",
+          "options": [
+            "yes",
+            "no"
+          ],
+          "ui": {
+            "control": "segmented",
+            "help": "Uncovered helps surface dry for crisp skin/sear."
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Salt Evenly",
+          "kind": "prep",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": [
+              "Use kosher salt; avoid oversalting thin cuts."
+            ]
+          }
+        },
+        {
+          "id": "rest_1",
+          "title": "Rest/Cure in Fridge",
+          "kind": "rest",
+          "estimatedMinutes": 720,
+          "cues": {
+            "visual": [
+              "Surface dries slightly."
+            ],
+            "tips": [
+              "Pat dry before cooking."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "preserve.pickling.quick_pickle",
+      "title": "Quick Pickle (Vinegar)",
+      "category": "heat_wet",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 10,
+        "max": 120
+      },
+      "defaultEquipment": [
+        "jar",
+        "saucepan_optional"
+      ],
+      "bestFor": [
+        "quick pickles",
+        "onions",
+        "veg"
+      ],
+      "cuisineTags": [
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "heat",
+          "label": "Brine Heat",
+          "type": "enum",
+          "default": "hot",
+          "options": [
+            "cold",
+            "hot"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        },
+        {
+          "key": "restMinutes",
+          "label": "Rest Time",
+          "type": "number",
+          "unit": "min",
+          "default": 30,
+          "min": 10,
+          "max": 240,
+          "step": 5,
+          "ui": {
+            "control": "stepper"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Make Brine",
+          "kind": "prep",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": [
+              "Balance salt + sugar + acid to taste."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Pour Over Veg; Rest",
+          "kind": "finish",
+          "estimatedMinutes": 30,
+          "cues": {
+            "visual": [
+              "Veg turns slightly translucent."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "preserve.ferment.lacto_basic",
+      "title": "Lacto-Fermentation (Vegetables)",
+      "category": "ferment",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 10,
+        "max": 20160
+      },
+      "defaultEquipment": [
+        "jar",
+        "weight",
+        "salt",
+        "scale_optional"
+      ],
+      "bestFor": [
+        "pickles",
+        "kraut",
+        "kimchi base"
+      ],
+      "cuisineTags": [
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "saltPercent",
+          "label": "Salt % (veg weight)",
+          "type": "number",
+          "unit": "% ",
+          "default": 2.5,
+          "min": 1.5,
+          "max": 4,
+          "step": 0.1,
+          "ui": {
+            "control": "slider"
+          }
+        },
+        {
+          "key": "fermentDays",
+          "label": "Ferment Days",
+          "type": "number",
+          "unit": "days",
+          "default": 7,
+          "min": 1,
+          "max": 30,
+          "step": 1,
+          "ui": {
+            "control": "stepper"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Salt & Pack Under Brine",
+          "kind": "prep",
+          "estimatedMinutes": 15,
+          "cues": {
+            "visual": [
+              "Veg submerged; no floaters."
+            ]
+          }
+        },
+        {
+          "id": "ferment_1",
+          "title": "Ferment & Taste",
+          "kind": "rest",
+          "estimatedMinutes": 10080,
+          "cues": {
+            "visual": [
+              "Bubbles; tangy aroma."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Refrigerate to Slow",
+          "kind": "finish",
+          "estimatedMinutes": 2,
+          "cues": {
+            "tips": [
+              "Refrigeration slows fermentation and stabilizes flavor."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "preserve.smoke.cold_smoke",
+      "title": "Cold Smoking (Flavor Only)",
+      "category": "smoke",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 60,
+        "max": 720
+      },
+      "defaultEquipment": [
+        "cold_smoke_setup",
+        "thermometer"
+      ],
+      "bestFor": [
+        "cheese",
+        "salt",
+        "fish",
+        "nuts"
+      ],
+      "cuisineTags": [
+        "global_smoke",
+        "modern"
+      ],
+      "parameters": [
+        {
+          "key": "chamberTempF",
+          "label": "Chamber Temp",
+          "type": "number",
+          "unit": "F",
+          "default": 75,
+          "min": 45,
+          "max": 90,
+          "step": 1,
+          "ui": {
+            "control": "slider"
+          }
+        },
+        {
+          "key": "smokeMinutes",
+          "label": "Smoke Time",
+          "type": "number",
+          "unit": "min",
+          "default": 120,
+          "min": 30,
+          "max": 480,
+          "step": 10,
+          "ui": {
+            "control": "stepper"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "setup_1",
+          "title": "Set Cold Smoke Below 90°F",
+          "kind": "setup",
+          "estimatedMinutes": 20,
+          "cues": {
+            "safety": [
+              "Keep chamber cool to prevent melting/unsafe temps."
+            ]
+          }
+        },
+        {
+          "id": "smoke_1",
+          "title": "Cold Smoke",
+          "kind": "cook",
+          "estimatedMinutes": 120,
+          "cues": {
+            "visual": [
+              "Light amber tint; smoke aroma."
+            ]
+          }
+        },
+        {
+          "id": "rest_1",
+          "title": "Rest/Age Flavor",
+          "kind": "rest",
+          "estimatedMinutes": 1440,
+          "cues": {
+            "tips": [
+              "Cheese benefits from resting days to mellow smoke."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.mexico.tortillas_corn",
+      "title": "Corn Tortillas (Masa)",
+      "category": "heat_dry",
+      "difficulty": "medium",
+      "typicalTimeMinutes": {
+        "min": 20,
+        "max": 60
+      },
+      "defaultEquipment": [
+        "masa_harina_or_nixtamal",
+        "tortilla_press_optional",
+        "comal_or_skillet"
+      ],
+      "bestFor": [
+        "tortillas"
+      ],
+      "cuisineTags": [
+        "mexican"
+      ],
+      "parameters": [
+        {
+          "key": "hydration",
+          "label": "Hydration",
+          "type": "enum",
+          "default": "standard",
+          "options": [
+            "dry",
+            "standard",
+            "soft"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        },
+        {
+          "key": "press",
+          "label": "Use Press",
+          "type": "boolean",
+          "default": true,
+          "ui": {
+            "control": "toggle"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "mix_1",
+          "title": "Mix Masa & Rest",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "texture": [
+              "Dough pliable; not cracking."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Press & Cook on Hot Comal",
+          "kind": "cook",
+          "estimatedMinutes": 10,
+          "cues": {
+            "visual": [
+              "Speckled; puffs slightly."
+            ]
+          }
+        },
+        {
+          "id": "hold_1",
+          "title": "Hold Warm Covered",
+          "kind": "rest",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": [
+              "Keep covered to stay flexible."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "cuisine.middle_east.flatbread_pita",
+      "title": "Pita/Flatbread (High Heat Puff)",
+      "category": "bake",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 30,
+        "max": 180
+      },
+      "defaultEquipment": [
+        "oven",
+        "stone_or_sheet",
+        "rolling_pin_optional"
+      ],
+      "bestFor": [
+        "pita",
+        "flatbread"
+      ],
+      "cuisineTags": [
+        "middle_east",
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "bakeTempF",
+          "label": "Bake Temp",
+          "type": "number",
+          "unit": "F",
+          "default": 500,
+          "min": 450,
+          "max": 550,
+          "step": 5,
+          "ui": {
+            "control": "slider"
+          }
+        },
+        {
+          "key": "cookSurface",
+          "label": "Surface",
+          "type": "enum",
+          "default": "stone",
+          "options": [
+            "stone",
+            "sheet",
+            "cast_iron"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Mix Dough & Proof",
+          "kind": "prep",
+          "estimatedMinutes": 60,
+          "cues": {
+            "visual": [
+              "Dough doubled; airy."
+            ]
+          }
+        },
+        {
+          "id": "shape_1",
+          "title": "Shape Thin Rounds",
+          "kind": "prep",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": [
+              "Even thickness for puff."
+            ]
+          }
+        },
+        {
+          "id": "bake_1",
+          "title": "Bake Hot Until Puff",
+          "kind": "cook",
+          "estimatedMinutes": 3,
+          "cues": {
+            "visual": [
+              "Pockets puff; light brown spots."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "dessert.custard.stovetop",
+      "title": "Stovetop Custard (Crème Anglaise Base)",
+      "category": "heat_wet",
+      "difficulty": "hard",
+      "typicalTimeMinutes": {
+        "min": 10,
+        "max": 45
+      },
+      "defaultEquipment": [
+        "saucepan",
+        "whisk",
+        "thermometer_optional"
+      ],
+      "bestFor": [
+        "custards",
+        "ice cream base"
+      ],
+      "cuisineTags": [
+        "french",
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "targetTempF",
+          "label": "Target Temp",
+          "type": "number",
+          "unit": "F",
+          "default": 175,
+          "min": 160,
+          "max": 185,
+          "step": 1,
+          "ui": {
+            "control": "slider"
+          }
+        },
+        {
+          "key": "strain",
+          "label": "Strain",
+          "type": "enum",
+          "default": "yes",
+          "options": [
+            "yes",
+            "no"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "prep_1",
+          "title": "Temper Yolks",
+          "kind": "prep",
+          "estimatedMinutes": 6,
+          "cues": {
+            "tips": [
+              "Add hot dairy slowly to avoid scrambling."
+            ]
+          }
+        },
+        {
+          "id": "cook_1",
+          "title": "Cook to Nappe",
+          "kind": "cook",
+          "estimatedMinutes": 8,
+          "cues": {
+            "visual": [
+              "Coats spoon; line holds."
+            ],
+            "tips": [
+              "Low heat; stir constantly."
+            ]
+          }
+        },
+        {
+          "id": "chill_1",
+          "title": "Chill Quickly",
+          "kind": "finish",
+          "estimatedMinutes": 10,
+          "cues": {
+            "tips": [
+              "Ice bath speeds cooling for safety and texture."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "dessert.syrup.simple",
+      "title": "Simple Syrup (1:1)",
+      "category": "heat_wet",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 5,
+        "max": 20
+      },
+      "defaultEquipment": [
+        "saucepan"
+      ],
+      "bestFor": [
+        "drinks",
+        "desserts"
+      ],
+      "cuisineTags": [
+        "global"
+      ],
+      "parameters": [
+        {
+          "key": "ratio",
+          "label": "Ratio",
+          "type": "enum",
+          "default": "1:1",
+          "options": [
+            "1:1",
+            "2:1_rich"
+          ],
+          "ui": {
+            "control": "segmented"
+          }
+        },
+        {
+          "key": "flavor",
+          "label": "Flavor",
+          "type": "enum",
+          "default": "plain",
+          "options": [
+            "plain",
+            "vanilla",
+            "citrus",
+            "mint",
+            "ginger"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "cook_1",
+          "title": "Dissolve Sugar in Water",
+          "kind": "cook",
+          "estimatedMinutes": 5,
+          "cues": {
+            "visual": [
+              "Clear syrup; no granules."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Cool & Store",
+          "kind": "finish",
+          "estimatedMinutes": 5,
+          "cues": {
+            "tips": [
+              "Refrigerate; label date."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "methodKey": "beverage.tea.chai_masala",
+      "title": "Masala Chai (Spice Simmer)",
+      "category": "heat_wet",
+      "difficulty": "easy",
+      "typicalTimeMinutes": {
+        "min": 10,
+        "max": 30
+      },
+      "defaultEquipment": [
+        "pot",
+        "strainer"
+      ],
+      "bestFor": [
+        "chai"
+      ],
+      "cuisineTags": [
+        "south_asian",
+        "beverage"
+      ],
+      "parameters": [
+        {
+          "key": "milk",
+          "label": "Milk",
+          "type": "enum",
+          "default": "whole",
+          "options": [
+            "whole",
+            "2%",
+            "oat",
+            "almond"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        },
+        {
+          "key": "sweet",
+          "label": "Sweetener",
+          "type": "enum",
+          "default": "sugar",
+          "options": [
+            "sugar",
+            "honey",
+            "none"
+          ],
+          "ui": {
+            "control": "dropdown"
+          }
+        }
+      ],
+      "defaultSteps": [
+        {
+          "id": "cook_1",
+          "title": "Simmer Spices",
+          "kind": "cook",
+          "estimatedMinutes": 5,
+          "cues": {
+            "aroma": [
+              "Warm spice aroma."
+            ]
+          }
+        },
+        {
+          "id": "cook_2",
+          "title": "Add Tea & Milk; Simmer Briefly",
+          "kind": "cook",
+          "estimatedMinutes": 5,
+          "cues": {
+            "visual": [
+              "Deep color; gentle simmer."
+            ]
+          }
+        },
+        {
+          "id": "finish_1",
+          "title": "Strain & Serve",
+          "kind": "finish",
+          "estimatedMinutes": 2,
+          "cues": {
+            "tips": [
+              "Adjust sweetness to taste."
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

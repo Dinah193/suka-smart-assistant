@@ -1,0 +1,158 @@
+{
+  "$id": "/schemas/planningGraph/nodes.schema.json",
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Planning Graph Node Config",
+  "description": "Schema for node-level calculator/planner configs in the SSA Planning Graph.",
+  "type": "object",
+  "required": ["id", "nodeKey", "version", "kind", "domain", "label"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this node config file."
+    },
+    "nodeKey": {
+      "type": "string",
+      "description": "Stable key used throughout the Planning Graph to reference this node."
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of the node definition."
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["calculator-node", "planner-node", "shim-node"],
+      "description": "Type of node in the Planning Graph."
+    },
+    "domain": {
+      "type": "string",
+      "enum": ["cooking", "cleaning", "garden", "animals", "preservation", "storehouse"],
+      "description": "Domain this node primarily belongs to."
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable label shown in the UI."
+    },
+    "description": {
+      "type": "string",
+      "description": "Longer description of what this node does."
+    },
+    "inputs": {
+      "type": "object",
+      "description": "Input contracts for this node.",
+      "properties": {
+        "requires": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "optional": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "outputs": {
+      "type": "object",
+      "description": "Outputs provided by this node.",
+      "properties": {
+        "provides": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ui": {
+      "type": "object",
+      "description": "UI metadata for routing and display.",
+      "properties": {
+        "group": { "type": "string" },
+        "icon": { "type": "string" },
+        "route": { "type": "string" },
+        "supportsSessionRunner": { "type": "boolean" },
+        "defaultModalSize": {
+          "type": "string",
+          "enum": ["sm", "md", "lg", "xl"]
+        },
+        "nowCtaLabel": { "type": "string" },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "sessionTemplate": {
+      "type": "object",
+      "description": "Default session skeleton to feed into SessionRunner for this node.",
+      "properties": {
+        "domain": { "type": "string" },
+        "title": { "type": "string" },
+        "sourceType": { "type": "string" },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["title", "desc", "durationSec"],
+            "properties": {
+              "title": { "type": "string" },
+              "desc": { "type": "string" },
+              "durationSec": { "type": "number" },
+              "blockers": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["inventory", "weather", "quietHours", "sabbath", "equipment"]
+                }
+              },
+              "metadata": {
+                "type": "object",
+                "properties": {
+                  "tempTargetF": { "type": "number" },
+                  "donenessCue": {
+                    "type": "string",
+                    "enum": ["color", "texture", "probeTemp", "timer", "smell"]
+                  },
+                  "cueNotes": { "type": "string" }
+                },
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "hooks": {
+      "type": "object",
+      "description": "Hook integration metadata.",
+      "properties": {
+        "file": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "logic": {
+      "type": "object",
+      "description": "Shim + schema connections for this node.",
+      "properties": {
+        "shimFile": { "type": "string" },
+        "schemaFile": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "next": {
+      "type": "object",
+      "description": "Next-step mappings configuration.",
+      "properties": {
+        "mappingsFile": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,96 @@
+{
+  "nodeId": "calculator.recipeScaling",
+  "label": "Recipe Scaling",
+  "description": "Scales recipe ingredient quantities based on desired servings or scale factor, then routes into batch yield and freezer planning.",
+  "version": 1,
+  "nextSteps": {
+    "default": [
+      {
+        "id": "toBatchYield",
+        "targetNodeId": "calculator.batchYield",
+        "label": "Estimate Batch Yield",
+        "reason": "Use the scaled recipe to estimate total portions, containers, and time for a batch cooking session.",
+        "autoOpen": true,
+        "preferredSurface": "storehouseMeals"
+      },
+      {
+        "id": "toFreezerSpace",
+        "targetNodeId": "calculator.freezerSpace",
+        "label": "Check Freezer Space",
+        "reason": "Make sure your freezer has enough room for the new batch portions and containers.",
+        "autoOpen": false,
+        "preferredSurface": "storehouseMeals"
+      }
+    ],
+    "largeScaleFactor": {
+      "label": "Large batch follow-ups",
+      "conditions": {
+        "minScaleFactor": 3.0
+      },
+      "targets": [
+        {
+          "id": "large_toBatchYield",
+          "targetNodeId": "calculator.batchYield",
+          "label": "Estimate Large Batch Yield",
+          "reason": "Scaling 3x or more usually means a dedicated batch cook; estimate yield and time to avoid overwhelm.",
+          "autoOpen": true,
+          "preferredSurface": "storehouseMeals"
+        },
+        {
+          "id": "large_toFreezerSpace",
+          "targetNodeId": "calculator.freezerSpace",
+          "label": "Plan Freezer Layout",
+          "reason": "High scale factor may exceed available freezer space; plan container layout and shelf usage.",
+          "autoOpen": true,
+          "preferredSurface": "storehouseMeals"
+        }
+      ]
+    },
+    "smallScaleFactor": {
+      "label": "Small batch follow-ups",
+      "conditions": {
+        "maxScaleFactor": 0.75
+      },
+      "targets": [
+        {
+          "id": "small_toBatchYield",
+          "targetNodeId": "calculator.batchYield",
+          "label": "Confirm Portions",
+          "reason": "When scaling down, confirm the new smaller yield still covers planned meals.",
+          "autoOpen": false,
+          "preferredSurface": "storehouseMeals"
+        }
+      ]
+    }
+  },
+  "events": {
+    "onComplete": [
+      {
+        "type": "calculator.scaling.completed",
+        "emit": true,
+        "payloadShape": {
+          "recipeId": "string|null",
+          "scaledServings": "number",
+          "appliedScaleFactor": "number",
+          "warnings": "string[]"
+        }
+      }
+    ],
+    "onNextStepSelected": {
+      "type": "planningGraph.edge.followed",
+      "emit": true,
+      "payloadShape": {
+        "fromNodeId": "calculator.recipeScaling",
+        "toNodeId": "string",
+        "edgeId": "string",
+        "context": "any"
+      }
+    }
+  },
+  "uiHints": {
+    "primaryActionNextStepId": "toBatchYield",
+    "secondaryActionNextStepId": "toFreezerSpace",
+    "badge": "Storehouse Meals",
+    "group": "Storehouse Planning"
+  }
+}

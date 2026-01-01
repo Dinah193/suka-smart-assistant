@@ -1,0 +1,522 @@
+{
+  "version": "1.2.0",
+  "module": "labels.templates",
+  "title": "Labels & Templates",
+  "description": "Dynamic label system with expressions, multi-household sharing, and creator-ready presets.",
+  "capabilities": {
+    "expressions": true,
+    "conditions": true,
+    "i18n": true,
+    "units": ["imperial", "metric"],
+    "rtl": false,
+    "qrShortlinks": true,
+    "barcodes": ["qrcode", "code128", "ean13", "upc", "gs1-128"],
+    "coalitions": true,
+    "marketplace": true,
+    "versioning": true,
+    "abTesting": true,
+    "autosuggestFields": true
+  },
+
+  "ia": {
+    "nav": [
+      { "key": "labels.home", "label": "Labels", "icon": "Tag", "path": "/labels", "placement": "primary" },
+      { "key": "labels.templates", "label": "Templates", "icon": "Layers", "path": "/labels/templates", "placement": "secondary", "badgeFrom": "Labels.counts.templates" },
+      { "key": "labels.batches", "label": "Batches", "icon": "Stamp", "path": "/labels/batches", "placement": "secondary", "badgeFrom": "Labels.counts.pendingPrint" },
+      { "key": "labels.presets", "label": "Presets", "icon": "Sparkles", "path": "/labels/presets", "placement": "secondary" },
+      { "key": "labels.coalitions", "label": "Coalitions", "icon": "Users", "path": "/labels/coalitions", "placement": "secondary", "badgeFrom": "Labels.counts.shared" },
+      { "key": "labels.settings", "label": "Settings", "icon": "Settings", "path": "/labels/settings", "placement": "utility" }
+    ],
+    "routes": [
+      { "path": "/labels", "component": "@/pages/labels/LabelsHome.jsx", "title": "Labels", "auth": "member" },
+      { "path": "/labels/templates", "component": "@/pages/labels/Templates.jsx", "title": "Label Templates", "auth": "member" },
+      { "path": "/labels/batches", "component": "@/pages/labels/Batches.jsx", "title": "Print Batches", "auth": "member" },
+      { "path": "/labels/presets", "component": "@/pages/labels/Presets.jsx", "title": "Quick Presets", "auth": "member" },
+      { "path": "/labels/coalitions", "component": "@/pages/labels/Coalitions.jsx", "title": "Shared Labels", "auth": "member" },
+      { "path": "/labels/:id", "component": "@/pages/labels/Editor.jsx", "title": "Edit Label Template", "auth": "member" },
+      { "path": "/labels/settings", "component": "@/pages/labels/Settings.jsx", "title": "Label Settings", "auth": "admin" }
+    ]
+  },
+
+  "designSystem": {
+    "tokens": {
+      "radius": "1rem",
+      "gap": { "sm": "0.5rem", "md": "1rem", "lg": "1.5rem" },
+      "elevation": { "card": "shadow-lg", "modal": "shadow-2xl" }
+    },
+    "components": {
+      "button": {
+        "base": "btn btn-md rounded-2xl",
+        "variants": { "primary": "btn-primary", "secondary": "btn-secondary", "ghost": "btn-ghost", "danger": "btn-error" },
+        "states": { "loading": "loading", "disabled": "btn-disabled", "success": "btn-success" }
+      },
+      "card": { "base": "rounded-2xl border border-base-200 bg-base-100 shadow-lg p-4" },
+      "confirm": { "modal": "modal modal-open", "panel": "modal-box rounded-2xl" },
+      "empty": { "base": "text-base-content/60 flex flex-col items-center justify-center gap-2 p-8" },
+      "toast": { "success": "alert alert-success", "error": "alert alert-error", "info": "alert alert-info" },
+      "pill": { "base": "badge badge-lg rounded-2xl" },
+      "grid": { "cards": "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" },
+      "preview": { "canvas": "bg-white border border-base-200 rounded-xl p-4", "scaleControl": "range range-sm w-full" }
+    }
+  },
+
+  "emptyStates": {
+    "labels.home": {
+      "title": "No labels yet",
+      "subtitle": "Generate labels from your meal plan, recipes, preservation, garden harvest, or butchery.",
+      "primaryAction": { "label": "Build From Meal Plan", "action": "flow.labels.buildFromMealPlan" },
+      "secondary": [
+        { "label": "Browse Templates", "action": "ui.goto", "to": "/labels/templates" },
+        { "label": "Import Presets", "action": "ui.openPresetImporter" }
+      ]
+    },
+    "labels.templates": {
+      "title": "No templates found",
+      "subtitle": "Start with a preset and customize. Expressions supported: ${item.title}, ${date('YYYY-MM-DD')}, conditional fields, and more.",
+      "primaryAction": { "label": "New Template", "action": "flow.labels.createTemplate" }
+    },
+    "labels.batches": {
+      "title": "No pending print jobs",
+      "subtitle": "Queued label batches will appear here after you build them.",
+      "primaryAction": { "label": "Build Batch Now", "action": "flow.labels.buildFromMealPlan" }
+    }
+  },
+
+  "undo": {
+    "ttlMs": 180000,
+    "actions": {
+      "labels.template.create": { "undoEvent": "labels.template.deleted", "ui": { "label": "Template created", "undoLabel": "Undo create" } },
+      "labels.template.update": { "undoEvent": "labels.template.reverted", "ui": { "label": "Template saved", "undoLabel": "Undo" } },
+      "labels.template.delete": { "undoEvent": "labels.template.restored", "ui": { "label": "Template deleted", "undoLabel": "Undo delete" } },
+      "labels.batch.queue": { "undoEvent": "labels.batch.unqueued", "ui": { "label": "Batch queued", "undoLabel": "Undo queue" } },
+      "labels.market.publish": { "undoEvent": "labels.market.unpublished", "ui": { "label": "Preset published", "undoLabel": "Unpublish" } }
+    }
+  },
+
+  "nextBestAction": {
+    "afterSuccess": [
+      {
+        "when": "event == 'labels.build.success'",
+        "actions": [
+          { "type": "ui.suggest", "title": "Print labels", "desc": "Send to thermal or PDF.", "cta": { "label": "Print now", "action": "flow.labels.printBatch" } },
+          { "type": "ui.suggest", "title": "Share with Cooks", "desc": "Send prep labels to the cooking team.", "cta": { "label": "Share", "action": "flow.labels.shareBatchToRoles", "args": { "roles": ["Cook"] } } },
+          { "type": "ui.suggest", "title": "Share to Coalition", "desc": "Distribute to family/coalition kitchens.", "cta": { "label": "Share", "action": "flow.labels.shareBatchToCoalition" } }
+        ]
+      },
+      {
+        "when": "event == 'labels.template.create.success'",
+        "actions": [
+          { "type": "ui.suggest", "title": "Set as default", "desc": "Use this template automatically for similar items.", "cta": { "label": "Make default", "action": "flow.labels.setDefaultTemplate" } },
+          { "type": "ui.suggest", "title": "Publish to Marketplace", "desc": "Help other households with your template.", "cta": { "label": "Publish", "action": "flow.labels.publishPreset" } }
+        ]
+      },
+      {
+        "when": "event == 'labels.print.sent'",
+        "actions": [
+          { "type": "ui.suggest", "title": "Record Batch", "desc": "Log lot, batch, and storage locations.", "cta": { "label": "Record", "action": "flow.labels.recordBatch" } }
+        ]
+      }
+    ]
+  },
+
+  "model": {
+    "templateFields": [
+      "title",
+      "size",
+      "brand",
+      "locale",
+      "units",
+      "fields.title",
+      "fields.subtitle",
+      "fields.ingredients",
+      "fields.allergens",
+      "fields.nutrition",
+      "fields.date",
+      "fields.time",
+      "fields.expiry",
+      "fields.batch",
+      "fields.lot",
+      "fields.netWeight",
+      "fields.servings",
+      "fields.storage",
+      "fields.reheat",
+      "fields.torahFlags",
+      "fields.origin",
+      "fields.producer",
+      "fields.qrUrl",
+      "fields.barcode",
+      "fields.gs1",
+      "fields.notes"
+    ],
+    "sizes": ["2x1", "3x2", "4x3", "4x6", "58x40mm", "62x29mm", "custom"],
+    "printers": ["pdf", "zpl", "escpos", "brother-ql", "dymo"],
+    "dataSources": [
+      "MealPlanEngine",
+      "RecipeStore",
+      "Inventory",
+      "PreservationPlanner",
+      "ButcheryCutSheetStore",
+      "GardenHarvests",
+      "AnimalProducts",
+      "CoalitionKitchens",
+      "MarketplacePresets"
+    ],
+    "expressionLanguage": {
+      "syntax": "${...}",
+      "helpers": [
+        "date(fmt?)",
+        "upper(s)",
+        "lower(s)",
+        "if(cond, a, b)",
+        "qty(uom?)",
+        "weight(unit?)",
+        "shortlink(url, utm?)",
+        "concat(...args)"
+      ],
+      "examples": [
+        "${item.title}",
+        "${date('YYYY-MM-DD')}",
+        "${if(torah.shellfishAllowed, '', 'NO SHELLFISH')}",
+        "${shortlink(fields.qrUrl, {utm_source:'labels'})}"
+      ]
+    }
+  },
+
+  "presets": [
+    {
+      "id": "prep.small",
+      "label": "Prep 2x1",
+      "size": "2x1",
+      "brand": "Generic",
+      "fields": { "title": true, "date": true, "time": true, "ingredients": false, "torahFlags": true }
+    },
+    {
+      "id": "pantry.medium",
+      "label": "Pantry 3x2",
+      "size": "3x2",
+      "brand": "Generic",
+      "fields": { "title": true, "ingredients": true, "allergens": true, "storage": true, "torahFlags": true }
+    },
+    {
+      "id": "freezer.large",
+      "label": "Freezer 4x6",
+      "size": "4x6",
+      "brand": "Zebra",
+      "fields": { "title": true, "subtitle": true, "ingredients": true, "nutrition": true, "date": true, "expiry": true, "batch": true, "lot": true, "netWeight": true, "storage": true, "reheat": true, "torahFlags": true, "qrUrl": true, "barcode": true }
+    },
+    {
+      "id": "garden.harvest",
+      "label": "Garden Harvest 3x2",
+      "size": "3x2",
+      "brand": "Generic",
+      "fields": { "title": true, "origin": true, "date": true, "netWeight": true, "qrUrl": true }
+    },
+    {
+      "id": "butchery.cut",
+      "label": "Butchery Cut 4x3",
+      "size": "4x3",
+      "brand": "Zebra",
+      "fields": { "title": true, "lot": true, "batch": true, "netWeight": true, "date": true, "storage": true, "torahFlags": true, "barcode": true }
+    },
+    {
+      "id": "eggs.carton",
+      "label": "Eggs Carton 3x2 (Poultry)",
+      "size": "3x2",
+      "brand": "Generic",
+      "fields": { "title": true, "date": true, "origin": true, "torahFlags": true, "notes": true }
+    }
+  ],
+
+  "torahFlags": {
+    "fromProfile": true,
+    "fields": [
+      "allowBlood",
+      "allowFatCaps",
+      "allowLeaven",
+      "shellfishAllowed",
+      "fishRequireFinsAndScales"
+    ],
+    "badges": {
+      "clean": "badge-success",
+      "review": "badge-warning",
+      "blocked": "badge-error"
+    },
+    "render": {
+      "showWhen": "${fields.torahFlags}",
+      "map": {
+        "allowLeaven": { "label": "Leaven OK", "style": "badge-info" },
+        "shellfishAllowed": { "label": "Shellfish OK", "style": "badge-info" }
+      }
+    }
+  },
+
+  "flows": [
+    {
+      "key": "flow.labels.createTemplate",
+      "label": "Create Label Template",
+      "steps": [
+        { "type": "collect", "id": "base", "fields": ["title","size","brand","locale","units"] },
+        { "type": "collect", "id": "fields", "fields": ["subtitle","ingredients","allergens","nutrition","date","time","expiry","batch","lot","netWeight","servings","storage","reheat","torahFlags","origin","producer","qrUrl","barcode","gs1","notes"] },
+        { "type": "persist", "id": "save", "fn": "Labels.createTemplate", "argsFrom": ["base","fields"] },
+        { "type": "emit", "event": "labels.template.create.success" },
+        { "type": "toast", "style": "success", "message": "Template created" },
+        { "type": "ui", "action": "ui.openEditor", "argsFrom": "save" }
+      ],
+      "undoKey": "labels.template.create"
+    },
+    {
+      "key": "flow.labels.buildFromMealPlan",
+      "label": "Build Labels From Meal Plan",
+      "steps": [
+        { "type": "fetch", "id": "context", "from": "MealPlanEngine.current" },
+        { "type": "call", "id": "ingredients", "fn": "MealPlanEngine.ingredientsForWindow", "argsFrom": "context" },
+        { "type": "call", "id": "resolved", "fn": "LabelTemplateBuilder.resolveFields", "args": { "ingredientsRef": "ingredients", "torahFromProfile": true } },
+        { "type": "create", "id": "batch", "template": "freezer.large", "dataFrom": "resolved" },
+        { "type": "persist", "id": "queue", "fn": "Labels.queueBatch", "argsFrom": "batch" },
+        { "type": "emit", "event": "labels.build.success" },
+        { "type": "toast", "style": "success", "message": "Labels built from meal plan" },
+        { "type": "ui", "action": "ui.goto", "args": { "to": "/labels/batches" } }
+      ],
+      "undoKey": "labels.batch.queue"
+    },
+    {
+      "key": "flow.labels.buildFromPreservation",
+      "label": "Build Labels From Preservation Queue",
+      "steps": [
+        { "type": "fetch", "id": "queue", "from": "PreservationPlanner.currentQueue" },
+        { "type": "transform", "id": "items", "fn": "LabelTemplateBuilder.fromPreservationQueue(queue)" },
+        { "type": "persist", "id": "queueBatch", "fn": "Labels.queueBatch", "argsFrom": "items" },
+        { "type": "emit", "event": "labels.build.success" },
+        { "type": "toast", "style": "success", "message": "Preservation labels prepared" }
+      ],
+      "undoKey": "labels.batch.queue"
+    },
+    {
+      "key": "flow.labels.buildFromButchery",
+      "label": "Build Labels From Butchery/Charcuterie",
+      "steps": [
+        { "type": "fetch", "id": "outputs", "from": "ButcheryCutSheetStore.getLatest" },
+        { "type": "call", "id": "calc", "fn": "CureCalc.mapOutputsToLabels", "argsFrom": "outputs" },
+        { "type": "persist", "id": "queueBatch", "fn": "Labels.queueBatch", "argsFrom": "calc" },
+        { "type": "emit", "event": "labels.build.success" },
+        { "type": "toast", "style": "success", "message": "Butchery labels queued" }
+      ],
+      "undoKey": "labels.batch.queue"
+    },
+    {
+      "key": "flow.labels.buildFromGarden",
+      "label": "Build Labels From Garden Harvest",
+      "steps": [
+        { "type": "fetch", "id": "harvests", "from": "GardenHarvests.recent" },
+        { "type": "transform", "id": "items", "fn": "LabelTemplateBuilder.fromHarvests(harvests)" },
+        { "type": "create", "id": "batch", "template": "garden.harvest", "dataFrom": "items" },
+        { "type": "persist", "id": "queueBatch", "fn": "Labels.queueBatch", "argsFrom": "batch" },
+        { "type": "emit", "event": "labels.build.success" }
+      ],
+      "undoKey": "labels.batch.queue"
+    },
+    {
+      "key": "flow.labels.printBatch",
+      "label": "Print Batch",
+      "confirm": { "title": "Print labels?", "body": "Send to connected printer or download PDF.", "confirmLabel": "Print" },
+      "steps": [
+        { "type": "call", "id": "target", "fn": "Printer.resolve", "argsFrom": "Labels.settings" },
+        { "type": "call", "id": "render", "fn": "Printer.render", "argsFrom": ["target","Labels.currentBatch"] },
+        { "type": "emit", "event": "labels.print.sent" },
+        { "type": "toast", "style": "success", "message": "Print job sent" }
+      ]
+    },
+    {
+      "key": "flow.labels.shareBatchToRoles",
+      "label": "Share Batch To Roles",
+      "steps": [
+        { "type": "gather", "id": "targets", "fn": "Contracts.stakeholders.resolveTargets" },
+        { "type": "send", "id": "dispatch", "fn": "Notification.send", "argsFrom": "targets" },
+        { "type": "emit", "event": "labels.batch.shared" },
+        { "type": "toast", "style": "info", "message": "Batch shared" }
+      ]
+    },
+    {
+      "key": "flow.labels.shareBatchToCoalition",
+      "label": "Share Batch To Coalition",
+      "steps": [
+        { "type": "gather", "id": "members", "fn": "CoalitionKitchens.resolveMembers" },
+        { "type": "send", "id": "dispatch", "fn": "Notification.send", "args": { "targetsRef": "members", "subject": "Shared label batch" } },
+        { "type": "emit", "event": "labels.coalition.shared" },
+        { "type": "toast", "style": "info", "message": "Shared with coalition" }
+      ]
+    },
+    {
+      "key": "flow.labels.setDefaultTemplate",
+      "label": "Set Default Template",
+      "steps": [
+        { "type": "persist", "id": "save", "fn": "Labels.setDefaultForType" },
+        { "type": "emit", "event": "labels.template.default.set" },
+        { "type": "toast", "style": "success", "message": "Default template set" }
+      ],
+      "undoKey": "labels.template.update"
+    },
+    {
+      "key": "flow.labels.publishPreset",
+      "label": "Publish Template to Marketplace",
+      "steps": [
+        { "type": "collect", "id": "meta", "fields": ["title","description","price"] },
+        { "type": "persist", "id": "publish", "fn": "MarketplacePresets.publish", "argsFrom": ["meta"] },
+        { "type": "emit", "event": "labels.market.publish.success" },
+        { "type": "toast", "style": "success", "message": "Preset published" }
+      ],
+      "undoKey": "labels.market.publish"
+    },
+    {
+      "key": "flow.labels.recordBatch",
+      "label": "Record Printed Batch",
+      "steps": [
+        { "type": "collect", "id": "loc", "fields": ["storageLocation","shelf","bin"] },
+        { "type": "persist", "id": "record", "fn": "Labels.recordBatch", "argsFrom": ["loc"] },
+        { "type": "emit", "event": "labels.batch.recorded" },
+        { "type": "toast", "style": "success", "message": "Batch recorded" }
+      ]
+    }
+  ],
+
+  "events": {
+    "listen": [
+      {
+        "on": "recipes.consolidated",
+        "do": [
+          { "type": "compute", "fn": "Labels.insights.recipeLabelImpact" },
+          { "type": "ui.toast", "style": "info", "message": "Recipes consolidated — labels can be rebuilt" },
+          { "type": "suggest", "flow": "flow.labels.buildFromMealPlan" }
+        ]
+      },
+      {
+        "on": "inventory.updated",
+        "do": [
+          { "type": "compute", "fn": "Labels.insights.allergenConflicts" },
+          { "type": "ui.badge.bump", "key": "labels.templates" }
+        ]
+      },
+      {
+        "on": "calendar.synced",
+        "do": [
+          { "type": "refresh", "target": "LabelsHome.widgets.expiringSoon" }
+        ]
+      },
+      {
+        "on": "mealplan.created",
+        "do": [
+          { "type": "suggest", "flow": "flow.labels.buildFromMealPlan" }
+        ]
+      },
+      {
+        "on": "batch.started",
+        "do": [
+          { "type": "suggest", "flow": "flow.labels.buildFromButchery" }
+        ]
+      },
+      {
+        "on": "garden.harvest.logged",
+        "do": [
+          { "type": "suggest", "flow": "flow.labels.buildFromGarden" }
+        ]
+      },
+      {
+        "on": "animals.eggs.collected",
+        "do": [
+          { "type": "flow", "ref": "flow.labels.buildFromGarden", "args": { "usePreset": "eggs.carton" } }
+        ]
+      },
+      {
+        "on": "torah.profile.updated",
+        "do": [
+          { "type": "suggest", "flow": "flow.labels.buildFromMealPlan" },
+          { "type": "flow", "ref": "flow.labels.buildFromPreservation" }
+        ]
+      },
+      {
+        "on": "coalition.membership.updated",
+        "do": [
+          { "type": "ui.badge.bump", "key": "labels.coalitions" },
+          { "type": "suggest", "flow": "flow.labels.shareBatchToCoalition" }
+        ]
+      },
+      {
+        "on": "marketplace.sale.logged",
+        "do": [
+          { "type": "ui.toast", "style": "success", "message": "Template sale! Consider updating your preset thumbnails." }
+        ]
+      }
+    ],
+    "emitOnUI": [
+      { "ui": "Labels.Template.New", "emit": "labels.template.create.requested" },
+      { "ui": "Labels.Template.Save", "emit": "labels.template.update.requested" },
+      { "ui": "Labels.Template.Delete", "emit": "labels.template.delete.requested" },
+      { "ui": "Labels.Batch.Print", "emit": "labels.print.requested" }
+    ]
+  },
+
+  "uiGlue": {
+    "widgets": [
+      { "key": "LabelsHome.widgets.expiringSoon", "source": "Inventory.expiringSoon", "refreshOn": ["calendar.synced","labels.build.success"] },
+      { "key": "LabelsHome.widgets.pendingPrint", "source": "Labels.counts.pendingPrint", "refreshOn": ["labels.build.success","labels.print.sent"] },
+      { "key": "Templates.widgets.defaults", "source": "Labels.defaults", "refreshOn": ["labels.template.default.set","labels.template.update.success"] },
+      { "key": "Coalitions.widgets.sharedBatches", "source": "Labels.counts.shared", "refreshOn": ["labels.coalition.shared"] }
+    ],
+    "badges": [
+      { "navKey": "labels.templates", "from": "Labels.counts.templates" },
+      { "navKey": "labels.batches", "from": "Labels.counts.pendingPrint" },
+      { "navKey": "labels.coalitions", "from": "Labels.counts.shared" }
+    ],
+    "previewHints": [
+      "Use the scale slider to proof at 100% physical size.",
+      "Toggle light/dark for contrast checks.",
+      "Keyboard: arrows nudge fields by 1px (Shift = 5px)."
+    ]
+  },
+
+  "guards": {
+    "preCreateTemplate": ["Labels.validators.hasTitle","Labels.validators.validSize"],
+    "preQueueBatch": ["Labels.validators.hasPrinterOrPDF"],
+    "prePrint": ["Printer.validators.connectedOrPDF"],
+    "sharing": ["Labels.validators.coalitionConsent"]
+  },
+
+  "metrics": {
+    "kpis": [
+      { "id": "labels.timeToPrint", "label": "Time to Print", "source": "Labels.metrics.timeToPrint" },
+      { "id": "labels.accuracyRate", "label": "Allergen Accuracy Rate", "source": "Labels.metrics.allergenAccuracy" },
+      { "id": "labels.flagCoverage", "label": "Torah Flag Coverage", "source": "Labels.metrics.torahFlagCoverage" },
+      { "id": "labels.printSuccess", "label": "Print Success Rate", "source": "Labels.metrics.printSuccess" },
+      { "id": "labels.batchThroughput", "label": "Batch Throughput/hr", "source": "Labels.metrics.batchThroughput" }
+    ],
+    "ab": {
+      "enabled": true,
+      "variants": [
+        { "id": "qr_top_right", "desc": "QR in top-right corner" },
+        { "id": "qr_bottom_left", "desc": "QR in bottom-left corner" }
+      ],
+      "goal": "labels.scanRate"
+    }
+  },
+
+  "accessibility": {
+    "aria": true,
+    "keyboardShortcuts": [
+      { "keys": ["Ctrl","Shift","L"], "action": "flow.labels.buildFromMealPlan" },
+      { "keys": ["Ctrl","P"], "action": "flow.labels.printBatch" },
+      { "keys": ["Alt","G"], "action": "flow.labels.buildFromGarden" }
+    ],
+    "colorContrastMin": 4.5,
+    "largeTextScale": true
+  },
+
+  "autosave": { "enabled": true, "debounceMs": 900, "emit": "labels.autosave" },
+
+  "printers": {
+    "profiles": [
+      { "id": "zebra_kitchen", "driver": "zpl", "dpi": 203, "defaultSize": "4x6", "margins": "2mm", "darkness": 17 },
+      { "id": "escpos_counter", "driver": "escpos", "dpi": 203, "defaultSize": "58x40mm", "margins": "1mm", "darkness": 14 },
+      { "id": "pdf_export", "driver": "pdf", "dpi": 300, "defaultSize": "4x6", "margins": "0mm" }
+    ]
+  }
+}

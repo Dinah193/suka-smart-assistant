@@ -1,0 +1,180 @@
+{
+  "provider": "costco",
+  "circularId": "costco-2025-10-membersavings",
+  "title": "Costco Member-Only Savings • Oct 15 – Oct 31, 2025",
+  "period": { "fromISO": "2025-10-15T05:00:00Z", "toISO": "2025-10-31T23:59:59Z" },
+  "meta": {
+    "source": "pdf_ocr",
+    "downloadedAtISO": "2025-10-15T09:30:00Z",
+    "timezone": "America/New_York",
+    "notes": "Fixture: warehouse-only pricing with instant savings & manager specials."
+  },
+
+  "storeScope": [
+    { "storeId": "costco-0791", "name": "Costco #791" }
+  ],
+
+  "userContext": {
+    "pinnedSchedules": [
+      { "type": "schedule", "id": "sched-grocery-wed", "name": "Wednesday Grocery Run" }
+    ]
+  },
+
+  "items": [
+    {
+      "sku": "C-ML-001",
+      "upc": "085239000715",
+      "title": "Lamb Breakfast Sausage — 16 oz",
+      "brand": "Butcher’s Table",
+      "categoryPath": ["Grocery", "Meat", "Lamb"],
+      "package": { "quantity": 16, "unit": "oz", "normalized": { "quantity": 453.59, "unit": "g" } },
+      "price": { "amount": 8.49, "currency": "USD" },
+      "unitPrice": { "unit": "per_g", "amount": 0.0187 },
+      "channel": "in_store",
+      "promo": {
+        "type": "member_instant_savings",
+        "tags": ["Member Savings", "Meat"],
+        "limitPerCustomer": 5
+      },
+      "candidateCoupons": [
+        { "id": "cpn-lamb-2off", "group": "store" }
+      ],
+      "cycleHints": { "pattern": "monthly" },
+      "images": [
+        "https://fixtures.suka.local/img/costco/lamb-sausage-16oz.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Lamb Breakfast Sausage", "16 OZ"],
+        "regex": "Lamb\\s*Breakfast\\s*Sausage"
+      }
+    },
+
+    {
+      "sku": "C-GOAT-2LB",
+      "upc": "009999000001",
+      "title": "Goat Stew Meat — 2 lb",
+      "brand": "Local Butchery",
+      "categoryPath": ["Grocery", "Meat", "Goat"],
+      "package": { "quantity": 2, "unit": "lb", "normalized": { "quantity": 907.18, "unit": "g" } },
+      "price": { "amount": 19.98, "currency": "USD" },
+      "unitPrice": { "unit": "per_g", "amount": 0.0220 },
+      "channel": "in_store",
+      "promo": {
+        "type": "manager_special",
+        "tags": ["Limited Time"],
+        "limitPerCustomer": 2
+      },
+      "candidateCoupons": [],
+      "cycleHints": { "pattern": "irregular" },
+      "images": [
+        "https://fixtures.suka.local/img/costco/goat-stew-2lb.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Goat Stew Meat", "2 LB"],
+        "regex": "Goat\\s*Stew\\s*Meat"
+      }
+    },
+
+    {
+      "sku": "C-KPL-12",
+      "title": "Kirkland Signature Paper Towels — 12 Mega Rolls",
+      "brand": "Kirkland Signature",
+      "categoryPath": ["Household", "Paper", "Paper Towels"],
+      "package": { "quantity": 12, "unit": "ct", "normalized": { "quantity": 12, "unit": "ct" } },
+      "price": { "amount": 22.99, "currency": "USD" },
+      "unitPrice": { "unit": "per_ct", "amount": 1.9158 },
+      "channel": "in_store",
+      "promo": {
+        "type": "member_instant_savings",
+        "tags": ["Bulk", "Warehouse Only"],
+        "limitPerCustomer": 1
+      },
+      "candidateCoupons": [
+        { "id": "cpn-house-1off5", "group": "basket", "note": "Basket coupon from ALDI should not match here." }
+      ],
+      "cycleHints": { "pattern": "monthly" },
+      "images": [
+        "https://fixtures.suka.local/img/costco/kirkland-paper-towels-12.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Paper Towels", "12 Mega Rolls"],
+        "regex": "Paper\\s*Towels\\s*12"
+      }
+    },
+
+    {
+      "sku": "C-EVOO-2L",
+      "title": "Extra Virgin Olive Oil — 2L",
+      "brand": "Kirkland Signature",
+      "categoryPath": ["Grocery", "Pantry", "Oils"],
+      "package": { "quantity": 2, "unit": "l", "normalized": { "quantity": 2000, "unit": "ml" } },
+      "price": { "amount": 14.99, "currency": "USD" },
+      "unitPrice": { "unit": "per_l", "amount": 7.495 },
+      "channel": "in_store",
+      "promo": {
+        "type": "member_instant_savings",
+        "tags": ["Pantry Essentials"]
+      },
+      "candidateCoupons": [],
+      "cycleHints": { "pattern": "monthly" },
+      "images": [
+        "https://fixtures.suka.local/img/costco/evoo-2l.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Extra Virgin Olive Oil", "2L"],
+        "regex": "Olive\\s*Oil\\s*2L"
+      }
+    },
+
+    {
+      "sku": "C-ROTIS-CHICK",
+      "title": "Rotisserie Chicken",
+      "brand": "Kirkland Signature",
+      "categoryPath": ["Grocery", "Prepared Foods", "Rotisserie"],
+      "package": { "quantity": 1, "unit": "ct", "normalized": { "quantity": 1, "unit": "ct" } },
+      "price": { "amount": 4.99, "currency": "USD" },
+      "unitPrice": { "unit": "per_ct", "amount": 4.99 },
+      "channel": "in_store",
+      "promo": {
+        "type": "everyday_price",
+        "tags": ["Warehouse Staple"]
+      },
+      "candidateCoupons": [],
+      "cycleHints": { "pattern": "irregular" },
+      "images": [
+        "https://fixtures.suka.local/img/costco/rotisserie-chicken.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Rotisserie Chicken"],
+        "regex": "Rotisserie\\s*Chicken"
+      }
+    },
+
+    {
+      "sku": "C-FRZN-WAFF-60",
+      "title": "Frozen Waffles — 60 ct Club Pack",
+      "brand": "Homestead",
+      "categoryPath": ["Grocery", "Frozen", "Breakfast"],
+      "package": { "quantity": 60, "unit": "ct", "normalized": { "quantity": 60, "unit": "ct" } },
+      "price": { "amount": 19.49, "currency": "USD" },
+      "unitPrice": { "unit": "per_ct", "amount": 0.3248 },
+      "channel": "in_store",
+      "promo": {
+        "type": "member_instant_savings",
+        "tags": ["Club Pack", "Freezer Staple"],
+        "mixAndMatchGroup": "frozen-breakfast"
+      },
+      "candidateCoupons": [
+        { "id": "cpn-waff-20pct", "group": "store", "provider": "sams", "note": "Cross-retailer; should not apply." }
+      ],
+      "cycleHints": { "pattern": "biweekly" },
+      "images": [
+        "https://fixtures.suka.local/img/costco/frozen-waffles-60ct.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Frozen Waffles", "60 CT"],
+        "regex": "Waffles\\s*60"
+      }
+    }
+  ]
+}

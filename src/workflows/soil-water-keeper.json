@@ -1,0 +1,763 @@
+{
+  "name": "Soil & Water Keeper",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "soil-water/telemetry",
+        "responseMode": "responseNode",
+        "options": {
+          "binaryData": false
+        }
+      },
+      "id": "Webhook_Telemetry",
+      "name": "Webhook (Telemetry)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/*\nExpected body example:\n{\n  \"userId\": \"user_123\",\n  \"deviceId\": \"probe_1\",\n  \"zoneId\": \"zone-1\",\n  \"moisturePercent\": 19.4,\n  \"soilTempC\": 18.1,\n  \"sampledAt\": \"ISO\"\n}\n*/\nconst b = items[0]?.json || {};\nconst apiBase = $env.SUKA_API_BASE || 'http://localhost:4000';\nconst lat = Number($env.GARDEN_LAT || 41.8781);\nconst lon = Number($env.GARDEN_LON || -87.6298);\n\nconst zoneId = b.zoneId || b.zone || 'zone-1';\nconst deviceId = b.deviceId || null;\nconst userId = b.userId || null;\nconst moisture = Number(b.moisturePercent ?? b.moisture ?? b.soilMoisture ?? 0);\nconst soilTempC = (b.soilTempC != null) ? Number(b.soilTempC) : null;\nconst sampledAt = b.sampledAt ? new Date(b.sampledAt).toISOString() : new Date().toISOString();\n\nconst target = Number($env.MOISTURE_TARGET || 28);\nconst min = Number($env.MOISTURE_MIN || 18);\nconst rainProbThresh = Number($env.RAIN_SKIP_PROB || 60);\nconst lookaheadH = Number($env.RAIN_LOOKAHEAD_H || 24);\nconst maxIrrigationMin = Number($env.MAX_IRRIGATION_MIN || 45);\nconst enableAutoIrrigation = String($env.IRRIGATION_AUTO || 'false').toLowerCase() === 'true';\n\nreturn [{ json: { apiBase, lat, lon, userId, zoneId, deviceId, moisture, soilTempC, sampledAt, target, min, rainProbThresh, lookaheadH, maxIrrigationMin, enableAutoIrrigation } }];"
+      },
+      "id": "Fn_NormalizeTelemetry",
+      "name": "Function: Normalize Telemetry",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "GET",
+        "url": "={{`https://api.open-meteo.com/v1/forecast?latitude=${$json.lat}&longitude=${$json.lon}&hourly=precipitation_probability,precipitation&forecast_days=2&timezone=auto`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "HTTP_Forecast",
+      "name": "HTTP: Forecast (Open-Meteo)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -740,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/* Evaluate watering need and rain likelihood */\nfunction clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }\nfunction calcDurationMin(cur,target,maxMin){\n  const deficit = Math.max(0, target - cur);\n  // ~8 min per 5% deficit, min 6m, capped\n  const est = Math.ceil(deficit / 5) * 8;\n  return clamp(est, 6, maxMin);\n}\n\nconst ctx = $items('Function: Normalize Telemetry', 0, 0)[0].json;\nconst fc = ($items('HTTP: Forecast (Open-Meteo)', 0, 0)[0]?.json) || {};\n\n// Lookahead window\nconst hours = (fc.hourly && fc.hourly.time) ? fc.hourly.time.length : 0;\nlet maxProb = 0; let sumPrec = 0; let counted = 0;\nif (fc.hourly && hours) {\n  const now = Date.now();\n  for (let i = 0; i < hours; i++) {\n    const tISO = fc.hourly.time[i];\n    const ts = Date.parse(tISO);\n    if (!Number.isFinite(ts)) continue;\n    if (ts - now > ctx.lookaheadH * 3600 * 1000) continue;\n    const p = Number(fc.hourly.precipitation_probability?.[i] ?? 0);\n    const mm = Number(fc.hourly.precipitation?.[i] ?? 0);\n    if (p > maxProb) maxProb = p;\n    sumPrec += mm; counted++;\n  }\n}\nconst rainLikely = (maxProb >= ctx.rainProbThresh) || (sumPrec >= 2);\nconst needsWater = ctx.moisture < ctx.target;\nconst durationMin = needsWater ? calcDurationMin(ctx.moisture, ctx.target, ctx.maxIrrigationMin) : 0;\n\nconst task = needsWater ? {\n  title: `Water ${ctx.zoneId} (${ctx.moisture.toFixed(1)}% → ${ctx.target}% target)`,\n  category: 'irrigation',\n  labels: ['watering', ctx.zoneId],\n  priority: rainLikely ? 3 : 2,\n  due: new Date().toISOString(),\n  meta: { zoneId: ctx.zoneId, moisture: ctx.moisture, target: ctx.target, rainLikely, maxProb, sumPrec, lookaheadH: ctx.lookaheadH, suggestedMinutes: durationMin, deviceId: ctx.deviceId, sampledAt: ctx.sampledAt }\n} : null;\n\nconst irrigCmd = (needsWater && !rainLikely && ctx.enableAutoIrrigation) ? {\n  url: `${ctx.apiBase}/irrigation/zones/${ctx.zoneId}/start`,\n  minutes: durationMin\n} : null;\n\nreturn [{ json: { ...ctx, maxProb, sumPrec, rainLikely, needsWater, durationMin, task, irrigCmd } }];"
+      },
+      "id": "Fn_Evaluate",
+      "name": "Function: Evaluate Need",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.needsWater}}",
+              "operation": "isTrue"
+            }
+          ]
+        }
+      },
+      "id": "IF_NeedsWater",
+      "name": "IF needs water",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.rainLikely}}",
+              "operation": "isTrue"
+            }
+          ]
+        }
+      },
+      "id": "IF_RainLikely",
+      "name": "IF rain likely",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{`${$json.apiBase}/automations/tasks`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={{$json.task}}"
+      },
+      "id": "HTTP_CreateTask_Defer",
+      "name": "HTTP: Create Task (defer water)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        140,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/* Tweak task title for deferral */\nconst t = $json.task || null;\nif (!t) return [{ json: { skip: true } }];\nconst nt = { ...t, title: `${t.title} — rain expected, reassess after storm` };\nreturn [{ json: nt }];"
+      },
+      "id": "Fn_AdjustDeferral",
+      "name": "Function: Adjust Deferral Task",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        140,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{`${$json.apiBase}/automations/tasks`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={{$json}}"
+      },
+      "id": "HTTP_CreateTask",
+      "name": "HTTP: Create Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        360,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{!!$json.irrigCmd}}",
+              "operation": "isTrue"
+            }
+          ]
+        }
+      },
+      "id": "IF_AutoIrrigate",
+      "name": "IF auto-irrigation",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{$json.irrigCmd.url}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={\"minutes\": $json.irrigCmd.minutes}"
+      },
+      "id": "HTTP_StartIrrigation",
+      "name": "HTTP: Start Irrigation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        140,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/* Follow-up check after watering */\nconst ctx = $json;\nif (!ctx.task) return [{ json: { skip: true } }];\nconst follow = {\n  title: `Check moisture: ${ctx.zoneId} (post-water)`,\n  category: 'irrigation',\n  labels: ['verify', ctx.zoneId],\n  priority: 3,\n  due: new Date(Date.now() + 2 * 3600 * 1000).toISOString(),\n  meta: { zoneId: ctx.zoneId }\n};\nreturn [{ json: follow }];"
+      },
+      "id": "Fn_FollowupTask",
+      "name": "Function: Follow-up Task",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        360,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "responseBody": "={{({ ok: true, zoneId: $json.zoneId, moisture: $json.moisture, target: $json.target, needsWater: $json.needsWater, rainLikely: $json.rainLikely, minutes: $json.durationMin })}}",
+        "responseCode": 200
+      },
+      "id": "Respond_Telemetry",
+      "name": "Respond (Telemetry)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        580,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyDay",
+              "hour": 6,
+              "minute": 0
+            }
+          ]
+        }
+      },
+      "id": "Cron_Daily",
+      "name": "Cron (Daily 06:00)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "tz",
+              "value": "America/Chicago"
+            }
+          ],
+          "number": [
+            {
+              "name": "horizonH",
+              "value": 24
+            }
+          ]
+        }
+      },
+      "id": "Set_Defaults",
+      "name": "Set Defaults (Daily)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        -960,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/* Build daily planning context */\nfunction zonesFromEnv(){\n  try {\n    const raw = $env.GARDEN_ZONES_JSON || '';\n    if (!raw) return [];\n    const arr = JSON.parse(raw);\n    return Array.isArray(arr) ? arr : [];\n  } catch { return []; }\n}\nconst apiBase = $env.SUKA_API_BASE || 'http://localhost:4000';\nconst lat = Number($env.GARDEN_LAT || 41.8781);\nconst lon = Number($env.GARDEN_LON || -87.6298);\nconst targetDefault = Number($env.MOISTURE_TARGET || 28);\nconst maxIrrigationMin = Number($env.MAX_IRRIGATION_MIN || 45);\nconst rainProbThresh = Number($env.RAIN_SKIP_PROB || 60);\nconst lookaheadH = Number($env.RAIN_LOOKAHEAD_H || 24);\nconst enableAutoIrrigation = String($env.IRRIGATION_AUTO || 'false').toLowerCase() === 'true';\nconst zones = zonesFromEnv();\nreturn [{ json: { apiBase, lat, lon, zones, targetDefault, maxIrrigationMin, rainProbThresh, lookaheadH, enableAutoIrrigation } }];"
+      },
+      "id": "Fn_DailyContext",
+      "name": "Function: Daily Context",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -740,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "GET",
+        "url": "={{`${$json.apiBase}/garden/soil?snapshot=latest`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000,
+          "ignoreResponseCode": true
+        }
+      },
+      "id": "HTTP_SoilSnapshot",
+      "name": "HTTP: Soil Snapshot",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -520,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "GET",
+        "url": "={{`https://api.open-meteo.com/v1/forecast?latitude=${$json.lat}&longitude=${$json.lon}&hourly=precipitation_probability,precipitation&forecast_days=2&timezone=auto`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "HTTP_Forecast_Daily",
+      "name": "HTTP: Forecast (Daily)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -520,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/* Plan watering per zone */\nfunction clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }\nfunction duration(cur,target,maxMin){ const deficit = Math.max(0, target - cur); const est = Math.ceil(deficit/5)*8; return clamp(est, 6, maxMin); }\n\nconst ctx = $json;\nconst snapRaw = $items('HTTP: Soil Snapshot', 0, 0)[0]?.json || [];\nconst zones = Array.isArray(ctx.zones) && ctx.zones.length ? ctx.zones : [{ id: 'zone-1', name: 'Garden Zone 1', target: ctx.targetDefault }];\n\n// Forecast stats\nconst fc = $items('HTTP: Forecast (Daily)', 0, 0)[0]?.json || {};\nlet maxProb = 0; let sumPrec = 0; const now = Date.now();\nif (fc.hourly && fc.hourly.time) {\n  for (let i = 0; i < fc.hourly.time.length; i++) {\n    const ts = Date.parse(fc.hourly.time[i]);\n    if (!Number.isFinite(ts) || ts - now > ctx.lookaheadH * 3600 * 1000) continue;\n    const p = Number(fc.hourly.precipitation_probability?.[i] ?? 0);\n    const mm = Number(fc.hourly.precipitation?.[i] ?? 0);\n    if (p > maxProb) maxProb = p; sumPrec += mm;\n  }\n}\nconst rainLikely = (maxProb >= ctx.rainProbThresh) || (sumPrec >= 2);\n\n// Build plan list\nconst readings = Array.isArray(snapRaw) ? snapRaw : (Array.isArray(snapRaw.items) ? snapRaw.items : []);\nconst byZone = new Map(readings.map(r => [String(r.zoneId || r.zone || 'zone-1'), Number(r.moisturePercent ?? r.moisture ?? 0)]));\n\nconst plan = [];\nfor (const z of zones) {\n  const id = String(z.id || 'zone-1');\n  const target = Number(z.target || ctx.targetDefault);\n  const cur = Number(byZone.get(id) ?? 0);\n  const needs = cur < target;\n  const minutes = needs ? duration(cur, target, ctx.maxIrrigationMin) : 0;\n  plan.push({ id, name: z.name || id, cur, target, needs, minutes });\n}\n\nreturn [{ json: { ...ctx, rainLikely, maxProb, sumPrec, plan } }];"
+      },
+      "id": "Fn_PlanDaily",
+      "name": "Function: Plan Daily",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -300,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const tasks = [];\nfor (const p of ($json.plan || [])) {\n  if (!p.needs) continue;\n  const title = `Water ${p.name} (${p.cur.toFixed(1)}% → ${p.target}%)`;\n  tasks.push({\n    title,\n    category: 'irrigation',\n    labels: ['watering', p.id],\n    priority: $json.rainLikely ? 3 : 2,\n    due: new Date().toISOString(),\n    meta: { zoneId: p.id, suggestedMinutes: p.minutes, target: p.target, moisture: p.cur, rainLikely: $json.rainLikely }\n  });\n}\nreturn tasks.length ? tasks.map(t => ({ json: { ...t, apiBase: $json.apiBase } })) : [{ json: { skip: true, apiBase: $json.apiBase } }];"
+      },
+      "id": "Fn_FanoutDailyTasks",
+      "name": "Function: Fan-out Daily Tasks",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{`${$json.apiBase}/automations/tasks`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={{$json}}"
+      },
+      "id": "HTTP_CreateDailyTask",
+      "name": "HTTP: Create Daily Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        140,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.enableAutoIrrigation && !$json.rainLikely}}",
+              "operation": "isTrue"
+            }
+          ]
+        }
+      },
+      "id": "IF_AutoIrrigate_Daily",
+      "name": "IF auto-irrigation (daily)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const out = [];\nfor (const p of ($json.plan || [])) {\n  if (!p.needs) continue;\n  out.push({ json: { url: `${$json.apiBase}/irrigation/zones/${p.id}/start`, minutes: p.minutes } });\n}\nreturn out.length ? out : [{ json: { skip: true } }];"
+      },
+      "id": "Fn_FanoutIrrig",
+      "name": "Function: Fan-out Irrigation Calls",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        140,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{$json.url}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={\"minutes\": $json.minutes}"
+      },
+      "id": "HTTP_StartIrrigation_Daily",
+      "name": "HTTP: Start Irrigation (Daily)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        360,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const created = ($items('HTTP: Create Daily Task', 0, 0) || []).length;\nconst started = ($items('HTTP: Start Irrigation (Daily)', 0, 0) || []).length;\nreturn [{ json: { ok: true, tasksCreated: created, zonesStarted: started } }];"
+      },
+      "id": "Fn_Summary_Daily",
+      "name": "Function: Summary (Daily)",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        580,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "Error_Trigger",
+      "name": "On Error (Soil & Water)",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1180,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const e = items[0].json;\nreturn [{ json: { ok: false, message: e.message || 'Workflow error', node: e.node?.name, timestamp: new Date().toISOString() } }];"
+      },
+      "id": "Fn_ErrorFormat",
+      "name": "Function: Format Error",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -960,
+        560
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook (Telemetry)": {
+      "main": [
+        [
+          {
+            "node": "Function: Normalize Telemetry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Normalize Telemetry": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Forecast (Open-Meteo)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Forecast (Open-Meteo)": {
+      "main": [
+        [
+          {
+            "node": "Function: Evaluate Need",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Evaluate Need": {
+      "main": [
+        [
+          {
+            "node": "IF needs water",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond (Telemetry)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF needs water": {
+      "main": [
+        [
+          {
+            "node": "IF rain likely",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF auto-irrigation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF rain likely": {
+      "main": [
+        [
+          {
+            "node": "Function: Adjust Deferral Task",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Function: Adjust Deferral Task": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Create Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF auto-irrigation": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Start Irrigation",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Function: Follow-up Task",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP: Create Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Follow-up Task": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Create Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Create Task (defer water)": {
+      "main": [
+        [
+          {
+            "node": "Respond (Telemetry)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Create Task": {
+      "main": [
+        [
+          {
+            "node": "Respond (Telemetry)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Start Irrigation": {
+      "main": [
+        [
+          {
+            "node": "Respond (Telemetry)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron (Daily 06:00)": {
+      "main": [
+        [
+          {
+            "node": "Set Defaults (Daily)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Defaults (Daily)": {
+      "main": [
+        [
+          {
+            "node": "Function: Daily Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Daily Context": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Soil Snapshot",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP: Forecast (Daily)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Soil Snapshot": {
+      "main": [
+        [
+          {
+            "node": "Function: Plan Daily",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Forecast (Daily)": {
+      "main": [
+        [
+          {
+            "node": "Function: Plan Daily",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Plan Daily": {
+      "main": [
+        [
+          {
+            "node": "Function: Fan-out Daily Tasks",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF auto-irrigation (daily)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Fan-out Daily Tasks": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Create Daily Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF auto-irrigation (daily)": {
+      "main": [
+        [
+          {
+            "node": "Function: Fan-out Irrigation Calls",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Function: Fan-out Irrigation Calls": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Start Irrigation (Daily)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Start Irrigation (Daily)": {
+      "main": [
+        [
+          {
+            "node": "Function: Summary (Daily)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On Error (Soil & Water)": {
+      "main": [
+        [
+          {
+            "node": "Function: Format Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "timezone": "America/Chicago",
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

@@ -1,0 +1,734 @@
+{
+  "schemaVersion": "1.0.0",
+  "domain": "textiles",
+  "catalogId": "textiles.methods",
+  "generatedAt": "2025-12-28T00:29:09Z",
+  "description": "Fixed textiles method definitions for SSA (planning + sessions). Includes fiber preparation, mending, sewing, weaving/knitting/crochet, dyeing, and garment care. Designed for SessionBlueprintBuilder to create runnable steps with timers, cues, and resource lists. Cultural techniques are presented as opt-in variants without stereotyping.",
+  "conventions": {
+    "methodIdFormat": "textiles.<category>.<slug>",
+    "stepIdFormat": "s<nn>",
+    "units": [
+      "min",
+      "hr",
+      "day"
+    ],
+    "notes": [
+      "Methods describe repeatable workflows (not patterns of consumption).",
+      "Safety: dyes/chemicals/tools require PPE and ventilation. Users can override via layer_overrides."
+    ]
+  },
+  "defaults": {
+    "quietHoursRespect": true,
+    "sabbathModeRespect": true,
+    "safety": {
+      "general": [
+        "Use adequate lighting and ergonomic posture to reduce strain.",
+        "Keep blades covered; store needles/pins in a container.",
+        "Ventilate when using dyes, solvents, or spray adhesives."
+      ],
+      "ppe": [
+        "thimble (optional)",
+        "eye protection when cutting metal/plastic",
+        "mask when handling dye powders"
+      ],
+      "heat": [
+        "Use caution with irons/steam; keep away from children and cords clear of walk paths."
+      ]
+    }
+  },
+  "methods": [
+    {
+      "id": "textiles.care.laundry_sort_plan",
+      "name": "Laundry Sort + Care Plan",
+      "summary": "Create a simple sorting system and care plan to reduce rewash, fading, and fabric damage.",
+      "tags": [
+        "care",
+        "laundry",
+        "planning",
+        "lean",
+        "defects"
+      ],
+      "supplies": {
+        "tools": [
+          "2–4 hampers or bags",
+          "stain treatment tool"
+        ],
+        "consumables": [
+          "detergent"
+        ],
+        "optional": [
+          "oxygen bleach (color-safe)",
+          "mesh bags"
+        ]
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Define sort bins",
+          "action": "Pick bins: lights/darks/towels/delicates (adjust to your household).",
+          "ui": {
+            "control": "chips",
+            "options": [
+              "lights",
+              "darks",
+              "towels",
+              "delicates",
+              "workwear",
+              "bedding"
+            ]
+          }
+        },
+        {
+          "i": 2,
+          "title": "Set care rules",
+          "action": "Set default water temp and drying rules per bin.",
+          "ui": {
+            "control": "matrix",
+            "rowsFrom": "selectedBins",
+            "cols": [
+              "washTemp",
+              "dryMethod",
+              "preTreat"
+            ]
+          }
+        },
+        {
+          "i": 3,
+          "title": "Stain triage",
+          "action": "Create a quick stain triage step: treat now vs soak later vs professional.",
+          "ui": {
+            "control": "select",
+            "options": [
+              "treat_now",
+              "soak_later",
+              "professional"
+            ]
+          }
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "Sort system exists; fewer rewashes and damaged items."
+        ],
+        "qualityChecks": [
+          "Delicates and dyed items protected with mesh/low heat."
+        ],
+        "commonMistakes": [
+          "Overloading washer; mixing towels with lint-sensitive fabrics."
+        ]
+      },
+      "kpiHints": {
+        "countsToward": [
+          "textiles.laundry.defects.down",
+          "home.time.saved"
+        ],
+        "estimatedMinutes": 12
+      },
+      "lean": {
+        "wastes": [
+          "defects",
+          "motion",
+          "waiting"
+        ],
+        "countermeasures": [
+          "standard bins",
+          "stain kit stationed",
+          "weekly laundry cadence"
+        ]
+      }
+    },
+    {
+      "id": "textiles.mend.basic_repair_kit",
+      "name": "Set Up a Basic Mending Kit",
+      "summary": "Assemble a small kit so repairs happen quickly (buttons, hems, small tears).",
+      "tags": [
+        "mending",
+        "setup",
+        "lean",
+        "standard_work"
+      ],
+      "supplies": {
+        "tools": [
+          "needles",
+          "thread",
+          "scissors",
+          "seam ripper",
+          "pins/clips",
+          "measuring tape"
+        ],
+        "consumables": [
+          "buttons",
+          "iron-on patches"
+        ],
+        "optional": [
+          "thimble",
+          "darning mushroom"
+        ]
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Choose kit container",
+          "action": "Pick a container and a home location (reachable).",
+          "ui": {
+            "control": "text",
+            "placeholder": "Where will you keep it?"
+          }
+        },
+        {
+          "i": 2,
+          "title": "Stock essentials",
+          "action": "Add needles, thread colors, scissors, seam ripper, pins/clips, tape.",
+          "checks": [
+            "Needles",
+            "Thread",
+            "Scissors",
+            "Seam ripper"
+          ]
+        },
+        {
+          "i": 3,
+          "title": "Add common replacements",
+          "action": "Add spare buttons and patches matching household wardrobes.",
+          "ui": {
+            "control": "tagInput",
+            "placeholder": "Buttons/patch types"
+          }
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "Kit stocked and easy to find."
+        ],
+        "qualityChecks": [
+          "Needle/pin safety container included."
+        ]
+      },
+      "kpiHints": {
+        "countsToward": [
+          "textiles.mending.ready"
+        ],
+        "estimatedMinutes": 10
+      }
+    },
+    {
+      "id": "textiles.mend.button_replacement",
+      "name": "Replace a Button (Hand Sew)",
+      "summary": "Securely replace a button using a shank (if needed) and locking stitches.",
+      "tags": [
+        "mending",
+        "hand_sew",
+        "repair"
+      ],
+      "supplies": {
+        "tools": [
+          "needle",
+          "thread",
+          "scissors"
+        ],
+        "consumables": [
+          "replacement button"
+        ],
+        "optional": [
+          "toothpick for shank",
+          "thimble"
+        ]
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Match button + thread",
+          "action": "Choose a matching button and strong thread.",
+          "checks": [
+            "Button matches size",
+            "Thread strong enough"
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Anchor thread",
+          "action": "Double thread, knot, and anchor from the inside.",
+          "cues": [
+            "Use small tight stitches on the inside."
+          ]
+        },
+        {
+          "i": 3,
+          "title": "Sew button",
+          "action": "Stitch through holes 6–10 times; create a small shank if fabric is thick.",
+          "timerSec": 300,
+          "cues": [
+            "Do not over-tighten; allow fabric movement."
+          ]
+        },
+        {
+          "i": 4,
+          "title": "Lock + finish",
+          "action": "Wrap thread under button 3–5 times, then knot inside.",
+          "checks": [
+            "Button sits flat",
+            "No thread slack"
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "Button secure and aligned."
+        ],
+        "qualityChecks": [
+          "Stitch path repeats consistently; knot secure."
+        ]
+      },
+      "kpiHints": {
+        "countsToward": [
+          "textiles.repairs.completed"
+        ],
+        "estimatedMinutes": 8
+      }
+    },
+    {
+      "id": "textiles.mend.hem_fix_hand",
+      "name": "Fix a Hem (Hand Stitch)",
+      "summary": "Repair or re-hem using a blind stitch or simple running stitch depending on garment.",
+      "tags": [
+        "mending",
+        "hemming",
+        "hand_sew"
+      ],
+      "supplies": {
+        "tools": [
+          "needle",
+          "thread",
+          "pins/clips",
+          "iron"
+        ],
+        "consumables": [],
+        "optional": [
+          "hemming tape"
+        ]
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Press hem",
+          "action": "Press fold to desired length; pin/clip.",
+          "timerSec": 180
+        },
+        {
+          "i": 2,
+          "title": "Stitch",
+          "action": "Use blind stitch for dress pants/skirts; running stitch for casual wear.",
+          "ui": {
+            "control": "select",
+            "options": [
+              "blind",
+              "running"
+            ]
+          }
+        },
+        {
+          "i": 3,
+          "title": "Finish",
+          "action": "Knot, trim, press again.",
+          "checks": [
+            "Hem even",
+            "No puckering"
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "Hem is even and secure."
+        ],
+        "qualityChecks": [
+          "Stitches not visible from outside (if blind)."
+        ]
+      },
+      "kpiHints": {
+        "countsToward": [
+          "textiles.repairs.completed"
+        ],
+        "estimatedMinutes": 20
+      }
+    },
+    {
+      "id": "textiles.sew.machine_basic_seam",
+      "name": "Sew a Basic Machine Seam",
+      "summary": "Sew a straight seam with seam allowance, backstitching, and pressing.",
+      "tags": [
+        "sewing",
+        "machine",
+        "construction"
+      ],
+      "supplies": {
+        "tools": [
+          "sewing machine",
+          "pins/clips",
+          "scissors",
+          "iron"
+        ],
+        "consumables": [
+          "thread"
+        ],
+        "optional": [
+          "seam gauge",
+          "walking foot"
+        ]
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Prep",
+          "action": "Choose needle type, set stitch length, and test on scrap.",
+          "checks": [
+            "Thread tension ok",
+            "Stitch length set"
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Align + pin",
+          "action": "Align fabric edges; pin/clip within seam allowance."
+        },
+        {
+          "i": 3,
+          "title": "Sew seam",
+          "action": "Sew with backstitch at start/end.",
+          "cues": [
+            "Guide, don't pull fabric."
+          ]
+        },
+        {
+          "i": 4,
+          "title": "Press",
+          "action": "Press seam flat, then press open/to one side.",
+          "timerSec": 120
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "Seam is straight with consistent allowance."
+        ],
+        "qualityChecks": [
+          "No skipped stitches; seam pressed."
+        ]
+      },
+      "kpiHints": {
+        "countsToward": [
+          "textiles.sewing.outputs"
+        ],
+        "estimatedMinutes": 25
+      }
+    },
+    {
+      "id": "textiles.weave.warp_setup_basic",
+      "name": "Basic Warp Setup (Loom)",
+      "summary": "Plan and set up a basic warp with even tension and secure tie-on.",
+      "tags": [
+        "weaving",
+        "loom",
+        "setup"
+      ],
+      "supplies": {
+        "tools": [
+          "loom",
+          "measuring tape",
+          "warp board (or pegs)"
+        ],
+        "consumables": [
+          "warp yarn"
+        ],
+        "optional": [
+          "lease sticks"
+        ]
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Plan warp",
+          "action": "Set width, length, ends-per-inch target, and yarn choice.",
+          "ui": {
+            "control": "form",
+            "fields": [
+              "width",
+              "length",
+              "epi",
+              "yarnType"
+            ]
+          }
+        },
+        {
+          "i": 2,
+          "title": "Wind warp",
+          "action": "Wind warp with counting; keep cross intact.",
+          "timerSec": 900,
+          "cues": [
+            "Count carefully; use markers every 10–20 ends."
+          ]
+        },
+        {
+          "i": 3,
+          "title": "Dress loom",
+          "action": "Beam warp, thread heddles/reed, and tie on evenly.",
+          "timerSec": 1800
+        },
+        {
+          "i": 4,
+          "title": "Tension check",
+          "action": "Check for even tension; adjust before weaving.",
+          "checks": [
+            "Even tension across width"
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "Warp dressed with even tension."
+        ],
+        "qualityChecks": [
+          "No crossed threads; cross preserved."
+        ]
+      },
+      "kpiHints": {
+        "countsToward": [
+          "textiles.weaving.ready"
+        ],
+        "estimatedMinutes": 90
+      }
+    },
+    {
+      "id": "textiles.knit.cast_on_basic",
+      "name": "Basic Cast-On + Gauge Check (Knitting)",
+      "summary": "Cast on and knit a small swatch to confirm gauge before a project.",
+      "tags": [
+        "knitting",
+        "planning",
+        "quality"
+      ],
+      "supplies": {
+        "tools": [
+          "knitting needles",
+          "measuring tape"
+        ],
+        "consumables": [
+          "yarn"
+        ],
+        "optional": [
+          "row counter"
+        ]
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Cast on",
+          "action": "Cast on enough stitches for a swatch (e.g., 30).",
+          "ui": {
+            "control": "number",
+            "field": "castOnStitches"
+          }
+        },
+        {
+          "i": 2,
+          "title": "Knit swatch",
+          "action": "Knit 4–6 inches in pattern stitch.",
+          "timerSec": 1800
+        },
+        {
+          "i": 3,
+          "title": "Measure gauge",
+          "action": "Measure stitches/rows per 4 inches; adjust needle size if needed.",
+          "checks": [
+            "Gauge recorded"
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "Gauge recorded; project plan updated."
+        ],
+        "qualityChecks": [
+          "Swatch washed/dried if garment will be washed."
+        ]
+      },
+      "kpiHints": {
+        "countsToward": [
+          "textiles.knitting.quality"
+        ],
+        "estimatedMinutes": 45
+      }
+    },
+    {
+      "id": "textiles.dye.natural_bundle",
+      "name": "Natural Dye Bath (Bundle Basics)",
+      "summary": "Prepare a small natural dye bath with safe handling and recordkeeping for repeatability.",
+      "tags": [
+        "dye",
+        "natural",
+        "recordkeeping",
+        "culture_variant"
+      ],
+      "supplies": {
+        "tools": [
+          "pot (dedicated)",
+          "stir stick",
+          "thermometer (optional)"
+        ],
+        "consumables": [
+          "dye material",
+          "mordant if used"
+        ],
+        "optional": [
+          "pH strips"
+        ]
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Safety + setup",
+          "action": "Ventilate, protect surfaces, and prep a dedicated pot.",
+          "checks": [
+            "Ventilation",
+            "Gloves/mask if powders"
+          ]
+        },
+        {
+          "i": 2,
+          "title": "Scour fabric",
+          "action": "Wash/scour fabric so dye takes evenly.",
+          "timerSec": 1200
+        },
+        {
+          "i": 3,
+          "title": "Prepare dye bath",
+          "action": "Simmer dye material; strain if needed.",
+          "timerSec": 2400,
+          "cues": [
+            "Keep below rolling boil unless method specifies."
+          ]
+        },
+        {
+          "i": 4,
+          "title": "Dye + record",
+          "action": "Dye fabric and record recipe/time/temp for repeatability.",
+          "checks": [
+            "Recipe recorded",
+            "Time recorded"
+          ]
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "Dyed item with recorded process."
+        ],
+        "qualityChecks": [
+          "Even color; rinsed until clear."
+        ]
+      },
+      "kpiHints": {
+        "countsToward": [
+          "textiles.dye.completed"
+        ],
+        "estimatedMinutes": 90
+      },
+      "variants": [
+        {
+          "id": "textiles.dye.natural_indigo_vat",
+          "name": "Indigo Vat (Opt-in Variant)",
+          "changes": {
+            "notes": [
+              "Indigo requires specialized chemistry; follow a trusted process and record carefully."
+            ],
+            "addSafety": [
+              "Avoid inhaling powders; use dedicated tools."
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "textiles.plan.capsule_wardrobe_repair",
+      "name": "Repair-First Capsule Plan",
+      "summary": "Plan a repair-first capsule wardrobe refresh: mend, alter, and prioritize durable pieces before buying.",
+      "tags": [
+        "planning",
+        "thrift",
+        "lean",
+        "inventory",
+        "repair_first"
+      ],
+      "supplies": {
+        "tools": [
+          "mending kit",
+          "measuring tape"
+        ],
+        "consumables": [],
+        "optional": [
+          "fabric swatches",
+          "notebook"
+        ]
+      },
+      "defaultSteps": [
+        {
+          "i": 1,
+          "title": "Inventory garments",
+          "action": "List key garments and condition (good/repair/replace).",
+          "ui": {
+            "control": "table",
+            "columns": [
+              "item",
+              "condition",
+              "notes"
+            ]
+          }
+        },
+        {
+          "i": 2,
+          "title": "Prioritize repairs",
+          "action": "Pick top 3 repairs that unlock multiple outfits.",
+          "ui": {
+            "control": "ranker",
+            "max": 3
+          }
+        },
+        {
+          "i": 3,
+          "title": "Set purchase guardrails",
+          "action": "Set budget and quality constraints for any replacement items.",
+          "ui": {
+            "control": "form",
+            "fields": [
+              "budgetCap",
+              "materialsPreferred"
+            ]
+          }
+        }
+      ],
+      "cues": {
+        "doneLooksLike": [
+          "Repair plan created; purchases reduced."
+        ],
+        "qualityChecks": [
+          "Budget and quality constraints set."
+        ]
+      },
+      "kpiHints": {
+        "countsToward": [
+          "textiles.thrift.savings"
+        ],
+        "estimatedMinutes": 20
+      },
+      "lean": {
+        "wastes": [
+          "overproduction",
+          "inventory",
+          "defects"
+        ],
+        "countermeasures": [
+          "repair-first policy",
+          "standardize staples",
+          "track cost-per-wear"
+        ]
+      }
+    }
+  ]
+}

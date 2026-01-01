@@ -1,0 +1,296 @@
+{
+  "meta": {
+    "name": "Suka Smart Assistant – Architectural Boundaries",
+    "version": "1.0.0",
+    "generatedAt": "2025-10-29T16:20:00Z",
+    "notes": [
+      "SVFFH is a separate app. Only entitlement gating via SVFFHAuthBridge ➜ SVFFHClaims ➜ EntitlementFlags is allowed inside SSA."
+    ]
+  },
+  "aliases": {
+    "@": "src"
+  },
+  "layers": [
+    { "id": "ui", "label": "UI / Pages", "glob": ["src/pages/**", "src/features/**/ui/**"] },
+    { "id": "features", "label": "Feature Shells", "glob": ["src/features/**", "!src/features/**/ui/**", "!src/features/**/services/**", "!src/features/**/managers/**", "!src/features/**/stores/**"] },
+    { "id": "engines", "label": "Engines", "glob": ["src/engines/**"] },
+    { "id": "managers", "label": "Managers", "glob": ["src/managers/**", "src/features/**/managers/**"] },
+    { "id": "services", "label": "Domain Services", "glob": ["src/services/**", "src/features/**/services/**"] },
+    { "id": "stores", "label": "State Stores", "glob": ["src/stores/**", "src/features/**/stores/**"] },
+    { "id": "db", "label": "DB and Schemas", "glob": ["src/db/**", "schemas/**", "src/**/data/fixtures/**"] },
+    { "id": "automation", "label": "Automation & Orchestration", "glob": ["src/services/automation/**", "src/services/session/**", "src/services/schedule/**", "src/services/nba/**", "src/services/storage/**"] },
+    { "id": "identity", "label": "Identity & Entitlements", "glob": ["src/services/auth/**"] },
+    { "id": "external", "label": "External Adapters", "glob": ["src/features/**/services/**/providers/**", "src/features/**/services/**/store-integrations/**"] }
+  ],
+  "rules": [
+    {
+      "id": "layering.ui-downward",
+      "description": "UI may depend only on features, managers, stores, services, engines, automation. UI cannot import db or schemas directly.",
+      "scope": ["src/pages/**", "src/features/**/ui/**"],
+      "allowImportsFrom": ["src/features/**", "src/managers/**", "src/stores/**", "src/services/**", "src/engines/**", "src/services/automation/**", "src/services/session/**", "src/services/schedule/**", "src/services/nba/**"],
+      "forbidImportsFrom": ["src/db/**", "schemas/**"],
+      "severity": "error",
+      "message": "UI must not touch DB or schemas directly. Use stores/services."
+    },
+    {
+      "id": "layering.features-no-upwards",
+      "description": "Features are shells that cannot import UI or pages.",
+      "scope": ["src/features/**", "!src/features/**/ui/**"],
+      "forbidImportsFrom": ["src/pages/**", "src/features/**/ui/**"],
+      "severity": "error",
+      "message": "Feature shells cannot depend on UI."
+    },
+    {
+      "id": "layering.engines-pure",
+      "description": "Engines must be UI-free and side-effect-light. They may call managers, services, and read/write via stores.",
+      "scope": ["src/engines/**"],
+      "allowImportsFrom": ["src/managers/**", "src/services/**", "src/stores/**", "src/services/automation/**"],
+      "forbidImportsFrom": ["src/pages/**", "src/features/**/ui/**", "src/db/**"],
+      "severity": "error",
+      "message": "Engines cannot import UI or DB."
+    },
+    {
+      "id": "layering.managers-no-ui",
+      "description": "Managers orchestrate domain tasks and cannot import UI.",
+      "scope": ["src/managers/**", "src/features/**/managers/**"],
+      "forbidImportsFrom": ["src/pages/**", "src/features/**/ui/**"],
+      "severity": "error",
+      "message": "Managers cannot import UI."
+    },
+    {
+      "id": "layering.services-no-ui",
+      "description": "Services provide I/O, adapters, workers. No UI imports.",
+      "scope": ["src/services/**", "src/features/**/services/**"],
+      "forbidImportsFrom": ["src/pages/**", "src/features/**/ui/**"],
+      "severity": "error",
+      "message": "Services cannot import UI."
+    },
+    {
+      "id": "layering.stores-lowest",
+      "description": "Stores are low-level state. They cannot import engines or managers.",
+      "scope": ["src/stores/**", "src/features/**/stores/**"],
+      "forbidImportsFrom": ["src/engines/**", "src/managers/**"],
+      "severity": "error",
+      "message": "Stores must not import engines or managers."
+    },
+    {
+      "id": "db.access-through-stores",
+      "description": "Only stores may access DexieDB directly.",
+      "scope": ["src/**"],
+      "allowImportsFrom": [],
+      "forbidImportsFrom": ["src/db/**"],
+      "exceptions": ["src/stores/**", "src/features/**/stores/**"],
+      "severity": "error",
+      "message": "Access DexieDB only from stores."
+    },
+    {
+      "id": "schemas.readonly",
+      "description": "Runtime code cannot write to /schemas. Treat as read-only contracts.",
+      "scope": ["src/**"],
+      "forbidWritesTo": ["schemas/**"],
+      "severity": "error",
+      "message": "Schemas directory is read-only."
+    },
+    {
+      "id": "automation.event-names-catalog",
+      "description": "All dispatched events must be declared in features/scan-compare-trust/automation/events.catalog.js or services/automation/events.catalog.js.",
+      "scope": ["src/**"],
+      "requireSymbolFrom": [
+        "src/features/scan-compare-trust/automation/events.catalog.js",
+        "src/services/automation/events.catalog.js"
+      ],
+      "symbolPattern": "EVENT_.*",
+      "severity": "error",
+      "message": "Use the central event catalog for all CustomEvent names."
+    },
+    {
+      "id": "scheduling.schema",
+      "description": "Automation schedules must validate against /schemas/automation.schedule.schema.json.",
+      "scope": ["src/**/automation/schedules/**/*.json"],
+      "validateWithSchema": "schemas/automation.schedule.schema.json",
+      "severity": "error",
+      "message": "Schedule JSON must conform to automation.schedule.schema.json."
+    },
+    {
+      "id": "guards.required-for-sessions",
+      "description": "SessionRunner and PrepSessionOrchestrator must pass through Guards.",
+      "scope": ["src/services/session/**"],
+      "mustImport": ["src/services/session/guards/**"],
+      "severity": "error",
+      "message": "All session flows must include Guards."
+    },
+    {
+      "id": "calendar.mapping-use",
+      "description": "CalendarEngine must map via CalendarMapper and respect Hebrew/Gregorian settings.",
+      "scope": ["src/engines/calendar/**"],
+      "mustImport": ["src/services/calendar/CalendarMapper.js"],
+      "severity": "error",
+      "message": "CalendarEngine must use CalendarMapper."
+    },
+    {
+      "id": "svffh.gating-only",
+      "description": "SVFFH usage inside SSA is limited to auth bridge and entitlement flags. No direct marketplace or hub UI.",
+      "scope": ["src/**"],
+      "forbidImportsFrom": ["src/hub/**", "src/svffh/**", "src/tiers/**"],
+      "mustImportTogether": {
+        "src/services/auth/SVFFHAuthBridge.js": ["src/services/auth/SVFFHClaims.js", "src/stores/useEntitlementFlags.js"]
+      },
+      "severity": "error",
+      "message": "Only SVFFHAuthBridge ➜ SVFFHClaims ➜ EntitlementFlags allowed."
+    },
+    {
+      "id": "entitlements.gate-coop",
+      "description": "Co-op features must be gated by EntitlementFlags.",
+      "scope": ["src/features/coop/**", "src/engines/coop/**", "src/services/templates/**"],
+      "mustReadFromStores": ["src/stores/useEntitlementFlags.js"],
+      "severity": "error",
+      "message": "Co-op code must check EntitlementFlags."
+    },
+    {
+      "id": "scan.pipeline-boundaries",
+      "description": "Scan → OCR → ProductResolver → Pricing/Coupons/Safety must follow the pipeline; UI cannot call adapters directly.",
+      "scope": ["src/features/scan-compare-trust/ui/**"],
+      "forbidImportsFrom": [
+        "src/features/scan-compare-trust/services/pricing/**",
+        "src/features/scan-compare-trust/services/coupons/**",
+        "src/features/scan-compare-trust/services/products/**",
+        "src/features/scan-compare-trust/services/safety/**"
+      ],
+      "mustImport": ["src/features/scan-compare-trust/services/workers/ocr.worker.js"],
+      "severity": "error",
+      "message": "UI must call OCR worker, not adapters directly."
+    },
+    {
+      "id": "pricebook.learn-only",
+      "description": "Only PriceComparator and CycleAnalyzer may write to PricebookManager.",
+      "scope": ["src/**"],
+      "writeWhitelist": {
+        "src/features/scan-compare-trust/managers/PricebookManager.js": [
+          "src/features/scan-compare-trust/services/pricing/PriceComparator.js",
+          "src/features/scan-compare-trust/services/coupons/CycleAnalyzer.js"
+        ]
+      },
+      "severity": "error",
+      "message": "Only comparator/analyzer can update Pricebook."
+    },
+    {
+      "id": "inventory.sync-contract",
+      "description": "InventorySync must be the only bi-directional sync point for Inventory ↔ Recipes/Plans.",
+      "scope": ["src/**"],
+      "forbidImportsFrom": ["src/stores/useInventory.js"],
+      "exceptions": ["src/managers/InventorySync.js", "src/features/**/stores/**", "src/pages/**"],
+      "severity": "warning",
+      "message": "Prefer InventorySync for cross-domain inventory updates."
+    },
+    {
+      "id": "dynamic-imports-heavy",
+      "description": "Heavy features must be lazy-loaded via React.lazy or dynamic import.",
+      "scope": ["src/pages/**", "src/features/**/ui/**"],
+      "requireDynamicImportFor": [
+        "Scanner",
+        "ScanSheet",
+        "PinterestImporter",
+        "MultiTimerPanel",
+        "BatchSessionTray"
+      ],
+      "severity": "warning",
+      "message": "Use dynamic import for heavy UI modules."
+    },
+    {
+      "id": "workers.isolate",
+      "description": "Web workers must not import UI or engines.",
+      "scope": ["src/**/workers/**/*.worker.js"],
+      "forbidImportsFrom": ["src/pages/**", "src/features/**/ui/**", "src/engines/**"],
+      "severity": "error",
+      "message": "Workers must be isolated from UI and engines."
+    },
+    {
+      "id": "exports.public-surface",
+      "description": "Each feature exposes only index.ts(x)/js as public surface.",
+      "scope": ["src/features/**"],
+      "enforceBarrelIndex": true,
+      "severity": "warning",
+      "message": "Import feature modules via feature barrel index."
+    },
+    {
+      "id": "naming.events",
+      "description": "Event names must be UPPER_SNAKE_CASE with 'EVENT_' prefix.",
+      "scope": ["src/**"],
+      "eventNameRegex": "^EVENT_[A-Z0-9_]+$",
+      "severity": "error",
+      "message": "Event names must match ^EVENT_[A-Z0-9_]+$."
+    },
+    {
+      "id": "sabbath.quiet-hours",
+      "description": "Automation must check Sabbath/Quiet Hours guards for scheduled actions.",
+      "scope": ["src/services/automation/**", "src/services/session/**", "src/engines/**"],
+      "mustImport": ["src/services/session/guards/**"],
+      "severity": "error",
+      "message": "Scheduled tasks must respect Guards."
+    },
+    {
+      "id": "calendar.ics-export",
+      "description": "CalendarEngine must export ICS via services/export.",
+      "scope": ["src/engines/calendar/**"],
+      "mustImport": ["src/services/export/**"],
+      "severity": "warning",
+      "message": "Provide ICS export for schedules."
+    },
+    {
+      "id": "accessibility.ui-aria",
+      "description": "Interactive UI elements must include ARIA roles or labels.",
+      "scope": ["src/pages/**", "src/features/**/ui/**"],
+      "requireAria": true,
+      "severity": "warning",
+      "message": "Add ARIA attributes to interactive elements."
+    },
+    {
+      "id": "cohesion.store-isolation",
+      "description": "Stores must not import other stores directly except useEntitlementFlags and useUserProfile.",
+      "scope": ["src/stores/**", "src/features/**/stores/**"],
+      "forbidImportsFrom": ["src/stores/**", "src/features/**/stores/**"],
+      "exceptions": ["src/stores/useEntitlementFlags.js", "src/stores/useUserProfile.js"],
+      "severity": "error",
+      "message": "Avoid cross-store coupling."
+    },
+    {
+      "id": "mapper.timeanddate-only",
+      "description": "Astronomy data must be sourced only via CalendarMapper adapter.",
+      "scope": ["src/**"],
+      "forbidImportsFrom": ["timeanddate.com", "src/services/**/astronomy/**"],
+      "exceptions": ["src/services/calendar/CalendarMapper.js"],
+      "severity": "error",
+      "message": "Use CalendarMapper for astronomy rules."
+    }
+  ],
+  "conventions": {
+    "fileExtensions": ["js", "jsx", "ts", "tsx", "json", "mdx"],
+    "testFolders": ["__tests__", "__specs__"],
+    "barrelIndexNames": ["index.js", "index.ts", "index.jsx", "index.tsx"]
+  },
+  "qualityGates": {
+    "minTestsPerFeature": 1,
+    "maxCircularDependencies": 0,
+    "maxDirectUIImportsPerPage": 12
+  },
+  "exceptions": [
+    {
+      "id": "temp.scan-ui-direct-pricebook",
+      "description": "Temporary allowance for Scan UI to read pricebook insights for badges.",
+      "expires": "2025-12-31",
+      "scope": ["src/features/scan-compare-trust/ui/**"],
+      "allowImportsFrom": ["src/features/scan-compare-trust/managers/PricebookManager.js"],
+      "severity": "warning"
+    }
+  ],
+  "enforcement": {
+    "onError": "fail",
+    "onWarning": "log",
+    "reportFormats": ["json", "console"],
+    "paths": {
+      "projectRoot": "C:/Users/larho/suka-smart-assistant",
+      "depgraph": "tools/ai-pack/depgraph.json",
+      "schemaSchedules": "schemas/automation.schedule.schema.json"
+    }
+  }
+}

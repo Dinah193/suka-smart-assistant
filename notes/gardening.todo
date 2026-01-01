@@ -1,0 +1,319 @@
+# C:\Users\larho\suka-smart-assistant\notes\gardening.todo
+# Suka Smart Assistant — Gardening System Scratch Plan (FULL + COLLAB)
+# Style: BLUF + actionable checklists + event hooks
+# Keep open while building. Check items off. Commit early/often.
+
+0) BLUF
+- Build an intuitive Gardening system that:
+  • Plans beds with companion planting + USDA zone + microclimate.
+  • Aligns seed-start/transplant/harvest to Hebrew calendar (month begins at/near full moon); shift off feasts/Sabbath to prep days.
+  • Runs irrigation/fertigation schedules (organic recipes), with timers.
+  • Logs harvest → Inventory produce[] + Savings ledger + Preservation suggestions and labels.
+  • Supports multi-household collaboration to meet shared harvest targets; allocates crops fairly, staggers sowings, resolves conflicts, and syncs calendars.
+  • Uses horizontal “raised card” layout (Planner | Tasks | Water/Soil | Harvest/Preservation | Inventory/Savings | Collaboration).
+
+1) One-liners (Job → Output → Next Best Action → Events)
+• Plan: “Choose crops & beds → companion map + sow/transplant calendar → ‘Commit Plan’ → garden.plan.committed”
+• Start: “Seed-start timeline → tray map + labels → ‘Print labels’ → garden.seed.labels.printed”
+• Tasks: “Weekly tasks → checklist + photos → ‘Start Session’ → garden.session.started”
+• Water/Soil: “Irrigation & mixes → timers + warnings → ‘Apply’ → garden.irrigation.applied”
+• Harvest: “Log harvest → inventory delta + savings update → ‘Confirm’ → harvest.logged”
+• Preservation: “Method suggestions → trackers + labels → ‘Log preservation’ → preservation.logged”
+• Calendar: “Windows & task blocks (Hebrew-guarded) → ‘Sync’ → calendar.synced”
+• Collaboration: “Targets across households → allocations + schedule → ‘Finalize’ → collab.schedule.finalized”
+
+2) Git setup (branch per feature)
+git checkout -b feat/garden-core
+git add .
+git commit -m "chore(garden): notes/gardening.todo + core scaffolding"
+
+3) Front-end files to (create/update)
+- src/pages/garden/index.jsx
+  ☐ Horizontal raised cards: <GardenPlanner /> | <GardenTasks /> | <WaterSoilPanel /> | <HarvestPanel /> | <InventorySavingsPanel /> | <CollabPanel />
+  ☐ “Garden Vault” (saved plans, seed lots, bed presets) collapsible.
+- src/pages/garden/garden.css
+  ☐ Card elevation, grid gaps, companion badges, sticky header with next sow/transplant date.
+- src/components/garden/GardenPlanner.jsx (NEW)
+  ☐ Select crops/beds; show companion chips; compute sow/transplant windows (Hebrew guard).
+- src/components/garden/GardenTasks.jsx (NEW)
+  ☐ Weekly checklist with photos/tooltips; “power-hour” toggle.
+- src/components/garden/WaterSoilPanel.jsx (NEW)
+  ☐ Irrigation schedule (drip/soaker/manual), fertigation recipes, rainfall ledger; Apply → timers.
+- src/components/garden/HarvestPanel.jsx (NEW)
+  ☐ Quick harvest form (crop/qty/unit/grade/bed) → delta preview; Print labels.
+- src/components/garden/InventorySavingsPanel.jsx (NEW)
+  ☐ produce[] → Confirm → Inventory & Savings; “Move to root cellar” toggle.
+- src/components/garden/CompanionLegend.jsx (NEW)
+  ☐ Badges for companions/antagonists; filters.
+- src/pages/garden/collab/index.jsx (NEW)
+  ☐ Targets | Allocations | Forecast | Schedule/Conflicts; “Finalize & Sync”.
+- src/components/garden/collab/AllocationBoard.jsx (NEW)
+  ☐ Manual fine-tuning per member/crop.
+
+4) Agents & services
+- src/agents/gardenAgent.js (NEW)
+  ☐ buildGardenPlan(crops, beds, zone, prefs, hebrewCal) → {plan, tasks}
+  ☐ computeHarvestDelta(entry, inventory) → { delta, value }
+  ☐ proposePreservation(crop, qty, constraints)
+- src/agents/soilAndWaterAgent.js (NEW or extend)
+  ☐ buildIrrigationPlan(beds, weatherHint, soilType) → timers/mixes
+  ☐ fertigationSchedule(cropStage, recipes) → mix rates + cautions
+- src/agents/gardenCollabAgent.js (NEW)
+  ☐ optimizeAllocations(goal, members, {cropFacts, hebrewCal}) → {allocation, schedule}
+  ☐ forecastYield(allocation, granularity)
+  ☐ detectConflicts(schedule, hebrewCal, calendars)
+  ☐ buildCalendarEventsFromSchedule(schedule)
+  ☐ planCollaborativeGoal({goal, members, cropFacts, hebrewCal, calendars})
+- src/services/automation/runtime.js
+  ☐ Ensure `emit(event, payload)` exists and events below are registered.
+- src/stores/*
+  ☐ GardenStore, InventoryStore, SavingsStore, HebrewCalendarStore (monthStartRule:'fullMoon'), WeatherStore.
+
+5) UI acceptance criteria
+☐ Planner generates companion map + sow/transplant windows in ≤1s perceived.
+☐ Tasks render with tooltips/photos; checklist emits events; “power-hour” works.
+☐ Water/Soil applies timers & prints organic recipes; feast/Sabbath guard on automation.
+☐ Harvest Confirm updates Inventory + Savings; root cellar toggle logs location/date.
+☐ Preservation tracker and label printing per crop.
+☐ Calendar sync respects Hebrew rules; suggests prep-day alternates.
+☐ Collaboration proposes fair allocations, staggers dates, surfaces conflicts, and syncs calendars.
+
+6) Domain preferences & constraints
+- Hebrew calendar: months begin at/near full moon (your rule).
+- Feast/Sabbath: shift actions to previous prep day; flag automation that would run during observance.
+- Storage goals: % fresh | % canned | % frozen | % dehydrated | % fermented (per crop).
+- Predator proofing: fence/gate/trellis warnings; crop-specific notes (e.g., corn+coons).
+- Torah diet: meals suggestions omit pork/shellfish.
+- Safety: low-acid canning warnings; labels include date/method.
+
+7) Event contract (emit/subscribe)
+Emit:
+  • garden.plan.committed ({planId})
+  • garden.session.started|paused|resumed|completed
+  • garden.tasks.updated ({week})
+  • garden.irrigation.applied ({scheduleId})
+  • harvest.logged ({items, value, ts})
+  • preservation.logged ({method, items, ts})
+  • calendar.synced ({events})
+  • collab.goal.created|updated|deleted
+  • collab.allocations.proposed ({allocation, schedule})
+  • collab.conflicts.detected ({items})
+  • collab.schedule.finalized ({events})
+Subscribe:
+  • hebrewCalendar.updated → rebuild schedules
+  • inventory.low → suggest succession planting
+  • weather.updated → adjust irrigation
+  • user.prefs.updated → recompute plans
+
+8) Minimal data shapes (reference)
+/** Bed */ { "id":"bed-1","name":"North Bed","areaSqFt":32,"sun":"full","soil":"loam","irrigation":"drip" }
+/** Crop */ { "id":"tomato","variety":"Roma","daysToMaturity":75,"companions":["basil","marigold"],"antagonists":["fennel"],"successionEveryDays":14 }
+/** GardenPlan */
+{
+  "id":"plan-uuid",
+  "zone":"7b",
+  "hebrewMonthStartRule":"fullMoon",
+  "beds":["bed-1","bed-2"],
+  "crops":[{"cropId":"tomato","bedId":"bed-1","count":8,"spacing":"18in","sun":"full"}],
+  "calendar":[
+    {"cropId":"tomato","type":"seed-start","date":"2025-10-14"},
+    {"cropId":"tomato","type":"transplant","date":"2025-11-04"}
+  ],
+  "companionMap":[{"primary":"tomato","companions":["basil","marigold"],"antagonists":["fennel"]}]
+}
+/** Task */
+{
+  "id":"task-uuid","week":"2025-W42","bedId":"bed-1",
+  "action":"Trellis tomatoes","durationMin":20,"tools":["twine","stakes"],
+  "photos":["/img/trellis.jpg"],"labels":["support","safety"]
+}
+/** HarvestEntry */
+{
+  "id":"harv-uuid","cropId":"tomato","qty":6,"unit":"lb","grade":"A",
+  "bedId":"bed-1","preservation":["can","freeze"],"pricePerUnit":2.2,"ts":"2025-10-08T19:02:00Z"
+}
+/** InventoryDelta */
+{
+  "produce":[{"sku":"TOMATO_ROMA_FRESH","qty":6,"unit":"lb"}],
+  "missing":[],
+  "preservePlan":[{"method":"can","skuOut":"TOMATO_SAUCE_QT","expected":3,"unit":"qt"}]
+}
+/** CollabGoal */
+{
+  "id":"goal-uuid","title":"Community Harvest Q4",
+  "window":{"start":"2025-10-15","end":"2025-12-31"},
+  "targets":[{"cropId":"tomato_roma","qty":120,"unit":"lb","cadence":"monthly"},{"cropId":"green_bean","qty":30,"unit":"qt","cadence":"monthly"}]
+}
+/** Allocation */
+{
+  "goalId":"goal-uuid","memberId":"household-rm","cropId":"tomato_roma",
+  "plan":{"bedId":"bed-1","count":12,"successionEveryDays":14},
+  "expectedYield":{"perSuccession":42,"unit":"lb","successions":2,"total":84}
+}
+
+9) Planning pseudocode (agents)
+/* gardenAgent.js */
+export async function buildGardenPlan(crops,beds,zone,prefs,hebrewCal){
+  const base = assignCropsToBeds(crops,beds,zone,prefs.microclimate);
+  const companionMap = computeCompanions(base);
+  const gregorian = makeSowTransplantSchedule(base,zone);
+  const aligned = shiftByHebrewCalendar(gregorian,hebrewCal,{monthStartRule:'fullMoon'});
+  const tasks = weeklyTasksFromSchedule(aligned,base);
+  return { plan:{...base,companionMap,calendar:aligned}, tasks };
+}
+export async function computeHarvestDelta(entry, inventory){
+  const produce=[{sku:skuFromCrop(entry.cropId),qty:entry.qty,unit:entry.unit}];
+  const value=entry.qty*entry.pricePerUnit;
+  const preservePlan=suggestPreservation(entry.cropId, entry.qty);
+  return { delta:{produce,missing:[],preservePlan}, value };
+}
+
+/* soilAndWaterAgent.js */
+export function buildIrrigationPlan(beds, weatherHint, soilType){
+  // return { scheduleId, timers:[{bedId:'bed-1', start:'2025-10-16T06:00', durationMin:30}] }
+}
+
+/* gardenCollabAgent.js */
+export async function optimizeAllocations(goal,members,{cropFacts,hebrewCal}){
+  // Fairness round-robin; pick bed by sun fit; compute expectedYield; schedule seed-start/transplant/harvest; apply Hebrew guard
+  return { allocation, schedule };
+}
+
+10) UI wiring notes
+- Planner: select crops/beds → buildGardenPlan → setPlan & setTasks.
+- Tasks: checklist emits garden.tasks.updated; power-hour like Cleaning module.
+- Water/Soil: buildIrrigationPlan → timers; “Apply” emits garden.irrigation.applied.
+- Harvest: onConfirm → computeHarvestDelta → show delta modal; Confirm → inventory & savings.
+- Inventory/Savings: show produce[], monthly savings; “Move to root cellar” sets location/date.
+- Preservation: open modal (can/freeze/dehydrate/ferment) + LabelPrinter (reuse from Cooking).
+- Collaboration: goal → optimizeAllocations → schedule → conflicts → finalize → calendar.synced.
+
+11) Organic mix recipes (WaterSoilPanel cards)
+- Compost Tea (aerated): 5gal water + 2c finished compost in mesh + 1 tbsp molasses; aerate 24h; soil drench AM.
+- Fish Emulsion: 1–2 tbsp/gal (per label); no foliar at high heat.
+- Calcium Boost (eggshell vinegar): 1c baked shells + 2c vinegar; steep 2–4 wks; 1–2 tbsp/gal drench.
+- Potassium Boost: 5 banana peels in 1 gal water, 48h; dilute 1:5; apply at flowering.
+- Neem Foliar: 1 tsp neem + 1/2 tsp unscented soap / quart; dusk/dawn; avoid blooms.
+
+12) Calendar sync (skeleton)
+/*
+events = [
+  {title:"Seed Start — Roma Tomato", start:"2025-10-14T09:00:00", end:"2025-10-14T10:00:00"},
+  {title:"Transplant — Roma Tomato", start:"2025-11-04T17:00:00", end:"2025-11-04T18:00:00"},
+  {title:"Irrigation — North Bed", start:"2025-10-16T06:00:00", end:"2025-10-16T06:30:00", meta:{auto:true}}
+]
+emit('calendar.synced',{events})
+*/
+
+13) Inventory & Savings flow
+1) On harvest Confirm:
+   - Create InventoryDelta.produce[]; show human-readable table.
+   - Add Savings entry: qty × pricePerUnit; update monthly total.
+   - If “Move to root cellar”, set location/date; add log.
+   - If preservePlan, open Preservation modal + print labels.
+2) Undo path: keep last patchId; allow revert.
+
+14) Companion planting rules (example set)
+- Tomato: loves basil, marigold; avoid fennel.
+- Brassicas: love dill, chamomile; avoid strawberries.
+- Beans: love corn & squash (Three Sisters); may avoid alliums when pest pressure high.
+- Carrots: love onions/leeks; avoid dill (late shade).
+
+15) Collaboration (Multi-Household Planning)
+Goal
+- Coordinate multiple gardeners to hit shared targets (e.g., “120 lb Roma/mo; 30 qt beans/mo; weekly herbs”), with fair allocations & staggered sowings.
+
+New UI
+- /garden/collab: <TargetSetter /> | <AllocationBoard /> | <ScheduleAligner /> | <SwapBoard />
+- Presence/chat later; start with allocations & schedule.
+
+Agent behaviors
+- optimizeAllocations(goal, members, cropFacts): fairness round-robin; sun/bed fit; expectedYield calc; succession every 7/14 days by cadence.
+- detectConflicts(schedule, hebrewCal, calendars): mark feast/Sabbath/personal overlaps; suggest shifts (-1 day prep / +2 hours).
+- forecastYield(allocation): small sparkline data for UX.
+- planCollaborativeGoal(): all-in-one orchestration → emits collab.* + calendar.synced.
+
+Events
+- collab.goal.created|updated|deleted
+- collab.allocations.proposed
+- collab.conflicts.detected
+- collab.schedule.finalized
+
+Permissions (later)
+- Roles: owner (edit+invite+finalize), editor (edit), viewer (comment).
+- Audit trail for goal/alloc/schedule changes.
+
+SwapBoard (later)
+- Post surplus/deficit offers; accept → update both inventories; expiry dates.
+
+16) Component snippets (wire-in ready)
+/* GardenPlanner.jsx — companion badges
+<CompanionLegend />
+<div className="grid md:grid-cols-2 gap-3">
+  {selectedCrops.map(c => (
+    <div key={c.id} className="card shadow-xl">
+      <div className="card-body">
+        <h3 className="card-title">{c.variety}</h3>
+        <div className="flex flex-wrap gap-2">
+          {c.companions.map(x => <span className="badge badge-success" key={x}>{x}</span>)}
+          {c.antagonists.map(x => <span className="badge badge-error" key={x}>avoid: {x}</span>)}
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+*/
+/* HarvestPanel.jsx — confirm delta
+async function onConfirmHarvest(entry){
+  const { delta, value } = await gardenAgent.computeHarvestDelta(entry, inventory);
+  setDelta(delta); setSavings(s=>s+value); showDeltaModal(delta);
+}
+*/
+/* InventorySavingsPanel.jsx — root cellar toggle
+function onMoveToRootCellar(item){
+  updateInventoryLocation(item.sku,"root_cellar"); toast.success("Moved to root cellar.");
+}
+*/
+/* Collab Schedule — finalize
+async function finalize(){
+  const events = buildCalendarEventsFromSchedule(schedule);
+  emit('collab.schedule.finalized',{events});
+  emit('calendar.synced',{events});
+}
+*/
+
+17) VS Code steps (you now)
+☐ Create folders: src/pages/garden/, src/components/garden/, src/pages/garden/collab/, src/components/garden/collab/
+☐ Scaffold components in §3; add route /tier2/household/garden and /tier2/household/garden/collab.
+☐ Implement gardenAgent.js & soilAndWaterAgent.js stubs; return plausible schedules.
+☐ Implement GardenPlanner (crops → plan → tasks) & CompanionLegend.
+☐ Implement HarvestPanel + InventorySavingsPanel (delta preview + savings ledger + root cellar toggle).
+☐ Implement WaterSoilPanel (organic recipes + Apply timers).
+☐ Implement Collaboration page + AllocationBoard; wire events.
+☐ Add Hebrew calendar guard (monthStartRule:'fullMoon') in scheduling.
+
+18) Commit cadence
+- feat: GardenPlanner + companion map + Hebrew-aligned schedule
+- feat: GardenTasks checklist + power-hour
+- feat: WaterSoilPanel irrigation + organic mixes + timers
+- feat: HarvestPanel → Inventory & Savings + root cellar toggle
+- feat: Preservation modal + label printing
+- feat: Collaboration planner + allocations + conflicts + calendar sync
+- chore: garden.css (raised cards & badges)
+- fix: bed assignment & succession edge cases
+
+19) Done = Definition
+☐ Companion map + sow/transplant calendar ≤1s perceived; Hebrew guard functioning.
+☐ Tasks smooth; events emitted; power-hour responsive.
+☐ Irrigation/fertigation timers applied with safety notes.
+☐ Harvest → Inventory & Savings correct; labels print; undo works.
+☐ Preservation logs; labels per method; safety warnings for low-acid canning.
+☐ Collaboration allocations fair; conflicts clear with suggested fixes; calendars synced.
+☐ No console errors; responsive; horizontal raised cards on desktop.
+
+20) Parking lot
+- Succession forecast with yield curves by week.
+- Pest camera classifier (hornworm/leaf spot) → organic treatment suggestions.
+- Market board: surplus swap within Family Fund network.
+- ROI dashboard (inputs vs savings).
+- Waze-map overlay for suppliers (seed/compost) per your mapping integration.

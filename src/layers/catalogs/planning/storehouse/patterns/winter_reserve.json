@@ -1,0 +1,233 @@
+{
+  "id": "pat.storehouse.winter_reserve",
+  "domain": "storehouse",
+  "kind": "planning_pattern",
+  "title": "Winter Reserve Build",
+  "description": "Build winter reserves with stable storage emphasis.",
+  "intentTags": [
+    "plan:storehouse",
+    "mode:seasonalReserve",
+    "season:winter"
+  ],
+  "inputs": [
+    {
+      "key": "storageZones",
+      "label": "Storage zones",
+      "type": "array",
+      "required": true,
+      "default": [
+        "pantry",
+        "cold",
+        "frozen",
+        "rootCellar",
+        "fermentationRoom"
+      ],
+      "notes": "Zones: pantry/cold/frozen/root cellar/fermentation room."
+    },
+    {
+      "key": "inventorySnapshot",
+      "label": "Inventory snapshot",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "budgetCap",
+      "label": "Budget cap (optional)",
+      "type": "number"
+    },
+    {
+      "key": "spaceCap",
+      "label": "Space cap (optional)",
+      "type": "object"
+    },
+    {
+      "key": "timeCapMinutes",
+      "label": "Time cap (minutes)",
+      "type": "number"
+    },
+    {
+      "key": "householdSize",
+      "label": "Household size",
+      "type": "number",
+      "default": 4
+    },
+    {
+      "key": "season",
+      "label": "Season / mode",
+      "type": "string"
+    }
+  ],
+  "outputs": [
+    {
+      "key": "reorderActions",
+      "label": "Reorder actions",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "rotationActions",
+      "label": "Rotation actions (FIFO)",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "preservationTriggers",
+      "label": "Preservation triggers (surplus risk)",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "sessions",
+      "label": "Session blueprints requested",
+      "type": "array",
+      "required": true
+    }
+  ],
+  "constraints": [
+    "budgetCap",
+    "spaceCap",
+    "timeCap",
+    "allergiesAvoidList"
+  ],
+  "requires": [
+    "artifact:inventorySnapshot"
+  ],
+  "produces": [
+    "artifact:reorderList",
+    "artifact:rotationPlan",
+    "blueprint:storehouseSessions",
+    "trigger:preservation"
+  ],
+  "lean": {
+    "wasteTargets": [
+      "motion",
+      "transport",
+      "inventory",
+      "defects",
+      "waiting"
+    ],
+    "standardWorkRefs": [
+      "stdwork.fifo.labels",
+      "stdwork.cycle.count",
+      "stdwork.zone.layout"
+    ],
+    "taktModelRef": "takt.household.storehouse",
+    "kpiTargets": {
+      "spoilageRate": "reduce",
+      "tripsPerWeek": "reduce",
+      "stockouts": "reduce",
+      "overstocks": "reduce"
+    }
+  },
+  "ui": {
+    "icon": "warehouse",
+    "chips": [
+      "time:high",
+      "difficulty:high",
+      "zones:pantry+rootCellar+frozen"
+    ],
+    "defaultFilters": {
+      "domain": "storehouse"
+    },
+    "form": [
+      {
+        "key": "reserveWeeks",
+        "type": "slider",
+        "label": "Reserve duration (weeks)",
+        "min": 2,
+        "max": 24,
+        "default": 12
+      },
+      {
+        "key": "stableFirst",
+        "type": "toggle",
+        "label": "Prioritize stable storage first",
+        "default": true
+      }
+    ]
+  },
+  "steps": [
+    {
+      "id": "inv.snapshot",
+      "title": "Confirm inventory snapshot (all zones)",
+      "template": "tpl.inventory.snapshot.confirm",
+      "domain": "storehouse",
+      "params": {
+        "zones": [
+          "pantry",
+          "cold",
+          "frozen",
+          "rootCellar",
+          "fermentationRoom"
+        ]
+      }
+    },
+    {
+      "id": "reserve.plan",
+      "title": "Compute reserve plan",
+      "template": "tpl.storehouse.reserve.compute",
+      "domain": "storehouse",
+      "params": {
+        "reserveWeeksKey": "reserveWeeks",
+        "stableFirstKey": "stableFirst"
+      }
+    },
+    {
+      "id": "reorder.build",
+      "title": "Build reorder actions",
+      "template": "tpl.storehouse.reorder.build",
+      "domain": "storehouse",
+      "params": {
+        "respectBudgetKey": "budgetCap",
+        "dedupe": true
+      }
+    },
+    {
+      "id": "preserve.trigger",
+      "title": "Trigger preservation sessions (late harvest)",
+      "template": "tpl.preservation.trigger.sessions",
+      "domain": "homestead",
+      "params": {
+        "methods": [
+          "can",
+          "dehydrate",
+          "freeze",
+          "ferment"
+        ],
+        "emitEvent": "session.blueprints.created"
+      },
+      "optional": true
+    }
+  ],
+  "kpis": [
+    {
+      "key": "stockouts",
+      "label": "Stockouts (winter)",
+      "direction": "down",
+      "unit": "count"
+    },
+    {
+      "key": "overstocks",
+      "label": "Overstocks",
+      "direction": "down",
+      "unit": "count"
+    },
+    {
+      "key": "spoilageRate",
+      "label": "Spoilage rate",
+      "direction": "down",
+      "unit": "%"
+    }
+  ],
+  "variants": [],
+  "links": {
+    "preservationSuggested": [
+      "pat.meals.preservation_first"
+    ]
+  },
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "tags": []
+  }
+}

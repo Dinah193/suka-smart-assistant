@@ -1,0 +1,407 @@
+{
+  "$schema": "../../schemas/yieldCurve.dairy.schema.json",
+  "version": "2025-10-31T15:15:00-05:00",
+  "meta": {
+    "id": "poultry-egg-layer-standard",
+    "species": "poultry",
+    "title": "Poultry Egg Layer – Standard / Dual-Purpose Friendly",
+    "description": "Daily/weekly egg output curve for a standard household/backyard layer flock (not breed-specific). Assumes good feed, basic shelter, and your calendar mapping. Built to drive storehouse stock planning (eggs → baked goods, breakfast, preserved eggs), meal planning, cleaning/sanitation of coop/nest boxes, garden compost/soil amendments from shells and soiled bedding, and animal acquisition, care, and eventual butchery/culling. Includes reverse generation so user/community egg goals can back into flock size.",
+    "source": "suka-smart-assistant",
+    "tags": [
+      "poultry",
+      "eggs",
+      "layers",
+      "standard",
+      "storehouse",
+      "meal-planning",
+      "cleaning",
+      "garden",
+      "animal-care",
+      "butchery"
+    ],
+    "calendar": {
+      "hebrewMonthStart": "full-moon",
+      "supportsAltStart": true,
+      "notes": "Map production to your Hebrew calendar so pre-feast windows can pull extra eggs."
+    }
+  },
+  "ui": {
+    "layout": "cards/timeline",
+    "hints": {
+      "primaryCTA": "Generate Egg Collection Session",
+      "secondaryCTA": "Save as Favorite",
+      "tertiaryCTA": "Reverse-generate Egg Flock",
+      "showSeasonalityBadge": true,
+      "groupBy": [
+        "phase",
+        "weekOfLay"
+      ]
+    },
+    "badges": [
+      {
+        "text": "Eggs",
+        "color": "amber"
+      },
+      {
+        "text": "Standard Flock",
+        "color": "blue"
+      }
+    ]
+  },
+  "engines": {
+    "primary": "animalSessionEngine",
+    "supports": [
+      "storehouseGoalEngine",
+      "mealPlanEngine",
+      "gardenQueueEngine",
+      "cleaningSessionEngine",
+      "inventoryGoalEngine"
+    ],
+    "notes": "Non-breed-specific layer profile: we target ~0.85–0.95 eggs/day at peak for a healthy backyard layer mix. This feeds all the other domains."
+  },
+  "orchestration": {
+    "bus": "window.__suka?.eventBus",
+    "emitOnLoad": [
+      "yieldcurve.loaded",
+      "animal.poultry.layer.curve.loaded"
+    ],
+    "listen": [
+      "automation.schedule.request",
+      "inventory.restock.request",
+      "storehouse.goal.request",
+      "meal.session.request",
+      "garden.session.request",
+      "cleaning.session.request",
+      "butchery.session.request"
+    ],
+    "sharedScopes": [
+      "meals",
+      "cleaning",
+      "garden",
+      "animals",
+      "storehouse",
+      "inventory"
+    ]
+  },
+  "reverse": {
+    "generateFrom": [
+      "storehouse.targets.eggs",
+      "mealplan.requirements.eggs",
+      "bakery.weekly.eggs",
+      "festival.feast-day.eggs",
+      "community.egg-pool",
+      "coop-pool.eggs"
+    ],
+    "strategies": [
+      {
+        "id": "from-storehouse-egg-target",
+        "title": "Back into flock size from storehouse egg target",
+        "input": {
+          "eggsPerWeekTarget": 84
+        },
+        "output": {
+          "suggestedLayers": 16,
+          "collectionSessionsPerDay": 2,
+          "nestBoxCleaningPerWeek": 2
+        }
+      },
+      {
+        "id": "from-bakery-load",
+        "title": "Back into layers from bakery / baked goods load",
+        "input": {
+          "dozensPerWeek": 6
+        },
+        "output": {
+          "suggestedLayers": 12
+        }
+      },
+      {
+        "id": "from-feast-window",
+        "title": "Back into pre-feast egg build-up",
+        "input": {
+          "daysUntilFeast": 10,
+          "desiredDozens": 10
+        },
+        "output": {
+          "extraCollectionSessions": 1,
+          "autoStorehousePlan": true
+        }
+      }
+    ]
+  },
+  "curve": {
+    "units": "eggs-per-day",
+    "lactationWindowDays": 365,
+    "base": [
+      { "day": 1, "value": 0.1, "stage": "start-lay" },
+      { "day": 7, "value": 0.35, "stage": "start-lay" },
+      { "day": 14, "value": 0.65, "stage": "ramp-up" },
+      { "day": 21, "value": 0.8, "stage": "ramp-up" },
+      { "day": 30, "value": 0.9, "stage": "peak" },
+      { "day": 60, "value": 0.95, "stage": "peak" },
+      { "day": 90, "value": 0.93, "stage": "peak" },
+      { "day": 120, "value": 0.9, "stage": "mid" },
+      { "day": 150, "value": 0.88, "stage": "mid" },
+      { "day": 180, "value": 0.85, "stage": "mid" },
+      { "day": 210, "value": 0.8, "stage": "late" },
+      { "day": 240, "value": 0.75, "stage": "late" },
+      { "day": 270, "value": 0.7, "stage": "late" },
+      { "day": 300, "value": 0.6, "stage": "taper" },
+      { "day": 330, "value": 0.5, "stage": "taper" },
+      { "day": 365, "value": 0.4, "stage": "taper" }
+    ],
+    "weeklyView": [
+      { "week": 1, "avg": 0.22 },
+      { "week": 2, "avg": 0.55 },
+      { "week": 3, "avg": 0.75 },
+      { "week": 4, "avg": 0.88 },
+      { "week": 8, "avg": 0.95 },
+      { "week": 12, "avg": 0.93 },
+      { "week": 16, "avg": 0.9 },
+      { "week": 20, "avg": 0.88 },
+      { "week": 24, "avg": 0.85 },
+      { "week": 28, "avg": 0.8 },
+      { "week": 32, "avg": 0.75 },
+      { "week": 36, "avg": 0.7 },
+      { "week": 40, "avg": 0.6 },
+      { "week": 48, "avg": 0.5 },
+      { "week": 52, "avg": 0.4 }
+    ]
+  },
+  "adjustments": {
+    "byClimateZone": [
+      {
+        "zone": "hot-humid",
+        "multiplier": 0.9,
+        "notes": "Heat → lower lay. Emit cleaning.session.request for waterers and deep litter refresh."
+      },
+      {
+        "zone": "hot-dry",
+        "multiplier": 0.88,
+        "notes": "Add shade and water checks; send to cleaningSessionEngine."
+      },
+      {
+        "zone": "cold-temperate",
+        "multiplier": 1.0,
+        "notes": "If light is adequate, production stays near baseline. Add coop sealing/cleaning."
+      }
+    ],
+    "byFeedQuality": [
+      { "level": "high", "multiplier": 1.02 },
+      { "level": "medium", "multiplier": 1.0 },
+      { "level": "low", "multiplier": 0.85 }
+    ],
+    "byAgeClass": [
+      {
+        "age": "pullets",
+        "multiplier": 1.0,
+        "notes": "once started"
+      },
+      {
+        "age": "1st-year",
+        "multiplier": 1.0
+      },
+      {
+        "age": "2nd-year",
+        "multiplier": 0.85
+      },
+      {
+        "age": "3rd-year",
+        "multiplier": 0.7
+      }
+    ]
+  },
+  "storehouse": {
+    "targets": {
+      "dozens_per_week": 7,
+      "pickled_eggs_monthly_jars": 3,
+      "baking_eggs_reserve": 24,
+      "festival_buffer_dozens": 4
+    },
+    "grocerySectionsInspiration": [
+      "Dairy & Eggs",
+      "Breakfast & Pancake",
+      "Baking Essentials",
+      "Prepared / Deli (egg salad, quiche)",
+      "Preserved / Pickled",
+      "Animal Feed / Garden Waste Loop"
+    ],
+    "autoPlan": {
+      "enabled": true,
+      "emit": [
+        "storehouse.plan.generated",
+        "inventory.restock.request"
+      ]
+    }
+  },
+  "meals": {
+    "recipes": [
+      {
+        "id": "standard-breakfast-eggs",
+        "title": "Daily Breakfast Eggs",
+        "useWithinHours": 48,
+        "linksTo": [
+          "/meals/breakfast",
+          "/inventory/eggs",
+          "/garden/compost"
+        ]
+      },
+      {
+        "id": "baking-eggs-weekly",
+        "title": "Baking Eggs Weekly Pull",
+        "minEggs": 12,
+        "emit": "cooking.session.request"
+      }
+    ],
+    "autoSession": {
+      "everyDays": 1,
+      "emit": [
+        "meal.session.request",
+        "automation.schedule.request"
+      ]
+    }
+  },
+  "garden": {
+    "eggShellUse": "crushed-to-compost-or-calcium",
+    "emit": [
+      "garden.session.request"
+    ],
+    "notes": "Soiled bedding and shells should be routed to compost → this ties egg output to garden planning / care / harvest."
+  },
+  "cleaning": {
+    "routines": [
+      {
+        "id": "nest-box-daily",
+        "title": "Nest Box Daily Check & Spot Clean",
+        "frequency": "DAILY",
+        "emit": "cleaning.session.request",
+        "tools": [
+          "gloves",
+          "bucket",
+          "sanitizer"
+        ]
+      },
+      {
+        "id": "coop-weekly-deep",
+        "title": "Coop Weekly Deep Clean",
+        "frequency": "WEEKLY",
+        "emit": "cleaning.session.request",
+        "tools": [
+          "rake",
+          "fresh-bedding",
+          "lime"
+        ]
+      },
+      {
+        "id": "waterer-feeder-sanitize",
+        "title": "Waterer & Feeder Sanitizing",
+        "frequency": "WEEKLY",
+        "emit": "cleaning.session.request"
+      }
+    ],
+    "sabbathGuard": true
+  },
+  "animals": {
+    "acquisition": {
+      "allowedSpecies": [
+        "chicken",
+        "poultry",
+        "layer"
+      ],
+      "disallowedSpecies": [
+        "pig",
+        "swine"
+      ],
+      "notes": "Torah-compliant: no unclean stocking in this poultry lane; keep separate from unclean species."
+    },
+    "care": {
+      "collectionPerDay": 2,
+      "healthCheckPerWeek": 1,
+      "dewormSchedule": "SEASONAL",
+      "emit": [
+        "animal.care.session.request"
+      ]
+    },
+    "butchery": {
+      "notes": "Older layers can be culled and sent to butchery. Integrate with existing meat curves (chicken_ranger.json) for carcass and parts mapping.",
+      "emit": [
+        "butchery.session.request",
+        "inventory.restock.request"
+      ]
+    }
+  },
+  "favoriteSessions": [
+    {
+      "id": "fav-daily-egg-collection",
+      "title": "Daily Egg Collection + Nest Box Spot Clean",
+      "domain": "animals/poultry",
+      "schedule": "RRULE:FREQ=DAILY;BYHOUR=9;BYMINUTE=0;BYSECOND=0",
+      "sabbathGuard": true
+    },
+    {
+      "id": "fav-evening-egg-check",
+      "title": "Evening Egg Check",
+      "domain": "animals/poultry",
+      "schedule": "RRULE:FREQ=DAILY;BYHOUR=17;BYMINUTE=30;BYSECOND=0",
+      "sabbathGuard": true
+    },
+    {
+      "id": "fav-weekly-coop-deep-clean",
+      "title": "Weekly Coop Deep Clean",
+      "domain": "cleaning/coop",
+      "schedule": "RRULE:FREQ=WEEKLY;BYDAY=SU;BYHOUR=15;BYMINUTE=0;BYSECOND=0"
+    }
+  ],
+  "scheduleTemplates": [
+    {
+      "id": "layers-twice-daily-collection",
+      "title": "Layers – Twice Daily Egg Collection (Hebrew Calendar Aware)",
+      "rrules": [
+        "RRULE:FREQ=DAILY;BYHOUR=9;BYMINUTE=0;BYSECOND=0",
+        "RRULE:FREQ=DAILY;BYHOUR=17;BYMINUTE=0;BYSECOND=0"
+      ],
+      "options": {
+        "sabbathGuard": true,
+        "quietHoursGuard": true
+      }
+    },
+    {
+      "id": "layers-weekly-coop-clean",
+      "title": "Layers – Weekly Coop Clean",
+      "rrules": [
+        "RRULE:FREQ=WEEKLY;BYDAY=SU;BYHOUR=14;BYMINUTE=0;BYSECOND=0"
+      ],
+      "options": {
+        "sabbathGuard": true
+      }
+    }
+  ],
+  "userProfiles": {
+    "allowUserOwnedSchedules": true,
+    "allowUserOwnedFavorites": true,
+    "allowExportShare": true,
+    "shareFormats": [
+      "json",
+      "suka-plan",
+      "calendar-rrule"
+    ]
+  },
+  "events": {
+    "emits": [
+      "yieldcurve.loaded",
+      "automation.schedule.request",
+      "storehouse.plan.generated",
+      "meal.session.request",
+      "garden.session.request",
+      "cleaning.session.request",
+      "animal.care.session.request",
+      "butchery.session.request"
+    ],
+    "consumes": [
+      "import.payload.ready",
+      "calendar.config.changed",
+      "inventory.updated",
+      "storehouse.targets.changed"
+    ]
+  }
+}

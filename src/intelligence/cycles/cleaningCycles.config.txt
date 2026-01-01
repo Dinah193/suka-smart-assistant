@@ -1,0 +1,435 @@
+===============================================================================
+CLEANING CYCLES CONFIG – DESIGN SPEC
+File: src/intelligence/cycles/cleaningCycles.config.txt
+Role: Config contract for cleaning/hygiene rhythms across the household
+===============================================================================
+
+0. CONCEPTUAL PURPOSE
+---------------------
+The cleaningCycles config describes how the householder’s cleaning and hygiene
+rhythms are structured, so SSA can:
+
+- Understand cleaning as a CYCLE, not random chores.
+- Tie cleaning rhythms to:
+  - cooking cycles (kitchen reset, feast prep/recovery),
+  - storehouse (supplies and provisions for cleaning),
+  - garden/animals (mud, manure, barn and coop cycles),
+  - preservation and butchery (sanitation-heavy cycles),
+  - feasts/events (before/after rhythm),
+  - seasonal shifts (spring reset, pre-winter reset).
+- Provide cycle-aware insights and SessionRunner guidance.
+
+This is **not** an engine by itself; it’s the contract that feeding tools,
+planners, and the householdCycles engine will use to:
+
+- Define zones, rhythms, and yields of a clean, ordered space.
+- Bind cleaning cycles to storehouse provisions (soaps, detergents, cloths).
+- Emit meaningful eventBus events when cleaning rhythms change or drift.
+
+It must support:
+
+- TOOL MODE: A single page or feature can load a local config object and work
+  with cleaning cycles without Dexie or global state.
+- STEWARDSHIP MODE: SSA loads/persists config in Dexie and merges with
+  seasonal intelligence, storehouse, and the householdCycles engine.
+
+Language: cycle, season, storehouse, provision, yield, rhythm, feast, householder.
+Avoid “task list”, “todo”, or generic productivity language.
+
+
+1. STRUCTURE – CONFIG SHAPE & DOMAINS
+-------------------------------------
+Primary domain:
+- cleaning/hygiene
+
+Connected domains:
+- cooking (kitchen resets, dish cycles, grease management)
+- storehouse/provisioning (cleaning supplies inventory, rags, paper products)
+- garden (mud, soil entry, harvest cleanup)
+- animals (barn/coop, milking area, slaughter area)
+- preservation (canning cleanup, ferment zones, dehydrator/smoker hygiene)
+- home maintenance (dust, vents, filters)
+- feasts/events (prep & recovery cycles)
+- textiles (laundry, linens, towels)
+
+The config is conceptually a JSON object (later held in JS):
+
+cleaningCyclesConfig = {
+  version: "1.0.0",
+  lastUpdatedAt: string,
+  modeHint?: "TOOL" | "STEWARDSHIP",
+
+  // Household cleaning zones and their rhythms
+  zones: CleaningZoneConfig[],
+
+  // Reusable cycle templates (daily reset, weekly reset, seasonal reset, feast reset)
+  cycleTemplates: CleaningCycleTemplate[],
+
+  // Seasonal adjustments (spring, pre-winter, feast seasons, rainy/muddy seasons)
+  seasonalAdjustments: CleaningSeasonalAdjustment[],
+
+  // Bindings to storehouse and other domains
+  bindings: {
+    storehouseSupplies: CleaningSupplyBinding[],
+    domainSignals: CleaningDomainSignalBinding[],
+  },
+
+  // Event & insight preferences (how “loud” to be)
+  signals: {
+    rhythmSensitivity: "gentle" | "balanced" | "attentive",
+    sendStorehouseAlerts: boolean,
+    sendFeastReadinessAlerts: boolean,
+    sendSeasonalResetAlerts: boolean,
+  },
+
+  // Optional:
+  metadata?: {
+    householdName?: string,
+    householderProfile?: string,
+  }
+};
+
+
+2. PROPS – DETAILED CONFIG COMPONENTS
+-------------------------------------
+
+2.1 CleaningZoneConfig
+Each zone represents a physical or functional area whose cleanliness is part of
+the household’s rhythm.
+
+CleaningZoneConfig = {
+  id: string,                        // e.g. "kitchen-core", "bathrooms", "animal-barn"
+  label: string,                     // human-facing label
+  domainTags: string[],              // e.g. ["cooking"], ["animals"], ["feasts", "storehouse"]
+  priority: "core" | "supporting",   // core zones affect rhythm more strongly
+
+  // How often its rhythm repeats in ordinary seasons
+  baseRhythms: {
+    daily?: string,                  // templateId for daily reset (if any)
+    weekly?: string,                 // templateId for weekly reset
+    seasonal?: string,               // templateId for seasonal deep reset
+    feastLinked?: string,            // templateId for feast prep/recovery
+  },
+
+  // How cleanliness contributes to “yield” in experience
+  yields: {
+    // conceptual yield, used for insights:
+    comfortScore: number,           // 0..1
+    safetyScore: number,            // 0..1 (sanitation, slip hazards, etc.)
+    hospitalityScore: number,       // 0..1 (guest/feast readiness)
+  },
+
+  // Bindings to storehouse supplies for this zone
+  supplyRefs: string[],              // references into CleaningSupplyBinding
+
+  // Optional contextual hints for SessionRunner & insights
+  notes?: string,
+};
+
+
+2.2 CleaningCycleTemplate
+Reusable rhythm patterns for cleaning, not step lists.
+
+CleaningCycleTemplate = {
+  id: string,                        // e.g. "daily-kitchen-reset"
+  label: string,                     // e.g. "Daily Kitchen Rhythm"
+  rhythmType: "daily" | "weekly" | "seasonal" | "feast-prep" | "feast-recovery",
+  intensity: "light" | "standard" | "deep",
+  typicalDurationMinutes?: number,   // for SessionRunner estimations
+
+  // How strongly this template should influence household posture
+  weight: number,                    // 0..1; cycles with higher weight matter more
+
+  // Domain and storehouse impact
+  storehouseImpact?: {
+    supplyUsageRefs: string[],       // supplyIds likely consumed by this cycle
+    estimatedUsagePerCycle?: { [supplyId: string]: number }, // e.g. ml, count
+  },
+
+  // TODO[cycles-engine]:
+  // Map intensity + frequency into rhythmSignal contributions used by
+  // householdCycles.engine to infer when rhythm is on/off.
+
+  description?: string,
+};
+
+
+2.3 CleaningSeasonalAdjustment
+Describes how cleaning rhythms shift with the seasons and feast windows.
+
+CleaningSeasonalAdjustment = {
+  id: string,
+  label: string,                     // e.g. "Spring Reset", "Pre-Winter Reset"
+  seasonIdPattern: string,           // e.g. "spring", "winter", "feast:unleavenedBread"
+  activeWindow?: {
+    startOffsetFromSeasonStartDays?: number,
+    endOffsetFromSeasonStartDays?: number,
+  },
+
+  // Rhythm multipliers / overrides
+  adjustments: {
+    zoneOverrides?: {
+      [zoneId: string]: {
+        extraTemplates?: string[],   // e.g. seasonal deep cleans
+        intensityOverride?: "light" | "standard" | "deep",
+        frequencyMultiplier?: number,// e.g. 1.5 = more often in this season
+      },
+    },
+
+    // Housewide shifts (e.g. more mud in rainy season)
+    mudSeason?: {
+      enabled: boolean,
+      affectedZones: string[],       // e.g. "entry-mudroom", "animal-barn"
+      frequencyMultiplier: number,
+    },
+  },
+
+  // TODO[seasonal-logic]:
+  // Link this to seasonalIntelligence so that when the Feast or season
+  // approaches, cleaning cycles gently “rise” in intensity and frequency.
+
+  notes?: string,
+};
+
+
+2.4 CleaningSupplyBinding
+Connects cleaning cycles to the storehouse domain.
+
+CleaningSupplyBinding = {
+  id: string,                        // e.g. "all-purpose-cleaner", "barn-disinfectant"
+  label: string,
+  storehouseItemKey: string,         // storehouse/inventory identifier
+  typicalUsePerCycle: {
+    templateIds: string[],           // cycleTemplates where this is used
+    estimatedQuantity: number,       // units per cycle (ml, grams, pieces)
+  },
+
+  // Minimum levels for the storehouse to feel “ready” for cleaning cycles.
+  readinessThreshold?: {
+    comfortable: number,
+    low: number,
+    critical: number,
+  },
+
+  // TODO[storehouse]:
+  // When bound to storehouse, the cycles engine can:
+  // - detect when a cleaning rhythm is at risk due to low supplies,
+  // - emit storehouse readiness insights.
+
+  notes?: string,
+};
+
+
+2.5 CleaningDomainSignalBinding
+Describes how **other domains** trigger or influence cleaning rhythms.
+
+CleaningDomainSignalBinding = {
+  id: string,
+  sourceDomain: string,              // "cooking" | "animals" | "preservation" | ...
+  sourceEventType: string,           // e.g. "session.completed", "harvest.logged"
+  zoneIds: string[],                 // zones affected when this signal fires
+  templateId: string,                // cleaning template linked to this signal
+  influence: "required" | "recommended" | "gentle-reminder",
+
+  // Example: after a “butchery.session.completed”, trigger sanitizing cycle
+  // in "animal-processing" zone with deep intensity.
+
+  // TODO[dependencies]:
+  // The householdCycles.engine can use these bindings to understand that
+  // intense cooking, harvest, butchery, or feast events create a “shadow”
+  // cleaning cycle that should follow not too far behind.
+
+  notes?: string,
+};
+
+
+3. DATA FLOW – HOW THIS CONFIG IS USED
+--------------------------------------
+
+3.1 TOOL MODE
+In TOOL MODE, a single view (e.g. "Cleaning Rhythm Planner" page) can:
+
+- Import or construct a cleaningCyclesConfig object in memory.
+- Let the householder adjust:
+  - zones
+  - cycleTemplates
+  - seasonalAdjustments
+  - storehouseSupplies
+- Use this config to:
+  - Show a visual of cleaning rhythms across days/weeks/seasons.
+  - Suggest SessionRunner sessions (e.g. “Daily Kitchen Rhythm”).
+  - Simulate storehouse supply usage.
+
+No Dexie is required; config can live only in component or local storage.
+An eventBus can still be passed to announce config changes.
+
+Typical TOOL MODE flow:
+
+1) View mounts → loads local cleaningCyclesConfig (static file or generated).
+2) Householder adjusts a zone or template.
+3) View calls `emit("cleaning.cycles.config.updated", ...)`.
+4) HouseholdCycles engine (if present) or just the view itself reacts.
+
+
+3.2 STEWARDSHIP MODE
+In STEWARDSHIP MODE:
+
+- SSA initializes cleaningCyclesConfig once (from Dexie or default JSON).
+- The householdCycles.engine and cleaning domain pages treat this as
+  **shared intelligence** about the household’s cleaning rhythms.
+
+Stewardship data flow:
+
+1) App boot → Dexie loads cleaningCyclesConfig from a table like
+   "cleaningCyclesConfig" or merges defaults with persisted overrides.
+
+2) cleaningCyclesConfig is injected into:
+   - cleaning dashboard
+   - SessionRunner (when domain = “cleaning” or “hygiene”)
+   - householdCycles.engine (through ingestDomainSnapshot or context).
+
+3) When cooking, garden, animals, feasts, or preservation domains emit their
+   events (sessions completed, harvests logged, etc.), the householdCycles.engine
+   uses CleaningDomainSignalBinding to derive follow-up cleaning rhythms.
+
+4) The engine can then:
+   - Emit insights (e.g., “animal barn rhythm is lagging in mud season”).
+   - Trigger readiness checks against storehouse (cleaning supplies).
+   - Suggest SessionRunner cycles that restore the house’s rhythm.
+
+5) Updated config (zones, templates, thresholds) is stored back in Dexie and,
+   if familyFundMode is enabled, summarized for the Family Fund Hub.
+
+
+4. EVENT TRIGGERS – EVENTBUS CONTRACT
+-------------------------------------
+The config itself doesn’t emit events, but **code that uses this config**
+must emit events reflecting config load and updates, and rhythm implications.
+
+All events follow the SSA eventBus contract:
+
+  { type, ts, source, data }
+
+Recommended event types:
+
+1) Config lifecycle
+   - "cleaning.cycles.config.loaded"
+     data: {
+       version,
+       zoneCount,
+       templateCount,
+       seasonalAdjustmentCount,
+     }
+
+   - "cleaning.cycles.config.updated"
+     data: {
+       version,
+       changedBy,            // "householder", "system", or "migration"
+       changesSummary,       // e.g. zonesAdded, templatesModified
+     }
+
+2) Rhythm & season links (triggered by householdCycles.engine or cleaning domain)
+   - "cleaning.cycles.rhythm.derived"
+     data: {
+       zoneId,
+       cycleTemplateId,
+       seasonId,
+       rhythmType,
+       intensity,
+       nextIdealWindow: { from, to },
+     }
+
+   - "cleaning.cycles.seasonal.reset.window"
+     data: {
+       adjustmentId,
+       seasonId,
+       affectedZoneIds,
+       suggestedIntensity,
+     }
+
+3) Storehouse & provisions
+   - "cleaning.storehouse.supplies.status"
+     data: {
+       supplyId,
+       storehouseItemKey,
+       levelState: "comfortable" | "low" | "critical",
+       estimatedCyclesRemaining,
+     }
+
+   - "cleaning.storehouse.provision.risk"
+     data: {
+       zoneIdsAtRisk,
+       missingSupplyIds,
+       message,
+     }
+
+4) Insights for householder
+   - "cleaning.cycles.insight"
+     data: {
+       insightId,
+       kind: "rhythm" | "seasonal" | "storehouse" | "feast-readiness",
+       severity: "info" | "gentle" | "important",
+       zoneIds?: string[],
+       message,
+     }
+
+These events allow:
+
+- Dashboards to show where cleaning rhythms are strong or lagging.
+- Storehouse planners to see cleaning-supply pressure.
+- SessionRunner to propose “Daily Kitchen Rhythm” or “Feast Recovery Rhythm”
+  at appropriate times, not randomly.
+
+
+5. CONCEPTUAL PURPOSE – HOW IT FITS THE WEB OF MEANING
+------------------------------------------------------
+The cleaningCycles config anchors cleaning/hygiene in SSA’s web of meaning.
+
+- It treats cleanliness as a **yield**:
+  - A clean kitchen yields smoother cooking cycles.
+  - A fresh barn yields healthier animals and safer food production.
+  - A reset home yields peace after feasts and intense seasons.
+
+- It respects **seasons**:
+  - Spring, pre-winter, rainy/muddy periods, and feast seasons push cleaning
+    rhythms into different intensities, not from a generic weekly checklist.
+
+- It honors the **storehouse**:
+  - Cleaning provisions (soaps, disinfectants, rags, towels, paper products)
+    are tied to zone rhythms, so the householder can see where supply shortages
+    will disturb the household rhythm before a feast or preservation cycle.
+
+- It connects **domains**:
+  - Garden mud leads to entryway cleaning rhythms.
+  - Butchery and preservation sessions pull in sanitation cycles.
+  - Feast prep and feast recovery define pre- and post-feast rhythms.
+  - Textile cycles (laundry, linens, towels) are linked to bathrooms, kitchen,
+    and guest spaces to support hospitality.
+
+- It supports both **TOOL MODE** and **STEWARDSHIP MODE**:
+  - As a standalone config, it powers a single Cleaning Rhythm Planner tool.
+  - In stewardship mode, it becomes a shared pattern that the householdCycles
+    engine, SessionRunner, storehouse, garden, animals, and feast planners use
+    to keep the whole house moving in a healthy rhythm.
+
+TODO HOOKS (explicit):
+- TODO[seasonal-logic]:
+  - Bind CleaningSeasonalAdjustment entries to seasonalIntelligence so the
+    cleaning dashboard can highlight “Seasonal Reset” windows.
+
+- TODO[cycles-engine]:
+  - Define how baseRhythms + cycleTemplates map into the rhythmSignal used
+    by householdCycles.engine for the cleaning domain.
+
+- TODO[dependencies]:
+  - Fully enumerate which cooking, animals, garden, preservation, and feast
+    events should trigger which cleaning cycle templates.
+
+- TODO[insights]:
+  - Define named insight patterns:
+    - “Kitchen rhythm drifting”: missed daily resets in core cooking season.
+    - “Barn in mud season”: increased cleaning load in rainy periods.
+    - “Feast hall readiness”: zone yields vs upcoming feast window.
+
+END OF SPEC
+===============================================================================

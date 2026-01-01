@@ -1,0 +1,758 @@
+===============================================================================
+DOMAIN GLOSSARY – SSA “WEB OF MEANING”
+File: src/copy/domain-glossary.txt
+Role: Canonical labels + descriptions for SSA domains & cross-domain flows
+===============================================================================
+
+0. PURPOSE
+----------
+This glossary defines **how SSA speaks** about each domain:
+
+- Core household domains (cooking, storehouse, garden, etc.)
+- Advanced domains (butchery, curing, ferments, etc.)
+- Meta domains (cycles engine, seasonal intelligence, dependencies, insights)
+
+Use this file when:
+- naming nav links, section titles, and tooltips,
+- writing contextual help and empty states,
+- designing new tools so they fit the **web of meaning** and not generic “modules”.
+
+Language anchors:
+- cycle, season, storehouse, yield, provision, rhythm, feast, householder, flow.
+Avoid:
+- task, todo, module, workload, productivity app language.
+
+
+1. CORE DOMAINS
+----------------
+
+1.1 COOKING – “Cooking & Meals Rhythm”
+--------------------------------------
+
+[COOKING.ID]
+"cooking"
+
+[COOKING.LABEL_SHORT]
+"Cooking & Meals"
+
+[COOKING.LABEL_FULL]
+"Cooking & Meal Rhythm"
+
+[COOKING.ONE_LINE]
+"Day-to-day meal rhythms that draw from the storehouse and welcome yields."
+
+[COOKING.DESCRIPTION]
+"Cooking in SSA is more than recipes. It is the steady rhythm of preparing
+meals that draw from the storehouse, use garden and animal yields wisely,
+and support feasts and everyday eating without exhausting the householder."
+
+[COOKING.EXAMPLE_FLOWS]
+- "Weeknight stew rhythm"
+- "Sabbath meal flow"
+- "Breakfast-before-work rhythm"
+- "Feast-day preparation cycle"
+
+[COOKING.CORE_DATA]
+- Meal plans
+- Recipes and flows
+- Cooking sessions (SessionRunner)
+- Links to storehouse items and yields
+
+[COOKING.CROSS_DOMAIN]
+- Pulls from: Storehouse, Garden, Animals
+- Feeds: Cleaning rhythms (dishes, kitchen), Feast planning
+- In cycles: garden → preservation → storehouse → meals → cleaning → compost → garden
+
+[COOKING.SAMPLE_UI_STRINGS]
+- "Shape a cooking flow that matches your time, season, and storehouse."
+- "This cooking rhythm draws from grains, beans, and preserved vegetables."
+- "A feast is approaching; consider a gentle cooking plan that honors your storehouse posture."
+
+
+1.2 STOREHOUSE/PROVISIONING – “Storehouse & Provisions”
+-------------------------------------------------------
+
+[STOREHOUSE.ID]
+"storehouse"
+
+[STOREHOUSE.LABEL_SHORT]
+"Storehouse & Provisions"
+
+[STOREHOUSE.LABEL_FULL]
+"Storehouse Snapshot & Planning"
+
+[STOREHOUSE.ONE_LINE]
+"Grains, jars, staples, and long-term provisions that carry the household through seasons."
+
+[STOREHOUSE.DESCRIPTION]
+"The storehouse holds the memory of past cycles: grain, jars, oil, dried goods,
+and other staples. SSA helps the householder see how long the provisions may last,
+where they are leaning, and how they relate to upcoming seasons and feasts."
+
+[STOREHOUSE.EXAMPLE_FLOWS]
+- "Lean-season grain planning"
+- "Oil and sweeteners snapshot"
+- "Winter provision cycle"
+- "Pre-feast supply check"
+
+[STOREHOUSE.CORE_DATA]
+- Inventory categories and quantities
+- Coverage estimates (weeks/months of meals)
+- Draws (usage) and deposits (new yields or purchases)
+- Storehouse posture scores
+
+[STOREHOUSE.CROSS_DOMAIN]
+- Pulls from: Garden yields, Animals yields, Preservation flows, Purchasing
+- Feeds: Cooking rhythms, Feasts, Mutual aid & enterprise
+- In cycles: garden → preservation → storehouse → meals → cleaning → compost → garden
+
+[STOREHOUSE.SAMPLE_UI_STRINGS]
+- "See how your grains, preserves, and daily staples are holding through the season."
+- "Your storehouse is leaning in this category. A small provisioning cycle may be helpful."
+- "This storehouse category holds about three weeks of meals at your current rhythm."
+
+
+1.3 GARDEN – “Garden & Beds”
+----------------------------
+
+[GARDEN.ID]
+"garden"
+
+[GARDEN.LABEL_SHORT]
+"Garden & Beds"
+
+[GARDEN.LABEL_FULL]
+"Garden & Animals – Yields in Motion" (shared panel)  
+"Garden Bed & Planting Flow" (tool)
+
+[GARDEN.ONE_LINE]
+"Beds, plots, and plantings that speak back in yields through the seasons."
+
+[GARDEN.DESCRIPTION]
+"The garden domain covers soil, beds, containers, and plantings. It tracks what was
+sown, when, and what came back in yields. SSA helps the householder see planting
+windows, expected harvests, and how garden yields feed preservation and the storehouse."
+
+[GARDEN.EXAMPLE_FLOWS]
+- "Spring planting cycle for leafy greens"
+- "Root crop rotation rhythm"
+- "Herb bed cutting flow"
+- "Seed starting flow"
+
+[GARDEN.CORE_DATA]
+- Beds and zones
+- Plant types and planted dates
+- Expected and actual yields
+- Seasonal windows for planting and harvest
+
+[GARDEN.CROSS_DOMAIN]
+- Feeds: Preservation, Storehouse, Cooking
+- Receives: Compost from Cleaning/Meals, Water & care flows from maintenance
+- In cycles: garden → preservation → storehouse → meals → cleaning → compost → garden
+
+[GARDEN.SAMPLE_UI_STRINGS]
+- "Plan or log what goes into this soil so it can speak back in yields."
+- "Your garden beds are speaking this week; yields are higher than usual."
+- "A planting window is opening; this may be a gentle time to add a new bed rhythm."
+
+
+1.4 ANIMALS – “Flocks & Herds”
+------------------------------
+
+[ANIMALS.ID]
+"animals"
+
+[ANIMALS.LABEL_SHORT]
+"Flocks & Herds"
+
+[ANIMALS.LABEL_FULL]
+"Flock & Herd Care Rhythm"
+
+[ANIMALS.ONE_LINE]
+"Care cycles for animals that provide eggs, milk, meat, fiber, and manure."
+
+[ANIMALS.DESCRIPTION]
+"The animals domain covers flocks and herds: feeding, watering, observation,
+breeding, and harvesting (milk, eggs, meat, fiber). SSA treats animal care as
+rhythms that yield provisions and require steady attention across seasons."
+
+[ANIMALS.EXAMPLE_FLOWS]
+- "Daily flock feeding rhythm"
+- "Weekly health check flow"
+- "Milk collection cycle"
+- "Butchering season preparation"
+
+[ANIMALS.CORE_DATA]
+- Animal groups and profiles
+- Feeding and care schedules
+- Yield logs (eggs, milk, manure, meat)
+- Health notes and breeding information
+
+[ANIMALS.CROSS_DOMAIN]
+- Feeds: Preservation (meat, broth, fat), Storehouse, Garden (manure/compost)
+- Receives: Storehouse feed provisions
+- In cycles: animals → yields → preservation → storehouse → meals → cleaning → compost → garden
+
+[ANIMALS.SAMPLE_UI_STRINGS]
+- "Map feeding, watering, and observation flows for your animals."
+- "This flock’s yields have been steady across several weeks."
+- "As butchering season approaches, SSA can help you link this yield to preservation flows."
+
+
+1.5 PRESERVATION – “Preservation & Long-Term Provision”
+-------------------------------------------------------
+
+[PRESERVATION.ID]
+"preservation"
+
+[PRESERVATION.LABEL_SHORT]
+"Preservation"
+
+[PRESERVATION.LABEL_FULL]
+"Preservation & Long-Term Provision"
+
+[PRESERVATION.ONE_LINE]
+"Canning, drying, curing, fermenting, and freezing that turn today’s abundance into tomorrow’s provision."
+
+[PRESERVATION.DESCRIPTION]
+"The preservation domain turns fresh yields or bulk purchases into long-term provision.
+Canning, drying, fermenting, freezing, and curing flows connect garden and animals
+to the storehouse. SSA helps the householder choose appropriate preservation rhythms
+for the season and storehouse posture."
+
+[PRESERVATION.EXAMPLE_FLOWS]
+- "Tomato canning cycle"
+- "Bone broth pressure canning flow"
+- "Herb drying rhythm"
+- "Freezer meal batch session"
+
+[PRESERVATION.CORE_DATA]
+- Preservation sessions and methods
+- Input yields and output jars/packs
+- Shelf life and storage locations
+- Links to storehouse entries
+
+[PRESERVATION.CROSS_DOMAIN]
+- Pulls from: Garden yields, Animals yields, Bulk purchases
+- Feeds: Storehouse, Meals, Feasts
+- In cycles: garden/animals → preservation → storehouse → meals
+
+[PRESERVATION.SAMPLE_UI_STRINGS]
+- "Turn today’s abundance into tomorrow’s provision for the storehouse."
+- "This preservation run will help your storehouse carry you through the next season."
+- "A yield flush is here; a preservation or sharing rhythm may be timely."
+
+
+1.6 CLEANING/HYGIENE – “Cleaning & Care”
+----------------------------------------
+
+[CLEANING.ID]
+"cleaning"
+
+[CLEANING.LABEL_SHORT]
+"Cleaning & Care"
+
+[CLEANING.LABEL_FULL]
+"Cleaning & Care Cycle"
+
+[CLEANING.ONE_LINE]
+"Rhythms of care for rooms, laundry, dishes, and personal hygiene that guard rest and dignity."
+
+[CLEANING.DESCRIPTION]
+"The cleaning and hygiene domain covers everyday care: dishes, laundry, floors,
+bathrooms, and personal hygiene flows. SSA treats these as protective rhythms
+that support rest, not as endless chores."
+
+[CLEANING.EXAMPLE_FLOWS]
+- "Evening kitchen reset rhythm"
+- "Weekly laundry flow"
+- "Bathroom cleaning cycle"
+- "Sabbath eve tidy-up"
+
+[CLEANING.CORE_DATA]
+- Rooms/zones and surfaces
+- Care flows and frequencies
+- Cleaning sessions
+- Links to supply usage (soaps, detergents, cloths)
+
+[CLEANING.CROSS_DOMAIN]
+- Follows: Meals (dishes), Feasts (extra cleaning), Preservation sessions
+- Feeds: Compost (food scraps), Textiles care
+- In cycles: meals/preservation → cleaning → compost → garden
+
+[CLEANING.SAMPLE_UI_STRINGS]
+- "Lay out a simple flow to guard rest and dignity in this space."
+- "Cleaning and care rhythms guard rest and dignity in the home. They are part of provision, not an afterthought."
+- "Begin a gentle cleaning cycle that matches your energy this season."
+
+
+1.7 TEXTILES – “Textiles & Garments”
+------------------------------------
+
+[TEXTILES.ID]
+"textiles"
+
+[TEXTILES.LABEL_SHORT]
+"Textiles & Garments"
+
+[TEXTILES.LABEL_FULL]
+"Textile & Garment Care & Making"
+
+[TEXTILES.ONE_LINE]
+"Care, repair, and making of garments, linens, and household textiles."
+
+[TEXTILES.DESCRIPTION]
+"The textiles domain covers clothing, linens, and fabrics: their care, repair,
+rotation, and making. SSA helps the householder see when garments are wearing thin,
+when linens need rotation, and where making or mending fits into the household rhythm."
+
+[TEXTILES.EXAMPLE_FLOWS]
+- "Weekly garment check & mending flow"
+- "Seasonal linen wash & rotation cycle"
+- "Sewing session for new garments"
+- "Winter blanket storage and airing"
+
+[TEXTILES.CORE_DATA]
+- Garment and linen lists
+- Condition and repair notes
+- Making/mending sessions
+- Storage locations
+
+[TEXTILES.CROSS_DOMAIN]
+- Connects to: Cleaning (laundry), Storehouse (textile supplies), Feasts (special garments)
+- Supports: Comfort, warmth, presentation at gatherings
+
+[TEXTILES.SAMPLE_UI_STRINGS]
+- "Map simple flows to care for garments, linens, and household textiles."
+- "This rhythm helps your textiles last across many seasons."
+- "Mending sessions extend the life of garments and lighten future provisioning."
+
+
+1.8 HOME MAINTENANCE – “Home Maintenance & Checks”
+---------------------------------------------------
+
+[MAINTENANCE.ID]
+"homeMaintenance"
+
+[MAINTENANCE.LABEL_SHORT]
+"Home Maintenance"
+
+[MAINTENANCE.LABEL_FULL]
+"Home Maintenance & Checks"
+
+[MAINTENANCE.ONE_LINE]
+"Checks and small fixes that keep the dwelling sound through seasons."
+
+[MAINTENANCE.DESCRIPTION]
+"The home maintenance domain covers structural checks, repairs, and simple fixes:
+roofs, gutters, drains, heating/cooling, doors, and windows. SSA treats these as
+rhythms aligned to seasons (before storms, before winter, etc.) rather than ad-hoc emergencies."
+
+[MAINTENANCE.EXAMPLE_FLOWS]
+- "Pre-winter home check cycle"
+- "Gutter cleaning rhythm"
+- "Quarterly safety check flow"
+- "Roof and drip line inspection"
+
+[MAINTENANCE.CORE_DATA]
+- Maintenance items and areas
+- Inspection flows and frequencies
+- Maintenance sessions and notes
+
+[MAINTENANCE.CROSS_DOMAIN]
+- Protects: Storehouse (from moisture, pests), Living spaces, Garden/Animals infrastructure
+- Ties to: Seasons & weather windows
+
+[MAINTENANCE.SAMPLE_UI_STRINGS]
+- "Shape simple maintenance rhythms that protect your dwelling and storehouse."
+- "This cycle helps prevent quiet leaks that could harm your provisions."
+- "Align maintenance checks with the coming season."
+
+
+1.9 FEASTS/EVENTS – “Feasts, Sabbaths, & Gatherings”
+----------------------------------------------------
+
+[FEASTS.ID]
+"feasts"
+
+[FEASTS.LABEL_SHORT]
+"Feasts & Gatherings"
+
+[FEASTS.LABEL_FULL]
+"Feasts, Sabbaths, & Gatherings"
+
+[FEASTS.ONE_LINE]
+"High points in the cycle where the household draws from the storehouse and welcomes others."
+
+[FEASTS.DESCRIPTION]
+"The feasts and events domain covers sabbaths, appointed times, and key household
+gatherings. SSA helps the householder plan menus, seating, and preparations in a way
+that honors the season and protects the storehouse from strain."
+
+[FEASTS.EXAMPLE_FLOWS]
+- "Weekly Sabbath meal cycle"
+- "Major feast season plan"
+- "Family gathering rhythm"
+- "Post-feast reset flow"
+
+[FEASTS.CORE_DATA]
+- Feast/event definitions and dates
+- Menus and provisions
+- Guest counts
+- Pre- and post-feast rhythms
+
+[FEASTS.CROSS_DOMAIN]
+- Pulls from: Storehouse, Cooking, Preservation
+- Impacts: Cleaning, Mutual aid, Enterprise (if selling or catering)
+- Anchored to: Seasons & calendar
+
+[FEASTS.SAMPLE_UI_STRINGS]
+- "Shape a feast rhythm that honors the season and protects the storehouse."
+- "A feast is approaching; review your storehouse and meal rhythms to welcome it without strain."
+- "Mark this feast so SSA can align rhythms and yields around it."
+
+
+1.10 ENTERPRISE – “Household Enterprise”
+----------------------------------------
+
+[ENTERPRISE.ID]
+"enterprise"
+
+[ENTERPRISE.LABEL_SHORT]
+"Household Enterprise"
+
+[ENTERPRISE.LABEL_FULL]
+"Household Enterprise & Shared Provision"
+
+[ENTERPRISE.ONE_LINE]
+"Flows where the household offers goods or services without starving its own storehouse."
+
+[ENTERPRISE.DESCRIPTION]
+"The enterprise domain covers income-generating and trade activities driven by
+the household: selling products, offering services, running a small food or craft
+operation. SSA helps ensure enterprise flows from surplus and wisdom, not from
+depleting vital provisions."
+
+[ENTERPRISE.EXAMPLE_FLOWS]
+- "Weekly bread baking for sale"
+- "Egg share rhythm"
+- "Seasonal food box delivery cycle"
+- "Craft production flow"
+
+[ENTERPRISE.CORE_DATA]
+- Offers/products and services
+- Required inputs from storehouse or yields
+- Income and trade records
+- Enterprise sessions and cycles
+
+[ENTERPRISE.CROSS_DOMAIN]
+- Pulls from: Storehouse, Garden, Animals, Textiles
+- Impacts: Mutual aid, Storehouse posture
+- Should be checked against: Feast and household needs
+
+[ENTERPRISE.SAMPLE_UI_STRINGS]
+- "Describe how your household offers goods or services without starving its own provision."
+- "This enterprise flow uses surplus eggs and bread from steady rhythms."
+- "Storehouse posture suggests caution before expanding this enterprise cycle."
+
+
+2. ADVANCED DOMAINS
+--------------------
+
+2.1 BUTCHERY – “Butchery & Meat Breakdown”
+------------------------------------------
+
+[BUTCHERY.ID]
+"butchery"
+
+[BUTCHERY.LABEL_SHORT]
+"Butchery"
+
+[BUTCHERY.LABEL_FULL]
+"Butchery & Meat Breakdown"
+
+[BUTCHERY.ONE_LINE]
+"Planning and recording the breaking down of animals into cuts, broth, fat, and preserved meats."
+
+[BUTCHERY.DESCRIPTION]
+"Butchery is the bridge between animal yields and long-term meat provision.
+SSA helps the householder plan when to butcher, how to portion, and how to direct
+each part (fresh meals, preservation, broth, fat, offal)."
+
+[BUTCHERY.CROSS_DOMAIN]
+- From: Animals
+- To: Cooking, Preservation, Storehouse
+
+[TODO.BUTCHERY]
+- Integrate with meat calculators and preservation planners.
+
+
+2.2 CURING – “Curing & Smoking”
+-------------------------------
+
+[CURING.ID]
+"curing"
+
+[CURING.LABEL_SHORT]
+"Curing & Smoking"
+
+[CURING.LABEL_FULL]
+"Curing & Smoking Flows"
+
+[CURING.ONE_LINE]
+"Salt, smoke, and time-based flows that create shelf-stable meats."
+
+[CURING.DESCRIPTION]
+"Curing uses salt, smoke, and controlled time to preserve meats. SSA treats curing
+as a slow, season-aware rhythm that, once started, requires faithful checking and patience."
+
+[CROSS_DOMAIN.CURING]
+- From: Butchery, Animals
+- To: Storehouse, Feasts, Enterprise
+
+
+2.3 FERMENTS/BREWING/WINEMAKING – “Ferments & Brewing”
+------------------------------------------------------
+
+[FERMENTS.ID]
+"ferments"
+
+[FERMENTS.LABEL_SHORT]
+"Ferments & Brewing"
+
+[FERMENTS.LABEL_FULL]
+"Ferments, Brewing, & Winemaking"
+
+[FERMENTS.ONE_LINE]
+"Bubbling flows that transform simple ingredients into preserved and special-use provisions."
+
+[FERMENTS.DESCRIPTION]
+"The ferments and brewing domain covers sourdough, vegetable ferments, vinegars,
+beer, wine, and similar processes. SSA sees these as long, living rhythms that
+add depth to the storehouse and feasts."
+
+[CROSS_DOMAIN.FERMENTS]
+- From: Garden, Storehouse staples
+- To: Storehouse, Feasts, Enterprise
+
+
+2.4 FOOD TRUCK/MOBILE KITCHEN – “Food Truck Mode”
+-------------------------------------------------
+
+[FOOD_TRUCK.ID]
+"foodTruck"
+
+[FOOD_TRUCK.LABEL_SHORT]
+"Food Truck Mode"
+
+[FOOD_TRUCK.LABEL_FULL]
+"Food Truck & Street Provision"
+
+[FOOD_TRUCK.ONE_LINE]
+"Mobile meal flows that extend household cooking rhythms into public spaces."
+
+[FOOD_TRUCK.DESCRIPTION]
+"Food Truck Mode covers street food and mobile kitchen operations based on the
+household’s recipes and provisions. SSA helps balance storehouse use, menu planning,
+and enterprise needs."
+
+[CROSS_DOMAIN.FOOD_TRUCK]
+- From: Cooking, Storehouse
+- To: Enterprise, Mutual aid, Feasts (community scale)
+
+
+2.5 SEASONAL FESTIVALS – “Seasonal Festivals”
+---------------------------------------------
+
+[FESTIVALS.ID]
+"seasonalFestivals"
+
+[FESTIVALS.LABEL_SHORT]
+"Seasonal Festivals"
+
+[FESTIVALS.LABEL_FULL]
+"Seasonal Festivals & Appointed Times"
+
+[FESTIVALS.ONE_LINE]
+"Major seasonal markers where feasts, rest, and provision meet."
+
+[FESTIVALS.DESCRIPTION]
+"Seasonal festivals are clusters of feasts tied to the calendar and harvest.
+SSA helps align storehouse, cooking, and rest rhythms with these concentrated times."
+
+[CROSS_DOMAIN.FESTIVALS]
+- Integrates: Feasts, Storehouse, Cooking, Cleaning, Mutual aid
+
+
+2.6 MUTUAL-AID COOKING DAYS – “Mutual Aid Cooking Days”
+-------------------------------------------------------
+
+[MUTUAL_AID_COOKING.ID]
+"mutualAidCooking"
+
+[MUTUAL_AID_COOKING.LABEL_SHORT]
+"Mutual Aid Cooking Days"
+
+[MUTUAL_AID_COOKING.LABEL_FULL]
+"Mutual Aid Cooking Days & Shared Provision"
+
+[MUTUAL_AID_COOKING.ONE_LINE]
+"Collective cooking and preservation days to support multiple households."
+
+[MUTUAL_AID_COOKING.DESCRIPTION]
+"Mutual-aid cooking days are shared sessions where households cook, preserve,
+and distribute provision together. SSA helps track contributions, yields, and
+distribution without losing track of each storehouse’s needs."
+
+[CROSS_DOMAIN.MUTUAL_AID_COOKING]
+- Mixes: Cooking, Preservation, Storehouse, Enterprise, Feasts
+
+
+3. META DOMAINS
+----------------
+
+3.1 CYCLES ENGINE – “Household Cycles”
+--------------------------------------
+
+[CYCLES.ID]
+"cyclesEngine"
+
+[CYCLES.LABEL_SHORT]
+"Household Cycles"
+
+[CYCLES.LABEL_FULL]
+"Household Cycles Engine"
+
+[CYCLES.ONE_LINE]
+"Under-the-surface logic that understands your repeating rhythms, flows, and seasons."
+
+[CYCLES.DESCRIPTION]
+"The cycles engine watches repeated patterns (weekly, seasonal, yearly) and
+helps SSA understand which rhythms are stable, which are drifting, and where
+small changes can relieve strain or deepen yields."
+
+[CYCLES.SAMPLE_UI_STRINGS]
+- "A steady rhythm is forming in this area."
+- "This cycle looks heavy for this season; consider a lighter expression."
+
+
+3.2 SEASONAL INTELLIGENCE – “Season Rules & Windows”
+----------------------------------------------------
+
+[SEASONAL.ID]
+"seasonalIntelligence"
+
+[SEASONAL.LABEL_SHORT]
+"Season Rules & Windows"
+
+[SEASONAL.LABEL_FULL]
+"Seasonal Intelligence & Windows"
+
+[SEASONAL.ONE_LINE]
+"Understanding which rhythms and flows are fitting for each part of the year."
+
+[SEASONAL.DESCRIPTION]
+"Seasonal intelligence uses your region and calendar to mark planting windows,
+preservation seasons, lean periods, and feast clusters so SSA can guide rhythms
+in harmony with time."
+
+[SEASONAL.SAMPLE_UI_STRINGS]
+- "A season has shifted. Your active rhythms may need gentle adjustment."
+- "This is a rich season; preserved yields now will carry you through the lean."
+
+
+3.3 DEPENDENCY GRAPH – “Household Dependency Map”
+-------------------------------------------------
+
+[DEPENDENCIES.ID]
+"dependencyGraph"
+
+[DEPENDENCIES.LABEL_SHORT]
+"Dependency Map"
+
+[DEPENDENCIES.LABEL_FULL]
+"Household Dependency Map"
+
+[DEPENDENCIES.ONE_LINE]
+"The map of how domains depend on each other: garden → preservation → storehouse → meals → cleaning → compost → garden."
+
+[DEPENDENCIES.DESCRIPTION]
+"The dependency graph describes how flows feed and depend on each other so SSA
+can warn about strain (e.g., enterprise pulling too hard on the storehouse) and
+highlight healthy cycles."
+
+[DEPENDENCIES.SAMPLE_UI_STRINGS]
+- "This flow is part of the garden → preservation → storehouse → meals cycle."
+- "Changes here may affect your feast readiness and storehouse posture."
+
+
+3.4 INSIGHTS/RECOMMENDATIONS – “Stewardship Insights”
+-----------------------------------------------------
+
+[INSIGHTS.ID]
+"insights"
+
+[INSIGHTS.LABEL_SHORT]
+"Stewardship Insights"
+
+[INSIGHTS.LABEL_FULL]
+"Stewardship Insights & Reflections"
+
+[INSIGHTS.ONE_LINE]
+"Short reflections drawn from your cycles, seasons, yields, and storehouse posture."
+
+[INSIGHTS.DESCRIPTION]
+"The insights engine weaves domain signals into short reflections that help
+the householder see patterns: strong rhythms, quiet areas, and gentle opportunities."
+
+[INSIGHTS.SAMPLE_UI_STRINGS]
+- "SSA is still learning your rhythms. As you log meals, yields, and sessions, gentle insights will appear here."
+- "Your storehouse and garden rhythm suggest you may be ready for a small preservation cycle this season."
+
+
+3.5 USER PROGRESSION – “Skill & Mastery Progression”
+-----------------------------------------------------
+
+[PROGRESSION.ID]
+"progression"
+
+[PROGRESSION.LABEL_SHORT]
+"Skill & Mastery Progression"
+
+[PROGRESSION.LABEL_FULL]
+"Householder Skill & Mastery Progression"
+
+[PROGRESSION.ONE_LINE]
+"A quiet sense of where the householder stands in skill and stewardship posture."
+
+[PROGRESSION.DESCRIPTION]
+"Progression tracks how rhythms and yields deepen over time. SSA uses it to
+suggest next gentle steps, not to award points or levels."
+
+[PROGRESSION.SAMPLE_UI_STRINGS]
+- "A steady rhythm is forming here; you may be ready to deepen it."
+- "Across the last few seasons, your patterns look like a storehouse-builder stage."
+
+
+4. TODO HOOKS FOR FUTURE INTEGRATION
+------------------------------------
+
+// TODO[seasonal-logic]:
+// - Extend each domain’s description with specific language for planting,
+//   harvest, lean, and feast-heavy seasons based on seasonRules.config.
+
+// TODO[cycles-engine]:
+// - Use these domain IDs in householdCycles.engine to classify flows and
+//   generate domain-aware rhythm insights.
+
+// TODO[dependencies]:
+// - Map each domain’s primary in/out relationships into dependencyMap.txt
+//   so cross-domain alerts (e.g., enterprise drawing too much from storehouse)
+//   can use consistent language from this glossary.
+
+// TODO[insights]:
+// - Build an insights template library that pulls directly from
+//   [DOMAIN].ONE_LINE and [DOMAIN].CROSS_DOMAIN for narrative consistency.
+
+END OF DOMAIN GLOSSARY
+===============================================================================

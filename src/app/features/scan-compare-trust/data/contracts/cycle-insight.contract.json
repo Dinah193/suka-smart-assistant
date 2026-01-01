@@ -1,0 +1,443 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka.local/contracts/cycle-insight.contract.json",
+  "title": "Suka • Cycle Insight (Learned Cadence)",
+  "description": "Learned promo/price/coupon cadence for Scan • Compare • Trust. Supports product/brand/category/store scopes, forecasting, and NBA recommendations.",
+  "type": "object",
+  "additionalProperties": false,
+
+  "required": [
+    "contractVersion",
+    "id",
+    "scope",
+    "subject",
+    "signals",
+    "metrics",
+    "forecast",
+    "confidence"
+  ],
+
+  "properties": {
+    "contractVersion": { "type": "string", "const": "1.0.0" },
+
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9\\-]{10,}$",
+      "description": "Deterministic ID (e.g., sha256-12 of scope+subject+provider family)."
+    },
+
+    "scope": {
+      "type": "string",
+      "enum": ["product", "brand", "category", "store_category", "store_brand"],
+      "description": "What this cycle insight is about."
+    },
+
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Pointer(s) that define the cycle’s subject.",
+      "properties": {
+        "productRef": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "productId": { "type": "string" },
+            "canonicalKey": { "type": "string" }
+          }
+        },
+        "brand": { "type": "string" },
+        "categoryPath": { "type": "array", "items": { "type": "string" } },
+        "store": { "$ref": "#/definitions/StoreRef" },
+        "providers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Adapters/providers this insight draws on (e.g., aldi, sams)."
+        }
+      }
+    },
+
+    "signals": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Raw observations distilled for the learner.",
+      "properties": {
+        "samples": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/SignalSample" }
+        },
+        "summary": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "count": { "type": "integer", "minimum": 0 },
+            "windowStartISO": { "type": "string", "format": "date-time" },
+            "windowEndISO": { "type": "string", "format": "date-time" },
+            "channels": { "type": "array", "items": { "type": "string", "enum": ["in_store","pickup","delivery","online"] } }
+          }
+        }
+      }
+    },
+
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Learned cadence metrics and price depth stats.",
+      "properties": {
+        "pattern": { "type": "string", "enum": ["weekly","biweekly","monthly","seasonal","irregular"] },
+        "periodDaysAvg": { "type": "number", "minimum": 0 },
+        "periodDaysStdDev": { "type": "number", "minimum": 0 },
+        "periodDaysMin": { "type": "number", "minimum": 0 },
+        "periodDaysMax": { "type": "number", "minimum": 0 },
+
+        "bestObserved": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "priceAmount": { "type": "number", "minimum": 0 },
+            "currency": { "type": "string", "minLength": 3, "maxLength": 3 },
+            "unitPrice": { "$ref": "#/definitions/UnitPrice" },
+            "observedAtISO": { "type": "string", "format": "date-time" },
+            "pricebookId": { "type": "string" },
+            "store": { "$ref": "#/definitions/StoreRef" }
+          }
+        },
+
+        "baseline": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Typical non-promo price (median) with spread.",
+          "properties": {
+            "amountMedian": { "type": "number", "minimum": 0 },
+            "amountP10": { "type": "number", "minimum": 0 },
+            "amountP90": { "type": "number", "minimum": 0 },
+            "currency": { "type": "string", "minLength": 3, "maxLength": 3 }
+          }
+        },
+
+        "promoDepth": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "How deep discounts tend to be.",
+          "properties": {
+            "percentOffAvg": { "type": "number", "minimum": 0, "maximum": 100 },
+            "percentOffStdDev": { "type": "number", "minimum": 0, "maximum": 100 },
+            "amountOffAvg": { "type": "number", "minimum": 0 },
+            "amountOffStdDev": { "type": "number", "minimum": 0 }
+          }
+        },
+
+        "seasonality": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Calendar-based tendencies.",
+          "properties": {
+            "weekdayBias": {
+              "type": "array",
+              "items": { "type": "number", "minimum": -1, "maximum": 1 },
+              "minItems": 7,
+              "maxItems": 7,
+              "description": "Index 0..6 = Sun..Sat; positive means more likely."
+            },
+            "monthBias": {
+              "type": "array",
+              "items": { "type": "number", "minimum": -1, "maximum": 1 },
+              "minItems": 12,
+              "maxItems": 12,
+              "description": "Index 0..11 = Jan..Dec."
+            },
+            "holidayAnchors": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Names of holidays/events that align with promos (e.g., Thanksgiving)."
+            }
+          }
+        }
+      }
+    },
+
+    "forecast": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Next expected buy windows with uncertainty.",
+      "properties": {
+        "windows": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/ForecastWindow" }
+        },
+        "horizonDays": { "type": "integer", "minimum": 1 },
+        "generatedAtISO": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "recommendations": {
+      "type": "array",
+      "description": "NBA-ready suggestions derived from the cycle.",
+      "items": { "$ref": "#/definitions/Recommendation" }
+    },
+
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Cross-refs to other artifacts for traceability.",
+      "properties": {
+        "relatedCouponIds": { "type": "array", "items": { "type": "string" } },
+        "relatedProductId": { "type": "string" },
+        "relatedCategoryPath": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+
+    "sourceAttribution": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Attribution" }
+    },
+
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "createdBy": { "type": "string", "description": "e.g., CycleAnalyzer:1.2.0" },
+        "createdAtISO": { "type": "string", "format": "date-time" },
+        "updatedAtISO": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "trust": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "reasons": { "type": "array", "items": { "type": "string" } },
+        "lastEvaluatedISO": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "userContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Per-user overlay: pin to schedules, notes, etc.",
+      "properties": {
+        "isFavorite": { "type": "boolean" },
+        "notes": { "type": "string" },
+        "pinnedSchedules": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/ScheduleRef" }
+        }
+      }
+    }
+  },
+
+  "definitions": {
+    "StoreRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["storeId"],
+      "properties": {
+        "storeId": { "type": "string" },
+        "name": { "type": "string" },
+        "distanceKm": { "type": "number", "minimum": 0 }
+      }
+    },
+
+    "UnitPrice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit", "amount"],
+      "properties": {
+        "unit": { "type": "string", "enum": ["per_g","per_kg","per_ml","per_l","per_ct"] },
+        "amount": { "type": "number", "minimum": 0 }
+      }
+    },
+
+    "SignalSample": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "A single observation used in cycle learning.",
+      "properties": {
+        "observedAtISO": { "type": "string", "format": "date-time" },
+        "type": { "type": "string", "enum": ["price_drop","promo_flag","coupon_active","coupon_depth","everyday_price"] },
+        "pricebookId": { "type": "string" },
+        "couponId": { "type": "string" },
+        "provider": { "type": "string" },
+        "store": { "$ref": "#/definitions/StoreRef" },
+        "channel": { "type": "string", "enum": ["in_store","pickup","delivery","online"] },
+        "priceAmount": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "minLength": 3, "maxLength": 3 },
+        "percentOffVsBaseline": { "type": "number", "minimum": -100, "maximum": 100 },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/MatchEvidence" }
+        }
+      }
+    },
+
+    "ForecastWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fromISO", "toISO", "probability"],
+      "properties": {
+        "fromISO": { "type": "string", "format": "date-time" },
+        "toISO": { "type": "string", "format": "date-time" },
+        "probability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "expectedDepth": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "percentOff": { "type": "number", "minimum": 0, "maximum": 100 },
+            "amountOff": { "type": "number", "minimum": 0 }
+          }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "Recommendation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "reason"],
+      "properties": {
+        "type": { "type": "string", "enum": ["buy_now","wait","stock_up","watch","switch_store"] },
+        "reason": { "type": "string" },
+        "suggestedQty": { "type": "number", "minimum": 0 },
+        "targetUnitPrice": { "$ref": "#/definitions/UnitPrice" },
+        "validForWindowIndex": { "type": "integer", "minimum": 0 },
+        "nba": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Next Best Action hints for UI/automation.",
+          "properties": {
+            "action": { "type": "string", "enum": ["pin_to_schedule","add_to_list","set_alert","compare_stores","simulate_stack"] },
+            "params": { "type": "object" }
+          }
+        }
+      }
+    },
+
+    "MatchEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "enum": ["barcode","title","ocr","taxonomy","provider_field","time_series"] },
+        "value": { "type": "string" },
+        "score": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "Attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider": { "type": "string" },
+        "fields": { "type": "array", "items": { "type": "string" } },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "ScheduleRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": { "type": "string", "enum": ["session","schedule"] },
+        "id": { "type": "string" },
+        "name": { "type": "string" }
+      }
+    }
+  },
+
+  "examples": [
+    {
+      "contractVersion": "1.0.0",
+      "id": "cycle-milk-aldi-weekly",
+      "scope": "product",
+      "subject": {
+        "productRef": { "productId": "p-9f52a1b0", "canonicalKey": "00012345678905" },
+        "store": { "storeId": "aldi-0123", "name": "ALDI #123" },
+        "providers": ["aldi"]
+      },
+      "signals": {
+        "samples": [
+          {
+            "observedAtISO": "2025-10-20T13:00:00Z",
+            "type": "price_drop",
+            "pricebookId": "pb-6e21f41a31",
+            "provider": "aldi",
+            "store": { "storeId": "aldi-0123", "name": "ALDI #123" },
+            "channel": "in_store",
+            "priceAmount": 2.99,
+            "currency": "USD",
+            "percentOffVsBaseline": 12.5
+          }
+        ],
+        "summary": { "count": 14, "windowStartISO": "2025-07-01T00:00:00Z", "windowEndISO": "2025-10-27T00:00:00Z", "channels": ["in_store"] }
+      },
+      "metrics": {
+        "pattern": "weekly",
+        "periodDaysAvg": 7.0,
+        "periodDaysStdDev": 0.6,
+        "periodDaysMin": 6.0,
+        "periodDaysMax": 8.0,
+        "bestObserved": {
+          "priceAmount": 2.89,
+          "currency": "USD",
+          "unitPrice": { "unit": "per_l", "amount": 0.76 },
+          "observedAtISO": "2025-10-06T13:00:00Z",
+          "pricebookId": "pb-6e21f41a30",
+          "store": { "storeId": "aldi-0123", "name": "ALDI #123" }
+        },
+        "baseline": { "amountMedian": 3.29, "amountP10": 3.09, "amountP90": 3.49, "currency": "USD" },
+        "promoDepth": { "percentOffAvg": 12.0, "percentOffStdDev": 3.5 }
+      },
+      "forecast": {
+        "windows": [
+          {
+            "fromISO": "2025-11-03T05:00:00Z",
+            "toISO": "2025-11-09T23:59:59Z",
+            "probability": 0.78,
+            "expectedDepth": { "percentOff": 10.0 }
+          }
+        ],
+        "horizonDays": 45,
+        "generatedAtISO": "2025-10-27T17:40:00Z"
+      },
+      "recommendations": [
+        {
+          "type": "buy_now",
+          "reason": "Current price within top 10% of observed lows and next cycle > 7 days away.",
+          "suggestedQty": 1,
+          "targetUnitPrice": { "unit": "per_l", "amount": 0.80 },
+          "nba": { "action": "add_to_list" }
+        },
+        {
+          "type": "pin_to_schedule",
+          "reason": "High confidence weekly cadence aligns with your Wednesday run.",
+          "nba": {
+            "action": "pin_to_schedule",
+            "params": { "scheduleId": "sched-grocery-wed" }
+          }
+        }
+      ],
+      "links": {
+        "relatedCouponIds": ["cpn-abc123"],
+        "relatedProductId": "p-9f52a1b0",
+        "relatedCategoryPath": ["Grocery","Dairy","Milk"]
+      },
+      "confidence": 0.82,
+      "sourceAttribution": [
+        { "provider": "aldi", "fields": ["pricebook","weekly_ad"], "confidence": 0.9 }
+      ],
+      "provenance": {
+        "createdBy": "CycleAnalyzer:1.2.0",
+        "createdAtISO": "2025-10-27T17:40:00Z",
+        "updatedAtISO": "2025-10-27T17:40:00Z"
+      },
+      "trust": { "score": 0.9, "reasons": ["consistent weekly pattern"], "lastEvaluatedISO": "2025-10-27T17:40:10Z" },
+      "userContext": {
+        "isFavorite": true,
+        "notes": "Buy 2 if <= $3.00/gal",
+        "pinnedSchedules": [{ "type": "schedule", "id": "sched-grocery-wed", "name": "Wednesday Grocery Run" }]
+      }
+    }
+  ]
+}

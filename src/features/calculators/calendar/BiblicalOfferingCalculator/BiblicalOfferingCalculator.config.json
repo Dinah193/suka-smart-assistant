@@ -1,0 +1,53 @@
+{
+  "$schema": "../../../../schemas/planningGraph/node.config.schema.json",
+  "nodeKey": "calendar.BiblicalOfferingCalculator",
+  "kind": "calculator-node",
+  "version": 1,
+  "name": "Biblical Offering Calculator",
+  "description": "Calculates scripturally-aligned offerings (burnt, peace, sin, guilt, firstfruits, tithes) for a given year, feast schedule, and household/herd context so SSA can plan humane slaughter, cooking, and distribution sessions.",
+  "tags": [
+    "calendar",
+    "feasts",
+    "offerings",
+    "sacrifice",
+    "animals",
+    "storehouse"
+  ],
+  "inputKeys": [
+    "calendar.ScripturalYearLengthCalculator.output.yearStructure",
+    "calendar.FeastDayAlignmentCalculator.output.feastCalendar",
+    "animals.HerdInventoryCalculator.output.herdSnapshot",
+    "storehouse.MeatBreakdownCalculator.output.meatYieldModel",
+    "household.HouseholdRosterPlanner.output.householdProfile"
+  ],
+  "outputKeys": [
+    "calendar.BiblicalOfferingCalculator.output.offeringPlan",
+    "calendar.BiblicalOfferingCalculator.output.slaughterWindows",
+    "calendar.BiblicalOfferingCalculator.output.meatDistributionPlan",
+    "calendar.BiblicalOfferingCalculator.output.prepSessionsHints"
+  ],
+  "feedsInto": [
+    "animals.SlaughterSessionPlanner",
+    "cooking.FeastMenuPlanner",
+    "preservation.FestivePreservationPlanner",
+    "storehouse.StorehouseBalancePlanner",
+    "calendar.FeastDayAlignmentCalculator"
+  ],
+  "ui": {
+    "label": "Biblical Offering Planner",
+    "category": "Calendar & Feasts",
+    "icon": "altar",
+    "priority": 60,
+    "docsPath": "src/features/calculators/calendar/BiblicalOfferingCalculator/README.md"
+  },
+  "behavior": {
+    "isDeterministic": false,
+    "canCache": true,
+    "sensitivity": "household",
+    "conflictsWith": [],
+    "dependsOnFreshness": [
+      "animals.HerdInventoryCalculator.output.herdSnapshot",
+      "storehouse.MeatBreakdownCalculator.output.meatYieldModel"
+    ]
+  }
+}

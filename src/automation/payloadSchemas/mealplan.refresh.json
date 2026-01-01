@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MealPlanRefresh",
+  "type": "object",
+  "required": ["userId", "reason"],
+  "properties": {
+    "userId": { "type": "string", "minLength": 1 },
+    "reason": {
+      "type": "string",
+      "enum": ["recipes-updated", "user-refill", "week-rollover", "prefs-updated"]
+    }
+  },
+  "additionalProperties": false
+}

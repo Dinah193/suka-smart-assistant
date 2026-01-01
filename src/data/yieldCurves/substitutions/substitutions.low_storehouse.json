@@ -1,0 +1,531 @@
+{
+  "$schema": "../../schemas/torah-substitutions.schema.json",
+  "version": "2025-10-31T21:35:00-05:00",
+  "description": "Low-storehouse substitutions & routing for Suka Smart Assistant. If an item is low or missing in storehouse/inventory, suggest: 1) garden planner grow/harvest/preserve, 2) animal acquisition/breeding/butchery (clean species only), or 3) grocery shopping list (with Torah-appropriate swaps). Includes cleaning, garden, meal, animal, and preservation tie-ins. Supports user favorites and reverse generation.",
+  "meta": {
+    "sourceFile": "src/data/yieldCurves/substitutions/substitutions.low_storehouse.json",
+    "schemaSource": "src/data/schemas/torah-substitutions.schema.json",
+    "scenario": "storehouse.low",
+    "compatibleEngines": [
+      "storehouseGoalEngine",
+      "inventorySessionEngine",
+      "gardenQueueEngine",
+      "animalSessionEngine",
+      "mealPlanEngine",
+      "cleaningPlanEngine",
+      "shoppingListEngine"
+    ],
+    "supportsReverseGeneration": true,
+    "supportsUserFavorites": true,
+    "uiHints": {
+      "groupOrder": [
+        "storehouse-low-core",
+        "storehouse-low-meals",
+        "storehouse-low-cleaning",
+        "storehouse-low-garden",
+        "storehouse-low-animals",
+        "storehouse-low-grocery"
+      ],
+      "badgeMap": {
+        "low": "bg-amber-100 text-amber-950",
+        "route-garden": "bg-emerald-100 text-emerald-950",
+        "route-animal": "bg-orange-100 text-orange-950",
+        "route-grocery": "bg-sky-100 text-sky-950",
+        "torah-clean": "bg-emerald-100 text-emerald-950",
+        "system": "bg-slate-100 text-slate-950",
+        "user-favorite": "bg-violet-100 text-violet-950"
+      }
+    }
+  },
+  "defaults": {
+    "targetCulture": "torah",
+    "preferredCleanMeat": "lamb",
+    "preferredCleanFat": "beef-tallow",
+    "notes": "This file is meant to be loaded when inventory/storehouse detects lows or gaps and should present the user with multiple replenishment paths, not just 'add to cart'."
+  },
+  "scopes": [
+    "storehouse",
+    "meals",
+    "garden",
+    "animals",
+    "cleaning",
+    "preservation"
+  ],
+  "profiles": {
+    "storehouse-torah-basic": {
+      "id": "profile:storehouse-torah-basic",
+      "label": "Torah storehouse – basic staples only",
+      "preferredMeats": [
+        "lamb",
+        "goat",
+        "beef"
+      ],
+      "disallow": [
+        "pork",
+        "ham",
+        "bacon",
+        "shellfish"
+      ]
+    }
+  },
+  "substitutions": [
+    {
+      "id": "storehouse-low:unclean-meat-low→clean-meat-or-animal-route",
+      "domain": "storehouse",
+      "category": "storehouse-low-core",
+      "from": [
+        "pork",
+        "ham",
+        "bacon",
+        "pancetta"
+      ],
+      "to": [
+        {
+          "item": "lamb",
+          "ratio": 1.0,
+          "yieldCurveRef": "src/data/yieldCurves/meat/sheep_katahdin.json"
+        },
+        {
+          "item": "goat",
+          "ratio": 1.0,
+          "yieldCurveRef": "src/data/yieldCurves/meat/goat_kiko.json"
+        },
+        {
+          "item": "beef-brangus",
+          "ratio": 1.05,
+          "yieldCurveRef": "src/data/yieldCurves/meat/beef_brangus.json"
+        }
+      ],
+      "storehouseMapping": {
+        "grocerySection": "Meat & Protein",
+        "preserveOptions": [
+          "freeze",
+          "cure",
+          "smoke",
+          "pressure-can"
+        ]
+      },
+      "butchery": {
+        "usdaFacility": true,
+        "torahCompliant": true,
+        "note": "If storehouse lacks clean meats, prompt animalSessionEngine to schedule slaughter of clean species."
+      },
+      "ui": {
+        "label": "Low unclean meat → clean lamb/goat OR route to animal butchery",
+        "badge": "torah-clean"
+      },
+      "reverseGeneration": {
+        "allowReverse": true,
+        "originals": [
+          "pork"
+        ],
+        "note": "For exporting/sharing to non-Torah households only."
+      }
+    },
+    {
+      "id": "storehouse-low:bacon→lamb-beef-bacon-or-garden-veg-protein",
+      "domain": "storehouse",
+      "category": "storehouse-low-meals",
+      "from": [
+        "bacon",
+        "pork-bacon"
+      ],
+      "to": [
+        {
+          "item": "lamb-bacon",
+          "ratio": 1.0,
+          "yieldCurveRef": "src/data/yieldCurves/meat/sheep_katahdin.json"
+        },
+        {
+          "item": "beef-bacon",
+          "ratio": 1.0,
+          "yieldCurveRef": "src/data/yieldCurves/meat/beef_brangus.json"
+        },
+        {
+          "item": "smoked-lamb-cubes",
+          "ratio": 1.0
+        }
+      ],
+      "storehouseMapping": {
+        "grocerySection": "Refrigerated/Breakfast"
+      },
+      "ui": {
+        "label": "Low bacon → lamb/beef bacon or smoked lamb cubes (feast-friendly)",
+        "badge": "low"
+      },
+      "processing": {
+        "required": false,
+        "queues": [
+          "storehouseGoalEngine:preserve"
+        ]
+      },
+      "reverseGeneration": {
+        "allowReverse": true,
+        "originals": [
+          "bacon"
+        ]
+      }
+    },
+    {
+      "id": "storehouse-low:flour-wheat-low→garden-grain-or-grocery",
+      "domain": "storehouse",
+      "category": "storehouse-low-garden",
+      "from": [
+        "wheat-flour",
+        "all-purpose-flour"
+      ],
+      "to": [
+        {
+          "item": "home-milled-wheat",
+          "ratio": 1.0
+        },
+        {
+          "item": "barley-grain",
+          "ratio": 1.0
+        },
+        {
+          "item": "emmer-or-spelt",
+          "ratio": 1.0
+        }
+      ],
+      "storehouseMapping": {
+        "grocerySection": "Grains & Flours",
+        "preserveOptions": [
+          "dry-store",
+          "vac-seal"
+        ]
+      },
+      "ui": {
+        "label": "Low flour → plant/grind from garden grains or add to shopping list",
+        "badge": "route-garden"
+      },
+      "processing": {
+        "required": false,
+        "queues": [
+          "gardenQueueEngine:plant-grain",
+          "shoppingListEngine:add"
+        ]
+      }
+    },
+    {
+      "id": "storehouse-low:oil-low→animal-tallow-or-garden-press",
+      "domain": "storehouse",
+      "category": "storehouse-low-core",
+      "from": [
+        "lard",
+        "shortening-mixed",
+        "veg-oil-blend"
+      ],
+      "to": [
+        {
+          "item": "beef-tallow",
+          "ratio": 1.0
+        },
+        {
+          "item": "lamb-tallow",
+          "ratio": 1.0
+        },
+        {
+          "item": "olive-oil",
+          "ratio": 0.9
+        }
+      ],
+      "storehouseMapping": {
+        "grocerySection": "Oils & Fats"
+      },
+      "ui": {
+        "label": "Low oils → render tallow (animal) or buy clean oil",
+        "badge": "route-animal"
+      },
+      "processing": {
+        "required": false,
+        "queues": [
+          "animalSessionEngine:render-fat",
+          "shoppingListEngine:add"
+        ]
+      }
+    },
+    {
+      "id": "storehouse-low:cleaning-supplies-low→homemade-cleaners",
+      "domain": "cleaning",
+      "category": "storehouse-low-cleaning",
+      "from": [
+        "general-purpose-cleaner",
+        "unclear-enzymatic-cleaner"
+      ],
+      "to": [
+        {
+          "item": "vinegar",
+          "ratio": 1.0
+        },
+        {
+          "item": "castile-soap",
+          "ratio": 1.0
+        },
+        {
+          "item": "borax",
+          "ratio": 1.0
+        }
+      ],
+      "storehouseMapping": {
+        "grocerySection": "Cleaning & Household"
+      },
+      "ui": {
+        "label": "Low cleaning supplies → make from pantry-safe items",
+        "badge": "system"
+      },
+      "processing": {
+        "required": false,
+        "queues": [
+          "cleaningPlanEngine:make-homemade"
+        ]
+      }
+    },
+    {
+      "id": "storehouse-low:veg-canned-low→garden-harvest-or-preserve",
+      "domain": "garden",
+      "category": "storehouse-low-garden",
+      "from": [
+        "canned-tomatoes",
+        "canned-green-beans",
+        "canned-peas"
+      ],
+      "to": [
+        {
+          "item": "garden-tomato-harvest",
+          "ratio": 1.0
+        },
+        {
+          "item": "garden-green-bean-harvest",
+          "ratio": 1.0
+        },
+        {
+          "item": "garden-pea-harvest",
+          "ratio": 1.0
+        }
+      ],
+      "ui": {
+        "label": "Low canned veg → harvest & preserve from garden",
+        "badge": "route-garden"
+      },
+      "processing": {
+        "required": false,
+        "queues": [
+          "storehouseGoalEngine:pressure-can",
+          "storehouseGoalEngine:dehydrate",
+          "storehouseGoalEngine:ferment"
+        ]
+      }
+    },
+    {
+      "id": "storehouse-low:eggs-low→animal-acquisition-or-meal-plan-swap",
+      "domain": "animals",
+      "category": "storehouse-low-animals",
+      "from": [
+        "chicken-eggs",
+        "duck-eggs",
+        "quail-eggs"
+      ],
+      "to": [
+        {
+          "item": "acquire-laying-hens",
+          "ratio": 1.0
+        },
+        {
+          "item": "acquire-ducks",
+          "ratio": 1.0
+        }
+      ],
+      "ui": {
+        "label": "Low eggs → acquire layers OR swap meals to egg-free",
+        "badge": "route-animal"
+      },
+      "processing": {
+        "required": false,
+        "queues": [
+          "animalSessionEngine:acquire",
+          "mealPlanEngine:swap-recipes-to-no-egg"
+        ]
+      }
+    },
+    {
+      "id": "storehouse-low:milk-dairy-low→goat-milk-or-grocery",
+      "domain": "animals",
+      "category": "storehouse-low-animals",
+      "from": [
+        "cow-milk",
+        "whole-milk",
+        "half-and-half"
+      ],
+      "to": [
+        {
+          "item": "goat-milk-fresh",
+          "ratio": 1.0
+        },
+        {
+          "item": "sheep-milk-fresh",
+          "ratio": 1.0
+        }
+      ],
+      "ui": {
+        "label": "Low dairy → milk goat/sheep or add to grocery list",
+        "badge": "route-animal"
+      },
+      "processing": {
+        "required": false,
+        "queues": [
+          "animalSessionEngine:milk",
+          "shoppingListEngine:add"
+        ]
+      }
+    },
+    {
+      "id": "storehouse-low:meal-ingredient-missing→torah-clean-sub+shopping",
+      "domain": "meals",
+      "category": "storehouse-low-meals",
+      "from": [
+        "recipe-ingredient-missing"
+      ],
+      "to": [
+        {
+          "item": "torah-clean-alt-from-storehouse",
+          "ratio": 1.0
+        },
+        {
+          "item": "torah-clean-alt-from-garden",
+          "ratio": 1.0
+        }
+      ],
+      "ui": {
+        "label": "Missing meal ingredient → offer clean storehouse/garden alt + shopping list",
+        "badge": "low"
+      },
+      "processing": {
+        "required": false,
+        "queues": [
+          "shoppingListEngine:add"
+        ]
+      }
+    },
+    {
+      "id": "storehouse-low:animal-feed-low→garden-fodder-or-buy",
+      "domain": "animals",
+      "category": "storehouse-low-animals",
+      "from": [
+        "bagged-chicken-feed",
+        "bagged-goat-feed"
+      ],
+      "to": [
+        {
+          "item": "grow-fodder",
+          "ratio": 1.0
+        },
+        {
+          "item": "grow-sunflowers-for-feed",
+          "ratio": 1.0
+        }
+      ],
+      "ui": {
+        "label": "Low animal feed → grow fodder/sunflowers or add to shopping",
+        "badge": "route-garden"
+      },
+      "processing": {
+        "required": false,
+        "queues": [
+          "gardenQueueEngine:plant-fodder",
+          "shoppingListEngine:add"
+        ]
+      }
+    }
+  ],
+  "reverseGeneration": {
+    "enabled": true,
+    "strategy": "per-item",
+    "blockedOriginals": [
+      "pork",
+      "ham",
+      "bacon",
+      "pancetta",
+      "shellfish"
+    ],
+    "notes": "We allow reverse only to help export/share the low-storehouse plan to households that don’t enforce Torah. Your own storehouse stays clean."
+  },
+  "userOverrides": {
+    "description": "User/household-level overrides for low-storehouse behavior so they can save THEIR favorite routings.",
+    "favorites": [
+      {
+        "substitutionId": "storehouse-low:flour-wheat-low→garden-grain-or-grocery",
+        "label": "If flour is low, ALWAYS send to garden THEN grocery",
+        "householdId": "HOUSEHOLD_DEFAULT"
+      },
+      {
+        "substitutionId": "storehouse-low:eggs-low→animal-acquisition-or-meal-plan-swap",
+        "label": "We raise our own layers first, don’t auto-add eggs to list",
+        "householdId": "HOUSEHOLD_DEFAULT"
+      }
+    ],
+    "blocked": [
+      "storehouse-low:bacon→lamb-beef-bacon-or-garden-veg-protein"
+    ],
+    "custom": [
+      {
+        "id": "storehouse-low:custom-rice-low→sweet-potato-harvest",
+        "domain": "garden",
+        "category": "storehouse-low-garden",
+        "from": [
+          "white-rice",
+          "brown-rice"
+        ],
+        "to": [
+          {
+            "item": "garden-sweet-potato-harvest",
+            "ratio": 1.0
+          }
+        ],
+        "ui": {
+          "label": "Low rice → harvest sweet potatoes",
+          "badge": "user-favorite"
+        },
+        "processing": {
+          "required": false,
+          "queues": [
+            "gardenQueueEngine:harvest",
+            "storehouseGoalEngine:dehydrate"
+          ]
+        }
+      }
+    ]
+  },
+  "integration": {
+    "importRouter": {
+      "listenFor": [
+        "import.storehouseGoal.detected",
+        "import.inventorySnapshot.detected",
+        "import.gardenPlan.detected",
+        "import.animalCarePlan.detected",
+        "import.cleaningPlan.detected"
+      ],
+      "applySubstitutionsOn": [
+        "storehouse.goals.items",
+        "inventory.low.items",
+        "garden.plan.seedList",
+        "animal.care.scheduledFeeds",
+        "cleaning.plan.supplies"
+      ]
+    },
+    "automationRuntime": {
+      "onEvent": "inventory.low.detected",
+      "actions": [
+        "apply-low-storehouse-substitutions",
+        "apply-household-overrides",
+        "emit-replenishment-options"
+      ],
+      "emit": [
+        "session.created.low-storehouse.garden",
+        "session.created.low-storehouse.animals",
+        "session.created.low-storehouse.shopping",
+        "session.created.low-storehouse.cleaning"
+      ]
+    }
+  }
+}

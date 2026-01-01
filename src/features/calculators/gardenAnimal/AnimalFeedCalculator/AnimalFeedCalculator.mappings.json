@@ -1,0 +1,130 @@
+{
+  "id": "animals.feedCalculator.nextSteps",
+  "calculator": "animals.feedCalculator",
+  "domains": ["animals", "storehouse"],
+
+  "inputs": {
+    "analytics": {
+      "from": "analytics"
+    },
+    "feedDemandProjection": {
+      "from": "feedDemandProjection"
+    },
+    "dailyFeedPlan": {
+      "from": "dailyFeedPlan"
+    },
+    "context": {
+      "from": "context"
+    },
+    "shortageItems": {
+      "from": "shortageItems"
+    },
+    "meatYieldCandidates": {
+      "from": "meatYieldCandidates"
+    }
+  },
+
+  "rules": [
+    {
+      "id": "animals.feed.shortageToProcurement",
+      "label": "Short feed → Plan procurement",
+      "description": "When projected feed shortage is within the planning horizon, suggest a Storehouse Feed Procurement step.",
+      "when": {
+        "kind": "fieldThreshold",
+        "input": "analytics",
+        "field": "projectedShortageDays",
+        "operator": "<=",
+        "value": 7,
+        "fallbackIfMissing": true
+      },
+      "nextStep": {
+        "nodeKey": "storehouse.feedProcurement",
+        "action": "openPlanner",
+        "priority": 40,
+        "reasonCode": "animals.feed.shortage",
+        "sessionDomain": "storehouse",
+        "sessionKind": "procurement-session",
+        "ctaLabel": "Plan Feed Purchase",
+        "passes": {
+          "from": "feedDemandProjection",
+          "as": "feedDemandProjection"
+        }
+      }
+    },
+
+    {
+      "id": "animals.feed.costChangeToBudget",
+      "label": "Feed cost jump → Update feed budget",
+      "description": "When projected feed cost per day changes significantly, propose a feed budget review.",
+      "when": {
+        "kind": "deltaPercent",
+        "input": "analytics",
+        "field": "estimatedFeedCostPerDay",
+        "vsField": "history.last.estimatedFeedCostPerDay",
+        "operator": ">=",
+        "value": 10
+      },
+      "nextStep": {
+        "nodeKey": "storehouse.feedBudget",
+        "action": "openPlanner",
+        "priority": 35,
+        "reasonCode": "animals.feed.costChange",
+        "sessionDomain": "storehouse",
+        "sessionKind": "budget-session",
+        "ctaLabel": "Review Feed Budget",
+        "passes": {
+          "from": "analytics",
+          "as": "feedCostAnalytics"
+        }
+      }
+    },
+
+    {
+      "id": "animals.feed.shortageToMeatYield",
+      "label": "Short feed → Consider meat processing",
+      "description": "When feed shortages are detected and meat animals are present, suggest a meat harvest planning step to relieve feed pressure.",
+      "when": {
+        "kind": "fieldExists",
+        "input": "shortageItems",
+        "field": "",
+        "mustBeNonEmpty": true
+      },
+      "nextStep": {
+        "nodeKey": "storehouseMeals.meatBreakdown",
+        "action": "openPlanner",
+        "priority": 30,
+        "reasonCode": "animals.feed.shortage.meat",
+        "sessionDomain": "storehouse",
+        "sessionKind": "meatYield-session",
+        "ctaLabel": "Plan Meat Harvest",
+        "passes": {
+          "from": "meatYieldCandidates",
+          "as": "meatYieldCandidates"
+        }
+      }
+    },
+
+    {
+      "id": "animals.feed.noShortageToDailyCare",
+      "label": "No shortage → Focus on daily care",
+      "description": "When there are no projected shortages, route the user to the Animals Daily Care planner as a default, low-pressure follow-up.",
+      "when": {
+        "kind": "fallback",
+        "matchesWhenNoneAbove": true
+      },
+      "nextStep": {
+        "nodeKey": "animals.dailyCarePlanner",
+        "action": "openPlanner",
+        "priority": 10,
+        "reasonCode": "animals.feed.ok",
+        "sessionDomain": "animals",
+        "sessionKind": "care-session",
+        "ctaLabel": "Plan Daily Care",
+        "passes": {
+          "from": "dailyFeedPlan",
+          "as": "dailyFeedPlan"
+        }
+      }
+    }
+  ]
+}

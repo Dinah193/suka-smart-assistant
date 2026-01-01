@@ -1,0 +1,424 @@
+{
+  "name": "Harvest → Preservation Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "harvest",
+        "responseMode": "responseNode",
+        "options": {
+          "binaryData": false
+        }
+      },
+      "id": "Webhook_Harvest",
+      "name": "Webhook (Harvest)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1060,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/*\nExpected POST body:\n{\n  userId: \"user_123\",\n  pickedAt?: ISO,\n  items: [ { name, qty, unit, variety?, bed?, quality? } ],\n  printLabels?: true|false,\n  labelTemplateId?: string\n}\n*/\nconst b = items[0]?.json || {};\nconst apiBase = $env.SUKA_API_BASE || 'http://localhost:4000';\n\nfunction normArray(x){ return Array.isArray(x)? x: (x? [x]: []); }\nfunction iso(x){ try { return x? new Date(x).toISOString(): new Date().toISOString(); } catch { return new Date().toISOString(); } }\nconst userId = b.userId || null;\nconst pickedAt = iso(b.pickedAt);\nconst itemsIn = normArray(b.items).map((it,i)=>({\n  name: it.name,\n  qty: Number(it.qty || 0),\n  unit: it.unit || '',\n  variety: it.variety || null,\n  bed: it.bed || null,\n  quality: it.quality || 'good'\n})).filter(x=>x.qty>0 && x.name);\n\n// Simple preservation recommendation map\nconst MAP = [\n  { test: /tomato/i, plan: (x)=> ({ method:'can', title:`Can tomatoes (${x.qty} ${x.unit})`, labels:[{ productName:'Canned Tomatoes', batchCode:null }] }) },\n  { test: /cucumber/i, plan: (x)=> ({ method:'pickle', title:`Pickle cucumbers (${x.qty} ${x.unit})`, labels:[{ productName:'Pickles', batchCode:null }] }) },\n  { test: /(pepper|chili)/i, plan: (x)=> ({ method:'freeze', title:`Chop & freeze peppers (${x.qty} ${x.unit})`, labels:[{ productName:'Frozen Peppers', batchCode:null }] }) },\n  { test: /(berry|strawberry|blueberry|raspberry)/i, plan: (x)=> ({ method:'freeze', title:`Freeze berries (${x.qty} ${x.unit})`, labels:[{ productName:'Frozen Berries', batchCode:null }] }) },\n  { test: /(basil|herb|mint|oregano|thyme|rosemary|sage|dill)/i, plan: (x)=> ({ method:'dehydrate', title:`Dehydrate herbs (${x.qty} ${x.unit})`, labels:[{ productName:'Dried Herbs', batchCode:null }] }) },\n  { test: /(leaf|lettuce|spinach|greens|kale|chard)/i, plan: (x)=> ({ method:'blanch_freeze', title:`Blanch & freeze greens (${x.qty} ${x.unit})`, labels:[{ productName:'Frozen Greens', batchCode:null }] }) }\n];\n\nfunction recommend(it){\n  const m = MAP.find(m => m.test.test(it.name));\n  if (!m) return null;\n  const rec = m.plan(it);\n  return {\n    ...rec,\n    item: it,\n    due: new Date(Date.now() + 6*60*60*1000).toISOString(), // later today\n    priority: 2,\n    labels: rec.labels || []\n  };\n}\n\nconst recs = itemsIn.map(recommend).filter(Boolean);\n\n// Build label items\nfunction batchCode(){ const d = new Date(); const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0'); const dd = String(d.getDate()).padStart(2,'0'); return `HARV-${y}${m}${dd}`; }\nconst code = batchCode();\nconst wantLabels = !!b.printLabels;\nconst labelTemplateId = b.labelTemplateId || null;\nconst labelItems = recs.flatMap(r => (r.labels || []).map(L => ({\n  productName: L.productName || r.method,\n  batchCode: L.batchCode || code,\n  variety: r.item.variety || undefined,\n  packedOn: new Date().toISOString().slice(0,10)\n})));\n\n// Inventory intake lines\nconst intakeLines = itemsIn.map(x => ({ name: x.name, qty: x.qty, unit: x.unit, source: 'garden', pickedAt }));\n\nreturn [{ json: { apiBase, userId, pickedAt, items: itemsIn, recommendations: recs, intakeLines, wantLabels, labelItems, labelTemplateId } }];"
+      },
+      "id": "Fn_NormalizePlan",
+      "name": "Function: Normalize & Plan",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -840,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{$json.apiBase}}/inventory/intake",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={\n  \"userId\": $json.userId,\n  \"pickedAt\": $json.pickedAt,\n  \"lines\": $json.intakeLines\n}"
+      },
+      "id": "HTTP_Intake",
+      "name": "HTTP: Inventory Intake",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -620,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{($json.recommendations || []).length}}",
+              "operation": "larger"
+            }
+          ]
+        }
+      },
+      "id": "IF_HasRecs",
+      "name": "IF recommendations > 0",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -140
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const out = [];\nfor (const r of ($json.recommendations || [])) {\n  out.push({ json: {\n    title: `${r.title}`,\n    category: 'preservation',\n    labels: ['preservation', r.method, $json.pickedAt.slice(0,10)],\n    priority: r.priority || 2,\n    due: r.due,\n    meta: { item: r.item, method: r.method },\n    userId: $json.userId,\n    apiBase: $json.apiBase\n  }});\n}\nreturn out.length ? out : [{ json: { skip: true } }];"
+      },
+      "id": "Fn_FanoutTasks",
+      "name": "Function: Fan‑out Tasks",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        -220
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{$json.apiBase}}/automations/tasks",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={{$json}}"
+      },
+      "id": "HTTP_CreateTask",
+      "name": "HTTP: Create Preservation Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        40,
+        -220
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.wantLabels || false}}",
+              "operation": "isTrue"
+            }
+          ],
+          "number": [
+            {
+              "value1": "={{($json.labelItems || []).length}}",
+              "operation": "larger"
+            }
+          ]
+        }
+      },
+      "id": "IF_Labels",
+      "name": "IF print labels",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "POST",
+        "url": "={{$json.apiBase}}/labels/print",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        },
+        "bodyParametersJson": "={\n  \"userId\": $json.userId,\n  \"items\": $json.labelItems,\n  \"templateId\": $json.labelTemplateId || null\n}"
+      },
+      "id": "HTTP_PrintLabels",
+      "name": "HTTP: Print Labels",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -180,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const ctx = items[0].json;\nconst summary = {\n  ok: true,\n  intake: ($items('HTTP: Inventory Intake', 0, 0)[0]?.json) || { ok: true },\n  tasksCreated: ($items('HTTP: Create Preservation Task', 0, 0)?.length) || 0,\n  labelsPrinted: ($items('HTTP: Print Labels', 0, 0)?.length) ? true : false,\n  recommendations: (ctx.recommendations || []).length\n};\nreturn [{ json: summary }];"
+      },
+      "id": "Fn_Summary",
+      "name": "Function: Summary",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        40,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "responseBody": "={{$json}}",
+        "responseCode": 200
+      },
+      "id": "Respond_Webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        260,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyDay",
+              "hour": 19,
+              "minute": 0
+            }
+          ]
+        }
+      },
+      "id": "Cron_Daily",
+      "name": "Cron (Daily sync 19:00)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -1060,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "requestMethod": "GET",
+        "url": "={{`${$env.SUKA_API_BASE || 'http://localhost:4000'}/garden/harvests?date=${new Date().toISOString().slice(0,10)}`}}",
+        "jsonParameters": true,
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "HTTP_GetHarvests",
+      "name": "HTTP: Get Today's Harvests",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        -840,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "/* Expect server to return { userId?, pickedAt?, items:[...] } or an array */\nconst data = items[0]?.json || {};\nconst arr = Array.isArray(data) ? data : (Array.isArray(data.items) ? [data] : []);\nif (!arr.length) return [{ json: { skip: true } }];\nconst out = [];\nfor (const b of arr) {\n  out.push({ json: {\n    userId: b.userId || null,\n    pickedAt: b.pickedAt || new Date().toISOString(),\n    items: b.items || [],\n    printLabels: true,\n    labelTemplateId: null\n  }});\n}\nreturn out;"
+      },
+      "id": "Fn_ToWebhookShape",
+      "name": "Function: To Webhook Shape",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -620,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "return items; // reuse Normalize & Plan"
+      },
+      "id": "Fn_Passthrough",
+      "name": "Function: Passthrough",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        280
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "Error_Trigger",
+      "name": "On Error (Harvest Sync)",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1060,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const e = items[0].json;\nreturn [{ json: { ok: false, message: e.message || 'Workflow error', node: e.node?.name, timestamp: new Date().toISOString() } }];"
+      },
+      "id": "Fn_ErrorFormat",
+      "name": "Function: Format Error",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -840,
+        520
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook (Harvest)": {
+      "main": [
+        [
+          {
+            "node": "Function: Normalize & Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Normalize & Plan": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Inventory Intake",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF recommendations > 0",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF print labels",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Function: Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF recommendations > 0": {
+      "main": [
+        [
+          {
+            "node": "Function: Fan‑out Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Function: Fan‑out Tasks": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Create Preservation Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF print labels": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Print Labels",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Function: Summary": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cron (Daily sync 19:00)": {
+      "main": [
+        [
+          {
+            "node": "HTTP: Get Today's Harvests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP: Get Today's Harvests": {
+      "main": [
+        [
+          {
+            "node": "Function: To Webhook Shape",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: To Webhook Shape": {
+      "main": [
+        [
+          {
+            "node": "Function: Passthrough",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function: Passthrough": {
+      "main": [
+        [
+          {
+            "node": "Function: Normalize & Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On Error (Harvest Sync)": {
+      "main": [
+        [
+          {
+            "node": "Function: Format Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "timezone": "America/Chicago",
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

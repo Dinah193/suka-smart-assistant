@@ -1,0 +1,383 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sukasmartassistant.local/schemas/lexicon.schema.json",
+  "title": "SSA Lexicon Schema (Expressive, Strict)",
+  "description": "Schema for SSA lexicons (synonyms/keywords + expressive rules) used to map text to method IDs/keys for layer-spine method selection.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["lexicon"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "lexicon": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "version",
+        "domain",
+        "title",
+        "description",
+        "locale",
+        "createdAt",
+        "updatedAt",
+        "normalization",
+        "scoring",
+        "methods"
+      ],
+      "properties": {
+        "key": { "type": "string", "minLength": 1 },
+        "version": { "type": "integer", "minimum": 1 },
+        "domain": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "locale": { "type": "string", "minLength": 2 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+
+        "normalization": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "lowercase",
+            "stripPunctuation",
+            "collapseWhitespace",
+            "unicodeNormalize"
+          ],
+          "properties": {
+            "lowercase": { "type": "boolean" },
+            "stripPunctuation": { "type": "boolean" },
+            "collapseWhitespace": { "type": "boolean" },
+            "unicodeNormalize": {
+              "type": "string",
+              "enum": ["NFC", "NFD", "NFKC", "NFKD"]
+            },
+            "stopwords": {
+              "type": "array",
+              "items": { "type": "string" },
+              "default": []
+            },
+            "spellings": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "default": {}
+            }
+          }
+        },
+
+        "scoring": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["matchTypes", "minScoreToSuggest", "minScoreToAutoMap"],
+          "properties": {
+            "matchTypes": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "exact_phrase",
+                "token_phrase",
+                "keyword",
+                "fuzzy",
+                "negative"
+              ],
+              "properties": {
+                "exact_phrase": { "type": "number" },
+                "token_phrase": { "type": "number" },
+                "keyword": { "type": "number" },
+                "fuzzy": { "type": "number" },
+                "negative": { "type": "number" }
+              }
+            },
+            "minScoreToSuggest": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "minScoreToAutoMap": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "maxSuggestions": { "type": "integer", "minimum": 1, "default": 5 }
+          }
+        },
+
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        },
+
+        "methods": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/methodEntry" }
+        },
+
+        "entityHints": {
+          "type": "object",
+          "additionalProperties": true,
+          "default": {}
+        },
+
+        "rules": {
+          "type": "array",
+          "default": [],
+          "items": { "$ref": "#/$defs/rule" }
+        }
+      }
+    }
+  },
+
+  "$defs": {
+    "stringList": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+
+    "methodEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "methodId",
+        "methodKey",
+        "weight",
+        "aliases",
+        "keywords",
+        "negative"
+      ],
+      "properties": {
+        "methodId": { "type": "string", "minLength": 1 },
+        "methodKey": { "type": "string", "minLength": 1 },
+        "weight": { "type": "number", "minimum": 0, "maximum": 2 },
+
+        "aliases": { "$ref": "#/$defs/stringList", "default": [] },
+        "keywords": { "$ref": "#/$defs/stringList", "default": [] },
+        "negative": { "$ref": "#/$defs/stringList", "default": [] },
+
+        "cuisineHints": { "$ref": "#/$defs/stringList", "default": [] },
+        "animalHints": { "$ref": "#/$defs/stringList", "default": [] },
+
+        "roomHints": { "$ref": "#/$defs/stringList", "default": [] },
+        "surfaceHints": { "$ref": "#/$defs/stringList", "default": [] },
+        "materialHints": { "$ref": "#/$defs/stringList", "default": [] },
+        "toolHints": { "$ref": "#/$defs/stringList", "default": [] },
+
+        "contexts": { "$ref": "#/$defs/stringList", "default": [] },
+        "evidence": { "$ref": "#/$defs/stringList", "default": [] }
+      }
+    },
+
+    "whenClause": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "containsAny": { "$ref": "#/$defs/stringList" },
+        "containsAll": { "$ref": "#/$defs/stringList" },
+        "containsAnyAlso": { "$ref": "#/$defs/stringList" },
+        "notContainsAny": { "$ref": "#/$defs/stringList" },
+
+        "regexAny": { "$ref": "#/$defs/stringList" },
+        "regexAll": { "$ref": "#/$defs/stringList" },
+
+        "roomAny": { "$ref": "#/$defs/stringList" },
+        "roomAll": { "$ref": "#/$defs/stringList" },
+
+        "surfaceAny": { "$ref": "#/$defs/stringList" },
+        "surfaceAll": { "$ref": "#/$defs/stringList" },
+
+        "materialAny": { "$ref": "#/$defs/stringList" },
+        "materialAll": { "$ref": "#/$defs/stringList" },
+
+        "toolAny": { "$ref": "#/$defs/stringList" },
+        "toolAll": { "$ref": "#/$defs/stringList" },
+
+        "entitiesAny": { "$ref": "#/$defs/stringList" },
+        "entitiesAll": { "$ref": "#/$defs/stringList" },
+
+        "methodKeysAny": { "$ref": "#/$defs/stringList" },
+        "methodKeysAll": { "$ref": "#/$defs/stringList" },
+
+        "minTokens": { "type": "integer", "minimum": 0 },
+        "lang": { "type": "string" }
+      }
+    },
+
+    "whenExpr": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "any": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/whenClause" },
+          "default": []
+        },
+        "all": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/whenClause" },
+          "default": []
+        },
+        "not": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/whenClause" },
+          "default": []
+        },
+
+        "containsAny": { "$ref": "#/$defs/stringList" },
+        "containsAll": { "$ref": "#/$defs/stringList" },
+        "containsAnyAlso": { "$ref": "#/$defs/stringList" },
+        "notContainsAny": { "$ref": "#/$defs/stringList" },
+
+        "regexAny": { "$ref": "#/$defs/stringList" },
+        "regexAll": { "$ref": "#/$defs/stringList" },
+
+        "roomAny": { "$ref": "#/$defs/stringList" },
+        "roomAll": { "$ref": "#/$defs/stringList" },
+
+        "surfaceAny": { "$ref": "#/$defs/stringList" },
+        "surfaceAll": { "$ref": "#/$defs/stringList" },
+
+        "materialAny": { "$ref": "#/$defs/stringList" },
+        "materialAll": { "$ref": "#/$defs/stringList" },
+
+        "toolAny": { "$ref": "#/$defs/stringList" },
+        "toolAll": { "$ref": "#/$defs/stringList" },
+
+        "entitiesAny": { "$ref": "#/$defs/stringList" },
+        "entitiesAll": { "$ref": "#/$defs/stringList" },
+
+        "methodKeysAny": { "$ref": "#/$defs/stringList" },
+        "methodKeysAll": { "$ref": "#/$defs/stringList" },
+
+        "minTokens": { "type": "integer", "minimum": 0 },
+        "lang": { "type": "string" }
+      },
+      "description": "Expressive condition tree. Use 'all' for AND, 'any' for OR, 'not' for negative gates. Flat keys are supported for convenience."
+    },
+
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "boostMethodKey",
+            "downrankMethodKey",
+            "blockMethodKey",
+
+            "preferMethodKey",
+            "forceMethodKey",
+
+            "addNote",
+            "addWarning",
+            "addChecklistItem",
+
+            "setParam",
+            "setDefaultParam",
+
+            "requirePPE",
+            "requireVentilation",
+            "requireRinse",
+            "requireDwellTime",
+
+            "emitHintTag",
+            "emitEntityHint"
+          ]
+        },
+
+        "methodKey": { "type": "string" },
+        "amount": { "type": "number" },
+        "reason": { "type": "string" },
+
+        "note": { "type": "string" },
+        "warning": { "type": "string" },
+
+        "key": { "type": "string" },
+        "value": {},
+
+        "ppe": { "$ref": "#/$defs/stringList", "default": [] },
+        "minutes": { "type": "number", "minimum": 0 },
+
+        "tag": { "type": "string" },
+        "entity": { "type": "string" }
+      },
+
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": { "enum": ["boostMethodKey", "downrankMethodKey"] }
+            }
+          },
+          "then": { "required": ["methodKey", "amount"] }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": ["blockMethodKey", "preferMethodKey", "forceMethodKey"]
+              }
+            }
+          },
+          "then": { "required": ["methodKey"] }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "enum": ["setParam", "setDefaultParam"] }
+            }
+          },
+          "then": { "required": ["key", "value"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "requirePPE" } } },
+          "then": { "required": ["ppe"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "requireDwellTime" } } },
+          "then": { "required": ["minutes"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "emitHintTag" } } },
+          "then": { "required": ["tag"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "emitEntityHint" } } },
+          "then": { "required": ["entity"] }
+        }
+      ]
+    },
+
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "when", "actions"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+
+        "title": { "type": "string" },
+        "explain": { "type": "string" },
+
+        "severity": {
+          "type": "string",
+          "enum": ["info", "hint", "warn", "block"],
+          "default": "hint"
+        },
+
+        "tags": { "$ref": "#/$defs/stringList", "default": [] },
+
+        "when": { "$ref": "#/$defs/whenExpr" },
+
+        "actions": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/action" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ssa.schemas/shopping.candidate.schema.json",
+  "title": "SSA Shopping Candidate",
+  "description": "Provisional scanned item (NOT committed to household inventory). Holds scan data, matches, and reconciliation state.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "candidateId",
+    "shoppingSessionId",
+    "status",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "candidateId": { "type": "string", "minLength": 6 },
+    "shoppingSessionId": { "type": "string", "minLength": 6 },
+    "householdId": { "type": ["string", "null"] },
+    "userId": { "type": ["string", "null"] },
+
+    "status": {
+      "type": "string",
+      "enum": ["staged", "matched", "reconciled", "committed", "discarded"]
+    },
+
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+
+    "upc": { "type": ["string", "null"], "pattern": "^[0-9]{8,14}$" },
+    "sku": { "type": ["string", "null"] },
+    "fingerprint": {
+      "type": ["string", "null"],
+      "description": "Stable dedupe key for scans of the same item."
+    },
+
+    "storeId": { "type": ["string", "null"] },
+    "storeChainId": { "type": ["string", "null"] },
+
+    "title": { "type": ["string", "null"] },
+    "brand": { "type": ["string", "null"] },
+    "sizeText": { "type": ["string", "null"] },
+
+    "qty": { "type": "number", "minimum": 0, "default": 1 },
+    "unit": { "type": ["string", "null"] },
+
+    "scan": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": ["camera", "manual", "import"],
+          "default": "camera"
+        },
+        "rawText": { "type": ["string", "null"] },
+        "barcodeFormat": { "type": ["string", "null"] },
+        "imageRef": { "type": ["string", "null"] },
+        "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "pricing": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "observedPrice": { "type": ["number", "null"], "minimum": 0 },
+        "currency": { "type": "string", "default": "USD" },
+        "priceObservationId": { "type": ["string", "null"] },
+        "unitPrice": { "type": ["number", "null"], "minimum": 0 }
+      }
+    },
+
+    "matches": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "couponMatchIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        },
+        "recallAlertIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        },
+        "ingredientFlags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      }
+    },
+
+    "reconciliation": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "receiptReconId": { "type": ["string", "null"] },
+        "receiptLineId": { "type": ["string", "null"] },
+        "matchedBy": {
+          "type": ["string", "null"],
+          "enum": ["upc", "title", "fuzzy", "manual", null]
+        },
+        "matchedConfidence": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+
+    "commitPlan": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "commitToInventory": { "type": "boolean", "default": true },
+        "inventoryLocation": { "type": ["string", "null"] },
+        "inventoryCategory": { "type": ["string", "null"] },
+        "lowStockFlag": { "type": ["boolean", "null"] }
+      }
+    }
+  }
+}

@@ -1,0 +1,192 @@
+/* src/theme/animations.css
+   Suka Theme Motion — variable-driven + a11y-first
+   - Keeps legacy classes intact for zero-refactor adoption
+   - Respects prefers-reduced-motion
+   - Themeable glow/accent via CSS vars
+*/
+
+/* -------------------- Theme Tokens -------------------- */
+:root {
+  /* Time */
+  --anim-dur-xs: 120ms;
+  --anim-dur-sm: 200ms;
+  --anim-dur-md: 320ms;
+  --anim-dur-lg: 480ms;
+
+  /* Distances */
+  --anim-dx: 30px;   /* slide X */
+  --anim-dy: 10px;   /* fade Y */
+
+  /* Easing */
+  --ease: cubic-bezier(.4,0,.2,1);
+  --ease-in: cubic-bezier(.32,0,.67,0);
+  --ease-out: cubic-bezier(.16,1,.3,1);
+
+  /* Opacity */
+  --opacity-start: .0;
+  --opacity-end: 1;
+
+  /* Accents (glow, ping) — can be themed */
+  --accent: #ff6384;             /* default glow color */
+  --accent-alpha: .45;
+}
+
+/* Example theme override:
+[data-theme="night"] {
+  --accent: #60a5fa;
+  --accent-alpha: .6;
+}
+*/
+
+/* Reduced motion friendly defaults */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --anim-dur-xs: 1ms;
+    --anim-dur-sm: 1ms;
+    --anim-dur-md: 1ms;
+    --anim-dur-lg: 1ms;
+    --anim-dx: 0px;
+    --anim-dy: 0px;
+  }
+  /* Clamp all legacy animate classes to 1ms */
+  .fade-in,
+  .pulse,
+  .slide-in-left,
+  .slide-in-right,
+  .bounce-in,
+  .wiggle,
+  .glow-pulse,
+  .ping,
+  .spin,
+  [data-animate] {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    transform: none !important;
+  }
+}
+
+/* -------------------- Keyframes -------------------- */
+
+/* Fade In (upwards) */
+@keyframes kf-fade-in {
+  from { opacity: var(--opacity-start); transform: translateY(var(--anim-dy)); }
+  to   { opacity: var(--opacity-end);   transform: translateY(0); }
+}
+
+/* Pulse (scale + opacity) */
+@keyframes kf-pulse {
+  0%   { transform: scale(1);    opacity: .9; }
+  50%  { transform: scale(1.05); opacity: 1;  }
+  100% { transform: scale(1);    opacity: .9; }
+}
+
+/* Slide In (from left) */
+@keyframes kf-slide-in-left {
+  from { transform: translateX(calc(-1 * var(--anim-dx))); opacity: 0; }
+  to   { transform: translateX(0);                         opacity: 1; }
+}
+
+/* Slide In (from right) */
+@keyframes kf-slide-in-right {
+  from { transform: translateX(var(--anim-dx)); opacity: 0; }
+  to   { transform: translateX(0);              opacity: 1; }
+}
+
+/* Bounce In (springy scale) */
+@keyframes kf-bounce-in {
+  0%   { transform: scale(.3);  opacity: 0; }
+  50%  { transform: scale(1.1); opacity: 1; }
+  70%  { transform: scale(.92); }
+  100% { transform: scale(1); }
+}
+
+/* Wiggle (subtle rotate) */
+@keyframes kf-wiggle {
+  0%, 100% { transform: rotate(-3deg); }
+  50%      { transform: rotate(3deg); }
+}
+
+/* Glow Pulse (shadow bloom) */
+@keyframes kf-glow-pulse {
+  0%   { box-shadow: 0 0 0 rgba(var(--_accent-rgb, 255,99,132), calc(var(--accent-alpha))); }
+  50%  { box-shadow: 0 0 12px rgba(var(--_accent-rgb, 255,99,132), calc(var(--accent-alpha) + .2)); }
+  100% { box-shadow: 0 0 0 rgba(var(--_accent-rgb, 255,99,132), calc(var(--accent-alpha))); }
+}
+
+/* Ping (audio/attention ripple) */
+@keyframes kf-ping {
+  0%   { transform: scale(1);   opacity: 1; }
+  75%,100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* Spin (loader) */
+@keyframes kf-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* -------------------- Legacy Classes (kept) -------------------- */
+
+.fade-in {
+  animation: kf-fade-in var(--anim-dur-md) var(--ease-out) both;
+}
+
+.pulse {
+  animation: kf-pulse 1.5s ease-in-out infinite;
+}
+
+.slide-in-left {
+  animation: kf-slide-in-left var(--anim-dur-sm) var(--ease-out) both;
+}
+
+.slide-in-right {
+  animation: kf-slide-in-right var(--anim-dur-sm) var(--ease-out) both;
+}
+
+.bounce-in {
+  animation: kf-bounce-in 0.8s var(--ease-out) both;
+}
+
+.wiggle {
+  animation: kf-wiggle 0.4s ease-in-out infinite;
+}
+
+/* Derive RGB for glow without JS (fallback if accent is hex) */
+.glow-pulse {
+  /* If your build supports color-mix() you can ignore the rgb fallback.
+     You can also set --_accent-rgb manually at a container for precision. */
+  --_accent-rgb: 255, 99, 132; /* fallback matches #ff6384 */
+  animation: kf-glow-pulse 2s ease-in-out infinite;
+  /* Optional outline to ensure visible on dark backgrounds */
+  outline-offset: 2px;
+}
+
+.ping {
+  animation: kf-ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.spin {
+  animation: kf-spin 1s linear infinite;
+}
+
+/* -------------------- Extras (opt-in) -------------------- */
+
+/* Data-driven variants for declarative usage */
+[data-animate="fade-in"]        { animation: kf-fade-in var(--anim-dur-md) var(--ease-out) both; }
+[data-animate="slide-left"]     { animation: kf-slide-in-left var(--anim-dur-sm) var(--ease-out) both; }
+[data-animate="slide-right"]    { animation: kf-slide-in-right var(--anim-dur-sm) var(--ease-out) both; }
+[data-animate="bounce-in"]      { animation: kf-bounce-in 0.8s var(--ease-out) both; }
+[data-animate="pulse"]          { animation: kf-pulse 1.5s ease-in-out infinite; }
+[data-animate="wiggle"]         { animation: kf-wiggle 0.4s ease-in-out infinite; }
+[data-animate="glow"]           { animation: kf-glow-pulse 2s ease-in-out infinite; }
+[data-animate="ping"]           { animation: kf-ping 1s cubic-bezier(0, 0, 0.2, 1) infinite; }
+[data-animate="spin"]           { animation: kf-spin 1s linear infinite; }
+
+/* Small utilities to orchestrate motion */
+.anim-delay-0   { animation-delay: 0ms !important; }
+.anim-delay-1   { animation-delay: 60ms !important; }
+.anim-delay-2   { animation-delay: 120ms !important; }
+.anim-delay-3   { animation-delay: 180ms !important; }
+.anim-duration-sm { animation-duration: var(--anim-dur-sm) !important; }
+.anim-duration-md { animation-duration: var(--anim-dur-md) !important; }
+.anim-duration-lg { animation-duration: var(--anim-dur-lg) !important; }

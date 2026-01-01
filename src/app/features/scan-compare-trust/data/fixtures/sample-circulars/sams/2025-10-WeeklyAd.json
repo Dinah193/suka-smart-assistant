@@ -1,0 +1,183 @@
+{
+  "provider": "sams",
+  "circularId": "sams-2025-10-weekly",
+  "title": "Sam's Club Weekly Ad • Oct 25 – Oct 31, 2025",
+  "period": { "fromISO": "2025-10-25T05:00:00Z", "toISO": "2025-10-31T23:59:59Z" },
+  "meta": {
+    "source": "api",
+    "downloadedAtISO": "2025-10-25T09:00:00Z",
+    "timezone": "America/New_York",
+    "notes": "Fixture: promotes breakfast, household, and dairy; includes app-exclusive offers."
+  },
+
+  "storeScope": [
+    { "storeId": "sams-0456", "name": "Sam's Club #456" }
+  ],
+
+  "userContext": {
+    "pinnedSchedules": [
+      { "type": "schedule", "id": "sched-grocery-wed", "name": "Wednesday Grocery Run" }
+    ]
+  },
+
+  "items": [
+    {
+      "sku": "S-CEREAL-MIX-001",
+      "title": "Toasted Oat Cereal — 18 oz",
+      "brand": "Morning Harvest",
+      "categoryPath": ["Grocery", "Breakfast & Cereal", "Cereal"],
+      "package": { "quantity": 18, "unit": "oz", "normalized": { "quantity": 510.29, "unit": "g" } },
+      "price": { "amount": 4.49, "currency": "USD" },
+      "unitPrice": { "unit": "per_g", "amount": 0.0088 },
+      "channel": "in_store",
+      "promo": {
+        "type": "weekly_ad",
+        "tags": ["Breakfast"],
+        "mixAndMatchGroup": "sams-cereal-bogo"
+      },
+      "candidateCoupons": [
+        { "id": "cpn-store-bogo-001", "group": "store" }
+      ],
+      "cycleHints": { "pattern": "weekly" },
+      "images": [
+        "https://fixtures.suka.local/img/sams/cereal-toasted-oats-18oz.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Toasted Oat Cereal", "18 OZ"],
+        "regex": "Cereal\\s*18\\s*oz"
+      }
+    },
+
+    {
+      "sku": "S-FRZN-WAFF-48",
+      "title": "Frozen Waffles — 48 ct",
+      "brand": "Homestead",
+      "categoryPath": ["Grocery", "Frozen", "Breakfast"],
+      "package": { "quantity": 48, "unit": "ct", "normalized": { "quantity": 48, "unit": "ct" } },
+      "price": { "amount": 15.49, "currency": "USD" },
+      "unitPrice": { "unit": "per_ct", "amount": 0.3227 },
+      "channel": "pickup",
+      "promo": {
+        "type": "app_exclusive",
+        "tags": ["App Only", "Freezer Staple"],
+        "mixAndMatchGroup": "frozen-breakfast"
+      },
+      "candidateCoupons": [
+        { "id": "cpn-waff-20pct", "group": "store" }
+      ],
+      "cycleHints": { "pattern": "biweekly" },
+      "images": [
+        "https://fixtures.suka.local/img/sams/frozen-waffles-48ct.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Frozen Waffles", "48 CT"],
+        "regex": "Waffles\\s*48"
+      }
+    },
+
+    {
+      "sku": "S-EGGS-18CT",
+      "upc": "036000291452",
+      "title": "Large Eggs — 18 Count",
+      "brand": "Member's Mark",
+      "categoryPath": ["Grocery", "Dairy", "Eggs"],
+      "package": { "quantity": 18, "unit": "ct", "normalized": { "quantity": 18, "unit": "ct" } },
+      "price": { "amount": 4.98, "currency": "USD" },
+      "unitPrice": { "unit": "per_ct", "amount": 0.2767 },
+      "channel": "in_store",
+      "promo": {
+        "type": "weekly_ad",
+        "tags": ["Value Pack"],
+        "limitPerCustomer": 2
+      },
+      "candidateCoupons": [
+        { "id": "cpn-egg-clip-50c", "group": "mfg", "weekdayRestriction": [1,2,3,4] }
+      ],
+      "cycleHints": { "pattern": "monthly" },
+      "images": [
+        "https://fixtures.suka.local/img/sams/eggs-18ct.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Large Eggs", "18 COUNT"],
+        "regex": "Eggs\\s*18"
+      }
+    },
+
+    {
+      "sku": "S-MILK-1GAL",
+      "title": "Whole Milk 1 Gallon",
+      "brand": "Member's Mark",
+      "categoryPath": ["Grocery", "Dairy", "Milk"],
+      "package": { "quantity": 1, "unit": "gal", "normalized": { "quantity": 3785.41, "unit": "ml" } },
+      "price": { "amount": 3.39, "currency": "USD" },
+      "unitPrice": { "unit": "per_l", "amount": 0.90 },
+      "channel": "in_store",
+      "promo": {
+        "type": "everyday_price",
+        "tags": ["Dairy Core"]
+      },
+      "candidateCoupons": [
+        { "id": "cpn-abc123", "group": "mfg", "note": "Should not match; coupon is scoped to ALDI." }
+      ],
+      "cycleHints": { "pattern": "weekly" },
+      "images": [
+        "https://fixtures.suka.local/img/sams/milk-1gal.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Whole Milk", "1 GAL"],
+        "regex": "Milk\\s*1\\s*gal"
+      }
+    },
+
+    {
+      "sku": "S-DISHSOAP-135OZ",
+      "title": "Dishwashing Liquid — 135 oz",
+      "brand": "Member's Mark",
+      "categoryPath": ["Household", "Cleaning", "Dish Soap"],
+      "package": { "quantity": 135, "unit": "oz", "normalized": { "quantity": 3991.09, "unit": "ml" } },
+      "price": { "amount": 9.98, "currency": "USD" },
+      "unitPrice": { "unit": "per_ml", "amount": 0.0025 },
+      "channel": "delivery",
+      "promo": {
+        "type": "weekly_ad",
+        "tags": ["Bulk Cleaners"]
+      },
+      "candidateCoupons": [
+        { "id": "cpn-house-1off5", "group": "basket", "note": "Cross-retailer ALDI basket coupon should not apply." }
+      ],
+      "cycleHints": { "pattern": "monthly" },
+      "images": [
+        "https://fixtures.suka.local/img/sams/dish-soap-135oz.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Dishwashing Liquid", "135 OZ"],
+        "regex": "Dish\\s*(Soap|washing)\\s*135"
+      },
+      "trustFlags": ["contains_sls", "fragrance"]
+    },
+
+    {
+      "sku": "S-BACON-BEEF-2LB",
+      "title": "Beef Bacon — 2 lb",
+      "brand": "Member's Mark",
+      "categoryPath": ["Grocery", "Meat", "Beef"],
+      "package": { "quantity": 2, "unit": "lb", "normalized": { "quantity": 907.18, "unit": "g" } },
+      "price": { "amount": 14.98, "currency": "USD" },
+      "unitPrice": { "unit": "per_g", "amount": 0.0165 },
+      "channel": "in_store",
+      "promo": {
+        "type": "manager_special",
+        "tags": ["Limited Time"]
+      },
+      "candidateCoupons": [],
+      "cycleHints": { "pattern": "irregular" },
+      "images": [
+        "https://fixtures.suka.local/img/sams/beef-bacon-2lb.jpg"
+      ],
+      "mappingHints": {
+        "ocrPhrases": ["Beef Bacon", "2 LB"],
+        "regex": "Beef\\s*Bacon"
+      }
+    }
+  ]
+}

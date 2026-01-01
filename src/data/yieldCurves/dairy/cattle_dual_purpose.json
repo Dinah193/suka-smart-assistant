@@ -1,0 +1,401 @@
+{
+  "$schema": "../../schemas/yieldCurve.dairy.schema.json",
+  "version": "2025-10-31T14:30:00-05:00",
+  "meta": {
+    "id": "cattle-dual-purpose-standard",
+    "species": "bovine",
+    "breed": "dual-purpose",
+    "title": "Dual-Purpose Cattle – Daily Yield Estimate (Temperate / Hebrew Full-Moon Start)",
+    "description": "Daily/weekly milk production curve for dual-purpose cattle (milk + eventual beef/cull) in a temperate zone. Designed to drive storehouse stock planning (butter, yogurt, cheese), meal planning, cleaning/parlor routines, garden/compost routing, and animal-care/butchery scheduling. Aligns with the user's Hebrew calendar logic (full-moon start months).",
+    "source": "suka-smart-assistant",
+    "tags": [
+      "dairy",
+      "cattle",
+      "dual-purpose",
+      "storehouse",
+      "meal-planning",
+      "cleaning",
+      "garden",
+      "animal-care",
+      "butchery",
+      "torah-compliant"
+    ],
+    "calendar": {
+      "hebrewMonthStart": "full-moon",
+      "supportsAltStart": true,
+      "notes": "Use the calendar mapping engine to pin day 1 of the dairy cycle to the full moon; honors user-selected start rules."
+    }
+  },
+  "ui": {
+    "layout": "cards/timeline",
+    "hints": {
+      "primaryCTA": "Generate Milking Session",
+      "secondaryCTA": "Save as Favorite",
+      "tertiaryCTA": "Reverse-generate Storehouse Dairy Plan",
+      "showSeasonalityBadge": true,
+      "groupBy": [
+        "lactationStage",
+        "weekOfLactation"
+      ]
+    },
+    "badges": [
+      {
+        "text": "Dual-purpose",
+        "color": "blue"
+      },
+      {
+        "text": "Torah-compliant",
+        "color": "emerald"
+      }
+    ]
+  },
+  "engines": {
+    "primary": "animalSessionEngine",
+    "supports": [
+      "storehouseGoalEngine",
+      "mealPlanEngine",
+      "gardenQueueEngine",
+      "cleaningSessionEngine",
+      "inventoryGoalEngine"
+    ],
+    "notes": "Cattle output is heavier → cleaning must scale; storehouse and meal engines should see higher fat/cream values than goat; garden engine can consume whey/milk waste."
+  },
+  "orchestration": {
+    "bus": "window.__suka?.eventBus",
+    "emitOnLoad": [
+      "yieldcurve.loaded",
+      "animal.dairy.curve.loaded",
+      "animal.cattle.dual-purpose.loaded"
+    ],
+    "listen": [
+      "automation.schedule.request",
+      "inventory.restock.request",
+      "storehouse.goal.request",
+      "meal.session.request",
+      "garden.session.request",
+      "cleaning.session.request",
+      "butchery.session.request"
+    ],
+    "sharedScopes": [
+      "meals",
+      "cleaning",
+      "garden",
+      "animals",
+      "storehouse",
+      "inventory"
+    ]
+  },
+  "reverse": {
+    "generateFrom": [
+      "storehouse.targets.dairy",
+      "mealplan.requirements.dairy",
+      "community.milk-pool",
+      "coop-pool.dairy",
+      "inventory.deficit.dairy",
+      "festival.feast-day.dairy"
+    ],
+    "strategies": [
+      {
+        "id": "from-storehouse-dairy-target",
+        "title": "Back into herd milking schedule from storehouse dairy targets",
+        "input": {
+          "storehouseTargetLitersPerMonth": 450
+        },
+        "output": {
+          "recommendedCows": 2,
+          "milkingSessionsPerDay": 2,
+          "milkingDaysPerMonth": 30
+        }
+      },
+      {
+        "id": "from-mealplan",
+        "title": "Back into daily milk from meal plan dairy usage (butter, yogurt, cheese)",
+        "input": {
+          "recipesPerWeekNeedingFreshMilk": 9,
+          "litersPerRecipe": 2.5
+        },
+        "output": {
+          "requiredDailyProductionLiters": 3.3,
+          "suggestedCows": 1
+        }
+      },
+      {
+        "id": "from-festival-window",
+        "title": "Back into pre-feast dairy build-up",
+        "input": {
+          "daysUntilFeast": 14,
+          "targetCulturedLiters": 90
+        },
+        "output": {
+          "extraMilkingSessions": 4,
+          "storehouseAutoPlan": true
+        }
+      }
+    ]
+  },
+  "curve": {
+    "units": "liters-per-day",
+    "lactationWindowDays": 305,
+    "base": [
+      { "day": 1, "value": 6.0, "stage": "freshening" },
+      { "day": 2, "value": 7.5, "stage": "freshening" },
+      { "day": 3, "value": 9.0, "stage": "freshening" },
+      { "day": 7, "value": 11.0, "stage": "ramp-up" },
+      { "day": 14, "value": 13.0, "stage": "ramp-up" },
+      { "day": 21, "value": 14.0, "stage": "peak-approach" },
+      { "day": 30, "value": 15.0, "stage": "peak" },
+      { "day": 45, "value": 15.5, "stage": "peak" },
+      { "day": 60, "value": 15.5, "stage": "peak" },
+      { "day": 90, "value": 14.5, "stage": "mid" },
+      { "day": 120, "value": 13.5, "stage": "mid" },
+      { "day": 150, "value": 12.5, "stage": "mid" },
+      { "day": 180, "value": 11.5, "stage": "late" },
+      { "day": 210, "value": 10.5, "stage": "late" },
+      { "day": 240, "value": 9.5, "stage": "late" },
+      { "day": 270, "value": 8.0, "stage": "dry-off-approach" },
+      { "day": 305, "value": 6.0, "stage": "dry-off-approach" }
+    ],
+    "weeklyView": [
+      { "week": 1, "avg": 8.5 },
+      { "week": 2, "avg": 12.0 },
+      { "week": 3, "avg": 13.5 },
+      { "week": 4, "avg": 14.5 },
+      { "week": 5, "avg": 15.0 },
+      { "week": 6, "avg": 15.5 },
+      { "week": 8, "avg": 15.3 },
+      { "week": 12, "avg": 14.5 },
+      { "week": 16, "avg": 13.5 },
+      { "week": 20, "avg": 12.5 },
+      { "week": 24, "avg": 11.5 },
+      { "week": 28, "avg": 10.0 },
+      { "week": 32, "avg": 9.0 },
+      { "week": 36, "avg": 8.0 },
+      { "week": 40, "avg": 6.5 }
+    ]
+  },
+  "adjustments": {
+    "byClimateZone": [
+      {
+        "zone": "hot-humid",
+        "multiplier": 0.9,
+        "notes": "Heat stress reduces yield; emit cleaning.session.request for waterers/fans; consider night milking."
+      },
+      {
+        "zone": "hot-dry",
+        "multiplier": 0.88,
+        "notes": "Dry heat → water checks + shade cleaning."
+      },
+      {
+        "zone": "cold-temperate",
+        "multiplier": 1.03,
+        "notes": "Slight gain; bedding cleaning should increase."
+      }
+    ],
+    "byFeedQuality": [
+      { "level": "high", "multiplier": 1.07 },
+      { "level": "medium", "multiplier": 1.0 },
+      { "level": "low", "multiplier": 0.9 }
+    ],
+    "byLitterSize": [
+      { "kidding": "single", "multiplier": 1.0 },
+      { "kidding": "twins", "multiplier": 1.0 },
+      { "kidding": "triplets", "multiplier": 1.0 }
+    ]
+  },
+  "storehouse": {
+    "targets": {
+      "butter_monthly_kg": 18,
+      "yogurt_weekly_liters": 12,
+      "cheese_monthly_liters": 60,
+      "cream_reserve_liters": 15,
+      "whey_to_garden_ratio": 0.25
+    },
+    "grocerySectionsInspiration": [
+      "Dairy & Eggs",
+      "Cheese & Cultured",
+      "Breakfast & Baking",
+      "Prepared / Ready-to-Eat",
+      "Animal Feed / Scraps → Livestock",
+      "Festivals / Feasts (dairy-heavy)"
+    ],
+    "autoPlan": {
+      "enabled": true,
+      "emit": [
+        "storehouse.plan.generated",
+        "inventory.restock.request"
+      ]
+    }
+  },
+  "meals": {
+    "recipes": [
+      {
+        "id": "fresh-milk-window-dual-cattle",
+        "title": "Fresh Milk Window (Cattle)",
+        "useWithinHours": 24,
+        "linksTo": [
+          "/meals/breakfast",
+          "/meals/breads",
+          "/inventory/dairy",
+          "/garden/companion"
+        ]
+      },
+      {
+        "id": "cream-to-butter-session",
+        "title": "Cream to Butter Session",
+        "minBatchLiters": 4,
+        "emit": "cooking.session.request"
+      },
+      {
+        "id": "cultured-dairy-batch",
+        "title": "Cultured Dairy Batch (yogurt/kefir)",
+        "minBatchLiters": 6,
+        "emit": "cooking.session.request"
+      }
+    ],
+    "autoSession": {
+      "everyDays": 2,
+      "emit": [
+        "meal.session.request",
+        "automation.schedule.request"
+      ]
+    }
+  },
+  "garden": {
+    "wheyUse": "compost-or-soil",
+    "emit": [
+      "garden.session.request"
+    ],
+    "notes": "Cattle dairy will produce more whey and rinse water → route to compost piles or garden rows. Can auto-schedule hose-down/irrigation if water is clean enough."
+  },
+  "cleaning": {
+    "routines": [
+      {
+        "id": "cattle-parlor-after-each-milking",
+        "title": "Cattle Parlor Clean After Each Milking",
+        "frequency": "EACH_SESSION",
+        "emit": "cleaning.session.request",
+        "tools": [
+          "sanitizer",
+          "parlor-brush",
+          "high-pressure-hose"
+        ]
+      },
+      {
+        "id": "cattle-parlor-weekly-deep",
+        "title": "Cattle Parlor Weekly Deep Clean",
+        "frequency": "WEEKLY",
+        "emit": "cleaning.session.request"
+      },
+      {
+        "id": "cattle-waterer-sanitizing",
+        "title": "Waterer / Trough Sanitizing",
+        "frequency": "WEEKLY",
+        "emit": "cleaning.session.request"
+      }
+    ],
+    "sabbathGuard": true
+  },
+  "animals": {
+    "acquisition": {
+      "allowedSpecies": [
+        "cattle",
+        "cow",
+        "calf"
+      ],
+      "disallowedSpecies": [
+        "pig",
+        "swine"
+      ],
+      "notes": "Torah-compliant: no unclean animals processed alongside this cattle dairy line."
+    },
+    "care": {
+      "milkingPerDay": 2,
+      "hoofTrimPerYear": 2,
+      "dewormSchedule": "SEASONAL",
+      "emit": [
+        "animal.care.session.request"
+      ]
+    },
+    "butchery": {
+      "notes": "Dual-purpose cattle may be culled → send to butchery workflow with Torah-compliant filters. Integrate with existing meat yield curves (beef_brangus.json) for carcass mapping.",
+      "emit": [
+        "butchery.session.request",
+        "inventory.restock.request"
+      ]
+    }
+  },
+  "favoriteSessions": [
+    {
+      "id": "fav-cattle-morning-milking",
+      "title": "Cattle Morning Milking + Parlor Clean",
+      "domain": "animals/dairy",
+      "schedule": "RRULE:FREQ=DAILY;BYHOUR=5;BYMINUTE=30;BYSECOND=0",
+      "sabbathGuard": true
+    },
+    {
+      "id": "fav-cattle-evening-milking",
+      "title": "Cattle Evening Milking + Trough Check",
+      "domain": "animals/dairy",
+      "schedule": "RRULE:FREQ=DAILY;BYHOUR=17;BYMINUTE=30;BYSECOND=0",
+      "sabbathGuard": true
+    },
+    {
+      "id": "fav-cattle-cultured-batch",
+      "title": "Cultured Dairy Batch (Large)",
+      "domain": "meals/cooking",
+      "schedule": "RRULE:FREQ=WEEKLY;BYDAY=SU;BYHOUR=13;BYMINUTE=0;BYSECOND=0"
+    }
+  ],
+  "scheduleTemplates": [
+    {
+      "id": "cattle-twice-daily-milking",
+      "title": "Cattle Twice Daily Milking (Hebrew Calendar Aware)",
+      "rrules": [
+        "RRULE:FREQ=DAILY;BYHOUR=5;BYMINUTE=30;BYSECOND=0",
+        "RRULE:FREQ=DAILY;BYHOUR=17;BYMINUTE=30;BYSECOND=0"
+      ],
+      "options": {
+        "sabbathGuard": true,
+        "quietHoursGuard": true
+      }
+    },
+    {
+      "id": "cattle-weekly-deep-clean",
+      "title": "Cattle Parlor Weekly Deep Clean",
+      "rrules": [
+        "RRULE:FREQ=WEEKLY;BYDAY=FR;BYHOUR=14;BYMINUTE=0;BYSECOND=0"
+      ],
+      "options": {
+        "sabbathGuard": true
+      }
+    }
+  ],
+  "userProfiles": {
+    "allowUserOwnedSchedules": true,
+    "allowUserOwnedFavorites": true,
+    "allowExportShare": true,
+    "shareFormats": [
+      "json",
+      "suka-plan",
+      "calendar-rrule"
+    ]
+  },
+  "events": {
+    "emits": [
+      "yieldcurve.loaded",
+      "automation.schedule.request",
+      "storehouse.plan.generated",
+      "meal.session.request",
+      "garden.session.request",
+      "cleaning.session.request",
+      "animal.care.session.request",
+      "butchery.session.request"
+    ],
+    "consumes": [
+      "import.payload.ready",
+      "calendar.config.changed",
+      "inventory.updated",
+      "storehouse.targets.changed"
+    ]
+  }
+}

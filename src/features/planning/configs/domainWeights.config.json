@@ -1,0 +1,189 @@
+{
+  "version": 1,
+  "meta": {
+    "description": "Weights for how each domain impacts household stability and priority flows. All weights are normalized to 0.0–1.0. Higher = stronger impact or bias.",
+    "intendedUse": "Scheduling, Planning Graph next-step biasing, and SessionRunner 'Now' CTA prioritization.",
+    "scale": {
+      "min": 0.0,
+      "max": 1.0
+    }
+  },
+  "domains": {
+    "storehouse": {
+      "stabilityImpact": 0.95,
+      "volatility": 0.25,
+      "priorityBias": 0.9,
+      "energyDemand": 0.5,
+      "timeSensitivity": 0.55,
+      "lifeSafetyImpact": 0.75,
+      "description": "Core food and supplies backbone. When the storehouse is stable, all other domains become easier to run smoothly.",
+      "defaultNowCtaBias": 0.9
+    },
+    "cooking": {
+      "stabilityImpact": 0.8,
+      "volatility": 0.6,
+      "priorityBias": 0.85,
+      "energyDemand": 0.7,
+      "timeSensitivity": 0.9,
+      "lifeSafetyImpact": 0.6,
+      "description": "High-frequency, time-sensitive domain that directly affects daily comfort and nutrition. Strong driver of short-term stability.",
+      "defaultNowCtaBias": 0.85
+    },
+    "cleaning": {
+      "stabilityImpact": 0.75,
+      "volatility": 0.45,
+      "priorityBias": 0.7,
+      "energyDemand": 0.65,
+      "timeSensitivity": 0.6,
+      "lifeSafetyImpact": 0.55,
+      "description": "Environmental quality, hygiene, and clarity. Important for mental and physical stability but slightly less time-critical than cooking.",
+      "defaultNowCtaBias": 0.75
+    },
+    "garden": {
+      "stabilityImpact": 0.7,
+      "volatility": 0.8,
+      "priorityBias": 0.65,
+      "energyDemand": 0.7,
+      "timeSensitivity": 0.85,
+      "lifeSafetyImpact": 0.55,
+      "description": "Seasonal and weather-driven. Very time-sensitive in windows, but impacts medium-to-long-term stability rather than daily operations.",
+      "defaultNowCtaBias": 0.7
+    },
+    "animals": {
+      "stabilityImpact": 0.85,
+      "volatility": 0.75,
+      "priorityBias": 0.8,
+      "energyDemand": 0.8,
+      "timeSensitivity": 0.8,
+      "lifeSafetyImpact": 0.95,
+      "description": "High responsibility and life-safety impact. Missed tasks can have serious consequences, so this domain gets strong priority during active windows.",
+      "defaultNowCtaBias": 0.8
+    },
+    "preservation": {
+      "stabilityImpact": 0.9,
+      "volatility": 0.5,
+      "priorityBias": 0.78,
+      "energyDemand": 0.75,
+      "timeSensitivity": 0.7,
+      "lifeSafetyImpact": 0.7,
+      "description": "Locks in the value of harvests, batches, and butchery. Key for long-term stability, especially when there is fresh surplus.",
+      "defaultNowCtaBias": 0.78
+    }
+  },
+  "flowMatrix": [
+    {
+      "from": "storehouse",
+      "to": "cooking",
+      "weight": 0.95,
+      "reason": "Storehouse stock directly drives cooking sessions and meal planning."
+    },
+    {
+      "from": "storehouse",
+      "to": "preservation",
+      "weight": 0.8,
+      "reason": "Detected surplus or looming expiry in storehouse should nudge preservation sessions."
+    },
+    {
+      "from": "storehouse",
+      "to": "cleaning",
+      "weight": 0.6,
+      "reason": "Bulk restocking and storage changes often require cleaning or reorganization."
+    },
+    {
+      "from": "cooking",
+      "to": "cleaning",
+      "weight": 0.85,
+      "reason": "Cooking sessions naturally generate cleaning tasks; cleaning should frequently be the next step."
+    },
+    {
+      "from": "cooking",
+      "to": "storehouse",
+      "weight": 0.7,
+      "reason": "Cooking depletes inventory and should trigger storehouse adjustments or audits."
+    },
+    {
+      "from": "cooking",
+      "to": "preservation",
+      "weight": 0.75,
+      "reason": "Batch cooking often leads to leftovers better preserved for later use."
+    },
+    {
+      "from": "cleaning",
+      "to": "storehouse",
+      "weight": 0.65,
+      "reason": "Deep cleaning of zones often exposes forgotten items or reorganized storage that should be reflected in the storehouse."
+    },
+    {
+      "from": "cleaning",
+      "to": "cooking",
+      "weight": 0.55,
+      "reason": "Cleaned kitchen or prep areas can encourage immediate cooking or batch sessions."
+    },
+    {
+      "from": "garden",
+      "to": "storehouse",
+      "weight": 0.9,
+      "reason": "Harvest events must be reflected in storehouse inventory and savings."
+    },
+    {
+      "from": "garden",
+      "to": "preservation",
+      "weight": 0.92,
+      "reason": "Perishable harvests strongly drive preservation sessions like canning, freezing, or dehydrating."
+    },
+    {
+      "from": "garden",
+      "to": "cooking",
+      "weight": 0.7,
+      "reason": "Fresh harvests increase cooking opportunities and recipe suggestions."
+    },
+    {
+      "from": "animals",
+      "to": "storehouse",
+      "weight": 0.93,
+      "reason": "Butchery and egg/milk collection significantly change storehouse protein and fat stocks."
+    },
+    {
+      "from": "animals",
+      "to": "preservation",
+      "weight": 0.9,
+      "reason": "Meat processing and preserving are time-sensitive after butchery tasks."
+    },
+    {
+      "from": "animals",
+      "to": "cleaning",
+      "weight": 0.78,
+      "reason": "Animal care and butchery generate immediate cleaning and sanitizing requirements."
+    },
+    {
+      "from": "preservation",
+      "to": "storehouse",
+      "weight": 0.97,
+      "reason": "Preservation sessions culminate in updated storehouse counts and long-term inventory stability."
+    },
+    {
+      "from": "preservation",
+      "to": "cooking",
+      "weight": 0.6,
+      "reason": "Newly preserved items should be surfaced in future cooking and meal planning suggestions."
+    },
+    {
+      "from": "preservation",
+      "to": "cleaning",
+      "weight": 0.7,
+      "reason": "Canning and preserving leave equipment and zones needing cleaning and reset."
+    },
+    {
+      "from": "storehouse",
+      "to": "garden",
+      "weight": 0.75,
+      "reason": "Storehouse gaps and projected shortages should drive garden planting plans."
+    },
+    {
+      "from": "storehouse",
+      "to": "animals",
+      "weight": 0.65,
+      "reason": "Protein and fat gaps can influence decisions about animal stocking and breeding."
+    }
+  ]
+}

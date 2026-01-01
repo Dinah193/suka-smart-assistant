@@ -1,0 +1,129 @@
+{
+  "$schema": "./MicronutrientCalculator.config.schema.json",
+
+  "calculatorId": "health.micronutrients",
+  "nodeId": "pg.health.micronutrientCalculator",
+
+  "domain": "health",
+  "category": "nutrition",
+  "label": "Micronutrient Calculator",
+  "shortLabel": "Micros",
+  "description": "Calculates daily micronutrient targets (vitamins and minerals) based on age, sex, weight, pregnancy/lactation status, and health focus. Feeds targets into meal planning, inventory/storehouse, and recipe selection.",
+
+  "tags": [
+    "health",
+    "nutrition",
+    "micronutrients",
+    "vitamins",
+    "minerals",
+    "planning-graph",
+    "ssa-calculator"
+  ],
+
+  "paths": {
+    "schema": "./MicronutrientCalculator.schema.json",
+    "shim": "./MicronutrientCalculator.shim.js",
+    "view": "./MicronutrientCalculator.view.jsx",
+    "hooks": "./MicronutrientCalculator.hooks.js",
+    "mappings": "./MicronutrientCalculator.mappings.json",
+    "readme": "./README.md"
+  },
+
+  "planningGraph": {
+    "group": "health",
+    "graphLabel": "Daily Micronutrient Targets",
+    "graphDescription": "Determine daily vitamin and mineral requirements and expose them to the Planning Graph so meals, storehouse, and session planning can align with nutrient coverage goals.",
+    "nodeType": "calculator",
+    "priority": 40,
+
+    "inputsFrom": [
+      "health.bmi",
+      "health.macros",
+      "health.bmr",
+      "profile.household",
+      "inventory.storehouse"
+    ],
+
+    "feedsInto": [
+      "meals.planner",
+      "meals.batchCooking",
+      "storehouse.nutritionGaps",
+      "health.tracker",
+      "health.goals"
+    ],
+
+    "edgeHints": {
+      "from": {
+        "health.bmi": "Use BMI and category to fine-tune certain micro targets (e.g., joint, heart, blood pressure support).",
+        "health.macros": "Align micronutrient distribution with dominant macro pattern (high protein, higher fiber, etc.).",
+        "health.bmr": "Use metabolic load to prioritize energy-related micronutrients (B vitamins, iron, magnesium).",
+        "profile.household": "Age, sex, pregnancy/lactation and known conditions influence micronutrient baselines.",
+        "inventory.storehouse": "Current pantry and storehouse items constrain real-world achievable micronutrient plans."
+      },
+      "to": {
+        "meals.planner": "Tag recipes and meals with micro coverage; prioritize combinations that close the biggest gaps.",
+        "meals.batchCooking": "Suggest batch sessions that cover chronic micronutrient gaps over a week/month.",
+        "storehouse.nutritionGaps": "Identify missing nutrient categories and map them to storehouse stocking targets.",
+        "health.tracker": "Track achieved vs target micronutrient intake over time.",
+        "health.goals": "Translate gaps into practical goals (e.g., 'hit iron target 5 days/week')."
+      }
+    }
+  },
+
+  "defaults": {
+    "unitSystem": "imperial",
+    "rounding": {
+      "gramsDecimals": 1,
+      "milligramsDecimals": 0,
+      "microgramsDecimals": 0
+    },
+    "profile": {
+      "sex": "unspecified",
+      "ageYears": 35,
+      "weight": {
+        "value": 180,
+        "unit": "lb"
+      },
+      "pregnancyStatus": "none",
+      "lactationStatus": "none"
+    },
+    "healthFocus": {
+      "boneHealth": true,
+      "bloodHealth": true,
+      "immuneSupport": true,
+      "heartHealth": false,
+      "brainHealth": false,
+      "metabolicHealth": true
+    },
+    "ssaIntegration": {
+      "autosaveProfile": true,
+      "allowLinkToMealPlanner": true,
+      "allowLinkToInventoryGaps": true
+    }
+  },
+
+  "ui": {
+    "icon": "MicronutrientCalculator",
+    "primaryColorToken": "healthMicrosPrimary",
+    "accentColorToken": "healthMicrosAccent",
+    "showNowButton": true,
+    "nowButtonLabel": "Use Targets in Plans",
+    "sectionTitle": "Micronutrient Needs",
+    "sectionSubtitle": "Daily vitamin and mineral targets for your household",
+    "showInHealthDashboard": true,
+    "showInPlanningGraphExplorer": true,
+    "quickAccessHotkey": "Shift+M"
+  },
+
+  "integration": {
+    "supportsPlanningGraph": true,
+    "supportsSessions": false,
+    "supportsHouseholdProfiles": true,
+    "supportsHouseholdMembers": true,
+    "sessionDomain": null,
+    "emitEvents": {
+      "calculated": "health.micronutrients.calculated",
+      "appliedNow": "health.micronutrients.appliedNow"
+    }
+  }
+}

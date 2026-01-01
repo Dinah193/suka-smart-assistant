@@ -1,0 +1,352 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka-smart-assistant/schemas/ResourceReadiness.schema.json",
+  "title": "SSA Resource Readiness",
+  "description": "Standard contract describing whether prerequisite resources (heat, water, soil, sanitizer, etc.) are in a ready state for a task step. Used by automation to gate execution and emit readiness events.",
+  "type": "object",
+  "required": ["readinessId", "kind", "status", "checkedAt"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "default": "1.0.0",
+      "description": "Schema payload version for migrations."
+    },
+    "readinessId": {
+      "type": "string",
+      "description": "Stable identifier (UUID or deterministic hash)."
+    },
+    "taskId": {
+      "type": "string",
+      "description": "If linked to a task, reference its ID."
+    },
+    "stepId": {
+      "type": "string",
+      "description": "If linked to a task step, reference its stepId."
+    },
+    "resourceRef": {
+      "type": "object",
+      "description": "Optional reference to a concrete resource/equipment item.",
+      "additionalProperties": false,
+      "properties": {
+        "refType": { "type": "string", "enum": ["inventory", "storehouse", "equipment", "location", "other"], "default": "equipment" },
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "location": { "type": "string" }
+      }
+    },
+    "kind": {
+      "type": "string",
+      "description": "Readiness domain.",
+      "enum": [
+        "heat",
+        "water",
+        "soil",
+        "sanitizer",
+        "air",
+        "electricity",
+        "fuel",
+        "container",
+        "surface",
+        "equipment",
+        "other"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "description": "Overall readiness outcome.",
+      "enum": ["unknown", "pending", "ready", "not_ready", "caution", "failed", "expired"],
+      "default": "unknown"
+    },
+    "checkedAt": { "type": "string", "format": "date-time" },
+    "expiresAt": { "type": "string", "format": "date-time" },
+    "measured": {
+      "type": "boolean",
+      "description": "True if based on measurement (sensor/thermometer/strip), false if asserted by instruction."
+    },
+    "method": {
+      "type": "string",
+      "enum": ["sensor", "manual", "recipe", "guideline", "estimate", "other"],
+      "default": "manual"
+    },
+    "observer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "actorId": { "type": "string" },
+        "displayName": { "type": "string" }
+      }
+    },
+    "notes": { "type": "string" },
+    "criteria": {
+      "type": "array",
+      "description": "Acceptance rules evaluated to compute readiness.",
+      "items": { "$ref": "#/definitions/criterion" }
+    },
+    "telemetry": {
+      "type": "object",
+      "description": "Raw or summarized readings by metric name.",
+      "additionalProperties": {
+        "type": ["number", "string", "boolean", "null"]
+      }
+    },
+    "details": {
+      "description": "Kind-specific details.",
+      "oneOf": [
+        { "$ref": "#/definitions/heat" },
+        { "$ref": "#/definitions/water" },
+        { "$ref": "#/definitions/soil" },
+        { "$ref": "#/definitions/sanitizer" },
+        { "$ref": "#/definitions/air" },
+        { "$ref": "#/definitions/electricity" },
+        { "$ref": "#/definitions/fuel" },
+        { "$ref": "#/definitions/containerSurface" },
+        { "$ref": "#/definitions/equipment" },
+        { "$ref": "#/definitions/other" }
+      ]
+    },
+    "provenance": {
+      "type": "object",
+      "description": "Where this readiness record came from.",
+      "additionalProperties": false,
+      "properties": {
+        "eventType": { "type": "string", "description": "Upstream SSA event that produced the check (e.g., 'scrape.result.received', 'sensor.reading')." },
+        "sourceUrl": { "type": "string", "format": "uri" },
+        "fingerprint": { "type": "string" },
+        "sensorId": { "type": "string" }
+      }
+    }
+  },
+  "definitions": {
+    "criterion": {
+      "type": "object",
+      "required": ["metric", "operator", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "metric": { "type": "string", "description": "Metric key, e.g., 'tempF', 'ppm', 'soilMoisturePct'." },
+        "operator": {
+          "type": "string",
+          "enum": ["=", "!=", ">", ">=", "<", "<=", "between", "in", "not_in", "exists", "not_exists"]
+        },
+        "value": {
+          "description": "Target value; for 'between' supply an array [min,max]; for 'in' supply array of strings/numbers.",
+          "oneOf": [
+            { "type": ["number", "string", "boolean"] },
+            {
+              "type": "array",
+              "items": { "type": ["number", "string"] },
+              "minItems": 1
+            }
+          ]
+        },
+        "unit": { "type": "string", "description": "Optional unit (F,C,ppm,%,pH,L,gal,mS/cm,lux,Pa,V,A,W)." }
+      }
+    },
+    "heat": {
+      "type": "object",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "heat" },
+        "currentTempF": { "type": "number" },
+        "targetTempF": { "type": "number" },
+        "minHoldMinutes": { "type": "number", "minimum": 0 },
+        "heatSource": { "type": "string", "enum": ["oven", "stovetop", "grill", "smoker", "boiler", "other"], "default": "other" },
+        "preheated": { "type": "boolean" },
+        "thermometerCalibrated": { "type": "boolean" }
+      }
+    },
+    "water": {
+      "type": "object",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "water" },
+        "tempF": { "type": "number" },
+        "volumeL": { "type": "number", "minimum": 0 },
+        "hardnessPPM": { "type": "number", "minimum": 0 },
+        "chlorinePPM": { "type": "number", "minimum": 0 },
+        "salinityPct": { "type": "number", "minimum": 0 },
+        "pH": { "type": "number", "minimum": 0, "maximum": 14 },
+        "potable": { "type": "boolean" }
+      }
+    },
+    "soil": {
+      "type": "object",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "soil" },
+        "soilMoisturePct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "tempC": { "type": "number" },
+        "ec_mScm": { "type": "number", "description": "Electrical conductivity mS/cm" },
+        "pH": { "type": "number", "minimum": 0, "maximum": 14 },
+        "sunlightLux": { "type": "number", "minimum": 0 },
+        "drainageOk": { "type": "boolean" },
+        "frostRisk": { "type": "boolean" }
+      }
+    },
+    "sanitizer": {
+      "type": "object",
+      "required": ["kind", "agent"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "sanitizer" },
+        "agent": { "type": "string", "enum": ["bleach", "quaternary", "peroxide", "iodine", "steam", "other"] },
+        "concentrationPPM": { "type": "number", "minimum": 0 },
+        "contactTimeSec": { "type": "number", "minimum": 0 },
+        "solutionTempF": { "type": "number" },
+        "testStripLot": { "type": "string" },
+        "rinsed": { "type": "boolean", "description": "Whether a required rinse step was performed." }
+      }
+    },
+    "air": {
+      "type": "object",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "air" },
+        "humidityPct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "tempC": { "type": "number" },
+        "airflowCFM": { "type": "number", "minimum": 0 },
+        "pressurePa": { "type": "number" }
+      }
+    },
+    "electricity": {
+      "type": "object",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "electricity" },
+        "voltageV": { "type": "number" },
+        "currentA": { "type": "number" },
+        "powerW": { "type": "number" },
+        "outletOk": { "type": "boolean" },
+        "gfciOk": { "type": "boolean", "description": "GFCI test pass (kitchen/garage/wet areas)." }
+      }
+    },
+    "fuel": {
+      "type": "object",
+      "required": ["kind", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "fuel" },
+        "type": { "type": "string", "enum": ["propane", "natural_gas", "wood", "charcoal", "diesel", "gasoline", "pellets", "other"] },
+        "levelPct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "valvesOpen": { "type": "boolean" },
+        "leakCheckOk": { "type": "boolean" }
+      }
+    },
+    "containerSurface": {
+      "type": "object",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "enum": ["container", "surface"] },
+        "cleanliness": { "type": "string", "enum": ["clean", "dirty", "sanitizing", "rinsed"] },
+        "sanitizerResidualPPM": { "type": "number", "minimum": 0 },
+        "lastSanitizedAt": { "type": "string", "format": "date-time" },
+        "foodContactSafe": { "type": "boolean" }
+      }
+    },
+    "equipment": {
+      "type": "object",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "equipment" },
+        "operational": { "type": "boolean" },
+        "calibrated": { "type": "boolean" },
+        "preheated": { "type": "boolean" },
+        "precooled": { "type": "boolean" }
+      }
+    },
+    "other": {
+      "type": "object",
+      "required": ["kind"],
+      "additionalProperties": true,
+      "properties": {
+        "kind": { "const": "other" },
+        "label": { "type": "string" }
+      }
+    }
+  },
+  "examples": [
+    {
+      "version": "1.0.0",
+      "readinessId": "ready_heat_01",
+      "taskId": "task_recipe_4f8a2",
+      "stepId": "s1",
+      "kind": "heat",
+      "status": "ready",
+      "checkedAt": "2025-11-11T20:10:00.000Z",
+      "measured": true,
+      "method": "manual",
+      "resourceRef": { "refType": "equipment", "id": "oven_main", "name": "Convection Oven", "location": "Kitchen" },
+      "criteria": [
+        { "metric": "currentTempF", "operator": ">=", "value": 425, "unit": "F" },
+        { "metric": "minHoldMinutes", "operator": ">=", "value": 5, "unit": "min" }
+      ],
+      "details": {
+        "kind": "heat",
+        "currentTempF": 430,
+        "targetTempF": 425,
+        "minHoldMinutes": 5,
+        "heatSource": "oven",
+        "preheated": true,
+        "thermometerCalibrated": true
+      }
+    },
+    {
+      "version": "1.0.0",
+      "readinessId": "ready_sanitizer_sink",
+      "taskId": "task_clean_9z2a",
+      "stepId": "c3",
+      "kind": "sanitizer",
+      "status": "caution",
+      "checkedAt": "2025-11-11T19:55:00.000Z",
+      "measured": true,
+      "method": "manual",
+      "criteria": [
+        { "metric": "concentrationPPM", "operator": "between", "value": [150, 400], "unit": "ppm" },
+        { "metric": "contactTimeSec", "operator": ">=", "value": 60, "unit": "s" }
+      ],
+      "details": {
+        "kind": "sanitizer",
+        "agent": "bleach",
+        "concentrationPPM": 120,
+        "contactTimeSec": 60,
+        "solutionTempF": 75,
+        "testStripLot": "BL-2025-08",
+        "rinsed": false
+      },
+      "notes": "Raise concentration to at least 150 ppm."
+    },
+    {
+      "version": "1.0.0",
+      "readinessId": "ready_soil_bedA",
+      "taskId": "task_garden_9k31",
+      "stepId": "g1",
+      "kind": "soil",
+      "status": "ready",
+      "checkedAt": "2025-03-20T13:50:00.000Z",
+      "measured": true,
+      "method": "sensor",
+      "criteria": [
+        { "metric": "soilMoisturePct", "operator": "between", "value": [20, 35], "unit": "%" },
+        { "metric": "tempC", "operator": ">=", "value": 7, "unit": "C" }
+      ],
+      "details": {
+        "kind": "soil",
+        "soilMoisturePct": 28.4,
+        "tempC": 9.2,
+        "ec_mScm": 1.1,
+        "pH": 6.6,
+        "sunlightLux": 18000,
+        "drainageOk": true,
+        "frostRisk": false
+      },
+      "provenance": { "eventType": "sensor.reading", "sensorId": "soil_probe_A" }
+    }
+  ]
+}

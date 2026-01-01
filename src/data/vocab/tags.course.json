@@ -1,0 +1,290 @@
+{
+  "version": "1.0.0",
+  "updatedAt": "2025-10-20T22:05:00Z",
+  "locale": "en-US",
+  "groups": [
+    { "id": "main-meals", "label": "Main Meals", "uiOrder": 10, "icon": "utensils" },
+    { "id": "light-meals", "label": "Light Meals", "uiOrder": 20, "icon": "sandwich" },
+    { "id": "sides-breads", "label": "Sides & Breads", "uiOrder": 30, "icon": "loaf" },
+    { "id": "sweet", "label": "Sweets & Dessert", "uiOrder": 40, "icon": "ice-cream" },
+    { "id": "beverage", "label": "Beverages", "uiOrder": 50, "icon": "cup-soda" },
+    { "id": "components", "label": "Sauces & Components", "uiOrder": 60, "icon": "flask-round" },
+    { "id": "preserve", "label": "Preserves & Pantry", "uiOrder": 70, "icon": "jar" },
+    { "id": "other", "label": "Other", "uiOrder": 90, "icon": "dots-horizontal" }
+  ],
+  "courses": [
+    {
+      "id": "breakfast",
+      "label": "Breakfast",
+      "groupId": "main-meals",
+      "synonyms": ["brekkie", "AM meal", "first meal"],
+      "mapsToMealType": ["breakfast"],
+      "dayparts": ["morning"],
+      "serveTemp": "any",
+      "sabbath": { "friendly": true, "notes": "Great with make-ahead items (overnight oats, cold platters)." },
+      "uiOrder": 1
+    },
+    {
+      "id": "brunch",
+      "label": "Brunch",
+      "groupId": "main-meals",
+      "synonyms": ["late breakfast"],
+      "mapsToMealType": ["breakfast", "lunch"],
+      "dayparts": ["late-morning", "midday"],
+      "serveTemp": "any",
+      "sabbath": { "friendly": true },
+      "uiOrder": 2
+    },
+    {
+      "id": "lunch",
+      "label": "Lunch",
+      "groupId": "main-meals",
+      "synonyms": ["midday meal"],
+      "mapsToMealType": ["lunch"],
+      "dayparts": ["midday", "afternoon"],
+      "serveTemp": "any",
+      "sabbath": { "friendly": true, "notes": "Cold platters and salads are ideal." },
+      "uiOrder": 3
+    },
+    {
+      "id": "dinner",
+      "label": "Dinner",
+      "groupId": "main-meals",
+      "synonyms": ["supper", "evening meal"],
+      "mapsToMealType": ["dinner"],
+      "dayparts": ["evening"],
+      "serveTemp": "hot",
+      "sabbath": { "friendly": false, "notes": "Prefer no-cook/ready dishes during guarded windows." },
+      "uiOrder": 4
+    },
+    {
+      "id": "snack",
+      "label": "Snack",
+      "groupId": "light-meals",
+      "synonyms": ["small bite", "nosh"],
+      "mapsToMealType": ["snack"],
+      "dayparts": ["any"],
+      "serveTemp": "any",
+      "sabbath": { "friendly": true },
+      "uiOrder": 10
+    },
+    {
+      "id": "soup",
+      "label": "Soup",
+      "groupId": "light-meals",
+      "synonyms": ["stew (light)"],
+      "mapsToMealType": ["lunch", "dinner"],
+      "dayparts": ["midday", "evening"],
+      "serveTemp": "hot",
+      "sabbath": { "friendly": false },
+      "uiOrder": 11
+    },
+    {
+      "id": "salad",
+      "label": "Salad",
+      "groupId": "light-meals",
+      "synonyms": ["greens", "cold salad", "grain bowl"],
+      "mapsToMealType": ["lunch", "dinner"],
+      "dayparts": ["midday", "evening"],
+      "serveTemp": "cold",
+      "sabbath": { "friendly": true },
+      "uiOrder": 12
+    },
+    {
+      "id": "sandwich",
+      "label": "Sandwich / Wrap",
+      "groupId": "light-meals",
+      "synonyms": ["wrap", "sub", "roll"],
+      "mapsToMealType": ["lunch", "dinner"],
+      "dayparts": ["midday", "evening"],
+      "serveTemp": "any",
+      "sabbath": { "friendly": true },
+      "uiOrder": 13
+    },
+    {
+      "id": "main",
+      "label": "Main Course",
+      "groupId": "main-meals",
+      "synonyms": ["entree", "mains"],
+      "mapsToMealType": ["lunch", "dinner"],
+      "dayparts": ["midday", "evening"],
+      "serveTemp": "hot",
+      "sabbath": { "friendly": false },
+      "uiOrder": 5
+    },
+    {
+      "id": "side",
+      "label": "Side",
+      "groupId": "sides-breads",
+      "synonyms": ["side dish"],
+      "mapsToMealType": ["lunch", "dinner"],
+      "dayparts": ["midday", "evening"],
+      "serveTemp": "any",
+      "sabbath": { "friendly": true },
+      "uiOrder": 30
+    },
+    {
+      "id": "bread",
+      "label": "Bread",
+      "groupId": "sides-breads",
+      "synonyms": ["loaf", "rolls", "flatbread"],
+      "mapsToMealType": ["breakfast", "lunch", "dinner"],
+      "dayparts": ["any"],
+      "serveTemp": "any",
+      "sabbath": { "friendly": true },
+      "uiOrder": 31
+    },
+    {
+      "id": "appetizer",
+      "label": "Appetizer",
+      "groupId": "light-meals",
+      "synonyms": ["starter", "tapas", "small plate"],
+      "mapsToMealType": ["lunch", "dinner"],
+      "dayparts": ["midday", "evening"],
+      "serveTemp": "any",
+      "sabbath": { "friendly": true },
+      "uiOrder": 14
+    },
+    {
+      "id": "dessert",
+      "label": "Dessert",
+      "groupId": "sweet",
+      "synonyms": ["sweet", "pudding"],
+      "mapsToMealType": ["dessert", "snack"],
+      "dayparts": ["any"],
+      "serveTemp": "any",
+      "sabbath": { "friendly": true },
+      "uiOrder": 40
+    },
+    {
+      "id": "beverage",
+      "label": "Beverage",
+      "groupId": "beverage",
+      "synonyms": ["drink"],
+      "mapsToMealType": ["beverage"],
+      "dayparts": ["any"],
+      "serveTemp": "any",
+      "sabbath": { "friendly": true },
+      "uiOrder": 50
+    },
+    {
+      "id": "sauce",
+      "label": "Sauce",
+      "groupId": "components",
+      "synonyms": ["gravy", "pan sauce"],
+      "mapsToMealType": ["other"],
+      "dayparts": ["any"],
+      "serveTemp": "any",
+      "sabbath": { "friendly": true },
+      "uiOrder": 60
+    },
+    {
+      "id": "condiment",
+      "label": "Condiment",
+      "groupId": "components",
+      "synonyms": ["spread", "relish"],
+      "mapsToMealType": ["other"],
+      "dayparts": ["any"],
+      "serveTemp": "any",
+      "sabbath": { "friendly": true },
+      "uiOrder": 61
+    },
+    {
+      "id": "dressing",
+      "label": "Dressing / Vinaigrette",
+      "groupId": "components",
+      "synonyms": ["vinaigrette"],
+      "mapsToMealType": ["other"],
+      "dayparts": ["any"],
+      "serveTemp": "cold",
+      "sabbath": { "friendly": true },
+      "uiOrder": 62
+    },
+    {
+      "id": "dip",
+      "label": "Dip",
+      "groupId": "components",
+      "synonyms": ["spread dip"],
+      "mapsToMealType": ["snack", "other"],
+      "dayparts": ["any"],
+      "serveTemp": "any",
+      "sabbath": { "friendly": true },
+      "uiOrder": 63
+    },
+    {
+      "id": "preserve",
+      "label": "Preserve",
+      "groupId": "preserve",
+      "synonyms": ["canned", "jarred", "put up"],
+      "mapsToMealType": ["other"],
+      "dayparts": ["any"],
+      "serveTemp": "any",
+      "sabbath": { "friendly": true },
+      "uiOrder": 70
+    },
+    {
+      "id": "jam-jelly",
+      "label": "Jam / Jelly",
+      "groupId": "preserve",
+      "synonyms": ["fruit spread"],
+      "mapsToMealType": ["other"],
+      "dayparts": ["any"],
+      "serveTemp": "any",
+      "sabbath": { "friendly": true },
+      "uiOrder": 71
+    },
+    {
+      "id": "stock-broth",
+      "label": "Stock / Broth",
+      "groupId": "components",
+      "synonyms": ["bone broth"],
+      "mapsToMealType": ["other"],
+      "dayparts": ["any"],
+      "serveTemp": "hot",
+      "sabbath": { "friendly": true },
+      "uiOrder": 64
+    },
+    {
+      "id": "freezer-meal",
+      "label": "Freezer Meal",
+      "groupId": "preserve",
+      "synonyms": ["make-ahead", "batch cook"],
+      "mapsToMealType": ["lunch", "dinner"],
+      "dayparts": ["any"],
+      "serveTemp": "hot",
+      "sabbath": { "friendly": true, "notes": "Ideal to reheat during guarded windows." },
+      "uiOrder": 72
+    },
+    {
+      "id": "other",
+      "label": "Other",
+      "groupId": "other",
+      "synonyms": ["misc", "uncategorized"],
+      "mapsToMealType": ["other"],
+      "dayparts": ["any"],
+      "serveTemp": "any",
+      "sabbath": { "friendly": true },
+      "uiOrder": 99
+    }
+  ],
+  "search": {
+    "boost": {
+      "synonyms": 0.6,
+      "label": 1.0,
+      "mapsToMealType": 0.8
+    },
+    "stopwords": ["the", "a", "an", "and"]
+  },
+  "x-uxHints": {
+    "featured": ["dinner", "lunch", "breakfast", "snack", "dessert", "salad", "soup", "freezer-meal"],
+    "suggestedNoCook": ["salad", "sandwich", "snack", "dessert", "beverage", "dip", "condiment", "dressing", "preserve"],
+    "pickerSections": [
+      { "label": "Popular", "items": ["dinner", "lunch", "breakfast", "snack"] },
+      { "label": "Light & Fresh", "items": ["salad", "sandwich", "soup"] },
+      { "label": "Sides & Bread", "items": ["side", "bread"] },
+      { "label": "Sweets & Drinks", "items": ["dessert", "beverage"] },
+      { "label": "Sauces & Components", "items": ["sauce", "condiment", "dressing", "dip", "stock-broth"] },
+      { "label": "Preserves & Make-Ahead", "items": ["preserve", "jam-jelly", "freezer-meal"] }
+    ]
+  }
+}

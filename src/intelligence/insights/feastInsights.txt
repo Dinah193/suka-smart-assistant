@@ -1,0 +1,595 @@
+===============================================================================
+FEAST INSIGHTS – DESIGN SPEC
+File: src/intelligence/insights/feastInsights.txt
+Role: Contract for season-aware, cycle-aware feast insights in SSA
+===============================================================================
+
+0. CONCEPTUAL PURPOSE
+---------------------
+The feastInsights spec describes how SSA turns **feast cycles + household data**
+(calendar windows, menus, storehouse posture, preparations, recovery, mutual-aid
+plans) into **meaningful guidance** for the householder:
+
+- Is each feast cycle (preparation → feast-day → recovery) aligned with
+  the season, storehouse, and household posture?
+- Are provisions for feasts (food, textiles, cleaning, hospitality) present
+  without starving later seasons?
+- Are garden and animal yields being honored in feast menus?
+- Is the feast rhythm restful and joyful, or heavy and draining?
+- Are mutual-aid and enterprise opportunities being recognized and not
+  pulled from essential provisions?
+
+It is NOT a UI and NOT a low-level checklists engine.
+It is a **logic contract** that defines:
+
+- Feast insight templates and rules,
+- What data they expect (feasts + cross-domain),
+- How to derive scores and narratives,
+- How to emit eventBus events that other domains respond to
+  (storehouse, cooking, cleaning, textiles, garden, animals, SessionRunner).
+
+It must support:
+
+- TOOL MODE:
+  - A “Feast Insight Viewer / Planner” can run these insights against a local
+    feast plan (menus, guest counts, storehouse snapshot) with no Dexie.
+- STEWARDSHIP MODE:
+  - The full SSA stack calls into this insight layer around feast windows
+    and surfaces guidance in dashboards, SessionRunner, and the Hub.
+
+
+1. STRUCTURE – CONFIG SHAPE & DOMAINS
+-------------------------------------
+Primary domain:
+- feasts / appointed events
+
+Connected domains:
+- cooking/meals, storehouse/provisioning, garden, animals, preservation,
+  cleaning/hygiene, textiles, mutual-aid, enterprise, seasonality,
+  dependency map, cycles engine.
+
+Conceptual config shape (JSON-like):
+
+feastInsightsConfig = {
+  version: "1.0.0",
+  lastUpdatedAt: string,
+  modeHint?: "TOOL" | "STEWARDSHIP",
+
+  // How to interpret feast plans and state into readiness and load postures
+  stateThresholds: FeastStateThresholds,
+
+  // Feast insight templates and rules
+  insightTemplates: FeastInsightTemplate[],
+
+  // Scoring and weighting rules
+  scoring: FeastInsightScoring,
+
+  // Signaling preferences
+  signals: {
+    sendAnticipationInsights: boolean,    // pre-feast
+    sendFeastDayInsights: boolean,        // during feast window
+    sendRecoveryInsights: boolean,        // after feast
+    sendStorehouseProtectionInsights: boolean,
+    sendRiskAlerts: boolean,
+  },
+
+  metadata?: {
+    householdName?: string,
+    regionProfile?: string,
+  },
+};
+
+
+2. PROPS – DETAILED COMPONENTS
+------------------------------
+
+2.1 FeastStateThresholds
+Defines how to interpret feast-related data into **readiness** and **load**.
+
+FeastStateThresholds = {
+  // Readiness posture: do we have what we need for this feast cycle?
+  readiness: {
+    // Menu vs storehouse thresholds
+    storehouseCoverageTarget: number,     // fraction of planned menu covered
+    minimumCoverageForGreenLight: number, // fraction for “ready” posture
+    textilesReadinessRequired?: boolean,  // linens, garments, etc.
+    cleaningReadinessRequired?: boolean,  // core areas ready for hospitality
+  },
+
+  // Load posture: how heavy is this feast on the household?
+  load: {
+    maxSimultaneousHighLoadDomains?: number, // e.g. 3 (cooking + cleaning + textiles)
+    highGuestCountThreshold?: number,        // e.g. > N guests
+    highMenuComplexityThreshold?: number,    // derived from menu structure
+  },
+
+  // Provision posture: feast impact vs storehouse
+  provisionImpact: {
+    maxStorehouseDrawPercentageForFeast?: number, // e.g. 0.3 = 30% draw from key categories
+    preferHarvestAndFreshFirst?: boolean,
+  },
+
+  // Recovery posture: time needed for reset after feast
+  recovery: {
+    minimumRecoveryWindowDays?: number,    // recommended days for gentle reset
+    highRecoveryLoadThreshold?: number,    // indicates heavy cleanup/restore
+  },
+
+  // TODO[seasonal-logic]:
+  // - Allow feast readiness and load thresholds to adjust by season and
+  //   by feast type (e.g., fall harvest feasts vs spring feasts).
+
+  notes?: string,
+};
+
+
+2.2 FeastInsightTemplate
+Defines a **pattern** of what to look for in feast cycles and how to speak about it.
+
+FeastInsightTemplate = {
+  id: string,                        // e.g. "feast-readiness-gap-storehouse",
+                                     //      "feast-load-high-vs-household-posture",
+                                     //      "harvest-feast-underusing-yields",
+                                     //      "recovery-window-too-tight",
+                                     //      "mutual-aid-feast-opportunity"
+
+  label: string,
+  category:
+    "readiness" | "load" | "storehouse" |
+    "yield-flow" | "seasonal-alignment" |
+    "mutual-aid" | "enterprise" | "recovery",
+
+  description?: string,
+
+  // Conditions for when this insight applies
+  conditions: {
+    // Feast cycle context
+    feastCycleIds?: string[],        // from feastCycles.config
+    phaseTypes?: ("preparation" | "feast-day" | "recovery")[],
+
+    requiredSeasonIds?: string[],    // from seasonRulesConfig.seasons.id
+    excludedSeasonIds?: string[],
+
+    // State expectations
+    feastReadinessStates?: (
+      "under-provisioned" |
+      "balanced" |
+      "abundantly-provided"
+    )[],
+    feastLoadStates?: (
+      "gentle" |
+      "balanced" |
+      "heavy"
+    )[],
+    recoveryStates?: (
+      "unplanned" |
+      "tight" |
+      "spacious"
+    )[],
+
+    // Cross-domain hints
+    storehouseStates?: {
+      categoryStates?: {
+        [storehouseCategoryKey: string]:
+          ("comfortable" | "low" | "critical")[];
+      },
+    },
+    gardenHarvestFlushExpected?: boolean,
+    animalYieldExpected?: boolean,
+    preservationCapacityState?: ("quiet" | "balanced" | "backlogged")[],
+    householdFatigueHint?: ("low" | "medium" | "high")[],
+  },
+
+  // How to compute a severity score (0..1)
+  scoringRecipe?: {
+    baseWeight: number,
+    seasonWeight?: number,
+    storehouseWeight?: number,
+    loadWeight?: number,
+    dependencyWeight?: number,       // from dependencyMap impact
+  },
+
+  // Narrative templates
+  narratives: {
+    // Short message (for cards / notifications)
+    summary: {
+      lean?: string,                 // e.g. "Feast preparations are leaning on a lean storehouse."
+      flush?: string,                // e.g. "Feast preparations match a rich harvest season."
+      balanced?: string,             // e.g. "Feast rhythm is balanced with household posture."
+    },
+
+    // Expanded explanation
+    detail?: string,
+
+    // Guidance suggestions
+    guidance?: {
+      adjustMenuToStorehouse?: string,     // e.g. "Shape the feast menu around preserved grains..."
+      highlightYields?: string,            // e.g. "Center this feast on current garden and animal yields..."
+      softenFeastLoad?: string,            // e.g. "Simplify courses to guard rest and recovery..."
+      planRecoveryRhythm?: string,         // e.g. "Reserve a day for a gentle reset after the feast..."
+      inviteMutualAidSupport?: string,     // e.g. "Invite allied households to share preparations..."
+      reserveMutualAidProvisions?: string, // e.g. "Set aside a portion for those in need..."
+      considerEnterpriseOfferings?: string,// e.g. "A stable feast menu could seed a catering offering..."
+    },
+  },
+
+  // Which domains should be notified when this insight appears
+  domainsToNotify?: ("feasts" | "cooking" | "storehouse" | "garden" |
+                     "animals" | "preservation" | "cleaning" |
+                     "textiles" | "mutual-aid" | "enterprise")[],
+
+  // TODO[insights]:
+  // - Curate templates for:
+  //   - feast readiness vs storehouse depth and season,
+  //   - feast load vs household fatigue and rest seasons,
+  //   - harvest-feasts leveraging abundance and preservation,
+  //   - lean-season feasts shaped by simple menus,
+  //   - mutual-aid feasts and shared provision pools,
+  //   - feast recovery rhythms (rest + restore).
+
+  notes?: string,
+};
+
+
+2.3 FeastInsightScoring
+Defines how to combine multiple feast insights into a coherent set.
+
+FeastInsightScoring = {
+  // Overall posture scoring (0..1) for feast cycles
+  postureWeights: {
+    readinessAlignment: number,      // planned feast vs provisions and season
+    storehouseProtection: number,    // feast draw vs long-term security
+    loadVsHouseholdPosture: number,  // feast effort vs fatigue/rest posture
+    yieldCelebration: number,        // how well feast honors current yields
+  },
+
+  limits: {
+    maxInsightsPerRun: number,       // e.g. 5
+    maxImportantPerRun: number,      // e.g. 2
+  },
+
+  severityThresholds: {
+    gentle: number,                  // e.g. 0.25
+    important: number,               // e.g. 0.6
+  },
+
+  // TODO[cycles-engine]:
+  // - Use householdCycles.engine posture metrics (feasts, storehouse, cleaning,
+  //   cooking) when computing loadVsHouseholdPosture and readinessAlignment.
+
+  notes?: string,
+};
+
+
+2.4 FeastInsightResult (output shape)
+Not part of the config itself, but the **shape of emitted feast insight objects**.
+
+FeastInsightResult = {
+  id: string,                        // unique per run (templateId + hash)
+  templateId: string,
+  severity: "info" | "gentle" | "important",
+  score: number,                     // 0..1
+  category: string,
+
+  seasonId?: string,
+  feastCycleId?: string,
+  phaseType?: "preparation" | "feast-day" | "recovery",
+
+  feastPlanSnapshotRef?: string,     // pointer/hash to feast plan snapshot
+  affectedDomains?: string[],        // e.g. ["cooking", "storehouse", "cleaning"],
+
+  summary: string,
+  detail?: string,
+  guidance?: {
+    adjustMenuToStorehouse?: string,
+    highlightYields?: string,
+    softenFeastLoad?: string,
+    planRecoveryRhythm?: string,
+    inviteMutualAidSupport?: string,
+    reserveMutualAidProvisions?: string,
+    considerEnterpriseOfferings?: string,
+  },
+
+  domainsToNotify?: string[],
+};
+
+
+3. DATA FLOW – HOW FEAST INSIGHTS ARE USED
+------------------------------------------
+
+3.1 TOOL MODE
+In TOOL MODE, a standalone “Feast Insight Viewer / Planner” can:
+
+1) Load:
+   - feastInsightsConfig (static),
+   - a feastCycles snapshot (selected feast, phase, date range),
+   - a feast plan snapshot:
+     - menu items and quantities,
+     - expected guests,
+     - basic storehouse state,
+     - basic garden/animal yield hints,
+     - planned recovery window.
+
+2) Normalize feast state:
+   - compute readiness:
+     - storehouse coverage of menu,
+     - textiles & cleaning readiness,
+   - compute load:
+     - menu complexity,
+     - guest count vs household capacity,
+     - number of high-load domains involved.
+
+3) Determine feast postures:
+   - readiness posture: under-provisioned / balanced / abundantly-provided,
+   - load posture: gentle / balanced / heavy,
+   - recovery posture: unplanned / tight / spacious.
+
+4) Evaluate insightTemplates:
+   - For each template:
+     - check season, feastCycle, phaseType, and posture conditions,
+     - compute score via scoringRecipe.
+
+5) Rank and filter:
+   - Apply scoring and limits to produce a small set of insights.
+
+6) Present:
+   - As cards or list items with summary, detail, and guidance.
+   - Optionally show “Align Feast Rhythm” CTAs that map to domain planners
+     (Meal Planner, Storehouse Planner, Cleaning/Textiles, Mutual-Aid).
+
+7) Emit eventBus events using a local or shared emitter:
+
+   - "feast.insights.evaluated"
+   - "feast.insights.generated"
+   - One "feast.insight" per result.
+
+
+3.2 STEWARDSHIP MODE
+In STEWARDSHIP MODE, feastInsights are part of **feast rhythm oversight**.
+
+Flow:
+
+1) App boot:
+   - Dexie loads:
+     - feastInsightsConfig,
+     - feastCyclesConfig,
+     - seasonRulesConfig,
+     - feastToTask.map (Feast → Rhythm Map),
+     - storehouseInsightsConfig,
+     - dependencyMapConfig.
+   - Feast engine exposes:
+     - active feast windows and phases,
+     - feast plans (menus, guests, rhythms).
+
+2) Triggers for running insights:
+   - When a feast window is created or updated,
+   - At key phase boundaries:
+     - "feasts.phase.active" (preparation / feast-day / recovery),
+   - When storehouse or garden/animal snapshots change meaningfully
+     near a feast window,
+   - At defined checkpoints (e.g. 7 days before, 3 days before, day-of,
+     1–2 days after).
+
+3) Insight engine:
+   - Ingests:
+     - feast info: feastCycleId, phaseType, dates,
+     - feast plan snapshot: menu, guests, planned rhythms from Feast → Rhythm Map,
+     - storehouse posture and category states (core staples, feast-specific items),
+     - garden and animal yield hints,
+     - cleaning and textiles readiness snapshots,
+     - household fatigue/rest hints from cycles engine,
+     - dependency impacts (feasts tying together many domains).
+
+   - Computes:
+     - readinessAlignment,
+     - storehouseProtection posture,
+     - loadVsHouseholdPosture,
+     - yieldCelebration posture.
+
+4) Template evaluation:
+   - For each FeastInsightTemplate:
+     - check conditions and compute score/severity,
+     - build narrative summary, detail, and guidance.
+
+5) Emit events:
+   - System events for dashboards, SessionRunner overlays,
+     domain planners, and Hub export.
+
+6) Domain reactions:
+   - Storehouse:
+     - highlight feast-related draws and needed stocking or menu shifts.
+   - Cooking:
+     - adjust menu complexity and batch sessions to protect rest.
+   - Garden & animals:
+     - highlight yields that should feature in feast menus.
+   - Preservation:
+     - see whether feast surpluses can be converted to longer-term yields.
+   - Cleaning & textiles:
+     - show feast readiness and recovery rhythm prompts.
+   - Mutual-aid & enterprise:
+     - reveal opportunities for shared feasts and offerings.
+
+
+4. EVENT TRIGGERS – EVENTBUS CONTRACT
+-------------------------------------
+The feast insights engine (or Viewer in TOOL MODE) must emit events.
+All events follow the SSA eventBus contract:
+
+  { type, ts, source, data }
+
+Where:
+- type: string
+- ts: ISO 8601 timestamp
+- source: "feast.insights.engine" or similar
+- data: structured payload
+
+Recommended event types:
+
+1) Config lifecycle
+   - "feast.insights.config.loaded"
+     data: {
+       version,
+       templateCount,
+     }
+
+   - "feast.insights.config.updated"
+     data: {
+       version,
+       changedBy,                     // "householder" | "system" | "migration"
+       changesSummary,                // e.g. { templatesAdded, thresholdsAdjusted }
+     }
+
+
+2) Evaluation runs
+   - "feast.insights.evaluated"
+     // When templates are evaluated, before filtering
+     data: {
+       runId: string,
+       at: string,
+       seasonId?: string,
+       feastCycleId?: string,
+       phaseType?: "preparation" | "feast-day" | "recovery",
+       evaluatedCount: number,
+       candidateCount: number,
+     }
+
+   - "feast.insights.generated"
+     // When final insight results are produced
+     data: {
+       runId,
+       at: string,
+       seasonId?: string,
+       feastCycleId?: string,
+       phaseType?: "preparation" | "feast-day" | "recovery",
+       postureSummary: {
+         readinessAlignmentScore: number,
+         storehouseProtectionScore: number,
+         loadVsHouseholdPostureScore: number,
+         yieldCelebrationScore: number,
+       },
+       insightCount: number,
+       importantCount: number,
+       insightIds: string[],
+     }
+
+
+3) Individual insights
+   - "feast.insight"
+     data: FeastInsightResult
+
+
+4) Risk and opportunity hooks
+   - "feast.insights.riskAlert"
+     data: {
+       runId,
+       severity: "gentle" | "important",
+       riskKind:
+         "under-provisioned" |
+         "storehouse-overdraw" |
+         "load-too-heavy" |
+         "recovery-too-tight",
+       seasonId?: string,
+       feastCycleId?: string,
+       phaseType?: "preparation" | "feast-day" | "recovery",
+       message,
+     }
+
+   - "feast.insights.yieldOpportunity"
+     data: {
+       runId,
+       seasonId?: string,
+       feastCycleId?: string,
+       opportunityKind:
+         "harvest-feast" |
+         "mutual-aid-feast" |
+         "enterprise-offering" |
+         "simple-lean-feast",
+       message,
+       suggestedDomains?: string[],   // e.g. ["mutual-aid", "enterprise", "preservation"]
+     }
+
+
+5) Integration with cycles / dependencies
+   - "feast.insights.cycleAlignment"
+     data: {
+       runId,
+       seasonId,
+       feastCycleId?: string,
+       alignmentScore: number,
+       misalignedPatterns?: string[], // from dependencyMapConfig.patterns
+       notes?: string,
+     }
+
+   - "feast.insights.dependencyImpact"
+     data: {
+       runId,
+       rootNodeId: string,            // e.g. "feasts.appointed"
+       impactScore: number,
+       upstreamNodes: string[],
+       downstreamNodes: string[],
+     }
+
+
+5. CONCEPTUAL PURPOSE – HOW FEAST INSIGHTS FIT THE WEB OF MEANING
+------------------------------------------------------------------
+Feast insights are the **voice of appointed times and hospitality** inside
+SSA’s web of meaning.
+
+They allow SSA to:
+
+- Treat feasts as **multi-phase cycles**:
+  - preparation, feast-day, and recovery are all part of one rhythm,
+    not disconnected events.
+
+- Honor feasts as **expressions of provision and faithfulness**:
+  - Feasts showcase what the storehouse holds from past cycles,
+  - They celebrate yields from garden and animals,
+  - They invite mutual-aid and hospitality without undermining future seasons.
+
+- Protect the **storehouse and long-term yield**:
+  - Insights speak when planned feasts would overdraw key provisions,
+  - Or when lean seasons need simpler menus and shared rhythms.
+
+- Connect **domains**:
+  - Cooking, storehouse, garden, animals, preservation, cleaning, textiles,
+    mutual-aid, and enterprise all respond to feast cycles.
+  - Feast insights help align these domains so feasts are joyful and sustainable.
+
+- Include **rest and recovery** as part of the feast cycle:
+  - Recovery windows are treated as essential rhythms,
+  - Heavy feasts are balanced with gentle post-feast days.
+
+- Support both **TOOL MODE and STEWARDSHIP MODE**:
+  - TOOL MODE:
+    - A feast planner can analyze a single event and teach a householder how
+      to right-size menus and rhythms.
+  - STEWARDSHIP MODE:
+    - The engine runs quietly over the calendar, surfacing gentle prompts as
+      feasts approach, unfold, and resolve.
+
+Explicit TODO HOOKS:
+- TODO[seasonal-logic]:
+  - Bind feast readiness/load thresholds and template conditions to
+    seasonRulesConfig and feastCyclesConfig so expectations change across
+    spring, harvest, lean, and rest seasons.
+
+- TODO[cycles-engine]:
+  - Integrate householdCycles.engine data on feast-related rhythms and
+    household fatigue/rest posture into FeastInsightScoring.
+
+- TODO[dependencies]:
+  - Use dependencyMapConfig to weight insights where feast nodes connect
+    many high-priority patterns (e.g., feast drawing on garden, animals,
+    storehouse, textiles, cleaning).
+
+- TODO[insights]:
+  - Curate a library of FeastInsightTemplate entries for:
+    - major appointed feasts,
+    - weekly sabbath meals,
+    - harvest feasts,
+    - lean-season feasts,
+    - mutual-aid feasts,
+    - business/enterprise-related offerings.
+
+END OF SPEC
+===============================================================================

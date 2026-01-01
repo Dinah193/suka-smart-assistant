@@ -1,0 +1,80 @@
+{
+  "id": "workflow.wca.pastoral_mobility_light",
+  "domain": "workflows",
+  "kind": "workflow_overlay",
+  "title": "Pastoral Mobility-Light Rhythm (West/Central Africa)",
+  "tags": [
+    "region:wca",
+    "mode:pastoral",
+    "values:mobility",
+    "workflow:portable"
+  ],
+  "description": "Mobility-light rhythm emphasizing portable workflows, feed/water buffers, and processing planning.",
+  "optIn": true,
+  "editable": true,
+  "valuePriorities": [
+    "mobility",
+    "animal_health",
+    "waste_reduction"
+  ],
+  "defaults": {
+    "preferredStaples": [
+      "staple:dry_goods",
+      "staple:portable_foods"
+    ],
+    "mealRhythm": [
+      "cook_simple:daily",
+      "preserve_when_possible"
+    ],
+    "preservationEmphasis": [
+      "drying",
+      "smoking_optional",
+      "fermentation_optional"
+    ],
+    "valuePriorities": [
+      "mobility",
+      "animal_health",
+      "waste_reduction"
+    ]
+  },
+  "ordering": {
+    "planningOrder": [
+      "feed_water_plan",
+      "stocking_estimate",
+      "processing_pipeline_optional",
+      "storehouse_buffers_optional"
+    ]
+  },
+  "naming": {
+    "sessionPrefixes": {
+      "animals": "Livestock Route",
+      "preservation": "Portable Preserve"
+    }
+  },
+  "constraints": {
+    "defaults": [
+      "constraint:time_budget",
+      "constraint:humane_windows"
+    ]
+  },
+  "uiOverlays": {
+    "form": {
+      "defaults": {
+        "feedBufferWeeks": 5
+      }
+    }
+  },
+  "preferredDefaultPatterns": {
+    "animals_estimate_recommendation": [
+      "pat.animals.feed_water_plan",
+      "pat.animals.breeding_cycle_planner"
+    ],
+    "preservation": [
+      "pat.preservation.shelf_stable_buffer"
+    ]
+  },
+  "notes": [
+    "This overlay provides defaults and ordering, not mandatory rules.",
+    "All role defaults are optional and user-editable."
+  ]
+}

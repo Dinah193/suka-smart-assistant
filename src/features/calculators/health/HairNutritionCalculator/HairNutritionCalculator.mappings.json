@@ -1,0 +1,370 @@
+{
+  "nodeId": "health.hairNutritionCalculator.nextSteps",
+  "label": "Black Hair Nutrition – Next Steps",
+  "description": "Rule-based next step mappings for the Black Hair Nutrition Calculator. Uses hair support and risk flags to suggest recipes, micronutrient adjustments, and storehouse stocking actions.",
+  "category": "health",
+  "sourceNodeId": "health.hairNutritionCalculator",
+  "role": "next-steps",
+  "version": "1.0.0",
+
+  "ux": {
+    "group": "Health & Body",
+    "order": 41,
+    "showInQuickLaunch": false,
+    "helpText": "These recommendations are generated from your hair nutrition results. Use them to plan meals, check micronutrients, and stock your storehouse with hair-supporting foods."
+  },
+
+  "triggers": {
+    "listensToEvents": [
+      "calculator.hairNutrition.calculated",
+      "planningGraph.node.hairNutrition.updated"
+    ],
+    "expectsPayloadShape": {
+      "metaPath": "data.meta",
+      "inputPath": "data.input",
+      "outputPath": "data.output",
+      "providesPath": "data.provides"
+    }
+  },
+
+  "rules": [
+    {
+      "id": "protein_and_breakage_support",
+      "priority": 100,
+      "label": "Support Protein Intake & Reduce Breakage",
+      "description": "If protein is not on track or breakage risk is high, recommend high-quality protein meals and storehouse items that support hair shaft strength.",
+      "when": {
+        "any": [
+          { "path": "output.hairSupportFlags.proteinOnTrack", "equals": false },
+          { "path": "output.blackHairRiskFlags.breakageRisk", "equals": true }
+        ]
+      },
+      "actions": [
+        {
+          "type": "navigate",
+          "target": "meals.mealPlanner",
+          "route": "/meals/plan",
+          "label": "Plan high-protein, hair-support meals",
+          "params": {
+            "filters": {
+              "tagsInclude": ["high-protein", "complete-protein", "hair-support"],
+              "excludeAllergensFrom": "input.dietaryConstraints.allergies",
+              "excludeFoodsFrom": "input.dietaryConstraints.avoids"
+            },
+            "seedFrom": {
+              "dailyProteinTargetPath": "output.dailyHairProteinTarget.grams"
+            }
+          }
+        },
+        {
+          "type": "navigate",
+          "target": "storehouse.inventoryPlanner",
+          "route": "/storehouse/plan",
+          "label": "Stock hair-supporting proteins",
+          "params": {
+            "focusCategories": [
+              "meat-lamb",
+              "meat-goat",
+              "meat-beef",
+              "fish",
+              "eggs",
+              "beans-lentils",
+              "beef-gelatin"
+            ],
+            "tagsInclude": ["hair-support", "protein-dense"],
+            "respectDietaryPatternFrom": "input.dietaryPattern"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "iron_and_shedding_support",
+      "priority": 90,
+      "label": "Support Iron & Reduce Shedding",
+      "description": "If iron support is needed or shedding is a concern, surface iron-rich recipes and storehouse items.",
+      "when": {
+        "any": [
+          { "path": "output.hairSupportFlags.ironSupportNeeded", "equals": true },
+          { "path": "output.blackHairRiskFlags.sheddingRisk", "equals": true }
+        ]
+      },
+      "actions": [
+        {
+          "type": "navigate",
+          "target": "meals.mealPlanner",
+          "route": "/meals/plan",
+          "label": "Plan iron-rich meals for hair",
+          "params": {
+            "filters": {
+              "tagsInclude": ["iron-rich", "leafy-greens", "legumes", "organ-meats"],
+              "excludeAllergensFrom": "input.dietaryConstraints.allergies",
+              "excludeFoodsFrom": "input.dietaryConstraints.avoids"
+            },
+            "notes": "Include vitamin C–rich sides (e.g., citrus, peppers) to enhance iron absorption."
+          }
+        },
+        {
+          "type": "navigate",
+          "target": "storehouse.inventoryPlanner",
+          "route": "/storehouse/plan",
+          "label": "Stock iron-supporting foods",
+          "params": {
+            "focusCategories": [
+              "leafy-greens",
+              "legumes",
+              "liver-organ-meats",
+              "molasses",
+              "fortified-grains"
+            ],
+            "tagsInclude": ["iron-support", "hair-support"],
+            "respectDietaryPatternFrom": "input.dietaryPattern"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "vitamin_d_and_scalp_health",
+      "priority": 80,
+      "label": "Support Vitamin D & Scalp Health",
+      "description": "If vitamin D support or scalp inflammation is present, suggest vitamin D–rich foods and gentle scalp-focused nutrition.",
+      "when": {
+        "any": [
+          { "path": "output.hairSupportFlags.vitaminDSupportNeeded", "equals": true },
+          { "path": "output.blackHairRiskFlags.scalpInflammationRisk", "equals": true }
+        ]
+      },
+      "actions": [
+        {
+          "type": "navigate",
+          "target": "meals.mealPlanner",
+          "route": "/meals/plan",
+          "label": "Plan vitamin D–rich meals",
+          "params": {
+            "filters": {
+              "tagsInclude": ["vitamin-d-rich", "omega-3", "anti-inflammatory"],
+              "excludeAllergensFrom": "input.dietaryConstraints.allergies",
+              "excludeFoodsFrom": "input.dietaryConstraints.avoids"
+            }
+          }
+        },
+        {
+          "type": "navigate",
+          "target": "storehouse.inventoryPlanner",
+          "route": "/storehouse/plan",
+          "label": "Stock vitamin D and scalp-support foods",
+          "params": {
+            "focusCategories": [
+              "fatty-fish",
+              "egg-yolks",
+              "fortified-milks",
+              "fortified-juices"
+            ],
+            "tagsInclude": ["vitamin-d", "scalp-support"],
+            "respectDietaryPatternFrom": "input.dietaryPattern"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "omega3_and_inflammation",
+      "priority": 75,
+      "label": "Improve Omega-3 Intake & Inflammation",
+      "description": "If omega-3 support is needed or inflammation/dryness is present, nudge toward omega-3–rich recipes and pantry items.",
+      "when": {
+        "any": [
+          { "path": "output.hairSupportFlags.omega3SupportNeeded", "equals": true },
+          { "path": "output.blackHairRiskFlags.drynessRisk", "equals": true },
+          { "path": "output.blackHairRiskFlags.scalpInflammationRisk", "equals": true }
+        ]
+      },
+      "actions": [
+        {
+          "type": "navigate",
+          "target": "meals.mealPlanner",
+          "route": "/meals/plan",
+          "label": "Plan omega-3–rich meals",
+          "params": {
+            "filters": {
+              "tagsInclude": ["omega-3", "hair-support", "anti-inflammatory"],
+              "excludeAllergensFrom": "input.dietaryConstraints.allergies",
+              "excludeFoodsFrom": "input.dietaryConstraints.avoids"
+            },
+            "notes": "Look for meals featuring fatty fish, chia seeds, flax, or walnuts."
+          }
+        },
+        {
+          "type": "navigate",
+          "target": "storehouse.inventoryPlanner",
+          "route": "/storehouse/plan",
+          "label": "Stock omega-3 pantry items",
+          "params": {
+            "focusCategories": [
+              "fatty-fish-canned",
+              "nuts-walnuts",
+              "seeds-flax",
+              "seeds-chia",
+              "oils",
+              "supplements-omega3"
+            ],
+            "tagsInclude": ["omega-3", "scalp-support"],
+            "respectDietaryPatternFrom": "input.dietaryPattern"
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "hydration_and_dryness",
+      "priority": 70,
+      "label": "Hydration & Dryness Care",
+      "description": "If hydration support or dryness risk is flagged, encourage water tracking and water-rich foods.",
+      "when": {
+        "any": [
+          { "path": "output.hairSupportFlags.hydrationSupportNeeded", "equals": true },
+          { "path": "output.blackHairRiskFlags.drynessRisk", "equals": true }
+        ]
+      },
+      "actions": [
+        {
+          "type": "navigate",
+          "target": "health.hydrationTracker",
+          "route": "/health/hydration",
+          "label": "Track daily water for hair & skin",
+          "params": {
+            "targetCupsPath": "output.waterIntakeTargetCups"
+          }
+        },
+        {
+          "type": "navigate",
+          "target": "meals.mealPlanner",
+          "route": "/meals/plan",
+          "label": "Add water-rich foods & teas",
+          "params": {
+            "filters": {
+              "tagsInclude": ["water-rich", "herbal-teas", "hydration-support"]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "postpartum_support",
+      "priority": 65,
+      "label": "Postpartum Hair Support",
+      "description": "If postpartum support is selected or postpartum risk is high, nudge toward gentle, nutrient-dense meals and storehouse items.",
+      "when": {
+        "any": [
+          { "path": "input.growthGoalFlags.postpartumSupport", "equals": true },
+          { "path": "output.blackHairRiskFlags.postpartumRisk", "equals": true }
+        ]
+      },
+      "actions": [
+        {
+          "type": "navigate",
+          "target": "meals.mealPlanner",
+          "route": "/meals/plan",
+          "label": "Plan postpartum-friendly meals",
+          "params": {
+            "filters": {
+              "tagsInclude": [
+                "postpartum-support",
+                "iron-rich",
+                "folate-rich",
+                "protein-dense"
+              ]
+            },
+            "notes": "Focus on steady, gentle nutrition to support recovery and hair regrowth."
+          }
+        },
+        {
+          "type": "navigate",
+          "target": "storehouse.inventoryPlanner",
+          "route": "/storehouse/plan",
+          "label": "Stock postpartum nutrient staples",
+          "params": {
+            "focusCategories": [
+              "leafy-greens",
+              "lentils-beans",
+              "whole-grains",
+              "bone-broth",
+              "high-quality-fats"
+            ],
+            "tagsInclude": ["postpartum-support", "hair-support"]
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "general_hair_support_bundle",
+      "priority": 40,
+      "label": "General Hair-Support Bundle",
+      "description": "If there are no urgent risk flags, offer a simple bundle of planner suggestions to maintain hair-supportive nutrition.",
+      "when": {
+        "all": [
+          { "path": "output.blackHairRiskFlags.breakageRisk", "equals": false },
+          { "path": "output.blackHairRiskFlags.sheddingRisk", "equals": false },
+          { "path": "output.blackHairRiskFlags.drynessRisk", "equals": false },
+          { "path": "output.blackHairRiskFlags.scalpInflammationRisk", "equals": false }
+        ]
+      },
+      "actions": [
+        {
+          "type": "navigate",
+          "target": "meals.mealPlanner",
+          "route": "/meals/plan",
+          "label": "Maintain hair-supportive meals",
+          "params": {
+            "filters": {
+              "tagsInclude": ["hair-support"],
+              "respectDailyTargetsFrom": {
+                "proteinGramsPath": "output.dailyHairProteinTarget.grams",
+                "fatGramsPath": "output.hairHealthyFatTargets.totalFatGrams"
+              }
+            }
+          }
+        },
+        {
+          "type": "navigate",
+          "target": "storehouse.inventoryPlanner",
+          "route": "/storehouse/plan",
+          "label": "Keep staple hair-support foods on hand",
+          "params": {
+            "focusCategories": [
+              "eggs",
+              "leafy-greens",
+              "berries",
+              "nuts-and-seeds",
+              "healthy-oils"
+            ],
+            "tagsInclude": ["hair-support", "staples"]
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "catch_all_no_op",
+      "priority": 0,
+      "label": "No-op fallback",
+      "description": "If no other rule matches, show a generic guidance card and invite the user to revisit their numbers in a few weeks.",
+      "when": {
+        "always": true
+      },
+      "actions": [
+        {
+          "type": "info",
+          "target": "ui.inline-card",
+          "label": "Keep consistent and re-check in a few weeks",
+          "params": {
+            "message": "Your hair nutrition plan is set. Stay consistent with your meals, water, and storehouse staples, then re-run this calculator in 4–6 weeks to see if your focus areas change."
+          }
+        }
+      ]
+    }
+  ]
+}

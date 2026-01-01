@@ -1,0 +1,156 @@
+{
+  "$schema": "../../../../../schemas/automation.schedule.schema.json",
+  "id": "schedule.coupons.refresh.daily",
+  "version": 2,
+  "kind": "schedule",
+  "title": "Daily Coupons Refresh",
+  "description": "Refresh coupons and stacked offers for preferred stores, learn cadence, and update insights without showing toasts during quiet hours.",
+  "owner": {
+    "type": "user-or-system",
+    "userId": "${user.id|null}",
+    "householdId": "${household.id|null}"
+  },
+  "enabled": true,
+  "timezone": "America/New_York",
+  "when": {
+    "rrules": [
+      "FREQ=DAILY;BYHOUR=06;BYMINUTE=15;BYSECOND=00",
+      "FREQ=DAILY;BYHOUR=18;BYMINUTE=15;BYSECOND=00"
+    ],
+    "dtstartISO": "${now.aligned('America/New_York','05:00')}",
+    "window": {
+      "maxStartSkewMs": 600000,
+      "maxDurationMs": 300000
+    },
+    "catchUpMode": "skip"
+  },
+  "guards": {
+    "respectSabbath": true,
+    "respectQuietHours": true,
+    "quietHours": {
+      "start": "${prefs.quietHours.start||'21:30'}",
+      "end": "${prefs.quietHours.end||'06:30'}"
+    },
+    "doNotDisturb": "${prefs.doNotDisturb||false}",
+    "network": {
+      "skipOnMetered": true,
+      "minBandwidthKbps": 256
+    },
+    "battery": {
+      "minPercent": 15,
+      "requireNotLowPowerMode": true
+    },
+    "onGuarded": {
+      "action": "defer",
+      "emit": "automation:deferred",
+      "inboxItem": {
+        "type": "automation",
+        "title": "Coupons refresh deferred",
+        "body": "Quiet Hours / Sabbath Guard active. I’ll keep it in your Inbox to run when you’re ready.",
+        "cta": [{ "id": "automation:run_now", "label": "Run now" }]
+      }
+    }
+  },
+  "concurrency": {
+    "key": "household:${household.id}",
+    "limit": 1,
+    "queuePolicy": "drop_latest"
+  },
+  "retry": {
+    "maxAttempts": 3,
+    "strategy": "exponential",
+    "baseDelayMs": 30000,
+    "maxDelayMs": 300000,
+    "jitter": 0.2
+  },
+  "inputs": {
+    "stores": "${prefs.stores||[]}",
+    "couponOptIns": "${prefs.couponOptIns||{}}",
+    "loyalty": "${prefs.loyalty||{}}",
+    "favoriteSessionId": "${favorites.lookup('scanCouponsOnly')||null}",
+    "segments": {
+      "brands": "${analytics.topBrands(30)||[]}",
+      "recentSkus": "${scans.recentSkus(7)||[]}"
+    }
+  },
+  "trigger": {
+    "emit": "coupons:refresh:requested",
+    "payloadTemplate": {
+      "requestId": "${uid.rid()}",
+      "sessionId": "${uid.sid()}",
+      "userId": "${user.id|null}",
+      "householdId": "${household.id|null}",
+      "product": null,
+      "coupons": [],
+      "rulesVersion": null,
+      "stores": "${inputs.stores}",
+      "context": {
+        "location": "${device.location||null}",
+        "device": "${device.kind||'automation'}",
+        "storeHints": "${inputs.segments.brands}"
+      },
+      "flags": {
+        "allowPartial": true,
+        "enableToasts": false,
+        "compareAllPreferred": true,
+        "deferIfGuarded": true
+      },
+      "meta": {
+        "scheduleId": "${schedule.id}",
+        "favoriteSessionName": "${favorites.name(inputs.favoriteSessionId)||'My Daily Coupons'}",
+        "templateId": "${inputs.favoriteSessionId}"
+      }
+    }
+  },
+  "pipeline": [
+    {
+      "await": "coupons:found",
+      "timeoutMs": 20000,
+      "fanout": [
+        { "emit": "coupons:insights:requested" },
+        { "emit": "pricing:compare:requested", "condition": "${prefs.autoStackWithPricing||true}" }
+      ]
+    }
+  ],
+  "postActions": {
+    "emit": [
+      { "event": "automation:run:completed", "payload": { "id": "${schedule.id}", "ts": "${now.iso}" } }
+    ],
+    "rememberLastRun": true,
+    "persist": {
+      "dexie": {
+        "table": "automationRuns",
+        "row": {
+          "id": "${uid.rid()}",
+          "scheduleId": "${schedule.id}",
+          "userId": "${user.id|null}",
+          "householdId": "${household.id|null}",
+          "startedAt": "${now.iso}",
+          "status": "completed",
+          "metrics": {
+            "couponsCount": "${metrics.coupons.count||0}",
+            "expiringSoon": "${metrics.coupons.expiringSoon||0}"
+          }
+        }
+      }
+    }
+  },
+  "favorites": {
+    "allowUserSaveAsTemplate": true,
+    "templateKind": "scanCouponsOnly",
+    "defaultName": "My Daily Coupons",
+    "exposeIn": ["TemplatePicker", "Scheduler"]
+  },
+  "observability": {
+    "logLevel": "info",
+    "metrics": {
+      "emit": "metrics:automation",
+      "fields": ["latencyMs", "coupons.count", "coupons.expiringSoon", "stores.count"]
+    },
+    "trace": true
+  },
+  "security": {
+    "scopes": ["household:read", "coupons:read", "pricing:read"],
+    "allowHouseholdMembers": true
+  }
+}

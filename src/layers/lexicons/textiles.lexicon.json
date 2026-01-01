@@ -1,0 +1,201 @@
+{
+  "meta": {
+    "id": "lex.textiles",
+    "title": "Textiles Lexicon",
+    "domain": "textiles",
+    "version": "1.0.0",
+    "updated": "2025-12-27",
+    "description": "Routes textiles planning intent (mending, sewing, dyeing, fiber-to-fabric) to finite planning patterns and emits hint tags.",
+    "tags": [
+      "domain:textiles"
+    ]
+  },
+  "methods": {
+    "pat.textiles.capsule_mending_cycle": {
+      "label": "Capsule mending cycle"
+    },
+    "pat.textiles.wardrobe_basics_builder": {
+      "label": "Wardrobe basics builder"
+    },
+    "pat.textiles.fiber_to_fabric_pipeline": {
+      "label": "Fiber to fabric pipeline"
+    },
+    "pat.textiles.dye_day_natural": {
+      "label": "Natural dye day"
+    },
+    "pat.textiles.sewing_batch_session": {
+      "label": "Sewing batch session"
+    }
+  },
+  "synonyms": {
+    "mend": {
+      "methodIds": [
+        "pat.textiles.capsule_mending_cycle"
+      ],
+      "boost": 0.2
+    },
+    "repair clothes": {
+      "methodIds": [
+        "pat.textiles.capsule_mending_cycle"
+      ],
+      "boost": 0.25
+    },
+    "sewing session": {
+      "methodIds": [
+        "pat.textiles.sewing_batch_session"
+      ],
+      "boost": 0.2
+    },
+    "batch sew": {
+      "methodIds": [
+        "pat.textiles.sewing_batch_session"
+      ],
+      "boost": 0.25
+    },
+    "make wardrobe basics": {
+      "methodIds": [
+        "pat.textiles.wardrobe_basics_builder"
+      ],
+      "boost": 0.25
+    },
+    "spin yarn": {
+      "methodIds": [
+        "pat.textiles.fiber_to_fabric_pipeline"
+      ],
+      "boost": 0.3
+    },
+    "weave cloth": {
+      "methodIds": [
+        "pat.textiles.fiber_to_fabric_pipeline"
+      ],
+      "boost": 0.25
+    },
+    "natural dye": {
+      "methodIds": [
+        "pat.textiles.dye_day_natural"
+      ],
+      "boost": 0.3
+    }
+  },
+  "phrases": [
+    {
+      "phrase": "plan a mending day",
+      "methodIds": [
+        "pat.textiles.capsule_mending_cycle"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "phrase": "batch sewing for multiple items",
+      "methodIds": [
+        "pat.textiles.sewing_batch_session"
+      ],
+      "confidence": 0.75
+    },
+    {
+      "phrase": "build wardrobe basics",
+      "methodIds": [
+        "pat.textiles.wardrobe_basics_builder"
+      ],
+      "confidence": 0.7
+    },
+    {
+      "phrase": "spin and weave a cloth",
+      "methodIds": [
+        "pat.textiles.fiber_to_fabric_pipeline"
+      ],
+      "confidence": 0.8
+    },
+    {
+      "phrase": "do a natural dye day",
+      "methodIds": [
+        "pat.textiles.dye_day_natural"
+      ],
+      "confidence": 0.8
+    }
+  ],
+  "rules": [
+    {
+      "id": "rule.need_machine_for_batch_sew",
+      "when": {
+        "anyTokens": [
+          "batch sew",
+          "serger",
+          "machine"
+        ],
+        "missingContext": [
+          "equipment"
+        ]
+      },
+      "actions": [
+        {
+          "type": "emitHintTag",
+          "emitHintTag": "needsSewingEquipment"
+        }
+      ]
+    },
+    {
+      "id": "rule.need_time_for_pipeline",
+      "when": {
+        "anyTokens": [
+          "spin",
+          "weave",
+          "loom",
+          "fiber to fabric"
+        ],
+        "missingContext": [
+          "timeBudgetMin"
+        ]
+      },
+      "actions": [
+        {
+          "type": "emitHintTag",
+          "emitHintTag": "needsTimeBudget"
+        }
+      ]
+    },
+    {
+      "id": "rule.downrank_pipeline_if_quick",
+      "when": {
+        "anyTokens": [
+          "quick mend",
+          "small repair"
+        ],
+        "alsoTokens": [
+          "fast",
+          "short"
+        ]
+      },
+      "actions": [
+        {
+          "type": "downrankMethodKey",
+          "methodKey": "pat.textiles.fiber_to_fabric_pipeline",
+          "amount": 0.25
+        }
+      ]
+    }
+  ],
+  "actions": [],
+  "signals": [
+    {
+      "id": "sig.rework_seams",
+      "phrases": [
+        "seams keep popping",
+        "stitches unravel",
+        "had to redo it twice"
+      ],
+      "signal": "waste:defects",
+      "severity": 0.7
+    },
+    {
+      "id": "sig.setup_overhead",
+      "phrases": [
+        "setup takes forever",
+        "threading machine every time",
+        "always switching tools"
+      ],
+      "signal": "waste:motion",
+      "severity": 0.6
+    }
+  ]
+}

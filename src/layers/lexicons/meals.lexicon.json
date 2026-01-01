@@ -1,0 +1,544 @@
+{
+  "meta": {
+    "id": "lex.meals.domain",
+    "domain": "meals",
+    "version": "1.0.0",
+    "title": "Meals Domain Lexicon",
+    "description": "Meal planning + cooking-session parsing lexicon. Recognizes meal structures, doneness, techniques, and batch styles. Routes to meal planning patterns and session styles.",
+    "updatedAt": "2025-12-27",
+    "tags": [
+      "meals",
+      "cooking",
+      "planning"
+    ]
+  },
+  "methods": {
+    "meal.breakfast": {
+      "label": "Meal type: breakfast",
+      "domain": "meals",
+      "intentTags": [
+        "meal:breakfast"
+      ]
+    },
+    "meal.lunch": {
+      "label": "Meal type: lunch",
+      "domain": "meals",
+      "intentTags": [
+        "meal:lunch"
+      ]
+    },
+    "meal.dinner": {
+      "label": "Meal type: dinner",
+      "domain": "meals",
+      "intentTags": [
+        "meal:dinner"
+      ]
+    },
+    "meal.snack": {
+      "label": "Meal type: snack",
+      "domain": "meals",
+      "intentTags": [
+        "meal:snack"
+      ]
+    },
+    "meal.feast": {
+      "label": "Meal type: feast",
+      "domain": "meals",
+      "intentTags": [
+        "meal:feast"
+      ]
+    },
+    "meal.fast": {
+      "label": "Meal type: fast",
+      "domain": "meals",
+      "intentTags": [
+        "meal:fast"
+      ]
+    },
+    "meal.sabbath": {
+      "label": "Meal type: sabbath",
+      "domain": "meals",
+      "intentTags": [
+        "meal:sabbath"
+      ]
+    },
+    "cook.doneness.rare": {
+      "label": "Doneness: rare",
+      "domain": "meals",
+      "intentTags": [
+        "doneness:rare"
+      ]
+    },
+    "cook.doneness.medium": {
+      "label": "Doneness: medium",
+      "domain": "meals",
+      "intentTags": [
+        "doneness:medium"
+      ]
+    },
+    "cook.doneness.well": {
+      "label": "Doneness: well",
+      "domain": "meals",
+      "intentTags": [
+        "doneness:well"
+      ]
+    },
+    "cook.technique.roast": {
+      "label": "Technique: roast",
+      "domain": "meals",
+      "intentTags": [
+        "technique:roast"
+      ]
+    },
+    "cook.technique.braise": {
+      "label": "Technique: braise",
+      "domain": "meals",
+      "intentTags": [
+        "technique:braise"
+      ]
+    },
+    "cook.technique.grill": {
+      "label": "Technique: grill",
+      "domain": "meals",
+      "intentTags": [
+        "technique:grill"
+      ]
+    },
+    "cook.technique.smoke": {
+      "label": "Technique: smoke",
+      "domain": "meals",
+      "intentTags": [
+        "technique:smoke"
+      ]
+    },
+    "cook.technique.fry": {
+      "label": "Technique: fry",
+      "domain": "meals",
+      "intentTags": [
+        "technique:fry"
+      ]
+    },
+    "cook.technique.bake": {
+      "label": "Technique: bake",
+      "domain": "meals",
+      "intentTags": [
+        "technique:bake"
+      ]
+    },
+    "cook.technique.stew": {
+      "label": "Technique: stew",
+      "domain": "meals",
+      "intentTags": [
+        "technique:stew"
+      ]
+    },
+    "cook.technique.pressure": {
+      "label": "Technique: pressure",
+      "domain": "meals",
+      "intentTags": [
+        "technique:pressure"
+      ]
+    },
+    "cook.technique.slowcook": {
+      "label": "Technique: slow cook",
+      "domain": "meals",
+      "intentTags": [
+        "technique:slowcook"
+      ]
+    },
+    "session.cooking.batch": {
+      "label": "Cooking session style: batch",
+      "domain": "meals",
+      "intentTags": [
+        "session:batch"
+      ]
+    },
+    "session.cooking.single": {
+      "label": "Cooking session style: single",
+      "domain": "meals",
+      "intentTags": [
+        "session:single"
+      ]
+    },
+    "session.cooking.prep_only": {
+      "label": "Cooking session style: prep-only",
+      "domain": "meals",
+      "intentTags": [
+        "session:prep_only"
+      ]
+    },
+    "pat.meals.weekly.plan": {
+      "label": "Weekly meal plan pattern",
+      "domain": "meals",
+      "intentTags": [
+        "plan:meals",
+        "horizon:week"
+      ]
+    },
+    "pat.meals.batch.cook": {
+      "label": "Batch cook session plan pattern",
+      "domain": "meals",
+      "intentTags": [
+        "plan:meals",
+        "mode:batch"
+      ]
+    },
+    "pat.meals.prep.only": {
+      "label": "Prep-only session plan pattern",
+      "domain": "meals",
+      "intentTags": [
+        "plan:meals",
+        "mode:prep"
+      ]
+    },
+    "pat.meals.sabbath.cook": {
+      "label": "Sabbath cooking plan pattern",
+      "domain": "meals",
+      "intentTags": [
+        "plan:meals",
+        "moed:sabbath"
+      ]
+    },
+    "pat.meals.fast.day": {
+      "label": "Fast-day meal plan pattern",
+      "domain": "meals",
+      "intentTags": [
+        "plan:meals",
+        "moed:fast"
+      ]
+    },
+    "pat.meals.feast.prep": {
+      "label": "Feast prep meal plan pattern",
+      "domain": "meals",
+      "intentTags": [
+        "plan:meals",
+        "moed:feast"
+      ]
+    }
+  },
+  "synonyms": {
+    "breakfast": {
+      "methodIds": [
+        "meal.breakfast"
+      ],
+      "boost": 1.1
+    },
+    "brunch": {
+      "methodIds": [
+        "meal.breakfast"
+      ],
+      "boost": 0.95
+    },
+    "lunch": {
+      "methodIds": [
+        "meal.lunch"
+      ],
+      "boost": 1.1
+    },
+    "dinner": {
+      "methodIds": [
+        "meal.dinner"
+      ],
+      "boost": 1.1
+    },
+    "supper": {
+      "methodIds": [
+        "meal.dinner"
+      ],
+      "boost": 1.05
+    },
+    "snack": {
+      "methodIds": [
+        "meal.snack"
+      ],
+      "boost": 1.0
+    },
+    "feast meal": {
+      "methodIds": [
+        "meal.feast",
+        "pat.meals.feast.prep"
+      ],
+      "boost": 1.25
+    },
+    "fast meal": {
+      "methodIds": [
+        "meal.fast",
+        "pat.meals.fast.day"
+      ],
+      "boost": 1.25
+    },
+    "sabbath meal": {
+      "methodIds": [
+        "meal.sabbath",
+        "pat.meals.sabbath.cook"
+      ],
+      "boost": 1.25
+    },
+    "meal planning": {
+      "methodIds": [
+        "pat.meals.weekly.plan"
+      ],
+      "boost": 1.25
+    },
+    "plan meals": {
+      "methodIds": [
+        "pat.meals.weekly.plan"
+      ],
+      "boost": 1.2
+    },
+    "batch cook": {
+      "methodIds": [
+        "pat.meals.batch.cook",
+        "session.cooking.batch"
+      ],
+      "boost": 1.45
+    },
+    "cook ahead": {
+      "methodIds": [
+        "pat.meals.batch.cook",
+        "session.cooking.batch"
+      ],
+      "boost": 1.2
+    },
+    "prep only": {
+      "methodIds": [
+        "pat.meals.prep.only",
+        "session.cooking.prep_only"
+      ],
+      "boost": 1.25
+    },
+    "cook one meal": {
+      "methodIds": [
+        "session.cooking.single"
+      ],
+      "boost": 1.2
+    },
+    "rare": {
+      "methodIds": [
+        "cook.doneness.rare"
+      ],
+      "boost": 1.0
+    },
+    "medium": {
+      "methodIds": [
+        "cook.doneness.medium"
+      ],
+      "boost": 1.0
+    },
+    "medium-rare": {
+      "methodIds": [
+        "cook.doneness.medium"
+      ],
+      "boost": 0.95
+    },
+    "medium-well": {
+      "methodIds": [
+        "cook.doneness.well"
+      ],
+      "boost": 0.95
+    },
+    "well done": {
+      "methodIds": [
+        "cook.doneness.well"
+      ],
+      "boost": 1.1
+    },
+    "fall apart tender": {
+      "methodIds": [
+        "cook.technique.braise",
+        "cook.technique.slowcook"
+      ],
+      "boost": 1.15
+    },
+    "roast": {
+      "methodIds": [
+        "cook.technique.roast"
+      ],
+      "boost": 1.05
+    },
+    "braise": {
+      "methodIds": [
+        "cook.technique.braise"
+      ],
+      "boost": 1.05
+    },
+    "stew": {
+      "methodIds": [
+        "cook.technique.stew"
+      ],
+      "boost": 1.0
+    },
+    "grill": {
+      "methodIds": [
+        "cook.technique.grill"
+      ],
+      "boost": 1.0
+    },
+    "smoke": {
+      "methodIds": [
+        "cook.technique.smoke"
+      ],
+      "boost": 1.0
+    },
+    "bake": {
+      "methodIds": [
+        "cook.technique.bake"
+      ],
+      "boost": 1.0
+    },
+    "fry": {
+      "methodIds": [
+        "cook.technique.fry"
+      ],
+      "boost": 1.0
+    },
+    "pressure cook": {
+      "methodIds": [
+        "cook.technique.pressure"
+      ],
+      "boost": 1.05
+    },
+    "slow cook": {
+      "methodIds": [
+        "cook.technique.slowcook"
+      ],
+      "boost": 1.05
+    },
+    "sheet pan": {
+      "methodIds": [
+        "session.cooking.batch"
+      ],
+      "boost": 1.05,
+      "notes": "Often batch-friendly"
+    },
+    "one pot": {
+      "methodIds": [
+        "session.cooking.single",
+        "cook.technique.stew"
+      ],
+      "boost": 1.0
+    }
+  },
+  "phrases": [
+    {
+      "text": "plan breakfast lunch and dinner",
+      "methodIds": [
+        "pat.meals.weekly.plan",
+        "meal.breakfast",
+        "meal.lunch",
+        "meal.dinner"
+      ],
+      "boost": 1.25
+    },
+    {
+      "text": "batch cook for the week",
+      "methodIds": [
+        "pat.meals.batch.cook",
+        "session.cooking.batch"
+      ],
+      "boost": 1.55
+    },
+    {
+      "text": "prep ingredients only",
+      "methodIds": [
+        "pat.meals.prep.only",
+        "session.cooking.prep_only"
+      ],
+      "boost": 1.45
+    },
+    {
+      "text": "sabbath cooking plan",
+      "methodIds": [
+        "pat.meals.sabbath.cook"
+      ],
+      "boost": 1.6
+    },
+    {
+      "text": "feast prep menu",
+      "methodIds": [
+        "pat.meals.feast.prep",
+        "meal.feast"
+      ],
+      "boost": 1.55
+    },
+    {
+      "text": "fast day light meals",
+      "methodIds": [
+        "pat.meals.fast.day",
+        "meal.fast"
+      ],
+      "boost": 1.5
+    },
+    {
+      "text": "braise until fall apart tender",
+      "methodIds": [
+        "cook.technique.braise"
+      ],
+      "boost": 1.3
+    }
+  ],
+  "rules": [
+    {
+      "id": "rule.meals.needs.inventory",
+      "when": {
+        "anyPhrases": [
+          "plan meals",
+          "meal planning",
+          "batch cook",
+          "batch cook for the week"
+        ]
+      },
+      "then": [
+        {
+          "type": "emitHintTag",
+          "hintTag": "needsInventorySnapshot",
+          "message": "Meal planning is best when inventory + leftovers are visible."
+        }
+      ]
+    },
+    {
+      "id": "rule.session.style.batch",
+      "when": {
+        "anyPhrases": [
+          "batch cook",
+          "cook ahead",
+          "sheet pan"
+        ],
+        "notAnyPhrases": [
+          "prep only"
+        ]
+      },
+      "then": [
+        {
+          "type": "emitHintTag",
+          "hintTag": "sessionStyle:batch",
+          "message": "Batch cooking session style detected."
+        }
+      ]
+    },
+    {
+      "id": "rule.session.style.prep",
+      "when": {
+        "anyPhrases": [
+          "prep only",
+          "prep ingredients only"
+        ]
+      },
+      "then": [
+        {
+          "type": "emitHintTag",
+          "hintTag": "sessionStyle:prep_only",
+          "message": "Prep-only session style detected."
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "emitHintTag",
+      "hintTag": "mealsLexiconActive",
+      "message": "Meals lexicon active. Route to meal planning patterns + cooking session styles."
+    }
+  ],
+  "signals": []
+}

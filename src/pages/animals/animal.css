@@ -1,0 +1,252 @@
+/**** Animals — Chips & Badges **********************************************
+  - Mirrors meals chip styles: .chip, .chip--effort, .chip--sabbath, .chip--safety
+  - Adds: .chip--ppe, .chip--biohazard, .chip--weathergate, .chip--withhold
+  - Theme-aware, accessible, reduced-motion friendly
+******************************************************************************/
+
+/* ---- Tokens (inherit from global/meals if defined) ---------------------- */
+
+:root,
+.theme-suka {
+  --chip-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  --chip-radius: 999px;
+  --chip-height: 26px;
+  --chip-gap: 0.45rem;
+  --chip-pad-x: 0.65rem;
+  --chip-font-size: 12.5px;
+  --chip-weight: 600;
+  --chip-ring: 2px;
+
+  /* Surfaces */
+  --chip-bg: rgba(10, 10, 12, 0.06);
+  --chip-fg: #1b1f23;
+  --chip-ring-color: rgba(0,0,0,0.06);
+
+  /* Meals parity — existing semantic colors */
+  --chip-effort-bg: #f1f8ff;
+  --chip-effort-fg: #0b5cab;
+
+  --chip-sabbath-bg: #fff7ed;
+  --chip-sabbath-fg: #b45309;
+
+  --chip-safety-bg: #fff1f2;
+  --chip-safety-fg: #be123c;
+
+  /* Animals domain accents (tuned for butchery/cold-chain context) */
+  --chip-ppe-bg: #eefdf6;           /* calm safety green */
+  --chip-ppe-fg: #047857;
+
+  --chip-biohazard-bg: #fff0eb;     /* alerting yet readable */
+  --chip-biohazard-fg: #b91c1c;
+
+  --chip-weathergate-bg: #ecfeff;   /* ambient weather blue */
+  --chip-weathergate-fg: #075985;
+
+  --chip-withhold-bg: #f5f3ff;      /* timing/hold purple */
+  --chip-withhold-fg: #6d28d9;
+
+  /* Icon color (mask fill) inherits fg by default */
+  --chip-icon: currentColor;
+  --chip-icon-size: 14px;
+
+  /* Focus */
+  --chip-focus: 0 0 0 var(--chip-ring) rgba(59,130,246,.4);
+}
+
+/* Dark theme */
+[data-theme="dark"],
+.theme-dark {
+  --chip-bg: rgba(255,255,255,0.08);
+  --chip-fg: #e7e9ee;
+  --chip-ring-color: rgba(255,255,255,0.08);
+
+  --chip-effort-bg: rgba(56, 189, 248, 0.18);
+  --chip-effort-fg: #7dd3fc;
+
+  --chip-sabbath-bg: rgba(251, 191, 36, 0.16);
+  --chip-sabbath-fg: #facc15;
+
+  --chip-safety-bg: rgba(239, 68, 68, 0.16);
+  --chip-safety-fg: #fca5a5;
+
+  --chip-ppe-bg: rgba(16, 185, 129, 0.16);
+  --chip-ppe-fg: #86efac;
+
+  --chip-biohazard-bg: rgba(239, 68, 68, 0.16);
+  --chip-biohazard-fg: #f87171;
+
+  --chip-weathergate-bg: rgba(59, 130, 246, 0.16);
+  --chip-weathergate-fg: #93c5fd;
+
+  --chip-withhold-bg: rgba(124, 58, 237, 0.18);
+  --chip-withhold-fg: #c4b5fd;
+}
+
+/* ---- Base chip ----------------------------------------------------------- */
+
+.chip {
+  --_bg: var(--chip-bg);
+  --_fg: var(--chip-fg);
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--chip-gap);
+  height: var(--chip-height);
+  max-width: 100%;
+  padding: 0 var(--chip-pad-x);
+  border-radius: var(--chip-radius);
+  background: var(--_bg);
+  color: var(--_fg);
+  font: var(--chip-weight) var(--chip-font-size)/1 var(--chip-font);
+  letter-spacing: .2px;
+  -webkit-font-smoothing: antialiased;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px var(--chip-ring-color);
+  user-select: none;
+  transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, color .2s ease;
+}
+
+.chip:focus-visible { outline: none; box-shadow: var(--chip-focus); }
+.chip:hover { transform: translateY(-1px); }
+
+/* Size variants */
+.chip--sm { --chip-height: 22px; --chip-font-size: 11.5px; --chip-icon-size: 12px; }
+.chip--lg { --chip-height: 32px; --chip-font-size: 13.5px; --chip-icon-size: 16px; --chip-pad-x: .8rem; }
+
+/* Button slot (dismiss/action) */
+.chip__btn {
+  appearance: none; border: 0; background: transparent; color: inherit;
+  padding: 0; margin: 0; inline-size: 1.15em; block-size: 1.15em;
+  border-radius: 999px; display: inline-grid; place-items: center; opacity: .8;
+}
+.chip__btn:hover { opacity: 1; }
+
+/* Icon slot (CSS mask; emoji fallback supported) */
+.chip__icon {
+  inline-size: var(--chip-icon-size);
+  block-size: var(--chip-icon-size);
+  flex: 0 0 var(--chip-icon-size);
+  background: var(--chip-icon);
+  -webkit-mask: var(--chip-icon-mask) no-repeat center / contain;
+          mask: var(--chip-icon-mask) no-repeat center / contain;
+}
+
+/* Fallback emoji if mask unsupported */
+@supports not ((mask: url()) or (-webkit-mask: url())) {
+  .chip__icon { background: none; }
+  .chip[data-icon]::before {
+    content: attr(data-icon);
+    margin-inline-end: .35rem;
+    font-size: 1.05em;
+  }
+}
+
+/* ---- Meals parity modifiers --------------------------------------------- */
+
+.chip--effort  { --_bg: var(--chip-effort-bg);  --_fg: var(--chip-effort-fg); }
+.chip--sabbath { --_bg: var(--chip-sabbath-bg); --_fg: var(--chip-sabbath-fg); }
+.chip--safety  { --_bg: var(--chip-safety-bg);  --_fg: var(--chip-safety-fg); }
+
+/* ---- NEW Animals modifiers ---------------------------------------------- */
+
+.chip--ppe         { --_bg: var(--chip-ppe-bg);         --_fg: var(--chip-ppe-fg); }
+.chip--biohazard   { --_bg: var(--chip-biohazard-bg);   --_fg: var(--chip-biohazard-fg); }
+.chip--weathergate { --_bg: var(--chip-weathergate-bg); --_fg: var(--chip-weathergate-fg); }
+.chip--withhold    { --_bg: var(--chip-withhold-bg);    --_fg: var(--chip-withhold-fg); }
+
+/* Icon masks (inline SVG data URIs) --------------------------------------- */
+/* PPE (glove) */
+.chip--ppe .chip__icon {
+  --chip-icon-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='256' height='256' viewBox='0 0 24 24' fill='black'><path d='M8 3a1 1 0 0 1 1 1v6h1V4a1 1 0 0 1 2 0v6h1V5a1 1 0 1 1 2 0v5h1V7a1 1 0 1 1 2 0v7a5 5 0 0 1-5 5H9a4 4 0 0 1-4-4V8a1 1 0 1 1 2 0v7a2 2 0 0 0 2 2h6a3 3 0 0 0 3-3V9h-9V4a1 1 0 0 1 1-1z'/></svg>");
+}
+
+/* Biohazard */
+.chip--biohazard .chip__icon {
+  --chip-icon-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='256' height='256' viewBox='0 0 24 24' fill='black'><path d='M12 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6.6 5.2a5 5 0 0 1-3.6 1.8c.6 1 .9 2.1.9 3.2h-1.8c0-1.2-.4-2.4-1.1-3.4-.7 1-1.1 2.2-1.1 3.4H10c0-1.1.3-2.2.9-3.2a5 5 0 0 1-3.6-1.8l1.3-1.3a3.5 3.5 0 0 0 2.7 1.3c-.7-.8-1.1-1.9-1.1-3H12c0 1.1-.4 2.2-1.1 3 1.2 0 2.2-.5 3-1.3l1.3 1.3a3.5 3.5 0 0 0 2.7-1.3l1.3 1.3zM7.4 8.8A5 5 0 0 1 11 7c-.6-1-.9-2.1-.9-3.2H12c0 1.1.4 2.2 1.1 3.2a5 5 0 0 1 3.6 1.8L15.4 10a3.5 3.5 0 0 0-2.7-1.3c.7.8 1.1 1.9 1.1 3H12c0-1.1.4-2.2 1.1-3-1.2 0-2.2.5-3 1.3L7.4 8.8z'/></svg>");
+}
+
+/* Weather-gate (cloud + rain) */
+.chip--weathergate .chip__icon {
+  --chip-icon-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='256' height='256' viewBox='0 0 24 24' fill='black'><path d='M7 18a3 3 0 1 1 .4-5.9A4.5 4.5 0 0 1 16.8 9 3.5 3.5 0 1 1 18 16H7zM9 20l1-2m3 2l1-2m-6 2l1-2' stroke='black' stroke-width='2' stroke-linecap='round' fill='none'/></svg>");
+}
+
+/* Withhold-timer (hourglass) */
+.chip--withhold .chip__icon {
+  --chip-icon-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='256' height='256' viewBox='0 0 24 24' fill='black'><path d='M6 3h12v2a5 5 0 0 1-2.1 4.1L13 11l2.9 1.9A5 5 0 0 1 18 17v2H6v-2a5 5 0 0 1 2.1-4.1L11 11 8.1 9.1A5 5 0 0 1 6 5V3zM8 19h8v-.9a3.5 3.5 0 0 0-1.5-2.9L12 13l-2.5 1.7A3.5 3.5 0 0 0 8 18.1V19z'/></svg>");
+}
+
+/* ---- Grouping / layout helpers ----------------------------------------- */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem .5rem;
+  align-items: center;
+}
+.chips--dense { gap: .25rem .35rem; }
+.chips > .chip { max-width: 100%; }
+
+/* Title + chip row layout */
+.chips-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: .5rem 1rem;
+}
+
+/* ---- Accessibility & Motion -------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .chip { transition: none; }
+  .chip:hover { transform: none; }
+}
+
+/* High-contrast/forced colors */
+@media (forced-colors: active) {
+  .chip {
+    forced-color-adjust: auto;
+    background: Canvas;
+    color: ButtonText;
+    outline: 1px solid CanvasText;
+    box-shadow: none;
+  }
+  .chip:focus-visible { outline: 2px solid Highlight; outline-offset: 1px; }
+}
+
+/* ---- Usage notes (non-rendering)
+  HTML:
+    <div class="chips">
+      <span class="chip chip--safety">
+        <i class="chip__icon" aria-hidden="true"></i>
+        Safety
+      </span>
+
+      <span class="chip chip--ppe" data-icon="🧤" title="PPE Required">
+        <i class="chip__icon" aria-hidden="true"></i>
+        PPE
+      </span>
+
+      <span class="chip chip--biohazard" data-icon="☣️" title="Biohazard">
+        <i class="chip__icon" aria-hidden="true"></i>
+        Biohazard
+      </span>
+
+      <span class="chip chip--weathergate" data-icon="🌧️" title="Weather-gate">
+        <i class="chip__icon" aria-hidden="true"></i>
+        Weather-gate
+      </span>
+
+      <span class="chip chip--withhold" data-icon="⏳" title="Withhold timer">
+        <i class="chip__icon" aria-hidden="true"></i>
+        Withhold
+      </span>
+    </div>
+
+  Notes:
+    • Shares the exact token/variant structure used on meals & cleaning pages.
+    • CSS masks render crisp vectors; emoji fallback kicks in automatically if
+      mask support isn’t available.
+    • Colors are variables — adjust in a theme root to tune brand or emphasis.
+*/

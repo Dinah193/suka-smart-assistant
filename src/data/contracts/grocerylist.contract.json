@@ -1,0 +1,247 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka.smart/contract/grocerylist.contract.json",
+  "title": "Suka Grocery List Contract",
+  "type": "object",
+  "required": ["version", "list"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "list": {
+      "type": "object",
+      "required": ["id", "createdAt", "updatedAt", "ownerTier", "title", "status", "options", "items"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "ownerTier": { "type": "string", "enum": ["tier1", "tier2", "tier3", "tier4"], "default": "tier2" },
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "timezone": { "type": "string", "default": "America/New_York" },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "generated", "active", "paused", "completed", "cancelled"],
+          "default": "generated"
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mealPlanId": { "type": "string" },
+            "dateRange": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "start": { "type": "string", "format": "date" },
+                "end": { "type": "string", "format": "date" }
+              }
+            },
+            "batchSessionIds": { "type": "array", "items": { "type": "string" } },
+            "generatedBy": { "type": "string", "enum": ["planner", "manual", "import"] }
+          }
+        },
+        "options": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "storeSelector": { "type": "string" },
+            "includeHave": { "type": "boolean", "default": false },
+            "collapseDuplicates": { "type": "boolean", "default": true },
+            "mergeUnitsStrategy": { "type": "string", "enum": ["smart", "strict", "none"], "default": "smart" },
+            "allowSubstitutions": { "type": "boolean", "default": true },
+            "showHouseholdItems": { "type": "boolean", "default": true },
+            "sabbathGuard": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": { "type": "boolean", "default": true },
+                "policy": { "type": "string", "enum": ["block", "warn", "defer"], "default": "block" }
+              }
+            },
+            "budget": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "currency": { "type": "string", "default": "USD" },
+                "maxTotal": { "type": "number", "minimum": 0 }
+              }
+            }
+          }
+        },
+        "stores": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["storeProfileId"],
+            "additionalProperties": false,
+            "properties": {
+              "storeProfileId": { "type": "string" },
+              "sequence": { "type": "integer", "minimum": 1 },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "label"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "label": { "type": "string" },
+              "order": { "type": "integer", "minimum": 0 },
+              "storeProfileId": { "type": "string" }
+            }
+          }
+        },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "quantity", "unit", "status"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "alias": { "type": "array", "items": { "type": "string" } },
+              "quantity": { "type": "number" },
+              "unit": { "type": "string" },
+              "size": { "type": "string" },
+              "brand": { "type": "string" },
+              "preferredStores": { "type": "array", "items": { "type": "string" } },
+              "aisle": { "type": "string" },
+              "department": { "type": "string" },
+              "have": { "type": "boolean", "default": false },
+              "short": { "type": "boolean", "default": false },
+              "householdItem": { "type": "boolean", "default": false },
+              "priority": { "type": "string", "enum": ["low", "normal", "high", "critical"], "default": "normal" },
+              "status": {
+                "type": "string",
+                "enum": ["pending", "in-cart", "substituted", "acquired", "skipped", "not-found", "delivered"],
+                "default": "pending"
+              },
+              "inventoryLink": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "itemId": { "type": "string" },
+                  "sourceType": { "type": "string", "enum": ["pantry", "freezer", "fridge", "root-cellar", "garden", "animal", "bulk", "retailer", "unknown"] },
+                  "preferredLocationId": { "type": "string" }
+                }
+              },
+              "sourceRecipes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["recipeId"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "recipeId": { "type": "string" },
+                    "versionId": { "type": "string" },
+                    "ingredientId": { "type": "string" },
+                    "mealPlanSlotId": { "type": "string" },
+                    "servingsShare": { "type": "number" },
+                    "batchSessionId": { "type": "string" }
+                  }
+                }
+              },
+              "substitutions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["name"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "name": { "type": "string" },
+                    "ratio": { "type": "number" },
+                    "unit": { "type": "string" },
+                    "reason": { "type": "string", "enum": ["allergy", "unavailable", "budget", "preference", "diet", "store-only", "other"] },
+                    "chosen": { "type": "boolean", "default": false },
+                    "storeProfileId": { "type": "string" },
+                    "sku": { "type": "string" },
+                    "aisle": { "type": "string" },
+                    "notes": { "type": "string" }
+                  }
+                }
+              },
+              "storeSkuMap": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["storeProfileId"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "storeProfileId": { "type": "string" },
+                    "sku": { "type": "string" },
+                    "aisle": { "type": "string" },
+                    "price": { "type": "number" },
+                    "currency": { "type": "string", "default": "USD" },
+                    "available": { "type": "boolean", "default": true },
+                    "size": { "type": "string" },
+                    "brand": { "type": "string" }
+                  }
+                }
+              },
+              "pricing": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "estimatedTotal": { "type": "number" },
+                  "currency": { "type": "string", "default": "USD" }
+                }
+              },
+              "notes": { "type": "string" },
+              "tags": { "type": "array", "items": { "type": "string" } },
+              "audit": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "addedAt": { "type": "string", "format": "date-time" },
+                  "updatedAt": { "type": "string", "format": "date-time" },
+                  "addedBy": { "type": "string" },
+                  "updatedBy": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "automation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "emit": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["on", "topic"],
+                "additionalProperties": true,
+                "properties": {
+                  "on": {
+                    "type": "string",
+                    "enum": ["list-created", "list-updated", "item-substituted", "item-acquired", "list-completed"]
+                  },
+                  "topic": { "type": "string" },
+                  "payload": { "type": "object" }
+                }
+              }
+            }
+          }
+        },
+        "analytics": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "channels": { "type": "array", "items": { "type": "string", "enum": ["costEstimate", "inventoryTurn", "shortageRate"] } },
+            "sampling": { "type": "string", "enum": ["all", "milestones", "none"], "default": "milestones" }
+          }
+        }
+      }
+    }
+  }
+}

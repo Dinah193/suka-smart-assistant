@@ -1,0 +1,424 @@
+{
+  "id": "curry-lovers-pack",
+  "title": "Curry Lovers: Global Pots & Weeknight Bases",
+  "description": "A globe-trotting curry set—Caribbean to West African to Indian, Thai, and beyond. Pantry-first, no-pork, freezer-friendly where it counts, and ready for your weekly flavor rhythm.",
+  "tags": [
+    "collection",
+    "diet:no-pork",
+    "prep:pantry-first",
+    "palette:curry",
+    "batch:flex"
+  ],
+  "flavor_profile": [
+    "Caribbean",
+    "West African",
+    "Indian",
+    "Thai",
+    "Japanese",
+    "Malaysian",
+    "Citrus-Chili",
+    "Herb-Garlic",
+    "Garden-Fresh",
+    "Pantry-First"
+  ],
+  "meta": {
+    "curation_notes": "Favor 30–40 min weeknights with a few batchable bases. Keep heat adjustable and sides flexible (rice, roti, naan, quinoa, cassava).",
+    "serving_plan": "Pair with rice, flatbreads, or steamed greens. Portion & freeze where noted.",
+    "storage_policy": "2–4 days fridge (≤4°C). 2–3 months freezer in airtight, labeled portions."
+  },
+  "items": [
+    {
+      "id": "trini-channa-aloo-weeknight",
+      "title": "Trini Channa & Aloo (Weeknight)",
+      "description": "Trinidad-style curry chickpeas and potatoes—bright, cozy, meatless.",
+      "flavor_profile": ["Caribbean", "Indian", "Pantry-First"],
+      "tags": ["flavor:Caribbean", "flavor:Indian", "legume:chickpea", "veg:potato", "time:30-min", "veg:plant-based"],
+      "meta": { "yield": "6 servings", "storage": "4 days fridge / 2 months freezer", "reheat": "Simmer 5–8 min; loosen with water" },
+      "ingredients": [
+        "2 tbsp oil",
+        "1 onion, diced",
+        "3 cloves garlic, minced",
+        "1 tsp grated ginger",
+        "2 tbsp Caribbean curry powder",
+        "1 can (14 oz) chickpeas, rinsed",
+        "2 medium potatoes, 1-inch cubes",
+        "2 cups water or broth",
+        "Sprig thyme or culantro/cilantro",
+        "Salt, pepper"
+      ],
+      "steps": [
+        "Sauté onion, garlic, ginger in oil 3–4 min.",
+        "Bloom curry powder 30 sec.",
+        "Add chickpeas, potatoes, liquid; simmer 15–18 min until tender.",
+        "Finish with herbs; season to taste."
+      ],
+      "images": []
+    },
+    {
+      "id": "jamaican-curry-chicken-lean",
+      "title": "Jamaican Curry Chicken (Lean, No Pork)",
+      "description": "Classic Jamaican curry profile on chicken; weeknight-friendly.",
+      "flavor_profile": ["Caribbean", "Citrus-Chili", "Herb-Garlic"],
+      "tags": ["flavor:Caribbean", "protein:chicken", "time:35-min"],
+      "meta": { "yield": "6 servings", "storage": "3 days fridge / 2 months freezer", "reheat": "Covered simmer 8–10 min" },
+      "ingredients": [
+        "1.5 lb chicken thighs, trimmed",
+        "1 onion, sliced",
+        "2 cloves garlic, minced",
+        "1 scotch bonnet (optional, to taste)",
+        "2 tbsp Jamaican curry powder",
+        "1 tsp all-purpose seasonings (optional)",
+        "1 cup coconut milk (light or full-fat)",
+        "1 cup water or broth",
+        "2 sprigs thyme",
+        "Salt"
+      ],
+      "steps": [
+        "Brown seasoned chicken 3–4 min; set aside.",
+        "Sauté onion/garlic/pepper; bloom curry 30 sec.",
+        "Return chicken; add coconut milk/liquid, thyme; simmer 15–20 min to tender; season."
+      ],
+      "images": []
+    },
+    {
+      "id": "west-african-groundnut-stew-quick",
+      "title": "West African Groundnut Stew (Quick)",
+      "description": "Peanut-tomato curry with greens; gentle chili heat and deep comfort.",
+      "flavor_profile": ["West African", "Herb-Garlic"],
+      "tags": ["flavor:West African", "stew", "legume:peanut", "time:30-min"],
+      "meta": { "yield": "6–8 servings", "storage": "4 days fridge / 3 months freezer", "reheat": "Simmer 8–10 min; thin as needed" },
+      "ingredients": [
+        "1 tbsp oil",
+        "1 onion, diced",
+        "2 cloves garlic, minced",
+        "2 tbsp tomato paste",
+        "1/2 cup peanut butter",
+        "3–4 cups broth/water",
+        "2 cups chopped spinach/kale",
+        "Chili flake or fresh chili (to taste)",
+        "Salt"
+      ],
+      "steps": [
+        "Sauté onion/garlic 3–4 min; add tomato paste 1 min.",
+        "Whisk in peanut butter and liquid; simmer 10 min.",
+        "Add greens; simmer 3–5 min; season."
+      ],
+      "images": []
+    },
+    {
+      "id": "thai-green-curry-weeknight",
+      "title": "Thai Green Curry (Weeknight, Buildable Heat)",
+      "description": "Fast green-curry broth with vegetables and your choice of protein.",
+      "flavor_profile": ["Thai", "Citrus-Chili", "Garden-Fresh"],
+      "tags": ["flavor:Thai", "curry:green", "time:25-min"],
+      "meta": { "yield": "4–6 servings", "storage": "3 days fridge / 2 months freezer", "reheat": "Gentle simmer 5–7 min" },
+      "ingredients": [
+        "1 tbsp oil",
+        "2–3 tbsp green curry paste (see base)",
+        "1 can (14 oz) coconut milk",
+        "2 cups broth/water",
+        "2 cups mixed veg (zucchini, bell pepper, green beans)",
+        "12 oz tofu or chicken (optional)",
+        "1–2 tsp fish sauce or soy/coconut aminos",
+        "Lime juice, basil/cilantro",
+        "Salt"
+      ],
+      "steps": [
+        "Bloom curry paste in oil 30–60 sec.",
+        "Add coconut milk and liquid; simmer 5 min.",
+        "Add veg + protein; simmer 6–8 min until tender.",
+        "Finish with lime and herbs; season."
+      ],
+      "images": []
+    },
+    {
+      "id": "indian-chicken-curry-simple",
+      "title": "Simple North-Indian Chicken Curry",
+      "description": "Onion–tomato–garam masala base; reliable and flexible.",
+      "flavor_profile": ["Indian", "Herb-Garlic"],
+      "tags": ["flavor:Indian", "protein:chicken", "time:40-min"],
+      "meta": { "yield": "6 servings", "storage": "4 days fridge / 3 months freezer", "reheat": "Covered simmer 8–10 min" },
+      "ingredients": [
+        "2 tbsp oil or ghee (or neutral oil)",
+        "2 onions, finely chopped",
+        "3 cloves garlic + 1 tsp grated ginger",
+        "2 tsp ground coriander",
+        "1 tsp ground cumin",
+        "1/2 tsp turmeric",
+        "1 tsp garam masala (plus to finish)",
+        "1 can (14 oz) tomatoes, crushed",
+        "1.5 lb chicken, chunks",
+        "Salt, chili to taste",
+        "Cilantro"
+      ],
+      "steps": [
+        "Sauté onions to deep golden 10–12 min; add garlic/ginger 1 min.",
+        "Add spices; toast 30 sec. Stir in tomatoes; simmer 5 min.",
+        "Add chicken; simmer 15–20 min until done; finish with garam masala & cilantro."
+      ],
+      "images": []
+    },
+    {
+      "id": "japanese-kare-presssure-or-pot",
+      "title": "Japanese Kare (Pressure Cooker or Pot)",
+      "description": "Gentle, kid-friendly Japanese curry with carrots and potatoes.",
+      "flavor_profile": ["Japanese", "Herb-Garlic"],
+      "tags": ["flavor:Japanese", "curry:japanese", "time:40-min"],
+      "meta": { "yield": "6 servings", "storage": "3 days fridge / 2 months freezer", "reheat": "Low simmer 8–10 min" },
+      "ingredients": [
+        "1 tbsp oil",
+        "1 onion, sliced",
+        "2 carrots, chunks",
+        "2 potatoes, chunks",
+        "1 lb beef or chicken (optional)",
+        "4 cups broth",
+        "3–4 tbsp Japanese curry roux or homemade blend",
+        "Splash soy/coconut aminos",
+        "Salt"
+      ],
+      "steps": [
+        "Sauté onion 3–4 min; add veg (and meat if using).",
+        "Add broth; pressure cook 8 min (or simmer pot 20–25 min).",
+        "Stir in curry roux to thicken; season."
+      ],
+      "images": []
+    },
+    {
+      "id": "malaysian-laksa-lite",
+      "title": "Malaysian Laksa (Lite Weeknight)",
+      "description": "Fragrant laksa broth with noodles; use tofu, shrimp, or chicken.",
+      "flavor_profile": ["Malaysian", "Citrus-Chili", "Garden-Fresh"],
+      "tags": ["flavor:Malaysian", "noodle:soup", "time:30-min"],
+      "meta": { "yield": "4–6 bowls", "storage": "Broth 3 days fridge / 2 months freezer; cook noodles fresh", "reheat": "Simmer broth 5–7 min" },
+      "ingredients": [
+        "1 tbsp oil",
+        "2–3 tbsp laksa paste (see base)",
+        "1 can (14 oz) coconut milk",
+        "3 cups broth",
+        "Rice noodles, cooked separately",
+        "Protein of choice (tofu/shrimp/chicken)",
+        "Bean sprouts, herbs, lime",
+        "Salt"
+      ],
+      "steps": [
+        "Bloom laksa paste in oil 30–60 sec; add coconut milk & broth.",
+        "Simmer 8–10 min; add protein to heat through.",
+        "Serve over noodles; top with sprouts, herbs, lime."
+      ],
+      "images": []
+    },
+    {
+      "id": "south-indian-egg-curry",
+      "title": "South Indian Egg Curry",
+      "description": "Coconut-tomato gravy with boiled eggs—budget-friendly and filling.",
+      "flavor_profile": ["Indian", "Citrus-Chili"],
+      "tags": ["flavor:Indian", "protein:eggs", "time:30-min", "budget"],
+      "meta": { "yield": "4–6 servings", "storage": "3 days fridge", "reheat": "Gentle simmer 5–6 min" },
+      "ingredients": [
+        "6 boiled eggs, peeled",
+        "1 tbsp oil",
+        "1 onion, sliced",
+        "1 tsp grated ginger",
+        "1 clove garlic, minced",
+        "1 tsp mustard seeds (optional)",
+        "1 tsp curry leaves (optional)",
+        "1 tsp chili powder (to taste)",
+        "1/2 tsp turmeric",
+        "1 can (14 oz) tomatoes",
+        "1 cup coconut milk",
+        "Salt"
+      ],
+      "steps": [
+        "Sauté onion/ginger/garlic; add mustard seeds/curry leaves if using.",
+        "Add chili/turmeric; stir tomatoes and coconut milk.",
+        "Simmer 8–10 min; add eggs to warm; season."
+      ],
+      "images": []
+    },
+    {
+      "id": "thai-massaman-slow-or-pressure",
+      "title": "Thai Massaman (Slow or Pressure)",
+      "description": "Warm, gently spiced curry with potatoes—beef or chicken.",
+      "flavor_profile": ["Thai", "Herb-Garlic"],
+      "tags": ["flavor:Thai", "curry:massaman", "time:flex"],
+      "meta": { "yield": "6–8 servings", "storage": "4 days fridge / 3 months freezer", "reheat": "Simmer 10 min" },
+      "ingredients": [
+        "2 tbsp oil",
+        "3 tbsp massaman curry paste",
+        "1 can (14 oz) coconut milk",
+        "2 cups broth",
+        "1 lb beef or chicken",
+        "2 potatoes, chunks",
+        "1 onion, wedges",
+        "1 tbsp fish sauce or soy/coconut aminos",
+        "1 tsp sugar (optional)",
+        "Salt"
+      ],
+      "steps": [
+        "Bloom paste in oil; add coconut milk & broth.",
+        "Add meat and veg; pressure cook 15 min (or simmer 35–45).",
+        "Season with fish sauce/soy and sugar to balance."
+      ],
+      "images": []
+    },
+    {
+      "id": "caribbean-curry-fish-stew-light",
+      "title": "Caribbean Curry Fish Stew (Light)",
+      "description": "Bright, citrusy curry broth with lean fish and peppers.",
+      "flavor_profile": ["Caribbean", "Citrus-Chili", "Garden-Fresh"],
+      "tags": ["flavor:Caribbean", "protein:fish", "time:25-min", "light:lean"],
+      "meta": { "yield": "4–6 servings", "storage": "1–2 days fridge", "reheat": "Low simmer 3–4 min" },
+      "ingredients": [
+        "1 tbsp oil",
+        "1 onion, sliced",
+        "1 bell pepper, strips",
+        "2 tsp Caribbean curry powder",
+        "1 cup coconut milk (light ok)",
+        "1 cup water or broth",
+        "1 lb firm white fish, chunks",
+        "Lime juice, cilantro",
+        "Salt"
+      ],
+      "steps": [
+        "Sauté onion/pepper; bloom curry 30 sec.",
+        "Add coconut milk/liquid; simmer 5 min.",
+        "Add fish; simmer gently 4–6 min; finish with lime and cilantro."
+      ],
+      "images": []
+    },
+    {
+      "id": "quick-veggie-korma-lite",
+      "title": "Quick Veggie Korma (Lite)",
+      "description": "Creamy cashew-coconut korma with mixed vegetables.",
+      "flavor_profile": ["Indian", "Herb-Garlic"],
+      "tags": ["flavor:Indian", "veg:mix", "time:30-min", "veg:plant-based"],
+      "meta": { "yield": "6 servings", "storage": "3 days fridge / 2 months freezer", "reheat": "Gentle simmer 6–8 min" },
+      "ingredients": [
+        "1 tbsp oil",
+        "1 onion, diced",
+        "2 cloves garlic, minced",
+        "1 tsp grated ginger",
+        "2 tsp korma or mild curry powder",
+        "1/2 cup cashews, blended with 1 cup water",
+        "1/2 cup coconut milk",
+        "3 cups mixed veg",
+        "Salt"
+      ],
+      "steps": [
+        "Sauté onion/garlic/ginger; add korma powder 30 sec.",
+        "Stir in cashew blend & coconut milk; simmer.",
+        "Add veg; cook until tender; season."
+      ],
+      "images": []
+    },
+
+    {
+      "id": "green-curry-paste-base",
+      "title": "Green Curry Paste (Base, Freezer Cubes)",
+      "description": "Homemade paste to jump-start Thai green curries.",
+      "flavor_profile": ["Thai", "Citrus-Chili", "Herb-Garlic"],
+      "tags": ["flavor:Thai", "craft", "base", "freezer"],
+      "meta": { "yield": "1.5 cups (24 cubes)", "storage": "1 week fridge / 3 months freezer", "reheat": "Use from frozen" },
+      "ingredients": [
+        "2 cups green herbs (cilantro stems, basil, green onion)",
+        "4–6 green chilies (to taste)",
+        "1 tbsp grated ginger or galangal",
+        "4 cloves garlic",
+        "1 tbsp lime zest",
+        "1 tbsp lime juice",
+        "1 tbsp oil",
+        "1 tsp salt"
+      ],
+      "steps": [
+        "Blend smooth adding a splash of water if needed.",
+        "Portion into ice cube trays; freeze and bag."
+      ],
+      "images": []
+    },
+    {
+      "id": "caribbean-green-seasoning-curry",
+      "title": "Caribbean Green Seasoning (Curry-Ready)",
+      "description": "Herb–garlic base to finish Caribbean curries and grills.",
+      "flavor_profile": ["Caribbean", "Herb-Garlic", "Garden-Fresh"],
+      "tags": ["flavor:Caribbean", "craft", "base"],
+      "meta": { "yield": "2 cups", "storage": "1 week fridge / 2 months freezer", "reheat": "n/a" },
+      "ingredients": [
+        "2 bunches cilantro/culantro",
+        "1 small onion",
+        "4 cloves garlic",
+        "1 bell pepper",
+        "Thyme leaves",
+        "Lime juice, salt"
+      ],
+      "steps": [
+        "Blend to a spoonable paste; adjust salt & lime.",
+        "Use as finishing spoon or marinade."
+      ],
+      "images": []
+    },
+    {
+      "id": "masala-base-onion-tomato",
+      "title": "Indian Masala Base (Onion–Tomato)",
+      "description": "Batch a quart to speed any Indian-style curry.",
+      "flavor_profile": ["Indian", "Herb-Garlic"],
+      "tags": ["flavor:Indian", "craft", "base", "batch"],
+      "meta": { "yield": "1 quart", "storage": "5 days fridge / 3 months freezer", "reheat": "Use from thaw or frozen pucks" },
+      "ingredients": [
+        "4 onions, finely chopped",
+        "6 cloves garlic + 2 tbsp ginger, minced",
+        "2 cans (14 oz) crushed tomatoes",
+        "2 tsp cumin",
+        "2 tsp coriander",
+        "1 tsp turmeric",
+        "Oil, salt"
+      ],
+      "steps": [
+        "Slowly brown onions in oil until deep golden.",
+        "Add garlic/ginger; spices; tomatoes. Simmer 15–20 min.",
+        "Cool; blend smooth if desired; portion & freeze."
+      ],
+      "images": []
+    },
+    {
+      "id": "laksa-paste-shortcut",
+      "title": "Laksa Paste (Shortcut, Freezer)",
+      "description": "Aromatic base for Malaysian laksa or noodle soups.",
+      "flavor_profile": ["Malaysian", "Citrus-Chili", "Herb-Garlic"],
+      "tags": ["flavor:Malaysian", "craft", "base", "freezer"],
+      "meta": { "yield": "1.5 cups", "storage": "1 week fridge / 3 months freezer", "reheat": "Use from frozen" },
+      "ingredients": [
+        "4 red chilies (to taste)",
+        "3 cloves garlic",
+        "1 tbsp ginger",
+        "2 stalks lemongrass (tender parts)",
+        "1 small onion",
+        "Zest of 1 lime or kaffir leaves",
+        "2 tbsp oil",
+        "1 tsp salt"
+      ],
+      "steps": [
+        "Blend into a paste; sauté portions 1–2 min before adding liquids.",
+        "Freeze as cubes."
+      ],
+      "images": []
+    },
+    {
+      "id": "crispy-shallots-topper",
+      "title": "Crispy Shallots (Curry Topper)",
+      "description": "Crunchy topper for curries, soups, and rice bowls.",
+      "flavor_profile": ["Pantry-First"],
+      "tags": ["craft", "topping", "pantry"],
+      "meta": { "yield": "1 cup", "storage": "2 weeks airtight", "reheat": "n/a" },
+      "ingredients": [
+        "1 cup thinly sliced shallots",
+        "1/2 cup neutral oil",
+        "Pinch salt"
+      ],
+      "steps": [
+        "Fry shallots in oil over medium until golden; drain on rack; salt lightly.",
+        "Reserve flavored oil for cooking."
+      ],
+      "images": []
+    }
+  ]
+}

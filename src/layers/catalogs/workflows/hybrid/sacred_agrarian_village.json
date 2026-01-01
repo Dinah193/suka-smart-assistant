@@ -1,0 +1,319 @@
+{
+  "id": "wf.hybrid.sacred_agrarian_village",
+  "domain": "workflow",
+  "kind": "workflow_overlay",
+  "title": "Sacred Agrarian Village (Hybrid) Workflow Overlay",
+  "intentTags": [
+    "overlay:workflow",
+    "culture:sacred_agrarian_village",
+    "group:hybrid"
+  ],
+  "inputs": [
+    {
+      "key": "enabled",
+      "label": "Enabled (opt-in)",
+      "type": "boolean",
+      "required": true,
+      "default": false,
+      "notes": "Overlays must be explicitly enabled by user/household."
+    },
+    {
+      "key": "householdMode",
+      "label": "Household mode",
+      "type": "string",
+      "default": "default",
+      "notes": "Examples: default, communal, travel, recovery."
+    },
+    {
+      "key": "dietaryLaws",
+      "label": "Dietary laws / household rules",
+      "type": "object",
+      "default": {},
+      "notes": "Merged with household prefs; overlay never overrides hard constraints."
+    },
+    {
+      "key": "quietHours",
+      "label": "Quiet hours / Sabbath guard",
+      "type": "object",
+      "default": {
+        "enabled": false
+      }
+    },
+    {
+      "key": "season",
+      "label": "Season",
+      "type": "string"
+    }
+  ],
+  "outputs": [
+    {
+      "key": "tagOverlays",
+      "label": "Canonical tags to apply",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "patternBiases",
+      "label": "Pattern bias suggestions",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "constraintOverlays",
+      "label": "Constraint overlays (soft)",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "uiOverlays",
+      "label": "UI label/order defaults",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "roleDefaults",
+      "label": "Role-based defaults (optional)",
+      "type": "object",
+      "default": {}
+    }
+  ],
+  "constraints": [
+    "optInOnly",
+    "neverStereotype",
+    "userEditable",
+    "respectDietaryLaws",
+    "respectQuietHours"
+  ],
+  "steps": [
+    {
+      "id": "overlay.apply",
+      "title": "Apply workflow overlay",
+      "template": "tpl.workflow.overlay.apply",
+      "domain": "workflow",
+      "params": {
+        "cultureTag": "culture:sacred_agrarian_village",
+        "mergeMode": "soft"
+      },
+      "hints": [
+        "emitHintTag:applyWorkflowOverlay"
+      ]
+    }
+  ],
+  "kpis": [
+    {
+      "key": "adoptionRate",
+      "label": "Overlay adoption rate",
+      "direction": "up",
+      "unit": "%",
+      "notes": "How often households keep overlay enabled."
+    },
+    {
+      "key": "overrideEdits",
+      "label": "User edits vs defaults",
+      "direction": "down",
+      "unit": "count",
+      "notes": "High edits may indicate defaults need tuning."
+    }
+  ],
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "changelog": [
+      {
+        "date": "2025-12-27",
+        "note": "Initial workflow overlay catalog (opt-in, non-stereotyped)."
+      }
+    ],
+    "tags": [
+      "culture:sacred_agrarian_village",
+      "group:hybrid"
+    ],
+    "family": "workflows"
+  },
+  "workflow": {
+    "preferredStaples": {
+      "canonicalTags": [
+        "grain",
+        "legume",
+        "garden_produce",
+        "preserved_goods"
+      ],
+      "examples": [
+        {
+          "tag": "staple:preserved_goods",
+          "examples": [
+            "ferments",
+            "dried goods",
+            "frozen stores"
+          ]
+        }
+      ],
+      "notes": "Emphasizes provisioning and preservation as household stewardship, opt-in."
+    },
+    "mealRhythms": {
+      "canonicalTags": [
+        "communal_optional",
+        "feast_focus_optional",
+        "batch_and_fresh_hybrid",
+        "sabbath_guard_optional"
+      ],
+      "defaults": {
+        "weeklyCadence": {
+          "batchCookDay": "Sat/Sun optional",
+          "gardenDay": "optional"
+        },
+        "structure": [
+          "staples",
+          "seasonal",
+          "preserved_support"
+        ]
+      },
+      "notes": "Hybrid of batch efficiency + seasonal agrarian flow; households can disable any element."
+    },
+    "preservationEmphasis": {
+      "canonicalTags": [
+        "fermentation",
+        "drying",
+        "rootCellar",
+        "freezing"
+      ],
+      "defaults": {
+        "prioritize": [
+          "fermentation",
+          "drying"
+        ],
+        "secondary": [
+          "rootCellar",
+          "freezing"
+        ]
+      },
+      "notes": "SSA can auto-suggest preservation sessions when harvest/surplus is detected."
+    },
+    "valuePriorities": {
+      "canonicalTags": [
+        "stewardship",
+        "sharing_optional",
+        "feastFocus_optional",
+        "thrift",
+        "skills"
+      ],
+      "defaults": {
+        "stewardshipMode": "on",
+        "sharingMode": "optional",
+        "skillsMode": "on"
+      },
+      "notes": "Aligns with your SSA 'household steward' framing."
+    },
+    "notes": "All fields are suggestions. Users can disable any default and replace with their own."
+  },
+  "outputs_default": {
+    "tagOverlays": [
+      "staple:grain",
+      "rhythm:feast_focus_optional",
+      "preservation:rootCellar",
+      "value:thrift",
+      "preservation:drying",
+      "staple:preserved_goods",
+      "preservation:freezing",
+      "rhythm:batch_and_fresh_hybrid",
+      "preservation:fermentation",
+      "rhythm:sabbath_guard_optional",
+      "staple:garden_produce",
+      "value:feastFocus_optional",
+      "staple:legume",
+      "value:skills",
+      "rhythm:communal_optional",
+      "value:stewardship",
+      "value:sharing_optional"
+    ],
+    "patternBiases": {
+      "favor": {
+        "pat.homestead.mixed_subsistence": 1.15,
+        "pat.meals.preservation_first": 1.12,
+        "pat.storehouse.root_cellar_optimizer": 1.1,
+        "pat.storehouse.winter_reserve": 1.1
+      },
+      "avoid": {},
+      "notes": "Biases are advisory; resolvers may downrank/boost patterns, not block unless user also sets a hard constraint.",
+      "emitHintTags": [
+        "theme:sacred_agrarian_village",
+        "workflow:seasonal"
+      ]
+    },
+    "constraintOverlays": {
+      "soft": {
+        "preferSeasonal": true,
+        "preferPreservationTriggers": true
+      },
+      "hard": {}
+    },
+    "uiOverlays": {
+      "labels": {
+        "planner": "Stewardship Planner"
+      },
+      "ordering": {
+        "plannerSections": [
+          "season",
+          "inventory",
+          "garden",
+          "meals",
+          "storehouse",
+          "preservation",
+          "sessions"
+        ]
+      },
+      "defaults": {
+        "theme": "Sacred Agrarian Village",
+        "showSeasonControls": true
+      }
+    },
+    "roleDefaults": {
+      "notes": "Role defaults are optional and editable per household.",
+      "roles": [
+        {
+          "roleId": "role.steward",
+          "label": "Steward",
+          "defaults": {
+            "owns": [
+              "plannerOverseer",
+              "inventoryTruth"
+            ]
+          }
+        },
+        {
+          "roleId": "role.preservation_steward",
+          "label": "Preservation Steward",
+          "defaults": {
+            "owns": [
+              "fermentation",
+              "drying",
+              "canning_optional"
+            ]
+          }
+        },
+        {
+          "roleId": "role.garden_steward",
+          "label": "Garden Steward",
+          "defaults": {
+            "owns": [
+              "planting",
+              "harvest",
+              "seedSaving_optional"
+            ]
+          }
+        },
+        {
+          "roleId": "role.animal_steward",
+          "label": "Animal Steward",
+          "defaults": {
+            "owns": [
+              "dailyCare",
+              "breeding_optional",
+              "processing_optional"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

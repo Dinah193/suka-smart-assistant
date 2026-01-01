@@ -1,0 +1,618 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka.smart/contract/batchsession.contract.json",
+  "title": "Suka Batch Session Contract",
+  "type": "object",
+  "required": ["version", "session", "prepSteps", "timers", "inventorySyncPlan"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Contract version for compatibility checks."
+    },
+    "session": {
+      "type": "object",
+      "required": ["id", "createdAt", "domainScopes", "ownerTier", "context"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "description": "Stable session id." },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "title": { "type": "string" },
+        "ownerTier": {
+          "type": "string",
+          "enum": ["tier1", "tier2", "tier3", "tier4"],
+          "description": "Who owns the session; informs tierSync and permissions."
+        },
+        "domainScopes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["cooking", "cleaning", "animal-care", "butchery", "gardening", "preservation", "inventory", "other"]
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "scheduled", "active", "paused", "completed", "aborted"],
+          "default": "draft"
+        },
+        "schedule": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "startsAt": { "type": "string", "format": "date-time" },
+            "endsAt": { "type": "string", "format": "date-time" },
+            "timezone": { "type": "string", "description": "IANA TZ." },
+            "sabbathGuard": {
+              "type": "object",
+              "description": "Block sabbath-sensitive operations within guarded windows.",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": { "type": "boolean", "default": false },
+                "windows": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["from", "to"],
+                    "properties": {
+                      "from": { "type": "string", "format": "date-time" },
+                      "to": { "type": "string", "format": "date-time" }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "policy": {
+                  "type": "string",
+                  "enum": ["block", "warn", "defer"],
+                  "default": "block"
+                }
+              }
+            },
+            "preSteps": {
+              "type": "array",
+              "description": "Auto-scheduled pre-requirements (defrost/marinate/preheat/soak/sanitize).",
+              "items": {
+                "type": "object",
+                "required": ["kind", "offset", "linkedStepId"],
+                "additionalProperties": false,
+                "properties": {
+                  "id": { "type": "string" },
+                  "kind": { "type": "string", "enum": ["defrost", "marinate", "preheat", "soak", "brine", "activate-yeast", "sanitize", "charge-device"] },
+                  "linkedStepId": { "type": "string", "description": "The prepStep this preStep prepares for." },
+                  "offset": {
+                    "type": "object",
+                    "description": "When to trigger relative to session start or linked step.",
+                    "required": ["unit", "value", "relation"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "unit": { "type": "string", "enum": ["minutes", "hours", "days"] },
+                      "value": { "type": "integer", "minimum": 0 },
+                      "relation": { "type": "string", "enum": ["before-session", "before-step", "absolute"] },
+                      "absoluteAt": { "type": "string", "format": "date-time" }
+                    }
+                  },
+                  "sabbathSensitive": { "type": "boolean", "default": true },
+                  "notes": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "context": {
+          "type": "object",
+          "description": "Ambient context for engines & UI.",
+          "additionalProperties": false,
+          "properties": {
+            "householdId": { "type": "string" },
+            "kitchenId": { "type": "string" },
+            "gardenZone": { "type": "string" },
+            "butcheryBay": { "type": "string" },
+            "storeSelector": { "type": "string", "description": "Preferred retailer profile id for substitutions & aisle groups." },
+            "includeHave": { "type": "boolean", "default": false, "description": "If true, show already-have items in lists." },
+            "collapseDuplicates": { "type": "boolean", "default": true }
+          }
+        },
+        "x-uxHints": {
+          "type": "object",
+          "description": "Non-binding hints for UI composition.",
+          "additionalProperties": true,
+          "properties": {
+            "showPanels": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["RecipeVault", "BatchSessionPlanner", "MultiTimerPanel", "BatchInventoryMap", "PrepChecklist", "LabelPrinter", "SmokingCuring", "Winemaking", "PressureCanning", "Dehydrating", "Freezing", "Distilling"] }
+            },
+            "primaryPanel": { "type": "string" }
+          }
+        }
+      }
+    },
+    "prepSteps": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Atomic steps with automation/timers/inventory impacts.",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "domain", "actionType"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "domain": { "type": "string", "enum": ["cooking", "cleaning", "animal-care", "butchery", "gardening", "preservation", "inventory", "other"] },
+          "actionType": {
+            "type": "string",
+            "description": "Verb that the executor uses: chop, mix, preheat, sanitize, feed, deworm, vaccinate, dispatch, chill, cure, can, dehydrate, plant, harvest, etc."
+          },
+          "description": { "type": "string" },
+          "recipeRef": {
+            "type": "object",
+            "description": "Optional link to a recipe/version when cooking/preservation.",
+            "additionalProperties": false,
+            "properties": {
+              "recipeId": { "type": "string" },
+              "versionId": { "type": "string" },
+              "servings": { "type": "number" }
+            }
+          },
+          "dependencies": {
+            "type": "array",
+            "description": "Step ids that must complete before this one starts.",
+            "items": { "type": "string" }
+          },
+          "concurrencyGroup": { "type": "string", "description": "Steps with same group may run in parallel if resources allow." },
+          "resources": {
+            "type": "array",
+            "description": "Tools/appliances/areas required; used by placementRules & conflicts.",
+            "items": {
+              "type": "object",
+              "required": ["kind", "id"],
+              "additionalProperties": false,
+              "properties": {
+                "kind": { "type": "string", "enum": ["appliance", "workstation", "tool", "surface", "zone", "container", "device"] },
+                "id": { "type": "string" },
+                "label": { "type": "string" },
+                "x-power": { "type": "string", "enum": ["gas", "electric", "manual", "none"], "default": "none" }
+              }
+            }
+          },
+          "durationEstimate": {
+            "type": "object",
+            "required": ["activeMinutes", "passiveMinutes"],
+            "additionalProperties": false,
+            "properties": {
+              "activeMinutes": { "type": "number", "minimum": 0 },
+              "passiveMinutes": { "type": "number", "minimum": 0 }
+            }
+          },
+          "timerId": {
+            "type": "string",
+            "description": "Bind to a timer in the timers map. If omitted, no timer is auto-managed."
+          },
+          "timerAuto": {
+            "type": "object",
+            "description": "If set, engine may auto-create/attach a timer at runtime.",
+            "additionalProperties": false,
+            "properties": {
+              "mode": { "type": "string", "enum": ["countdown", "stopwatch", "interval"] },
+              "durationMinutes": { "type": "number", "minimum": 0 },
+              "autostart": { "type": "boolean", "default": true },
+              "startOn": { "type": "string", "enum": ["step-start", "after-deps", "manual"] }
+            }
+          },
+          "inventoryImpacts": {
+            "type": "array",
+            "description": "References to inventorySyncPlan entries by id to apply on start/complete.",
+            "items": {
+              "type": "object",
+              "required": ["planId", "applyOn"],
+              "properties": {
+                "planId": { "type": "string" },
+                "applyOn": { "type": "string", "enum": ["start", "complete", "timer-start", "timer-complete"] }
+              },
+              "additionalProperties": false
+            }
+          },
+          "safety": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "flags": {
+                "type": "array",
+                "items": { "type": "string", "enum": ["raw-meat", "biohazard", "sharp", "hot", "allergen", "pressurized", "fermentation-gas", "chemical"] }
+              },
+              "ppe": {
+                "type": "array",
+                "items": { "type": "string", "enum": ["gloves", "apron", "face-shield", "goggles", "mask", "ear-protection", "cut-resistant"] }
+              },
+              "chillChain": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "maxMinutesOut": { "type": "number", "minimum": 0 }
+                }
+              }
+            }
+          },
+          "sabbathSensitive": { "type": "boolean", "default": true },
+          "labels": {
+            "type": "array",
+            "description": "Label templates to generate at step complete (e.g., canning jars, vacuum bags).",
+            "items": {
+              "type": "object",
+              "required": ["templateId"],
+              "additionalProperties": true,
+              "properties": {
+                "templateId": { "type": "string" },
+                "copies": { "type": "integer", "minimum": 1, "default": 1 },
+                "data": { "type": "object" }
+              }
+            }
+          },
+          "notes": { "type": "string" },
+          "x-nba": {
+            "type": "object",
+            "description": "Next Best Action hooks for prompting users in-flow.",
+            "additionalProperties": true,
+            "properties": {
+              "onStart": { "type": "array", "items": { "type": "string" } },
+              "onComplete": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "timers": {
+      "type": "object",
+      "description": "Timer map keyed by timerId.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["id", "name", "mode"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "mode": { "type": "string", "enum": ["countdown", "stopwatch", "interval"] },
+          "durationMinutes": { "type": "number", "minimum": 0 },
+          "repeats": { "type": "integer", "minimum": 1, "default": 1 },
+          "autostart": { "type": "boolean", "default": false },
+          "tone": { "type": "string" },
+          "speech": { "type": "string", "description": "Optional TTS phrase on complete." },
+          "bindings": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "startEvents": {
+                "type": "array",
+                "items": { "type": "string", "enum": ["session-start", "step-start", "manual", "after-deps", "preStep-complete"] }
+              },
+              "completeActions": {
+                "type": "array",
+                "description": "Actions to fire on timer complete (emit, advance, print, open-panel).",
+                "items": {
+                  "type": "object",
+                  "required": ["kind"],
+                  "additionalProperties": true,
+                  "properties": {
+                    "kind": { "type": "string", "enum": ["emit", "advance-step", "print-labels", "open-panel", "play-tone", "speak"] },
+                    "payload": { "type": "object" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "inventorySyncPlan": {
+      "type": "array",
+      "description": "Planned inventory adjustments, reservations, and results across pantry/garden/animal/bulk/store.",
+      "items": {
+        "type": "object",
+        "required": ["id", "intent", "item"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "intent": { "type": "string", "enum": ["reserve", "consume", "produce", "transfer", "purchase", "waste"] },
+          "applyPolicy": { "type": "string", "enum": ["on-start", "on-complete", "on-timer-complete"], "default": "on-complete" },
+          "item": {
+            "type": "object",
+            "required": ["name", "unit", "quantity"],
+            "additionalProperties": false,
+            "properties": {
+              "itemId": { "type": "string" },
+              "name": { "type": "string" },
+              "sku": { "type": "string" },
+              "unit": { "type": "string" },
+              "quantity": { "type": "number" }
+            }
+          },
+          "source": {
+            "type": "object",
+            "description": "Where from: pantry, garden, animal, bulk, retailer, workstation, etc.",
+            "additionalProperties": false,
+            "properties": {
+              "type": { "type": "string", "enum": ["pantry", "freezer", "fridge", "root-cellar", "garden", "animal", "bulk", "retailer", "workstation", "unknown"] },
+              "id": { "type": "string" },
+              "label": { "type": "string" }
+            }
+          },
+          "destination": {
+            "type": "object",
+            "description": "Where to: storage or packaging after processing.",
+            "additionalProperties": false,
+            "properties": {
+              "type": { "type": "string", "enum": ["pantry", "freezer", "fridge", "root-cellar", "warehouse", "retailer", "discard", "unknown"] },
+              "id": { "type": "string" },
+              "label": { "type": "string" }
+            }
+          },
+          "preservation": {
+            "type": "object",
+            "description": "If producing preserved goods.",
+            "additionalProperties": false,
+            "properties": {
+              "method": { "type": "string", "enum": ["pressure-canning", "water-bath", "dehydrating", "freezing", "curing", "smoking", "fermenting", "vacuum-seal", "none"] },
+              "batchCode": { "type": "string" },
+              "expectedYield": { "type": "number" },
+              "container": { "type": "string", "description": "Jar/bag size or container type." },
+              "shelfLifeDays": { "type": "integer", "minimum": 0 }
+            }
+          },
+          "butchery": {
+            "type": "object",
+            "description": "Cut mapping if intent=produce from animal.",
+            "additionalProperties": false,
+            "properties": {
+              "animalId": { "type": "string" },
+              "cutSheetId": { "type": "string" },
+              "cutName": { "type": "string" },
+              "yieldWeight": { "type": "number" },
+              "packaging": { "type": "string" }
+            }
+          },
+          "costing": {
+            "type": "object",
+            "description": "Supplier profile link for estimateEngine and analytics.",
+            "additionalProperties": false,
+            "properties": {
+              "supplierProfileId": { "type": "string" },
+              "unitCost": { "type": "number" },
+              "currency": { "type": "string", "default": "USD" }
+            }
+          },
+          "labels": {
+            "type": "array",
+            "description": "Optional label jobs tied to this plan entry.",
+            "items": {
+              "type": "object",
+              "required": ["templateId"],
+              "additionalProperties": true,
+              "properties": {
+                "templateId": { "type": "string" },
+                "copies": { "type": "integer", "minimum": 1, "default": 1 },
+                "data": { "type": "object" }
+              }
+            }
+          },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "participants": {
+      "type": "array",
+      "description": "Optional participants & role assignment for accountability.",
+      "items": {
+        "type": "object",
+        "required": ["userId", "role"],
+        "additionalProperties": false,
+        "properties": {
+          "userId": { "type": "string" },
+          "role": { "type": "string", "enum": ["owner", "assistant", "observer", "child-helper", "butcher", "gardener", "cook", "cleaner"] }
+        }
+      }
+    },
+    "automation": {
+      "type": "object",
+      "description": "Event hooks for eventBus/NBA/milestones.",
+      "additionalProperties": false,
+      "properties": {
+        "emit": {
+          "type": "array",
+          "description": "Static emits at lifecycle points.",
+          "items": {
+            "type": "object",
+            "required": ["on", "topic"],
+            "additionalProperties": true,
+            "properties": {
+              "on": { "type": "string", "enum": ["session-created", "session-started", "step-started", "step-completed", "timer-started", "timer-completed", "inventory-applied", "session-completed"] },
+              "topic": { "type": "string" },
+              "payload": { "type": "object" }
+            }
+          }
+        },
+        "milestones": {
+          "type": "array",
+          "description": "Declarative conditions to hit household/community milestones.",
+          "items": {
+            "type": "object",
+            "required": ["id", "when"],
+            "additionalProperties": true,
+            "properties": {
+              "id": { "type": "string" },
+              "when": { "type": "string", "description": "CEL-like expression or engine ref (evaluated by milestones/evaluator.js)." },
+              "award": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "analytics": {
+      "type": "object",
+      "description": "Lightweight analytics hints for emitters.",
+      "additionalProperties": false,
+      "properties": {
+        "channels": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["stabilityScore", "prepThroughput", "inventoryTurn", "costPerServing", "energyUse"] }
+        },
+        "sampling": { "type": "string", "enum": ["all", "milestones", "none"], "default": "milestones" }
+      }
+    }
+  },
+  "examples": [
+    {
+      "version": "1.0.0",
+      "session": {
+        "id": "sess_2025_10_20_batch_001",
+        "createdAt": "2025-10-20T21:00:00Z",
+        "updatedAt": "2025-10-20T21:00:00Z",
+        "title": "Sunday Batch: Lamb stew + Canning Apples + Freezer Sausage",
+        "ownerTier": "tier2",
+        "domainScopes": ["cooking", "preservation", "butchery"],
+        "status": "scheduled",
+        "schedule": {
+          "startsAt": "2025-10-26T18:00:00Z",
+          "timezone": "America/New_York",
+          "sabbathGuard": {
+            "enabled": true,
+            "windows": [
+              { "from": "2025-10-24T22:45:00Z", "to": "2025-10-26T00:45:00Z" }
+            ],
+            "policy": "defer"
+          },
+          "preSteps": [
+            {
+              "id": "pre_defrost_lamb",
+              "kind": "defrost",
+              "linkedStepId": "step_brown_lamb",
+              "offset": { "unit": "hours", "value": 24, "relation": "before-step" },
+              "sabbathSensitive": true
+            },
+            {
+              "id": "pre_sanitize_jars",
+              "kind": "sanitize",
+              "linkedStepId": "step_canning_apple",
+              "offset": { "unit": "hours", "value": 1, "relation": "before-step" }
+            }
+          ]
+        },
+        "context": {
+          "householdId": "hh_main",
+          "kitchenId": "kitchen_a",
+          "storeSelector": "costco_01",
+          "includeHave": false,
+          "collapseDuplicates": true
+        },
+        "x-uxHints": {
+          "showPanels": ["RecipeVault", "BatchSessionPlanner", "MultiTimerPanel", "BatchInventoryMap", "PrepChecklist", "LabelPrinter"],
+          "primaryPanel": "BatchSessionPlanner"
+        }
+      },
+      "prepSteps": [
+        {
+          "id": "step_brown_lamb",
+          "title": "Brown lamb cubes",
+          "domain": "cooking",
+          "actionType": "sear",
+          "durationEstimate": { "activeMinutes": 15, "passiveMinutes": 0 },
+          "timerAuto": { "mode": "stopwatch", "autostart": true, "startOn": "step-start" },
+          "resources": [
+            { "kind": "appliance", "id": "stovetop_main", "label": "Stovetop", "x-power": "gas" },
+            { "kind": "tool", "id": "dutch_oven" }
+          ],
+          "inventoryImpacts": [
+            { "planId": "inv_consume_lamb", "applyOn": "start" }
+          ],
+          "safety": { "flags": ["hot", "raw-meat"], "ppe": ["apron", "gloves"] }
+        },
+        {
+          "id": "step_canning_apple",
+          "title": "Pressure can apple slices in syrup",
+          "domain": "preservation",
+          "actionType": "pressure-can",
+          "durationEstimate": { "activeMinutes": 20, "passiveMinutes": 75 },
+          "timerId": "timer_canner",
+          "resources": [
+            { "kind": "appliance", "id": "pressure_canner" },
+            { "kind": "workstation", "id": "sink_zone" }
+          ],
+          "inventoryImpacts": [
+            { "planId": "inv_consume_apples", "applyOn": "start" },
+            { "planId": "inv_produce_apple_jars", "applyOn": "complete" }
+          ],
+          "labels": [
+            { "templateId": "lbl_mason_regular", "copies": 12, "data": { "product": "Apples in Syrup", "date": "2025-10-26" } }
+          ],
+          "safety": { "flags": ["pressurized", "hot"], "ppe": ["goggles", "gloves"] }
+        }
+      ],
+      "timers": {
+        "timer_canner": {
+          "id": "timer_canner",
+          "name": "Canner cycle",
+          "mode": "countdown",
+          "durationMinutes": 75,
+          "autostart": false,
+          "tone": "bell",
+          "speech": "Canner cycle complete. Allow pressure to drop naturally.",
+          "bindings": {
+            "startEvents": ["step-start"],
+            "completeActions": [
+              { "kind": "emit", "payload": { "topic": "timer.completed", "timerId": "timer_canner" } },
+              { "kind": "print-labels", "payload": { "stepId": "step_canning_apple" } }
+            ]
+          }
+        }
+      },
+      "inventorySyncPlan": [
+        {
+          "id": "inv_consume_lamb",
+          "intent": "consume",
+          "applyPolicy": "on-start",
+          "item": { "itemId": "itm_lamb_cubes", "name": "Lamb, cubed", "unit": "lb", "quantity": 3 },
+          "source": { "type": "freezer", "id": "fz_main" },
+          "notes": "Pulled from chest freezer."
+        },
+        {
+          "id": "inv_consume_apples",
+          "intent": "consume",
+          "applyPolicy": "on-start",
+          "item": { "itemId": "itm_apples", "name": "Apples", "unit": "lb", "quantity": 10 },
+          "source": { "type": "garden", "id": "orchard_a" }
+        },
+        {
+          "id": "inv_produce_apple_jars",
+          "intent": "produce",
+          "applyPolicy": "on-complete",
+          "item": { "itemId": "itm_apple_jar_pint", "name": "Apples in Syrup (Pint)", "unit": "jar", "quantity": 12 },
+          "destination": { "type": "pantry", "id": "shelf_canning" },
+          "preservation": {
+            "method": "pressure-canning",
+            "batchCode": "APP-2025-10-26-A",
+            "expectedYield": 12,
+            "container": "Pint Mason",
+            "shelfLifeDays": 365
+          },
+          "labels": [
+            { "templateId": "lbl_mason_regular", "copies": 12, "data": { "batch": "APP-2025-10-26-A" } }
+          ]
+        }
+      ],
+      "participants": [
+        { "userId": "u_rhonda", "role": "owner" },
+        { "userId": "u_helper_01", "role": "assistant" }
+      ],
+      "automation": {
+        "emit": [
+          { "on": "session-started", "topic": "batch.session.started", "payload": { "id": "sess_2025_10_20_batch_001" } },
+          { "on": "step-completed", "topic": "batch.step.completed" }
+        ],
+        "milestones": [
+          { "id": "ms_12_jars", "when": "inv('inv_produce_apple_jars').item.quantity >= 12", "award": "Pantry Builder I" }
+        ]
+      },
+      "analytics": { "channels": ["prepThroughput", "inventoryTurn"], "sampling": "milestones" }
+    }
+  ]
+}

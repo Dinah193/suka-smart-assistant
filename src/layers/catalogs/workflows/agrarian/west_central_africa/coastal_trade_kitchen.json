@@ -1,0 +1,85 @@
+{
+  "id": "workflow.wca.coastal_trade_kitchen",
+  "domain": "workflows",
+  "kind": "workflow_overlay",
+  "title": "Coastal Trade-Kitchen Rhythm (West/Central Africa)",
+  "tags": [
+    "region:wca",
+    "mode:kitchen",
+    "values:communal",
+    "workflow:batching"
+  ],
+  "description": "Kitchen rhythm emphasizing batch prep and efficient storehouse rotation (communal options are opt-in).",
+  "optIn": true,
+  "editable": true,
+  "valuePriorities": [
+    "communal",
+    "efficiency",
+    "feast_focus_optional"
+  ],
+  "defaults": {
+    "preferredStaples": [
+      "staple:grain",
+      "staple:seafood_optional",
+      "staple:legumes",
+      "staple:spices_optional"
+    ],
+    "mealRhythm": [
+      "batch_prep:frequent",
+      "service_meals_optional"
+    ],
+    "preservationEmphasis": [
+      "drying_optional",
+      "smoking_optional",
+      "freezing_optional"
+    ],
+    "valuePriorities": [
+      "communal",
+      "efficiency",
+      "feast_focus_optional"
+    ]
+  },
+  "ordering": {
+    "planningOrder": [
+      "meal_plan",
+      "prep_batch",
+      "storehouse_restock",
+      "preservation_follow_on"
+    ]
+  },
+  "naming": {
+    "sessionPrefixes": {
+      "meals": "Kitchen Rhythm",
+      "storehouse": "Rotation + Restock"
+    }
+  },
+  "constraints": {
+    "defaults": [
+      "constraint:food_safety"
+    ]
+  },
+  "uiOverlays": {
+    "form": {
+      "defaults": {
+        "timeBudgetMin": 150
+      }
+    }
+  },
+  "preferredDefaultPatterns": {
+    "meals": [
+      "pat.meals.weekly_batch",
+      "pat.meals.feast_anchored"
+    ],
+    "storehouse": [
+      "pat.storehouse.weekly_restock",
+      "pat.storehouse.root_cellar_optimizer"
+    ],
+    "preservation": [
+      "pat.preservation.batch_day"
+    ]
+  },
+  "notes": [
+    "This overlay provides defaults and ordering, not mandatory rules.",
+    "All role defaults are optional and user-editable."
+  ]
+}

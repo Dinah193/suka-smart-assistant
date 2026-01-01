@@ -1,0 +1,1059 @@
+/* ==========================================================================
+  FAMILY SHARING SERVICE (.todo) — v4 shim-aware scaffold
+  Purpose: Private, role-aware sharing across a single family/family-fund:
+           plans, sessions, storehouse updates, calendars, etc.
+
+  Principles:
+    1) Clear IA (organized nav + routes)
+    2) Intuitive flow (compose → preview → post)
+    3) Consistent design (btn/card/alert/states)
+    4) Event-driven glue (recipes/inventory/calendar/... updates)
+    5) Respect sabbath/quiet-hours; support undo, NBAs, empty states
+    6) Background-safe: posting is handled by a shim that survives navigation
+========================================================================== */
+
+/* --------------------------------------------------------------------------
+  0) ROUTES & NAV (Information Architecture)
+---------------------------------------------------------------------------- */
+export const FAMILY_ROUTES_TODO = String.raw`// src/pages/family/index.jsx
+import React from "react";
+import { Outlet } from "react-router-dom";
+import { FamilySidebar } from "@/components/family/FamilySidebar.jsx";
+
+export default function FamilyLayout() {
+  return (
+    <div className="grid grid-cols-12 gap-4 p-4">
+      <aside className="col-span-12 lg:col-span-3">
+        <FamilySidebar />
+      </aside>
+      <main className="col-span-12 lg:col-span-9">
+        <Outlet />
+      </main>
+    </div>
+  );
+}
+`;
+
+// src/pages/family/routes.jsx
+export const FAMILY_ROUTES_CONFIG_TODO = String.raw`// src/pages/family/routes.jsx
+import React from "react";
+import FamilyLayout from "./index.jsx";
+import { FamilyCompose } from "@/components/family/FamilyCompose.jsx";
+import { FamilyPreview } from "@/components/family/FamilyPreview.jsx";
+import { FamilyBoard } from "@/components/family/FamilyBoard.jsx";
+import { FamilyInbox } from "@/components/family/FamilyInbox.jsx";
+import { FamilyHistory } from "@/components/family/FamilyHistory.jsx";
+import { FamilySettings } from "@/components/family/FamilySettings.jsx";
+
+export const familyRoutes = {
+  path: "/family",
+  element: <FamilyLayout />,
+  children: [
+    { index: true, element: <FamilyCompose /> },
+    { path: "preview", element: <FamilyPreview /> },
+    { path: "board", element: <FamilyBoard /> },
+    { path: "inbox", element: <FamilyInbox /> },
+    { path: "history", element: <FamilyHistory /> },
+    { path: "settings", element: <FamilySettings /> },
+  ],
+};
+`;
+
+// src/components/family/FamilySidebar.jsx
+export const FAMILY_SIDEBAR_TODO = String.raw`// src/components/family/FamilySidebar.jsx
+import React from "react";
+import { NavLink } from "react-router-dom";
+
+export function FamilySidebar() {
+  const item = (to, label) => (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        \`block px-3 py-2 rounded-xl border mb-2 text-sm \${isActive ? "bg-base-200 border-base-300" : "border-base-200 hover:bg-base-100"}\`
+      }
+    >
+      {label}
+    </NavLink>
+  );
+  return (
+    <nav>
+      <h2 className="text-lg font-semibold mb-3">Family Sharing</h2>
+      {item("/family", "Compose")}
+      {item("/family/preview", "Preview & Confirm")}
+      {item("/family/board", "Family Board")}
+      {item("/family/inbox", "Inbox / Assignments")}
+      {item("/family/history", "History")}
+      {item("/family/settings", "Settings")}
+    </nav>
+  );
+}
+`;
+
+/* --------------------------------------------------------------------------
+  1) REGISTRY & JOB STATE (Channels + Undo + Persistence)
+---------------------------------------------------------------------------- */
+export const FAMILY_REGISTRY_TODO = String.raw`// src/services/sharing/family/registry.js
+// Registry of output channels (Family Board, DM, Email, SMS, Drive, etc.)
+// This can be safely used from UI OR background shims.
+const channels = new Map();
+
+/**
+ * registerFamilyChannel({ id, label, kind, supports(ctx), post({payload,audience,options}) })
+ * - id: "family-board" | "dm" | "email" | "sms" | "drive"
+ * - kind: "realtime" | "async" | "broadcast"
+ * - supports(ctx): gate by selection/policy (returns boolean)
+ * - post(args): async -> { id, url? }
+ */
+export function registerFamilyChannel(def){
+  if (!def?.id || !def?.post) throw new Error("Invalid channel def");
+  channels.set(def.id, def);
+}
+
+export function listFamilyChannels(ctx){
+  return Array.from(channels.values()).filter(ch =>
+    typeof ch.supports === "function" ? ch.supports(ctx) : true
+  );
+}
+
+export async function postToFamilyChannel(id, args){
+  const ch = channels.get(id);
+  if (!ch) throw new Error(\`Family channel "\${id}" not found\`);
+  return ch.post(args);
+}
+`;
+
+export const FAMILY_JOBS_TODO = String.raw`// src/services/sharing/family/jobs.js
+// Lightweight local job registry so family share jobs can outlive UI components.
+// NOTE: For deeper resilience, you can later mirror this into Dexie.
+const JOBS = new Map();
+const UNDO_STACK = [];
+const LS_KEY = "suka.family.jobs";
+
+function persist(){
+  try {
+    const arr = Array.from(JOBS.values());
+    localStorage.setItem(LS_KEY, JSON.stringify(arr));
+  } catch {}
+}
+
+function restore(){
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    JOBS.clear();
+    for (const j of arr) JOBS.set(j.id, j);
+  } catch {}
+}
+restore();
+
+export function createFamilyShareJob({ channelId, audience, payload, options }){
+  const id =
+    (globalThis.crypto?.randomUUID?.() ||
+      (Date.now() + "-" + Math.random().toString(36).slice(2)));
+
+  const job = {
+    id,
+    channelId,
+    audience,
+    payload,
+    options,
+    status: "draft", // draft -> ready -> queued -> posting -> done | error | cancelled
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    history: [],
+    result: null,
+    error: null,
+  };
+
+  JOBS.set(id, job);
+  persist();
+  return job;
+}
+
+export function updateFamilyShareJob(id, patch){
+  const job = JOBS.get(id);
+  if (!job) throw new Error("Family share job not found");
+
+  const prev = typeof structuredClone === "function"
+    ? structuredClone(job)
+    : JSON.parse(JSON.stringify(job));
+
+  Object.assign(job, patch, { updatedAt: Date.now() });
+  job.history.push({ ts: Date.now(), patch });
+  UNDO_STACK.push(() => {
+    JOBS.set(id, prev);
+    persist();
+  });
+
+  persist();
+  return job;
+}
+
+export function getFamilyShareJob(id){ return JOBS.get(id); }
+
+export function listFamilyShareJobs(){
+  return Array.from(JOBS.values()).sort((a,b) => b.createdAt - a.createdAt);
+}
+
+export function undoLastFamilyShare(){
+  const fn = UNDO_STACK.pop();
+  if (fn) fn();
+}
+
+export function clearFamilyShareJobs(){
+  JOBS.clear();
+  persist();
+}
+`;
+
+/* --------------------------------------------------------------------------
+  2) DEFAULT CHANNELS (Family Board, DM, Email, SMS, Drive/Folder)
+---------------------------------------------------------------------------- */
+export const FAMILY_CHANNELS_INDEX_TODO = String.raw`// src/services/sharing/family/channels/index.js
+import { registerFamilyChannel } from "@/services/sharing/family/registry.js";
+import { familyBoard } from "./familyBoard.js";
+import { familyDM } from "./familyDM.js";
+import { familyEmail } from "./familyEmail.js";
+import { familySMS } from "./familySMS.js";
+import { familyDrive } from "./familyDrive.js";
+
+export function registerDefaultFamilyChannels(){
+  registerFamilyChannel(familyBoard);
+  registerFamilyChannel(familyDM);
+  registerFamilyChannel(familyEmail);
+  registerFamilyChannel(familySMS);
+  registerFamilyChannel(familyDrive);
+}
+`;
+
+// Board
+export const FAMILY_BOARD_CHANNEL_TODO = String.raw`// src/services/sharing/family/channels/familyBoard.js
+// In-app Kanban-style board for family coordination.
+export const familyBoard = {
+  id: "family-board",
+  label: "Family Board (Kanban)",
+  kind: "realtime",
+  supports: () => true,
+  async post({ payload, audience, options }){
+    // Create/append a card for the family board (goals, sessions, chores).
+    // TODO: Hook into your board store or event bus (e.g. eventBus.emit("family.board.cardCreated", ...)).
+    const cardId = (crypto?.randomUUID?.() || String(Date.now()));
+    const url = "/family/board";
+    return { id: cardId, url };
+  },
+};
+`;
+
+// DM
+export const FAMILY_DM_CHANNEL_TODO = String.raw`// src/services/sharing/family/channels/familyDM.js
+export const familyDM = {
+  id: "dm",
+  label: "Direct Message (member)",
+  kind: "realtime",
+  supports: (ctx) =>
+    Array.isArray(ctx?.audience?.members) && ctx.audience.members.length > 0,
+  async post({ payload, audience }){
+    // TODO: Implement in-app DM/mentions (e.g. notifications).
+    const msgId = (crypto?.randomUUID?.() || String(Date.now()));
+    return { id: msgId };
+  },
+};
+`;
+
+// Email
+export const FAMILY_EMAIL_CHANNEL_TODO = String.raw`// src/services/sharing/family/channels/familyEmail.js
+export const familyEmail = {
+  id: "email",
+  label: "Email (households)",
+  kind: "async",
+  supports: (ctx) =>
+    Array.isArray(ctx?.audience?.emails) && ctx.audience.emails.length > 0,
+  async post({ payload, audience }){
+    // TODO: Hook into your email sending service.
+    const emailId = (crypto?.randomUUID?.() || String(Date.now()));
+    return { id: emailId };
+  },
+};
+`;
+
+// SMS
+export const FAMILY_SMS_CHANNEL_TODO = String.raw`// src/services/sharing/family/channels/familySMS.js
+export const familySMS = {
+  id: "sms",
+  label: "SMS (urgent)",
+  kind: "async",
+  supports: (ctx) =>
+    Array.isArray(ctx?.audience?.phones) && ctx.audience.phones.length > 0,
+  async post({ payload, audience }){
+    // TODO: Hook into your SMS gateway.
+    const smsId = (crypto?.randomUUID?.() || String(Date.now()));
+    return { id: smsId };
+  },
+};
+`;
+
+// Drive
+export const FAMILY_DRIVE_CHANNEL_TODO = String.raw`// src/services/sharing/family/channels/familyDrive.js
+export const familyDrive = {
+  id: "drive",
+  label: "Drive Folder (exports)",
+  kind: "async",
+  supports: () => true,
+  async post({ payload }){
+    // Persist JSON/PDF to a family drive folder and return a link.
+    const fileId = (crypto?.randomUUID?.() || String(Date.now()));
+    const url = "/files/family/exports/" + fileId + ".json";
+    return { id: fileId, url };
+  },
+};
+`;
+
+/* --------------------------------------------------------------------------
+  3) POLICY & AUDIENCE (Roles & Scopes)
+---------------------------------------------------------------------------- */
+export const FAMILY_POLICY_TODO = String.raw`// src/services/sharing/family/policy.js
+// Very simple role model; you can tighten this later.
+export const ROLES = ["householder", "steward", "agrarian", "member"];
+
+export function canFamilyShare(user){
+  return !!user;
+}
+
+export function enforceRole(user, role){
+  return !!user?.roles?.includes(role);
+}
+
+export function normalizeFamilyAudience({ members = [], households = [], emails = [], phones = [] } = {}){
+  return { members, households, emails, phones };
+}
+`;
+
+/* --------------------------------------------------------------------------
+  4) UI: Compose → Preview → Post (Flow + Empty states + Undo)
+     NOTE: The actual posting is now handled by a background shim; UI just
+     queues jobs via events so it is safe when users navigate away.
+---------------------------------------------------------------------------- */
+export const FAMILY_COMPOSE_TODO = String.raw`// src/components/family/FamilyCompose.jsx
+import React, { useMemo, useState } from "react";
+import { listFamilyChannels } from "@/services/sharing/family/registry.js";
+import { createFamilyShareJob, updateFamilyShareJob } from "@/services/sharing/family/jobs.js";
+import { useSelectionContext } from "@/stores/selectionStore.js";
+import { normalizeFamilyAudience } from "@/services/sharing/family/policy.js";
+
+export function FamilyCompose(){
+  // selection = { mealPlan, batch, rows, calendarEvents, garden, animals, chores, storehouse }
+  const selection = useSelectionContext();
+  const [channelId, setChannelId] = useState(null);
+  const [members, setMembers] = useState([]);
+  const [emails, setEmails] = useState([]);
+  const [phones, setPhones] = useState([]);
+  const [title, setTitle] = useState("");
+  const [note, setNote] = useState("");
+
+  const context = useMemo(
+    () => ({ selection, audience: { members, emails, phones } }),
+    [selection, members, emails, phones]
+  );
+  const channels = useMemo(() => listFamilyChannels(context), [context]);
+
+  const empty =
+    !selection ||
+    Object.values(selection).every(
+      (v) => !v || (Array.isArray(v) && v.length === 0)
+    );
+
+  if (empty){
+    return (
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">Nothing to share with family yet</h3>
+        <p className="mb-4 text-sm opacity-80">
+          Create a weekly meal plan, a batch cooking session, a garden/animals plan, or
+          assign rhythms in chores and storehouse before sending a family update.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <a className="btn" href="/tier2/household/meals">Meal Planner</a>
+          <a className="btn" href="/tier2/household/meals#batch">Batch Cooking</a>
+          <a className="btn" href="/tier2/garden">Garden Plan</a>
+          <a className="btn" href="/tier2/animals">Animal Plan</a>
+          <a className="btn" href="/calendar">Household Calendar</a>
+        </div>
+      </div>
+    );
+  }
+
+  const smartTitle =
+    title ||
+    selection?.mealPlan?.title ||
+    selection?.batch?.title ||
+    selection?.garden?.title ||
+    "Family Update";
+
+  return (
+    <div className="space-y-4">
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">Channel & Audience</h3>
+        <div className="grid md:grid-cols-3 gap-3">
+          <div className="flex gap-2 flex-wrap">
+            {channels.map((ch) => (
+              <button
+                key={ch.id}
+                className={\`btn \${channelId === ch.id ? "btn-primary" : "btn-outline"}\`}
+                onClick={() => setChannelId(ch.id)}
+              >
+                {ch.label}
+              </button>
+            ))}
+          </div>
+          <input
+            className="input input-bordered"
+            placeholder="Members (comma)"
+            onBlur={(e) =>
+              setMembers(
+                e.target.value
+                  .split(",")
+                  .map((x) => x.trim())
+                  .filter(Boolean)
+              )
+            }
+          />
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              className="input input-bordered"
+              placeholder="Emails (comma)"
+              onBlur={(e) =>
+                setEmails(
+                  e.target.value
+                    .split(",")
+                    .map((x) => x.trim())
+                    .filter(Boolean)
+                )
+              }
+            />
+            <input
+              className="input input-bordered"
+              placeholder="Phones (comma)"
+              onBlur={(e) =>
+                setPhones(
+                  e.target.value
+                    .split(",")
+                    .map((x) => x.trim())
+                    .filter(Boolean)
+                )
+              }
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">Message</h3>
+        <input
+          className="input input-bordered w-full mb-2"
+          placeholder="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <textarea
+          className="textarea textarea-bordered w-full"
+          rows={5}
+          placeholder="Context, asks, feast prep, who stewards which part…"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+        />
+        <div className="text-xs opacity-70 mt-2">
+          Tip: Assign an owner and simple time frame for each household provision or rhythm.
+        </div>
+      </div>
+
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">What you’re sharing</h3>
+        <pre className="bg-base-200 p-3 rounded max-h-64 overflow-auto text-xs">
+{JSON.stringify(selection, null, 2)}
+        </pre>
+      </div>
+
+      <div className="flex gap-2">
+        <a className="btn btn-outline" href="/family/history">
+          View History
+        </a>
+        <button
+          className="btn btn-primary"
+          disabled={!channelId}
+          onClick={() => {
+            const audience = normalizeFamilyAudience({ members, emails, phones });
+            const payload = { title: smartTitle, note, selection };
+            const job = createFamilyShareJob({
+              channelId,
+              audience,
+              payload,
+              options: {},
+            });
+            updateFamilyShareJob(job.id, { status: "ready" });
+            sessionStorage.setItem("currentFamilyShareJob", job.id);
+            location.href = "/family/preview";
+          }}
+        >
+          Continue
+        </button>
+      </div>
+    </div>
+  );
+}
+`;
+
+// Preview (now shim-aware: it only QUEUES work via events)
+export const FAMILY_PREVIEW_TODO = String.raw`// src/components/family/FamilyPreview.jsx
+import React, { useEffect, useState } from "react";
+import {
+  getFamilyShareJob,
+  updateFamilyShareJob,
+  undoLastFamilyShare,
+} from "@/services/sharing/family/jobs.js";
+import { emit } from "@/services/automation/runtime";
+
+/**
+ * FamilyPreview no longer posts directly.
+ * It:
+ *   - Updates job to "queued"
+ *   - Emits "family.share.post.requested" with { jobId }
+ * A background shim listens and performs the actual post so it survives
+ * navigation away from this screen.
+ */
+export function FamilyPreview(){
+  const [job, setJob] = useState(null);
+
+  useEffect(() => {
+    const id = sessionStorage.getItem("currentFamilyShareJob");
+    if (!id) return;
+    setJob(getFamilyShareJob(id));
+  }, []);
+
+  if (!job){
+    return (
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">No family share in progress</h3>
+        <p className="mb-4 text-sm opacity-80">
+          Start in Family Sharing composer.
+        </p>
+        <a className="btn" href="/family">
+          Go to Family Sharing
+        </a>
+      </div>
+    );
+  }
+
+  const postingLike =
+    job.status === "posting" || job.status === "queued";
+
+  return (
+    <div className="space-y-4">
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">Preview</h3>
+        <pre className="bg-base-200 p-3 rounded max-h-64 overflow-auto text-xs">
+{JSON.stringify(
+  {
+    channel: job.channelId,
+    audience: job.audience,
+    payload: job.payload,
+  },
+  null,
+  2
+)}
+        </pre>
+        {job.error && (
+          <div className="alert alert-error mt-3 text-sm">
+            Error: {job.error}
+          </div>
+        )}
+        <div className="flex gap-2 mt-3">
+          <button
+            className="btn btn-outline"
+            onClick={() => {
+              undoLastFamilyShare();
+              const updated = getFamilyShareJob(job.id);
+              setJob(updated || null);
+            }}
+          >
+            Undo Last Change
+          </button>
+          <button
+            className="btn btn-primary"
+            disabled={postingLike}
+            onClick={async () => {
+              try {
+                // Mark as queued and emit an event for the background shim.
+                updateFamilyShareJob(job.id, { status: "queued" });
+
+                sessionStorage.setItem(
+                  "lastFamilySuggestion",
+                  JSON.stringify({
+                    message:
+                      job.channelId === "family-board"
+                        ? "Assign owners & simple time frames on the Family Board."
+                        : job.channelId === "drive"
+                        ? "Share the folder link on the Family Board and Household Calendar."
+                        : "Create calendar reminders and notify the Agrarian/Steward.",
+                    actions: [
+                      { label: "Open Family Board", href: "/family/board" },
+                      { label: "Create Calendar Items", href: "/calendar" },
+                      { label: "Share More", href: "/family" },
+                    ],
+                  })
+                );
+
+                emit("family.share.post.requested", {
+                  jobId: job.id,
+                  source: "ui.family.preview",
+                });
+
+                setJob(getFamilyShareJob(job.id));
+                setTimeout(() => {
+                  location.href = "/family/history";
+                }, 150);
+              } catch (e) {
+                updateFamilyShareJob(job.id, {
+                  status: "error",
+                  error: e?.message || String(e),
+                });
+                setJob(getFamilyShareJob(job.id));
+              }
+            }}
+          >
+            {postingLike ? "Queued…" : "Post to Family"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+`;
+
+// Board / Inbox / History / Settings
+export const FAMILY_BOARD_TODO = String.raw`// src/components/family/FamilyBoard.jsx
+import React from "react";
+
+export function FamilyBoard(){
+  return (
+    <div className="card p-6 border">
+      <h3 className="text-lg font-semibold mb-2">Family Board</h3>
+      <p className="text-sm opacity-80">
+        Convert updates into visible lanes of work:
+        Plan → Doing → Done. Assign owners (Householder, Steward, Agrarian, Members).
+      </p>
+      <div className="mt-3 grid md:grid-cols-3 gap-3">
+        <div className="card p-4 border">
+          <div className="font-semibold mb-2">Plan</div>
+          <div className="text-xs opacity-70">Drop new items here.</div>
+        </div>
+        <div className="card p-4 border">
+          <div className="font-semibold mb-2">Doing</div>
+        </div>
+        <div className="card p-4 border">
+          <div className="font-semibold mb-2">Done</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+`;
+
+export const FAMILY_INBOX_TODO = String.raw`// src/components/family/FamilyInbox.jsx
+import React from "react";
+
+export function FamilyInbox(){
+  return (
+    <div className="card p-6 border">
+      <h3 className="text-lg font-semibold mb-2">Inbox & Assignments</h3>
+      <p className="text-sm opacity-80">
+        Mentions, assignments, and follow-ups that name you will surface here so
+        no one is surprised by household rhythms.
+      </p>
+    </div>
+  );
+}
+`;
+
+export const FAMILY_HISTORY_TODO = String.raw`// src/components/family/FamilyHistory.jsx
+import React, { useEffect, useState } from "react";
+import { listFamilyShareJobs } from "@/services/sharing/family/jobs.js";
+
+export function FamilyHistory(){
+  const [items, setItems] = useState([]);
+  const [tip, setTip] = useState(null);
+
+  useEffect(() => {
+    setItems(listFamilyShareJobs());
+    const t = sessionStorage.getItem("lastFamilySuggestion");
+    if (t) setTip(JSON.parse(t));
+  }, []);
+
+  if (!items.length){
+    return (
+      <div className="card p-6 border">
+        <h3 className="text-lg font-semibold mb-2">No family shares yet</h3>
+        <p className="mb-4 text-sm opacity-80">
+          When you post to the family, those updates will show here.
+        </p>
+        <a className="btn" href="/family">
+          Compose a Share
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {tip && (
+        <div className="alert">
+          <div>
+            <h4 className="font-semibold">Next best action</h4>
+            <p className="text-sm opacity-80">{tip.message}</p>
+          </div>
+          <div className="ml-auto flex gap-2">
+            {tip.actions?.map((a, i) => (
+              <a key={i} className="btn btn-sm" href={a.href}>
+                {a.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="grid gap-3">
+        {items.map((j) => (
+          <div key={j.id} className="card p-4 border">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="font-semibold">
+                  {j.payload?.title || j.channelId}
+                </div>
+                <div className="text-xs opacity-70">
+                  {new Date(j.createdAt).toLocaleString()} • {j.status}
+                </div>
+              </div>
+              <div className="text-xs opacity-70">
+                #{String(j.id).slice(0, 8)}
+              </div>
+            </div>
+            {j.error && (
+              <div className="text-error text-sm mt-2">
+                Error: {j.error}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+`;
+
+export const FAMILY_SETTINGS_TODO = String.raw`// src/components/family/FamilySettings.jsx
+import React, { useState } from "react";
+
+export function FamilySettings(){
+  const [defaultChannel, setDefaultChannel] = useState("family-board");
+  const [autoNotifyAgrarian, setAutoNotifyAgrarian] = useState(true);
+  const [autoSummaries, setAutoSummaries] = useState(true);
+
+  return (
+    <div className="card p-6 border space-y-4">
+      <h3 className="text-lg font-semibold">Family Settings</h3>
+      <div className="grid lg:grid-cols-3 gap-3">
+        <select
+          className="select select-bordered"
+          value={defaultChannel}
+          onChange={(e) => setDefaultChannel(e.target.value)}
+        >
+          {["family-board", "dm", "email", "sms", "drive"].map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+
+        <label className="label cursor-pointer">
+          <span className="label-text mr-3">
+            Auto-notify Agrarian with support forecasts
+          </span>
+          <input
+            type="checkbox"
+            className="toggle"
+            checked={autoNotifyAgrarian}
+            onChange={() => setAutoNotifyAgrarian(!autoNotifyAgrarian)}
+          />
+        </label>
+
+        <label className="label cursor-pointer">
+          <span className="label-text mr-3">Auto-summarize shares</span>
+          <input
+            type="checkbox"
+            className="toggle"
+            checked={autoSummaries}
+            onChange={() => setAutoSummaries(!autoSummaries)}
+          />
+        </label>
+      </div>
+      <p className="text-xs opacity-70">
+        These preferences can later be wired to the automation/runtime and agent shims,
+        so family summaries and support forecasts respect sabbath and quiet-hour guards.
+      </p>
+    </div>
+  );
+}
+`;
+
+/* --------------------------------------------------------------------------
+  5) EVENT-DRIVEN GLUE (Recipes/Inventory/Calendar/Garden/Animals/Chores)
+---------------------------------------------------------------------------- */
+export const FAMILY_HOOKS_TODO = String.raw`// src/services/sharing/family/hooks.js
+import { on, emit } from "@/services/automation/runtime";
+import { refreshSelection } from "@/stores/selectionStore.js";
+
+/**
+ * Registers listeners so Family composer stays in sync and
+ * forwards support forecasts (garden/animals/cleaning/cooking) to the Agrarian.
+ *
+ * This runs as part of automation/runtime and is safe across route changes.
+ */
+export function registerFamilyEventGlue(){
+  const relays = [
+    "mealplan.created",
+    "recipes.updated",
+    "batch.completed",
+    "inventory.updated",
+    "calendar.events.updated",
+    "garden.plan.updated",
+    "animals.plan.updated",
+    "chores.routines.updated",
+    "storehouse.updated",
+    "session.completed",
+  ];
+
+  relays.forEach((evt) => on(evt, handleFamilyChange));
+
+  function handleFamilyChange(evt){
+    refreshSelection();
+
+    const payload = evt?.data || evt?.payload || null;
+    const forecast = buildSupportForecast(payload);
+
+    emit("family.nudge", {
+      at: Date.now(),
+      message:
+        "Share key updates with your family so everyone understands the household rhythm.",
+      actions: [
+        { label: "Open Family Composer", href: "/family" },
+        { label: "Open Family Board", href: "/family/board" },
+      ],
+      source: evt?.type || "data.change",
+    });
+
+    if (forecast){
+      emit("family.agrarian.supportForecast", {
+        at: Date.now(),
+        summary: forecast.summary,
+        details: forecast.details,
+      });
+    }
+  }
+}
+
+// Minimal placeholder; replace with your real derivation logic
+function buildSupportForecast(payload){
+  if (!payload) return null;
+  return {
+    summary: "Upcoming support needs based on plans, sessions, and storehouse changes.",
+    details: {
+      notes:
+        "Auto-generated from current meal plans, batch sessions, chores, garden, animals, and storehouse deltas.",
+    },
+  };
+}
+`;
+
+/* --------------------------------------------------------------------------
+  6) BACKGROUND SHIM — FAMILY SHARING POSTING ENGINE
+     This is the key shim piece: it listens for "family.share.post.requested"
+     and takes responsibility for posting, so UI can safely unmount.
+---------------------------------------------------------------------------- */
+export const FAMILY_SHIM_TODO = String.raw`// src/services/sharing/family/shim.js
+import { on, emit } from "@/services/automation/runtime";
+import {
+  getFamilyShareJob,
+  updateFamilyShareJob,
+} from "@/services/sharing/family/jobs.js";
+import { postToFamilyChannel } from "@/services/sharing/family/registry.js";
+import { trackFamilyShareCompleted } from "@/services/sharing/family/telemetry.js";
+
+let registered = false;
+
+/**
+ * registerFamilySharingShim
+ *
+ * Wires background listeners so that:
+ *   - UI emits "family.share.post.requested" with { jobId }
+ *   - This shim:
+ *       * validates job
+ *       * updates status "posting" / "done" / "error"
+ *       * posts via the appropriate channel
+ *       * emits progress events so other parts of SSA can react
+ *
+ * This is how family sharing continues even if the user navigates away.
+ */
+export function registerFamilySharingShim(){
+  if (registered) return;
+  registered = true;
+
+  on("family.share.post.requested", handlePostRequested);
+}
+
+async function handlePostRequested(evt){
+  try {
+    const data = evt?.data || evt || {};
+    const jobId = data.jobId;
+    if (!jobId) return;
+
+    let job = getFamilyShareJob(jobId);
+    if (!job) return;
+
+    updateFamilyShareJob(jobId, { status: "posting" });
+
+    emit("family.share.posting", {
+      jobId,
+      channelId: job.channelId,
+      at: Date.now(),
+    });
+
+    const result = await postToFamilyChannel(job.channelId, {
+      payload: job.payload,
+      audience: job.audience,
+      options: job.options,
+    });
+
+    job = updateFamilyShareJob(jobId, {
+      status: "done",
+      result,
+      error: null,
+    });
+
+    const sizeBytes = safeSize(job.payload);
+    trackFamilyShareCompleted({
+      channelId: job.channelId,
+      sizeBytes,
+    });
+
+    emit("family.share.completed", {
+      jobId,
+      channelId: job.channelId,
+      result,
+      at: Date.now(),
+    });
+  } catch (e) {
+    const data = evt?.data || evt || {};
+    const jobId = data.jobId;
+    if (jobId){
+      const job = updateFamilyShareJob(jobId, {
+        status: "error",
+        error: e?.message || String(e),
+      });
+      emit("family.share.failed", {
+        jobId,
+        channelId: job?.channelId,
+        error: e?.message || String(e),
+        at: Date.now(),
+      });
+    }
+  }
+}
+
+function safeSize(obj){
+  try {
+    return JSON.stringify(obj || {}).length;
+  } catch {
+    return 0;
+  }
+}
+`;
+
+/* --------------------------------------------------------------------------
+  7) TELEMETRY
+---------------------------------------------------------------------------- */
+export const FAMILY_TELEMETRY_TODO = String.raw`// src/services/sharing/family/telemetry.js
+import { emit } from "@/services/automation/runtime";
+
+/**
+ * trackFamilyShareCompleted
+ *
+ * Called by the background shim after a successful post.
+ * This can be extended to log to Dexie or hub analytics later.
+ */
+export function trackFamilyShareCompleted({ channelId, sizeBytes }){
+  emit("family.share.completed.metrics", {
+    channelId,
+    sizeBytes,
+    at: Date.now(),
+  });
+}
+`;
+
+/* --------------------------------------------------------------------------
+  8) BOOTSTRAP
+---------------------------------------------------------------------------- */
+export const FAMILY_BOOTSTRAP_TODO = String.raw`// src/services/sharing/family/bootstrap.js
+import { registerDefaultFamilyChannels } from "@/services/sharing/family/channels/index.js";
+import { registerFamilyEventGlue } from "@/services/sharing/family/hooks.js";
+import { registerFamilySharingShim } from "@/services/sharing/family/shim.js";
+
+/**
+ * bootstrapFamilySharingService
+ *
+ * Call this once during SSA startup (e.g., app bootstrap) so:
+ *   - Channels are registered
+ *   - Event glue keeps the selection context in sync
+ *   - The background shim is listening for post requests
+ */
+export function bootstrapFamilySharingService(){
+  registerDefaultFamilyChannels();
+  registerFamilyEventGlue();
+  registerFamilySharingShim();
+}
+`;
+
+/* --------------------------------------------------------------------------
+  9) SELECTION STORE CONTRACT (reference)
+---------------------------------------------------------------------------- */
+export const FAMILY_SELECTION_CONTRACT = String.raw`// src/stores/selectionStore.js (reference)
+let state = {
+  mealPlan: null,
+  batch: null,
+  rows: null,           // inventory rows
+  calendarEvents: null,
+  garden: null,
+  animals: null,
+  chores: null,
+  storehouse: null,
+};
+
+export function useSelectionContext(){ return state; }
+export function refreshSelection(){
+  // TODO: Derive from domain stores (meals, garden, animals, storehouse, calendar).
+  // This is what keeps "FamilyCompose" grounded in the current household rhythm.
+}
+`;
+
+/* --------------------------------------------------------------------------
+  10) QA CHECKLIST
+---------------------------------------------------------------------------- */
+// [ ] /family shows empty state with quick links when nothing selected
+// [ ] Channels list reflects supports(context) gating (DM/email/sms presence)
+// [ ] Compose → Preview → Post uses jobs + events; UI does NOT call postToFamilyChannel directly
+// [ ] Shim handles "family.share.post.requested" and updates job status appropriately
+// [ ] Family History reflects queued/posting/done/error states
+// [ ] Next-best-action banner appears in History after posting
+// [ ] Family Board lanes present with clear guidance
+// [ ] Inbox surfaces mentions/assignments (later integration)
+// [ ] Event glue refreshes selection and emits supportForecast to Agrarian
+// [ ] Settings include auto-notify Agrarian toggle (forecasts), default channel
+// [ ] Design uses consistent btn/card/alert patterns across screens
+// [ ] Shim continues posting if user navigates away from /family/preview within the SPA

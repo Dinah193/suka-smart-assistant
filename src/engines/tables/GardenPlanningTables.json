@@ -1,0 +1,397 @@
+{
+  "metadata": {
+    "name": "GardenPlanningTables",
+    "version": "1.0.0",
+    "updatedAt": "2025-11-10T00:00:00.000Z",
+    "units": "metric",
+    "notes": "Cuisine-forward planning tables that help the synthesis engine generate sow/plant windows, successions, trellising, and harvest/storage plans. Values are conservative baselines; prefer local extension data when available."
+  },
+
+  "schemaHints": {
+    "_comment": "Shape guidance for consumers; not enforced here.",
+    "crop": {
+      "id": "string (snake_case)",
+      "family": "string (rotation family key)",
+      "lifeCycle": "annual|biennial|perennial",
+      "daysToMaturity": { "directSow": "range", "transplant": "range" },
+      "sowDepthCm": "number",
+      "thinToCm": "number (or null for not applicable)",
+      "transplantAgeWeeks": "number (nursery age) | null when direct sow",
+      "soilTempMinC": "number (germination floor at 5cm)",
+      "photoperiod": "neutral|long-day|short-day|notes",
+      "planningWindows": {
+        "directSow": {
+          "fromLastFrostDays": "int (negative = before LF)",
+          "toFirstFrostDays": "int"
+        },
+        "transplant": {
+          "fromLastFrostDays": "int",
+          "soilMinC": "number minimum soil temp for transplant",
+          "airNightMinC": "number"
+        }
+      },
+      "succession": { "intervalDays": "int", "rounds": "int", "untilFirstFrostDays": "int" },
+      "trellis": { "required": "bool", "systems": ["list of system ids"], "rowSupportCm": "number|null" },
+      "pruning": { "method": "string", "notes": "string" },
+      "companions": { "good": ["ids"], "avoid": ["ids"], "notes": "string" },
+      "harvest": { "cues": ["strings"], "cutRepeat": "bool", "coolingPriority": "low|medium|high" },
+      "storage": { "method": "room|cool|refrigerated|cured", "tempC": "range or single", "humidityPct": "range", "lifeDays": "approx int or null" },
+      "yield": { "kgPerM2": "range", "notes": "string" },
+      "seedViabilityYears": "int (avg)",
+      "source": "manual:curated|scraped:<origin>"
+    }
+  },
+
+  "rotationFamilies": {
+    "_comment": "Use to diversify rotations and reduce disease pressure.",
+    "solanaceae": ["tomato", "pepper", "eggplant", "african_eggplant"],
+    "cucurbitaceae": ["cucumber", "squash", "melon", "bitter_melon", "chayote"],
+    "brassicaceae": ["bok_choy", "mizuna", "tatsoi", "broccoli", "cabbage"],
+    "allium": ["onion", "garlic", "leek"],
+    "legume": ["bean_bush", "bean_pole", "yardlong_bean", "pea"],
+    "amaranthaceae": ["amaranth_leaf", "beet", "spinach", "chard"],
+    "umbellifer": ["carrot", "cilantro", "culantro"],
+    "araceae": ["taro"],
+    "euphorbiaceae": ["cassava"],
+    "lamiaceae": ["basil", "thai_basil", "shiso_perilla (mint family alias)"],
+    "poaceae": ["corn", "sorghum", "millet"]
+  },
+
+  "trellisSystems": {
+    "_comment": "Canonical trellis IDs referenced in crops.trellis.systems.",
+    "systems": {
+      "single_stake": { "heightCm": 180, "notes": "Twine tie every 20–30 cm" },
+      "florida_weave": { "heightCm": 120, "notes": "Reinforce every 20–30 cm growth" },
+      "a_frame": { "heightCm": 200, "notes": "Cucurbits & beans; 15–20 cm grid" },
+      "string_drop": { "heightCm": 220, "notes": "Greenhouse tomatoes/ cukes" },
+      "netting": { "heightCm": 150, "notes": "Peas/beans/light cucurbits" },
+      "arch_trellis": { "heightCm": 200, "notes": "Walkthrough for vining gourds" }
+    }
+  },
+
+  "plannerDefaults": {
+    "_comment": "Synthesis uses these when dates aren’t provided explicitly.",
+    "climateAnchors": {
+      "lastFrostDate": "use per-location dataset (SSA to supply)",
+      "firstFrostDate": "use per-location dataset (SSA to supply)"
+    },
+    "soilProbeDepthCm": 5,
+    "coolingPriorityMap": { "low": 0, "medium": 1, "high": 2 }
+  },
+
+  "crops": [
+    {
+      "id": "tomato_indeterminate",
+      "family": "solanaceae",
+      "lifeCycle": "annual",
+      "daysToMaturity": { "directSow": null, "transplant": { "min": 70, "max": 85 } },
+      "sowDepthCm": 0.6,
+      "thinToCm": null,
+      "transplantAgeWeeks": 6,
+      "soilTempMinC": 15,
+      "photoperiod": "neutral",
+      "planningWindows": {
+        "directSow": { "fromLastFrostDays": null, "toFirstFrostDays": null },
+        "transplant": { "fromLastFrostDays": 7, "soilMinC": 15, "airNightMinC": 10 }
+      },
+      "succession": { "intervalDays": 0, "rounds": 1, "untilFirstFrostDays": 0 },
+      "trellis": { "required": true, "systems": ["single_stake", "florida_weave", "string_drop"], "rowSupportCm": 180 },
+      "pruning": { "method": "single/double leader", "notes": "Remove suckers below first flower truss" },
+      "companions": { "good": ["basil", "marigold"], "avoid": ["potato"], "notes": "Avoid heavy solanaceae repeats" },
+      "harvest": { "cues": ["Full color, slight give"], "cutRepeat": true, "coolingPriority": "medium" },
+      "storage": { "method": "room", "tempC": [15, 20], "humidityPct": [60, 70], "lifeDays": 5 },
+      "yield": { "kgPerM2": [3, 6], "notes": "Staked, home scale" },
+      "seedViabilityYears": 4,
+      "source": "manual:curated"
+    },
+    {
+      "id": "pepper_sweet",
+      "family": "solanaceae",
+      "lifeCycle": "annual",
+      "daysToMaturity": { "directSow": null, "transplant": { "min": 65, "max": 80 } },
+      "sowDepthCm": 0.6,
+      "thinToCm": null,
+      "transplantAgeWeeks": 8,
+      "soilTempMinC": 18,
+      "photoperiod": "neutral",
+      "planningWindows": {
+        "directSow": { "fromLastFrostDays": null, "toFirstFrostDays": null },
+        "transplant": { "fromLastFrostDays": 14, "soilMinC": 18, "airNightMinC": 12 }
+      },
+      "succession": { "intervalDays": 0, "rounds": 1, "untilFirstFrostDays": 0 },
+      "trellis": { "required": false, "systems": [], "rowSupportCm": null },
+      "pruning": { "method": "light pinch", "notes": "Stake tall bells in wind" },
+      "companions": { "good": ["basil", "onion"], "avoid": ["fennel"], "notes": "" },
+      "harvest": { "cues": ["Glossy skin, firm walls"], "cutRepeat": true, "coolingPriority": "medium" },
+      "storage": { "method": "refrigerated", "tempC": [7, 10], "humidityPct": [90, 95], "lifeDays": 10 },
+      "yield": { "kgPerM2": [2, 4], "notes": "" },
+      "seedViabilityYears": 2,
+      "source": "manual:curated"
+    },
+    {
+      "id": "cucumber_trellis",
+      "family": "cucurbitaceae",
+      "lifeCycle": "annual",
+      "daysToMaturity": { "directSow": { "min": 50, "max": 65 }, "transplant": { "min": 45, "max": 60 } },
+      "sowDepthCm": 2.0,
+      "thinToCm": 30,
+      "transplantAgeWeeks": 3,
+      "soilTempMinC": 16,
+      "photoperiod": "neutral",
+      "planningWindows": {
+        "directSow": { "fromLastFrostDays": 7, "toFirstFrostDays": 60 },
+        "transplant": { "fromLastFrostDays": 7, "soilMinC": 16, "airNightMinC": 10 }
+      },
+      "succession": { "intervalDays": 21, "rounds": 2, "untilFirstFrostDays": 45 },
+      "trellis": { "required": true, "systems": ["a_frame", "netting", "string_drop"], "rowSupportCm": 180 },
+      "pruning": { "method": "train main vine", "notes": "Remove first 3–4 lateral fruits for vigor" },
+      "companions": { "good": ["bean_bush", "dill"], "avoid": ["potato"], "notes": "" },
+      "harvest": { "cues": ["Uniform color, size by type, tender seeds"], "cutRepeat": true, "coolingPriority": "high" },
+      "storage": { "method": "cool", "tempC": [10, 12], "humidityPct": [90, 95], "lifeDays": 7 },
+      "yield": { "kgPerM2": [3, 5], "notes": "Trellised increases quality" },
+      "seedViabilityYears": 5,
+      "source": "manual:curated"
+    },
+    {
+      "id": "lettuce_head",
+      "family": "asteraceae",
+      "lifeCycle": "annual",
+      "daysToMaturity": { "directSow": { "min": 55, "max": 70 }, "transplant": { "min": 45, "max": 60 } },
+      "sowDepthCm": 0.3,
+      "thinToCm": 30,
+      "transplantAgeWeeks": 4,
+      "soilTempMinC": 4,
+      "photoperiod": "long-day sensitive (bolts in heat)",
+      "planningWindows": {
+        "directSow": { "fromLastFrostDays": -14, "toFirstFrostDays": 45 },
+        "transplant": { "fromLastFrostDays": -7, "soilMinC": 4, "airNightMinC": 2 }
+      },
+      "succession": { "intervalDays": 14, "rounds": 4, "untilFirstFrostDays": 30 },
+      "trellis": { "required": false, "systems": [], "rowSupportCm": null },
+      "pruning": { "method": "none", "notes": "" },
+      "companions": { "good": ["onion", "carrot"], "avoid": [], "notes": "" },
+      "harvest": { "cues": ["Firm head, no tipburn"], "cutRepeat": false, "coolingPriority": "high" },
+      "storage": { "method": "refrigerated", "tempC": [1, 4], "humidityPct": [95, 100], "lifeDays": 10 },
+      "yield": { "kgPerM2": [1.5, 3], "notes": "" },
+      "seedViabilityYears": 3,
+      "source": "manual:curated"
+    },
+    {
+      "id": "carrot",
+      "family": "umbellifer",
+      "lifeCycle": "biennial",
+      "daysToMaturity": { "directSow": { "min": 70, "max": 80 }, "transplant": null },
+      "sowDepthCm": 0.6,
+      "thinToCm": 3,
+      "transplantAgeWeeks": null,
+      "soilTempMinC": 4,
+      "photoperiod": "neutral",
+      "planningWindows": {
+        "directSow": { "fromLastFrostDays": -14, "toFirstFrostDays": 70 },
+        "transplant": { "fromLastFrostDays": null, "soilMinC": null, "airNightMinC": null }
+      },
+      "succession": { "intervalDays": 21, "rounds": 3, "untilFirstFrostDays": 70 },
+      "trellis": { "required": false, "systems": [], "rowSupportCm": null },
+      "pruning": { "method": "thin promptly", "notes": "Keep bed moist for germination" },
+      "companions": { "good": ["lettuce", "onion"], "avoid": ["dill (strong)"], "notes": "" },
+      "harvest": { "cues": ["Shoulder size, color set"], "cutRepeat": false, "coolingPriority": "high" },
+      "storage": { "method": "refrigerated", "tempC": [0, 2], "humidityPct": [95, 100], "lifeDays": 120 },
+      "yield": { "kgPerM2": [2, 5], "notes": "Deep loose soil increases yield" },
+      "seedViabilityYears": 3,
+      "source": "manual:curated"
+    },
+
+    {
+      "id": "bok_choy",
+      "family": "brassicaceae",
+      "lifeCycle": "annual",
+      "daysToMaturity": { "directSow": { "min": 40, "max": 55 }, "transplant": { "min": 35, "max": 45 } },
+      "sowDepthCm": 0.6,
+      "thinToCm": 20,
+      "transplantAgeWeeks": 3,
+      "soilTempMinC": 7,
+      "photoperiod": "bolts in heat/long days",
+      "planningWindows": {
+        "directSow": { "fromLastFrostDays": -14, "toFirstFrostDays": 40 },
+        "transplant": { "fromLastFrostDays": -7, "soilMinC": 7, "airNightMinC": 2 }
+      },
+      "succession": { "intervalDays": 10, "rounds": 4, "untilFirstFrostDays": 30 },
+      "trellis": { "required": false, "systems": [], "rowSupportCm": null },
+      "pruning": { "method": "cut whole or baby", "notes": "Shade cloth in heat" },
+      "companions": { "good": ["onion", "dill"], "avoid": ["other brassicas (pest buildup)"], "notes": "" },
+      "harvest": { "cues": ["Firm heads, no bolting"], "cutRepeat": false, "coolingPriority": "high" },
+      "storage": { "method": "refrigerated", "tempC": [0, 2], "humidityPct": [95, 100], "lifeDays": 10 },
+      "yield": { "kgPerM2": [2, 4], "notes": "" },
+      "seedViabilityYears": 4,
+      "source": "manual:curated"
+    },
+    {
+      "id": "bitter_melon",
+      "family": "cucurbitaceae",
+      "lifeCycle": "annual",
+      "daysToMaturity": { "directSow": { "min": 60, "max": 80 }, "transplant": { "min": 55, "max": 70 } },
+      "sowDepthCm": 2.0,
+      "thinToCm": 45,
+      "transplantAgeWeeks": 3,
+      "soilTempMinC": 18,
+      "photoperiod": "neutral",
+      "planningWindows": {
+        "directSow": { "fromLastFrostDays": 10, "toFirstFrostDays": 60 },
+        "transplant": { "fromLastFrostDays": 10, "soilMinC": 18, "airNightMinC": 12 }
+      },
+      "succession": { "intervalDays": 21, "rounds": 2, "untilFirstFrostDays": 50 },
+      "trellis": { "required": true, "systems": ["a_frame", "arch_trellis", "netting"], "rowSupportCm": 200 },
+      "pruning": { "method": "train main + laterals", "notes": "Harvest young fruit for tenderness" },
+      "companions": { "good": ["bean_bush", "corn (wind break)"], "avoid": ["potato"], "notes": "" },
+      "harvest": { "cues": ["Green/immature pale, warty skin, crisp flesh"], "cutRepeat": true, "coolingPriority": "high" },
+      "storage": { "method": "cool", "tempC": [10, 12], "humidityPct": [90, 95], "lifeDays": 7 },
+      "yield": { "kgPerM2": [2.5, 4], "notes": "Trellis improves shape" },
+      "seedViabilityYears": 3,
+      "source": "manual:curated"
+    },
+    {
+      "id": "yardlong_bean",
+      "family": "legume",
+      "lifeCycle": "annual",
+      "daysToMaturity": { "directSow": { "min": 60, "max": 80 }, "transplant": null },
+      "sowDepthCm": 2.5,
+      "thinToCm": 20,
+      "transplantAgeWeeks": null,
+      "soilTempMinC": 18,
+      "photoperiod": "short-day benefits in late summer",
+      "planningWindows": {
+        "directSow": { "fromLastFrostDays": 14, "toFirstFrostDays": 60 },
+        "transplant": { "fromLastFrostDays": null, "soilMinC": null, "airNightMinC": null }
+      },
+      "succession": { "intervalDays": 21, "rounds": 2, "untilFirstFrostDays": 45 },
+      "trellis": { "required": true, "systems": ["a_frame", "netting"], "rowSupportCm": 200 },
+      "pruning": { "method": "minimal", "notes": "Pick often to maintain set" },
+      "companions": { "good": ["corn"], "avoid": ["allium"], "notes": "" },
+      "harvest": { "cues": ["Pods 30–45 cm, seeds small"], "cutRepeat": true, "coolingPriority": "medium" },
+      "storage": { "method": "refrigerated", "tempC": [7, 10], "humidityPct": [90, 95], "lifeDays": 6 },
+      "yield": { "kgPerM2": [2, 4], "notes": "" },
+      "seedViabilityYears": 3,
+      "source": "manual:curated"
+    },
+    {
+      "id": "amaranth_leaf",
+      "family": "amaranthaceae",
+      "lifeCycle": "annual",
+      "daysToMaturity": { "directSow": { "min": 30, "max": 45 }, "transplant": { "min": 25, "max": 35 } },
+      "sowDepthCm": 0.3,
+      "thinToCm": 20,
+      "transplantAgeWeeks": 3,
+      "soilTempMinC": 18,
+      "photoperiod": "short-day flowering; grow for leaves before flowering",
+      "planningWindows": {
+        "directSow": { "fromLastFrostDays": 10, "toFirstFrostDays": 60 },
+        "transplant": { "fromLastFrostDays": 10, "soilMinC": 18, "airNightMinC": 12 }
+      },
+      "succession": { "intervalDays": 14, "rounds": 3, "untilFirstFrostDays": 45 },
+      "trellis": { "required": false, "systems": [], "rowSupportCm": null },
+      "pruning": { "method": "cut-and-come-again", "notes": "Harvest tender tops" },
+      "companions": { "good": ["corn"], "avoid": ["pigweed (weed pressure)"], "notes": "" },
+      "harvest": { "cues": ["Leaves tender, pre-flower"], "cutRepeat": true, "coolingPriority": "high" },
+      "storage": { "method": "refrigerated", "tempC": [1, 4], "humidityPct": [95, 100], "lifeDays": 5 },
+      "yield": { "kgPerM2": [1.5, 3], "notes": "" },
+      "seedViabilityYears": 4,
+      "source": "manual:curated"
+    },
+    {
+      "id": "shiso_perilla",
+      "family": "lamiaceae",
+      "lifeCycle": "annual",
+      "daysToMaturity": { "directSow": { "min": 60, "max": 70 }, "transplant": { "min": 50, "max": 60 } },
+      "sowDepthCm": 0.2,
+      "thinToCm": 25,
+      "transplantAgeWeeks": 4,
+      "soilTempMinC": 18,
+      "photoperiod": "short-day flowering; harvest leaves earlier",
+      "planningWindows": {
+        "directSow": { "fromLastFrostDays": 14, "toFirstFrostDays": 60 },
+        "transplant": { "fromLastFrostDays": 14, "soilMinC": 18, "airNightMinC": 12 }
+      },
+      "succession": { "intervalDays": 21, "rounds": 2, "untilFirstFrostDays": 45 },
+      "trellis": { "required": false, "systems": [], "rowSupportCm": null },
+      "pruning": { "method": "pinch tips", "notes": "Encourages bushy growth" },
+      "companions": { "good": ["tomato"], "avoid": [], "notes": "" },
+      "harvest": { "cues": ["Large aromatic leaves"], "cutRepeat": true, "coolingPriority": "medium" },
+      "storage": { "method": "refrigerated", "tempC": [1, 4], "humidityPct": [95, 100], "lifeDays": 7 },
+      "yield": { "kgPerM2": [0.5, 1.5], "notes": "Primarily herb harvest" },
+      "seedViabilityYears": 3,
+      "source": "manual:curated"
+    },
+    {
+      "id": "culantro",
+      "family": "umbellifer",
+      "lifeCycle": "biennial (grown annual)",
+      "daysToMaturity": { "directSow": { "min": 60, "max": 70 }, "transplant": { "min": 50, "max": 60 } },
+      "sowDepthCm": 0.3,
+      "thinToCm": 20,
+      "transplantAgeWeeks": 4,
+      "soilTempMinC": 18,
+      "photoperiod": "bolts in heat/long days; partial shade ok",
+      "planningWindows": {
+        "directSow": { "fromLastFrostDays": 7, "toFirstFrostDays": 60 },
+        "transplant": { "fromLastFrostDays": 7, "soilMinC": 18, "airNightMinC": 12 }
+      },
+      "succession": { "intervalDays": 21, "rounds": 3, "untilFirstFrostDays": 45 },
+      "trellis": { "required": false, "systems": [], "rowSupportCm": null },
+      "pruning": { "method": "leaf harvest", "notes": "Harvest outer leaves; avoid flowering" },
+      "companions": { "good": ["onion"], "avoid": [], "notes": "" },
+      "harvest": { "cues": ["Leaf length 15–20 cm"], "cutRepeat": true, "coolingPriority": "high" },
+      "storage": { "method": "refrigerated", "tempC": [1, 4], "humidityPct": [95, 100], "lifeDays": 10 },
+      "yield": { "kgPerM2": [0.7, 1.5], "notes": "" },
+      "seedViabilityYears": 2,
+      "source": "manual:curated"
+    },
+    {
+      "id": "taro",
+      "family": "araceae",
+      "lifeCycle": "perennial (grown annual)",
+      "daysToMaturity": { "directSow": null, "transplant": { "min": 180, "max": 270 } },
+      "sowDepthCm": 8,
+      "thinToCm": 60,
+      "transplantAgeWeeks": 6,
+      "soilTempMinC": 20,
+      "photoperiod": "neutral (long warm season)",
+      "planningWindows": {
+        "directSow": { "fromLastFrostDays": null, "toFirstFrostDays": null },
+        "transplant": { "fromLastFrostDays": 20, "soilMinC": 20, "airNightMinC": 15 }
+      },
+      "succession": { "intervalDays": 0, "rounds": 1, "untilFirstFrostDays": 0 },
+      "trellis": { "required": false, "systems": [], "rowSupportCm": null },
+      "pruning": { "method": "remove damaged leaves", "notes": "Requires consistent moisture; paddy-style ok" },
+      "companions": { "good": ["amaranth_leaf"], "avoid": ["dry-site crops"], "notes": "" },
+      "harvest": { "cues": ["Leaves yellowing; corm size adequate"], "cutRepeat": false, "coolingPriority": "medium" },
+      "storage": { "method": "cool", "tempC": [10, 12], "humidityPct": [85, 90], "lifeDays": 30 },
+      "yield": { "kgPerM2": [2, 4], "notes": "Varies by cultivar and water" },
+      "seedViabilityYears": 0,
+      "source": "manual:curated"
+    },
+    {
+      "id": "cassava",
+      "family": "euphorbiaceae",
+      "lifeCycle": "perennial (grown annual)",
+      "daysToMaturity": { "directSow": null, "transplant": { "min": 240, "max": 360 } },
+      "sowDepthCm": 10,
+      "thinToCm": 100,
+      "transplantAgeWeeks": 0,
+      "soilTempMinC": 22,
+      "photoperiod": "day-length influences root bulking",
+      "planningWindows": {
+        "directSow": { "fromLastFrostDays": null, "toFirstFrostDays": null },
+        "transplant": { "fromLastFrostDays": 30, "soilMinC": 22, "airNightMinC": 18 }
+      },
+      "succession": { "intervalDays": 0, "rounds": 1, "untilFirstFrostDays": 0 },
+      "trellis": { "required": false, "systems": [], "rowSupportCm": null },
+      "pruning": { "method": "top prunes for cuttings", "notes": "Handle roots promptly post-harvest" },
+      "companions": { "good": ["legumes"], "avoid": ["heavy shade"], "notes": "" },
+      "harvest": { "cues": ["Plants 8–12 months old; root size adequate"], "cutRepeat": false, "coolingPriority": "high" },
+      "storage": { "method": "room (short), processed preferred", "tempC": [15, 20], "humidityPct": [70, 80], "lifeDays": 7 },
+      "yield": { "kgPerM2": [3, 6], "notes": "Highly climate-dependent" },
+      "seedViabilityYears": 0,
+      "source": "manual:curated"
+    }
+  ]
+}

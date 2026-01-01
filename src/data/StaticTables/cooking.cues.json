@@ -1,0 +1,1019 @@
+{
+  "_meta": {
+    "table": "cooking.cues",
+    "description": "Doneness cue reference for SSA SessionRunner. Maps high-level donenessCue values (color|texture|probeTemp|timer|smell|sound|jiggle) to concrete examples, safety guidance, and UI hints. Used for cooking, preservation, and storehouse/meal planning sessions, and supports reverse generation from free text instructions.",
+    "version": 1,
+    "updatedAt": "2025-11-18T00:00:00.000Z",
+    "domains": [
+      "cooking",
+      "preservation",
+      "storehouse",
+      "animals",
+      "cleaning"
+    ]
+  },
+  "schema": {
+    "id": "string",
+    "label": "string",
+    "cueCategory": "string", 
+    "appliesToDomains": [
+      "string"
+    ],
+    "bestFor": [
+      "string"
+    ],
+    "examples": [
+      "string"
+    ],
+    "signals": {
+      "visual": [
+        "string"
+      ],
+      "texture": [
+        "string"
+      ],
+      "smell": [
+        "string"
+      ],
+      "sound": [
+        "string"
+      ],
+      "timeHints": [
+        "string"
+      ],
+      "tempFRange": {
+        "min": "number|null",
+        "max": "number|null"
+      }
+    },
+    "fallbackSignals": [
+      "string"
+    ],
+    "safetyNotes": "string",
+    "reverseGeneration": {
+      "keywords": [
+        "string"
+      ],
+      "phrases": [
+        "string"
+      ]
+    },
+    "sessionHints": {
+      "stepTitlePatterns": [
+        "string"
+      ],
+      "defaultMetadata": {
+        "tempTargetF": "number|null",
+        "donenessCue": "string",
+        "cueNotes": "string"
+      }
+    },
+    "storehouseHints": {
+      "grocerySections": [
+        "string"
+      ],
+      "batchSessionIdeas": [
+        "string"
+      ]
+    },
+    "tags": [
+      "string"
+    ]
+  },
+  "rows": [
+    {
+      "id": "probeTemp_poultry_safe",
+      "label": "Poultry Safe (No Pink, Clear Juices)",
+      "cueCategory": "probeTemp",
+      "appliesToDomains": [
+        "cooking",
+        "animals",
+        "preservation"
+      ],
+      "bestFor": [
+        "whole_chicken",
+        "chicken_thighs",
+        "turkey",
+        "duck"
+      ],
+      "examples": [
+        "Roast chicken",
+        "Sheet pan chicken thighs",
+        "Smoked turkey"
+      ],
+      "signals": {
+        "visual": [
+          "No visible pink near the bone or in the thickest part",
+          "Juices run clear, not red"
+        ],
+        "texture": [
+          "Meat fibers feel firm but still moist when pressed with tongs"
+        ],
+        "smell": [
+          "Savory roasted poultry aroma; no raw or metallic smell"
+        ],
+        "sound": [],
+        "timeHints": [
+          "Often reached in final 10–15 minutes of roasting",
+          "Bone-in pieces may lag behind boneless by 5–10 minutes"
+        ],
+        "tempFRange": {
+          "min": 165,
+          "max": 180
+        }
+      },
+      "fallbackSignals": [
+        "Pierce near bone; juices run clear and not bloody",
+        "No translucent or jelly-like meat against the bone",
+        "Allow a 5–10 minute rest to finish carryover cooking"
+      ],
+      "safetyNotes": "USDA food-safety guidance: poultry should reach at least 165°F (74°C) in the thickest part. Always err on the side of safety for chicken and turkey.",
+      "reverseGeneration": {
+        "keywords": [
+          "165",
+          "poultry",
+          "chicken",
+          "turkey",
+          "no pink",
+          "clear juices"
+        ],
+        "phrases": [
+          "cook until juices run clear",
+          "no pink near the bone",
+          "internal temp reaches 165°F",
+          "fully cooked chicken",
+          "safe to eat (chicken)"
+        ]
+      },
+      "sessionHints": {
+        "stepTitlePatterns": [
+          "Check chicken for doneness",
+          "Verify turkey is cooked",
+          "Probe thickest part of chicken"
+        ],
+        "defaultMetadata": {
+          "tempTargetF": 165,
+          "donenessCue": "probeTemp",
+          "cueNotes": "Insert probe into thickest part without touching bone; confirm 165°F+ and clear juices."
+        }
+      },
+      "storehouseHints": {
+        "grocerySections": [
+          "meat+freezer"
+        ],
+        "batchSessionIdeas": [
+          "Batch roast chicken quarters for the week and shred once they hit 165°F.",
+          "Plan preservation session for cooked chicken (shredded and frozen in meal-size packs)."
+        ]
+      },
+      "tags": [
+        "meat",
+        "safety_critical",
+        "animal_butchery_followup"
+      ]
+    },
+    {
+      "id": "probeTemp_beef_medium",
+      "label": "Beef Medium (Warm Pink Center)",
+      "cueCategory": "probeTemp",
+      "appliesToDomains": [
+        "cooking",
+        "animals"
+      ],
+      "bestFor": [
+        "steak",
+        "roast_beef",
+        "lamb_chops"
+      ],
+      "examples": [
+        "Pan-seared steak",
+        "Roast beef for slicing"
+      ],
+      "signals": {
+        "visual": [
+          "Brown sear outside with a slight pink band toward the center"
+        ],
+        "texture": [
+          "Yielding but springy when pressed with a finger or tongs"
+        ],
+        "smell": [
+          "Deep roasted beef aroma; no raw smell"
+        ],
+        "sound": [
+          "Sizzle softens compared to hard sear stage"
+        ],
+        "timeHints": [
+          "Often ~3–5 minutes per side for 1 inch steak (varies by heat)",
+          "Roasts may require 45–90 minutes depending on size"
+        ],
+        "tempFRange": {
+          "min": 140,
+          "max": 150
+        }
+      },
+      "fallbackSignals": [
+        "Finger test: feels like the base of thumb when making a relaxed fist",
+        "Slight resistance when sliced, juices light pink"
+      ],
+      "safetyNotes": "Whole cuts of beef and lamb can be safely served at lower temps than poultry if handled properly. Ground meat should still reach at least 160°F inside.",
+      "reverseGeneration": {
+        "keywords": [
+          "medium",
+          "warm pink",
+          "140",
+          "145"
+        ],
+        "phrases": [
+          "cook to medium",
+          "warm pink center",
+          "about 145°F",
+          "juices lightly pink but not bloody"
+        ]
+      },
+      "sessionHints": {
+        "stepTitlePatterns": [
+          "Check steak doneness",
+          "Probe roast beef",
+          "Verify lamb chops are medium"
+        ],
+        "defaultMetadata": {
+          "tempTargetF": 145,
+          "donenessCue": "probeTemp",
+          "cueNotes": "Aim for 140–145°F in center, then rest under foil to allow carryover cooking."
+        }
+      },
+      "storehouseHints": {
+        "grocerySections": [
+          "meat+freezer"
+        ],
+        "batchSessionIdeas": [
+          "Slice leftover roast beef for sandwiches once cooled; portion and freeze.",
+          "Plan gravy or stew session using medium-cooked beef that will be reheated."
+        ]
+      },
+      "tags": [
+        "red_meat",
+        "temp_based",
+        "carryover_cooking"
+      ]
+    },
+    {
+      "id": "probeTemp_bread_done",
+      "label": "Bread Done (Hollow Thump / 200–210°F)",
+      "cueCategory": "probeTemp",
+      "appliesToDomains": [
+        "cooking",
+        "storehouse"
+      ],
+      "bestFor": [
+        "yeast_bread_loaves",
+        "sandwich_bread",
+        "enriched_breads"
+      ],
+      "examples": [
+        "Whole wheat sandwich loaf",
+        "Pan loaves and artisan boule"
+      ],
+      "signals": {
+        "visual": [
+          "Deep golden crust, especially on top and edges",
+          "Sides pull slightly away from the pan"
+        ],
+        "texture": [
+          "Firm crust that springs back slightly with gentle press"
+        ],
+        "smell": [
+          "Rich baked bread aroma; no raw dough smell"
+        ],
+        "sound": [
+          "When tapped on bottom, loaf sounds hollow"
+        ],
+        "timeHints": [
+          "Typically in final 5–10 minutes of baking window",
+          "Check earlier during first runs of new recipes"
+        ],
+        "tempFRange": {
+          "min": 200,
+          "max": 210
+        }
+      },
+      "fallbackSignals": [
+        "Tap bottom of loaf: hollow sound suggests done",
+        "Center feels set, not squishy, when pressed lightly"
+      ],
+      "safetyNotes": "Undercooked bread will be gummy and dense in the center. Fully cooked crumb helps with storage and mold prevention.",
+      "reverseGeneration": {
+        "keywords": [
+          "hollow",
+          "thump",
+          "200°F",
+          "210°F",
+          "golden crust"
+        ],
+        "phrases": [
+          "bake until deep golden",
+          "loaf sounds hollow when tapped",
+          "internal temp about 200°F",
+          "center is set not doughy"
+        ]
+      },
+      "sessionHints": {
+        "stepTitlePatterns": [
+          "Check bread for doneness",
+          "Tap loaf bottom",
+          "Probe loaf temperature"
+        ],
+        "defaultMetadata": {
+          "tempTargetF": 205,
+          "donenessCue": "probeTemp",
+          "cueNotes": "Aim for 200–210°F inside loaf; look for hollow sound and deep golden crust."
+        }
+      },
+      "storehouseHints": {
+        "grocerySections": [
+          "pantry+baking",
+          "storehouse:grain"
+        ],
+        "batchSessionIdeas": [
+          "Schedule weekly bread-baking batch and cool completely before slicing and freezing.",
+          "Tie bread-doneness checks into grain usage planning (how many loaves per bucket)."
+        ]
+      },
+      "tags": [
+        "bread",
+        "grain_system",
+        "batch_baking"
+      ]
+    },
+    {
+      "id": "color_golden_brown_edges",
+      "label": "Golden Brown Edges, Light Center",
+      "cueCategory": "color",
+      "appliesToDomains": [
+        "cooking",
+        "storehouse"
+      ],
+      "bestFor": [
+        "cookies",
+        "sheet_pan_veggies",
+        "roasted_potatoes"
+      ],
+      "examples": [
+        "Drop cookies with crisp edges and chewy centers",
+        "Roasted carrots and potatoes"
+      ],
+      "signals": {
+        "visual": [
+          "Edges have clear golden-brown color",
+          "Centers slightly lighter but opaque"
+        ],
+        "texture": [
+          "Edges feel firmer than centers when nudged with spatula"
+        ],
+        "smell": [
+          "Sweet, slightly nutty aroma; no raw flour smell"
+        ],
+        "sound": [
+          "Gentle sizzle; less aggressive than at start"
+        ],
+        "timeHints": [
+          "Often appears in final 2–5 minutes of baking/roasting window"
+        ],
+        "tempFRange": {
+          "min": null,
+          "max": null
+        }
+      },
+      "fallbackSignals": [
+        "Rotate tray and add 1–3 minutes if edges pale",
+        "Watch for rapid shift from pale to golden to prevent burning"
+      ],
+      "safetyNotes": "Usually not safety-critical foods; main risk is underdone centers or over-browning.",
+      "reverseGeneration": {
+        "keywords": [
+          "golden brown",
+          "edges set",
+          "light center"
+        ],
+        "phrases": [
+          "bake until edges are golden",
+          "center still pale but set",
+          "roast until golden at the edges"
+        ]
+      },
+      "sessionHints": {
+        "stepTitlePatterns": [
+          "Bake until edges are golden",
+          "Roast vegetables until golden at edges"
+        ],
+        "defaultMetadata": {
+          "tempTargetF": null,
+          "donenessCue": "color",
+          "cueNotes": "Look for golden-brown edges and set centers; add short time as needed."
+        }
+      },
+      "storehouseHints": {
+        "grocerySections": [
+          "pantry+baking",
+          "produce"
+        ],
+        "batchSessionIdeas": [
+          "Batch roast vegetables to golden edges and store for quick meals.",
+          "Cookie-baking session: pull sheets when edges are golden and centers pale."
+        ]
+      },
+      "tags": [
+        "baking",
+        "sheet_pan",
+        "visual_cue"
+      ]
+    },
+    {
+      "id": "color_even_browning_top_bottom",
+      "label": "Even Browning Top and Bottom",
+      "cueCategory": "color",
+      "appliesToDomains": [
+        "cooking",
+        "storehouse"
+      ],
+      "bestFor": [
+        "casseroles",
+        "lasagna",
+        "gratins",
+        "baked_pasta"
+      ],
+      "examples": [
+        "Lasagna with browned cheese on top",
+        "Mac and cheese gratin"
+      ],
+      "signals": {
+        "visual": [
+          "Top layer golden and bubbly at edges",
+          "Bottom crust or pasta edges slightly browned where contact with pan"
+        ],
+        "texture": [
+          "Top cheese layer crisp at high points, gooey below"
+        ],
+        "smell": [
+          "Rich, toasted cheese or breadcrumb aroma"
+        ],
+        "sound": [
+          "Bubbling sounds around edges when jostled in oven"
+        ],
+        "timeHints": [
+          "Often requires extra 5–10 minutes beyond simple 'heated through' time"
+        ],
+        "tempFRange": {
+          "min": 165,
+          "max": 190
+        }
+      },
+      "fallbackSignals": [
+        "Insert knife in center; contents should be hot, not lukewarm",
+        "Let rest 10–15 minutes before slicing to set layers"
+      ],
+      "safetyNotes": "Casseroles containing eggs, meat, or dairy should be heated thoroughly to at least 165°F in center.",
+      "reverseGeneration": {
+        "keywords": [
+          "bubbly",
+          "golden on top",
+          "brown around edges"
+        ],
+        "phrases": [
+          "bake until bubbly and golden",
+          "cheese is browned on top",
+          "edges are browned and center is hot"
+        ]
+      },
+      "sessionHints": {
+        "stepTitlePatterns": [
+          "Bake casserole until bubbly and golden",
+          "Brown cheese topping"
+        ],
+        "defaultMetadata": {
+          "tempTargetF": 175,
+          "donenessCue": "color",
+          "cueNotes": "Look for bubbling edges and golden browned top; confirm center is hot."
+        }
+      },
+      "storehouseHints": {
+        "grocerySections": [
+          "dairy",
+          "meat+freezer",
+          "pantry+baking"
+        ],
+        "batchSessionIdeas": [
+          "Batch-assemble casseroles for freezer and bake to even browning when ready.",
+          "Use storehouse staples (pasta, canned tomatoes, cheese) for layered casseroles."
+        ]
+      },
+      "tags": [
+        "casserole",
+        "family_meal",
+        "batch_cooking"
+      ]
+    },
+    {
+      "id": "texture_fork_tender",
+      "label": "Fork-Tender Vegetables and Meats",
+      "cueCategory": "texture",
+      "appliesToDomains": [
+        "cooking",
+        "preservation",
+        "storehouse"
+      ],
+      "bestFor": [
+        "stews",
+        "braised_meats",
+        "root_veggies"
+      ],
+      "examples": [
+        "Pot roast",
+        "Braised lamb shanks",
+        "Stewed carrots and potatoes"
+      ],
+      "signals": {
+        "visual": [
+          "Veg edges slightly softened or rounded",
+          "Meat fibers separating easily"
+        ],
+        "texture": [
+          "Fork slides in with little resistance",
+          "Meat pulls apart with fork twist"
+        ],
+        "smell": [
+          "Deep, blended stew aroma; no sharp raw smells"
+        ],
+        "sound": [
+          "Gentle simmering, not aggressive boiling"
+        ],
+        "timeHints": [
+          "Usually after 1–3 hours low simmer/braise depending on cut and size"
+        ],
+        "tempFRange": {
+          "min": 185,
+          "max": 210
+        }
+      },
+      "fallbackSignals": [
+        "Test both meat and largest vegetable pieces for tenderness",
+        "If tough, continue low simmer in 15–20 minute increments"
+      ],
+      "safetyNotes": "Stews with meat should be fully cooked throughout. Once fork-tender, most cuts have passed safe internal temps.",
+      "reverseGeneration": {
+        "keywords": [
+          "fork tender",
+          "fall-apart",
+          "braised",
+          "stewed"
+        ],
+        "phrases": [
+          "cook until fork-tender",
+          "simmer until the meat falls apart",
+          "braise until vegetables are very soft"
+        ]
+      },
+      "sessionHints": {
+        "stepTitlePatterns": [
+          "Simmer until fork-tender",
+          "Cook pot roast until meat pulls apart"
+        ],
+        "defaultMetadata": {
+          "tempTargetF": null,
+          "donenessCue": "texture",
+          "cueNotes": "Check largest pieces with a fork; extend simmer if resistance remains."
+        }
+      },
+      "storehouseHints": {
+        "grocerySections": [
+          "meat+freezer",
+          "produce"
+        ],
+        "batchSessionIdeas": [
+          "Large stew batch using tougher cuts from butchery; cool and portion for freezer.",
+          "Root vegetables cooked fork-tender for mash, soups, or freezer-ready sides."
+        ]
+      },
+      "tags": [
+        "braise",
+        "stew",
+        "comfort_food"
+      ]
+    },
+    {
+      "id": "texture_springy_center",
+      "label": "Springy Center (Cakes and Quick Breads)",
+      "cueCategory": "texture",
+      "appliesToDomains": [
+        "cooking",
+        "storehouse"
+      ],
+      "bestFor": [
+        "cakes",
+        "muffins",
+        "quick_breads"
+      ],
+      "examples": [
+        "Banana bread",
+        "Muffins",
+        "Snack cakes"
+      ],
+      "signals": {
+        "visual": [
+          "Top is matte, not shiny",
+          "Edges slightly pull from pan"
+        ],
+        "texture": [
+          "Light press in center springs back without leaving indentation"
+        ],
+        "smell": [
+          "Sweet, toasty aroma; no raw batter smell"
+        ],
+        "sound": [],
+        "timeHints": [
+          "Usually in final 5 minutes of listed bake time"
+        ],
+        "tempFRange": {
+          "min": 200,
+          "max": 210
+        }
+      },
+      "fallbackSignals": [
+        "Toothpick inserted in center comes out with only a few moist crumbs",
+        "Avoid overbaking; check early and often"
+      ],
+      "safetyNotes": "Undercooked quick breads can be gummy and dense; fully baked crumb improves storage and texture.",
+      "reverseGeneration": {
+        "keywords": [
+          "springs back",
+          "toothpick clean",
+          "center set"
+        ],
+        "phrases": [
+          "bake until the center springs back",
+          "toothpick comes out clean",
+          "top is golden and center is set"
+        ]
+      },
+      "sessionHints": {
+        "stepTitlePatterns": [
+          "Check banana bread for doneness",
+          "Test cake center"
+        ],
+        "defaultMetadata": {
+          "tempTargetF": 205,
+          "donenessCue": "texture",
+          "cueNotes": "Press center lightly; it should spring back. Toothpick should have only a few moist crumbs."
+        }
+      },
+      "storehouseHints": {
+        "grocerySections": [
+          "pantry+baking"
+        ],
+        "batchSessionIdeas": [
+          "Bake multiple loaves of banana or zucchini bread, cool fully, then freeze.",
+          "Use quick-bread sessions to rotate through overripe fruit stock."
+        ]
+      },
+      "tags": [
+        "baking",
+        "snacks",
+        "overripe_fruit_usage"
+      ]
+    },
+    {
+      "id": "smell_nutty_toasted",
+      "label": "Nutty / Toasted Aroma",
+      "cueCategory": "smell",
+      "appliesToDomains": [
+        "cooking",
+        "preservation",
+        "storehouse"
+      ],
+      "bestFor": [
+        "nuts",
+        "grains",
+        "brown_butter",
+        "roux"
+      ],
+      "examples": [
+        "Toasting nuts",
+        "Browning butter",
+        "Cooking a roux for gumbo"
+      ],
+      "signals": {
+        "visual": [
+          "Color deepens slightly from pale to golden or tan"
+        ],
+        "texture": [],
+        "smell": [
+          "Shift from raw or bland to warm, nutty, toasted aroma"
+        ],
+        "sound": [
+          "Gentle sizzle or pop; may quiet as moisture evaporates"
+        ],
+        "timeHints": [
+          "Quick window: often within 30–90 seconds for nuts and butter over medium heat"
+        ],
+        "tempFRange": {
+          "min": null,
+          "max": null
+        }
+      },
+      "fallbackSignals": [
+        "Stir constantly once nutty aroma appears; remove from heat promptly to avoid burning",
+        "Err on the side of light toast; darker can tip to bitter"
+      ],
+      "safetyNotes": "Primarily a flavor cue. Burning can create bitter compounds and smoke; ventilate when toasting at high heat.",
+      "reverseGeneration": {
+        "keywords": [
+          "nutty",
+          "toasted",
+          "browned butter",
+          "roux"
+        ],
+        "phrases": [
+          "cook until nutty aroma",
+          "heat until lightly toasted",
+          "brown the butter until it smells nutty"
+        ]
+      },
+      "sessionHints": {
+        "stepTitlePatterns": [
+          "Toast nuts until fragrant",
+          "Brown butter until nutty"
+        ],
+        "defaultMetadata": {
+          "tempTargetF": null,
+          "donenessCue": "smell",
+          "cueNotes": "Watch closely; as soon as nutty aroma appears and color deepens, pull from heat."
+        }
+      },
+      "storehouseHints": {
+        "grocerySections": [
+          "pantry+baking",
+          "grain",
+          "nuts_and_seeds"
+        ],
+        "batchSessionIdeas": [
+          "Batch-toast nuts or seeds, cool, then store for salads and snacks.",
+          "Prep brown butter in batches for sauces and baking; chill or freeze."
+        ]
+      },
+      "tags": [
+        "flavor_boost",
+        "high_attention_step"
+      ]
+    },
+    {
+      "id": "smell_caramelized_sweet",
+      "label": "Caramelized Sweet Aroma",
+      "cueCategory": "smell",
+      "appliesToDomains": [
+        "cooking",
+        "storehouse"
+      ],
+      "bestFor": [
+        "onions",
+        "roasted_vegetables",
+        "caramel_sauce"
+      ],
+      "examples": [
+        "Caramelized onions",
+        "Roasted root vegetables",
+        "Caramel-making"
+      ],
+      "signals": {
+        "visual": [
+          "Color shifts from pale to golden to amber or rich brown (onions)",
+          "Veg edges browned"
+        ],
+        "texture": [
+          "Onions soft and jammy",
+          "Veg tender all the way through"
+        ],
+        "smell": [
+          "Strong sweet, caramel-like smell; no sharp raw onion smell"
+        ],
+        "sound": [
+          "Sizzle reduces as moisture cooks off; occasional gentle bubbling"
+        ],
+        "timeHints": [
+          "Onions can take 30–45+ minutes over low heat",
+          "Roasted veg typically 25–45 minutes depending on size"
+        ],
+        "tempFRange": {
+          "min": null,
+          "max": null
+        }
+      },
+      "fallbackSignals": [
+        "Taste a small piece: sweet and mellow, not sharp or raw",
+        "If bottom begins to scorch, lower heat and add a splash of water"
+      ],
+      "safetyNotes": "Primarily a flavor cue; monitor closely to avoid burning sugars which can smoke.",
+      "reverseGeneration": {
+        "keywords": [
+          "caramelized",
+          "deeply golden",
+          "sweet aroma"
+        ],
+        "phrases": [
+          "cook until deeply caramelized",
+          "onions turn golden and sweet",
+          "roast until vegetables smell sweet and toasty"
+        ]
+      },
+      "sessionHints": {
+        "stepTitlePatterns": [
+          "Caramelize onions",
+          "Roast vegetables until caramelized"
+        ],
+        "defaultMetadata": {
+          "tempTargetF": null,
+          "donenessCue": "smell",
+          "cueNotes": "Aim for deep golden color and sweet aroma; allow enough time for full caramelization."
+        }
+      },
+      "storehouseHints": {
+        "grocerySections": [
+          "produce"
+        ],
+        "batchSessionIdeas": [
+          "Batch-cook caramelized onions and freeze in small portions for future meals.",
+          "Roast and freeze caramelized vegetable medleys for quick sides."
+        ]
+      },
+      "tags": [
+        "flavor_base",
+        "batch_component"
+      ]
+    },
+    {
+      "id": "timer_gentle_simmer",
+      "label": "Gentle Simmer for X Minutes",
+      "cueCategory": "timer",
+      "appliesToDomains": [
+        "cooking",
+        "preservation",
+        "cleaning"
+      ],
+      "bestFor": [
+        "soups",
+        "sauces",
+        "broths",
+        "jam",
+        "pectin_activation"
+      ],
+      "examples": [
+        "Simmer broth for 30–60 minutes",
+        "Simmer sauce after deglazing",
+        "Simmer jam for gel"
+      ],
+      "signals": {
+        "visual": [
+          "Small bubbles occasionally breaking the surface",
+          "No violent boiling or splashing"
+        ],
+        "texture": [],
+        "smell": [
+          "Aroma gradually intensifies"
+        ],
+        "sound": [
+          "Soft, intermittent bubbling rather than rolling boil"
+        ],
+        "timeHints": [
+          "Use timer for minimum, but allow extra time for flavor or texture if needed"
+        ],
+        "tempFRange": {
+          "min": 185,
+          "max": 205
+        }
+      },
+      "fallbackSignals": [
+        "If liquid reduces too quickly, lower heat and partially cover",
+        "If not reducing at all, increase heat slightly until gentle bubble pattern appears"
+      ],
+      "safetyNotes": "For canning and preservation, always follow specified simmer/boil times and processing instructions in a tested recipe.",
+      "reverseGeneration": {
+        "keywords": [
+          "simmer",
+          "gentle boil",
+          "low heat"
+        ],
+        "phrases": [
+          "simmer gently for",
+          "cook over low heat for",
+          "maintain a gentle simmer"
+        ]
+      },
+      "sessionHints": {
+        "stepTitlePatterns": [
+          "Simmer soup for 20 minutes",
+          "Simmer sauce gently"
+        ],
+        "defaultMetadata": {
+          "tempTargetF": null,
+          "donenessCue": "timer",
+          "cueNotes": "Set a timer and maintain gentle bubbling; adjust heat as needed."
+        }
+      },
+      "storehouseHints": {
+        "grocerySections": [
+          "storehouse:stock_pots",
+          "storehouse:jars"
+        ],
+        "batchSessionIdeas": [
+          "Schedule broth-making sessions with 60–90 minute gentle simmers.",
+          "Plan jam/preserves sessions using garden or storehouse fruit with specified simmer times."
+        ]
+      },
+      "tags": [
+        "simmer",
+        "low_and_slow",
+        "jam_and_broth"
+      ]
+    },
+    {
+      "id": "jiggle_center_set_edges",
+      "label": "Center Slightly Wobbly, Edges Set",
+      "cueCategory": "jiggle",
+      "appliesToDomains": [
+        "cooking",
+        "storehouse"
+      ],
+      "bestFor": [
+        "custards",
+        "cheesecakes",
+        "quiches",
+        "egg_bakes"
+      ],
+      "examples": [
+        "Baked custard",
+        "Cheesecake",
+        "Breakfast egg casserole"
+      ],
+      "signals": {
+        "visual": [
+          "Edges look set and matte",
+          "Center circle (about 1–2 inches) gently jiggles like firm gelatin when pan is nudged"
+        ],
+        "texture": [],
+        "smell": [
+          "Warm eggy or creamy aroma; no raw egg smell"
+        ],
+        "sound": [],
+        "timeHints": [
+          "Usually reached near the end of listed bake time; residual heat finishes the center"
+        ],
+        "tempFRange": {
+          "min": 155,
+          "max": 175
+        }
+      },
+      "fallbackSignals": [
+        "Insert knife near edge, not center; it should come out mostly clean",
+        "Carryover heat will finish setting the center during cooling"
+      ],
+      "safetyNotes": "Egg-based dishes should reach safe temps; if uncertain, probe in center to ensure at least ~160°F.",
+      "reverseGeneration": {
+        "keywords": [
+          "slight jiggle",
+          "center wobbly",
+          "edges set"
+        ],
+        "phrases": [
+          "bake until the center trembles slightly",
+          "edges are set but center jiggles",
+          "custard quivers like firm jelly"
+        ]
+      },
+      "sessionHints": {
+        "stepTitlePatterns": [
+          "Check custard jiggle",
+          "See if cheesecake center still jiggles"
+        ],
+        "defaultMetadata": {
+          "tempTargetF": 165,
+          "donenessCue": "jiggle",
+          "cueNotes": "Look for set edges and a gentle jiggle in the center; allow cooling to finish the set."
+        }
+      },
+      "storehouseHints": {
+        "grocerySections": [
+          "eggs",
+          "dairy"
+        ],
+        "batchSessionIdeas": [
+          "Bake multiple egg casseroles or quiches and cool until centers set, then freeze portions.",
+          "Cheesecake batch for events; cool completely to set before slicing and chilling."
+        ]
+      },
+      "tags": [
+        "egg_dishes",
+        "carryover_set",
+        "delicate"
+      ]
+    }
+  ]
+}

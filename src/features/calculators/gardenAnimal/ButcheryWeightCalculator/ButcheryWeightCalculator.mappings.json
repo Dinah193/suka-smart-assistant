@@ -1,0 +1,276 @@
+{
+  "id": "planningGraph.mappings.butcheryWeightCalculator",
+  "calculator": "ButcheryWeightCalculator",
+  "domains": ["animals", "storehouse", "cooking", "preservation"],
+  "inputs": {
+    "byId": {
+      "liveWeightKg": {
+        "label": "Live Weight (kg)",
+        "description": "Estimated or recorded live animal weight in kilograms.",
+        "kind": "number",
+        "role": "input"
+      },
+      "hangingWeightKg": {
+        "label": "Hanging / Carcass Weight (kg)",
+        "description": "Weight after slaughter and initial dressing in kilograms.",
+        "kind": "number",
+        "role": "input"
+      },
+      "species": {
+        "label": "Species",
+        "description": "Species being processed (e.g., beef, lamb, goat, poultry, pork).",
+        "kind": "string",
+        "role": "input"
+      },
+      "targetYieldPct": {
+        "label": "Target Retail Yield (%)",
+        "description": "Planner’s target retail yield percentage from hanging carcass.",
+        "kind": "number",
+        "role": "input"
+      },
+      "totalRetailKg": {
+        "label": "Total Retail Cut Weight (kg)",
+        "description": "Total weight of retail cuts calculated by the shim.",
+        "kind": "number",
+        "role": "output"
+      },
+      "bonesKg": {
+        "label": "Bones & Stock Material (kg)",
+        "description": "Weight of bones and cartilage available for stock/broth.",
+        "kind": "number",
+        "role": "output"
+      },
+      "fatRenderKg": {
+        "label": "Fat / Tallow Rendering (kg)",
+        "description": "Weight of fat suitable for rendering or sausage.",
+        "kind": "number",
+        "role": "output"
+      },
+      "grindKg": {
+        "label": "Ground / Trim Meat (kg)",
+        "description": "Trim and grindable meat weight calculated by the shim.",
+        "kind": "number",
+        "role": "output"
+      },
+      "steaksKg": {
+        "label": "Steaks & Chops (kg)",
+        "description": "Weight of steak/chop style cuts.",
+        "kind": "number",
+        "role": "output"
+      },
+      "roastsKg": {
+        "label": "Roasts (kg)",
+        "description": "Weight of whole roast cuts.",
+        "kind": "number",
+        "role": "output"
+      },
+      "offalKg": {
+        "label": "Organs & Specialty Offal (kg)",
+        "description": "Weight of edible organs and offal.",
+        "kind": "number",
+        "role": "output"
+      },
+      "retailYieldPct": {
+        "label": "Actual Retail Yield (%)",
+        "description": "Actual yield percentage from carcass to retail cuts.",
+        "kind": "number",
+        "role": "output"
+      },
+      "batchId": {
+        "label": "Butchery Batch Id",
+        "description": "Internal batch identifier used for cross-tool planning.",
+        "kind": "string",
+        "role": "meta"
+      }
+    }
+  },
+  "rules": [
+    {
+      "id": "butchery.freezer.plan",
+      "label": "Create Freezer Inventory Plan",
+      "description": "When a meaningful amount of retail meat is present, prompt user to create a freezer/storehouse plan.",
+      "when": {
+        "pipeline": [
+          {
+            "kind": "threshold",
+            "inputId": "totalRetailKg",
+            "op": ">=",
+            "value": 10
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "actionType": "emitEvent",
+            "eventType": "storehouse.freezer.plan.requested",
+            "payloadMap": {
+              "batchId": "batchId",
+              "species": "species",
+              "liveWeightKg": "liveWeightKg",
+              "hangingWeightKg": "hangingWeightKg",
+              "totalRetailKg": "totalRetailKg",
+              "steaksKg": "steaksKg",
+              "roastsKg": "roastsKg",
+              "grindKg": "grindKg",
+              "offalKg": "offalKg",
+              "bonesKg": "bonesKg",
+              "fatRenderKg": "fatRenderKg",
+              "retailYieldPct": "retailYieldPct"
+            }
+          },
+          {
+            "actionType": "suggestSessionDraft",
+            "sessionDomain": "storehouse",
+            "payloadMap": {
+              "batchId": "batchId",
+              "species": "species",
+              "totalRetailKg": "totalRetailKg"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "butchery.batchCooking.planning",
+      "label": "Suggest Batch Cooking Sessions",
+      "description": "If there is enough grind or stew-style meat, suggest grind and batch-cooking sessions.",
+      "when": {
+        "pipeline": [
+          {
+            "kind": "any",
+            "conditions": [
+              {
+                "kind": "threshold",
+                "inputId": "grindKg",
+                "op": ">=",
+                "value": 5
+              },
+              {
+                "kind": "threshold",
+                "inputId": "roastsKg",
+                "op": ">=",
+                "value": 5
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "actionType": "emitEvent",
+            "eventType": "planning.batchCooking.suggested",
+            "payloadMap": {
+              "batchId": "batchId",
+              "species": "species",
+              "grindKg": "grindKg",
+              "roastsKg": "roastsKg",
+              "steaksKg": "steaksKg",
+              "totalRetailKg": "totalRetailKg"
+            }
+          },
+          {
+            "actionType": "suggestSessionDraft",
+            "sessionDomain": "cooking",
+            "payloadMap": {
+              "batchId": "batchId",
+              "species": "species",
+              "grindKg": "grindKg",
+              "roastsKg": "roastsKg"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "butchery.stockAndOffal.sessions",
+      "label": "Suggest Stock & Offal Sessions",
+      "description": "If there is a meaningful amount of bones or offal, suggest stock/broth and organ-prep sessions.",
+      "when": {
+        "pipeline": [
+          {
+            "kind": "any",
+            "conditions": [
+              {
+                "kind": "threshold",
+                "inputId": "bonesKg",
+                "op": ">=",
+                "value": 3
+              },
+              {
+                "kind": "threshold",
+                "inputId": "offalKg",
+                "op": ">=",
+                "value": 2
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "actionType": "emitEvent",
+            "eventType": "planning.preservation.stockSuggested",
+            "payloadMap": {
+              "batchId": "batchId",
+              "species": "species",
+              "bonesKg": "bonesKg",
+              "offalKg": "offalKg"
+            }
+          },
+          {
+            "actionType": "suggestSessionDraft",
+            "sessionDomain": "preservation",
+            "payloadMap": {
+              "batchId": "batchId",
+              "species": "species",
+              "bonesKg": "bonesKg",
+              "offalKg": "offalKg"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "butchery.meatYield.analytics",
+      "label": "Update Meat Yield Analytics",
+      "description": "Always push yield metrics into the analytics stream for dashboards and long-term planning.",
+      "when": {
+        "pipeline": [
+          {
+            "kind": "exists",
+            "inputId": "hangingWeightKg"
+          },
+          {
+            "kind": "exists",
+            "inputId": "totalRetailKg"
+          }
+        ]
+      },
+      "then": {
+        "actions": [
+          {
+            "actionType": "emitEvent",
+            "eventType": "analytics.meatYield.updated",
+            "payloadMap": {
+              "batchId": "batchId",
+              "species": "species",
+              "liveWeightKg": "liveWeightKg",
+              "hangingWeightKg": "hangingWeightKg",
+              "totalRetailKg": "totalRetailKg",
+              "retailYieldPct": "retailYieldPct",
+              "bonesKg": "bonesKg",
+              "fatRenderKg": "fatRenderKg",
+              "grindKg": "grindKg",
+              "steaksKg": "steaksKg",
+              "roastsKg": "roastsKg",
+              "offalKg": "offalKg"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

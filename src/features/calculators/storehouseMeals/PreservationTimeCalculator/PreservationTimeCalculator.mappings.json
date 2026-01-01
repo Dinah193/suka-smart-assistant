@@ -1,0 +1,195 @@
+{
+  "id": "PreservationTimeCalculator.mappings",
+  "nodeKey": "preservationTimeCalculator",
+  "version": "1.0.0",
+  "kind": "calculator-mappings",
+  "description": "Next steps mapping for using preservation time results to drive preservation sessions, freezer loading, and storehouse updates.",
+
+  "nextSteps": [
+    {
+      "key": "schedulePreservationSession",
+      "label": "Schedule preservation session",
+      "description": "Create a preservation SessionRunner session using the calculated times and methods.",
+      "targetNodeKey": "sessionRunner",
+      "action": "createPreservationSessionFromCalculator",
+      "conditions": {
+        "requires": ["PreservationTimeResult"],
+        "minItems": 1
+      },
+      "sessionTemplate": {
+        "domain": "preservation",
+        "title": "Run preservation session",
+        "sourceType": "manual",
+        "steps": [
+          {
+            "title": "Prepare jars, trays, or curing space",
+            "desc": "Gather jars, lids, dehydrator trays, racks, or curing hooks based on the selected preservation method.",
+            "durationSec": 900,
+            "blockers": ["inventory", "equipment", "quietHours", "sabbath"],
+            "metadata": {
+              "tempTargetF": 0,
+              "donenessCue": "timer",
+              "cueNotes": "Planning and setup step only; no temperature yet."
+            }
+          },
+          {
+            "title": "Run active preservation cycle",
+            "desc": "Follow the calculated preservation time for canning, dehydrating, or curing. SSA timers and alerts will keep you on track.",
+            "durationSec": 3600,
+            "blockers": ["equipment", "quietHours", "sabbath"],
+            "metadata": {
+              "tempTargetF": 0,
+              "donenessCue": "timer",
+              "cueNotes": "Actual runtime will be taken from preservation calculator outputs and adjusted for altitude if available."
+            }
+          }
+        ]
+      },
+      "uiHints": {
+        "ctaLabel": "Run now",
+        "icon": "play-circle",
+        "priority": 1
+      }
+    },
+    {
+      "key": "sendToFreezerInventory",
+      "label": "Send preserved foods to freezer",
+      "description": "Create freezer inventory entries for items preserved via freezing or post-blanching steps.",
+      "targetNodeKey": "freezerInventory",
+      "action": "createFreezerItemsFromPreservationResult",
+      "conditions": {
+        "requires": ["PreservationTimeResult"],
+        "filter": {
+          "method": ["freeze", "par-freeze", "blast-freeze"]
+        }
+      },
+      "sessionTemplate": {
+        "domain": "storehouse",
+        "title": "Log preserved foods into freezer",
+        "sourceType": "manual",
+        "steps": [
+          {
+            "title": "Label and pack freezer items",
+            "desc": "Label packages with food name, date, and method, then place them into their assigned freezer zones.",
+            "durationSec": 600,
+            "blockers": ["inventory"],
+            "metadata": {
+              "tempTargetF": 0,
+              "donenessCue": "timer",
+              "cueNotes": "Use this step to confirm labels and zones before storage."
+            }
+          }
+        ]
+      },
+      "uiHints": {
+        "ctaLabel": "Log to freezer",
+        "icon": "fridge",
+        "priority": 2
+      }
+    },
+    {
+      "key": "updateShelfStorehouse",
+      "label": "Update shelf storehouse inventory",
+      "description": "Create or update shelf-stable storehouse entries for canned, dehydrated, or cured foods.",
+      "targetNodeKey": "storehouseInventory",
+      "action": "updateStorehouseFromPreservationResult",
+      "conditions": {
+        "requires": ["PreservationTimeResult"],
+        "filter": {
+          "method": ["water-bath", "pressure-can", "dehydrate", "cure", "smoke"]
+        }
+      },
+      "sessionTemplate": {
+        "domain": "storehouse",
+        "title": "Record shelf-stable preserved foods",
+        "sourceType": "manual",
+        "steps": [
+          {
+            "title": "Confirm jars, bags, and cured weights",
+            "desc": "Count jars, bags, or cured bundles and assign them to storehouse locations and categories.",
+            "durationSec": 900,
+            "blockers": ["inventory"],
+            "metadata": {
+              "tempTargetF": 0,
+              "donenessCue": "timer",
+              "cueNotes": "Use this step to double-check that all preserved items are logged before storage."
+            }
+          }
+        ]
+      },
+      "uiHints": {
+        "ctaLabel": "Update storehouse",
+        "icon": "warehouse",
+        "priority": 3
+      }
+    },
+    {
+      "key": "alignWithBatchCooking",
+      "label": "Align with batch cooking session",
+      "description": "Connect preservation results back to batch cooking plans so you can preserve leftovers or planned batches.",
+      "targetNodeKey": "batchYieldCalculator",
+      "action": "linkPreservationTimesToBatchSessions",
+      "conditions": {
+        "requires": ["PreservationTimeResult", "BatchYieldResult"],
+        "minItems": 1
+      },
+      "sessionTemplate": {
+        "domain": "cooking",
+        "title": "Sync batch cooking and preservation",
+        "sourceType": "recipe",
+        "steps": [
+          {
+            "title": "Choose which batches to preserve",
+            "desc": "Select which cooked batches will be canned, frozen, or dehydrated based on the preservation times calculated.",
+            "durationSec": 600,
+            "blockers": ["inventory", "equipment"],
+            "metadata": {
+              "tempTargetF": 0,
+              "donenessCue": "timer",
+              "cueNotes": "Use this step to map cooked volumes to preservation methods and containers."
+            }
+          }
+        ]
+      },
+      "uiHints": {
+        "ctaLabel": "Sync with batch cooking",
+        "icon": "layers",
+        "priority": 4
+      }
+    },
+    {
+      "key": "scheduleFuturePreservation",
+      "label": "Schedule preservation for later",
+      "description": "Use the calculated times to schedule a preservation session into the household calendar instead of running it immediately.",
+      "targetNodeKey": "calendarPlanner",
+      "action": "addPreservationSessionToCalendar",
+      "conditions": {
+        "requires": ["PreservationTimeResult"],
+        "minItems": 1
+      },
+      "sessionTemplate": {
+        "domain": "preservation",
+        "title": "Planned preservation session",
+        "sourceType": "manual",
+        "steps": [
+          {
+            "title": "Pick a preservation window",
+            "desc": "Choose a time block that fits the required preservation duration and your household’s quiet hours, Sabbath, and equipment availability.",
+            "durationSec": 300,
+            "blockers": ["quietHours", "sabbath"],
+            "metadata": {
+              "tempTargetF": 0,
+              "donenessCue": "timer",
+              "cueNotes": "Scheduling-only step; actual timers will run when the session starts."
+            }
+          }
+        ]
+      },
+      "uiHints": {
+        "ctaLabel": "Schedule later",
+        "icon": "calendar-clock",
+        "priority": 5
+      }
+    }
+  ]
+}

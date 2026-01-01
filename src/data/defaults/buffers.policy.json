@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "generatedAt": "2025-11-08T00:00:00.000Z",
+  "units": "percent-of-estimated-duration",
+  "defaults": {
+    "prePct": 0.05,
+    "postPct": 0.08,
+    "cleanupPct": 0.04,
+    "minPreMs": 60000,
+    "minPostMs": 120000,
+    "minCleanupMs": 30000,
+    "maxPreMs": 900000,
+    "maxPostMs": 1800000,
+    "maxCleanupMs": 600000
+  },
+  "byDomain": {
+    "cooking": {
+      "prePct": 0.06,
+      "postPct": 0.10,
+      "cleanupPct": 0.06,
+      "minPreMs": 120000,
+      "minPostMs": 180000,
+      "minCleanupMs": 60000
+    },
+    "cleaning": {
+      "prePct": 0.03,
+      "postPct": 0.05,
+      "cleanupPct": 0.03,
+      "minPreMs": 30000,
+      "minPostMs": 60000,
+      "minCleanupMs": 30000
+    },
+    "garden": {
+      "prePct": 0.04,
+      "postPct": 0.07,
+      "cleanupPct": 0.04,
+      "minPreMs": 60000,
+      "minPostMs": 90000,
+      "minCleanupMs": 30000
+    },
+    "animals": {
+      "prePct": 0.03,
+      "postPct": 0.05,
+      "cleanupPct": 0.03,
+      "minPreMs": 30000,
+      "minPostMs": 60000,
+      "minCleanupMs": 30000
+    },
+    "preservation": {
+      "prePct": 0.07,
+      "postPct": 0.12,
+      "cleanupPct": 0.08,
+      "minPreMs": 120000,
+      "minPostMs": 240000,
+      "minCleanupMs": 120000
+    },
+    "inventory": {
+      "prePct": 0.03,
+      "postPct": 0.05,
+      "cleanupPct": 0.02,
+      "minPreMs": 30000,
+      "minPostMs": 60000,
+      "minCleanupMs": 15000
+    },
+    "storehouse": {
+      "prePct": 0.04,
+      "postPct": 0.07,
+      "cleanupPct": 0.04,
+      "minPreMs": 60000,
+      "minPostMs": 90000,
+      "minCleanupMs": 30000
+    },
+    "other": {
+      "prePct": 0.05,
+      "postPct": 0.08,
+      "cleanupPct": 0.04
+    }
+  },
+  "bySessionType": {
+    "project": {
+      "prePct": 0.08,
+      "postPct": 0.12,
+      "cleanupPct": 0.06,
+      "minPreMs": 120000,
+      "minPostMs": 180000,
+      "minCleanupMs": 60000,
+      "maxPreMs": 1200000,
+      "maxPostMs": 2400000,
+      "maxCleanupMs": 900000
+    },
+    "feeding": {
+      "prePct": 0.03,
+      "postPct": 0.05,
+      "cleanupPct": 0.02,
+      "minPreMs": 30000,
+      "minPostMs": 60000,
+      "minCleanupMs": 15000,
+      "maxPreMs": 180000,
+      "maxPostMs": 300000,
+      "maxCleanupMs": 120000
+    }
+  },
+  "situationalMultipliers": {
+    "quietHours": 1.2,
+    "rtcUnavailable": 1.1,
+    "firstRunOnDevice": 1.15,
+    "lowInventoryConfidence": 1.1
+  }
+}

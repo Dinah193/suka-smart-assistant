@@ -1,0 +1,499 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://suka-smart-assistant.local/schemas/FreezerSpaceCalculator.schema.json",
+  "title": "FreezerSpaceCalculator Payload Schema",
+  "type": "object",
+  "description": "Schema for the Freezer Space Calculator: capacity inputs and usage / layout outputs.",
+  "additionalProperties": false,
+  "properties": {
+    "inputs": {
+      "type": "object",
+      "description": "All inputs required to estimate freezer capacity usage.",
+      "additionalProperties": false,
+      "properties": {
+        "householdId": {
+          "type": "string",
+          "description": "Identifier for the household this calculation belongs to."
+        },
+        "projectId": {
+          "type": "string",
+          "description": "Optional project / batch identifier (e.g., butchery weekend, fall stock-up)."
+        },
+        "freezers": {
+          "type": "array",
+          "description": "List of freezers and their capacities.",
+          "items": {
+            "$ref": "#/definitions/Freezer"
+          },
+          "minItems": 1
+        },
+        "items": {
+          "type": "array",
+          "description": "Planned items to place into freezers (meat, meals, ferments, etc.).",
+          "items": {
+            "$ref": "#/definitions/PlannedItem"
+          },
+          "minItems": 1
+        },
+        "preferredZones": {
+          "type": "array",
+          "description": "Optional preferred zone assignments for certain categories.",
+          "items": {
+            "$ref": "#/definitions/PreferredZoneRule"
+          }
+        },
+        "constraints": {
+          "type": "object",
+          "description": "Optional constraints for the planning algorithm.",
+          "additionalProperties": false,
+          "properties": {
+            "maxRepackSessions": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Maximum number of repack / reorganization sessions the household is willing to do."
+            },
+            "reservePct": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Percentage of each freezer to keep in reserve as headroom."
+            }
+          }
+        }
+      },
+      "required": [
+        "householdId",
+        "freezers",
+        "items"
+      ]
+    },
+    "outputs": {
+      "type": "object",
+      "description": "Calculated results for freezer space usage and layout.",
+      "additionalProperties": false,
+      "properties": {
+        "volumeUsage": {
+          "type": "array",
+          "description": "Per-freezer and overall volume usage metrics.",
+          "items": {
+            "$ref": "#/definitions/FreezerUsage"
+          }
+        },
+        "fitReport": {
+          "$ref": "#/definitions/FitReport",
+          "description": "Report of which items fit, which overflow, and any warnings."
+        },
+        "suggestedLayout": {
+          "type": "array",
+          "description": "Suggested shelf/zone layout for each freezer.",
+          "items": {
+            "$ref": "#/definitions/FreezerLayout"
+          }
+        },
+        "sessionSuggestions": {
+          "type": "array",
+          "description": "Suggested sessions for SessionRunner (repack, reorganize, label).",
+          "items": {
+            "$ref": "#/definitions/SessionHint"
+          }
+        },
+        "inventoryHints": {
+          "type": "array",
+          "description": "Hints for storehouse inventory updates (locations, zones, capacity guardrails).",
+          "items": {
+            "$ref": "#/definitions/InventoryHint"
+          }
+        }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "description": "Optional metadata passed through by the caller.",
+      "additionalProperties": true,
+      "properties": {
+        "sourceNode": {
+          "type": "string",
+          "description": "Planning Graph node that initiated this calculation."
+        },
+        "requestedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp when the calculation was requested."
+        }
+      }
+    }
+  },
+  "required": [
+    "inputs"
+  ],
+  "definitions": {
+    "Freezer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "freezerId": {
+          "type": "string",
+          "description": "Unique identifier for this freezer."
+        },
+        "label": {
+          "type": "string",
+          "description": "Human-friendly name (e.g., Garage Chest Freezer)."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "chest",
+            "upright",
+            "drawer",
+            "combo",
+            "other"
+          ],
+          "description": "Freezer type to help with default zone rules."
+        },
+        "capacityLiters": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Approximate internal capacity in liters."
+        },
+        "reservePct": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Optional reserve percentage for this specific freezer (overrides global)."
+        },
+        "zones": {
+          "type": "array",
+          "description": "Optional internal zones (shelves, baskets, drawers).",
+          "items": {
+            "$ref": "#/definitions/FreezerZone"
+          }
+        }
+      },
+      "required": [
+        "freezerId",
+        "label",
+        "type",
+        "capacityLiters"
+      ]
+    },
+    "FreezerZone": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "zoneId": {
+          "type": "string",
+          "description": "Unique identifier for this zone within its freezer."
+        },
+        "label": {
+          "type": "string",
+          "description": "Human label (e.g., Top Shelf, Basket A)."
+        },
+        "capacityLiters": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Optional rough capacity for this zone."
+        },
+        "categoryHints": {
+          "type": "array",
+          "description": "Preferred categories for this zone (e.g., quick-grab meals, ferments).",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "zoneId",
+        "label"
+      ]
+    },
+    "PlannedItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "itemId": {
+          "type": "string",
+          "description": "Identifier for this planned item or batch."
+        },
+        "label": {
+          "type": "string",
+          "description": "Human-friendly name (e.g., Lamb Sausage Links, Beef Quarters)."
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "meat",
+            "prepared_meal",
+            "ferment",
+            "bulk",
+            "dessert",
+            "broth",
+            "other"
+          ],
+          "description": "Item category to help guide layout rules."
+        },
+        "volumeLiters": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Estimated volume per unit in liters."
+        },
+        "quantity": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Number of units or packages."
+        },
+        "preferredFreezerId": {
+          "type": "string",
+          "description": "Preferred freezer for this item, if any."
+        },
+        "preferredZoneId": {
+          "type": "string",
+          "description": "Preferred internal zone for this item, if any."
+        },
+        "tags": {
+          "type": "array",
+          "description": "Optional tags (e.g., rotation priority, feastUseOnly).",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "itemId",
+        "label",
+        "category",
+        "volumeLiters",
+        "quantity"
+      ]
+    },
+    "PreferredZoneRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "type": "string",
+          "description": "Category to match (e.g., prepared_meal, ferment)."
+        },
+        "freezerId": {
+          "type": "string",
+          "description": "Freezer where this category should be stored by preference."
+        },
+        "zoneId": {
+          "type": "string",
+          "description": "Zone within the freezer where this category should be stored by preference."
+        }
+      },
+      "required": [
+        "category"
+      ]
+    },
+    "FreezerUsage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "freezerId": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "capacityLiters": {
+          "type": "number"
+        },
+        "usedLiters": {
+          "type": "number"
+        },
+        "reservedLiters": {
+          "type": "number"
+        },
+        "freeLiters": {
+          "type": "number"
+        },
+        "utilizationPct": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "freezerId",
+        "label",
+        "capacityLiters",
+        "usedLiters",
+        "freeLiters",
+        "utilizationPct"
+      ]
+    },
+    "FitReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fitsAll": {
+          "type": "boolean",
+          "description": "True if all planned items fit within the defined freezers and constraints."
+        },
+        "overflowItems": {
+          "type": "array",
+          "description": "Items that could not be placed within the given capacities.",
+          "items": {
+            "$ref": "#/definitions/OverflowItem"
+          }
+        },
+        "warnings": {
+          "type": "array",
+          "description": "Human-readable warning messages (e.g., very high utilization).",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "fitsAll"
+      ]
+    },
+    "OverflowItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "itemId": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "requiredLiters": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "itemId",
+        "label",
+        "requiredLiters"
+      ]
+    },
+    "FreezerLayout": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "freezerId": {
+          "type": "string"
+        },
+        "zones": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LayoutZone"
+          }
+        }
+      },
+      "required": [
+        "freezerId",
+        "zones"
+      ]
+    },
+    "LayoutZone": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "zoneId": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LayoutItem"
+          }
+        }
+      },
+      "required": [
+        "zoneId",
+        "label",
+        "items"
+      ]
+    },
+    "LayoutItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "itemId": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "volumeLiters": {
+          "type": "number"
+        },
+        "quantity": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "itemId",
+        "label",
+        "volumeLiters",
+        "quantity"
+      ]
+    },
+    "SessionHint": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "description": "Type of session being suggested (e.g., repack, pre_batch)."
+        },
+        "label": {
+          "type": "string"
+        },
+        "scheduledAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Suggested time for the session, if known."
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Arbitrary hint metadata for the SessionRunner composer."
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "label"
+      ]
+    },
+    "InventoryHint": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "description": "Type of inventory hint (e.g., location_hint, capacity_guardrail)."
+        },
+        "freezerId": {
+          "type": "string"
+        },
+        "zoneId": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "id",
+        "kind"
+      ]
+    }
+  }
+}

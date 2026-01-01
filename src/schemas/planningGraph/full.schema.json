@@ -1,0 +1,234 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://suka-smart-assistant.local/schemas/planningGraph/full.schema.json",
+  "title": "SSA Planning Graph (Full)",
+  "description": "Pre-merged Planning Graph (nodes + edges) for fast loading and querying inside Suka Smart Assistant.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional local schema pointer for editor tooling."
+    },
+    "id": {
+      "type": "string",
+      "const": "planningGraphFull",
+      "description": "Identifier for this full Planning Graph definition."
+    },
+    "graphId": {
+      "type": "string",
+      "const": "planningGraph",
+      "description": "Logical graph id that ties nodes, edges, and full views together."
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable label for this graph."
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of the Planning Graph definition."
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp of last update."
+    },
+    "sourceFiles": {
+      "type": "object",
+      "description": "Optional pointers back to the source node/edge JSON files.",
+      "properties": {
+        "nodes": {
+          "type": "string",
+          "description": "Relative path to planningGraph.nodes.json"
+        },
+        "edges": {
+          "type": "string",
+          "description": "Relative path to planningGraph.edges.json"
+        }
+      },
+      "required": [
+        "nodes",
+        "edges"
+      ],
+      "additionalProperties": false
+    },
+    "nodes": {
+      "type": "array",
+      "description": "All Planning Graph nodes (calculators, planners, engines, shims, infrastructure, etc.).",
+      "items": {
+        "$ref": "#/definitions/node"
+      }
+    },
+    "edges": {
+      "type": "array",
+      "description": "All Planning Graph edges describing data & flow relationships between nodes.",
+      "items": {
+        "$ref": "#/definitions/edge"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "graphId",
+    "label",
+    "version",
+    "updatedAt",
+    "nodes",
+    "edges"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "node": {
+      "type": "object",
+      "description": "A single Planning Graph node representing a calculator, planner, engine, module, or infrastructure helper.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable key used in edges.from / edges.to."
+        },
+        "label": {
+          "type": "string",
+          "description": "Human-readable node label."
+        },
+        "kind": {
+          "type": "string",
+          "description": "Node kind (more permissive in full graph; node-only schema may be stricter).",
+          "enum": [
+            "calculator",
+            "planner",
+            "engine",
+            "module",
+            "infrastructure",
+            "shim-node",
+            "calculator-node",
+            "planner-node"
+          ]
+        },
+        "domain": {
+          "type": "string",
+          "description": "Primary SSA domain this node belongs to.",
+          "enum": [
+            "cooking",
+            "cleaning",
+            "garden",
+            "animals",
+            "preservation",
+            "storehouse",
+            "calendar",
+            "stability",
+            "multi",
+            "core"
+          ]
+        },
+        "category": {
+          "type": "string",
+          "description": "Sub-category within the domain (e.g., nutrition, yield, storage)."
+        },
+        "impl": {
+          "type": "object",
+          "description": "Implementation details for runtime wiring.",
+          "properties": {
+            "module": {
+              "type": "string",
+              "description": "Import path for the module implementing this node."
+            },
+            "export": {
+              "type": "string",
+              "description": "Named export to call when this node runs."
+            }
+          },
+          "required": [
+            "module",
+            "export"
+          ],
+          "additionalProperties": false
+        },
+        "inputs": {
+          "type": "object",
+          "description": "Named input contracts. Values are type/shape hints (not enforced here).",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "outputs": {
+          "type": "object",
+          "description": "Named outputs this node produces. Values are type/shape hints (not enforced here).",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "feedsInto": {
+          "type": "array",
+          "description": "List of node ids this node commonly feeds into (for quick traversal).",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "description": "Free-form tags for grouping, filtering, and UI labeling.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "additionalProperties": true
+    },
+    "edge": {
+      "type": "object",
+      "description": "A directional relationship between two nodes in the Planning Graph.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable identifier for the edge (usually `${from}->${to}`)."
+        },
+        "from": {
+          "type": "string",
+          "description": "Source node id."
+        },
+        "to": {
+          "type": "string",
+          "description": "Target node id."
+        },
+        "relation": {
+          "type": "string",
+          "description": "Relationship type between nodes.",
+          "enum": [
+            "feeds-into",
+            "cross-link",
+            "decorates"
+          ]
+        },
+        "weight": {
+          "type": "number",
+          "description": "Relative importance/strength of this relationship. Used for ranking and flow decisions."
+        },
+        "meta": {
+          "type": "object",
+          "description": "Additional metadata describing how the edge is used (e.g., via/into mappings).",
+          "properties": {
+            "via": {
+              "type": "string",
+              "description": "Name of the output field / bundle on the source node."
+            },
+            "into": {
+              "type": "string",
+              "description": "Name of the input field / bundle on the target node."
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "id",
+        "from",
+        "to",
+        "relation"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://suka-smart-assistant.local/schemas/health/BMICalculator.schema.json",
+  "title": "BMICalculator",
+  "description": "JSON schema for BMI Calculator inputs and outputs used in SSA health calculators and automation.",
+  "type": "object",
+  "additionalProperties": false,
+
+  "properties": {
+    "input": {
+      "type": "object",
+      "title": "BMICalculatorInput",
+      "additionalProperties": false,
+      "required": ["height", "weight"],
+      "properties": {
+        "height": {
+          "type": "object",
+          "title": "Height",
+          "additionalProperties": false,
+          "required": ["value", "unit"],
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 36,
+              "maximum": 272,
+              "description": "Height value in either inches or centimeters depending on unit."
+            },
+            "unit": {
+              "type": "string",
+              "enum": ["in", "cm"],
+              "description": "Unit for height. 'in' for inches, 'cm' for centimeters."
+            }
+          }
+        },
+
+        "weight": {
+          "type": "object",
+          "title": "Weight",
+          "additionalProperties": false,
+          "required": ["value", "unit"],
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 40,
+              "maximum": 700,
+              "description": "Weight value in either pounds or kilograms depending on unit."
+            },
+            "unit": {
+              "type": "string",
+              "enum": ["lb", "kg"],
+              "description": "Unit for weight. 'lb' for pounds, 'kg' for kilograms."
+            }
+          }
+        },
+
+        "sex": {
+          "type": "string",
+          "enum": ["female", "male", "other", "unspecified"],
+          "default": "unspecified",
+          "description": "Optional sex field. Used only for contextual messaging; BMI computation itself does not differ by sex."
+        },
+
+        "ageYears": {
+          "type": "number",
+          "minimum": 5,
+          "maximum": 120,
+          "description": "Optional age in years. Used for screening notes; BMI computation itself does not differ by age."
+        },
+
+        "unitSystem": {
+          "type": "string",
+          "enum": ["imperial", "metric", "mixed"],
+          "default": "imperial",
+          "description": "Preferred display unit system for results. Does not change the underlying BMI formula."
+        },
+
+        "rounding": {
+          "type": "object",
+          "title": "RoundingPreferences",
+          "additionalProperties": false,
+          "properties": {
+            "bmiDecimals": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4,
+              "default": 1,
+              "description": "Number of decimal places to show for BMI."
+            },
+            "weightDecimals": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3,
+              "default": 1,
+              "description": "Number of decimal places to show for recommended weight range."
+            }
+          },
+          "default": {
+            "bmiDecimals": 1,
+            "weightDecimals": 1
+          }
+        },
+
+        "ssaIntegration": {
+          "type": "object",
+          "title": "SSAIntegrationHints",
+          "additionalProperties": false,
+          "properties": {
+            "autosaveProfile": {
+              "type": "boolean",
+              "default": true,
+              "description": "When true, SSA may persist BMI input as part of a health profile."
+            },
+            "allowLinkToMacroCalculator": {
+              "type": "boolean",
+              "default": true,
+              "description": "When true, BMI results may be passed as context to the Macro Calculator node."
+            }
+          },
+          "default": {
+            "autosaveProfile": true,
+            "allowLinkToMacroCalculator": true
+          }
+        }
+      }
+    },
+
+    "output": {
+      "type": "object",
+      "title": "BMICalculatorOutput",
+      "additionalProperties": false,
+      "required": ["bmi", "category"],
+      "properties": {
+        "bmi": {
+          "type": "number",
+          "minimum": 5,
+          "maximum": 90,
+          "description": "Computed Body Mass Index (BMI) using standard formula (kg/m^2)."
+        },
+
+        "category": {
+          "type": "string",
+          "enum": [
+            "underweight",
+            "normal",
+            "overweight",
+            "obeseClass1",
+            "obeseClass2",
+            "obeseClass3"
+          ],
+          "description": "BMI category based on numeric BMI value (WHO-style breakpoints)."
+        },
+
+        "categoryLabel": {
+          "type": "string",
+          "description": "Human-friendly label for the BMI category (e.g., 'Underweight', 'Normal weight', 'Overweight', 'Obesity Class I')."
+        },
+
+        "recommendedWeightRange": {
+          "type": "object",
+          "title": "RecommendedWeightRange",
+          "additionalProperties": false,
+          "required": ["min", "max", "unit"],
+          "properties": {
+            "min": {
+              "type": "number",
+              "description": "Lower bound of weight corresponding to BMI 18.5 at the given height (in the unit specified by 'unit')."
+            },
+            "max": {
+              "type": "number",
+              "description": "Upper bound of weight corresponding to BMI 24.9 at the given height (in the unit specified by 'unit')."
+            },
+            "unit": {
+              "type": "string",
+              "enum": ["lb", "kg"],
+              "description": "Unit used for the recommended weight boundaries."
+            }
+          }
+        },
+
+        "warnings": {
+          "type": "array",
+          "description": "Non-blocking warnings relevant to BMI interpretation (e.g., athletes, pregnancy, children).",
+          "items": {
+            "type": "string"
+          }
+        },
+
+        "notes": {
+          "type": "array",
+          "description": "Informational notes about BMI and its limitations that can be displayed under the result.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "meta": {
+      "type": "object",
+      "title": "BMICalculatorMeta",
+      "description": "Optional metadata for debugging, analytics, or SSA orchestration.",
+      "additionalProperties": false,
+      "properties": {
+        "calculatorId": {
+          "type": "string",
+          "description": "Internal id for this calculator run, if the runtime wants to stamp one."
+        },
+        "nodeId": {
+          "type": "string",
+          "const": "pg.health.bmiCalculator",
+          "description": "Planning Graph node id for this calculator."
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp when this output was generated."
+        }
+      }
+    }
+  }
+}

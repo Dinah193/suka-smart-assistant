@@ -1,0 +1,387 @@
+{
+  "$schema": "file:///c:/Users/larho/suka-smart-assistant/src/data/schemas/gardenHarvest.schema.json",
+  "version": "2025-10-31T17:40:00-05:00",
+  "meta": {
+    "id": "orchard_row_1",
+    "title": "Orchard Row 1 – Base Seasonal Harvest (Paired with orchard-row-1)",
+    "description": "Base orchard-row harvest profile for your mapped row (apples/pears/stone or mixed, depending on your presets). This is the normal/expected season output that your ‘orchard_row_1_overflow’ profile can build on. It feeds: (1) garden/orchard care and harvest sessions, (2) storehouse stock planning (applesauce, pie base, dried fruit), (3) meal planning (fresh fruit windows pre-processing), (4) cleaning/sanitizing for harvest totes, presses, and jars, and (5) animal/compost routing for culls and windfall. Supports reverse generation from storehouse targets, feast menus, and co-op fruit pooling. User can save their own favorite orchard sessions and schedules.",
+    "source": "suka-smart-assistant",
+    "tags": [
+      "garden",
+      "harvest",
+      "orchard",
+      "fruit",
+      "storehouse",
+      "meal-planning",
+      "cleaning",
+      "animals",
+      "reverse-gen"
+    ],
+    "calendar": {
+      "hebrewMonthStart": "full-moon",
+      "supportsAltStart": true,
+      "notes": "Aligns the orchard base season with your full-moon month start so feast-prep and shared harvests line up."
+    },
+    "locationPreset": "garden_beds/orchard-row-1"
+  },
+  "ui": {
+    "layout": "cards/timeline",
+    "hints": {
+      "primaryCTA": "Create Orchard Harvest Session",
+      "secondaryCTA": "Save as Favorite",
+      "tertiaryCTA": "Reverse-generate From Fruit Targets",
+      "showSeasonalityBadge": true,
+      "groupBy": [
+        "weekOfSeason",
+        "rowId",
+        "fruitType"
+      ],
+      "suggestOnly": true,
+      "notes": "Show a smooth season curve like well-executed orchard dashboards (week chips, color by readiness). Put ‘overflow’ as a separate suggestion if the curve spikes."
+    },
+    "badges": [
+      { "text": "Orchard", "color": "orange" },
+      { "text": "Row 1", "color": "amber" },
+      { "text": "Base Season", "color": "green" }
+    ]
+  },
+  "orchestration": {
+    "bus": "window.__suka?.eventBus",
+    "emitOnLoad": [
+      "garden.harvest.curve.loaded",
+      "garden.orchard.row1.loaded"
+    ],
+    "listen": [
+      "garden.session.request",
+      "garden.plan.changed",
+      "storehouse.goal.request",
+      "meal.session.request",
+      "cleaning.session.request",
+      "inventory.restock.request",
+      "automation.schedule.request"
+    ],
+    "sharedScopes": [
+      "garden",
+      "storehouse",
+      "meals",
+      "cleaning",
+      "animals"
+    ]
+  },
+  "engines": {
+    "primary": "gardenQueueEngine",
+    "supports": [
+      "storehouseGoalEngine",
+      "mealPlanEngine",
+      "cleaningSessionEngine",
+      "animalSessionEngine"
+    ],
+    "notes": "This is the ‘normal’ orchard row profile. If a particular week’s actual harvest is > 120% of the base curve for that day/week, the engine can ALSO surface your orchard_row_1_overflow entry to give processing options."
+  },
+  "reverse": {
+    "generateFrom": [
+      "storehouse.targets.applesauce",
+      "storehouse.targets.fruit-pie-base",
+      "storehouse.targets.dried-fruit",
+      "mealplan.requirements.fresh-fruit",
+      "community.feast-days.fruit",
+      "coop-pool.orchard-shared",
+      "garden.orchard-row-1.target"
+    ],
+    "strategies": [
+      {
+        "id": "from-storehouse-applesauce",
+        "title": "Back into orchard harvests from applesauce/storehouse fruit target",
+        "input": {
+          "applesauceQuartsTarget": 10,
+          "fruitKgPerQuart": 1.4
+        },
+        "output": {
+          "requiredFruitKg": 14,
+          "suggestedHarvestSessions": 2,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Harvest orchard-row-1 twice for applesauce",
+              "emitOnUserAccept": [
+                "garden.session.request",
+                "cleaning.session.request"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "from-feast-fruit",
+        "title": "Back into orchard harvest from feast / holy-day fruit menu",
+        "input": {
+          "feastFruitRecipes": 4,
+          "fruitKgPerRecipe": 1.1
+        },
+        "output": {
+          "requiredFreshFruitKg": 4.4,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Pick 4–5 kg 2–3 days before feast",
+              "emitOnUserAccept": [
+                "garden.session.request",
+                "meal.session.request"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "from-coop-shared-orchard",
+        "title": "Back into harvest from shared/co-op orchard goal",
+        "input": {
+          "coopFruitKgGoal": 50,
+          "householdSharePct": 0.2
+        },
+        "output": {
+          "householdFruitKgGoal": 10,
+          "suggestedHarvestSessions": 2,
+          "actions": [
+            {
+              "type": "offer-session",
+              "label": "Contribute 10 kg from orchard-row-1 to co-op",
+              "emitOnUserAccept": [
+                "garden.session.request",
+                "storehouse.plan.generated"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "curve": {
+    "units": "kg-per-day",
+    "seasonLengthDays": 65,
+    "base": [
+      { "day": 1,  "value": 0.0, "stage": "pre-ripen" },
+      { "day": 7,  "value": 0.6, "stage": "early" },
+      { "day": 14, "value": 1.3, "stage": "early" },
+      { "day": 21, "value": 2.0, "stage": "ramp-up" },
+      { "day": 28, "value": 2.8, "stage": "ramp-up" },
+      { "day": 35, "value": 3.2, "stage": "peak" },
+      { "day": 42, "value": 3.0, "stage": "peak" },
+      { "day": 49, "value": 2.4, "stage": "taper" },
+      { "day": 56, "value": 1.6, "stage": "late" },
+      { "day": 65, "value": 0.7, "stage": "cleanup" }
+    ],
+    "weeklyView": [
+      { "week": 1, "avg": 0.4 },
+      { "week": 2, "avg": 1.1 },
+      { "week": 3, "avg": 2.3 },
+      { "week": 4, "avg": 3.0 },
+      { "week": 5, "avg": 3.1 },
+      { "week": 6, "avg": 2.1 },
+      { "week": 7, "avg": 1.2 },
+      { "week": 8, "avg": 0.6 },
+      { "week": 9, "avg": 0.3 }
+    ],
+    "bed": {
+      "id": "orchard-row-1",
+      "areaSqft": 120,
+      "rowLengthFt": 40,
+      "treeSpacingFt": 8,
+      "notes": "This is the baseline. Use orchard_row_1_overflow.json to describe heavier-than-normal weeks."
+    }
+  },
+  "adjustments": {
+    "byClimateZone": [
+      {
+        "zone": "hot-humid",
+        "multiplier": 0.9,
+        "notes": "More disease/split. Also emit ‘clean harvest totes / pruners’ to cleaning engine."
+      },
+      {
+        "zone": "hot-dry",
+        "multiplier": 1.03,
+        "notes": "Better sugar, slightly higher usable yield."
+      },
+      {
+        "zone": "cooler-shoulder",
+        "multiplier": 0.92,
+        "notes": "Later ripening — shift harvest suggestions 1–2 weeks out."
+      }
+    ],
+    "byCareLevel": [
+      { "level": "intensive", "multiplier": 1.1 },
+      { "level": "standard", "multiplier": 1.0 },
+      { "level": "minimal", "multiplier": 0.8 }
+    ]
+  },
+  "storehouse": {
+    "targets": {
+      "fruit_preserves_pints": 8,
+      "applesauce_quarts": 6,
+      "dried_fruit_quarts": 4,
+      "fresh_fruit_reserve_kg": 5
+    },
+    "grocerySectionsInspiration": [
+      "Canned Fruit & Applesauce",
+      "Preserves & Jellies",
+      "Dried Fruit & Snacks",
+      "Juices & Ciders",
+      "Baking / Pie Fillings"
+    ],
+    "autoPlan": {
+      "enabled": false
+    }
+  },
+  "meals": {
+    "recipes": [
+      {
+        "id": "fresh-orchard-bowl",
+        "title": "Fresh Orchard Fruit Bowl (Use First)",
+        "useWithinHours": 72,
+        "linksTo": [
+          "/meals/breakfast",
+          "/inventory/fresh-produce"
+        ]
+      },
+      {
+        "id": "orchard-pie-base",
+        "title": "Orchard Pie Base / Cobbler Kit",
+        "linksTo": [
+          "/storehouse/fruit",
+          "/cleaning/kitchen"
+        ],
+        "emit": "cooking.session.request"
+      },
+      {
+        "id": "orchard-dehydrate",
+        "title": "Dehydrate Orchard Fruit (Snacks)",
+        "linksTo": [
+          "/storehouse/dried",
+          "/cleaning/kitchen"
+        ],
+        "emit": "cooking.session.request"
+      }
+    ],
+    "autoSession": {
+      "everyDays": 0,
+      "emit": []
+    }
+  },
+  "cleaning": {
+    "routines": [
+      {
+        "id": "orchard-totes-sanitize",
+        "title": "Sanitize Orchard Totes / Buckets",
+        "frequency": "PER_HARVEST",
+        "emit": "cleaning.session.request",
+        "tools": [
+          "sanitizer",
+          "brush",
+          "drying-rack"
+        ]
+      },
+      {
+        "id": "dehydrator-jars-clean",
+        "title": "Dehydrator / Jars Cleaning After Fruit Run",
+        "frequency": "PER_RUN",
+        "emit": "cleaning.session.request"
+      }
+    ],
+    "sabbathGuard": true
+  },
+  "garden": {
+    "care": [
+      {
+        "id": "orchard-light-prune",
+        "title": "Orchard – Light Prune & Sucker Removal",
+        "emit": "garden.session.request"
+      },
+      {
+        "id": "orchard-irrigation-check",
+        "title": "Orchard – Irrigation / Mulch Check",
+        "emit": "garden.session.request"
+      }
+    ],
+    "harvest": {
+      "autoSuggest": true,
+      "userMustConfirm": true,
+      "emitOnConfirm": [
+        "garden.session.request"
+      ]
+    },
+    "notes": "Use this as the default orchard-row-1 curve. When actual harvest > curve, engine can also surface orchard_row_1_overflow.json."
+  },
+  "animals": {
+    "routing": {
+      "cullsAndWindfall": [
+        "poultry",
+        "goat",
+        "compost"
+      ],
+      "notes": "Keep unclean species out of this stream. Compost moldy/rotten fruit instead of feeding."
+    },
+    "emit": [
+      "animal.care.session.request"
+    ]
+  },
+  "inventory": {
+    "productId": "garden-orchard-row-1",
+    "unit": "kg",
+    "trackLots": true,
+    "harvestTag": "orchard-row-1",
+    "shelfLifeDays": 7
+  },
+  "favoriteSessions": [
+    {
+      "id": "fav-orchard-row-1-weekly",
+      "title": "Orchard Row 1 – Weekly Pick (User Confirm)",
+      "domain": "garden/harvest",
+      "schedule": "RRULE:FREQ=WEEKLY;BYDAY=SU;BYHOUR=16;BYMINUTE=0;BYSECOND=0",
+      "sabbathGuard": true
+    },
+    {
+      "id": "fav-orchard-process-today",
+      "title": "Process Today’s Orchard Fruit",
+      "domain": "meals/cooking",
+      "schedule": ""
+    }
+  ],
+  "scheduleTemplates": [
+    {
+      "id": "orchard-weekly-user",
+      "title": "Orchard Weekly (User Must Confirm)",
+      "rrules": [
+        "RRULE:FREQ=WEEKLY;BYDAY=SU;BYHOUR=16;BYMINUTE=30;BYSECOND=0"
+      ],
+      "options": {
+        "userMustConfirm": true,
+        "sabbathGuard": true,
+        "quietHoursGuard": true
+      }
+    }
+  ],
+  "userProfiles": {
+    "allowUserOwnedSchedules": true,
+    "allowUserOwnedFavorites": true,
+    "allowExportShare": true,
+    "shareFormats": [
+      "json",
+      "suka-plan",
+      "calendar-rrule"
+    ]
+  },
+  "events": {
+    "emits": [
+      "garden.session.request",
+      "cleaning.session.request",
+      "meal.session.request",
+      "storehouse.plan.generated",
+      "inventory.restock.request"
+    ],
+    "consumes": [
+      "garden.plan.changed",
+      "storehouse.targets.changed",
+      "meal.session.completed"
+    ]
+  }
+}

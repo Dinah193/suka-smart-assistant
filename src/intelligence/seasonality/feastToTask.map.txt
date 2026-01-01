@@ -1,0 +1,416 @@
+===============================================================================
+FEAST → RHYTHM MAP – DESIGN SPEC
+File: src/intelligence/seasonality/feastToTask.map.txt
+Role: Mapping contract from feast cycles → concrete domain rhythms/sessions
+===============================================================================
+
+0. CONCEPTUAL PURPOSE
+---------------------
+The Feast → Rhythm Map describes how each **feast cycle + phase** should
+unfold as concrete, domain-specific **household rhythms**:
+
+- cooking sessions (menus, prep flows, leftovers),
+- storehouse/provisioning rhythms (stocking up, drawing down),
+- garden & animal rhythms (harvest selection, animal selection),
+- preservation rhythms (converting feast surplus into future yields),
+- cleaning & textiles rhythms (pre-feast readiness, post-feast recovery),
+- mutual-aid & enterprise rhythms (shared feasts, catered events).
+
+This map does **not** define low-level checklists.
+Instead, it binds:
+
+> feastCycle + phase + season + household posture  
+> → named “rhythm bundles” that SessionRunner and domain pages can activate.
+
+It must support:
+
+- TOOL MODE:
+  - A single “Feast Rhythm Designer” or “Feast Planner” can consume the map
+    and suggest feast-related rhythm bundles without Dexie or global state.
+- STEWARDSHIP MODE:
+  - The broader SSA (feastCycles, seasonRules, householdCycles.engine,
+    SessionRunner) uses this map to keep feast cycles woven into the
+    household’s yearly rhythm.
+
+Language: cycle, season, storehouse, provision, yield, rhythm, feast, householder.
+Avoid generic “task” phrasing inside this spec (only the filename keeps “task”).
+
+
+1. STRUCTURE – CONFIG SHAPE & DOMAINS
+-------------------------------------
+Meta-domain:
+- seasonality / feasts/events
+
+Connected domains:
+- cooking, storehouse/provisioning, garden, animals, preservation,
+  cleaning/hygiene, textiles, mutual-aid, enterprise.
+
+Conceptual config shape (JSON-like):
+
+feastRhythmMapConfig = {
+  version: "1.0.0",
+  lastUpdatedAt: string,
+  modeHint?: "TOOL" | "STEWARDSHIP",
+
+  // Core mapping entries: feast cycle + phase → rhythm bundles
+  mappings: FeastRhythmMapping[],
+
+  // Global preferences for mapping behavior
+  signals: {
+    defaultAnticipationHorizonDays: number,    // lead time before feast window
+    defaultRecoveryWindowDays: number,         // how long to keep recovery rhythms visible
+    sendMappingAppliedAlerts: boolean,
+    sendOverloadWarnings: boolean,
+  },
+
+  metadata?: {
+    householdName?: string,
+    feastCultureNotes?: string,
+  },
+};
+
+
+2. PROPS – DETAILED MAPPING COMPONENTS
+--------------------------------------
+
+2.1 FeastRhythmMapping
+Connects a specific feast + phase to domain rhythm bundles.
+
+FeastRhythmMapping = {
+  id: string,                         // e.g. "passover-prep-core-kitchen",
+                                      //      "sukkot-recovery-storehouse",
+                                      //      "sabbath-prep-weekly"
+
+  feastCycleId: string,               // from feastCyclesConfig.feastCycles.id
+  phaseType: "preparation" | "feast-day" | "recovery",
+
+  // Optional refinement by season or sub-season
+  seasonFilter?: {
+    seasonIds?: string[],             // from seasonRulesConfig.seasons.id
+    category?: "agricultural" | "festal" | "rest" | "custom",
+  },
+
+  // How prominent this mapping is
+  priority: "core" | "supporting",
+
+  // Which domains should be influenced in this mapping
+  domainsInvolved: ("cooking" | "storehouse" | "garden" | "animals" |
+                    "preservation" | "cleaning" | "textiles" |
+                    "mutualAid" | "enterprise")[],
+
+  // The actual rhythm bundles to activate
+  rhythmBundles: FeastRhythmBundle[],
+
+  notes?: string,
+};
+
+
+2.2 FeastRhythmBundle
+A bundle of related **household actions/sessions** for a single domain.
+
+FeastRhythmBundle = {
+  id: string,                         // e.g. "pre-passover-kitchen-rhythm"
+  domain: "cooking" | "storehouse" | "garden" | "animals" |
+          "preservation" | "cleaning" | "textiles" |
+          "mutualAid" | "enterprise",
+
+  label: string,                      // human-facing description
+  rhythmKind: "anticipation" | "feast-core" | "recovery",
+  intensity: "gentle" | "balanced" | "strong",  // load on the household
+
+  // Link into domain-specific session templates (for SessionRunner)
+  sessionTemplateKey?: string,        // e.g. "feastPrep:breadAndBroth",
+                                      //      "postFeast:kitchenReset"
+
+  // Storehouse impact summary for this bundle
+  storehouseImpact?: {
+    inflowCategories?: {
+      [categoryKey: string]: { magnitude: "low" | "medium" | "high" };
+    },
+    outflowCategories?: {
+      [categoryKey: string]: { magnitude: "low" | "medium" | "high" };
+    },
+  },
+
+  // Preconditions that may influence whether this bundle should be suggested
+  preconditions?: {
+    minimumStorehouseState?: "lean" | "moderate" | "comfortable",
+    gardenHarvestExpected?: boolean,
+    animalYieldExpected?: boolean,
+  },
+
+  // Expected yield (not in units; conceptual outcomes)
+  yields?: {
+    feastReadinessScore?: number,     // 0..1
+    hospitalityScore?: number,        // 0..1
+    restSupportScore?: number,        // 0..1
+  },
+
+  // TODO[cycles-engine]:
+  // - Use rhythmKind, intensity, and storehouseImpact to build the
+  //   feasts/events domain rhythmInput for householdCycles.engine.
+
+  notes?: string,
+};
+
+
+2.3 Optional: FeastRhythmOverrideRule
+Allows overrides when household posture or storehouse states demand adjustments.
+
+FeastRhythmOverrideRule = {
+  id: string,
+  label: string,
+
+  feastCycleId: string,
+  phaseType?: "preparation" | "feast-day" | "recovery",
+
+  // Conditions based on household posture
+  conditions: {
+    storehouseState?: "lean" | "moderate" | "comfortable",
+    preservationBacklog?: "low" | "medium" | "high",
+    fatigueLevelHint?: "low" | "medium" | "high", // from past sessions
+  },
+
+  // Effects on rhythm bundles
+  effects: {
+    suppressBundleIds?: string[],     // hide or soften heavy bundles
+    elevateBundleIds?: string[],      // highlight gentle/restful options
+    intensityAdjustment?: "soften" | "intensify",
+  },
+
+  // TODO[insights]:
+  // - Use this for gentle suggestions like:
+  //   “Household is in a lean or tired posture; soften feast prep rhythm.”
+
+  notes?: string,
+};
+
+(If implemented, FeastRhythmOverrideRule entries would be attached as an
+optional property on feastRhythmMapConfig, similar to `mappings`.)
+
+
+
+3. DATA FLOW – HOW THE MAP IS USED
+----------------------------------
+
+3.1 TOOL MODE
+In TOOL MODE, a single “Feast Rhythm Designer / Planner” page can:
+
+1) Load a feastCyclesConfig + seasonRulesConfig + feastRhythmMapConfig in memory
+   (static JS/JSON).
+2) Let the householder:
+   - pick a feastCycle + phase for a given date,
+   - see suggested rhythmBundles (e.g. “core kitchen prep”, “linens and textiles”),
+   - toggle bundles on/off and customize preferences.
+3) Use the mapping to:
+   - show which domains will feel the feast rhythm most strongly,
+   - preview storehouse impact and conceptual yields,
+   - optionally trigger a SessionRunner preview.
+
+No Dexie is required. The tool may still emit eventBus events to inform
+other features if they are loaded.
+
+Typical TOOL MODE flow:
+
+- User opens Feast Planner.
+- System loads feastCyclesConfig, seasonRulesConfig, feastRhythmMapConfig.
+- User selects a feast and date → planner determines:
+  - active feastCycleId,
+  - phaseType (preparation, feast-day, recovery),
+  - relevant seasonId.
+- Planner applies mappings to produce rhythmBundles.
+- Planner emits a summary event:
+  - "feasts.rhythmMap.mapping.applied" for analytics and optional listeners.
+
+
+3.2 STEWARDSHIP MODE
+In STEWARDSHIP MODE, the map becomes part of the core seasonal intelligence.
+
+Flow:
+
+1) App boot:
+   - Dexie loads:
+     - feastCyclesConfig (feast definitions),
+     - seasonRulesConfig (season windows),
+     - feastRhythmMapConfig (this map).
+   - seasonalIntelligence + feast cycles compute active feast windows and phases.
+
+2) When a feast window opens or phase changes:
+   - seasonalIntelligence/feast engine emits:
+     - "feasts.phase.active" (from feastCycles.config design).
+   - The Feast → Rhythm layer receives this phase event and:
+     - finds all FeastRhythmMapping entries for (feastCycleId, phaseType),
+     - filters by season and household posture (optionally using overrides),
+     - produces a set of rhythmBundles.
+
+3) The resulting bundles are:
+
+   a) Sent as a **domain-agnostic summary** to householdCycles.engine:
+      - used to enrich the “feasts/events” domain snapshot and cross-domain
+        cycle posture.
+
+   b) Projected as **domain-specific suggestions**:
+      - to SessionRunner (for direct “Start Feast Prep Rhythm Now” buttons),
+      - to domain dashboards (kitchen, storehouse, textiles, cleaning).
+
+4) Household posture and storehouse data:
+   - may cause overrides (FeastRhythmOverrideRule) to soften or intensify
+     suggested bundles.
+
+5) Any adjustments made by the householder:
+   - (e.g., turning off enterprise catering for a particular feast)
+   - can be persisted to Dexie and reflected in future cycles.
+
+
+4. EVENT TRIGGERS – EVENTBUS CONTRACT
+-------------------------------------
+The map itself is data, but **code applying the map** must emit events.
+
+All events follow SSA’s eventBus shape:
+
+  { type, ts, source, data }
+
+Recommended event types:
+
+1) Config lifecycle
+   - "feasts.rhythmMap.config.loaded"
+     data: {
+       version,
+       mappingCount,
+     }
+
+   - "feasts.rhythmMap.config.updated"
+     data: {
+       version,
+       changedBy,             // "householder" | "system" | "migration"
+       changesSummary,        // e.g. { mappingsAdded, bundlesReweighted }
+     }
+
+2) Mapping application (key for cycles & dashboards)
+   - "feasts.rhythmMap.mapping.applied"
+     // When a feast cycle + phase is mapped to rhythm bundles
+     data: {
+       feastCycleId,
+       phaseType,
+       seasonId?: string,
+       mappingIds: string[],
+       domainsInvolved: string[],
+     }
+
+   - "feasts.rhythmMap.bundles.derived"
+     // When concrete bundles for this feast phase are formed
+     data: {
+       feastCycleId,
+       phaseType,
+       seasonId?: string,
+       bundles: [{
+         bundleId,
+         domain,
+         rhythmKind,
+         intensity,
+         sessionTemplateKey?: string,
+       }],
+     }
+
+3) Overrides and load warnings
+   - "feasts.rhythmMap.override.applied"
+     data: {
+       feastCycleId,
+       phaseType,
+       overrideRuleId,
+       effectsSummary,
+     }
+
+   - "feasts.rhythmMap.load.warning"
+     // When overall intensity across domains is too high
+     data: {
+       feastCycleId,
+       phaseType,
+       intensityScore: number,   // 0..1
+       message,
+     }
+
+4) Insight hooks
+   - "feasts.rhythmMap.insight"
+     data: {
+       insightId,
+       feastCycleId,
+       phaseType,
+       kind: "readiness" | "yield" | "storehouse" | "recovery" | "mutual-aid",
+       severity: "info" | "gentle" | "important",
+       message,
+     }
+
+These events allow:
+
+- householdCycles.engine to see how feast-related rhythms are being applied.
+- SessionRunner to surface feast-specific sessions at the right time.
+- Dashboards to visualize cross-domain feast load (kitchen vs storehouse vs
+  cleaning vs textiles).
+- Insight engines to warn when feast rhythms might overload the household.
+
+
+5. CONCEPTUAL PURPOSE – HOW THIS MAP FITS THE WEB OF MEANING
+------------------------------------------------------------
+The Feast → Rhythm Map keeps feasts from being isolated calendar dots and
+weaves them into the **living rhythm** of the household:
+
+- It treats each feast as a **multi-phase cycle**:
+  - preparation, feast-day, recovery – not just a single date.
+
+- It respects **seasons**:
+  - The same feast may use different bundles in “lean winter” versus “harvest
+    flush” (simpler menus vs abundant spread and preservation opportunities).
+
+- It honors the **storehouse and provisions**:
+  - Rhythm bundles know their storehouse impact (inflow & outflow categories),
+    helping SSA protect long-term provisions while still honoring feasts.
+
+- It defines **yields**:
+  - Bundles describe not just effort but outcomes:
+    - feast readiness,
+    - hospitality,
+    - rest,
+    - preserved surplus.
+
+- It connects **domains**:
+  - Kitchen prep, linens, cleaning, garden harvest, animals, storehouse,
+    preservation, mutual-aid, and enterprise all respond to the same
+    feast cycle in a coordinated way.
+  - The householder sees feast rhythm as a **household story**, not a
+    scattered list of chores.
+
+- It supports **TOOL MODE and STEWARDSHIP MODE**:
+  - TOOL MODE:
+    - A stand-alone feast planner uses the map to propose multi-domain
+      rhythms for a single feast, even without full SSA.
+  - STEWARDSHIP MODE:
+    - The map gives the cycles engine, seasonal intelligence, SessionRunner,
+      and domain dashboards a shared language for how feasts flow through
+      the year.
+
+Explicit TODO HOOKS:
+- TODO[seasonal-logic]:
+  - Connect mappings to FeastSeasonBinding and SeasonDefinition so that
+    rhythm bundles adjust automatically for early/late harvest, lean/flush
+    seasons, and different feast clusters.
+
+- TODO[cycles-engine]:
+  - Define how FeastRhythmBundle objects are transformed into the
+    "feasts/events" domain rhythmInput for householdCycles.engine, so that
+    feast load contributes to overall household posture.
+
+- TODO[dependencies]:
+  - Wire FeastDomainSignalBinding (from feastCycles.config) into this map:
+    - e.g., “harvest.logged near a feast” may add preservation bundles.
+    - “storehouse lean” may activate override rules that soften certain bundles.
+
+- TODO[insights]:
+  - Standardize insight patterns based on feast rhythm bundles, such as:
+    - “Feast prep rhythm is heavy while household posture is lean; consider
+       a gentler menu or shared mutual-aid feast.”
+    - “Post-feast recovery bundles not yet applied; householder may benefit
+       from a rest-supporting rhythm.”
+
+END OF SPEC
+===============================================================================

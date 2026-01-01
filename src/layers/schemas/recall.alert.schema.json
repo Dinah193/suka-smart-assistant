@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ssa.schemas/recall.alert.schema.json",
+  "title": "SSA Recall Alert",
+  "description": "Recall matches tied to UPC/brand/lot info (when available). Used to warn at scan-time and at receipt reconciliation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["alertId", "status", "issuedAt", "severity", "source"],
+  "properties": {
+    "alertId": { "type": "string", "minLength": 6 },
+
+    "upc": { "type": ["string", "null"], "pattern": "^[0-9]{8,14}$" },
+    "brand": { "type": ["string", "null"] },
+    "productName": { "type": ["string", "null"] },
+
+    "lot": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "lotCode": { "type": ["string", "null"] },
+        "bestBy": { "type": ["string", "null"] },
+        "productionDates": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      }
+    },
+
+    "issuedAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": ["string", "null"], "format": "date-time" },
+    "createdAt": { "type": ["string", "null"], "format": "date-time" },
+
+    "status": {
+      "type": "string",
+      "enum": ["active", "resolved", "unknown"]
+    },
+
+    "severity": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"]
+    },
+
+    "summary": { "type": ["string", "null"] },
+    "actions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+
+    "source": {
+      "type": "string",
+      "enum": ["fda", "usda", "cpsc", "store", "partner", "manual"]
+    },
+
+    "reference": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "referenceId": { "type": ["string", "null"] },
+        "url": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

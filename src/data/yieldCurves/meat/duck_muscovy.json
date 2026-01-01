@@ -1,0 +1,589 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "2025-10-31T15:23:00-05:00",
+  "description": "Meat yield curve for Muscovy duck – tuned for Israelite households in the U.S. South building agrarian, Torah-compliant, multi-species systems inside the Suka Smart Assistant. Muscovy is heat-tolerant, excellent on pasture, powerful for insect control (flies/mosquitos near livestock), and gives a redder, leaner meat than most ducks. This profile is designed to: (1) schedule flock acquisition/grow-out, (2) support garden/orchard pest passes, (3) run a duck butchery day, (4) update storehouse with grocery-style sections, (5) suggest meal plans (roast, confit, stews), (6) auto-create cleaning/sanitation sessions using duck-safe/Torah-safe cleaners, and (7) support reverse generation from storehouse, meal, and garden events. User-owned templates, favorites, and schedules live in Dexie/local DB – this file just gives the system defaults.",
+  "__notes": [
+    "Muscovy is one of the best ‘hot climate’ waterfowl – perfect for your southern, Florida/AL/GA/TX contexts and your NW Nigeria/Burkina Faso ambitions.",
+    "Unlike Cornish X, ducks will often have wetter, messier processing – so we add a DUCK sanitation profile and tie it to cleaning.",
+    "We also tie Muscovy to your storehouse with inspiration from premium/ethnic grocers: confit, smoked duck, broth, fat for cooking, and offal.",
+    "Reverse generation is important here because people don’t always think ‘I need to harvest ducks’ – they think ‘I want duck for Sukkot / feast / smoked meat’ → we turn it into a butchery day."
+  ],
+  "animal": {
+    "species": "duck",
+    "breed": "Muscovy",
+    "class": "waterfowl",
+    "warm_zone_preset": true,
+    "pest_control_capable": true,
+    "pasture_or_orchard_suitable": true,
+    "typical_live_weight_lbs": [7, 8, 9, 10],
+    "default_live_weight_lbs": 8.5,
+    "live_to_dressed_yield_pct": 0.68,
+    "dressed_to_cut_yield_pct": 0.9,
+    "default_chill_hours": 0.5,
+    "butchery_style_default": "whole-duck",
+    "butchery_supported_styles": [
+      "whole-duck",
+      "quartered",
+      "breast + legs",
+      "stock-pack / broth-pack",
+      "duck-fat-render",
+      "poultry/waterfowl-torah-compliant-no-unclean-cross-contamination"
+    ],
+    "torah_compliant_profile": {
+      "allow_unclean_animals": false,
+      "separate_tools_required": true,
+      "separate_surfaces_required": true,
+      "blood_draining_required": true,
+      "notes": "Slaughter/bleed ducks in a waterfowl-safe area; do not mix with unclean species; run duck sanitation after."
+    }
+  },
+  "yield_model": {
+    "formula_hint": "dressed = live_weight * live_to_dressed_yield_pct; cut_weight = dressed * dressed_to_cut_yield_pct",
+    "example": {
+      "live_weight_lbs": 8.5,
+      "live_to_dressed_yield_pct": 0.68,
+      "dressed_to_cut_yield_pct": 0.9,
+      "calculated_dressed_weight_lbs": 5.78,
+      "calculated_cut_weight_lbs": 5.202
+    },
+    "cut_profile_defaults": [
+      {
+        "cut_id": "muscovy_whole",
+        "label": "Muscovy – Whole Duck",
+        "default_pct_of_dressed": 0.6,
+        "storehouse_section_hint": "Meat → Waterfowl → Whole Duck",
+        "mealplanner_tags": [
+          "roast-duck",
+          "feast",
+          "sabbath",
+          "holiday"
+        ],
+        "inventory_unit": "duck",
+        "preservation": ["freeze", "marinate-freeze"],
+        "cleaning_profile_ref": "duck_sanitation"
+      },
+      {
+        "cut_id": "muscovy_legs",
+        "label": "Muscovy – Legs/Thighs (confit-ready)",
+        "default_pct_of_dressed": 0.16,
+        "storehouse_section_hint": "Meat → Waterfowl → Legs / Confit",
+        "mealplanner_tags": [
+          "confit",
+          "braise",
+          "stew"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze", "confit"],
+        "cleaning_profile_ref": "duck_sanitation"
+      },
+      {
+        "cut_id": "muscovy_breast",
+        "label": "Muscovy – Breast (pan/roast/smoke)",
+        "default_pct_of_dressed": 0.12,
+        "storehouse_section_hint": "Meat → Waterfowl → Breasts",
+        "mealplanner_tags": [
+          "sear",
+          "smoke",
+          "stir-fry"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "duck_sanitation"
+      },
+      {
+        "cut_id": "muscovy_stock",
+        "label": "Muscovy – Stock / Broth Pack",
+        "default_pct_of_dressed": 0.07,
+        "storehouse_section_hint": "Meat → Waterfowl → Stock Pack",
+        "mealplanner_tags": [
+          "broth",
+          "soup",
+          "ramen-base"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "duck_sanitation"
+      },
+      {
+        "cut_id": "muscovy_fat",
+        "label": "Muscovy – Fat (render)",
+        "default_pct_of_dressed": 0.03,
+        "storehouse_section_hint": "Pantry → Fats → Duck Fat",
+        "mealplanner_tags": [
+          "fry",
+          "roast-potatoes",
+          "confit"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["render-and-jar", "freeze"],
+        "cleaning_profile_ref": "duck_sanitation"
+      },
+      {
+        "cut_id": "muscovy_organs",
+        "label": "Muscovy – Organs",
+        "default_pct_of_dressed": 0.02,
+        "storehouse_section_hint": "Meat → Waterfowl → Organs",
+        "mealplanner_tags": [
+          "paté",
+          "dog-food"
+        ],
+        "inventory_unit": "lb",
+        "preservation": ["freeze"],
+        "cleaning_profile_ref": "duck_sanitation"
+      }
+    ]
+  },
+  "garden_pass_profiles": {
+    "purpose": "Let Muscovy help in orchard/pond/garden zones for insect and slug control before butchery.",
+    "passes": [
+      {
+        "id": "muscovy-orchard-pass",
+        "label": "Muscovy – Orchard Pest Pass",
+        "duration_minutes": 40,
+        "allowed_seasons": ["spring", "summer", "fall"],
+        "requires_supervision": false,
+        "post_pass_cleaning_profile": "duck_sanitation_light",
+        "emits_events": [
+          "garden.pestpass.completed",
+          "garden.log.updated"
+        ]
+      },
+      {
+        "id": "muscovy-garden-slug-pass",
+        "label": "Muscovy – Garden Slug/Grasshopper Pass",
+        "duration_minutes": 25,
+        "allowed_seasons": ["spring", "summer"],
+        "requires_supervision": true,
+        "post_pass_cleaning_profile": "duck_sanitation_light",
+        "emits_events": [
+          "garden.pestpass.completed"
+        ]
+      },
+      {
+        "id": "muscovy-pond-perimeter-pass",
+        "label": "Muscovy – Pond/Water Perimeter Pass (mosquito/larvae)",
+        "duration_minutes": 35,
+        "allowed_seasons": ["summer"],
+        "requires_supervision": false,
+        "post_pass_cleaning_profile": "duck_sanitation_light",
+        "emits_events": [
+          "garden.pestpass.completed"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "when_garden_detects_pest_event": "waterfowl.garden-pass.requested",
+      "notes": "If garden/orchard detects slug or fruit-drop pests, the runtime can schedule a Muscovy pass BEFORE the planned butchery date."
+    }
+  },
+  "storehouse_mapping": {
+    "purpose": "Map Muscovy outputs to storehouse sections with grocery-style inspiration, so users see ‘premium duck’ lanes like better grocery sites.",
+    "sections": [
+      {
+        "id": "STH-DUCK-WHOLE-MUSCOVY",
+        "label": "Meat → Waterfowl → Whole (Muscovy)",
+        "target_inventory_unit": "duck",
+        "auto_replenish_from": [
+          "muscovy_whole"
+        ],
+        "grocery_inspo": [
+          "Asian markets – whole duck",
+          "Premium grocers – frozen duck",
+          "Farm-to-freezer – whole waterfowl"
+        ]
+      },
+      {
+        "id": "STH-DUCK-PARTS-MUSCOVY",
+        "label": "Meat → Waterfowl → Parts (Muscovy Legs/Breast)",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "muscovy_legs",
+          "muscovy_breast"
+        ],
+        "grocery_inspo": [
+          "Specialty stores – duck breast",
+          "French/cajun shops – duck legs for confit"
+        ]
+      },
+      {
+        "id": "STH-DUCK-STOCK-MUSCOVY",
+        "label": "Meat → Waterfowl → Stock / Broth (Muscovy)",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "muscovy_stock"
+        ],
+        "grocery_inspo": [
+          "Restaurant supply – duck bone broth",
+          "Pho/ramen suppliers – duck base"
+        ]
+      },
+      {
+        "id": "STH-DUCK-FAT-MUSCOVY",
+        "label": "Pantry → Fats → Duck",
+        "target_inventory_unit": "lb",
+        "auto_replenish_from": [
+          "muscovy_fat"
+        ],
+        "grocery_inspo": [
+          "French markets – duck fat jars",
+          "Gourmet stores – confit fat"
+        ]
+      }
+    ],
+    "reverse_generation_rules": [
+      {
+        "id": "RG-MUSCOVY-WHOLE",
+        "when_event": "storehouse.goal.short.muscovy-whole",
+        "action": "calc required whole ducks → map to live Muscovy → emit automation.schedule.request (waterfowl-butchery + cleaning + mealplan.refresh)",
+        "notes": "Use for feasts like Sukkot / big family gathering where duck is preferred over chicken."
+      },
+      {
+        "id": "RG-MUSCOVY-CONFIT",
+        "when_event": "storehouse.goal.short.muscovy-legs-confit",
+        "action": "calc required legs → back-calc to ducks → emit automation.schedule.request"
+      }
+    ]
+  },
+  "meal_planner_hooks": {
+    "default_meal_templates": [
+      {
+        "id": "mt-muscovy-roast",
+        "label": "Roast Muscovy Duck + Garden Root Veg",
+        "uses_cuts": [
+          {
+            "cut_id": "muscovy_whole",
+            "qty_ducks": 1
+          }
+        ],
+        "suggested_sides": [
+          "roasted carrots",
+          "sweet potatoes",
+          "greens",
+          "fermented veg"
+        ],
+        "garden_suggestions": [
+          "carrot",
+          "onion",
+          "garlic",
+          "greens"
+        ],
+        "cleaning_profiles": [
+          "duck_sanitation",
+          "oven_tray_deep_clean"
+        ]
+      },
+      {
+        "id": "mt-muscovy-confit",
+        "label": "Muscovy Confit (Legs)",
+        "uses_cuts": [
+          {
+            "cut_id": "muscovy_legs",
+            "qty_lb": 2.5
+          },
+          {
+            "cut_id": "muscovy_fat",
+            "qty_lb": 0.75
+          }
+        ],
+        "suggested_sides": [
+          "roasted potatoes in duck fat",
+          "salad",
+          "flatbread"
+        ],
+        "garden_suggestions": [
+          "potato/sweet potato",
+          "lettuce",
+          "cucumber"
+        ],
+        "cleaning_profiles": [
+          "duck_sanitation"
+        ]
+      },
+      {
+        "id": "mt-muscovy-soup",
+        "label": "Duck Soup / Broth (Muscovy)",
+        "uses_cuts": [
+          {
+            "cut_id": "muscovy_stock",
+            "qty_lb": 2
+          }
+        ],
+        "suggested_sides": [
+          "rice",
+          "noodles",
+          "bread"
+        ],
+        "garden_suggestions": [
+          "celery",
+          "carrot",
+          "onion"
+        ],
+        "cleaning_profiles": [
+          "duck_sanitation"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "can_generate_animal_plan": true,
+      "handler_event": "animal.plan.requested",
+      "notes": "If user pins 2 roast ducks + 1 confit week + 1 broth, emit an animal plan: ‘raise 4 Muscovy, harvest in 14–16 weeks,’ then schedule waterfowl sanitation."
+    }
+  },
+  "garden_integration": {
+    "purpose": "Muscovy supports garden → Muscovy supports meal → meal supports garden. We tell the garden what to grow for duck meals and when to expect pest passes.",
+    "crops_to_recommend": [
+      {
+        "crop": "carrot",
+        "use_case": "roast & soup",
+        "harvest_window": "spring-fall",
+        "preservation": ["pressure can", "dehydrate"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "onion",
+        "use_case": "roast, broth base",
+        "harvest_window": "late summer",
+        "preservation": ["cure", "store dry"],
+        "cleaning_profile_ref": "garden_root"
+      },
+      {
+        "crop": "celery",
+        "use_case": "soup/broth base",
+        "harvest_window": "cool season",
+        "preservation": ["freeze", "dehydrate"],
+        "cleaning_profile_ref": "garden_light"
+      },
+      {
+        "crop": "greens",
+        "use_case": "sides",
+        "harvest_window": "cool seasons",
+        "preservation": ["blanch-freeze"],
+        "cleaning_profile_ref": "garden_light"
+      }
+    ],
+    "reverse_generation": {
+      "when_waterfowl_day_scheduled_event": "garden.plan.adjust.requested",
+      "notes": "If we set a Muscovy butchery day, we can also log the final pest pass for the orchard and remind to rest the garden bed."
+    }
+  },
+  "animal_care_and_butchery": {
+    "pre_slaughter_care_checklist": [
+      "10–12hr feed withdrawal (shorter if very hot)",
+      "fresh water until 2hr before",
+      "shade/low-stress holding (ducks overheat)",
+      "check for wet/dirty feathers – may need pre-wash",
+      "torah_compliant_tools_ready"
+    ],
+    "butchery_session_template": {
+      "id": "butchery-session-duck-muscovy",
+      "label": "Muscovy Duck – Waterfowl Processing Day",
+      "estimated_duration_hours": 3.5,
+      "scales_with_duck_count": true,
+      "roles_needed": [
+        "scalder/waxer",
+        "picker/feather-detail",
+        "eviscerator",
+        "chill-station",
+        "sanitation-runner"
+      ],
+      "outputs": [
+        "whole_ducks",
+        "duck_parts",
+        "stock_packs",
+        "fat_to_render",
+        "organs"
+      ],
+      "emits_events": [
+        "inventory.add.requested",
+        "storehouse.update.requested",
+        "cleaning.plan.requested",
+        "mealplan.refresh.requested",
+        "garden.plan.adjust.requested"
+      ],
+      "scheduling": {
+        "supports_user_favorites": true,
+        "supports_recurring": true,
+        "supports_coop_mode": true,
+        "coop_mode_notes": "Co-op members can bring their Muscovy ducks to the same setup – sanitation must run at the end and water should be flushed."
+      }
+    },
+    "cleaning_after_butchery": {
+      "cleaning_profile_id": "duck_sanitation",
+      "label": "Post–Muscovy Duck Sanitation",
+      "tasks": [
+        "dispose of feathers/wax in designated bin",
+        "wash tables, knives, tubs",
+        "sanitize with duck-safe, torah-safe cleaner",
+        "mop floor / drains (waterfowl are messier)",
+        "launder aprons/towels"
+      ],
+      "emits_events": [
+        "cleaning.log.added",
+        "inventory.cleaning-supplies.decrement"
+      ]
+    }
+  },
+  "cleaning_integration": {
+    "profiles": [
+      {
+        "id": "duck_sanitation",
+        "label": "Waterfowl – Heavy Sanitation",
+        "zone": "Processing / Kitchen / Outdoor",
+        "supplies": [
+          "hot_water",
+          "duck-safe_disinfectant",
+          "scrub_brush",
+          "mop_bucket",
+          "laundry_detergent"
+        ]
+      },
+      {
+        "id": "duck_sanitation_light",
+        "label": "Waterfowl – Light (after short pass)",
+        "zone": "Utility / Outdoor",
+        "supplies": [
+          "hose",
+          "brush",
+          "sanitizer"
+        ]
+      },
+      {
+        "id": "garden_root",
+        "label": "Garden Root Veg Cleanup",
+        "zone": "Utility / Outdoor Sink",
+        "supplies": [
+          "hose",
+          "brush",
+          "drain_screens"
+        ]
+      },
+      {
+        "id": "garden_light",
+        "label": "Garden Light Wash",
+        "zone": "Kitchen",
+        "supplies": [
+          "sink_sanitizer",
+          "drying_rack"
+        ]
+      },
+      {
+        "id": "oven_tray_deep_clean",
+        "label": "Oven/Tray Deep Clean (post-roast duck)",
+        "zone": "Kitchen",
+        "supplies": [
+          "oven_cleaner",
+          "scrub_pad"
+        ]
+      }
+    ],
+    "reverse_generation": {
+      "when_butchery_scheduled_event": "cleaning.session.auto-created",
+      "when_garden_pass_completed_event": "cleaning.session.suggested"
+    }
+  },
+  "scheduling_and_favorites": {
+    "can_be_favorited": true,
+    "favorite_key": "yieldcurve:meat:duck_muscovy",
+    "suggested_schedules": [
+      {
+        "id": "sched-muscovy-16wk",
+        "label": "Muscovy → Butchery every 16 weeks",
+        "rule": "FREQ=MONTHLY;INTERVAL=4;BYDAY=SA;BYSETPOS=2",
+        "creates": [
+          "butchery-session-duck-muscovy",
+          "cleaning:duck_sanitation",
+          "storehouse:update",
+          "mealplan:refresh",
+          "garden.plan.adjust.requested"
+        ]
+      },
+      {
+        "id": "sched-muscovy-orchard-pass-weekly",
+        "label": "Muscovy Orchard Pass – Weekly",
+        "rule": "FREQ=WEEKLY;BYDAY=WE;BYHOUR=8;BYMINUTE=0;BYSECOND=0",
+        "creates": [
+          "muscovy-orchard-pass"
+        ]
+      }
+    ],
+    "shared_orchestration": {
+      "event_bus_path": "window.__suka.eventBus",
+      "events_emitted": [
+        "yieldcurve.loaded",
+        "yieldcurve.butchery.session.generated",
+        "waterfowl.garden-pass.completed",
+        "storehouse.goal.derived",
+        "cleaning.session.derived",
+        "mealplan.refresh.requested",
+        "garden.plan.adjust.requested"
+      ],
+      "events_listened_for": [
+        "automation.schedule.request",
+        "garden.pestpass.requested",
+        "storehouse.goal.short",
+        "mealplanner.menu.locked",
+        "garden.plan.adjust.requested"
+      ]
+    }
+  },
+  "reverse_generation": {
+    "enabled": true,
+    "scenarios": [
+      {
+        "id": "RG-MUSCOVY-01",
+        "source": "meal-planner",
+        "input_example": {
+          "roast_duck_events": 2,
+          "duck_confit_weeks": 1,
+          "duck_soup_weeks": 1
+        },
+        "output_example": {
+          "required_dressed_ducks": 4,
+          "required_live_ducks": 4,
+          "suggested_date": "next-available-waterfowl-day",
+          "auto_cleaning_sessions": [
+            "duck_sanitation"
+          ]
+        }
+      },
+      {
+        "id": "RG-MUSCOVY-02",
+        "source": "storehouse",
+        "input_example": {
+          "target_section": "STH-DUCK-WHOLE-MUSCOVY",
+          "target_ducks": 10
+        },
+        "output_example": {
+          "required_dressed_ducks": 10,
+          "required_live_ducks": 10,
+          "notes": "UI should offer: ‘Harvest 10 Muscovy’, ‘Process with duck sanitation’, ‘Render fat’, ‘Notify garden/orchard’."
+        }
+      }
+    ],
+    "notes": "This duck profile should be available as an option whenever the user picks ‘waterfowl’ in the meal planner or storehouse goals; automation/runtime will create butchery + cleaning + garden updates in one shot."
+  },
+  "user_overrides_placeholder": {
+    "explanation": "User-specific tweaks (more confit, fewer whole ducks, longer orchard passes, different butchery interval) should be saved to Dexie/local DB.",
+    "keys": [
+      "yield_model.cut_profile_defaults",
+      "scheduling_and_favorites.suggested_schedules",
+      "garden_pass_profiles.passes"
+    ]
+  },
+  "interop": {
+    "import_sources_supported": [
+      "csv-waterfowl-yields",
+      "google-sheets-yields",
+      "extension.capture.waterfowl",
+      "pinterest-board-to-planner",
+      "recipe-site-duck-detector"
+    ],
+    "export_targets_supported": [
+      "household.storehouse",
+      "household.inventory",
+      "community.coop-planner",
+      "family-fund.hub",
+      "pdf-labels"
+    ]
+  }
+}

@@ -1,0 +1,353 @@
+{
+  "version": "2025-10-31T12:58:00-05:00",
+  "description": "Storehouse sections (grocery-style) for Suka Smart Assistant. Shared by Storehouse Goals, Inventory, Cleaning (storehouse visibility), Meal Planner (to map ingredients), Garden (to route harvests), and Animals/Butchery (to route meat intake). Supports user-owned favorites/schedules and reverse generation from low-stock / harvest / butchery / meal events.",
+  "meta": {
+    "sourceOfTruth": "scraper",
+    "allowHubOverrides": true,
+    "mergeStrategy": "scraper-wins",
+    "ingestionPipelines": [
+      "scraperService",
+      "importService",
+      "bookmarklet",
+      "linked-accounts",
+      "scan-compare-trust"
+    ],
+    "sharedOrchestration": {
+      "emitOnUpdate": true,
+      "reason": "storehouse-sections-update",
+      "channels": [
+        "storehouse",
+        "inventory",
+        "cleaning",
+        "meals",
+        "garden",
+        "animals"
+      ]
+    },
+    "notes": [
+      "This is the canonical list that central_storehouse_goals.json referenced.",
+      "Cleaning routines like 'Storehouse Visibility Pass' should use these section IDs.",
+      "Import pipelines can map scraped products directly into a section for faster intake.",
+      "Households can still create custom sections (ex: 'kosher-wine', 'ferments-crock', 'animal-supplies')."
+    ]
+  },
+  "defaults": {
+    "timezone": "America/Chicago",
+    "sabbathGuard": true,
+    "quietHoursGuard": true,
+    "onMismatch": "warn-and-suggest",
+    "supportsReverseGeneration": true
+  },
+  "sections": [
+    {
+      "id": "produce",
+      "label": "Produce",
+      "priority": 1,
+      "tempControl": "cool-or-cellar",
+      "defaultCleaningRoutineId": "cleaning.storehouse-harvest-sanitize",
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.harvest.logged",
+          "storehouse.intake.from-garden"
+        ],
+        "emit": [
+          "cleaning.storehouse-harvest-sanitize"
+        ],
+        "rules": [
+          {
+            "id": "harvest-to-produce",
+            "ifEvent": "garden.harvest.logged",
+            "generate": "storehouse.intake.from-garden"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "carrot",
+        "group": "fresh"
+      }
+    },
+    {
+      "id": "dry-goods",
+      "label": "Dry Goods",
+      "priority": 1,
+      "tempControl": "room",
+      "defaultCleaningRoutineId": "cleaning.storehouse-visibility-pass",
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "inventory.item.below-threshold",
+          "storehouse.visibility.requested"
+        ],
+        "emit": [
+          "cleaning.storehouse-visibility-pass"
+        ],
+        "rules": [
+          {
+            "id": "dry-low-to-meals",
+            "ifEvent": "inventory.item.below-threshold",
+            "generate": "meals.plan.fromStorehouse.requested"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "box",
+        "group": "pantry"
+      }
+    },
+    {
+      "id": "baking",
+      "label": "Baking & Grains",
+      "priority": 1,
+      "tempControl": "room",
+      "defaultCleaningRoutineId": "cleaning.storehouse-visibility-pass",
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "meals.sabbath-cooking.planned",
+          "calendar.feast.upcoming",
+          "inventory.item.below-threshold"
+        ],
+        "emit": [
+          "cleaning.storehouse-visibility-pass"
+        ],
+        "rules": [
+          {
+            "id": "feast-to-bread",
+            "ifEvent": "calendar.feast.upcoming",
+            "generate": "meals.plan.fromFeast.requested"
+          },
+          {
+            "id": "low-baking-to-garden",
+            "ifEvent": "inventory.item.below-threshold",
+            "generate": "garden.plan.grains-or-feed",
+            "emit": [
+              "garden.plan.fromStorehouse.requested"
+            ]
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "loaf",
+        "group": "pantry"
+      }
+    },
+    {
+      "id": "ferments",
+      "label": "Ferments / Cured / Active",
+      "priority": 2,
+      "tempControl": "cool",
+      "defaultCleaningRoutineId": "cleaning.after-cooking-session",
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "storehouse.overstock.detected",
+          "garden.harvest.logged"
+        ],
+        "emit": [
+          "cleaning.after-cooking-session"
+        ],
+        "rules": [
+          {
+            "id": "overstock-to-ferment",
+            "ifEvent": "storehouse.overstock.detected",
+            "generate": "meals.batch-cooking.fromOverstock",
+            "emit": [
+              "meals.batch-cooking.requested"
+            ]
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "jar",
+        "group": "cold"
+      }
+    },
+    {
+      "id": "freezer",
+      "label": "Freezer",
+      "priority": 1,
+      "tempControl": "frozen",
+      "defaultCleaningRoutineId": "cleaning.storehouse-meat-intake",
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "animals.butchery.completed",
+          "meals.batch-cooking.completed"
+        ],
+        "emit": [
+          "cleaning.storehouse-meat-intake"
+        ],
+        "rules": [
+          {
+            "id": "butchery-to-freezer",
+            "ifEvent": "animals.butchery.completed",
+            "generate": "storehouse.meat-intake-and-freeze"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "snowflake",
+        "group": "cold"
+      }
+    },
+    {
+      "id": "meat",
+      "label": "Meat & Fish (Torah-clean only)",
+      "priority": 1,
+      "tempControl": "cold-or-frozen",
+      "torahConstraints": {
+        "noPork": true,
+        "noShellfish": true
+      },
+      "defaultCleaningRoutineId": "cleaning.storehouse-meat-intake",
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "meals.plan.created",
+          "inventory.item.below-threshold",
+          "animals.butchery.completed"
+        ],
+        "emit": [
+          "cleaning.storehouse-meat-intake"
+        ],
+        "rules": [
+          {
+            "id": "meal-to-animals",
+            "ifEvent": "meals.plan.created",
+            "ifProteinIn": [
+              "lamb",
+              "goat",
+              "beef",
+              "poultry"
+            ],
+            "generate": "animals.plan.fromMeals.generated",
+            "emit": [
+              "animals.plan.fromMeals.generated",
+              "storehouse.intake.expected"
+            ]
+          },
+          {
+            "id": "meat-low-to-animals",
+            "ifEvent": "inventory.item.below-threshold",
+            "generate": "animals.plan.fromStorehouse.low-meat"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "steak",
+        "group": "cold"
+      }
+    },
+    {
+      "id": "eggs-dairy",
+      "label": "Eggs & Dairy",
+      "priority": 2,
+      "tempControl": "cold",
+      "defaultCleaningRoutineId": "cleaning.storehouse-visibility-pass",
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "animals.poultry-production.generated",
+          "inventory.item.below-threshold"
+        ],
+        "emit": [
+          "cleaning.storehouse-visibility-pass"
+        ],
+        "rules": [
+          {
+            "id": "eggs-low-to-animals",
+            "ifEvent": "inventory.item.below-threshold",
+            "generate": "animals.poultry-production-boost",
+            "emit": [
+              "animals.poultry-production.generated"
+            ]
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "egg",
+        "group": "cold"
+      }
+    },
+    {
+      "id": "oils-condiments",
+      "label": "Oils, Condiments & Sauces",
+      "priority": 3,
+      "tempControl": "room",
+      "defaultCleaningRoutineId": "cleaning.storehouse-visibility-pass",
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "inventory.item.below-threshold"
+        ],
+        "emit": [
+          "cleaning.storehouse-visibility-pass"
+        ],
+        "rules": [
+          {
+            "id": "condiment-low-to-meals",
+            "ifEvent": "inventory.item.below-threshold",
+            "generate": "meals.plan.condiment-light",
+            "emit": [
+              "meals.plan.fromStorehouse.requested"
+            ]
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "bottle",
+        "group": "pantry"
+      }
+    },
+    {
+      "id": "hygiene",
+      "label": "Hygiene & Cleaning Supplies",
+      "priority": 3,
+      "tempControl": "room",
+      "defaultCleaningRoutineId": "cleaning.storehouse-visibility-pass",
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "storehouse.hygiene.low"
+        ],
+        "emit": [
+          "cleaning.storehouse-visibility-pass"
+        ],
+        "rules": [
+          {
+            "id": "hygiene-low-to-cleaning",
+            "ifEvent": "storehouse.hygiene.low",
+            "generate": "cleaning.restroom-restock"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "sparkles",
+        "group": "pantry"
+      }
+    }
+  ],
+  "userCanSaveFavorites": true,
+  "favoritesTemplate": [
+    {
+      "id": "fav-storehouse-fresh-pass",
+      "source": "system",
+      "cloneOf": "produce",
+      "label": "My Produce Quick Pass",
+      "allowUserScheduleOverride": true
+    },
+    {
+      "id": "fav-storehouse-freezer-pass",
+      "source": "system",
+      "cloneOf": "freezer",
+      "label": "My Freezer Intake Check",
+      "allowUserScheduleOverride": true
+    }
+  ],
+  "userFavoritePolicy": {
+    "maxPerHousehold": 40,
+    "allowCustomSchedule": true,
+    "allowCustomReverseGeneration": true
+  }
+}

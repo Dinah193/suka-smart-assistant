@@ -1,0 +1,247 @@
+{
+  "id": "pat.storehouse.root_cellar_optimizer",
+  "domain": "storehouse",
+  "kind": "planning_pattern",
+  "title": "Root Cellar Optimizer",
+  "description": "Optimize root cellar zoning, targets, and rotation schedules.",
+  "intentTags": [
+    "plan:storehouse",
+    "storage:rootCellar",
+    "mode:optimize"
+  ],
+  "inputs": [
+    {
+      "key": "storageZones",
+      "label": "Storage zones",
+      "type": "array",
+      "required": true,
+      "default": [
+        "pantry",
+        "cold",
+        "frozen",
+        "rootCellar",
+        "fermentationRoom"
+      ],
+      "notes": "Zones: pantry/cold/frozen/root cellar/fermentation room."
+    },
+    {
+      "key": "inventorySnapshot",
+      "label": "Inventory snapshot",
+      "type": "object",
+      "required": true
+    },
+    {
+      "key": "budgetCap",
+      "label": "Budget cap (optional)",
+      "type": "number"
+    },
+    {
+      "key": "spaceCap",
+      "label": "Space cap (optional)",
+      "type": "object"
+    },
+    {
+      "key": "timeCapMinutes",
+      "label": "Time cap (minutes)",
+      "type": "number"
+    },
+    {
+      "key": "householdSize",
+      "label": "Household size",
+      "type": "number",
+      "default": 4
+    },
+    {
+      "key": "season",
+      "label": "Season / mode",
+      "type": "string"
+    }
+  ],
+  "outputs": [
+    {
+      "key": "reorderActions",
+      "label": "Reorder actions",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "rotationActions",
+      "label": "Rotation actions (FIFO)",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "preservationTriggers",
+      "label": "Preservation triggers (surplus risk)",
+      "type": "array",
+      "required": true
+    },
+    {
+      "key": "sessions",
+      "label": "Session blueprints requested",
+      "type": "array",
+      "required": true
+    }
+  ],
+  "constraints": [
+    "budgetCap",
+    "spaceCap",
+    "timeCap",
+    "allergiesAvoidList"
+  ],
+  "requires": [
+    "artifact:inventorySnapshot"
+  ],
+  "produces": [
+    "artifact:reorderList",
+    "artifact:rotationPlan",
+    "blueprint:storehouseSessions",
+    "trigger:preservation"
+  ],
+  "lean": {
+    "wasteTargets": [
+      "motion",
+      "transport",
+      "inventory",
+      "defects",
+      "waiting"
+    ],
+    "standardWorkRefs": [
+      "stdwork.fifo.labels",
+      "stdwork.cycle.count",
+      "stdwork.zone.layout"
+    ],
+    "taktModelRef": "takt.household.storehouse",
+    "kpiTargets": {
+      "spoilageRate": "reduce",
+      "tripsPerWeek": "reduce",
+      "stockouts": "reduce",
+      "overstocks": "reduce"
+    }
+  },
+  "ui": {
+    "icon": "warehouse",
+    "chips": [
+      "time:medium",
+      "difficulty:medium",
+      "zones:rootCellar"
+    ],
+    "defaultFilters": {
+      "domain": "storehouse"
+    },
+    "form": [
+      {
+        "key": "targetTempF",
+        "type": "slider",
+        "label": "Target temperature (°F)",
+        "min": 32,
+        "max": 60,
+        "default": 40
+      },
+      {
+        "key": "targetHumidity",
+        "type": "slider",
+        "label": "Target humidity (%)",
+        "min": 50,
+        "max": 95,
+        "default": 85
+      },
+      {
+        "key": "zoningMode",
+        "type": "select",
+        "label": "Zoning mode",
+        "options": [
+          "byEthylene",
+          "byMoisture",
+          "byUseRate"
+        ],
+        "default": "byMoisture"
+      }
+    ]
+  },
+  "steps": [
+    {
+      "id": "inv.root",
+      "title": "Confirm root cellar inventory snapshot",
+      "template": "tpl.inventory.snapshot.confirm",
+      "domain": "storehouse",
+      "params": {
+        "zones": [
+          "rootCellar"
+        ]
+      }
+    },
+    {
+      "id": "zone.plan",
+      "title": "Build zoning plan",
+      "template": "tpl.storehouse.rootcellar.zone",
+      "domain": "storehouse",
+      "params": {
+        "zoningModeKey": "zoningMode",
+        "targetTempFKey": "targetTempF",
+        "targetHumidityKey": "targetHumidity"
+      }
+    },
+    {
+      "id": "rotation.plan",
+      "title": "Build rotation + inspection plan",
+      "template": "tpl.storehouse.rotation.plan",
+      "domain": "storehouse",
+      "params": {
+        "zones": [
+          "rootCellar"
+        ]
+      }
+    },
+    {
+      "id": "overflow.detect",
+      "title": "Detect overflow risk and preservation triggers",
+      "template": "tpl.inventory.risk.scan",
+      "domain": "storehouse",
+      "params": {
+        "riskHorizonDays": 10
+      }
+    },
+    {
+      "id": "preserve.trigger",
+      "title": "Trigger preservation sessions for overflow",
+      "template": "tpl.preservation.trigger.sessions",
+      "domain": "homestead",
+      "params": {
+        "methods": [
+          "ferment",
+          "dehydrate",
+          "can",
+          "freeze"
+        ],
+        "emitEvent": "session.blueprints.created"
+      },
+      "optional": true
+    }
+  ],
+  "kpis": [
+    {
+      "key": "spoilageRate",
+      "label": "Spoilage rate (root cellar)",
+      "direction": "down",
+      "unit": "%"
+    },
+    {
+      "key": "tripsPerWeek",
+      "label": "Trips per week",
+      "direction": "down",
+      "unit": "trips"
+    }
+  ],
+  "variants": [],
+  "links": {
+    "preservationSuggested": [
+      "pat.meals.preservation_first"
+    ]
+  },
+  "meta": {
+    "version": "1.0.0",
+    "updatedAt": "2025-12-27",
+    "tags": []
+  }
+}

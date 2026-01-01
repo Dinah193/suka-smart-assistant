@@ -1,0 +1,398 @@
+{
+  "$id": "https://suka.local/calculators/storehouseMeals/FermentationDurationCalculator.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Fermentation Duration Calculator Payload",
+  "description": "Schema for fermentation duration calculator inputs (product, method, temperature, style) and derived timing outputs (schedule, ready window, storage shift, and hints).",
+  "type": "object",
+  "additionalProperties": true,
+
+  "properties": {
+    "inputs": {
+      "type": "object",
+      "description": "User and system-provided parameters describing the ferment batch.",
+      "additionalProperties": true,
+      "properties": {
+        "product": {
+          "type": "object",
+          "description": "What is being fermented and in what quantity.",
+          "additionalProperties": true,
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Type of product being fermented, e.g. 'cabbage', 'cucumbers', 'peppers', 'mixed_vegetables'."
+            },
+            "batchSize": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Total batch size for this fermentation, expressed in the given unit."
+            },
+            "unit": {
+              "type": "string",
+              "description": "Unit for batchSize, e.g. 'kg', 'lb', 'g', 'jar', 'quart', 'liter'."
+            },
+            "householdId": {
+              "type": "string",
+              "description": "Optional SSA household identifier for routing to the correct storehouse."
+            },
+            "projectId": {
+              "type": "string",
+              "description": "Optional project or batch id for linking to larger preservation projects."
+            },
+            "label": {
+              "type": "string",
+              "description": "Human-friendly label for this batch, e.g. 'Red Kraut - October'."
+            }
+          },
+          "required": [
+            "type",
+            "batchSize",
+            "unit"
+          ]
+        },
+
+        "fermentation": {
+          "type": "object",
+          "description": "Core fermentation parameters driving timing recommendations.",
+          "additionalProperties": true,
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": [
+                "brined",
+                "dry_salted",
+                "starter_based",
+                "wild",
+                "other"
+              ],
+              "description": "Primary fermentation method: brined, dry-salted, starter-based, wild, or other."
+            },
+            "temperatureRange": {
+              "type": "object",
+              "description": "Expected ambient or controlled temperature range during active fermentation.",
+              "additionalProperties": false,
+              "properties": {
+                "unit": {
+                  "type": "string",
+                  "enum": [
+                    "C",
+                    "F"
+                  ],
+                  "description": "Temperature unit (Celsius or Fahrenheit)."
+                },
+                "min": {
+                  "type": "number",
+                  "description": "Minimum expected temperature during fermentation in the given unit."
+                },
+                "max": {
+                  "type": "number",
+                  "description": "Maximum expected temperature during fermentation in the given unit."
+                }
+              },
+              "required": [
+                "unit",
+                "min",
+                "max"
+              ]
+            },
+            "targetStyle": {
+              "type": "string",
+              "description": "Desired flavor/texture profile, e.g. 'mild', 'tangy', 'sour', 'crisp', 'soft'."
+            },
+            "saltPct": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 25,
+              "description": "Salt percentage by weight (of vegetables or brine), where known."
+            },
+            "starterType": {
+              "type": "string",
+              "description": "If using a starter culture, the type (e.g. 'whey', 'sourdough_starter', 'kombucha', 'brine_from_previous_batch')."
+            },
+            "targetAcidity": {
+              "type": "number",
+              "description": "Target acidity (pH) at the end of active fermentation, when known."
+            },
+            "desiredShelfLifeDays": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Desired shelf life (in days) at cold storage once the ferment is complete."
+            }
+          },
+          "required": [
+            "method",
+            "temperatureRange",
+            "targetStyle"
+          ]
+        },
+
+        "scheduleAnchor": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Start timestamp for scheduling (defaults to now if omitted)."
+        },
+        "timezone": {
+          "type": "string",
+          "description": "IANA timezone for generating schedule dates, e.g. 'America/Chicago'."
+        },
+        "householdPreferences": {
+          "type": "object",
+          "description": "Optional household-level preferences for timing and workload distribution.",
+          "additionalProperties": true,
+          "properties": {
+            "avoidQuietHours": {
+              "type": "boolean",
+              "description": "If true, schedule active tasks outside configured quiet hours."
+            },
+            "avoidSabbath": {
+              "type": "boolean",
+              "description": "If true, avoid starting new sessions during Sabbath window; checkpoints may be shifted."
+            },
+            "maxDailyTasks": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Soft maximum number of fermentation-related tasks per day."
+            }
+          }
+        }
+      },
+      "required": [
+        "product",
+        "fermentation"
+      ]
+    },
+
+    "outputs": {
+      "type": "object",
+      "description": "Derived schedule, ready window, and linkage hints for SessionRunner and Storehouse.",
+      "additionalProperties": true,
+      "properties": {
+        "schedule": {
+          "type": "array",
+          "description": "Ordered list of fermentation phases with expected durations and checkpoints.",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "phaseId": {
+                "type": "string",
+                "description": "Machine-friendly id for the phase, e.g. 'active_ferment', 'cold_storage'."
+              },
+              "label": {
+                "type": "string",
+                "description": "Human-friendly phase label."
+              },
+              "durationDays": {
+                "type": "number",
+                "description": "Nominal duration of this phase in days."
+              },
+              "startAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "ISO start timestamp for this phase."
+              },
+              "endAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "ISO end timestamp for this phase."
+              },
+              "checkpoints": {
+                "type": "array",
+                "description": "Within-phase checkpoints such as 'burp jars', 'taste test', or 'move to cold'.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Identifier for this checkpoint."
+                    },
+                    "label": {
+                      "type": "string",
+                      "description": "Short label, e.g. 'Burp jars / check activity'."
+                    },
+                    "offsetDays": {
+                      "type": "number",
+                      "description": "Offset (in days) from the start of this phase when the checkpoint should fire."
+                    },
+                    "preferredTimeOfDay": {
+                      "type": "string",
+                      "description": "Optional hint like 'morning', 'evening' or a specific hour."
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label",
+                    "offsetDays"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "phaseId",
+              "label",
+              "durationDays"
+            ]
+          }
+        },
+
+        "targetReadyWindow": {
+          "type": "object",
+          "description": "Date range when the ferment should be at peak flavor and texture.",
+          "additionalProperties": false,
+          "properties": {
+            "start": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Earliest recommended date/time for serving or using in meal planning."
+            },
+            "end": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Latest recommended date/time before quality noticeably declines."
+            }
+          },
+          "required": [
+            "start",
+            "end"
+          ]
+        },
+
+        "storageShift": {
+          "type": "object",
+          "description": "Planned move from room temperature to cold or root-cellar storage.",
+          "additionalProperties": true,
+          "properties": {
+            "moveAt": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When to move jars/crocks into cold storage."
+            },
+            "targetStorage": {
+              "type": "string",
+              "description": "Target storage location label, e.g. 'Fridge', 'Root Cellar', 'Cool Pantry'."
+            }
+          }
+        },
+
+        "sessionSuggestions": {
+          "type": "array",
+          "description": "Suggested SessionRunner sessions derived from phases and checkpoints.",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Identifier for this suggested session template instance."
+              },
+              "kind": {
+                "type": "string",
+                "description": "Type of session, e.g. 'start_batch', 'checkpoint', 'move_to_cold', 'tasting'."
+              },
+              "title": {
+                "type": "string",
+                "description": "Display title for the session."
+              },
+              "scheduledFor": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Suggested date/time to run this session."
+              },
+              "stepHints": {
+                "type": "array",
+                "description": "Optional hints for steps that SessionRunner can materialize.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "properties": {
+                    "title": {
+                      "type": "string"
+                    },
+                    "desc": {
+                      "type": "string"
+                    },
+                    "durationSec": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "title"
+            ]
+          }
+        },
+
+        "inventoryHints": {
+          "type": "array",
+          "description": "Hints for when and how this ferment batch becomes available to the storehouse and meal planner.",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "itemKey": {
+                "type": "string",
+                "description": "Internal storehouse key or SKU-like reference for this ferment batch."
+              },
+              "quantity": {
+                "type": "number",
+                "description": "Quantity that will be available for planning during the ready window."
+              },
+              "unit": {
+                "type": "string",
+                "description": "Unit for quantity (should align with inventory units)."
+              },
+              "readyFrom": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Start of the window when this ferment is available to be consumed."
+              },
+              "readyTo": {
+                "type": "string",
+                "format": "date-time",
+                "description": "End of the window when this ferment should ideally be used."
+              },
+              "eligibleForMealPlanning": {
+                "type": "boolean",
+                "description": "If true, this batch should be surfaced to meal planners during the ready window."
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "meta": {
+      "type": "object",
+      "description": "Optional metadata about the calculator invocation.",
+      "additionalProperties": true,
+      "properties": {
+        "calculatorId": {
+          "type": "string",
+          "const": "FermentationDurationCalculator",
+          "description": "Identifier for the calculator; used for routing and analytics."
+        },
+        "requestedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When this calculation was requested."
+        },
+        "householdId": {
+          "type": "string",
+          "description": "Household id for attribution and routing."
+        },
+        "sourceNode": {
+          "type": "string",
+          "description": "Planning graph node id that initiated this calculation, e.g. 'PG_NODE_FERMENTATION_DURATION_CALCULATOR'."
+        }
+      }
+    }
+  },
+
+  "required": [
+    "inputs"
+  ]
+}

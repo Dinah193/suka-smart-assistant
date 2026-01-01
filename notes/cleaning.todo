@@ -1,0 +1,232 @@
+# C:\Users\larho\suka-smart-assistant\cleaning.todo
+# Suka Smart Assistant — Cleaning System Scratch Plan
+# Style: BLUF + actionable checklists + event hooks
+
+0) BLUF
+- Build an intuitive Cleaning flow with:
+  • Zone-based + Batch cleaning sessions (room-by-room or “power hour”).
+  • Smart chore lists with step-by-step instructions + homemade cleaner recipes.
+  • Timers, pacing (Pomodoro / Power-25), and HR targets for fitness benefits.
+  • Roles & rotations (assign to household members) with streaks/rewards.
+  • Inventory sync for supplies (auto low-stock alerts + make-at-home prompts).
+  • Calendar and notification hooks (avoid feast days per Hebrew calendar; auto-reschedule).
+  • Horizontal “raised card” layout for Session Planner + Timer + Supplies + Progress.
+
+1) One-liners (Job → Output → Next Best Action → Events)
+• Plan: “Select zones & goals → session plan + timeboxes → ‘Start Session’ → cleaning.session.started”
+• Guide: “Generate chore steps → interactive checklist + tooltips → ‘Mark done’ → cleaning.step.completed”
+• Pace: “Timers + voice cues + HR target → live ring & logs → ‘Pause/Resume’ → cleaning.session.updated”
+• Supplies: “Check inventory → delta + make/buy list → ‘Apply/Print’ → supplies.delta.applied”
+• Fitness: “Set HR target (light/moderate/vigorous) → micro-drills in steps → ‘Enable drills’ → cleaning.fitness.enabled”
+• Calendar: “Block session & rotations → calendar events → ‘Sync’ → calendar.synced”
+• Rewards: “Compute points/streaks → Household Board updates → ‘Redeem’ → rewards.redeemed”
+
+2) Git Setup
+git checkout -b feat/cleaning-session-core
+git add .
+git commit -m "chore(cleaning): scratch .todo + session scaffolding"
+
+3) Files/Areas to touch (front-end)
+- src/pages/cleaning/index.jsx
+  ☐ Horizontal raised cards: <CleaningSessionPlanner /> | <CleaningTimerPanel /> | <SuppliesPanel /> | <ProgressPanel />
+  ☐ Collapsible “Cleaning Vault” (like Recipe Vault): zones, routines, saved presets.
+- src/pages/cleaning/cleaning.css
+  ☐ Card elevation, grid gap, sticky mini-header with time/HR ring.
+- src/components/cleaning/CleaningSessionPlanner.jsx (NEW)
+  ☐ Select zones, presets, roles, HR target.
+  ☐ “Batch Mode” toggle (multi-zone sprint) vs “Deep Clean Mode”.
+- src/components/cleaning/CleaningChecklist.jsx (NEW)
+  ☐ Step-by-step tasks with estimated mins, pictures/tooltips, micro-drills.
+  ☐ Quick toggles: “Fragrance-free”, “Kids/Pets Present”, “Sabbath-safe prep”.
+- src/components/cleaning/CleaningTimerPanel.jsx (NEW)
+  ☐ Power-25 timers (25/5), Power-10 sprints, custom durations.
+  ☐ Voice/Toast cues at step change; pause/resume; persistent on route change.
+- src/components/cleaning/SuppliesPanel.jsx (NEW)
+  ☐ Inventory delta preview; Make-at-Home recipes; Print / Apply.
+- src/components/cleaning/HomemadeCleanerCard.jsx (NEW)
+  ☐ Vinegar spray, Citrus degreaser, Soft scrub, Laundry booster, etc. (with cautions).
+- src/components/cleaning/RoleAssigner.jsx (NEW)
+  ☐ Assign tasks per household member; show load balance and rotation.
+- src/components/cleaning/ProgressPanel.jsx (NEW)
+  ☐ Live completion %, streaks, rewards, export log.
+
+4) Files/Areas to touch (agents + services)
+- src/agents/cleaningAgent.js (NEW)
+  ☐ buildCleaningPlan(zones, constraints, prefs) → steps with durations, tools, micro-drills.
+  ☐ computeSuppliesDelta(steps, inventory) → consume / missing / homemadeSuggestions.
+  ☐ proposeScheduleAvoidingFeasts(plan, hebrewCalendar) → safe times + fallbacks.
+- src/services/automation/runtime.js
+  ☐ Register events below.
+- src/stores/*
+  ☐ CleaningStore (zones, presets, logs), SuppliesStore, HouseholdStore (roles), FitnessStore (HR prefs), HebrewCalendarStore.
+
+5) UI Acceptance Criteria
+☐ Horizontal “raised card” layout for Planner | Timer | Supplies | Progress.
+☐ Selecting zones/presets creates a realistic plan (≤1s perceived).
+☐ Checklist steps have tooltips (tools, safety, drill suggestions).
+☐ Timers control pacing; voice + toast cues; survives route changes.
+☐ Supplies panel shows delta + “Make at home” recipes; one-click Print/Apply.
+☐ Calendar sync respects Hebrew feast days and Sabbath; auto-suggest reschedule.
+☐ Role assignment shows fair rotation; streaks & rewards increment correctly.
+
+6) Domain Preferences & Constraints
+- Fragrance sensitivity: prefer unscented; avoid mixing bleach/ammonia; caution vinegar on stone.
+- Pets & kids: floor/low-shelf toxins → swap to safer options; add doors/gates steps.
+- Material care: stone, wood, stainless, glass, fabric; surface-safe cleaners only.
+- Feast days/Sabbath: block cleaning sessions (or suggest “preparation day”).
+- Time windows: Morning shine (windows/mirrors), Evening reset (kitchen/entry), Weekly deep clean per zone.
+- HR goal: light (Zone 1–2), moderate (Zone 2–3), vigorous (Zone 3–4) — micro-drills inserted accordingly.
+
+7) Event Contract (emit/subscribe)
+Emit:
+  • cleaning.session.started|paused|resumed|completed
+  • cleaning.step.completed ({stepId, zoneId, ts, hrSample?})
+  • supplies.delta.applied ({patchId, items})
+  • cleaning.fitness.enabled ({targetZone})
+  • calendar.synced ({events})
+  • rewards.redeemed ({points})
+Subscribe:
+  • user.prefs.updated → rebuild plan/timers
+  • inventory.low → suggest make-at-home or purchase
+  • calendar.updated → reschedule conflicts
+  • hebrewCalendar.updated → recompute safe windows
+
+8) Minimal Data Shapes (typedef sketch)
+/** Zone */
+{ "id":"kitchen", "name":"Kitchen", "priority": "high", "materials":["stone","stainless","wood"] }
+/** CleaningStep */
+{
+  "id":"step-uuid",
+  "zoneId":"kitchen",
+  "action":"Degrease range hood",
+  "durationSec": 300,
+  "tools":["microfiber","degreaser"],
+  "cleaner":{"sku":"CITRUS_DEGREASER","homemade":true},
+  "microDrill":{"type":"air-squat","reps":10,"when":"after"},
+  "safety":["gloves","ventilate"],
+  "blockers":["clear-countertops"],
+  "labels":["timer","safety","drill"],
+  "hrTarget":"moderate"  // light|moderate|vigorous
+}
+/** SuppliesDelta */
+{
+  "consume":[{"sku":"MICROFIBER_CLOTH","qty":3,"unit":"pc"},{"sku":"VINEGAR","qty":200,"unit":"ml"}],
+  "missing":[{"sku":"BAKING_SODA","qty":500,"unit":"g"}],
+  "homemade":[{"name":"Citrus Degreaser","needs":["citrus peels","vinegar","jar","spray bottle"]}]
+}
+/** CleaningPlan */
+{
+  "id":"plan-uuid",
+  "zones":["kitchen","bathroom","entry"],
+  "mode":"batch", // batch | deep
+  "steps":[...CleaningStep],
+  "estimatedMin": 85,
+  "roles":{"rhonda":["kitchen-wipe","entry-reset"],"helper":["bathroom-sink"]},
+  "hrTarget":"moderate"
+}
+
+9) Agent Pseudocode — Plan & Supplies
+/*
+export async function buildCleaningPlan(zones, constraints, prefs){
+  const steps = loadPresets(zones, prefs.materials);
+  const tuned = applyPrefs(steps, {fragranceFree:prefs.fragranceFree, pets:prefs.pets, kids:prefs.kids});
+  const drilled = injectMicroDrills(tuned, prefs.hrTarget); // add HR boosters
+  const sequenced = scheduleByMode(drilled, prefs.mode); // batch vs deep
+  return { steps: sequenced, estimatedMin: sum(sequenced.map(s=>s.durationSec))/60 };
+}
+export async function computeSuppliesDelta(steps, inventory){
+  // aggregate per SKU; suggest homemade where viable
+  return { consume, missing, homemade };
+}
+*/
+
+10) UI Wiring Notes
+- Planner selects zones/presets → call buildCleaningPlan → setPlan().
+- Checklist consumes plan.steps; each checkbox emits cleaning.step.completed.
+- TimerPanel reads step durations; Power-25 default; “Power-10 sprint” option.
+- SuppliesPanel shows computeSuppliesDelta result; “Apply” writes inventory patch.
+- RoleAssigner writes assignments to plan.roles; ProgressPanel reads completions.
+- Hebrew calendar: before sync, filter plan time windows; suggest earlier “prep day.”
+
+11) Homemade Cleaner Recipes (cards → SuppliesPanel)
+- Citrus Degreaser (do NOT use on marble/stone): Fill jar with citrus peels; cover with vinegar; steep 7–14 days; strain; 1:1 with water in spray bottle.
+- Glass Cleaner: 1c water + 1c vinegar + 1 tbsp isopropyl; optional drop unscented soap; lint-free cloth.
+- Soft Scrub (non-stone): 1/2c baking soda + enough castile soap to paste; optional 10ml hydrogen peroxide; patch test.
+- Floor Wash (sealed wood): 1 gal warm water + few drops castile; wring nearly dry; follow with dry pass.
+- Stainless Polish: tiny olive oil drop on microfiber; buff with grain; final dry cloth.
+
+12) Calendar Sync (event skeleton)
+/*
+events = [
+ {title:"Batch Cleaning: Kitchen/Bath/Entry", start:"2025-10-05T14:00:00", end:"2025-10-05T15:30:00", meta:{mode:"batch"}},
+ {title:"Weekly Deep Clean: Bathrooms", start:"2025-10-08T18:00:00", end:"2025-10-08T19:00:00"}
+]
+// filterAgainstHebrewFeasts(events) → push alt suggestion if conflict
+emit('calendar.synced',{events})
+*/
+
+13) Rewards & Streaks (simple rule)
+- +1 point per minute planned; +2 per minute completed on-time.
+- Bonus +50 for entire zone 100% with “vigorous” HR target met.
+- 7-day streak: +100; 30-day streak: +500.
+
+14) Component Snippets (wire-in ready)
+// CleaningTimerPanel.jsx — minimal Power-25 logic
+/*
+const [mode,setMode]=useState('power25'); // 'power25'|'power10'|'custom'
+const [secs,setSecs]=useState(25*60);
+useEffect(()=>{ if(mode==='power25') setSecs(25*60); if(mode==='power10') setSecs(10*60); },[mode]);
+useEffect(()=>{ if(!running) return; const id=setInterval(()=> setSecs(s=>Math.max(0,s-1)),1000); return ()=>clearInterval(id);},[running]);
+useEffect(()=>{ if(secs===0){ toast("Time! Switch tasks."); speak("Time! Switch tasks."); emit('cleaning.session.updated',{phase:'switch'});} },[secs]);
+*/
+
+// CleaningChecklist.jsx — step complete
+/*
+function onCheck(step){
+  setDone(prev=>({...prev,[step.id]:!prev[step.id]}));
+  emit('cleaning.step.completed',{stepId:step.id, zoneId:step.zoneId, ts:Date.now()});
+}
+*/
+
+// SuppliesPanel.jsx — apply delta
+/*
+async function applyDelta(){
+  const patchId = await inventory.applyDelta(delta);
+  emit('supplies.delta.applied',{patchId, items:delta});
+  toast.success("Supplies updated.");
+}
+*/
+
+15) VS Code Steps
+☐ Create new folder: src/components/cleaning/ and src/pages/cleaning/
+☐ Scaffold components listed in §3.
+☐ Add routes: /tier2/household/cleaning → index.jsx with horizontal cards.
+☐ Implement minimal timers & checklist first; wire events.
+☐ Implement SuppliesPanel with computeSuppliesDelta mock; then connect store.
+☐ Add Hebrew calendar guard before calendar sync.
+☐ Add RoleAssigner + ProgressPanel with streaks.
+
+16) Commit Cadence
+- feat: CleaningSessionPlanner + horizontal layout
+- feat: TimerPanel (Power-25/10) + voice/toasts
+- feat: Checklist with micro-drills + safety tooltips
+- feat: SuppliesPanel (delta + homemade recipes) + Print/Apply
+- feat: Calendar sync with Hebrew feast guard
+- feat: RoleAssigner + streaks/rewards
+- chore: styles for raised cards; sticky header ring
+- fix: inventory delta rounding & undo
+
+17) Done = Definition
+☐ Users can select zones and start a session in ≤1s perceived.
+☐ Checklist + timers feel intuitive; voice/alerts fire reliably; survives refresh.
+☐ Supplies delta correct; homemade recipes printable; inventory applies/undo works.
+☐ Calendar events created; feast/Sabbath conflicts avoided with suggestions.
+☐ Roles assigned; progress tracked; points + streaks update.
+☐ No console errors; mobile-responsive; cards remain horizontal on desktop.
+
+18) Parking Lot
+- AI “DirtMap”: heatmap of home hotspots by frequency/severity.
+- Computer vision (optional): check surface type & cleanliness via camera.
+- QR on supply bottles to decrement inventory + show recipe/safety.
+- Allergy profiles (dust/pollen molds) → seasonal focus tasks.
+- Integrate Stronghold Fitness metrics (est. calories, HR samples) into ProgressPanel.

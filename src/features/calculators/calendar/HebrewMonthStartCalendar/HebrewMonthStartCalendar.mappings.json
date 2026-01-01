@@ -1,0 +1,127 @@
+{
+  "id": "calendar.hebrewMonthStart",
+  "calculator": "HebrewMonthStartCalendar",
+  "domains": ["storehouse", "garden", "animals"],
+  "inputs": {
+    "methodPresetId": "string",
+    "latitude": "number",
+    "longitude": "number",
+    "year": "number",
+    "timezone": "string",
+    "includeIntercalary": "boolean",
+    "flags": "string[]"
+  },
+  "rules": [
+    {
+      "id": "calendar.hebrewMonthStart -> garden.plantingWindows",
+      "description": "Use month start outputs to derive planting windows for configured crops.",
+      "trigger": {
+        "outputKey": "months",
+        "minCount": 1
+      },
+      "next": [
+        {
+          "type": "planningGraph",
+          "targetNode": "garden.plantingWindows",
+          "payloadShape": {
+            "fromCalculator": "HebrewMonthStartCalendar",
+            "usesHook": "useHebrewPlantingPlans",
+            "fields": [
+              "hebrewMonthIndex",
+              "gregorianStartDate",
+              "flags"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "calendar.hebrewMonthStart -> calendar.feastAnchors",
+      "description": "Map month starts to anchors for feasts (Passover, Unleavened Bread, Firstfruits, Trumpets, Atonement, Sukkot).",
+      "trigger": {
+        "outputKey": "months",
+        "requiredMonths": [1, 7]
+      },
+      "next": [
+        {
+          "type": "planningGraph",
+          "targetNode": "calendar.feastAnchors",
+          "payloadShape": {
+            "fromCalculator": "HebrewMonthStartCalendar",
+            "usesHook": "useHebrewFeastSessions",
+            "fields": [
+              "feastKey",
+              "feastName",
+              "hebrewMonth",
+              "hebrewDay",
+              "approxGregorianDate"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "calendar.feastAnchors -> sessions.feastPrep",
+      "description": "Convert feast anchors into storehouse and cooking prep session drafts.",
+      "trigger": {
+        "dependsOnRule": "calendar.hebrewMonthStart -> calendar.feastAnchors"
+      },
+      "next": [
+        {
+          "type": "sessionDrafts",
+          "domain": "storehouse",
+          "sessionBuilder": "buildFeastSessionDrafts",
+          "emitEvent": "session.builder.requested",
+          "sessionMeta": {
+            "reason": "hebrewMonthStartCalendar.feasts",
+            "preferredDomains": ["storehouse", "cooking"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "calendar.hebrewMonthStart -> storehouse.seasonalBudget",
+      "description": "Use Hebrew months to segment storehouse and grocery budgets into feast and non-feast seasons.",
+      "trigger": {
+        "outputKey": "months",
+        "minCount": 12
+      },
+      "next": [
+        {
+          "type": "storehousePlanning",
+          "targetNode": "storehouse.seasonalBudget",
+          "payloadShape": {
+            "fromCalculator": "HebrewMonthStartCalendar",
+            "fields": [
+              "hebrewMonthIndex",
+              "gregorianStartDate",
+              "seasonTag"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "calendar.hebrewMonthStart -> animals.rotationPlanning",
+      "description": "Use the Hebrew calendar to align breeding, pasture rotation, and planned butchery sessions with feast and rest patterns.",
+      "trigger": {
+        "outputKey": "months",
+        "minCount": 12
+      },
+      "next": [
+        {
+          "type": "animalsPlanning",
+          "targetNode": "animals.rotationCalendar",
+          "payloadShape": {
+            "fromCalculator": "HebrewMonthStartCalendar",
+            "fields": [
+              "hebrewMonthIndex",
+              "gregorianStartDate",
+              "seasonTag"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

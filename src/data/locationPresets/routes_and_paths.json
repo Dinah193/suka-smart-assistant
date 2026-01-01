@@ -1,0 +1,298 @@
+{
+  "version": "2025-10-31T13:55:00-05:00",
+  "description": "Domain-aware routes/paths inside the household for Suka Smart Assistant. These connect rooms and stations so cleaning, garden harvest, storehouse intake, meals, and animal/butchery flows can create the RIGHT cleaning pass (hallway, pantry path, garden-to-wash, animal-to-processing) without hardcoding UI. Supports user-owned favorites and schedules. Reverse generation enabled so events like harvest, batch cooking, butchery, and storehouse intake can request a path cleaning.",
+  "meta": {
+    "sourceOfTruth": "scraper",
+    "allowHubOverrides": true,
+    "mergeStrategy": "scraper-wins",
+    "ingestionPipelines": [
+      "scraperService",
+      "importService",
+      "bookmarklet",
+      "linked-accounts"
+    ],
+    "sharedOrchestration": {
+      "emitOnUpdate": true,
+      "reason": "routes-and-paths-update",
+      "channels": [
+        "cleaning",
+        "garden",
+        "storehouse",
+        "meals",
+        "animals",
+        "ui"
+      ]
+    },
+    "notes": [
+      "This is the piece your central_cleaning_routines.json kept hinting at when it said 'pantry/storehouse access'.",
+      "Meal → storehouse → cleaning should resolve the path FIRST, then create the cleaning session.",
+      "Garden and animals can both converge on the same outdoor path; that’s why onMismatch allows mitigation."
+    ]
+  },
+  "defaults": {
+    "timezone": "America/Chicago",
+    "sabbathGuard": true,
+    "quietHoursGuard": true,
+    "onMismatch": "allow-with-mitigation",
+    "supportsReverseGeneration": true
+  },
+  "routes": [
+    {
+      "id": "route-kitchen-to-pantry",
+      "label": "Kitchen → Pantry / Storehouse",
+      "from": "kitchen-main",
+      "to": "pantry-main",
+      "priority": 1,
+      "kind": "indoor",
+      "sabbathAllowed": true,
+      "quietHoursAllowed": true,
+      "supports": [
+        "storehouse.intake.expected",
+        "meals.cooking-session",
+        "cleaning.storehouse-visibility-pass"
+      ],
+      "defaultCleaningRoutineId": "cleaning.storehouse-visibility-pass",
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "storehouse.intake.expected",
+          "meals.batch-cooking.completed"
+        ],
+        "emit": [
+          "cleaning.storehouse-visibility-pass"
+        ],
+        "rules": [
+          {
+            "id": "intake-to-path-clean",
+            "ifEvent": "storehouse.intake.expected",
+            "generate": "cleaning.storehouse-visibility-pass"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "arrow-right",
+        "group": "indoor"
+      }
+    },
+    {
+      "id": "route-garden-to-wash",
+      "label": "Garden → Wash / Processing Station",
+      "from": "garden-bed-area",
+      "to": "garden-processing-area",
+      "priority": 1,
+      "kind": "outdoor",
+      "sabbathAllowed": false,
+      "quietHoursAllowed": true,
+      "supports": [
+        "garden.harvest.logged",
+        "cleaning.garden-bin-sanitize",
+        "storehouse.intake.from-garden"
+      ],
+      "defaultCleaningRoutineId": "cleaning.garden-bin-sanitize",
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.harvest.logged"
+        ],
+        "emit": [
+          "cleaning.garden-bin-sanitize"
+        ],
+        "rules": [
+          {
+            "id": "harvest-to-path-clean",
+            "ifEvent": "garden.harvest.logged",
+            "generate": "cleaning.garden-bin-sanitize"
+          }
+        ]
+      },
+      "mitigation": {
+        "extraCleaningEmit": [
+          "cleaning.outdoor-zone.expected"
+        ],
+        "risks": [
+          "mud/dirt tracked into entry-mudroom",
+          "in rainy weather add entry-mudroom cleaning"
+        ]
+      },
+      "uiHints": {
+        "icon": "leaf",
+        "group": "outdoor"
+      }
+    },
+    {
+      "id": "route-entry-to-pantry",
+      "label": "Entry / Mudroom → Pantry",
+      "from": "entry-mudroom",
+      "to": "pantry-main",
+      "priority": 2,
+      "kind": "indoor",
+      "sabbathAllowed": true,
+      "quietHoursAllowed": true,
+      "supports": [
+        "garden.harvest.staging",
+        "animals.care.staging",
+        "storehouse.intake.expected"
+      ],
+      "defaultCleaningRoutineId": "cleaning.storehouse-harvest-sanitize",
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.harvest.logged",
+          "animals.butchery.completed"
+        ],
+        "emit": [
+          "cleaning.storehouse-harvest-sanitize"
+        ],
+        "rules": [
+          {
+            "id": "animals-to-entry-path-clean",
+            "ifEvent": "animals.butchery.completed",
+            "generate": "cleaning.storehouse-meat-intake"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "door",
+        "group": "indoor"
+      }
+    },
+    {
+      "id": "route-animal-yard-to-processing-bay",
+      "label": "Animal Yard → Processing Bay",
+      "from": "animal-yard",
+      "to": "animal-processing-bay",
+      "priority": 1,
+      "kind": "outdoor",
+      "sabbathAllowed": false,
+      "quietHoursAllowed": false,
+      "supports": [
+        "animals.butchery",
+        "animals.processing",
+        "cleaning.processing-area.requested"
+      ],
+      "defaultCleaningRoutineId": "cleaning.processing-area.requested",
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "animals.butchery.completed",
+          "animals.large-butchery.generated"
+        ],
+        "emit": [
+          "cleaning.processing-area.requested"
+        ],
+        "rules": [
+          {
+            "id": "butchery-to-path-clean",
+            "ifEvent": "animals.butchery.completed",
+            "generate": "cleaning.processing-area.requested"
+          }
+        ]
+      },
+      "mitigation": {
+        "extraCleaningEmit": [
+          "cleaning.outdoor-zone.expected"
+        ],
+        "risks": [
+          "blood/fluids may require extra hose-down",
+          "flies/pests if not sanitized quickly"
+        ]
+      },
+      "uiHints": {
+        "icon": "paw-print",
+        "group": "outdoor"
+      }
+    },
+    {
+      "id": "route-kitchen-to-preservation",
+      "label": "Kitchen → Preservation Room",
+      "from": "kitchen-main",
+      "to": "preserve-canning-kitchen",
+      "priority": 2,
+      "kind": "indoor",
+      "sabbathAllowed": false,
+      "quietHoursAllowed": false,
+      "supports": [
+        "meals.batch-cooking",
+        "storehouse.preservation.canning",
+        "cleaning.after-cooking-session"
+      ],
+      "defaultCleaningRoutineId": "cleaning.after-cooking-session",
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "meals.batch-cooking.completed",
+          "storehouse.overstock.detected"
+        ],
+        "emit": [
+          "cleaning.after-cooking-session"
+        ],
+        "rules": [
+          {
+            "id": "overstock-to-preserve-path",
+            "ifEvent": "storehouse.overstock.detected",
+            "generate": "storehouse.preservation.canning"
+          }
+        ]
+      },
+      "uiHints": {
+        "icon": "jar",
+        "group": "indoor"
+      }
+    },
+    {
+      "id": "route-garden-to-seasonal",
+      "label": "Garden → Seasonal Structure (Harvest Tent / Sukkot)",
+      "from": "garden-bed-area",
+      "to": "harvest-shade-tent",
+      "priority": 3,
+      "kind": "outdoor",
+      "sabbathAllowed": false,
+      "quietHoursAllowed": true,
+      "supports": [
+        "garden.harvest.staging",
+        "cleaning.outdoor-zone.expected"
+      ],
+      "activeWhenStructures": [
+        "harvest-shade-tent",
+        "sukkot-outdoor-kitchen"
+      ],
+      "defaultCleaningRoutineId": "cleaning.outdoor-zone.expected",
+      "reverseGeneration": {
+        "enabled": true,
+        "listensFor": [
+          "garden.harvest.logged",
+          "calendar.feast.upcoming"
+        ],
+        "emit": [
+          "cleaning.outdoor-zone.expected"
+        ]
+      },
+      "uiHints": {
+        "icon": "tree-palm",
+        "group": "outdoor"
+      }
+    }
+  ],
+  "userCanSaveFavorites": true,
+  "favoritesTemplate": [
+    {
+      "id": "fav-route-harvest",
+      "source": "system",
+      "cloneOf": "route-garden-to-wash",
+      "label": "My Harvest Route",
+      "allowUserScheduleOverride": true
+    },
+    {
+      "id": "fav-route-butchery",
+      "source": "system",
+      "cloneOf": "route-animal-yard-to-processing-bay",
+      "label": "My Butchery Route",
+      "allowUserScheduleOverride": true
+    }
+  ],
+  "userFavoritePolicy": {
+    "maxPerHousehold": 30,
+    "allowCustomSchedule": true,
+    "allowCustomReverseGeneration": true
+  }
+}

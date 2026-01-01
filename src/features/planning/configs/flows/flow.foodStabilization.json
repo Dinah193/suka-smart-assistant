@@ -1,0 +1,347 @@
+{
+  "id": "flow.foodStabilization",
+  "version": 1,
+  "title": "Food Stabilization Flow",
+  "description": "End-to-end flow for stabilizing the household food situation: assess storehouse, plan meals, align garden/animals, preserve surplus, and lock in stable daily routines.",
+  "category": "stability",
+  "priority": 0.95,
+  "domainsInvolved": [
+    "storehouse",
+    "cooking",
+    "garden",
+    "animals",
+    "preservation",
+    "cleaning"
+  ],
+  "objectives": [
+    "Ensure a minimum horizon of stable meals based on current inventory.",
+    "Align garden and animal outputs with storehouse gaps and goals.",
+    "Capture and preserve any surplus before spoilage.",
+    "Establish routine cooking and cleaning sessions that keep the system stable."
+  ],
+  "entryCriteria": {
+    "description": "When to consider activating this flow.",
+    "triggersAny": [
+      "inventory.shortage.detected",
+      "storehouse.horizon.low",
+      "meal.gaps.detected",
+      "garden.harvest.peaking",
+      "animals.butchery.planned",
+      "user.manualFlowStart.foodStabilization"
+    ],
+    "minStorehouseHorizonDays": 3,
+    "maxStorehouseHorizonDaysForBoost": 14,
+    "supportsManualStart": true
+  },
+  "exitCriteria": {
+    "description": "When the household food situation is considered 'stable' for now.",
+    "conditionsAll": [
+      {
+        "metric": "storehouse.mealHorizonDays",
+        "operator": ">=",
+        "value": 14
+      },
+      {
+        "metric": "storehouse.perishableSpoilageRisk",
+        "operator": "<=",
+        "value": 0.2
+      },
+      {
+        "metric": "preservation.backlogCount",
+        "operator": "<=",
+        "value": 1
+      }
+    ]
+  },
+  "guards": {
+    "sabbathAware": true,
+    "quietHoursSensitive": true,
+    "weatherAware": true,
+    "inventoryAware": true,
+    "deviceBatteryAware": true
+  },
+  "nowCtaBehavior": {
+    "description": "How the 'Now' button should behave when this flow is active.",
+    "preferredDomains": [
+      "storehouse",
+      "cooking",
+      "preservation"
+    ],
+    "respectDomainWeights": true,
+    "boostWhenTriggersPresent": [
+      "inventory.shortage.detected",
+      "garden.harvest.peaking",
+      "animals.butchery.completed"
+    ]
+  },
+  "phaseOrder": [
+    "assessment",
+    "storehouse_stabilization",
+    "production_alignment",
+    "preservation_lock_in",
+    "routine_loops"
+  ],
+  "phases": {
+    "assessment": {
+      "id": "assessment",
+      "label": "Assessment & Horizon Check",
+      "goal": "Understand how many days of stable meals you can support and where the gaps are.",
+      "priorityBias": 0.98,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "storehouse"
+      ],
+      "steps": [
+        {
+          "id": "step.assess.inventoryAudit",
+          "label": "Run Inventory Audit",
+          "description": "Take a quick snapshot of current pantry, fridge, and freezer to understand what you actually have.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.inventory.audit",
+          "nodeType": "calculator",
+          "sessionTemplateId": "storehouse.sessions.inventoryAudit",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "If no recent audit exists, suggest this first."
+        },
+        {
+          "id": "step.assess.macroTargets",
+          "label": "Update Household Nutrition Targets",
+          "description": "Make sure your nutrition or health calculators reflect your current household goals.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.meals.macroCalculator",
+          "nodeType": "calculator",
+          "sessionTemplateId": "storehouse.sessions.macroTargetsReview",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Optional but recommended if health goals recently changed."
+        },
+        {
+          "id": "step.assess.mealHorizon",
+          "label": "Check Meal Horizon",
+          "description": "Estimate how many days of balanced meals you can support based on current inventory and targets.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.meals.horizonEstimator",
+          "nodeType": "calculator",
+          "sessionTemplateId": "storehouse.sessions.horizonCheck",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Use output to decide if you need emergency stabilization or normal planning."
+        }
+      ]
+    },
+    "storehouse_stabilization": {
+      "id": "storehouse_stabilization",
+      "label": "Storehouse Stabilization",
+      "goal": "Close immediate gaps, reduce waste risk, and build a realistic meal plan from what you have.",
+      "priorityBias": 0.95,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "storehouse",
+        "cooking"
+      ],
+      "steps": [
+        {
+          "id": "step.storehouse.resolveGaps",
+          "label": "Resolve Critical Gaps",
+          "description": "Identify critical shortages (staples, protein, fats) and decide whether to buy, substitute, or re-plan.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.meals.gapResolver",
+          "nodeType": "planner",
+          "sessionTemplateId": "storehouse.sessions.gapResolution",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "If critical gaps exist, prioritize this before detailed meal planning."
+        },
+        {
+          "id": "step.storehouse.mealPlanner",
+          "label": "Create Meal Plan from Storehouse",
+          "description": "Generate a 7–14 day meal plan anchored in what is actually in your storehouse.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.meals.planner",
+          "nodeType": "planner",
+          "sessionTemplateId": "storehouse.sessions.mealPlanFromInventory",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Primary planning step; strongly recommended every stabilization run."
+        },
+        {
+          "id": "step.storehouse.shoppingList",
+          "label": "Generate Shopping/Restock List",
+          "description": "Create a targeted shopping list to close remaining gaps and avoid random impulse purchases.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.meals.shoppingListGenerator",
+          "nodeType": "planner",
+          "sessionTemplateId": "storehouse.sessions.shoppingTripPlanner",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Only if outside purchases are part of your stabilization strategy."
+        }
+      ]
+    },
+    "production_alignment": {
+      "id": "production_alignment",
+      "label": "Garden & Animals Alignment",
+      "goal": "Aim your garden and animal outputs at storehouse gaps, not random surplus.",
+      "priorityBias": 0.85,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "garden",
+        "animals",
+        "storehouse"
+      ],
+      "steps": [
+        {
+          "id": "step.production.gardenPlanner",
+          "label": "Align Garden Plan with Storehouse Gaps",
+          "description": "Plan what to plant and when based on medium-term shortages and preferred meals.",
+          "domain": "garden",
+          "nodeId": "garden.planting.planner",
+          "nodeType": "planner",
+          "sessionTemplateId": "garden.sessions.plantingFromGaps",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Use after meal/storehouse gaps have been identified."
+        },
+        {
+          "id": "step.production.animalPlanner",
+          "label": "Align Animal Plan with Protein/Fat Needs",
+          "description": "Plan breeding, culling, or butchery windows so your storehouse has stable protein and fat.",
+          "domain": "animals",
+          "nodeId": "animals.stocking.planner",
+          "nodeType": "planner",
+          "sessionTemplateId": "animals.sessions.stockingAndButcheryWindow",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Especially important if you rely heavily on your own meat/eggs/dairy."
+        },
+        {
+          "id": "step.production.harvestLogging",
+          "label": "Prepare Harvest & Butchery Logging",
+          "description": "Ensure harvest and butchery logs are configured so future events automatically feed storehouse and preservation suggestions.",
+          "domain": "garden",
+          "nodeId": "garden.harvest.logger",
+          "nodeType": "calculator",
+          "sessionTemplateId": "garden.sessions.harvestLoggingSetup",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "One-time or occasional configuration step; boosts automation quality."
+        }
+      ]
+    },
+    "preservation_lock_in": {
+      "id": "preservation_lock_in",
+      "label": "Preservation Lock-In",
+      "goal": "Capture surplus from garden, animals, or batch cooking and convert it into stable, long-term storehouse value.",
+      "priorityBias": 0.9,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "preservation",
+        "storehouse",
+        "cooking",
+        "garden",
+        "animals"
+      ],
+      "steps": [
+        {
+          "id": "step.preservation.identifySurplus",
+          "label": "Identify Surplus and Urgent Items",
+          "description": "Scan storehouse, harvest logs, and butchery yields for items at high risk of spoilage.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.meals.surplusDetector",
+          "nodeType": "calculator",
+          "sessionTemplateId": "storehouse.sessions.surplusReview",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "If spoilage risk is high, this step should override normal cooking sessions."
+        },
+        {
+          "id": "step.preservation.planSession",
+          "label": "Plan Preservation Session",
+          "description": "Map surplus into canning, freezing, dehydrating, or curing sessions.",
+          "domain": "preservation",
+          "nodeId": "preservation.sessionPlanner",
+          "nodeType": "planner",
+          "sessionTemplateId": "preservation.sessions.planFromSurplus",
+          "requiresSession": false,
+          "allowsParallel": false,
+          "nowCtaHint": "Creates a concrete checklist that can be run in the SessionRunner."
+        },
+        {
+          "id": "step.preservation.runSession",
+          "label": "Run Preservation Session",
+          "description": "Execute preservation tasks with a guided session, timers, and safety cues.",
+          "domain": "preservation",
+          "nodeId": "preservation.session.runnerTemplate",
+          "nodeType": "session-template",
+          "sessionTemplateId": "preservation.session.runnerTemplate",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "This should be a top candidate for 'Now' when spoilage risk is high."
+        },
+        {
+          "id": "step.preservation.updateStorehouse",
+          "label": "Update Storehouse with Preserved Items",
+          "description": "Add jars, frozen packs, and dried goods to storehouse inventory and savings.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.inventory.preservedIntake",
+          "nodeType": "planner",
+          "sessionTemplateId": "storehouse.sessions.preservedIntake",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Can be prompted immediately after preservation session completes."
+        }
+      ]
+    },
+    "routine_loops": {
+      "id": "routine_loops",
+      "label": "Routine Cooking & Cleaning Loops",
+      "goal": "Turn the plan into daily reality and keep the kitchen environment stable and pleasant.",
+      "priorityBias": 0.88,
+      "recommendedMinimumRuns": 1,
+      "domains": [
+        "cooking",
+        "cleaning",
+        "storehouse"
+      ],
+      "steps": [
+        {
+          "id": "step.routine.batchCooking",
+          "label": "Run Batch Cooking Session",
+          "description": "Execute planned meals in a batch session to reduce daily workload and increase predictability.",
+          "domain": "cooking",
+          "nodeId": "cooking.batchSession.runnerTemplate",
+          "nodeType": "session-template",
+          "sessionTemplateId": "cooking.batchSession.runnerTemplate",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "Prime candidate for daily/weekly 'Now' button when a meal plan exists."
+        },
+        {
+          "id": "step.routine.kitchenCleaning",
+          "label": "Run Kitchen Reset Session",
+          "description": "Clean and reset kitchen zones after cooking or preservation to keep the environment ready for the next session.",
+          "domain": "cleaning",
+          "nodeId": "cleaning.zoneSession.kitchenReset",
+          "nodeType": "session-template",
+          "sessionTemplateId": "cleaning.zoneSession.kitchenReset",
+          "requiresSession": true,
+          "allowsParallel": false,
+          "nowCtaHint": "Often suggested immediately after cooking/preservation sessions end."
+        },
+        {
+          "id": "step.routine.storehouseAdjustments",
+          "label": "Adjust Storehouse after Sessions",
+          "description": "Update inventory for ingredients used and leftovers produced from cooking sessions.",
+          "domain": "storehouse",
+          "nodeId": "storehouse.meals.postSessionAdjuster",
+          "nodeType": "planner",
+          "sessionTemplateId": "storehouse.sessions.postSessionAdjuster",
+          "requiresSession": false,
+          "allowsParallel": true,
+          "nowCtaHint": "Can be a lightweight panel in SessionRunner's 'done' state."
+        }
+      ]
+    }
+  }
+}

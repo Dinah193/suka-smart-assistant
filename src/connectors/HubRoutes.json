@@ -1,0 +1,168 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "2025-11-02T00:00:00-06:00",
+  "description": "Hub route map for SSA → Suka Village Family Fund Hub data transmission. SSA owns the data first; Hub is an optional upstream. These routes are used by FamilyFundConnector.js and any other hub-aware modules to decide WHERE to send each kind of packet.",
+  "defaults": {
+    "baseUrl": "https://hub.suka.local",
+    "ingest": "/api/ingest",
+    "health": "/api/health",
+    "ws": "/ws"
+  },
+  "routes": {
+    "ssa.event": {
+      "method": "POST",
+      "path": "/api/ingest",
+      "retry": {
+        "strategy": "exponential-backoff",
+        "maxAttempts": 5,
+        "initialDelayMs": 2000
+      },
+      "notes": "Generic SSA event fallback – use when the event kind is unknown or not explicitly mapped."
+    },
+    "import.parsed": {
+      "method": "POST",
+      "path": "/api/ingest/imports",
+      "retry": {
+        "strategy": "exponential-backoff",
+        "maxAttempts": 3,
+        "initialDelayMs": 1500
+      },
+      "notes": "Normalized imports from external sites (recipe, cleaning, garden/seed, animal/butchery, storehouse, video/how-to)."
+    },
+    "inventory.updated": {
+      "method": "POST",
+      "path": "/api/ingest/inventory",
+      "retry": {
+        "strategy": "exponential-backoff",
+        "maxAttempts": 4,
+        "initialDelayMs": 2000
+      },
+      "notes": "Inventory changes that the Hub may aggregate for community-level storehouse views."
+    },
+    "inventory.shortage.detected": {
+      "method": "POST",
+      "path": "/api/ingest/inventory/shortage",
+      "retry": {
+        "strategy": "exponential-backoff",
+        "maxAttempts": 4,
+        "initialDelayMs": 2000
+      },
+      "notes": "Demand signal – Hub businesses can respond with supply."
+    },
+    "storehouse.low": {
+      "method": "POST",
+      "path": "/api/ingest/storehouse/low",
+      "retry": {
+        "strategy": "exponential-backoff",
+        "maxAttempts": 4,
+        "initialDelayMs": 2000
+      },
+      "notes": "Storehouse goals not met; Hub can match to pantry / long-term supply."
+    },
+    "storehouse.wants": {
+      "method": "POST",
+      "path": "/api/ingest/storehouse/wants",
+      "retry": {
+        "strategy": "exponential-backoff",
+        "maxAttempts": 4,
+        "initialDelayMs": 2000
+      },
+      "notes": "Explicit user/storehouse wish list."
+    },
+    "meal.executed": {
+      "method": "POST",
+      "path": "/api/ingest/meals",
+      "retry": {
+        "strategy": "simple",
+        "maxAttempts": 3,
+        "initialDelayMs": 1500
+      },
+      "notes": "Meals cooked/eaten – Hub can derive consumption patterns."
+    },
+    "garden.harvest.logged": {
+      "method": "POST",
+      "path": "/api/ingest/garden/harvest",
+      "retry": {
+        "strategy": "simple",
+        "maxAttempts": 3,
+        "initialDelayMs": 1500
+      },
+      "notes": "Produce available from households – Hub can route to barter / micro-markets."
+    },
+    "preservation.completed": {
+      "method": "POST",
+      "path": "/api/ingest/preservation",
+      "retry": {
+        "strategy": "simple",
+        "maxAttempts": 3,
+        "initialDelayMs": 1500
+      },
+      "notes": "Preserved goods – Hub can track community storage capacity."
+    },
+    "commerce.offers.generated": {
+      "method": "POST",
+      "path": "/api/ingest/commerce/offers",
+      "retry": {
+        "strategy": "simple",
+        "maxAttempts": 2,
+        "initialDelayMs": 2000
+      },
+      "notes": "Commerce engine found products to satisfy demand – Hub can index offers."
+    },
+    "commerce.barter.suggested": {
+      "method": "POST",
+      "path": "/api/ingest/commerce/barter",
+      "retry": {
+        "strategy": "simple",
+        "maxAttempts": 2,
+        "initialDelayMs": 2000
+      },
+      "notes": "Barter suggestions emitted by SSA – Hub can match across households."
+    },
+    "analytics.waste.logged": {
+      "method": "POST",
+      "path": "/api/ingest/analytics/waste",
+      "retry": {
+        "strategy": "simple",
+        "maxAttempts": 2,
+        "initialDelayMs": 2000
+      },
+      "notes": "Waste events – Hub can detect community-level leakages."
+    },
+    "analytics.preservation.method.updated": {
+      "method": "POST",
+      "path": "/api/ingest/analytics/preservation",
+      "retry": {
+        "strategy": "simple",
+        "maxAttempts": 2,
+        "initialDelayMs": 2000
+      },
+      "notes": "Preservation stats – helps Hub understand which methods households use."
+    },
+    "ssa.batch": {
+      "method": "POST",
+      "path": "/api/ingest/batch",
+      "retry": {
+        "strategy": "exponential-backoff",
+        "maxAttempts": 5,
+        "initialDelayMs": 2000
+      },
+      "notes": "Batch packet containing multiple SSA events."
+    }
+  },
+  "security": {
+    "auth": {
+      "type": "bearer",
+      "envVar": "SUKA_HUB_TOKEN",
+      "headerName": "Authorization"
+    },
+    "allowInsecureLocal": true
+  },
+  "notes": [
+    "1. SSA MUST still function when these routes are unreachable.",
+    "2. FamilyFundConnector.js should consult this file when deciding where to POST.",
+    "3. When a kind is missing, use routes['ssa.event'] as the fallback.",
+    "4. These routes may be overridden at runtime by window.__suka.hub.routes.",
+    "5. Use this map for future domains too: preservation, animal, storehouse, construction."
+  ]
+}
