@@ -11,7 +11,6 @@
       "verboseEvents": false,
       "allowLLM": false,
       "debugAgents": false,
-
       "session-runner": true,
       "session-background-shims": true,
       "session-wake-lock": true,
@@ -45,7 +44,6 @@
       22,
       7
     ],
-
     "sessionRunner": {
       "enabled": true,
       "backgroundShims": true,
@@ -74,7 +72,6 @@
         }
       }
     },
-
     "scan": {
       "ui": {
         "sheet": "compact",
@@ -405,7 +402,6 @@
         "percent": 100,
         "allowlist": []
       },
-
       "session.runner.wakeLock": {
         "percent": 100,
         "allowlist": []
@@ -456,7 +452,6 @@
         "garden.harvest.logged",
         "preservation.completed",
         "meal.executed",
-
         "session.started",
         "session.step.changed",
         "session.paused",
@@ -464,7 +459,6 @@
         "session.completed",
         "session.aborted",
         "session.exported",
-
         "agent.invocation.requested",
         "agent.invocation.started",
         "agent.invocation.completed",
@@ -497,6 +491,14 @@
         "source": "string",
         "data": "object"
       }
+    },
+    "cuisineProfiles": {
+      "enabled": true,
+      "enableCuisineProfilesUI": true,
+      "enableAAICuisineProfile": true,
+      "enableFeastDayMealSuggestions": true,
+      "enablePreservationCrosslinks": true,
+      "enableCuisineExplainability": true
     }
   },
   "rules": [
@@ -554,7 +556,6 @@
         "rollouts.storehouse.storehouseStockPlanner.percent": 100,
         "rollouts.animals.butcherySessionEngine.percent": 100,
         "rollouts.preservation.preservationSessionEngine.percent": 100,
-
         "rollouts.session.runner.wakeLock.percent": 100,
         "rollouts.session.runner.notifications.percent": 100,
         "rollouts.session.runner.pictureInPicture.percent": 100,
@@ -580,7 +581,6 @@
       "enableCoupons": true,
       "allowLLM": true,
       "debugAgents": true,
-
       "sessionRunner": {
         "enabled": true,
         "backgroundShims": true,
@@ -590,7 +590,6 @@
         "mediaSession": true,
         "textToSpeech": true
       },
-
       "cleaning": {
         "enabled": true
       },
@@ -644,7 +643,6 @@
       "enableCoupons": true,
       "allowLLM": true,
       "debugAgents": true,
-
       "sessionRunner": {
         "enabled": true,
         "backgroundShims": true,
@@ -654,7 +652,6 @@
         "mediaSession": true,
         "textToSpeech": true
       },
-
       "analytics": {
         "enabled": true
       },
@@ -682,7 +679,6 @@
       "enableCoupons": true,
       "allowLLM": true,
       "debugAgents": false,
-
       "sessionRunner": {
         "enabled": true,
         "backgroundShims": true,
@@ -692,7 +688,6 @@
         "mediaSession": true,
         "textToSpeech": true
       },
-
       "analytics": {
         "enabled": true
       },

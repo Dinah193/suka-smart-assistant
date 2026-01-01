@@ -1441,6 +1441,7 @@ export default function App() {
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/badges" element={<BadgesPage />} />
           <Route path="/meal-planning" element={<MealPlanningPage />} />
+          <Route path="/household/meals" element={<HouseholdMealsCuisinePage />} />
           <Route path="/jobs" element={<JobsPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
 

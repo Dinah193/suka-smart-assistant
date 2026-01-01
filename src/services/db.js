@@ -953,6 +953,33 @@ db.version(13)
     }
   });
 
+
+
+/* -------------------------------------------------------------------------- */
+/* Cuisine Profiles (AAI Cuisine) tables — version 14                          */
+/* -------------------------------------------------------------------------- */
+
+db.version(14)
+  .stores({
+    cuisine_profiles:
+      "++id,&key,name,enabledByDefault,createdAt,updatedAt",
+    cuisine_rulesets:
+      "++id,cuisineKey,versionTag,updatedAt,[cuisineKey+versionTag]",
+    cuisine_user_prefs:
+      "++id,householdId,updatedAt",
+    cuisine_rotation_state:
+      "++id,householdId,cuisineKey,weekIndex,updatedAt,[householdId+cuisineKey],[householdId+updatedAt]",
+    // Optional indexes (safe to add now; can be used later for recipe linking)
+    cuisine_recipe_index:
+      "++id,recipeId,cuisineKey,updatedAt,[recipeId+cuisineKey],[cuisineKey+updatedAt]",
+    preservation_outputs_index:
+      "++id,householdId,itemKey,updatedAt,[householdId+itemKey],[itemKey+updatedAt]",
+  })
+  .upgrade(async (tx) => {
+    // Non-destructive, best-effort backfill: nothing required.
+    try { void tx; } catch { /* ignore */ }
+  });
+
 /* -------------------------------------------------------------------------- */
 /* Dexie hooks → SSA events (+ optional Hub export)                           */
 /* -------------------------------------------------------------------------- */

@@ -3,6 +3,8 @@ import React, { useEffect, useMemo, useState, Suspense } from "react";
 import DashboardSection from "@/components/layout/DashboardSection";
 import RecipeConsolidatorCard from "@/components/home/RecipeConsolidatorCard";
 import HouseholdProfile from "@/components/home/HouseholdProfile";
+import CuisineProfileCard from "@/components/cuisine/CuisineProfileCard";
+import { getFeatureFlag } from "@/config";
 import { automation } from "@/services/automation/runtime"; // shared automation runtime
 
 /* ✅ QuickAdd (cross-domain) */
@@ -1402,9 +1404,38 @@ export default function HomePage() {
           </ul>
         </DashboardSection>
 
+
+
+      {getFeatureFlag("cuisineProfiles.enabled") !== false &&
+      getFeatureFlag("cuisineProfiles.enableCuisineProfilesUI") !== false &&
+      getFeatureFlag("cuisineProfiles.enableAAICuisineProfile") !== false ? (
+        <DashboardSection title="Cuisine">
+          <div className="grid lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-1">
+              <CuisineProfileCard householdId="default" cuisineKey="aai" onOpenPreferences={() => {}} />
+            </div>
+            <div className="lg:col-span-2 card">
+              <div className="text-sm font-semibold">AAI Cuisine is ready to drive meal planning rhythms</div>
+              <div className="text-xs text-[hsl(var(--text-subtle))] mt-1">
+                Deterministic “random-like” rotation, spice matrix, technique overlaps, and scripture-only feast-day suggestions.
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <a className="btn btn--primary btn--sm" href="/household/meals">
+                  Open Meals • Cuisine
+                </a>
+                <span className="chip">Rotation + cooldowns</span>
+                <span className="chip">Preservation crosslinks</span>
+                <span className="chip">Explainability</span>
+              </div>
+            </div>
+          </div>
+        </DashboardSection>
+      ) : null}
+
         {/* ✅ Mount QuickAddModal once (Home is OK; App root is even better later) */}
         <QuickAddModal />
       </main>
+
     </div>
   );
 }
