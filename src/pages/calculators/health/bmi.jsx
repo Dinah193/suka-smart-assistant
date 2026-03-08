@@ -19,11 +19,11 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
 // BMI view component (create if not present yet)
-import BMICalculatorView from "@/features/calculators/health/BMICalculator.view";
+import BMICalculatorView from "@/features/calculators/health/BMICalculator.view.jsx";
 
 const CALCULATOR_ID = "bmi-basic";
 
@@ -101,9 +101,7 @@ function BmiNextStepsPanel({ result, loadingNext, onRequestSession }) {
     <aside className="w-full lg:w-80 xl:w-96 flex-shrink-0">
       <div className="bg-slate-900/60 border border-slate-700 rounded-2xl shadow-lg p-4 lg:p-5 flex flex-col h-full">
         <header className="mb-3">
-          <h2 className="text-lg font-semibold text-slate-50">
-            Next Steps
-          </h2>
+          <h2 className="text-lg font-semibold text-slate-50">Next Steps</h2>
           <p className="text-xs text-slate-400 mt-1">
             SSA can turn your BMI result into stability flows, movement
             sessions, and gentle nutrition adjustments that fit your household.
@@ -129,7 +127,9 @@ function BmiNextStepsPanel({ result, loadingNext, onRequestSession }) {
                 "bg-slate-800/60 hover:bg-slate-800 focus:outline-none",
                 "focus-visible:ring-2 focus-visible:ring-emerald-400/70",
                 "transition-all px-3 py-3 flex flex-col gap-1",
-                (action.disabled || loadingNext) ? "opacity-70 cursor-not-allowed" : "cursor-pointer",
+                action.disabled || loadingNext
+                  ? "opacity-70 cursor-not-allowed"
+                  : "cursor-pointer",
               ].join(" ")}
             >
               <div className="flex items-center justify-between gap-2">
@@ -150,8 +150,9 @@ function BmiNextStepsPanel({ result, loadingNext, onRequestSession }) {
         {hasResult && (
           <footer className="mt-4 border-t border-slate-800 pt-3">
             <p className="text-[10px] text-slate-500 leading-snug">
-              Tip: Any next step can trigger sessions and flows the SessionRunner
-              will guide you through with timers, cues, and notifications.
+              Tip: Any next step can trigger sessions and flows the
+              SessionRunner will guide you through with timers, cues, and
+              notifications.
             </p>
           </footer>
         )}
@@ -320,8 +321,8 @@ export default function BmiCalculatorPage() {
             </h1>
             <p className="mt-1 text-sm text-slate-400 max-w-2xl">
               Calculate your BMI and category, then let SSA turn that insight
-              into gentle, sustainable changes through stability flows,
-              movement sessions, and nutrition planning.
+              into gentle, sustainable changes through stability flows, movement
+              sessions, and nutrition planning.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">

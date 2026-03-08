@@ -15,10 +15,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import PreservationTimeCalculatorView from "@/features/calculators/storehouseMeals/PreservationTimeCalculator.view";
+import PreservationTimeCalculatorView from "@/features/calculators/storehouseMeals/PreservationTimeCalculator.view.jsx";
 
 const CALCULATOR_ID = "storehouseMeals.preservationTime";
 
@@ -261,8 +261,7 @@ export default function PreservationTimeCalculatorPage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    document.title =
-      "Preservation Time Calculator | Suka Smart Assistant";
+    document.title = "Preservation Time Calculator | Suka Smart Assistant";
   }, []);
 
   /**
@@ -275,14 +274,10 @@ export default function PreservationTimeCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source: "pages.calculators.storehouseMeals.preservation-time",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.storehouseMeals.preservation-time",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
         throw new Error(
@@ -300,12 +295,8 @@ export default function PreservationTimeCalculatorPage() {
           typeof calcResult.category === "string"
             ? calcResult.category
             : undefined,
-        windows: Array.isArray(calcResult.windows)
-          ? calcResult.windows
-          : [],
-        warnings: Array.isArray(calcResult.warnings)
-          ? calcResult.warnings
-          : [],
+        windows: Array.isArray(calcResult.windows) ? calcResult.windows : [],
+        warnings: Array.isArray(calcResult.warnings) ? calcResult.warnings : [],
         notes: Array.isArray(calcResult.notes) ? calcResult.notes : [],
         meta: calcResult.meta || {},
       };
@@ -344,9 +335,8 @@ export default function PreservationTimeCalculatorPage() {
             </h1>
             <p className="mt-1 text-sm text-slate-400 max-w-2xl">
               Enter what you&apos;re preserving, your method, and basic safety
-              details. SSA estimates safe time windows so you can plan
-              canning, freezing, fermenting, and other preservation tasks
-              confidently.
+              details. SSA estimates safe time windows so you can plan canning,
+              freezing, fermenting, and other preservation tasks confidently.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">

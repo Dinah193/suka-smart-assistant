@@ -17,10 +17,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import BatchYieldCalculatorView from "@/features/calculators/storehouseMeals/BatchYieldCalculator.view";
+import BatchYieldCalculatorView from "@/features/calculators/storehouseMeals/BatchYieldCalculator.view.jsx";
 
 const CALCULATOR_ID = "storehouseMeals.batchYield";
 
@@ -132,8 +132,8 @@ function BatchYieldSummaryCard({ result, onUseInSession }) {
             Batch Yield Snapshot
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Use this to decide if one pot, two pans, or a full preservation
-            run best fits your storehouse and meal rhythm.
+            Use this to decide if one pot, two pans, or a full preservation run
+            best fits your storehouse and meal rhythm.
           </p>
         </div>
         <span className="text-[10px] px-2 py-1 rounded-full bg-slate-900 border border-slate-700 text-slate-200 whitespace-nowrap">
@@ -178,8 +178,8 @@ function BatchYieldSummaryCard({ result, onUseInSession }) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1">
         <p className="text-[11px] text-slate-500 leading-snug max-w-md">
           Tip: SSA can blend batches into your meal planner, storehouse goals,
-          and preservation schedule so you&apos;re cooking once and eating
-          many times.
+          and preservation schedule so you&apos;re cooking once and eating many
+          times.
         </p>
         <button
           type="button"
@@ -216,14 +216,10 @@ export default function BatchYieldCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source: "pages.calculators.storehouseMeals.batch-yield",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.storehouseMeals.batch-yield",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
         throw new Error(
@@ -259,10 +255,7 @@ export default function BatchYieldCalculatorPage() {
       emitBatchYieldCalculated(normalized);
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error(
-        "[batch-yield.jsx] Batch yield calculator error",
-        err
-      );
+      console.error("[batch-yield.jsx] Batch yield calculator error", err);
       setError(
         err && err.message
           ? err.message
@@ -288,10 +281,9 @@ export default function BatchYieldCalculatorPage() {
               Batch Yield Calculator
             </h1>
             <p className="mt-1 text-sm text-slate-400 max-w-2xl">
-              Estimate how many servings, meals, and days of coverage each
-              batch provides. SSA will use this to shape storehouse goals,
-              shopping lists, and batch cooking sessions that fit your
-              household rhythm.
+              Estimate how many servings, meals, and days of coverage each batch
+              provides. SSA will use this to shape storehouse goals, shopping
+              lists, and batch cooking sessions that fit your household rhythm.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">

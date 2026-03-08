@@ -20,11 +20,11 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
 // Micronutrient view component (create if not present yet)
-import MicronutrientCalculatorView from "@/features/calculators/health/MicronutrientCalculator.view";
+import MicronutrientCalculatorView from "@/features/calculators/health/MicronutrientCalculator.view.jsx";
 
 const CALCULATOR_ID = "micronutrients-daily";
 
@@ -45,7 +45,11 @@ const CALCULATOR_ID = "micronutrients-daily";
  * @property {Object<string, any>} [meta]   - any extra details from calculator
  */
 
-function MicronutrientNextStepsPanel({ result, loadingNext, onRequestSession }) {
+function MicronutrientNextStepsPanel({
+  result,
+  loadingNext,
+  onRequestSession,
+}) {
   const navigate = useNavigate();
   const hasResult = !!result;
 
@@ -58,7 +62,9 @@ function MicronutrientNextStepsPanel({ result, loadingNext, onRequestSession }) 
           desc: "Enter what you currently eat, and SSA will estimate your micronutrient coverage. Once you have a result, targeted suggestions will appear here.",
           cta: "Calculate first",
           onClick: () => {
-            const el = document.querySelector("#micronutrients-calculator-root");
+            const el = document.querySelector(
+              "#micronutrients-calculator-root"
+            );
             if (el) {
               el.scrollIntoView({ behavior: "smooth", block: "start" });
             }
@@ -118,12 +124,10 @@ function MicronutrientNextStepsPanel({ result, loadingNext, onRequestSession }) 
     <aside className="w-full lg:w-80 xl:w-96 flex-shrink-0">
       <div className="bg-slate-900/60 border border-slate-700 rounded-2xl shadow-lg p-4 lg:p-5 flex flex-col h-full">
         <header className="mb-3">
-          <h2 className="text-lg font-semibold text-slate-50">
-            Next Steps
-          </h2>
+          <h2 className="text-lg font-semibold text-slate-50">Next Steps</h2>
           <p className="text-xs text-slate-400 mt-1">
-            SSA uses your micronutrient coverage to steer storehouse goals,
-            meal plans, garden choices, and even preservation batches—without
+            SSA uses your micronutrient coverage to steer storehouse goals, meal
+            plans, garden choices, and even preservation batches—without
             overwhelming you.
           </p>
         </header>
@@ -147,7 +151,9 @@ function MicronutrientNextStepsPanel({ result, loadingNext, onRequestSession }) 
                 "bg-slate-800/60 hover:bg-slate-800 focus:outline-none",
                 "focus-visible:ring-2 focus-visible:ring-emerald-400/70",
                 "transition-all px-3 py-3 flex flex-col gap-1",
-                (action.disabled || loadingNext) ? "opacity-70 cursor-not-allowed" : "cursor-pointer",
+                action.disabled || loadingNext
+                  ? "opacity-70 cursor-not-allowed"
+                  : "cursor-pointer",
               ].join(" ")}
             >
               <div className="flex items-center justify-between gap-2">
@@ -287,14 +293,10 @@ export default function MicronutrientCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source: "pages.calculators.health.micronutrients",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.health.micronutrients",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
         throw new Error(

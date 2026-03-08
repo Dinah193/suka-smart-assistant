@@ -19,10 +19,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import FreezerSpaceCalculatorView from "@/features/calculators/storehouseMeals/FreezerSpaceCalculator.view";
+import FreezerSpaceCalculatorView from "@/features/calculators/storehouseMeals/FreezerSpaceCalculator.view.jsx";
 
 const CALCULATOR_ID = "storehouseMeals.freezerSpace";
 
@@ -386,14 +386,10 @@ export default function FreezerSpaceCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source: "pages.calculators.storehouseMeals.freezer-space",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.storehouseMeals.freezer-space",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
         throw new Error(
@@ -424,15 +420,11 @@ export default function FreezerSpaceCalculatorPage() {
           typeof calcResult.freezerType === "string"
             ? calcResult.freezerType
             : undefined,
-        zonePlan: Array.isArray(calcResult.zonePlan)
-          ? calcResult.zonePlan
-          : [],
+        zonePlan: Array.isArray(calcResult.zonePlan) ? calcResult.zonePlan : [],
         organizationTips: Array.isArray(calcResult.organizationTips)
           ? calcResult.organizationTips
           : [],
-        warnings: Array.isArray(calcResult.warnings)
-          ? calcResult.warnings
-          : [],
+        warnings: Array.isArray(calcResult.warnings) ? calcResult.warnings : [],
         notes: Array.isArray(calcResult.notes) ? calcResult.notes : [],
         suggestedSessionTitle:
           typeof calcResult.suggestedSessionTitle === "string"
@@ -445,10 +437,7 @@ export default function FreezerSpaceCalculatorPage() {
       emitFreezerSpaceCompleted(normalized);
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error(
-        "[freezer-space.jsx] Freezer Space calculator error",
-        err
-      );
+      console.error("[freezer-space.jsx] Freezer Space calculator error", err);
       setError(
         err && err.message
           ? err.message

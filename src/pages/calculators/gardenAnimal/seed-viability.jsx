@@ -22,10 +22,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import SeedViabilityCalculatorView from "@/features/calculators/gardenAnimal/SeedViabilityCalculator.view";
+import SeedViabilityCalculatorView from "@/features/calculators/gardenAnimal/SeedViabilityCalculator.view.jsx";
 
 const CALCULATOR_ID = "garden.seedViability";
 
@@ -327,9 +327,7 @@ function SeedViabilitySummaryCard({
       </div>
 
       <div
-        className={`text-[11px] rounded-xl border px-3 py-2 shadow-sm ${
-          viabilityBadge.className
-        }`}
+        className={`text-[11px] rounded-xl border px-3 py-2 shadow-sm ${viabilityBadge.className}`}
       >
         <p className="font-medium mb-0.5">{viabilityBadge.text}</p>
         <p className="leading-snug">
@@ -371,9 +369,7 @@ function SeedViabilitySummaryCard({
           <button
             type="button"
             onClick={() =>
-              result &&
-              onGardenPlannerSync &&
-              onGardenPlannerSync(result)
+              result && onGardenPlannerSync && onGardenPlannerSync(result)
             }
             className="inline-flex items-center justify-center rounded-xl px-3.5 py-2 text-[11px] font-semibold bg-indigo-400 hover:bg-indigo-300 text-slate-950 shadow-md shadow-indigo-500/30 transition"
           >
@@ -391,9 +387,7 @@ function SeedViabilitySummaryCard({
           <button
             type="button"
             onClick={() =>
-              result &&
-              onReplacementPlanning &&
-              onReplacementPlanning(result)
+              result && onReplacementPlanning && onReplacementPlanning(result)
             }
             className="inline-flex items-center justify-center rounded-xl px-3.5 py-2 text-[11px] font-semibold bg-rose-400 hover:bg-rose-300 text-slate-950 shadow-md shadow-rose-500/30 transition"
           >
@@ -427,14 +421,10 @@ export default function SeedViabilityCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source: "pages.calculators.gardenAnimal.seed-viability",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.gardenAnimal.seed-viability",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
         throw new Error(
@@ -477,9 +467,7 @@ export default function SeedViabilityCalculatorPage() {
           typeof calcResult.recommendedAction === "string"
             ? calcResult.recommendedAction
             : undefined,
-        warnings: Array.isArray(calcResult.warnings)
-          ? calcResult.warnings
-          : [],
+        warnings: Array.isArray(calcResult.warnings) ? calcResult.warnings : [],
         notes: Array.isArray(calcResult.notes) ? calcResult.notes : [],
         suggestedPlannerLabel:
           typeof calcResult.suggestedPlannerLabel === "string"
@@ -492,7 +480,10 @@ export default function SeedViabilityCalculatorPage() {
       emitSeedViabilityCompleted(normalized);
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error("[seed-viability.jsx] Seed Viability calculator error", err);
+      console.error(
+        "[seed-viability.jsx] Seed Viability calculator error",
+        err
+      );
       setError(
         err && err.message
           ? err.message

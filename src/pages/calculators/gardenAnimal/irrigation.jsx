@@ -20,10 +20,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import eventBus from "@/services/eventBus";
-import { familyFundMode } from "@/services/featureFlags";
+import eventBus from "@/services/events/eventBus";
+import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import IrrigationCalculatorView from "@/features/calculators/gardenAnimal/IrrigationCalculator.view";
+import IrrigationCalculatorView from "@/features/calculators/gardenAnimal/IrrigationCalculator.view.jsx";
 
 const CALCULATOR_ID = "garden.irrigation";
 
@@ -418,17 +418,15 @@ export default function IrrigationCalculatorPage() {
     setError(null);
 
     try {
-      const { result: calcResult } = await runCalculator(
-        CALCULATOR_ID,
-        input,
-        {
-          source: "pages.calculators.gardenAnimal.irrigation",
-          emitEvents: true,
-        }
-      );
+      const { result: calcResult } = await runCalculator(CALCULATOR_ID, input, {
+        source: "pages.calculators.gardenAnimal.irrigation",
+        emitEvents: true,
+      });
 
       if (!calcResult || typeof calcResult !== "object") {
-        throw new Error("Irrigation calculator did not return a result object.");
+        throw new Error(
+          "Irrigation calculator did not return a result object."
+        );
       }
 
       /** @type {IrrigationResult} */
@@ -470,9 +468,7 @@ export default function IrrigationCalculatorPage() {
           typeof calcResult.scheduleSummary === "string"
             ? calcResult.scheduleSummary
             : undefined,
-        warnings: Array.isArray(calcResult.warnings)
-          ? calcResult.warnings
-          : [],
+        warnings: Array.isArray(calcResult.warnings) ? calcResult.warnings : [],
         notes: Array.isArray(calcResult.notes) ? calcResult.notes : [],
         suggestedSessionTitle:
           typeof calcResult.suggestedSessionTitle === "string"
