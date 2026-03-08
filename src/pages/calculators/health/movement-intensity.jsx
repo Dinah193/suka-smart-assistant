@@ -21,7 +21,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import MovementIntensityCalculatorView from "@/features/calculators/health/MovementIntensityCalculator.view.jsx";
+import MovementIntensityCalculatorView from "@/features/calculators/health/MovementIntensityCalculator/MovementIntensityCalculator.view.jsx";
 
 const CALCULATOR_ID = "movement-intensity";
 

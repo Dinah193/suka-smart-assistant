@@ -19,7 +19,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import CostPerServingCalculatorView from "@/features/calculators/storehouseMeals/CostPerServingCalculator.view.jsx";
+import CostPerServingCalculatorView from "@/features/calculators/storehouseMeals/CostPerServingCalculator/CostPerServingCalculator.view.jsx";
 
 const CALCULATOR_ID = "storehouseMeals.costPerServing";
 

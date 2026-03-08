@@ -24,7 +24,7 @@ import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
 // Micronutrient view component (create if not present yet)
-import MicronutrientCalculatorView from "@/features/calculators/health/MicronutrientCalculator.view.jsx";
+import MicronutrientCalculatorView from "@/features/calculators/health/MicronutrientCalculator/MicronutrientCalculator.view.jsx";
 
 const CALCULATOR_ID = "micronutrients-daily";
 

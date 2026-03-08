@@ -23,7 +23,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import SoilAmendmentCalculatorView from "@/features/calculators/gardenAnimal/SoilAmendmentCalculator.view.jsx";
+import SoilAmendmentCalculatorView from "@/features/calculators/gardenAnimal/SoilAmendmentCalculator/SoilAmendmentCalculator.view.jsx";
 
 const CALCULATOR_ID = "garden.soilAmendment";
 

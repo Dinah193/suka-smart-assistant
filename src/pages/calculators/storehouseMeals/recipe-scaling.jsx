@@ -20,7 +20,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import RecipeScalingCalculatorView from "@/features/calculators/storehouseMeals/RecipeScalingCalculator.view.jsx";
+import RecipeScalingCalculatorView from "@/features/calculators/storehouseMeals/RecipeScalingCalculator/RecipeScalingCalculator.view.jsx";
 
 const CALCULATOR_ID = "storehouseMeals.recipeScaling";
 

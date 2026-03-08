@@ -25,7 +25,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import SeedViabilityCalculatorView from "@/features/calculators/gardenAnimal/SeedViabilityCalculator.view.jsx";
+import SeedViabilityCalculatorView from "@/features/calculators/gardenAnimal/SeedViabilityCalculator/SeedViabilityCalculator.view.jsx";
 
 const CALCULATOR_ID = "garden.seedViability";
 

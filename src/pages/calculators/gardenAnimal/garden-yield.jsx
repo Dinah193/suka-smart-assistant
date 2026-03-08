@@ -22,7 +22,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import GardenYieldCalculatorView from "@/features/calculators/gardenAnimal/GardenYieldCalculator.view.jsx";
+import GardenYieldCalculatorView from "@/features/calculators/gardenAnimal/GardenYieldCalculator/GardenYieldCalculator.view.jsx";
 
 const CALCULATOR_ID = "garden.yield";
 

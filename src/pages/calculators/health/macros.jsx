@@ -27,7 +27,7 @@ import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
 // If you created a dedicated view component for macros:
-import MacroCalculatorView from "@/features/calculators/health/MacroCalculator.view.jsx";
+import MacroCalculatorView from "@/features/calculators/health/MacroCalculator/MacroCalculator.view.jsx";
 // If not yet created, you can temporarily point to a generic calculator shell.
 
 // Optional: if/when you wire result persistence or queries, you can import:

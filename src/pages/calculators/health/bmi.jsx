@@ -23,7 +23,7 @@ import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
 // BMI view component (create if not present yet)
-import BMICalculatorView from "@/features/calculators/health/BMICalculator.view.jsx";
+import BMICalculatorView from "@/features/calculators/health/BMICalculator/BMICalculator.view.jsx";
 
 const CALCULATOR_ID = "bmi-basic";
 

@@ -23,7 +23,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import ButcheryWeightCalculatorView from "@/features/calculators/gardenAnimal/ButcheryWeightCalculator.view.jsx";
+import ButcheryWeightCalculatorView from "@/features/calculators/gardenAnimal/ButcheryWeightCalculator/ButcheryWeightCalculator.view.jsx";
 
 const CALCULATOR_ID = "gardenAnimal.butcheryWeight";
 

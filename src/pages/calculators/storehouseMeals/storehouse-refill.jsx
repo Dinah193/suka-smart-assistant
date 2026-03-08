@@ -20,7 +20,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import StorehouseRefillCalculatorView from "@/features/calculators/storehouseMeals/StorehouseRefillCalculator.view.jsx";
+import StorehouseRefillCalculatorView from "@/features/calculators/storehouseMeals/StorehouseRefillCalculator/StorehouseRefillCalculator.view.jsx";
 
 const CALCULATOR_ID = "storehouseMeals.storehouseRefill";
 

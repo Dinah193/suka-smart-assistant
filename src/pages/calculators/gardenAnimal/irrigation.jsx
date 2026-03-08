@@ -23,7 +23,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import IrrigationCalculatorView from "@/features/calculators/gardenAnimal/IrrigationCalculator.view.jsx";
+import IrrigationCalculatorView from "@/features/calculators/gardenAnimal/IrrigationCalculator/IrrigationCalculator.view.jsx";
 
 const CALCULATOR_ID = "garden.irrigation";
 

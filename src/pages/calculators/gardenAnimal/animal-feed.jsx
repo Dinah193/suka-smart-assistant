@@ -25,7 +25,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import AnimalFeedCalculatorView from "@/features/calculators/gardenAnimal/AnimalFeedCalculator.view.jsx";
+import AnimalFeedCalculatorView from "@/features/calculators/gardenAnimal/AnimalFeedCalculator/AnimalFeedCalculator.view.jsx";
 
 const CALCULATOR_ID = "gardenAnimal.animalFeed";
 

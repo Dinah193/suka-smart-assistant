@@ -18,7 +18,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import PreservationTimeCalculatorView from "@/features/calculators/storehouseMeals/PreservationTimeCalculator.view.jsx";
+import PreservationTimeCalculatorView from "@/features/calculators/storehouseMeals/PreservationTimeCalculator/PreservationTimeCalculator.view.jsx";
 
 const CALCULATOR_ID = "storehouseMeals.preservationTime";
 

@@ -29,7 +29,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import FeastDayAlignmentCalculatorView from "@/features/calculators/calendar/FeastDayAlignmentCalculator.view.jsx";
+import FeastDayAlignmentCalculatorView from "@/features/calculators/calendar/FeastDayAlignmentCalculator/FeastDayAlignmentCalculator.view.jsx";
 
 const CALCULATOR_ID = "calendar.feastAlignment";
 

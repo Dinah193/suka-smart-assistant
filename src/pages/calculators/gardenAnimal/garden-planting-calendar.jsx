@@ -22,7 +22,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import GardenPlantingCalendarCalculatorView from "@/features/calculators/gardenAnimal/GardenPlantingCalendarCalculator.view.jsx";
+import GardenPlantingCalendarCalculatorView from "@/features/calculators/gardenAnimal/GardenPlantingCalendarCalculator/GardenPlantingCalendarCalculator.view.jsx";
 
 const CALCULATOR_ID = "garden.plantingCalendar";
 

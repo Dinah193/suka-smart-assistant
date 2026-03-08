@@ -22,7 +22,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import FreezerSpaceCalculatorView from "@/features/calculators/storehouseMeals/FreezerSpaceCalculator.view.jsx";
+import FreezerSpaceCalculatorView from "@/features/calculators/storehouseMeals/FreezerSpaceCalculator/FreezerSpaceCalculator.view.jsx";
 
 const CALCULATOR_ID = "storehouseMeals.freezerSpace";
 

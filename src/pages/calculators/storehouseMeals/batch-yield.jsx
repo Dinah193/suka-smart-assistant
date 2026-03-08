@@ -20,7 +20,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import BatchYieldCalculatorView from "@/features/calculators/storehouseMeals/BatchYieldCalculator.view.jsx";
+import BatchYieldCalculatorView from "@/features/calculators/storehouseMeals/BatchYieldCalculator/BatchYieldCalculator.view.jsx";
 
 const CALCULATOR_ID = "storehouseMeals.batchYield";
 

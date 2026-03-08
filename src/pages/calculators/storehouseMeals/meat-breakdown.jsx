@@ -20,7 +20,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import MeatBreakdownCalculatorView from "@/features/calculators/storehouseMeals/MeatBreakdownCalculator.view.jsx";
+import MeatBreakdownCalculatorView from "@/features/calculators/storehouseMeals/MeatBreakdownCalculator/MeatBreakdownCalculator.view.jsx";
 
 const CALCULATOR_ID = "storehouseMeals.meatBreakdown";
 

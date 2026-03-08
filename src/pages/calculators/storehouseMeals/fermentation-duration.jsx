@@ -22,7 +22,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import eventBus from "@/services/events/eventBus";
 import { familyFundMode } from "@/config/featureFlags";
 import { runCalculator } from "@/services/calculators/calculatorRunner";
-import FermentationDurationCalculatorView from "@/features/calculators/storehouseMeals/FermentationDurationCalculator.view.jsx";
+import FermentationDurationCalculatorView from "@/features/calculators/storehouseMeals/FermentationDurationCalculator/FermentationDurationCalculator.view.jsx";
 
 const CALCULATOR_ID = "storehouseMeals.fermentationDuration";
 
