@@ -424,7 +424,7 @@ export default defineConfig(({ mode }) => {
     target: "es2022",
     // Sourcemaps in this large app can exceed Node heap during bundling.
     sourcemap: false,
-    minify: "esbuild",
+    minify: isCiBuild ? false : "esbuild",
     reportCompressedSize: !isCiBuild,
     chunkSizeWarningLimit: 1200,
     rollupOptions: {
