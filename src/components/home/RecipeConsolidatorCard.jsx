@@ -2,7 +2,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import useRecipeStore from "@/store/RecipeStore";
 import { callLLM } from "@/agents/base/AgentCore";
-import { recipeFromUrl } from "@/services/ingest/recipeFromURL";
+import { recipeFromUrl } from "@/services/ingest/recipeFromUrl";
 
 // (kept for persistence helpers)
 import { getSavedUnitSystem } from "@/components/UnitSystemToggle";
