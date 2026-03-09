@@ -46,7 +46,7 @@ try {
 } catch {}
 try {
   ({ useFavoritesStore: FavoritesStore } = await import(
-    "@/store/FavoritesStore"
+    "@/store/favoritesStore.js"
   ));
 } catch {}
 try {
